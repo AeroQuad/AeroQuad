@@ -32,20 +32,20 @@
 #define LEDPIN 13
 
 // Sensor pin assignments
-/* Original orientation
-#define XACCELPIN 0
-#define YACCELPIN 1
+// Original orientation
+#define PITCHACCELPIN 0
+#define ROLLACCELPIN 1
 #define ZACCELPIN 2
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
-#define YAWRATEPIN 5*/
+#define YAWRATEPIN 5
 // New orientation
-#define PITCHACCELPIN 4
+/*#define PITCHACCELPIN 4
 #define ROLLACCELPIN 5
 #define ZACCELPIN 3
 #define PITCHRATEPIN 0
 #define ROLLRATEPIN 1
-#define YAWRATEPIN 2
+#define YAWRATEPIN 2*/
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
@@ -317,17 +317,17 @@ void loop () {
   motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     
   // Calculate motor commands
-  // Original orientation
-  // frontCommand =limitRange(throttle + pitchMotorCommand - yawMotorCommand - pitchLevelAdjust, MINCOMMAND, MAXCOMMAND);
-  // rearCommand = limitRange(throttle - pitchMotorCommand - yawMotorCommand + pitchLevelAdjust, MINCOMMAND, MAXCOMMAND);
-  // rightCommand = limitRange(throttle + rollMotorCommand + yawMotorCommand + rollLevelAdjust, MINCOMMAND, MAXCOMMAND);
-  // leftCommand = limitRange(throttle - rollMotorCommand + yawMotorCommand - rollLevelAdjust, MINCOMMAND, MAXCOMMAND);
-
   if (armed && safetyCheck) {
-    motorCommand[FRONT] =limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    // Original Orientation
+    motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    // New Orientation
+    /*motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);*/
   }
   else {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
