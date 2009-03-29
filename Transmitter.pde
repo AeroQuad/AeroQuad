@@ -1,6 +1,6 @@
 /*
-  MikroQuad v3.0 - March 2009
-  www.MikroQuad.com
+  AeroQuad v1.0 - March 2009
+  www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Arduino based quadrocopter using the Sparkfun 5DOF IMU and IDG300 Dual Axis Gyro
   This version will be able to use gyros for stability (acrobatic mode) or accelerometers (experimental stable mode).
@@ -35,7 +35,7 @@ void readTransmitter() {
       transmitterData[orderCh[channel]] = pulseIn(xmitCh[channel], HIGH, TIMEOUT);
     // Calculate Commanded Angles
     // Reduce transmitter commands using xmitFactor and center around 1500
-    // rollCommand, pitchCommand and yawCommand used in main loop of MikroQuad.pde to control quad
+    // rollCommand, pitchCommand and yawCommand used in main loop of AeroQuad.pde to control quad
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((transmitterData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
     transmitterCommand[THROTTLE] = transmitterData[THROTTLE];

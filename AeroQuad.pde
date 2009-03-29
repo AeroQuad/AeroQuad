@@ -1,6 +1,6 @@
 /*
-  MikroQuad v3.0 - March 2009
-  www.MikroQuad.com
+  AeroQuad v1.0 - March 2009
+  www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Arduino based quadrocopter using the Sparkfun 5DOF IMU and IDG300 Dual Axis Gyro
   This version will be able to use gyros for stability (acrobatic mode) or accelerometers (experimental stable mode).
@@ -89,7 +89,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define MINDELTA 200
 #define MINCHECK MINCOMMAND + 100
 #define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 75
+#define MINTHROTTLE MINCOMMAND + 50
 #define FRONTMOTORPIN 8
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
@@ -208,7 +208,7 @@ long deltaTime = 0;
 long enableAcc = 0;
 float dt = 0;
 
-// ******************** Setup MikroQuadAero ********************
+// ******************** Setup AeroQuadAero ********************
 void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL); // Current external ref is connected to 3.3V
@@ -239,7 +239,7 @@ void setup() {
   safetyCheck = 0;
 }
 
-// ******************** Main MikroQuad Loop ********************
+// ******************** Main AeroQuad Loop ********************
 void loop () {
   // Measure loop rate
   currentTime = millis();

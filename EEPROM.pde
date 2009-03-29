@@ -1,6 +1,6 @@
 /*
-  MikroQuad v3.0 - March 2009
-  www.MikroQuad.com
+  AeroQuad v1.0 - March 2009
+  www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Arduino based quadrocopter using the Sparkfun 5DOF IMU and IDG300 Dual Axis Gyro
   This version will be able to use gyros for stability (acrobatic mode) or accelerometers (experimental stable mode).
