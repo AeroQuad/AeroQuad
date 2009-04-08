@@ -46,6 +46,13 @@
 #define PITCHRATEPIN 0
 #define ROLLRATEPIN 1
 #define YAWRATEPIN 2*/
+//Experimental Orientation
+/*#define ROLLRATEPIN 0
+#define PITCHRATEPIN 1
+#define YAWRATEPIN 2
+#define ROLLACCELPIN 3
+#define PITCHACCELPIN 4
+#define ZACCELPIN 5*/
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
@@ -128,7 +135,8 @@ float bMotorRate = 1500;   // b = y1 - m * x1
 #define AUX 5
 #define LASTCHANNEL 6
 volatile int transmitterData[6];
-int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW}; // order the channels are output from receiver
+int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW}; // AR6200 Channel Order
+//int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE}; // AR6100 Channel Order
 int xmitCh[6] = {2,5,7,3,4,6}; // digital pin assignments for each channel
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
@@ -252,7 +260,7 @@ void loop () {
     zeroIntegralError();
     // Disarm motors (throttle down, yaw left)
     //if (yaw < MINCHECK && armed == 1) {
-    if (transmitterData[YAW] > MAXCHECK && armed == 1) {
+    if (transmitterData[YAW] < MINCHECK && armed == 1) {
       armed = 0;
       commandAllMotors(MINCOMMAND);
     }    
@@ -266,7 +274,7 @@ void loop () {
     }   
     // Arm motors (throttle down, yaw right)  
     //if (yaw > MAXCHECK && armed == 0) {
-    if (transmitterData[YAW] < MINCHECK && armed == 0 && safetyCheck == 1) {
+    if (transmitterData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
       armed = 1;
       zeroIntegralError();
       minCommand = MINTHROTTLE;
@@ -319,15 +327,20 @@ void loop () {
   // Calculate motor commands
   if (armed && safetyCheck) {
     // Original Orientation
-    motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     // New Orientation
     /*motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);*/
+    // Experimental Orientation
+    /*motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);*/
   }
   else {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
