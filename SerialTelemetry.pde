@@ -22,9 +22,94 @@
 void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
-  case 'X': // send no debug messages
+  case 'B': // Send roll and pitch gyro PID values
+    Serial.print(PID[ROLL].P);
+    comma();
+    Serial.print(PID[ROLL].I);
+    comma();
+    Serial.print(PID[ROLL].D);
+    comma();
+    Serial.print(PID[PITCH].P);
+    comma();
+    Serial.print(PID[PITCH].I);
+    comma();
+    Serial.println(PID[PITCH].D);
+    queryType = 'X';
     break;
-  case 'A': // send all data
+  case 'D': // Send yaw PID values
+    Serial.print(PID[YAW].P);
+    comma();
+    Serial.print(PID[YAW].I);
+    comma();
+    Serial.println(PID[YAW].D);
+    queryType = 'X';
+    break;
+  case 'F': // Send roll and pitch auto level PID values
+    Serial.print(PID[LEVELROLL].P);
+    comma();
+    Serial.print(PID[LEVELROLL].I);
+    comma();
+    Serial.print(PID[LEVELROLL].D);
+    comma();
+    Serial.print(PID[LEVELPITCH].P);
+    comma();
+    Serial.print(PID[LEVELPITCH].I);
+    comma();
+    Serial.println(PID[LEVELPITCH].D);
+    queryType = 'X';
+    break;
+  case 'H': // Send auto level configuration values
+    Serial.print(levelLimit);
+    comma();
+    Serial.println(levelInterval);
+    queryType = 'X';
+    break;
+  case 'J': // Send flight control configuration values
+    Serial.print(windupGuard);
+    comma();
+    Serial.println(xmitFactor);
+    queryType = 'X';
+    break;
+  case 'L': // Send data filtering values
+    Serial.print(smoothFactor[GYRO]);
+    comma();
+    Serial.print(smoothFactor[ACCEL]);
+    comma();
+    Serial.println(timeConstant);
+    queryType = 'X';
+    break;
+  case 'Q': // Send sensor data
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(gyroADC[axis]);
+      comma();
+    }
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(accelADC[axis]);
+      comma();
+    }
+    for (axis = ROLL; axis < YAW; axis++) {
+      Serial.print(levelAdjust[axis]);
+      comma();
+    }
+    Serial.print(flightAngle[ROLL]);
+    comma();
+    Serial.print(flightAngle[PITCH]);
+    Serial.println();
+    break;
+  case 'R': // Send raw sensor data
+    Serial.print(analogRead(ROLLRATEPIN));
+    comma();
+    Serial.print(analogRead(PITCHRATEPIN));
+    comma();
+    Serial.print(analogRead(YAWRATEPIN));
+    comma();
+    Serial.print(analogRead(ROLLACCELPIN));
+    comma();
+    Serial.print(analogRead(PITCHACCELPIN));
+    comma();
+    Serial.println(analogRead(ZACCELPIN));
+    break;
+  case 'S': // Send all flight data
     Serial.print(deltaTime);
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
@@ -45,74 +130,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(transmitterData[MODE]);
     break;
-  case 'S': // send sensor data
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(gyroADC[axis]);
-      comma();
-    }
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(accelADC[axis]);
-      comma();
-    }
-    for (axis = ROLL; axis < YAW; axis++) {
-      Serial.print(levelAdjust[axis]);
-      comma();
-    }
-    Serial.print(flightAngle[ROLL]);
-    comma();
-    Serial.print(flightAngle[PITCH]);
-    Serial.println();
-    break;
-  case 'D': // raw read sensor data
-    Serial.print(analogRead(ROLLRATEPIN));
-    comma();
-    Serial.print(analogRead(PITCHRATEPIN));
-    comma();
-    Serial.print(analogRead(YAWRATEPIN));
-    comma();
-    Serial.print(analogRead(ROLLACCELPIN));
-    comma();
-    Serial.print(analogRead(PITCHACCELPIN));
-    comma();
-    Serial.println(analogRead(ZACCELPIN));
-    break;
-  case 'U': // send user defined values
-    //Serial.print(dtostrf(PID[ROLL].P, 1, 2, string));
-    Serial.print(PID[ROLL].P);
-    comma();
-    Serial.print(PID[ROLL].I);
-    comma();
-    Serial.print(PID[ROLL].D);
-    comma();
-    Serial.print(PID[LEVELROLL].P);
-    comma();
-    Serial.print(PID[LEVELROLL].I);
-    comma();
-    Serial.print(PID[LEVELROLL].D);
-    comma();
-    Serial.print(PID[YAW].P);
-    comma();
-    Serial.print(PID[YAW].I);
-    comma();
-    Serial.print(PID[YAW].D);
-    comma();
-    Serial.print(windupGuard);
-    comma();
-    Serial.print(levelLimit);
-    comma();
-    Serial.print(levelInterval);
-    comma();
-    Serial.print(xmitFactor);
-    comma();
-    Serial.print(smoothFactor[GYRO]);
-    comma();
-    Serial.print(smoothFactor[ACCEL]);
-    comma();
-    Serial.print(timeConstant);
-    Serial.println(); // will probably add more responses in the future
-    queryType = 'X';
-    break;
-   case 'T': // read processed transmitter values
+   case 'T': // Send processed transmitter values
     Serial.print(xmitFactor);
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
@@ -129,12 +147,14 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(motorAxisCommand[YAW]);
     break;
-  case 'R': // send receiver values
+  case 'U': // Send receiver values
     for (channel = ROLL; channel < AUX; channel++) {
       Serial.print(transmitterData[channel]);
       comma();
     }
     Serial.println(transmitterData[AUX]);
+    break;
+  case 'X': // Stop sending messages
     break;
   /*case 'N': // send receiver channel order
     for (channel = ROLL; channel < LASTCHANNEL; channel++) {

@@ -24,29 +24,46 @@ void readSerialCommand() {
   if (Serial.available()) {
     digitalWrite(LEDPIN, LOW);
     queryType = Serial.read();
-    if (queryType == 'C') {
-      // Configure user defined values
+    if (queryType == 'A') { // Receive roll and pitch gyro PID
       PID[ROLL].P = readFloatSerial();
       PID[ROLL].I = readFloatSerial();
       PID[ROLL].D = readFloatSerial();
       PID[ROLL].lastPosition = 0;
       PID[ROLL].integratedError = 0;
-      PID[PITCH] = PID[ROLL];
-      PID[LEVELROLL].P = readFloatSerial();
-      PID[LEVELROLL].I = readFloatSerial();
-      PID[LEVELROLL].D = readFloatSerial();
-      PID[LEVELROLL].lastPosition = 0;
-      PID[LEVELROLL].integratedError = 0;
-      PID[LEVELPITCH] = PID[LEVELROLL];
+      PID[PITCH].P = readFloatSerial();
+      PID[PITCH].I = readFloatSerial();
+      PID[PITCH].D = readFloatSerial();
+      PID[PITCH].lastPosition = 0;
+      PID[PITCH].integratedError = 0;
+    }
+    else if (queryType == 'C') { // Receive yaw PID
       PID[YAW].P = readFloatSerial();
       PID[YAW].I = readFloatSerial();
       PID[YAW].D = readFloatSerial();
       PID[YAW].lastPosition = 0;
       PID[YAW].integratedError = 0;
-      windupGuard = readFloatSerial();
+    }
+    else if (queryType == 'E') { // Receive roll and pitch auto level PID
+      PID[LEVELROLL].P = readFloatSerial();
+      PID[LEVELROLL].I = readFloatSerial();
+      PID[LEVELROLL].D = readFloatSerial();
+      PID[LEVELROLL].lastPosition = 0;
+      PID[LEVELROLL].integratedError = 0;
+      PID[LEVELPITCH].P = readFloatSerial();
+      PID[LEVELPITCH].I = readFloatSerial();
+      PID[LEVELPITCH].D = readFloatSerial();
+      PID[LEVELPITCH].lastPosition = 0;
+      PID[LEVELPITCH].integratedError = 0;
+    }
+    else if (queryType == 'G') { // Receive auto level configuration
       levelLimit = readFloatSerial();
       levelInterval = readFloatSerial();
+    }
+    else if (queryType == 'I') { // Receive flight control configuration
+      windupGuard = readFloatSerial();
       xmitFactor = readFloatSerial();
+    }
+    else if (queryType == 'K') { // Receive data filtering values
       smoothFactor[GYRO] = readFloatSerial();
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
@@ -55,9 +72,15 @@ void readSerialCommand() {
       writeFloat(PID[ROLL].P, PGAIN_ADR);
       writeFloat(PID[ROLL].I, IGAIN_ADR);
       writeFloat(PID[ROLL].D, DGAIN_ADR);
+      writeFloat(PID[PITCH].P, PITCH_PGAIN_ADR);
+      writeFloat(PID[PITCH].I, PITCH_IGAIN_ADR);
+      writeFloat(PID[PITCH].D, PITCH_DGAIN_ADR);
       writeFloat(PID[LEVELROLL].P, LEVEL_PGAIN_ADR);
       writeFloat(PID[LEVELROLL].I, LEVEL_IGAIN_ADR);
       writeFloat(PID[LEVELROLL].D, LEVEL_DGAIN_ADR);
+      writeFloat(PID[LEVELPITCH].P, LEVEL_PITCH_PGAIN_ADR);
+      writeFloat(PID[LEVELPITCH].I, LEVEL_PITCH_IGAIN_ADR);
+      writeFloat(PID[LEVELPITCH].D, LEVEL_PITCH_DGAIN_ADR);
       writeFloat(PID[YAW].P, YAW_PGAIN_ADR);
       writeFloat(PID[YAW].I, YAW_IGAIN_ADR);
       writeFloat(PID[YAW].D, YAW_DGAIN_ADR);

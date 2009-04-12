@@ -43,13 +43,17 @@ void writeFloat(float value, int address) {
 }
 
 void readEEPROM() {
-  for (axis = ROLL; axis < YAW; axis++) {
-    PID[axis].P = readFloat(PGAIN_ADR);
-    PID[axis].I = readFloat(IGAIN_ADR);
-    PID[axis].D = readFloat(DGAIN_ADR);
-    PID[axis].lastPosition = 0;
-    PID[axis].integratedError = 0;
-  }
+  PID[ROLL].P = readFloat(PGAIN_ADR);
+  PID[ROLL].I = readFloat(IGAIN_ADR);
+  PID[ROLL].D = readFloat(DGAIN_ADR);
+  PID[ROLL].lastPosition = 0;
+  PID[ROLL].integratedError = 0;
+  
+  PID[PITCH].P = readFloat(PITCH_PGAIN_ADR);
+  PID[PITCH].I = readFloat(PITCH_IGAIN_ADR);
+  PID[PITCH].D = readFloat(PITCH_DGAIN_ADR);
+  PID[PITCH].lastPosition = 0;
+  PID[PITCH].integratedError = 0;
   
   PID[YAW].P = readFloat(YAW_PGAIN_ADR);
   PID[YAW].I = readFloat(YAW_IGAIN_ADR);
@@ -57,14 +61,18 @@ void readEEPROM() {
   PID[YAW].lastPosition = 0;
   PID[YAW].integratedError = 0;
   
-  for (axis = LEVELROLL; axis < (LASTLEVELAXIS); axis++) {
-    PID[axis].P = readFloat(LEVEL_PGAIN_ADR);
-    PID[axis].I = readFloat(LEVEL_IGAIN_ADR);
-    PID[axis].D = readFloat(LEVEL_DGAIN_ADR);
-    PID[axis].lastPosition = 0;
-    PID[axis].integratedError = 0;
-  }  
+  PID[LEVELROLL].P = readFloat(LEVEL_PGAIN_ADR);
+  PID[LEVELROLL].I = readFloat(LEVEL_IGAIN_ADR);
+  PID[LEVELROLL].D = readFloat(LEVEL_DGAIN_ADR);
+  PID[LEVELROLL].lastPosition = 0;
+  PID[LEVELROLL].integratedError = 0;  
   
+  PID[LEVELPITCH].P = readFloat(LEVEL_PITCH_PGAIN_ADR);
+  PID[LEVELPITCH].I = readFloat(LEVEL_PITCH_IGAIN_ADR);
+  PID[LEVELPITCH].D = readFloat(LEVEL_PITCH_DGAIN_ADR);
+  PID[LEVELPITCH].lastPosition = 0;
+  PID[LEVELPITCH].integratedError = 0;  
+
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelInterval = readFloat(LEVELINTERVAL_ADR);
