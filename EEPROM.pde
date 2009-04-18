@@ -83,4 +83,11 @@ void readEEPROM() {
   accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
   accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
+  
+  for (channel = ROLL; channel < LASTCHANNEL; channel++)
+    orderCh[channel] = readFloat(ROLLCH_ADR + (channel * 4));
+  for (channel = ROLL; channel < LASTCHANNEL; channel++)
+    xmitCh[channel] = readFloat(ROLLPIN_ADR + (channel * 4));
+    
+  xmitCh[0] = ROLLPIN; // First receiver output channel must match pin for AttachInterrupt
 }
