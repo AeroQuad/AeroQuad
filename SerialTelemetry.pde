@@ -59,9 +59,9 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
-    Serial.print((float)levelLimit);
+    Serial.print(levelLimit);
     comma();
-    Serial.println((float)levelInterval);
+    Serial.println((levelInterval);
     queryType = 'X';
     break;
   case 'J': // Send flight control configuration values
