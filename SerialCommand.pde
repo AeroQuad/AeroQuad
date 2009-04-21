@@ -68,7 +68,7 @@ void readSerialCommand() {
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
     }
-    else if (queryType =='M') { // remotely configure receiver order
+    /*else if (queryType =='M') { // remotely configure receiver order
       for (channel = ROLL; channel < LASTCHANNEL; channel++) {
         orderCh[channel] = readFloatSerial();
         writeFloat(orderCh[channel], ROLLCH_ADR + (channel * 4));
@@ -77,7 +77,7 @@ void readSerialCommand() {
         xmitCh[channel] = readFloatSerial();
         writeFloat(xmitCh[channel], ROLLPIN_ADR + (channel * 4));
       }
-    }
+    }*/
     else if (queryType == 'W') {
       writeFloat(PID[ROLL].P, PGAIN_ADR);
       writeFloat(PID[ROLL].I, IGAIN_ADR);

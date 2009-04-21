@@ -61,7 +61,7 @@ void sendSerialTelemetry() {
   case 'H': // Send auto level configuration values
     Serial.print(levelLimit);
     comma();
-    Serial.println((levelInterval);
+    Serial.println(levelInterval);
     queryType = 'X';
     break;
   case 'J': // Send flight control configuration values
@@ -78,7 +78,7 @@ void sendSerialTelemetry() {
     Serial.println(timeConstant);
     queryType = 'X';
     break;
-  case 'N': // send receiver channel order
+  /*case 'N': // send receiver channel order
     for (channel = ROLL; channel < LASTCHANNEL; channel++) {
       Serial.print(orderCh[channel]);
       comma();
@@ -89,7 +89,7 @@ void sendSerialTelemetry() {
     }
     Serial.println(xmitCh[AUX]);
     queryType = 'X';
-    break;
+    break;*/
   case 'Q': // Send sensor data
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(gyroADC[axis]);

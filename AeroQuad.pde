@@ -126,7 +126,7 @@ float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 -
 float bMotorRate = 1500;   // b = y1 - m * x1 
 
 // Transmitter variables
-#define TIMEOUT 25000
+#define TIMEOUT 2500
 #define THROTTLEPIN 4
 #define ROLLPIN 2
 #define PITCHPIN 3
