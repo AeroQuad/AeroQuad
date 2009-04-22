@@ -2,8 +2,7 @@
   AeroQuad v1.0 - April 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Arduino based quadrocopter using the Sparkfun 5DOF IMU and IDG300 Dual Axis Gyro
-  This version will be able to use gyros for stability (acrobatic mode) or accelerometers (experimental stable mode).
+  An Open Source Arduino based quadrocopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -19,8 +18,13 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// To Do:
-// Create automated calibration for Z axis
+// Define which Spektrum receiver is used
+#define AR6200
+//#define AR6100
+
+// Define sensor pinouts
+#define Standard
+//#define Experimental
 
 #include <stdlib.h>
 #include <math.h>
@@ -32,27 +36,24 @@
 #define LEDPIN 13
 
 // Sensor pin assignments
-// Original orientation
-#define PITCHACCELPIN 0
-#define ROLLACCELPIN 1
-#define ZACCELPIN 2
-#define PITCHRATEPIN 3
-#define ROLLRATEPIN 4
-#define YAWRATEPIN 5
-// New orientation
-/*#define PITCHACCELPIN 4
-#define ROLLACCELPIN 5
-#define ZACCELPIN 3
-#define PITCHRATEPIN 0
-#define ROLLRATEPIN 1
-#define YAWRATEPIN 2*/
-//Experimental Orientation
-/*#define ROLLRATEPIN 0
-#define PITCHRATEPIN 1
-#define YAWRATEPIN 2
-#define ROLLACCELPIN 3
-#define PITCHACCELPIN 4
-#define ZACCELPIN 5*/
+#ifdef Standard
+  // Original orientation
+  #define PITCHACCELPIN 0
+  #define ROLLACCELPIN 1
+  #define ZACCELPIN 2
+  #define PITCHRATEPIN 3
+  #define ROLLRATEPIN 4
+  #define YAWRATEPIN 5
+#endif
+#ifdef Experimental
+  //Experimental Orientation
+  #define ROLLRATEPIN 0
+  #define PITCHRATEPIN 1
+  #define YAWRATEPIN 2
+  #define ROLLACCELPIN 3
+  #define PITCHACCELPIN 4
+  #define ZACCELPIN 5
+#endif
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
@@ -142,10 +143,17 @@ float bMotorRate = 1500;   // b = y1 - m * x1
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-volatile int transmitterData[6];
-int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW}; // AR6200 Channel Order
-//int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE}; // AR6100 Channel Order
+// Define receiver channel order here
+#ifdef AR6200
+  // AR6200 Channel Order
+  int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW};
+#endif
+#ifdef AR6100
+  // AR6100 Channel Order
+  int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE};
+#endif
 int xmitCh[6] = {2,5,7,3,4,6}; // digital pin assignments for each channel
+volatile int transmitterData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
 int channel = 0;
