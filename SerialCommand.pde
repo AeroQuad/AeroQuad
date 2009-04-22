@@ -68,6 +68,8 @@ void readSerialCommand() {
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
     }
+    // Used for user defined receiver pins and channel order
+    // (Still under development)
     /*else if (queryType =='M') { // remotely configure receiver order
       for (channel = ROLL; channel < LASTCHANNEL; channel++) {
         orderCh[channel] = readFloatSerial();

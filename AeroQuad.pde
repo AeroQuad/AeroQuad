@@ -76,7 +76,9 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-#define ROLLCH_ADR 76
+// These addresses used for user defined receiver pins and channel order
+// (Still under development)
+/*#define ROLLCH_ADR 76
 #define PITCHCH_ADR 80
 #define YAWCH_ADR 84
 #define THROTTLECH_ADR 88
@@ -87,7 +89,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define YAWPIN_ADR 108
 #define THROTTLEPIN_ADR 112
 #define MODEPIN_ADR 116
-#define AUXPIN_ADR 120
+#define AUXPIN_ADR 120*/
 #define PITCH_PGAIN_ADR 124
 #define PITCH_IGAIN_ADR 128
 #define PITCH_DGAIN_ADR 132
@@ -126,7 +128,7 @@ float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 -
 float bMotorRate = 1500;   // b = y1 - m * x1 
 
 // Transmitter variables
-#define TIMEOUT 2500
+#define TIMEOUT 25000
 #define THROTTLEPIN 4
 #define ROLLPIN 2
 #define PITCHPIN 3
@@ -272,7 +274,7 @@ void loop () {
     }    
     // Zero sensors (throttle down, yaw left, roll left)
     //if (yaw < MINCHECK && roll > MAXCHECK) {
-    if (transmitterData[YAW] > MAXCHECK && transmitterData[ROLL] < MINCHECK) {
+    if (transmitterData[YAW] < MINCHECK && transmitterData[ROLL] < MINCHECK) {
       zeroGyros();
       zeroAccelerometers();
       zeroIntegralError();

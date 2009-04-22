@@ -78,6 +78,8 @@ void sendSerialTelemetry() {
     Serial.println(timeConstant);
     queryType = 'X';
     break;
+  // Used for user defined receiver pins and channel order
+  // (Still under development)
   /*case 'N': // send receiver channel order
     for (channel = ROLL; channel < LASTCHANNEL; channel++) {
       Serial.print(orderCh[channel]);

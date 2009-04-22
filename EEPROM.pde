@@ -84,6 +84,8 @@ void readEEPROM() {
   accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
   
+  // Used for user defined receiver pins and channel order
+  // (Still under development)
   /*for (channel = ROLL; channel < LASTCHANNEL; channel++)
     orderCh[channel] = readFloat(ROLLCH_ADR + (channel * 4));
   for (channel = ROLL; channel < LASTCHANNEL; channel++)
