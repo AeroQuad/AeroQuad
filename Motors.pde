@@ -48,22 +48,3 @@ void pulseMotors(byte quantity) {
     delay(250);
   }
 }
-
-/*
-void armESC(unsigned long msWaitTime) {
-  unsigned long startTime;
-  startTime = millis();
-  while ((millis() - startTime) < msWaitTime) {
-    digitalWrite(FRONTMOTORPIN, HIGH);
-    digitalWrite(REARMOTORPIN, HIGH);
-    digitalWrite(RIGHTMOTORPIN, HIGH);
-    digitalWrite(LEFTMOTORPIN, HIGH);
-    delay(1);
-    digitalWrite(FRONTMOTORPIN, LOW);
-    digitalWrite(REARMOTORPIN, LOW);
-    digitalWrite(RIGHTMOTORPIN, LOW);
-    digitalWrite(LEFTMOTORPIN, LOW);
-    delay(20);
-  }
-}
-*/

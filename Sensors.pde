@@ -18,8 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Utilities for sensor measurements
-
 int findMode(int *data, int arraySize) {
   // The mode of a set of numbers is the value that occurs most frequently
   boolean done = 0;

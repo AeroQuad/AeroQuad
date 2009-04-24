@@ -249,9 +249,6 @@ void setup() {
   // Setup interrupt to trigger on pin D2
   configureTransmitter();
   
-  // Wait for battery to be plugged in before ESC's are armed
-  //armESC(3000);
-  
   // Calibrate sensors
   zeroGyros();
   
@@ -275,13 +272,11 @@ void loop () {
   if (transmitterData[THROTTLE] < 1010) {
     zeroIntegralError();
     // Disarm motors (throttle down, yaw left)
-    //if (yaw < MINCHECK && armed == 1) {
     if (transmitterData[YAW] < MINCHECK && armed == 1) {
       armed = 0;
       commandAllMotors(MINCOMMAND);
     }    
     // Zero sensors (throttle down, yaw left, roll left)
-    //if (yaw < MINCHECK && roll > MAXCHECK) {
     if (transmitterData[YAW] < MINCHECK && transmitterData[ROLL] < MINCHECK) {
       zeroGyros();
       zeroAccelerometers();
@@ -289,7 +284,6 @@ void loop () {
       pulseMotors(3);
     }   
     // Arm motors (throttle down, yaw right)  
-    //if (yaw > MAXCHECK && armed == 0) {
     if (transmitterData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
       armed = 1;
       zeroIntegralError();
@@ -332,8 +326,8 @@ void loop () {
   
   // Transmitter Commands
   // Calculations are performed in Transmitter.pde when receiver channels are read
-  // Commands calculated are transmitterCommand[ROLL], transmitterCommand[PITCH], transmitterCommand[YAW]
   // Saves processing time, since values only change when reading receiver
+  // Commands calculated are transmitterCommand[ROLL], transmitterCommand[PITCH], transmitterCommand[YAW]
   
   // Update PID
   motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] - levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
@@ -347,16 +341,6 @@ void loop () {
     motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    // New Orientation
-    /*motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);*/
-    // Experimental Orientation
-    /*motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);*/
   }
   else {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
