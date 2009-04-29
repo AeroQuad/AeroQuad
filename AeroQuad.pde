@@ -19,8 +19,12 @@
 */
 
 // Define which Spektrum receiver is used
-#define AR6200
-//#define AR6100
+//#define AR6200
+#define AR6100
+
+// Define Motor PWM Approach
+#define ServoTimerTwo
+//#define AnalogWrite
 
 // Define sensor pinouts
 #define Standard
@@ -29,7 +33,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <EEPROM.h>
-#include <ServoTimer2.h>
+#ifdef ServoTimerTwo
+  #include <ServoTimer2.h>
+#endif
 
 // ******************** Initialize Variables ********************
 #define BAUD 115200
@@ -110,15 +116,18 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
+#define LASTMOTORPIN 12
 #define FRONT 0
 #define REAR 1
 #define RIGHT 2
 #define LEFT 3
 #define LASTMOTOR 4
-ServoTimer2 frontMotor;
-ServoTimer2 rearMotor;
-ServoTimer2 rightMotor;
-ServoTimer2 leftMotor;
+#ifdef ServoTimerTwo
+  ServoTimer2 frontMotor;
+  ServoTimer2 rearMotor;
+  ServoTimer2 rightMotor;
+  ServoTimer2 leftMotor;
+#endif
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
 int motor, minCommand = 0;
@@ -126,7 +135,14 @@ int motor, minCommand = 0;
 // Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
 // use y = mx + b 
 float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
-float bMotorRate = 1500;   // b = y1 - m * x1 
+float bMotorRate = 1500;   // b = y1 - m * x1
+#ifdef AnalogWrite
+  // Scale motor commands to analogWrite
+  // m = (255-128)/(2000-1000) = 0.127
+  // b = y1 - (m * x1) = 128 - (0.127 * 1000) = 1
+  float mMotorCommand = 0.127;
+  float bMotorCommand = 1;
+#endif
 
 // Transmitter variables
 #define TIMEOUT 25000
