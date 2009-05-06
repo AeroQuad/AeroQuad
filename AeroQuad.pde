@@ -11,7 +11,7 @@
 
   This program is distributed in the hope that it will be useful, 
   but WITHOUT ANY WARRANTY; without even the implied warranty of 
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
   GNU General Public License for more details. 
 
   You should have received a copy of the GNU General Public License 
@@ -19,16 +19,25 @@
 */
 
 // Define which Spektrum receiver is used
-//#define AR6200
-#define AR6100
+#define AR6200
+//#define AR6100
 
 // Define Motor PWM Approach
-#define ServoTimerTwo
+//#define ServoTimerTwo
 //#define AnalogWrite
+#define AnalogWrite328
 
 // Define sensor pinouts
 #define Standard
 //#define Experimental
+
+// Define raw sensor filter
+#define LowPass
+//#define AverageData
+
+// Define auto level filter
+//#define FirstOrderComplementary
+#define SecondOrderComplementary
 
 #include <stdlib.h>
 #include <math.h>
@@ -111,8 +120,13 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define MINDELTA 200
 #define MINCHECK MINCOMMAND + 100
 #define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 50
-#define FRONTMOTORPIN 8
+#define MINTHROTTLE MINCOMMAND + 100
+#ifdef AnalogWrite
+  #define FRONTMOTORPIN 8
+#endif
+#ifdef AnalogWrite328
+  #define FRONTMOTORPIN 3
+#endif
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
@@ -138,10 +152,17 @@ float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 -
 float bMotorRate = 1500;   // b = y1 - m * x1
 #ifdef AnalogWrite
   // Scale motor commands to analogWrite
-  // m = (255-128)/(2000-1000) = 0.127
-  // b = y1 - (m * x1) = 128 - (0.127 * 1000) = 1
-  float mMotorCommand = 0.127;
-  float bMotorCommand = 1;
+  // m = (250-126)/(2000-1000) = 0.124
+  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
+  float mMotorCommand = 0.124;
+  float bMotorCommand = 2;
+#endif
+#ifdef AnalogWrite328
+  // Scale motor commands to analogWrite
+  // m = (250-126)/(2000-1000) = 0.124
+  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
+  float mMotorCommand = 0.124;
+  float bMotorCommand = 2;
 #endif
 
 // Transmitter variables
@@ -206,7 +227,8 @@ int gyroADC[3] = {0,0,0};
 
 // Complementary roll/pitch angle
 float flightAngle[2] = {0,0};
-float filterTerm[2] = {0,0};
+float filterTermRoll[4] = {0,0,0,0};
+float filterTermPitch[4] = {0,0,0,0};
 float timeConstant; // Read in from EEPROM
 
 // Calibration parameters
@@ -217,6 +239,14 @@ int findZero[FINDZERO];
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
+#ifdef AverageData
+  // Average parameters 
+  #define AVG 16 
+  #define AVGSHIFT 4  
+  int rollAverageArray[AVG];  
+  int pitchAverageArray[AVG];  
+  int yawAverageArray[AVG];  
+#endif
 
 // PID Values
 #define LASTAXIS 3
@@ -264,6 +294,15 @@ void setup() {
   
   // Setup interrupt to trigger on pin D2
   configureTransmitter();
+  #ifdef AnalogWrite328
+    //Redefine transmitter channels for ATmega 328
+    xmitCh[0] = 2;
+    xmitCh[1] = 5;
+    xmitCh[2] = 7;
+    xmitCh[3] = 8;
+    xmitCh[4] = 4;
+    xmitCh[5] = 6;
+  #endif
   
   // Calibrate sensors
   zeroGyros();
@@ -285,7 +324,7 @@ void loop () {
   enableAcc++;
   
   // Send configuration commands from transmitter
-  if (transmitterData[THROTTLE] < 1010) {
+  if (transmitterData[THROTTLE] < 1050) {
     zeroIntegralError();
     // Disarm motors (throttle down, yaw left)
     if (transmitterData[YAW] < MINCHECK && armed == 1) {
@@ -316,17 +355,27 @@ void loop () {
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
     accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
+   
   }
-  
+
+  #ifdef AverageData
+    gyroData[ROLL] = average(gyroADC[ROLL], rollAverageArray);
+    gyroData[PITCH] = average(gyroADC[PITCH], pitchAverageArray);
+    gyroData[YAW] = average(gyroADC[YAW], yawAverageArray);
+  #endif
+
   for (axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
+    #ifdef LowPass
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
+    #endif
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
   }
-  
-  dt = deltaTime / 1000.0;
-  for (axis = ROLL; axis < YAW; axis++)
-    flightAngle[axis] = filterData(flightAngle[axis], gyroADC[axis], accelADC[axis], filterTerm, dt);
-  
+    
+  // Calculate absolute flight angle
+  dt = deltaTime / 1000.0; // Convert to seconds
+  flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], accelADC[ROLL], filterTermRoll, dt);
+  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], accelADC[PITCH], filterTermPitch, dt);
+ 
   if (transmitterData[MODE] < 1500) {
     // Acrobatic Mode
     levelAdjust[ROLL] = 0;
@@ -352,13 +401,16 @@ void loop () {
     
   // Calculate motor commands
   if (armed && safetyCheck) {
-    // Original Orientation
     motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
   }
-  else {
+  if (transmitterCommand[THROTTLE] < 1050) {
+    for (motor = FRONT; motor < LASTMOTOR; motor++)
+      motorCommand[motor] = minCommand;
+  }
+  if (armed == 0) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = MINCOMMAND;
   }
