@@ -33,7 +33,7 @@ void configureFilter(float timeConstant) {
   #endif
 }
 
-float filterData(float previousAngle, int gyroADC, int accADC, float *filterTerm, float dt) {
+float filterData(float previousAngle, int gyroADC, float accADC, float *filterTerm, float dt) {
   #ifdef FirstOrderComplementary
     // For Sparkfun 5DOF IMU
     // accelerometerOutput = (N-512)/1024*(double)10.78;
@@ -50,8 +50,9 @@ float filterData(float previousAngle, int gyroADC, int accADC, float *filterTerm
     // accelerometerOutput = (N-512)/1024*(double)10.78; (rad)
     // gyroOutput = (N-512)/1024*(double)28.783; (rad/sec)
     //if ((accelADC[ZAXIS] < 0.5) || (previousAngle > 30.0) || (previousAngle < -30.0))
-      accel = accADC / 11038.72 * 57.2957795;
+      //accel = accADC / 11038.72 * 57.2957795;
       //accel = accADC / 1024 * 10.78 * 57.2957795;
+      accel = accADC * 57.2957795;
     //else
       //accel = atan2(accADC, accelADC[ZAXIS]) * 57.2957795;
     gyro = gyroADC / 29473.792 * 57.2957795;
@@ -83,6 +84,7 @@ float filterData(float previousAngle, int gyroADC, int accADC, float *filterTerm
     filterTerm[2] = (dt * filterTerm[0]) + filterTerm[2];
     filterTerm[1] = filterTerm[2] + (accel - previousAngle) * 2 * timeConstant + gyro;
     return (dt * filterTerm[1]) + previousAngle;
+    //return accel;
   #endif
 }
 

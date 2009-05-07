@@ -373,8 +373,8 @@ void loop () {
     
   // Calculate absolute flight angle
   dt = deltaTime / 1000.0; // Convert to seconds
-  flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], accelADC[ROLL], filterTermRoll, dt);
-  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], accelADC[PITCH], filterTermPitch, dt);
+  flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
+  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
  
   if (transmitterData[MODE] < 1500) {
     // Acrobatic Mode
