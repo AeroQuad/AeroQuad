@@ -31,14 +31,6 @@
 #define Standard
 //#define Experimental
 
-// Define raw sensor filter
-#define LowPass
-//#define AverageData
-
-// Define auto level filter
-//#define FirstOrderComplementary
-#define SecondOrderComplementary
-
 #include <stdlib.h>
 #include <math.h>
 #include <EEPROM.h>
@@ -121,6 +113,8 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define MINCHECK MINCOMMAND + 100
 #define MAXCHECK MAXCOMMAND - 100
 #define MINTHROTTLE MINCOMMAND + 100
+#define LEVELOFFHIGH MIDCOMMAND + 30
+#define LEVELOFFLOW MIDCOMMAND - 30
 #ifdef AnalogWrite
   #define FRONTMOTORPIN 8
 #endif
@@ -150,20 +144,11 @@ int motor, minCommand = 0;
 // use y = mx + b 
 float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
 float bMotorRate = 1500;   // b = y1 - m * x1
-#ifdef AnalogWrite
   // Scale motor commands to analogWrite
-  // m = (250-126)/(2000-1000) = 0.124
-  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-  float mMotorCommand = 0.124;
-  float bMotorCommand = 2;
-#endif
-#ifdef AnalogWrite328
-  // Scale motor commands to analogWrite
-  // m = (250-126)/(2000-1000) = 0.124
-  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-  float mMotorCommand = 0.124;
-  float bMotorCommand = 2;
-#endif
+// m = (250-126)/(2000-1000) = 0.124
+// b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
+float mMotorCommand = 0.124;
+float bMotorCommand = 2;
 
 // Transmitter variables
 #define TIMEOUT 25000
@@ -355,27 +340,18 @@ void loop () {
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
     accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-   
   }
-
-  #ifdef AverageData
-    gyroData[ROLL] = average(gyroADC[ROLL], rollAverageArray);
-    gyroData[PITCH] = average(gyroADC[PITCH], pitchAverageArray);
-    gyroData[YAW] = average(gyroADC[YAW], yawAverageArray);
-  #endif
 
   for (axis = ROLL; axis < LASTAXIS; axis++) {
-    #ifdef LowPass
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
-    #endif
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
   }
-    
-  // Calculate absolute flight angle
+
+  // Calculate flight angle
   dt = deltaTime / 1000.0; // Convert to seconds
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
   flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
- 
+    
   if (transmitterData[MODE] < 1500) {
     // Acrobatic Mode
     levelAdjust[ROLL] = 0;
@@ -383,7 +359,12 @@ void loop () {
   }
   else {
     // Stable Mode
-    if ((enableAcc % levelInterval) == 0) {
+    if ((transmitterCommand[PITCH] > LEVELOFFHIGH) || (transmitterCommand[PITCH] < LEVELOFFLOW) || (transmitterCommand[ROLL] > LEVELOFFHIGH) || (transmitterCommand[ROLL] < LEVELOFFLOW)) {
+      // Turn off Stable Mode if transmitter stick applied
+      levelAdjust[ROLL] = 0;
+      levelAdjust[PITCH] = 0;
+    }
+    else {
       for (axis = ROLL; axis < YAW; axis++)
         levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
     }
