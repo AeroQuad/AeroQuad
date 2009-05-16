@@ -76,7 +76,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define YAW_DGAIN_ADR 32
 #define WINDUPGUARD_ADR 36
 #define LEVELLIMIT_ADR 40
-#define LEVELINTERVAL_ADR 44
+#define LEVELOFF_ADR 44
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
@@ -106,15 +106,6 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVEL_PITCH_DGAIN_ADR 144
 
 // Motor control variables
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFFHIGH MIDCOMMAND + 30
-#define LEVELOFFLOW MIDCOMMAND - 30
 #ifdef AnalogWrite
   #define FRONTMOTORPIN 8
 #endif
@@ -144,7 +135,7 @@ int motor, minCommand = 0;
 // use y = mx + b 
 float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
 float bMotorRate = 1500;   // b = y1 - m * x1
-  // Scale motor commands to analogWrite
+// Scale motor commands to analogWrite
 // m = (250-126)/(2000-1000) = 0.124
 // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
 float mMotorCommand = 0.124;
@@ -152,6 +143,14 @@ float bMotorCommand = 2;
 
 // Transmitter variables
 #define TIMEOUT 25000
+#define MINCOMMAND 1000
+#define MIDCOMMAND 1500
+#define MAXCOMMAND 2000
+#define MINDELTA 200
+#define MINCHECK MINCOMMAND + 100
+#define MAXCHECK MAXCOMMAND - 100
+#define MINTHROTTLE MINCOMMAND + 100
+#define LEVELOFF 100
 #define THROTTLEPIN 4
 #define ROLLPIN 2
 #define PITCHPIN 3
@@ -178,6 +177,7 @@ int xmitCh[6] = {2,5,7,3,4,6}; // digital pin assignments for each channel
 volatile int transmitterData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
+int transmitterCenter[2] = {1500,1500};
 int channel = 0;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
@@ -203,7 +203,7 @@ int accelADC[3] = {0,0,0};
 // Auto level setup
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
-int levelInterval; // Read in from EEPROM
+int levelOff; // Read in from EEPROM
 
 // Gyro setup
 int gyroData[3] = {0,0,0};
@@ -224,14 +224,6 @@ int findZero[FINDZERO];
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
-#ifdef AverageData
-  // Average parameters 
-  #define AVG 16 
-  #define AVGSHIFT 4  
-  int rollAverageArray[AVG];  
-  int pitchAverageArray[AVG];  
-  int yawAverageArray[AVG];  
-#endif
 
 // PID Values
 #define LASTAXIS 3
@@ -328,6 +320,8 @@ void loop () {
       armed = 1;
       zeroIntegralError();
       minCommand = MINTHROTTLE;
+      transmitterCenter[PITCH] = transmitterData[PITCH];
+      transmitterCenter[ROLL] = transmitterData[ROLL];
     }
     if (transmitterData[YAW] > MINCHECK) safetyCheck = 1; 
   }
@@ -359,15 +353,13 @@ void loop () {
   }
   else {
     // Stable Mode
-    if ((transmitterCommand[PITCH] > LEVELOFFHIGH) || (transmitterCommand[PITCH] < LEVELOFFLOW) || (transmitterCommand[ROLL] > LEVELOFFHIGH) || (transmitterCommand[ROLL] < LEVELOFFLOW)) {
-      // Turn off Stable Mode if transmitter stick applied
-      levelAdjust[ROLL] = 0;
-      levelAdjust[PITCH] = 0;
-    }
-    else {
-      for (axis = ROLL; axis < YAW; axis++)
+    for (axis = ROLL; axis < YAW; axis++)
         levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
-    }
+    // Turn off Stable Mode if transmitter stick applied
+    if ((abs(transmitterData[PITCH] - transmitterCenter[PITCH]) > levelOff))
+       levelAdjust[PITCH] = 0;
+    if ((abs(transmitterData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+      levelAdjust[ROLL] = 0;
   }
   
   // Transmitter Commands

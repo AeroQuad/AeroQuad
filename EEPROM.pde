@@ -74,7 +74,7 @@ void readEEPROM() {
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
-  levelInterval = readFloat(LEVELINTERVAL_ADR);
+  levelOff = readFloat(LEVELOFF_ADR);
   xmitFactor = readFloat(XMITFACTOR_ADR);
   smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR);
   smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR);

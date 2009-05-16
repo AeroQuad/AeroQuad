@@ -56,7 +56,7 @@ void readSerialCommand() {
     }
     else if (queryType == 'G') { // Receive auto level configuration
       levelLimit = readFloatSerial();
-      levelInterval = readFloatSerial();
+      levelOff = readFloatSerial();
     }
     else if (queryType == 'I') { // Receive flight control configuration
       windupGuard = readFloatSerial();
@@ -97,7 +97,7 @@ void readSerialCommand() {
       writeFloat(PID[YAW].D, YAW_DGAIN_ADR);
       writeFloat(windupGuard, WINDUPGUARD_ADR);  
       writeFloat(levelLimit, LEVELLIMIT_ADR);   
-      writeFloat(levelInterval, LEVELINTERVAL_ADR); 
+      writeFloat(levelOff, LEVELOFF_ADR); 
       writeFloat(xmitFactor, XMITFACTOR_ADR);
       writeFloat(smoothFactor[GYRO], GYROSMOOTH_ADR);
       writeFloat(smoothFactor[ACCEL], ACCSMOOTH_ADR);
