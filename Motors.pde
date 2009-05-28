@@ -26,14 +26,13 @@ void configureMotors() {
     leftMotor.attach(LEFTMOTORPIN);
   #endif
   #ifdef AnalogWrite
-    for (motor = FRONTMOTORPIN; motor < LASTMOTORPIN; motor++)
-      analogWrite(motor, 124);
-  #endif
-  #ifdef AnalogWrite328
-    analogWrite(FRONTMOTORPIN, 124);
-    for (motor = REARMOTORPIN; motor < LASTMOTORPIN; motor++)
-      analogWrite(motor, 124);
-  #endif
+    for (motor = FRONTMOTORPIN; motor < LASTMOTORPIN; motor++) {
+      analogWrite(FRONTMOTORPIN, 124);
+      analogWrite(REARMOTORPIN, 124);
+      analogWrite(RIGHTMOTORPIN, 124);
+      analogWrite(LEFTMOTORPIN, 124);
+    }
+   #endif
 }
 
 void commandMotors() {
@@ -44,12 +43,6 @@ void commandMotors() {
     leftMotor.write(motorCommand[LEFT]);
   #endif
   #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
-  #endif
-  #ifdef AnalogWrite328
     analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
     analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
     analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
@@ -66,12 +59,6 @@ void commandAllMotors(int motorCommand) {
     leftMotor.write(motorCommand);
   #endif
   #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-  #endif
-  #ifdef AnalogWrite328
     analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
     analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
     analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);

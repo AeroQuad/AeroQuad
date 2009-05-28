@@ -23,13 +23,8 @@
 //#define AR6100
 
 // Define Motor PWM Approach
+#define AnalogWrite
 //#define ServoTimerTwo
-//#define AnalogWrite
-#define AnalogWrite328
-
-// Define sensor pinouts
-#define Standard
-//#define Experimental
 
 // Define flight configuration
 #define plusConfig
@@ -47,24 +42,12 @@
 #define LEDPIN 13
 
 // Sensor pin assignments
-#ifdef Standard
-  // Original orientation
-  #define PITCHACCELPIN 0
-  #define ROLLACCELPIN 1
-  #define ZACCELPIN 2
-  #define PITCHRATEPIN 3
-  #define ROLLRATEPIN 4
-  #define YAWRATEPIN 5
-#endif
-#ifdef Experimental
-  //Experimental Orientation
-  #define ROLLRATEPIN 0
-  #define PITCHRATEPIN 1
-  #define YAWRATEPIN 2
-  #define ROLLACCELPIN 3
-  #define PITCHACCELPIN 4
-  #define ZACCELPIN 5
-#endif
+#define PITCHACCELPIN 0
+#define ROLLACCELPIN 1
+#define ZACCELPIN 2
+#define PITCHRATEPIN 3
+#define ROLLRATEPIN 4
+#define YAWRATEPIN 5
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
@@ -110,12 +93,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVEL_PITCH_DGAIN_ADR 144
 
 // Motor control variables
-#ifdef AnalogWrite
-  #define FRONTMOTORPIN 8
-#endif
-#ifdef AnalogWrite328
-  #define FRONTMOTORPIN 3
-#endif
+#define FRONTMOTORPIN 3
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
@@ -155,12 +133,12 @@ float bMotorCommand = 2;
 #define MAXCHECK MAXCOMMAND - 100
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
-#define THROTTLEPIN 4
 #define ROLLPIN 2
-#define PITCHPIN 3
+#define THROTTLEPIN 4
+#define PITCHPIN 5
 #define YAWPIN 6
 #define MODEPIN 7
-#define AUXPIN 5
+#define AUXPIN 8
 #define ROLL 0
 #define PITCH 1
 #define YAW 2
@@ -172,12 +150,13 @@ float bMotorCommand = 2;
 #ifdef AR6200
   // AR6200 Channel Order
   int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW};
+  int xmitCh[6] = {ROLLPIN,AUXPIN,MODEPIN,PITCHPIN,THROTTLEPIN,YAWPIN}; // digital pin assignments for each channel
 #endif
 #ifdef AR6100
   // AR6100 Channel Order
   int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE};
+  int xmitCh[6] = {ROLLPIN,AUXPIN,PITCHPIN,YAWPIN,THROTTLEPIN,MODEPIN,}; // digital pin assignments for each channel
 #endif
-int xmitCh[6] = {2,5,7,3,4,6}; // digital pin assignments for each channel
 volatile int transmitterData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
@@ -275,15 +254,6 @@ void setup() {
   
   // Setup interrupt to trigger on pin D2
   configureTransmitter();
-  #ifdef AnalogWrite328
-    //Redefine transmitter channels for ATmega 328
-    xmitCh[0] = 2;
-    xmitCh[1] = 5;
-    xmitCh[2] = 7;
-    xmitCh[3] = 8;
-    xmitCh[4] = 4;
-    xmitCh[5] = 6;
-  #endif
   
   // Calibrate sensors
   zeroGyros();
