@@ -13,17 +13,17 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <o:Author>Ted Carancho</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>Ted Carancho</o:LastAuthor>
-  <o:Revision>6</o:Revision>
-  <o:TotalTime>24</o:TotalTime>
+  <o:Revision>7</o:Revision>
+  <o:TotalTime>28</o:TotalTime>
   <o:Created>2009-02-21T16:36:00Z</o:Created>
-  <o:LastSaved>2009-04-25T00:45:00Z</o:LastSaved>
+  <o:LastSaved>2009-06-05T07:57:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>169</o:Words>
-  <o:Characters>966</o:Characters>
+  <o:Words>215</o:Words>
+  <o:Characters>1226</o:Characters>
   <o:Company>Carancho Engineering</o:Company>
-  <o:Lines>8</o:Lines>
+  <o:Lines>10</o:Lines>
   <o:Paragraphs>2</o:Paragraphs>
-  <o:CharactersWithSpaces>1133</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>1439</o:CharactersWithSpaces>
   <o:Version>11.9999</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
@@ -52,6 +52,20 @@ xmlns="http://www.w3.org/TR/REC-html40">
 	mso-generic-font-family:swiss;
 	mso-font-pitch:variable;
 	mso-font-signature:536902279 -2147483648 8 0 511 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{mso-style-parent:"";
@@ -103,10 +117,24 @@ div.Section1
 	{page:Section1;}
  /* List Definitions */
  @list l0
+	{mso-list-id:444007359;
+	mso-list-type:hybrid;
+	mso-list-template-ids:586192962 942977062 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:-;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Verdana;
+	mso-fareast-font-family:"Times New Roman";
+	mso-bidi-font-family:Helvetica;}
+@list l1
 	{mso-list-id:747505106;
 	mso-list-type:hybrid;
 	mso-list-template-ids:-1072109144 -1681343656 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
-@list l0:level1
+@list l1:level1
 	{mso-level-start-at:0;
 	mso-level-number-format:bullet;
 	mso-level-text:-;
@@ -116,35 +144,35 @@ div.Section1
 	text-indent:-.25in;
 	font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";}
-@list l0:level2
+@list l1:level2
 	{mso-level-tab-stop:1.0in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level3
+@list l1:level3
 	{mso-level-tab-stop:1.5in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level4
+@list l1:level4
 	{mso-level-tab-stop:2.0in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level5
+@list l1:level5
 	{mso-level-tab-stop:2.5in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level6
+@list l1:level6
 	{mso-level-tab-stop:3.0in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level7
+@list l1:level7
 	{mso-level-tab-stop:3.5in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level8
+@list l1:level8
 	{mso-level-tab-stop:4.0in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
-@list l0:level9
+@list l1:level9
 	{mso-level-tab-stop:4.5in;
 	mso-level-number-position:left;
 	text-indent:-.25in;}
@@ -182,73 +210,51 @@ ul
 
 <div class=Section1>
 
-<p class=p1><span class=SpellE>AeroQuad</span> Source Code v1.0</p>
+<p class=p1><span class=SpellE>AeroQuad</span> Source Code v1.1</p>
 
 <p class=p1><a href="http://www.aeroquad.info/">http://www.aeroquad.info</a></p>
 
+<p class=p1><o:p>&nbsp;</o:p></p>
+
+<p class=p1>This version of the code now uses <span class=SpellE><span
+class=GramE>analogWrite</span></span><span class=GramE>(</span>) to efficiently
+write PWM commands to the <span class=SpellE>ESC’s</span>.<span
+style='mso-spacerun:yes'>  </span>The tradeoff is that we can only achieve 128
+steps of resolution.<span style='mso-spacerun:yes'>  </span>The <span
+class=SpellE>Turnigy</span> <span class=SpellE>ESC’s</span> specified in the
+parts list have been measured to only have 128 steps of resolution, so if you
+are using this ESC, there shouldn’t be any issues.<span
+style='mso-spacerun:yes'>  </span>Also, if you’ve built a previous <span
+class=SpellE>MikroQuad</span> or <span class=SpellE>AeroQuad</span> you will be
+required to update wiring in your shield per the <span class=SpellE>AeroQuad</span>
+website instructions.</p>
+
 <p class=p2><o:p>&nbsp;</o:p></p>
 
-<p class=p1>This sketch uses a modified version of the <span class=SpellE>the</span>
-ServoTimer2 library found at:<span class=apple-converted-space>&nbsp;</span></p>
+<p class=p1>If you’d like to maintain as much PWM resolution as possible,
+please install the ServoTimer2 library found at:<span
+class=apple-converted-space>&nbsp;</span></p>
 
 <p class=p1><a
-href="http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75">http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75</a></p>
-
-<p class=p2><o:p>&nbsp;</o:p></p>
-
-<p class=p1>To compile the <span class=SpellE>AeroQuad</span> sketch, the
-ServoTimer2 folder found in this distribution must be copied <span class=GramE>to
-..</span>\Arduino-00xx\hardware\libraries.</p>
-
-<p class=p2><o:p>&nbsp;</o:p></p>
-
-<p class=p1>To verify the library has been successfully installed, open the <span
-class=SpellE>Arduino</span> IDE and go to Sketch-&gt;Import Library.<span
-class=apple-converted-space>&nbsp; </span>You should see ServoTimer2 as one of
-the items to select (you don't need to select it at this time).</p>
+href="http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75">http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75</a>.<span
+style='mso-spacerun:yes'>  </span>To compile the <span class=SpellE>AeroQuad</span>
+sketch, the ServoTimer2 folder found in this distribution must be copied <span
+class=GramE>to ..</span>\Arduino-00xx\hardware\libraries.<span
+style='mso-spacerun:yes'>  </span>To verify the library has been successfully
+installed, open the <span class=SpellE>Arduino</span> IDE and go to
+Sketch-&gt;Import Library.<span class=apple-converted-space>&nbsp; </span>You
+should see ServoTimer2 as one of the items to select (you don't need to select
+it at this time).</p>
 
 <p class=p2><o:p>&nbsp;</o:p></p>
 
 <p class=p1>New features:</p>
 
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Separate PID loops for roll, pitch and yaws axes</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>PWM update rates to <span class=SpellE>ESC’s</span>
-increased to 125 Hz</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Single pole low pass filter implementation for
-reducing sensor noise</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Improved calibration process for gyros and
-accelerometers</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Additional user defined values able to be saved
-to EEPROM</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Additional debug messages for troubleshooting</p>
-
-<p class=p1 style='margin-left:.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;
-tab-stops:list .25in'><![if !supportLists]><span style='mso-fareast-font-family:
-Helvetica'><span style='mso-list:Ignore'>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Code restructured to allow for easier user modification</p>
+<p class=p2><span style='font-size:10.0pt;font-family:Verdana;color:black'>- Capability
+to use any transmitter/receiver (special thanks to <span class=SpellE>dcaspi</span><span
+class=GramE>)</span><br>
+- 400Hz update rate to <span class=SpellE>ESC's</span>/Motors<br>
+- Combined user configurable values into single tab in <span class=SpellE>Configurator</span><o:p></o:p></span></p>
 
 <p class=p2><o:p>&nbsp;</o:p></p>
 
