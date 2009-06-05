@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.0 - April 2009
+  AeroQuad v1.1 - May 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -44,10 +44,10 @@
 // Absolute minimum and maximum values of raw receiver data.
 // Beyond them the receiver is considered to be non-functional.
 
-#define RECEIVER_LOW_MIN  (16000 / RECEIVER_TICK)
-#define RECEIVER_LOW_MAX  (24000 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MIN ( 1000 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MAX ( 2000 / RECEIVER_TICK)
+#define RECEIVER_LOW_MIN (16000 / RECEIVER_TICK)
+#define RECEIVER_LOW_MAX (24000 / RECEIVER_TICK)
+#define RECEIVER_HIGH_MIN (750 / RECEIVER_TICK)
+#define RECEIVER_HIGH_MAX (2250 / RECEIVER_TICK)
 
 // Maximum number of consecutive errors before we decalre a fault.
 // Experience has shown that from time to time we get too-short or too-long

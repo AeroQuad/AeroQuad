@@ -1,8 +1,11 @@
 /*
-  AeroQuad v1.0 - April 2009
+  AeroQuad v1.1 - April 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
+  
+  Second order complementary filter written by LB Roy
+  http://www.rcgroups.com/forums/showpost.php?p=12082524&postcount=1286
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 

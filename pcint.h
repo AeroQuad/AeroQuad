@@ -1,8 +1,5 @@
-#ifndef __PCINT_H__
-#define __PCINT_H__
-
 /*
-  AeroQuad v1.0 - April 2009
+  AeroQuad v1.1 - May 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -24,6 +21,9 @@
   You should have received a copy of the GNU General Public License 
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
+
+#ifndef __PCINT_H__
+#define __PCINT_H__
 
 #define PCINT_DEBUG
 
