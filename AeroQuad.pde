@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <EEPROM.h>
+#include "pcint.h"
 #ifdef ServoTimerTwo
   #include <ServoTimer2.h>
 #endif
@@ -123,7 +124,7 @@ float bMotorRate = 1500;   // b = y1 - m * x1
 float mMotorCommand = 0.124;
 float bMotorCommand = 2;
 
-// Transmitter variables
+// Receiver variables
 #define TIMEOUT 25000
 #define MINCOMMAND 1000
 #define MIDCOMMAND 1500
@@ -157,7 +158,7 @@ float bMotorCommand = 2;
   int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE};
   int xmitCh[6] = {ROLLPIN,AUXPIN,PITCHPIN,YAWPIN,THROTTLEPIN,MODEPIN,}; // digital pin assignments for each channel
 #endif
-volatile int transmitterData[6];
+volatile int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
 int transmitterCenter[2] = {1500,1500};
@@ -226,16 +227,17 @@ byte tlmType = 0;
 char string[32];
 byte armed = 0;
 byte safetyCheck = 0;
-volatile byte update = 0;
+byte update = 0;
 
 // Interrupt handler variables
-volatile byte timeSlot;
+byte timeSlot;
 
 // Timing
 long previousTime = 0;
 long currentTime = 0;
 long deltaTime = 0;
-long enableAcc = 0;
+long receiverTime =0;
+long telemetryTime = 0;
 float dt = 0;
 
 // ******************** Setup AeroQuadAero ********************
@@ -253,7 +255,7 @@ void setup() {
   readEEPROM();
   
   // Setup interrupt to trigger on pin D2
-  configureTransmitter();
+  configureReceiver();
   
   // Calibrate sensors
   zeroGyros();
@@ -272,35 +274,34 @@ void loop () {
   currentTime = millis();
   deltaTime = currentTime - previousTime;
   previousTime = currentTime;
-  enableAcc++;
   
   // Send configuration commands from transmitter
-  if (transmitterData[THROTTLE] < 1050) {
+  if (receiverData[THROTTLE] < 1050) {
     zeroIntegralError();
     // Disarm motors (throttle down, yaw left)
-    if (transmitterData[YAW] < MINCHECK && armed == 1) {
+    if (receiverData[YAW] < MINCHECK && armed == 1) {
       armed = 0;
       commandAllMotors(MINCOMMAND);
     }    
     // Zero sensors (throttle down, yaw left, roll left)
-    if (transmitterData[YAW] < MINCHECK && transmitterData[ROLL] < MINCHECK) {
+    if (receiverData[YAW] < MINCHECK && receiverData[ROLL] < MINCHECK) {
       zeroGyros();
       zeroAccelerometers();
       zeroIntegralError();
       pulseMotors(3);
     }   
     // Arm motors (throttle down, yaw right)  
-    if (transmitterData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
+    if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
       armed = 1;
       zeroIntegralError();
       minCommand = MINTHROTTLE;
-      transmitterCenter[PITCH] = transmitterData[PITCH];
-      transmitterCenter[ROLL] = transmitterData[ROLL];
+      transmitterCenter[PITCH] = receiverData[PITCH];
+      transmitterCenter[ROLL] = receiverData[ROLL];
     }
-    if (transmitterData[YAW] > MINCHECK) safetyCheck = 1; 
+    if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
   }
-  else if (transmitterData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = transmitterData[THROTTLE] - MINDELTA;
-  if (transmitterData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
+  else if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
+  if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
 
   // Read Sensors
   // Apply low pass filter to sensor values and center around zero
@@ -320,7 +321,20 @@ void loop () {
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
   flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
     
-  if (transmitterData[MODE] < 1500) {
+  // Transmitter Commands
+  if (currentTime > (receiverTime + 20)) {
+    for (channel = ROLL; channel < LASTCHANNEL; channel++)
+      receiverData[channel] = readReceiver(channel);
+    receiverTime = currentTime;
+  }
+
+  // Reduce transmitter commands using xmitFactor and center around 1500
+  // rollCommand, pitchCommand and yawCommand used in main loop of AeroQuad.pde to control quad
+  for (axis = ROLL; axis < LASTAXIS; axis++)
+    transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
+  transmitterCommand[THROTTLE] = receiverData[THROTTLE];
+  
+  if (receiverData[MODE] < 1500) {
     // Acrobatic Mode
     levelAdjust[ROLL] = 0;
     levelAdjust[PITCH] = 0;
@@ -330,16 +344,11 @@ void loop () {
     for (axis = ROLL; axis < YAW; axis++)
         levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
     // Turn off Stable Mode if transmitter stick applied
-    if ((abs(transmitterData[PITCH] - transmitterCenter[PITCH]) > levelOff))
+    if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
        levelAdjust[PITCH] = 0;
-    if ((abs(transmitterData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+    if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
       levelAdjust[ROLL] = 0;
   }
-  
-  // Transmitter Commands
-  // Calculations are performed in Transmitter.pde when receiver channels are read
-  // Saves processing time, since values only change when reading receiver
-  // Commands calculated are transmitterCommand[ROLL], transmitterCommand[PITCH], transmitterCommand[YAW]
   
   // Update PID
   motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
@@ -376,5 +385,8 @@ void loop () {
   
   // Check for remote commands and send requested telemetry
   readSerialCommand();
-  if (update) sendSerialTelemetry();
+  if (currentTime > (telemetryTime + 100)) {
+    sendSerialTelemetry();
+    telemetryTime = currentTime;
+  }
 }

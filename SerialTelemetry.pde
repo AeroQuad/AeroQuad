@@ -129,7 +129,7 @@ void sendSerialTelemetry() {
       Serial.print(gyroData[axis]);
       comma();
     }
-    Serial.print(transmitterData[THROTTLE]);
+    Serial.print(receiverData[THROTTLE]);
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(motorAxisCommand[axis]);
@@ -141,7 +141,7 @@ void sendSerialTelemetry() {
     }
     Serial.print(armed, BIN);
     comma();
-    Serial.println(transmitterData[MODE]);
+    Serial.println(receiverData[MODE]);
     break;
    case 'T': // Send processed transmitter values
     Serial.print(xmitFactor);
@@ -162,10 +162,10 @@ void sendSerialTelemetry() {
     break;
   case 'U': // Send receiver values
     for (channel = ROLL; channel < AUX; channel++) {
-      Serial.print(transmitterData[channel]);
+      Serial.print(receiverData[channel]);
       comma();
     }
-    Serial.println(transmitterData[AUX]);
+    Serial.println(receiverData[AUX]);
     break;
   case 'X': // Stop sending messages
     break;
