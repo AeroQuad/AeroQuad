@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.1 - May 2009
+  AeroQuad v1.2 - June 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -18,17 +18,15 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Define which Spektrum receiver is used
-#define AR6200
-//#define AR6100
-
+// ************************ User Options ***********************
 // Define Motor PWM Approach
-#define AnalogWrite
-//#define ServoTimerTwo
+//#define AnalogWrite
+#define ServoTimerTwo
 
 // Define flight configuration
 #define plusConfig
 //#define XConfig
+// *************************************************************
 
 #include <stdlib.h>
 #include <math.h>
@@ -38,7 +36,6 @@
   #include <ServoTimer2.h>
 #endif
 
-// ******************** Initialize Variables ********************
 #define BAUD 115200
 #define LEDPIN 13
 
@@ -72,20 +69,6 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-// These addresses used for user defined receiver pins and channel order
-// (Still under development)
-/*#define ROLLCH_ADR 76
-#define PITCHCH_ADR 80
-#define YAWCH_ADR 84
-#define THROTTLECH_ADR 88
-#define MODECH_ADR 92
-#define AUXCH_ADR 96
-#define ROLLPIN_ADR 100
-#define PITCHPIN_ADR 104
-#define YAWPIN_ADR 108
-#define THROTTLEPIN_ADR 112
-#define MODEPIN_ADR 116
-#define AUXPIN_ADR 120*/
 #define PITCH_PGAIN_ADR 124
 #define PITCH_IGAIN_ADR 128
 #define PITCH_DGAIN_ADR 132
@@ -147,18 +130,7 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-// Define receiver channel order here
-#ifdef AR6200
-  // AR6200 Channel Order
-  int orderCh[6] = {ROLL,AUX,MODE,PITCH,THROTTLE,YAW};
-  int xmitCh[6] = {ROLLPIN,AUXPIN,MODEPIN,PITCHPIN,THROTTLEPIN,YAWPIN}; // digital pin assignments for each channel
-#endif
-#ifdef AR6100
-  // AR6100 Channel Order
-  int orderCh[6] = {ROLL,AUX,PITCH,YAW,THROTTLE,MODE};
-  int xmitCh[6] = {ROLLPIN,AUXPIN,PITCHPIN,YAWPIN,THROTTLEPIN,MODEPIN,}; // digital pin assignments for each channel
-#endif
-volatile int receiverData[6];
+int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
 int transmitterCenter[2] = {1500,1500};
@@ -233,11 +205,11 @@ byte update = 0;
 byte timeSlot;
 
 // Timing
-long previousTime = 0;
-long currentTime = 0;
-long deltaTime = 0;
-long receiverTime =0;
-long telemetryTime = 0;
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
+unsigned long deltaTime = 0;
+unsigned long receiverTime =0;
+unsigned long telemetryTime = 0;
 float dt = 0;
 
 // ******************** Setup AeroQuadAero ********************
@@ -275,66 +247,67 @@ void loop () {
   deltaTime = currentTime - previousTime;
   previousTime = currentTime;
   
-  // Send configuration commands from transmitter
-  if (receiverData[THROTTLE] < 1050) {
-    zeroIntegralError();
-    // Disarm motors (throttle down, yaw left)
-    if (receiverData[YAW] < MINCHECK && armed == 1) {
-      armed = 0;
-      commandAllMotors(MINCOMMAND);
-    }    
-    // Zero sensors (throttle down, yaw left, roll left)
-    if (receiverData[YAW] < MINCHECK && receiverData[ROLL] < MINCHECK) {
-      zeroGyros();
-      zeroAccelerometers();
+// ******************* Transmitter Commands *******************
+  if (currentTime > (receiverTime + 20)) {
+    // Buffer receiver values read from pin change interrupt handler
+    for (channel = ROLL; channel < LASTCHANNEL; channel++)
+      receiverData[channel] = (int)readReceiver(channel);
+    // Reduce transmitter commands using xmitFactor and center around 1500
+    for (axis = ROLL; axis < LASTAXIS; axis++)
+      transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
+    // Copy throttle from buffer, no xmitFactor reduction applied
+    transmitterCommand[THROTTLE] = receiverData[THROTTLE];  
+    // Read quad configuration commands from transmitter
+    if (receiverData[THROTTLE] < 1050) {
       zeroIntegralError();
-      pulseMotors(3);
-    }   
-    // Arm motors (throttle down, yaw right)  
-    if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
-      armed = 1;
-      zeroIntegralError();
-      minCommand = MINTHROTTLE;
-      transmitterCenter[PITCH] = receiverData[PITCH];
-      transmitterCenter[ROLL] = receiverData[ROLL];
+      // Disarm motors (throttle down, yaw left)
+      if (receiverData[YAW] < MINCHECK && armed == 1) {
+        armed = 0;
+        commandAllMotors(MINCOMMAND);
+      }    
+      // Zero sensors (throttle down, yaw left, roll left, pitch up)
+      if (receiverData[YAW] < MINCHECK && receiverData[ROLL] < MINCHECK && receiverData[PITCH] > MAXCHECK) {
+        zeroGyros();
+        zeroAccelerometers();
+        zeroIntegralError();
+        pulseMotors(3);
+      }   
+      // Arm motors (throttle down, yaw right)
+      if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
+        armed = 1;
+        zeroIntegralError();
+        minCommand = MINTHROTTLE;
+        transmitterCenter[PITCH] = receiverData[PITCH];
+        transmitterCenter[ROLL] = receiverData[ROLL];
+      }
+      // Prevents accidental arming of motor output if no transmitter command received
+      if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
     }
-    if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
+    if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
+    if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
+    receiverTime = currentTime;
   }
-  else if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
-  if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
-
-  // Read Sensors
+  
+// *********************** Read Sensors **********************
   // Apply low pass filter to sensor values and center around zero
-  // Did not convert to engineering units, since will apply P gain anyway
+  // Did not convert to engineering units, since will experiment to find P gain anyway
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
     accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
   }
-
+  // Compiler seems to like calculating this in separate loops better
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
   }
 
-  // Calculate flight angle
+// ****************** Calculate Absolute Angle *****************
   dt = deltaTime / 1000.0; // Convert to seconds
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
-  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
-    
-  // Transmitter Commands
-  if (currentTime > (receiverTime + 20)) {
-    for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      receiverData[channel] = readReceiver(channel);
-    receiverTime = currentTime;
-  }
+  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);  
 
-  // Reduce transmitter commands using xmitFactor and center around 1500
-  // rollCommand, pitchCommand and yawCommand used in main loop of AeroQuad.pde to control quad
-  for (axis = ROLL; axis < LASTAXIS; axis++)
-    transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
-  transmitterCommand[THROTTLE] = receiverData[THROTTLE];
-  
-  if (receiverData[MODE] < 1500) {
+  // ******************* Check Flight Mode *******************
+  if (receiverData[MODE] < 1200) {
     // Acrobatic Mode
     levelAdjust[ROLL] = 0;
     levelAdjust[PITCH] = 0;
@@ -342,20 +315,20 @@ void loop () {
   else {
     // Stable Mode
     for (axis = ROLL; axis < YAW; axis++)
-        levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
+      levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
     // Turn off Stable Mode if transmitter stick applied
     if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
-       levelAdjust[PITCH] = 0;
+      levelAdjust[PITCH] = 0;
     if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
       levelAdjust[ROLL] = 0;
   }
   
-  // Update PID
+// ************************* Update PID ************************
   motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
   motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
   motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     
-  // Calculate motor commands
+// ****************** Calculate Motor Commands *****************
   if (armed && safetyCheck) {
     #ifdef plusConfig
       motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
@@ -379,11 +352,11 @@ void loop () {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = MINCOMMAND;
   }
-  
-  // Command motors
+
+// *********************** Command Motors **********************
   commandMotors();
   
-  // Check for remote commands and send requested telemetry
+// **************** Command & Telemetry Functions **************
   readSerialCommand();
   if (currentTime > (telemetryTime + 100)) {
     sendSerialTelemetry();

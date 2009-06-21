@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.1 - May 2009
+  AeroQuad v1.2 - June 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -46,8 +46,8 @@
 
 #define RECEIVER_LOW_MIN (16000 / RECEIVER_TICK)
 #define RECEIVER_LOW_MAX (24000 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MIN (750 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MAX (2250 / RECEIVER_TICK)
+#define RECEIVER_HIGH_MIN (1000 / RECEIVER_TICK)
+#define RECEIVER_HIGH_MAX (2000 / RECEIVER_TICK)
 
 // Maximum number of consecutive errors before we decalre a fault.
 // Experience has shown that from time to time we get too-short or too-long
@@ -177,10 +177,8 @@ void receiver_pci_handler(void     *p_usr,
 //
 //=============================================================================
 
-boolean             // Ret: true if OK, false if failed
-configureReceiver(void)
-
-{
+boolean configureReceiver(void) {
+  // Ret: true if OK, false if failed
   uint8_t ch;
   
  
@@ -217,10 +215,8 @@ configureReceiver(void)
 //
 //=============================================================================
 
-boolean                    // Ret: true if OK, false if not OK
-receiver_get_status(void)
-
-{
+boolean statusReceiver(void) {
+  // Ret: true if OK, false if not 
   boolean status = true;
   uint8_t ch;
 
@@ -241,10 +237,9 @@ receiver_get_status(void)
 //
 //=============================================================================
 
-uint16_t                             // Ret: raw data, in units of  RECEIVER_TICK
-readReceiver(uint8_t ch) // In:  channel
-
-{
+uint16_t readReceiver(uint8_t ch) {
+  // In:  channel
+  // Ret: raw data, in units of  RECEIVER_TICK
   uint16_t data;
   uint8_t  old_sreg;
 
@@ -271,13 +266,11 @@ readReceiver(uint8_t ch) // In:  channel
 //
 //=============================================================================
 
-void receiver_print_stats(void)
-
-{
+void receiver_print_stats(void) {
   uint8_t ch;
 
   
-  if (receiver_get_status())
+  if (statusReceiver())
     Serial.print("GOOD\t");
   else
     Serial.print("BAD\t");

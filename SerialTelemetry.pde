@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.1 - May 2009
+  AeroQuad v1.2 - June 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -77,21 +77,7 @@ void sendSerialTelemetry() {
     Serial.println(timeConstant);
     queryType = 'X';
     break;
-  // Used for user defined receiver pins and channel order
-  // (Still under development)
-  /*case 'N': // send receiver channel order
-    for (channel = ROLL; channel < LASTCHANNEL; channel++) {
-      Serial.print(orderCh[channel]);
-      comma();
-    }
-    for (channel = ROLL; channel < AUX; channel++) {
-      Serial.print(xmitCh[channel]);
-      comma();
-    }
-    Serial.println(xmitCh[AUX]);
-    queryType = 'X';
-    break;*/
-  case 'Q': // Send sensor data
+   case 'Q': // Send sensor data
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(gyroADC[axis]);
       comma();
