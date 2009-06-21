@@ -20,8 +20,8 @@
 
 // ************************ User Options ***********************
 // Define Motor PWM Approach
-//#define AnalogWrite
-#define ServoTimerTwo
+#define AnalogWrite
+//#define ServoTimerTwo
 
 // Define flight configuration
 #define plusConfig
@@ -212,7 +212,9 @@ unsigned long receiverTime =0;
 unsigned long telemetryTime = 0;
 float dt = 0;
 
-// ******************** Setup AeroQuadAero ********************
+// ************************************************************
+// ********************** Setup AeroQuad **********************
+// ************************************************************
 void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL); // Current external ref is connected to 3.3V
@@ -240,7 +242,9 @@ void setup() {
   safetyCheck = 0;
 }
 
+// ************************************************************
 // ******************** Main AeroQuad Loop ********************
+// ************************************************************
 void loop () {
   // Measure loop rate
   currentTime = millis();

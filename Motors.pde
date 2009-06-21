@@ -68,7 +68,7 @@ void commandAllMotors(int motorCommand) {
 
 void pulseMotors(byte quantity) {
   for (byte i=0; i<quantity; i++) {      
-    commandAllMotors(MINCOMMAND + 50);
+    commandAllMotors(MINCOMMAND + 100);
     delay(250);
     commandAllMotors(MINCOMMAND);
     delay(250);
