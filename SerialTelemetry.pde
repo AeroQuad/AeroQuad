@@ -153,6 +153,9 @@ void sendSerialTelemetry() {
     }
     Serial.println(receiverData[AUX]);
     break;
+  case 'V': // Print receiver status
+    printReceiverStatus();
+    break;
   case 'X': // Stop sending messages
     break;
   }

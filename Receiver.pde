@@ -24,52 +24,34 @@
 
 #include "pcint.h"
 
-//=============================================================================
-//
-// Local Definitions
-//
-//=============================================================================
-
 // Receiver Tick defines the measuement units of raw receiver data.  Currently
 // this is 1 uSec but it may change for the sake of optimization.
-
 #define RECEIVER_TICK 1   // uSec
 
 // Nominal minimum, middle and maximum values of raw receiver data
-
 #define RECEIVER_NOM_MIN (1000 / RECEIVER_TICK)
 #define RECEIVER_NOM_MID (1500 / RECEIVER_TICK)
 #define RECEIVER_NOM_MAX (2000 / RECEIVER_TICK)
 
 // Absolute minimum and maximum values of raw receiver data.
 // Beyond them the receiver is considered to be non-functional.
-
 #define RECEIVER_LOW_MIN (16000 / RECEIVER_TICK)
 #define RECEIVER_LOW_MAX (24000 / RECEIVER_TICK)
 #define RECEIVER_HIGH_MIN (1000 / RECEIVER_TICK)
 #define RECEIVER_HIGH_MAX (2000 / RECEIVER_TICK)
 
-// Maximum number of consecutive errors before we decalre a fault.
+// Maximum number of consecutive errors before we declare a fault.
 // Experience has shown that from time to time we get too-short or too-long
 // pulses from the reciver.  This does not seem to be a s/w bug but either a
 // receiver mis-behavior of a h/w problem.  The current solution is to ignore
 // illegal-width pulses, if their consecutive number is small.
-
 #define RECEIVER_MAX_ERRORS 4
 
-
-//=============================================================================
-//
-// Static Variables
-//
-//=============================================================================
-
 // Channel data
-
 typedef struct
 {
-  boolean  last_was_high;   // true if last time channel input was high
-  uint8_t  error_count;     // Counts error to detect receiver faults
+  boolean last_was_high;   // true if last time channel input was high
+  uint8_t error_count;     // Counts error to detect receiver faults
   uint32_t last_ticks;      // Time (number of ticks) of last pin change
   uint32_t ticks_high;      // Pulse width (number of ticks) last measured
 } ReceiverChData;
@@ -77,87 +59,51 @@ typedef struct
 static ReceiverChData ch_data[LASTCHANNEL];
 
 
-//=============================================================================
-//
-// Static Functions
-//
-//=============================================================================
-
 //======================== receiver_pci_handler() =============================
 //
 // Handles PCI for receiver pins
 //
 //=============================================================================
-
-void receiver_pci_handler(void     *p_usr,
-                          uint8_t   masked_in,
-                          uint32_t  curr_ticks)
-
-{
+void receiver_pci_handler(void *p_usr, uint8_t masked_in, uint32_t curr_ticks) {
   ReceiverChData *p_ch_data;
-  uint32_t        ticks_diff;   // Time diff (# of ticks) from last input change
-  boolean         error_flag;   // Flags a receiver error
-
-
+  uint32_t ticks_diff;   // Time diff (# of ticks) from last input change
+  boolean error_flag;   // Flags a receiver error
   p_ch_data = (ReceiverChData *)p_usr;
   
-  if (masked_in == 0)
-  {
-    // high-to-low transition
-
-    if (! p_ch_data->last_was_high)
-    {
+  // high-to-low transition
+  if (masked_in == 0) {
+    if (! p_ch_data->last_was_high) {
       // Sanity check failed, last time was low
-      
       error_flag = true;
     }
-
-    else
-    {
-      ticks_diff = curr_ticks - p_ch_data->last_ticks;
-      
-      if ((ticks_diff < RECEIVER_HIGH_MIN) || 
-          (ticks_diff > RECEIVER_HIGH_MAX))
+    else {
+      ticks_diff = curr_ticks - p_ch_data->last_ticks;     
+      if ((ticks_diff < RECEIVER_HIGH_MIN) || (ticks_diff > RECEIVER_HIGH_MAX))
         error_flag = true;
-
-      else
-      {
+      else {
         p_ch_data->ticks_high = ticks_diff;
         p_ch_data->error_count = 0;   // Only successful high resets the counter
         error_flag = false;
       }
-    }
-    
+    }    
     p_ch_data->last_was_high = false;
     p_ch_data->last_ticks = curr_ticks;
   }
-
-  else
-  {
+  else {
     // low-to-high transition
-
-    if (p_ch_data->last_was_high)
-    {
-      // Sanity check failed, last time was high
-      
+    if (p_ch_data->last_was_high) {
+      // Sanity check failed, last time was high   
       error_flag = true;
     }
-
-    else
-    {
-
+    else {
       ticks_diff = curr_ticks - p_ch_data->last_ticks;
-
-      error_flag = ((ticks_diff < RECEIVER_LOW_MIN) || 
-                    (ticks_diff > RECEIVER_LOW_MAX));
-    }
-    
+      error_flag = ((ticks_diff < RECEIVER_LOW_MIN) || (ticks_diff > RECEIVER_LOW_MAX));
+    }   
     p_ch_data->last_was_high = true;
     p_ch_data->last_ticks = curr_ticks;
   }
 
-  if (error_flag)
-  {
+  if (error_flag) {
     if (p_ch_data->error_count < RECEIVER_MAX_ERRORS)
       p_ch_data->error_count++;
   }
@@ -266,7 +212,7 @@ uint16_t readReceiver(uint8_t ch) {
 //
 //=============================================================================
 
-void receiver_print_stats(void) {
+void printReceiverStatus(void) {
   uint8_t ch;
 
   

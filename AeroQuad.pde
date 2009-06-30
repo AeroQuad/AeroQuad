@@ -252,7 +252,7 @@ void loop () {
   previousTime = currentTime;
   
 // ******************* Transmitter Commands *******************
-  if (currentTime > (receiverTime + 20)) {
+  if (currentTime > (receiverTime + 20) && statusReceiver()) {
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       receiverData[channel] = (int)readReceiver(channel);
@@ -260,7 +260,8 @@ void loop () {
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
     // Copy throttle from buffer, no xmitFactor reduction applied
-    transmitterCommand[THROTTLE] = receiverData[THROTTLE];  
+    if ((receiverData[THROTTLE] >= MINCOMMAND) && (receiverData[THROTTLE] <= MAXCOMMAND))
+      transmitterCommand[THROTTLE] = receiverData[THROTTLE];
     // Read quad configuration commands from transmitter
     if (receiverData[THROTTLE] < 1050) {
       zeroIntegralError();
