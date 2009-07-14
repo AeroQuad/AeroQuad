@@ -31,7 +31,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <EEPROM.h>
-#include "pcint.h"
 #ifdef ServoTimerTwo
   #include <ServoTimer2.h>
 #endif
@@ -130,11 +129,15 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
+#define MINWIDTH 925
+#define MAXWIDTH 2075
+int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
+int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterZero[3] = {1500,1500,1500};
 int transmitterCenter[2] = {1500,1500};
-int channel = 0;
+byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
 float xmitFactor; // Read in from EEPROM
@@ -228,7 +231,7 @@ void setup() {
   // Read user values from EEPROM
   readEEPROM();
   
-  // Setup interrupt to trigger on pin D2
+  // Setup receiver pins for pin change interrupts
   configureReceiver();
   
   // Calibrate sensors
@@ -252,10 +255,10 @@ void loop () {
   previousTime = currentTime;
   
 // ******************* Transmitter Commands *******************
-  if (currentTime > (receiverTime + 20) && statusReceiver()) {
+  if (currentTime > (receiverTime + 100)) {
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      receiverData[channel] = (int)readReceiver(channel);
+      receiverData[channel] = readReceiver(receiverPin[channel]);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];

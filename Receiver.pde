@@ -4,9 +4,10 @@
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
   
-  Interrupt based method for reading receiver inputs written by Dror Caspi
+  Interrupt based method for inspired by Dror Caspi
   http://www.rcgroups.com/forums/showpost.php?p=12356667&postcount=1639
-  Copyright (c) 2009 Dror Caspi.  All rights reserved.
+  
+  Version in AeroQuad code is written by Ted Carancho
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -22,212 +23,130 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "pcint.h"
+#include "pins_arduino.h"
 
-// Receiver Tick defines the measuement units of raw receiver data.  Currently
-// this is 1 uSec but it may change for the sake of optimization.
-#define RECEIVER_TICK 1   // uSec
+volatile uint8_t *port_to_pcmask[] = {
+  &PCMSK0,
+  &PCMSK1,
+  &PCMSK2
+};
 
-// Nominal minimum, middle and maximum values of raw receiver data
-#define RECEIVER_NOM_MIN (1000 / RECEIVER_TICK)
-#define RECEIVER_NOM_MID (1500 / RECEIVER_TICK)
-#define RECEIVER_NOM_MAX (2000 / RECEIVER_TICK)
+volatile static uint8_t PCintLast[3];
 
-// Absolute minimum and maximum values of raw receiver data.
-// Beyond them the receiver is considered to be non-functional.
-#define RECEIVER_LOW_MIN (16000 / RECEIVER_TICK)
-#define RECEIVER_LOW_MAX (24000 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MIN (1000 / RECEIVER_TICK)
-#define RECEIVER_HIGH_MAX (2000 / RECEIVER_TICK)
+// Channel data 
+typedef struct {   
+  unsigned long riseTime;    
+  unsigned long fallTime; 
+  unsigned long lastGoodWidth;
+} pinTimingData;  
 
-// Maximum number of consecutive errors before we declare a fault.
-// Experience has shown that from time to time we get too-short or too-long
-// pulses from the reciver.  This does not seem to be a s/w bug but either a
-// receiver mis-behavior of a h/w problem.  The current solution is to ignore
-// illegal-width pulses, if their consecutive number is small.
-#define RECEIVER_MAX_ERRORS 4
+volatile static pinTimingData pinData[24]; 
 
-// Channel data
-typedef struct
-{
-  boolean last_was_high;   // true if last time channel input was high
-  uint8_t error_count;     // Counts error to detect receiver faults
-  uint32_t last_ticks;      // Time (number of ticks) of last pin change
-  uint32_t ticks_high;      // Pulse width (number of ticks) last measured
-} ReceiverChData;
+// Attaches PCINT to Arduino Pin
+void attachPinChangeInterrupt(uint8_t pin) {
+  uint8_t bit = digitalPinToBitMask(pin);
+  uint8_t port = digitalPinToPort(pin);
+  uint8_t slot;
+  volatile uint8_t *pcmask;
 
-static ReceiverChData ch_data[LASTCHANNEL];
-
-
-//======================== receiver_pci_handler() =============================
-//
-// Handles PCI for receiver pins
-//
-//=============================================================================
-void receiver_pci_handler(void *p_usr, uint8_t masked_in, uint32_t curr_ticks) {
-  ReceiverChData *p_ch_data;
-  uint32_t ticks_diff;   // Time diff (# of ticks) from last input change
-  boolean error_flag;   // Flags a receiver error
-  p_ch_data = (ReceiverChData *)p_usr;
-  
-  // high-to-low transition
-  if (masked_in == 0) {
-    if (! p_ch_data->last_was_high) {
-      // Sanity check failed, last time was low
-      error_flag = true;
-    }
-    else {
-      ticks_diff = curr_ticks - p_ch_data->last_ticks;     
-      if ((ticks_diff < RECEIVER_HIGH_MIN) || (ticks_diff > RECEIVER_HIGH_MAX))
-        error_flag = true;
-      else {
-        p_ch_data->ticks_high = ticks_diff;
-        p_ch_data->error_count = 0;   // Only successful high resets the counter
-        error_flag = false;
-      }
-    }    
-    p_ch_data->last_was_high = false;
-    p_ch_data->last_ticks = curr_ticks;
-  }
+  // map pin to PCIR register
+  if (port == NOT_A_PORT) {
+    return;
+  } 
   else {
-    // low-to-high transition
-    if (p_ch_data->last_was_high) {
-      // Sanity check failed, last time was high   
-      error_flag = true;
+    port -= 2;
+    pcmask = port_to_pcmask[port];
+  }
+  // set the mask
+  *pcmask |= bit;
+  // enable the interrupt
+  PCICR |= 0x01 << port;
+}
+
+// Detaches PCINT from Arduino Pin
+void detachPinChangeInterrupt(uint8_t pin) {
+  uint8_t bit = digitalPinToBitMask(pin);
+  uint8_t port = digitalPinToPort(pin);
+  volatile uint8_t *pcmask;
+
+  // map pin to PCIR register
+  if (port == NOT_A_PORT) {
+    return;
+  } 
+  else {
+    port -= 2;
+    pcmask = port_to_pcmask[port];
+  }
+
+  // disable the mask.
+  *pcmask &= ~bit;
+  // if that's the last one, disable the interrupt.
+  if (*pcmask == 0) {
+    PCICR &= ~(0x01 << port);
+  }
+}
+
+// ISR which records time of rising or falling edge of signal
+static void measurePulseWidthISR(uint8_t port) {
+  uint8_t bit;
+  uint8_t curr;
+  uint8_t mask;
+  uint8_t pin;
+  uint32_t currentTime;
+
+  // get the pin states for the indicated port.
+  curr = *portInputRegister(port+2);
+  mask = curr ^ PCintLast[port];
+  PCintLast[port] = curr;
+  // mask is pins that have changed. screen out non pcint pins.
+  if ((mask &= *port_to_pcmask[port]) == 0) {
+    return;
+  }
+  currentTime = micros();
+  // mask is pcint pins that have changed.
+  for (uint8_t i=0; i < 8; i++) {
+    bit = 0x01 << i;
+    if (bit & mask) {
+      pin = port * 8 + i;
+      // for each pin changed, record time of change
+      if (bit & PCintLast[port]) {
+        pinData[pin].riseTime = currentTime;
+      }
+      else {
+        pinData[pin].fallTime = currentTime;
+      }
     }
-    else {
-      ticks_diff = curr_ticks - p_ch_data->last_ticks;
-      error_flag = ((ticks_diff < RECEIVER_LOW_MIN) || (ticks_diff > RECEIVER_LOW_MAX));
-    }   
-    p_ch_data->last_was_high = true;
-    p_ch_data->last_ticks = curr_ticks;
-  }
-
-  if (error_flag) {
-    if (p_ch_data->error_count < RECEIVER_MAX_ERRORS)
-      p_ch_data->error_count++;
   }
 }
 
+SIGNAL(PCINT0_vect) {
+  measurePulseWidthISR(0);
+}
+SIGNAL(PCINT1_vect) {
+  measurePulseWidthISR(1);
+}
+SIGNAL(PCINT2_vect) {
+  measurePulseWidthISR(2);
+}
 
-//=============================================================================
-//
-// Public Functions
-//
-//=============================================================================
-
-//============================ configureReceiver() ================================
-//
-// Initialize the receiver module
-// Should be called on system initalization
-//
-//=============================================================================
-
-boolean configureReceiver(void) {
-  // Ret: true if OK, false if failed
-  uint8_t ch;
-  
- 
-  for (ch = ROLL; ch < LASTCHANNEL; ch++)
-  {
-    ch_data[ch].last_was_high = false;
-    ch_data[ch].error_count = RECEIVER_MAX_ERRORS;   // Error until proven otherwise
-    ch_data[ch].last_ticks = 0;
-    ch_data[ch].ticks_high = 0;
-    // ch_data[ch].ticks_low = 0;
+// Configure each receiver pin for PCINT
+void configureReceiver() {
+  for (channel = ROLL; channel < LASTCHANNEL; channel++) {
+    pinMode(channel, INPUT);
+    attachPinChangeInterrupt(receiverChannel[channel]);
   }
-  
-  pinMode(THROTTLEPIN, INPUT);
-  pinMode(ROLLPIN, INPUT);
-  pinMode(PITCHPIN, INPUT);
-  pinMode(YAWPIN, INPUT);
-  pinMode(MODE, INPUT);
-  pinMode(AUXPIN, INPUT);
-
-  pcint_attach(THROTTLEPIN, receiver_pci_handler, &ch_data[THROTTLE]);
-  pcint_attach(ROLLPIN, receiver_pci_handler, &ch_data[ROLL]);
-  pcint_attach(PITCHPIN, receiver_pci_handler, &ch_data[PITCH]);
-  pcint_attach(YAWPIN, receiver_pci_handler, &ch_data[YAW]);
-  pcint_attach(MODEPIN, receiver_pci_handler, &ch_data[MODE]);
-  pcint_attach(AUXPIN, receiver_pci_handler, &ch_data[AUX]);
-
-  return true;
 }
 
+// Calculate PWM pulse width of receiver data
+// If invalid PWM measured, use last known good time
+unsigned int readReceiver(byte receiverPin) {
+  unsigned int time;
+  
+  time = pinData[receiverPin].fallTime - pinData[receiverPin].riseTime;
+  if ((time > MINWIDTH) && (time < MAXWIDTH))
+    pinData[receiverPin].lastGoodWidth = time;
 
-//======================== receiver_get_status() ==============================
-//
-// Get the current status of the receiver
-//
-//=============================================================================
-
-boolean statusReceiver(void) {
-  // Ret: true if OK, false if not 
-  boolean status = true;
-  uint8_t ch;
-
-
-  for (ch = ROLL; ch < LASTCHANNEL; ch++)
-  {
-    if (ch_data[ch].error_count >= RECEIVER_MAX_ERRORS)
-       status = false;
-  }
-
-  return status;
+  return pinData[receiverPin].lastGoodWidth;
 }
-
-
-//====================== receiver_get_current_raw() ===========================
-//
-// Get the current raw receiver data (that has been read before from the h/w)
-//
-//=============================================================================
-
-uint16_t readReceiver(uint8_t ch) {
-  // In:  channel
-  // Ret: raw data, in units of  RECEIVER_TICK
-  uint16_t data;
-  uint8_t  old_sreg;
-
-
-  // Save the interrupt status and disable interrupts.
-  // This is required to assure consistent reading of the data.
-  
-  old_sreg = SREG;
-  cli();	
-
-  data = ch_data[ch].ticks_high;
-
-  // Restore the interrupt status
-  
-  SREG = old_sreg;
-
-  return data;
-}
-
-
-//========================== receiver_print_stats() ===========================
-//
-// Print some statistics (for debug)
-//
-//=============================================================================
-
-void printReceiverStatus(void) {
-  uint8_t ch;
-
-  
-  if (statusReceiver())
-    Serial.print("GOOD\t");
-  else
-    Serial.print("BAD\t");
-  
-  for (ch = ROLL; ch < LASTCHANNEL; ch++)
-  { 
-    Serial.print(readReceiver(ch), DEC);
-    Serial.print("\t");
-  }
-  
-  pcint_print_stats();
-  Serial.println();
-}
-
+    
+    

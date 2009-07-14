@@ -154,7 +154,11 @@ void sendSerialTelemetry() {
     Serial.println(receiverData[AUX]);
     break;
   case 'V': // Print receiver status
-    printReceiverStatus();
+    for (channel = ROLL; channel < AUX; channel++) {
+      Serial.print(receiverData[channel]);
+      comma();
+    }
+    Serial.println(receiverData[AUX]);
     break;
   case 'X': // Stop sending messages
     break;
