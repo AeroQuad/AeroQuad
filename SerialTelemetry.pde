@@ -77,7 +77,14 @@ void sendSerialTelemetry() {
     Serial.println(timeConstant);
     queryType = 'X';
     break;
-   case 'Q': // Send sensor data
+  case 'N': // Send motor smoothing values
+    for (motor = FRONT; motor < LEFT; motor++) {
+      Serial.print(smoothMotor[motor]);
+      comma();
+    }
+    Serial.println(smoothMotor[LEFT]);
+    break;
+  case 'Q': // Send sensor data
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(gyroADC[axis]);
       comma();
@@ -153,7 +160,7 @@ void sendSerialTelemetry() {
     }
     Serial.println(receiverData[AUX]);
     break;
-  case 'V': // Print receiver status
+  case 'V': // Send receiver status
     for (channel = ROLL; channel < AUX; channel++) {
       Serial.print(receiverData[channel]);
       comma();

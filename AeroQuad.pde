@@ -68,6 +68,13 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
+#define FRONTSMOOTH_ADR 76
+#define REARSMOOTH_ADR 80
+#define RIGHTSMOOTH_ADR 84
+#define LEFTSMOOTH_ADR 88
+#define GYRO_ROLL_ZERO_ADR 92
+#define GYRO_PITCH_ZERO_ADR 96
+#define GYRO_YAW_ZERO_ADR 100
 #define PITCH_PGAIN_ADR 124
 #define PITCH_IGAIN_ADR 128
 #define PITCH_DGAIN_ADR 132
@@ -93,6 +100,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
   ServoTimer2 leftMotor;
 #endif
 int motorCommand[4] = {1000,1000,1000,1000};
+int motorCommandSmooth[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
 int motor, minCommand = 0;
 // If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
@@ -129,8 +137,8 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-#define MINWIDTH 925
-#define MAXWIDTH 2075
+#define MINWIDTH 996
+#define MAXWIDTH 2004
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
 int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
@@ -175,6 +183,12 @@ float filterTermRoll[4] = {0,0,0,0};
 float filterTermPitch[4] = {0,0,0,0};
 float timeConstant; // Read in from EEPROM
 
+// Camera stabilization variables
+int camera[2];
+// map +/-90 degrees to 1000-2000
+float mCamera = 0;
+float bCamera = 0;
+
 // Calibration parameters
 #define FINDZERO 50
 int findZero[FINDZERO];
@@ -183,6 +197,7 @@ int findZero[FINDZERO];
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
+float smoothMotor[4]; // Read in from EEPROM
 
 // PID Values
 #define LASTAXIS 3
@@ -235,7 +250,7 @@ void setup() {
   configureReceiver();
   
   // Calibrate sensors
-  zeroGyros();
+  //zeroGyros();
   
   // Complementary filter setup
   configureFilter(timeConstant);
@@ -273,7 +288,7 @@ void loop () {
         armed = 0;
         commandAllMotors(MINCOMMAND);
       }    
-      // Zero sensors (throttle down, yaw left, roll left, pitch up)
+      // Zero sensors (throttle down, yaw left, roll left, pitch down)
       if (receiverData[YAW] < MINCHECK && receiverData[ROLL] < MINCHECK && receiverData[PITCH] > MAXCHECK) {
         zeroGyros();
         zeroAccelerometers();

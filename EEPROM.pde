@@ -78,18 +78,27 @@ void readEEPROM() {
   xmitFactor = readFloat(XMITFACTOR_ADR);
   smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR);
   smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR);
+  smoothMotor[FRONT] = readFloat(FRONTSMOOTH_ADR);
+  smoothMotor[REAR] = readFloat(REARSMOOTH_ADR);
+  smoothMotor[RIGHT] = readFloat(RIGHTSMOOTH_ADR);
+  smoothMotor[LEFT] = readFloat(LEFTSMOOTH_ADR);
   accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
   accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
   accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+  gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
+  gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+  gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
   
-  // Used for user defined receiver pins and channel order
-  // (Still under development)
-  /*for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    orderCh[channel] = readFloat(ROLLCH_ADR + (channel * 4));
-  for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    xmitCh[channel] = readFloat(ROLLPIN_ADR + (channel * 4));
-    
-  orderCh[0] = ROLL;
-  xmitCh[0] = ROLLPIN; // First receiver output channel must match pin for AttachInterrupt*/
+  // Check if certain key values are not populated
+  // Put default value in if it is zero
+  if (PID[ROLL].P == 0) PID[ROLL].P = 3.0;
+  if (PID[PITCH].P == 0) PID[PITCH].P = 3.0;
+  if (PID[YAW].P == 0) PID[YAW].P = 10.0;
+  if (smoothFactor[GYRO] == 0) smoothFactor[GYRO] = 0.20;
+  if (smoothFactor[ACCEL] == 0) smoothFactor[ACCEL] = 0.20;
+  if (smoothMotor[FRONT] == 0) smoothMotor[FRONT] = 1.0;
+  if (smoothMotor[REAR] == 0) smoothMotor[REAR] = 1.0;
+  if (smoothMotor[LEFT] == 0) smoothMotor[LEFT] = 1.0;
+  if (smoothMotor[RIGHT] == 0) smoothMotor[RIGHT] = 1.0;
 }

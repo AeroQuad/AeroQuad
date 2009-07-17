@@ -36,17 +36,20 @@ void configureMotors() {
 }
 
 void commandMotors() {
+  for (motor = FRONT; motor < LASTMOTOR; motor++)
+    motorCommandSmooth[motor] = smooth(motorCommand[motor], motorCommandSmooth[motor], smoothMotor[motor]);
+    
   #ifdef ServoTimerTwo
-    frontMotor.write(motorCommand[FRONT]);
-    rearMotor.write(motorCommand[REAR]);
-    rightMotor.write(motorCommand[RIGHT]);
-    leftMotor.write(motorCommand[LEFT]);
+    frontMotor.write(motorCommandSmooth[FRONT]);
+    rearMotor.write(motorCommandSmooth[REAR]);
+    rightMotor.write(motorCommandSmooth[RIGHT]);
+    leftMotor.write(motorCommandSmooth[LEFT]);
   #endif
   #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (motorCommandSmooth[FRONT] * mMotorCommand) + bMotorCommand);
+    analogWrite(REARMOTORPIN, (motorCommandSmooth[REAR] * mMotorCommand) + bMotorCommand);
+    analogWrite(RIGHTMOTORPIN, (motorCommandSmooth[RIGHT] * mMotorCommand) + bMotorCommand);
+    analogWrite(LEFTMOTORPIN, (motorCommandSmooth[LEFT] * mMotorCommand) + bMotorCommand);
   #endif
 }
 

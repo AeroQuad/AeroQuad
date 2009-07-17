@@ -143,7 +143,7 @@ unsigned int readReceiver(byte receiverPin) {
   unsigned int time;
   
   time = pinData[receiverPin].fallTime - pinData[receiverPin].riseTime;
-  if ((time > MINWIDTH) && (time < MAXWIDTH))
+  if ((time >= MINWIDTH) && (time <= MAXWIDTH))
     pinData[receiverPin].lastGoodWidth = time;
 
   return pinData[receiverPin].lastGoodWidth;
