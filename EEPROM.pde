@@ -102,7 +102,7 @@ void readEEPROM() {
   if (xmitFactor == 0) xmitFactor = 0.20;  
   if (levelLimit == 0) levelLimit = 2000.0;
   if (levelOff == 0) levelOff = 50;  
-  if (smoothFactor[THROTTLE] == 0) smoothFactor[THROTTLE] = 1.0;
+  if (smoothTransmitter[THROTTLE] == 0) smoothTransmitter[THROTTLE] = 1.0;
   if (smoothTransmitter[ROLL] == 0) smoothTransmitter[ROLL] = 1.0;
   if (smoothTransmitter[PITCH] == 0) smoothTransmitter[PITCH] = 1.0;
   if (smoothTransmitter[YAW] == 0) smoothTransmitter[YAW] = 1.0;  

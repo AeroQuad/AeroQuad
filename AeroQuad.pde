@@ -24,6 +24,9 @@
 #define plusConfig
 //#define XConfig
 
+// Calibration At Powerup
+//#define CalibrationAtPower
+
 // Define Motor PWM Approach
 #define AnalogWrite
 //#define ServoTimerTwo
@@ -255,8 +258,15 @@ void setup() {
   // Setup receiver pins for pin change interrupts
   configureReceiver();
   
-  // Calibrate sensors
-  //zeroGyros();
+  #ifdef CalibrationAtStartup
+    // Calibrate sensors
+    zeroGyros();
+    zeroAccelerometers();
+    zeroIntegralError();
+  #endif
+  levelAdjust[ROLL] = 0;
+  levelAdjust[PITCH] = 0;
+
   
   // Complementary filter setup
   configureFilter(timeConstant);
@@ -286,8 +296,11 @@ void loop () {
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((transmitterCommandSmooth[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
+    // No xmitFactor reduction applied for throttle
+    if ((receiverData[THROTTLE] >= MINCOMMAND) && (receiverData[THROTTLE] <= MAXCOMMAND)) // Check if within range to prevent throttle spikes
+      transmitterCommand[THROTTLE] = smooth(transmitterCommandSmooth[THROTTLE], transmitterCommand[THROTTLE], smoothTransmitter[THROTTLE]);
     // Read quad configuration commands from transmitter
-    if (receiverData[THROTTLE] < 1050) {
+    if (receiverData[THROTTLE] < MINCHECK) {
       zeroIntegralError();
       // Disarm motors (throttle down, yaw left)
       if (receiverData[YAW] < MINCHECK && armed == 1) {
@@ -312,6 +325,7 @@ void loop () {
       // Prevents accidental arming of motor output if no transmitter command received
       if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
     }
+    // Prevents too little power applied to motors during hard manuevers
     if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
     if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
     receiverTime = currentTime;
@@ -324,14 +338,14 @@ void loop () {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
     accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
   }
-  // Compiler seems to like calculating this in separate loops better
+  // Compiler seems to like calculating this in separate loop better
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
   }
 
 // ****************** Calculate Absolute Angle *****************
-  dt = deltaTime / 1000.0; // Convert to seconds
+  dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
   flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);  
 
@@ -345,7 +359,7 @@ void loop () {
     else {
       // Stable Mode
       for (axis = ROLL; axis < YAW; axis++)
-      levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
+        levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
       // Turn off Stable Mode if transmitter stick applied
       if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
         levelAdjust[PITCH] = 0;
@@ -375,10 +389,13 @@ void loop () {
       motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     #endif
   }
+  
+  // If throttle in minimum position, don't apply yaw
   if (transmitterCommand[THROTTLE] < MINCHECK) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = minCommand;
   }
+  // If motor output disarmed, force motor output to minimum
   if (armed == 0) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = MINCOMMAND;

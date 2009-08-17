@@ -123,7 +123,7 @@ void sendSerialTelemetry() {
       Serial.print(gyroData[axis]);
       comma();
     }
-    Serial.print(receiverData[THROTTLE]);
+    Serial.print(transmitterCommand[THROTTLE]);
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(motorAxisCommand[axis]);
@@ -136,10 +136,10 @@ void sendSerialTelemetry() {
      Serial.print(armed, BIN);
     comma();
     #ifdef AutoLevel
-    Serial.println(1000);
+      Serial.println(receiverData[MODE]);
     #endif
     #ifndef AutoLevel
-    Serial.println(receiverData[MODE]);
+      Serial.println(1000);
     #endif
     break;
    case 'T': // Send processed transmitter values
