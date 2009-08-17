@@ -1,10 +1,10 @@
 /*
-  AeroQuad v1.2 - June 2009
+  AeroQuad v1.2 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
   
-  Interrupt based method for inspired by Dror Caspi
+  Interrupt based method inspired by Dror Caspi
   http://www.rcgroups.com/forums/showpost.php?p=12356667&postcount=1639
   
   Version in AeroQuad code is written by Ted Carancho
@@ -145,8 +145,6 @@ unsigned int readReceiver(byte receiverPin) {
   time = pinData[receiverPin].fallTime - pinData[receiverPin].riseTime;
   if ((time >= MINWIDTH) && (time <= MAXWIDTH))
     pinData[receiverPin].lastGoodWidth = time;
-
+  
   return pinData[receiverPin].lastGoodWidth;
 }
-    
-    

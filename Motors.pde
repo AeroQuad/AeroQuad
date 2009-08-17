@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - June 2009
+  AeroQuad v1.2 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -36,20 +36,17 @@ void configureMotors() {
 }
 
 void commandMotors() {
-  for (motor = FRONT; motor < LASTMOTOR; motor++)
-    motorCommandSmooth[motor] = smooth(motorCommand[motor], motorCommandSmooth[motor], smoothMotor[motor]);
-    
   #ifdef ServoTimerTwo
-    frontMotor.write(motorCommandSmooth[FRONT]);
-    rearMotor.write(motorCommandSmooth[REAR]);
-    rightMotor.write(motorCommandSmooth[RIGHT]);
-    leftMotor.write(motorCommandSmooth[LEFT]);
+    frontMotor.write(motorCommand[FRONT]);
+    rearMotor.write(motorCommand[REAR]);
+    rightMotor.write(motorCommand[RIGHT]);
+    leftMotor.write(motorCommand[LEFT]);
   #endif
   #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommandSmooth[FRONT] * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommandSmooth[REAR] * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommandSmooth[RIGHT] * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommandSmooth[LEFT] * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
   #endif
 }
 
@@ -70,7 +67,7 @@ void commandAllMotors(int motorCommand) {
 }
 
 void pulseMotors(byte quantity) {
-  for (byte i=0; i<quantity; i++) {      
+  for (byte i = 0; i < quantity; i++) {      
     commandAllMotors(MINCOMMAND + 100);
     delay(250);
     commandAllMotors(MINCOMMAND);

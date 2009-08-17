@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - June 2009
+  AeroQuad v1.2 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -68,10 +68,10 @@ void readSerialCommand() {
       timeConstant = readFloatSerial();
     }
     else if (queryType == 'M') { // Receive motor smoothing values
-      smoothMotor[FRONT] = readFloatSerial();
-      smoothMotor[REAR] = readFloatSerial();
-      smoothMotor[RIGHT] = readFloatSerial();
-      smoothMotor[LEFT] = readFloatSerial();
+      smoothTransmitter[ROLL] = readFloatSerial();
+      smoothTransmitter[PITCH] = readFloatSerial();
+      smoothTransmitter[YAW] = readFloatSerial();
+      smoothTransmitter[THROTTLE] = readFloatSerial();
     }
     else if (queryType == 'W') {
       writeFloat(PID[ROLL].P, PGAIN_ADR);
@@ -95,6 +95,10 @@ void readSerialCommand() {
       writeFloat(xmitFactor, XMITFACTOR_ADR);
       writeFloat(smoothFactor[GYRO], GYROSMOOTH_ADR);
       writeFloat(smoothFactor[ACCEL], ACCSMOOTH_ADR);
+      writeFloat(smoothTransmitter[THROTTLE], THROTTLESMOOTH_ADR);
+      writeFloat(smoothTransmitter[ROLL], ROLLSMOOTH_ADR);
+      writeFloat(smoothTransmitter[PITCH], PITCHSMOOTH_ADR);
+      writeFloat(smoothTransmitter[YAW], YAWSMOOTH_ADR);
       writeFloat(timeConstant, FILTERTERM_ADR);
       zeroIntegralError();
       

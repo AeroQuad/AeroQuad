@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - June 2009
+  AeroQuad v1.2 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -19,13 +19,18 @@
 */
 
 // ************************ User Options ***********************
-// Define Motor PWM Approach
-#define AnalogWrite
-//#define ServoTimerTwo
 
 // Define flight configuration
 #define plusConfig
 //#define XConfig
+
+// Define Motor PWM Approach
+#define AnalogWrite
+//#define ServoTimerTwo
+
+// Experimental Auto Level (still under development)
+//#define AutoLevel
+
 // *************************************************************
 
 #include <stdlib.h>
@@ -68,13 +73,14 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-#define FRONTSMOOTH_ADR 76
-#define REARSMOOTH_ADR 80
-#define RIGHTSMOOTH_ADR 84
-#define LEFTSMOOTH_ADR 88
-#define GYRO_ROLL_ZERO_ADR 92
-#define GYRO_PITCH_ZERO_ADR 96
-#define GYRO_YAW_ZERO_ADR 100
+#define SPARE_1 76
+#define ROLLSMOOTH_ADR 80
+#define PITCHSMOOTH_ADR 84
+#define YAWSMOOTH_ADR 88
+#define THROTTLESMOOTH_ADR 92
+#define GYRO_ROLL_ZERO_ADR 96
+#define GYRO_PITCH_ZERO_ADR 100
+#define GYRO_YAW_ZERO_ADR 104
 #define PITCH_PGAIN_ADR 124
 #define PITCH_IGAIN_ADR 128
 #define PITCH_DGAIN_ADR 132
@@ -100,7 +106,6 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
   ServoTimer2 leftMotor;
 #endif
 int motorCommand[4] = {1000,1000,1000,1000};
-int motorCommandSmooth[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
 int motor, minCommand = 0;
 // If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
@@ -137,12 +142,13 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-#define MINWIDTH 996
-#define MAXWIDTH 2004
+#define MINWIDTH 975
+#define MAXWIDTH 2025
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
 int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
+int transmitterCommandSmooth[4] = {0,0,0,0};
 int transmitterZero[3] = {1500,1500,1500};
 int transmitterCenter[2] = {1500,1500};
 byte channel;
@@ -156,8 +162,8 @@ float xmitFactor; // Read in from EEPROM
 // #define XMAX 607
 // #define YMIN 409
 // #define YMAX 618
-#define ZMIN 403
-#define ZMAX 611
+#define ZMIN 454
+#define ZMAX 687
 #define ZAXIS 2
 #define ZEROLIMIT 2
 int axis;
@@ -197,7 +203,7 @@ int findZero[FINDZERO];
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
-float smoothMotor[4]; // Read in from EEPROM
+float smoothTransmitter[4]; // Read in from EEPROM
 
 // PID Values
 #define LASTAXIS 3
@@ -274,12 +280,12 @@ void loop () {
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       receiverData[channel] = readReceiver(receiverPin[channel]);
+    // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
+    for (axis = ROLL; axis < MODE; axis++)
+      transmitterCommandSmooth[axis] = smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (axis = ROLL; axis < LASTAXIS; axis++)
-      transmitterCommand[axis] = ((receiverData[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
-    // Copy throttle from buffer, no xmitFactor reduction applied
-    if ((receiverData[THROTTLE] >= MINCOMMAND) && (receiverData[THROTTLE] <= MAXCOMMAND))
-      transmitterCommand[THROTTLE] = receiverData[THROTTLE];
+      transmitterCommand[axis] = ((transmitterCommandSmooth[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
     // Read quad configuration commands from transmitter
     if (receiverData[THROTTLE] < 1050) {
       zeroIntegralError();
@@ -329,28 +335,30 @@ void loop () {
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
   flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);  
 
-  // ******************* Check Flight Mode *******************
-  if (receiverData[MODE] < 1200) {
-    // Acrobatic Mode
-    levelAdjust[ROLL] = 0;
-    levelAdjust[PITCH] = 0;
-  }
-  else {
-    // Stable Mode
-    for (axis = ROLL; axis < YAW; axis++)
-      levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
-    // Turn off Stable Mode if transmitter stick applied
-    if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
-      levelAdjust[PITCH] = 0;
-    if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+// ********************* Check Flight Mode *********************
+  #ifdef AutoLevel
+    if (receiverData[MODE] < 1200) {
+      // Acrobatic Mode
       levelAdjust[ROLL] = 0;
-  }
+      levelAdjust[PITCH] = 0;
+    }
+    else {
+      // Stable Mode
+      for (axis = ROLL; axis < YAW; axis++)
+      levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
+      // Turn off Stable Mode if transmitter stick applied
+      if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
+        levelAdjust[PITCH] = 0;
+      if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+        levelAdjust[ROLL] = 0;
+    }
+  #endif
   
 // ************************* Update PID ************************
   motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
   motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
   motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
-    
+  
 // ****************** Calculate Motor Commands *****************
   if (armed && safetyCheck) {
     #ifdef plusConfig
@@ -367,7 +375,7 @@ void loop () {
       motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
     #endif
   }
-  if (transmitterCommand[THROTTLE] < 1050) {
+  if (transmitterCommand[THROTTLE] < MINCHECK) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = minCommand;
   }

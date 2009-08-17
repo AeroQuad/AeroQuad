@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - June 2009
+  AeroQuad v1.2 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -78,10 +78,10 @@ void readEEPROM() {
   xmitFactor = readFloat(XMITFACTOR_ADR);
   smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR);
   smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR);
-  smoothMotor[FRONT] = readFloat(FRONTSMOOTH_ADR);
-  smoothMotor[REAR] = readFloat(REARSMOOTH_ADR);
-  smoothMotor[RIGHT] = readFloat(RIGHTSMOOTH_ADR);
-  smoothMotor[LEFT] = readFloat(LEFTSMOOTH_ADR);
+  smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR);
+  smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR);
+  smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR);
+  smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR);
   accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
   accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
   accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
@@ -97,8 +97,18 @@ void readEEPROM() {
   if (PID[YAW].P == 0) PID[YAW].P = 10.0;
   if (smoothFactor[GYRO] == 0) smoothFactor[GYRO] = 0.20;
   if (smoothFactor[ACCEL] == 0) smoothFactor[ACCEL] = 0.20;
-  if (smoothMotor[FRONT] == 0) smoothMotor[FRONT] = 1.0;
-  if (smoothMotor[REAR] == 0) smoothMotor[REAR] = 1.0;
-  if (smoothMotor[LEFT] == 0) smoothMotor[LEFT] = 1.0;
-  if (smoothMotor[RIGHT] == 0) smoothMotor[RIGHT] = 1.0;
+  if (timeConstant == 0) timeConstant = 5.0;  
+  if (windupGuard == 0) windupGuard = 2000.0;
+  if (xmitFactor == 0) xmitFactor = 0.20;  
+  if (levelLimit == 0) levelLimit = 2000.0;
+  if (levelOff == 0) levelOff = 50;  
+  if (smoothFactor[THROTTLE] == 0) smoothFactor[THROTTLE] = 1.0;
+  if (smoothTransmitter[ROLL] == 0) smoothTransmitter[ROLL] = 1.0;
+  if (smoothTransmitter[PITCH] == 0) smoothTransmitter[PITCH] = 1.0;
+  if (smoothTransmitter[YAW] == 0) smoothTransmitter[YAW] = 1.0;  
+  if (accelZero[ROLL] == 0) {
+    zeroGyros();
+    zeroAccelerometers();
+    zeroIntegralError();
+  }
 }
