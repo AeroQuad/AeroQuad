@@ -192,7 +192,7 @@ float filterTermRoll[4] = {0,0,0,0};
 float filterTermPitch[4] = {0,0,0,0};
 float timeConstant; // Read in from EEPROM
 
-// Camera stabilization variables
+// Camera stabilization variables (under construction)
 int camera[2];
 // map +/-90 degrees to 1000-2000
 float mCamera = 0;
@@ -236,7 +236,7 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 unsigned long receiverTime =0;
-unsigned long telemetryTime = 0;
+unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
 float dt = 0;
 
 // ************************************************************
@@ -299,22 +299,22 @@ void loop () {
     // No xmitFactor reduction applied for throttle
     if ((receiverData[THROTTLE] >= MINCOMMAND) && (receiverData[THROTTLE] <= MAXCOMMAND)) // Check if within range to prevent throttle spikes
       transmitterCommand[THROTTLE] = smooth(transmitterCommandSmooth[THROTTLE], transmitterCommand[THROTTLE], smoothTransmitter[THROTTLE]);
-    // Read quad configuration commands from transmitter
+    // Read quad configuration commands from transmitter when throttle down
     if (receiverData[THROTTLE] < MINCHECK) {
       zeroIntegralError();
-      // Disarm motors (throttle down, yaw left)
+      // Disarm motors (left stick lower left corner)
       if (receiverData[YAW] < MINCHECK && armed == 1) {
         armed = 0;
         commandAllMotors(MINCOMMAND);
       }    
-      // Zero sensors (throttle down, yaw left, roll left, pitch down)
-      if (receiverData[YAW] < MINCHECK && receiverData[ROLL] < MINCHECK && receiverData[PITCH] > MAXCHECK) {
+      // Zero sensors (left stick lower left, right stick lower right corner)
+      if (receiverData[YAW] < MINCHECK && receiverData[ROLL] > MAXCHECK && receiverData[PITCH] < MINCHECK) {
         zeroGyros();
         zeroAccelerometers();
         zeroIntegralError();
         pulseMotors(3);
       }   
-      // Arm motors (throttle down, yaw right)
+      // Arm motors (left stick lower right corner)
       if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
         armed = 1;
         zeroIntegralError();
