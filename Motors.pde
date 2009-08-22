@@ -20,7 +20,8 @@
 
 void configureMotors() {
   #ifdef ServoTimerTwo  
-    frontMotor.attach(FRONTMOTORPIN);
+    //frontMotor.attach(FRONTMOTORPIN);
+    frontMotor.attach(AUXPIN);
     rearMotor.attach(REARMOTORPIN);
     rightMotor.attach(RIGHTMOTORPIN);
     leftMotor.attach(LEFTMOTORPIN);

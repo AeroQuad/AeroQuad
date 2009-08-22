@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - August 2009
+  AeroQuad v1.3 - August 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -20,16 +20,19 @@
 
 // ************************ User Options ***********************
 
-// Define flight configuration
-#define plusConfig
-//#define XConfig
+// Define Flight Configuration
+//#define plusConfig
+#define XConfig
 
 // Calibration At Powerup
 //#define CalibrationAtPower
 
 // Define Motor PWM Approach
-#define AnalogWrite
-//#define ServoTimerTwo
+//#define AnalogWrite
+#define ServoTimerTwo
+
+// Camera Stabilization
+#define Camera
 
 // Experimental Auto Level (still under development)
 //#define AutoLevel
@@ -40,7 +43,7 @@
 #include <math.h>
 #include <EEPROM.h>
 #ifdef ServoTimerTwo
-  #include <ServoTimer2.h>
+  #include <Servo.h>
 #endif
 
 #define BAUD 115200
@@ -103,10 +106,10 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEFT 3
 #define LASTMOTOR 4
 #ifdef ServoTimerTwo
-  ServoTimer2 frontMotor;
-  ServoTimer2 rearMotor;
-  ServoTimer2 rightMotor;
-  ServoTimer2 leftMotor;
+  Servo frontMotor;
+  Servo rearMotor;
+  Servo rightMotor;
+  Servo leftMotor;
 #endif
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
@@ -147,8 +150,10 @@ float bMotorCommand = 2;
 #define LASTCHANNEL 6
 #define MINWIDTH 975
 #define MAXWIDTH 2025
-int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
-int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+//int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
+//int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, MODEPIN}; // defines Arduino pins
+int receiverPin[6] = {18, 21, 22, 20, 23, 23}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterCommandSmooth[4] = {0,0,0,0};
@@ -192,11 +197,16 @@ float filterTermRoll[4] = {0,0,0,0};
 float filterTermPitch[4] = {0,0,0,0};
 float timeConstant; // Read in from EEPROM
 
-// Camera stabilization variables (under construction)
-int camera[2];
+// Camera stabilization variables
+#define ROLLCAMERAPIN 12
+#define PITCHCAMERAPIN 13
 // map +/-90 degrees to 1000-2000
-float mCamera = 0;
-float bCamera = 0;
+float mCamera = 5.556;
+float bCamera = 1500;
+#ifdef Camera
+  Servo rollCamera;
+  Servo pitchCamera;
+#endif
 
 // Calibration parameters
 #define FINDZERO 50
@@ -246,7 +256,6 @@ void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL); // Current external ref is connected to 3.3V
   pinMode (LEDPIN, OUTPUT);
-  digitalWrite(LEDPIN, LOW);
   
   // Configure motors
   configureMotors();
@@ -266,7 +275,12 @@ void setup() {
   #endif
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
-
+  
+  // Camera stabilization setup
+  #ifdef Camera
+    rollCamera.attach(ROLLCAMERAPIN);
+    pitchCamera.attach(PITCHCAMERAPIN);
+  #endif
   
   // Complementary filter setup
   configureFilter(timeConstant);
@@ -410,4 +424,10 @@ void loop () {
     sendSerialTelemetry();
     telemetryTime = currentTime;
   }
+  
+// ******************* Camera Stailization *********************
+#ifdef Camera
+  rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
+  pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
+#endif
 }
