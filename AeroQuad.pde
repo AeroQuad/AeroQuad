@@ -170,8 +170,8 @@ float bMotorCommand = 2;
   int receiverPin[6] = {18, 21, 22, 20, 23, 23}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 #endif
 int receiverData[6];
-int transmitterCommand[4] = {1500,1500,1500,1000};
-int transmitterCommandSmooth[4] = {0,0,0,0};
+int transmitterCommand[6] = {1500,1500,1500,1000,1000,1000};
+int transmitterCommandSmooth[6] = {0,0,0,0,0,0};
 int transmitterZero[3] = {1500,1500,1500};
 int transmitterCenter[2] = {1500,1500};
 byte channel;

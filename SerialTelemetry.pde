@@ -173,10 +173,10 @@ void sendSerialTelemetry() {
     break;
   case 'U': // Send receiver values
     for (channel = ROLL; channel < AUX; channel++) {
-      Serial.print(receiverData[channel]);
+      Serial.print(transmitterCommandSmooth[channel]);
       comma();
     }
-    Serial.println(receiverData[AUX]);
+    Serial.println(transmitterCommandSmooth[AUX]);
     break;
   case 'V': // Send receiver status
     for (channel = ROLL; channel < AUX; channel++) {

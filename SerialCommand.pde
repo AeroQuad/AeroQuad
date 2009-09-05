@@ -77,14 +77,14 @@ void readSerialCommand() {
       smoothTransmitter[AUX] = readFloatSerial();
       break;
     case 'O': // Received transmitter calibrtion values
-      mTransmitter[THROTTLE] = readFloatSerial();
-      bTransmitter[THROTTLE] = readFloatSerial();
       mTransmitter[ROLL] = readFloatSerial();
       bTransmitter[ROLL] = readFloatSerial();
       mTransmitter[PITCH] = readFloatSerial();
       bTransmitter[PITCH] = readFloatSerial();
       mTransmitter[YAW] = readFloatSerial();
       bTransmitter[YAW] = readFloatSerial();
+      mTransmitter[THROTTLE] = readFloatSerial();
+      bTransmitter[THROTTLE] = readFloatSerial();
       mTransmitter[MODE] = readFloatSerial();
       bTransmitter[MODE] = readFloatSerial();
       mTransmitter[AUX] = readFloatSerial();
@@ -134,20 +134,31 @@ void readSerialCommand() {
       configureFilter(timeConstant);
       break;
     case 'Y': // Initialize EEPROM with default values
-      if (PID[ROLL].P == 0) PID[ROLL].P = 3.0;
-      if (PID[PITCH].P == 0) PID[PITCH].P = 3.0;
-      if (PID[YAW].P == 0) PID[YAW].P = 10.0;
-      if (smoothFactor[GYRO] == 0) smoothFactor[GYRO] = 0.20;
-      if (smoothFactor[ACCEL] == 0) smoothFactor[ACCEL] = 0.20;
-      if (timeConstant == 0) timeConstant = 5.0;  
-      if (windupGuard == 0) windupGuard = 2000.0;
-      if (xmitFactor == 0) xmitFactor = 0.20;  
-      if (levelLimit == 0) levelLimit = 2000.0;
-      if (levelOff == 0) levelOff = 50;  
-      if (accelZero[ROLL] == 0) {
-        zeroGyros();
-        zeroAccelerometers();
-        zeroIntegralError();
+      PID[ROLL].P = 3.75;
+      PID[ROLL].I = 0;
+      PID[ROLL].D = -10;
+      PID[PITCH].P = 3.75;
+      PID[PITCH].I = 0;
+      PID[PITCH].D = -10;
+      PID[YAW].P = 12.0;
+      PID[YAW].I = 0;
+      PID[YAW].D = 0;
+      PID[LEVELROLL].P = 2;
+      PID[LEVELROLL].I = 0;
+      PID[LEVELROLL].D = 0;
+      PID[LEVELPITCH].P = 2;
+      PID[LEVELPITCH].I = 0;
+      PID[LEVELPITCH].D = 0;
+      windupGuard = 2000.0;
+      xmitFactor = 0.20;  
+      levelLimit = 2000.0;
+      levelOff = 50;  
+      smoothFactor[GYRO] = 0.20;
+      smoothFactor[ACCEL] = 0.20;
+      timeConstant = 3.0;   
+      for (axis = ROLL; axis < LASTCHANNEL; axis++) {
+        mTransmitter[axis] = 1.0;
+        bTransmitter[axis] = 0.0;
       }
   
       // Will implement this properly in next version of Configurator
@@ -158,6 +169,10 @@ void readSerialCommand() {
       smoothTransmitter[YAW] = 1.0;  
       smoothTransmitter[MODE] = 1.0;
       smoothTransmitter[AUX] = 1.0;
+
+      zeroGyros();
+      zeroAccelerometers();
+      zeroIntegralError();
       break;
     }
   digitalWrite(LEDPIN, HIGH);
