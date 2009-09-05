@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - August 2009
+  AeroQuad v1.3 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -23,7 +23,8 @@ void readSerialCommand() {
   if (Serial.available()) {
     digitalWrite(LEDPIN, LOW);
     queryType = Serial.read();
-    if (queryType == 'A') { // Receive roll and pitch gyro PID
+    switch (queryType) {
+    case 'A': // Receive roll and pitch gyro PID
       PID[ROLL].P = readFloatSerial();
       PID[ROLL].I = readFloatSerial();
       PID[ROLL].D = readFloatSerial();
@@ -34,15 +35,15 @@ void readSerialCommand() {
       PID[PITCH].D = readFloatSerial();
       PID[PITCH].lastPosition = 0;
       PID[PITCH].integratedError = 0;
-    }
-    else if (queryType == 'C') { // Receive yaw PID
+      break;
+    case 'C': // Receive yaw PID
       PID[YAW].P = readFloatSerial();
       PID[YAW].I = readFloatSerial();
       PID[YAW].D = readFloatSerial();
       PID[YAW].lastPosition = 0;
       PID[YAW].integratedError = 0;
-    }
-    else if (queryType == 'E') { // Receive roll and pitch auto level PID
+      break;
+    case 'E': // Receive roll and pitch auto level PID
       PID[LEVELROLL].P = readFloatSerial();
       PID[LEVELROLL].I = readFloatSerial();
       PID[LEVELROLL].D = readFloatSerial();
@@ -53,27 +54,43 @@ void readSerialCommand() {
       PID[LEVELPITCH].D = readFloatSerial();
       PID[LEVELPITCH].lastPosition = 0;
       PID[LEVELPITCH].integratedError = 0;
-    }
-    else if (queryType == 'G') { // Receive auto level configuration
+      break;
+    case 'G': // Receive auto level configuration
       levelLimit = readFloatSerial();
       levelOff = readFloatSerial();
-    }
-    else if (queryType == 'I') { // Receive flight control configuration
+      break;
+    case 'I': // Receive flight control configuration
       windupGuard = readFloatSerial();
       xmitFactor = readFloatSerial();
-    }
-    else if (queryType == 'K') { // Receive data filtering values
+      break;
+    case 'K': // Receive data filtering values
       smoothFactor[GYRO] = readFloatSerial();
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
-    }
-    else if (queryType == 'M') { // Receive motor smoothing values
+      break;
+    case 'M': // Receive motor smoothing values
       smoothTransmitter[ROLL] = readFloatSerial();
       smoothTransmitter[PITCH] = readFloatSerial();
       smoothTransmitter[YAW] = readFloatSerial();
       smoothTransmitter[THROTTLE] = readFloatSerial();
-    }
-    else if (queryType == 'W') {
+      smoothTransmitter[MODE] = readFloatSerial();
+      smoothTransmitter[AUX] = readFloatSerial();
+      break;
+    case 'O': // Received transmitter calibrtion values
+      mTransmitter[THROTTLE] = readFloatSerial();
+      bTransmitter[THROTTLE] = readFloatSerial();
+      mTransmitter[ROLL] = readFloatSerial();
+      bTransmitter[ROLL] = readFloatSerial();
+      mTransmitter[PITCH] = readFloatSerial();
+      bTransmitter[PITCH] = readFloatSerial();
+      mTransmitter[YAW] = readFloatSerial();
+      bTransmitter[YAW] = readFloatSerial();
+      mTransmitter[MODE] = readFloatSerial();
+      bTransmitter[MODE] = readFloatSerial();
+      mTransmitter[AUX] = readFloatSerial();
+      bTransmitter[AUX] = readFloatSerial();
+      break;
+    case 'W': // Write all user configurable values to EEPROM
       writeFloat(PID[ROLL].P, PGAIN_ADR);
       writeFloat(PID[ROLL].I, IGAIN_ADR);
       writeFloat(PID[ROLL].D, DGAIN_ADR);
@@ -100,10 +117,48 @@ void readSerialCommand() {
       writeFloat(smoothTransmitter[PITCH], PITCHSMOOTH_ADR);
       writeFloat(smoothTransmitter[YAW], YAWSMOOTH_ADR);
       writeFloat(timeConstant, FILTERTERM_ADR);
+      writeFloat(mTransmitter[THROTTLE], THROTTLESCALE_ADR);
+      writeFloat(bTransmitter[THROTTLE], THROTTLEOFFSET_ADR);
+      writeFloat(mTransmitter[ROLL], ROLLSCALE_ADR);
+      writeFloat(bTransmitter[ROLL], ROLLOFFSET_ADR);
+      writeFloat(mTransmitter[PITCH], PITCHSCALE_ADR);
+      writeFloat(bTransmitter[PITCH], PITCHOFFSET_ADR);
+      writeFloat(mTransmitter[YAW], YAWSCALE_ADR);
+      writeFloat(bTransmitter[YAW], YAWOFFSET_ADR);
+      writeFloat(mTransmitter[MODE], MODESCALE_ADR);
+      writeFloat(bTransmitter[MODE], MODEOFFSET_ADR);
+      writeFloat(mTransmitter[AUX], AUXSCALE_ADR);
+      writeFloat(bTransmitter[AUX], AUXOFFSET_ADR);
       zeroIntegralError();
-      
       // Complementary filter setup
       configureFilter(timeConstant);
+      break;
+    case 'Y': // Initialize EEPROM with default values
+      if (PID[ROLL].P == 0) PID[ROLL].P = 3.0;
+      if (PID[PITCH].P == 0) PID[PITCH].P = 3.0;
+      if (PID[YAW].P == 0) PID[YAW].P = 10.0;
+      if (smoothFactor[GYRO] == 0) smoothFactor[GYRO] = 0.20;
+      if (smoothFactor[ACCEL] == 0) smoothFactor[ACCEL] = 0.20;
+      if (timeConstant == 0) timeConstant = 5.0;  
+      if (windupGuard == 0) windupGuard = 2000.0;
+      if (xmitFactor == 0) xmitFactor = 0.20;  
+      if (levelLimit == 0) levelLimit = 2000.0;
+      if (levelOff == 0) levelOff = 50;  
+      if (accelZero[ROLL] == 0) {
+        zeroGyros();
+        zeroAccelerometers();
+        zeroIntegralError();
+      }
+  
+      // Will implement this properly in next version of Configurator
+      // For now, force all values to 1
+      smoothTransmitter[THROTTLE] = 1.0;
+      smoothTransmitter[ROLL] = 1.0;
+      smoothTransmitter[PITCH] = 1.0;
+      smoothTransmitter[YAW] = 1.0;  
+      smoothTransmitter[MODE] = 1.0;
+      smoothTransmitter[AUX] = 1.0;
+      break;
     }
   digitalWrite(LEDPIN, HIGH);
   }

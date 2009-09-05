@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - August 2009
+  AeroQuad v1.3 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -25,6 +25,12 @@
 
 #include "pins_arduino.h"
 
+#define RISING_EDGE 1
+#define FALLING_EDGE 0
+#define MINWIDTH 800
+#define MAXWIDTH 2200
+
+
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
@@ -34,7 +40,8 @@ volatile uint8_t *port_to_pcmask[] = {
 volatile static uint8_t PCintLast[3];
 
 // Channel data 
-typedef struct {   
+typedef struct {
+  byte edge;
   unsigned long riseTime;    
   unsigned long fallTime; 
   unsigned long lastGoodWidth;
@@ -93,6 +100,7 @@ static void measurePulseWidthISR(uint8_t port) {
   uint8_t mask;
   uint8_t pin;
   uint32_t currentTime;
+  uint32_t time;
 
   // get the pin states for the indicated port.
   curr = *portInputRegister(port+2);
@@ -111,9 +119,15 @@ static void measurePulseWidthISR(uint8_t port) {
       // for each pin changed, record time of change
       if (bit & PCintLast[port]) {
         pinData[pin].riseTime = currentTime;
+        pinData[pin].edge = RISING_EDGE;
       }
       else {
         pinData[pin].fallTime = currentTime;
+        time = pinData[pin].fallTime - pinData[pin].riseTime;
+        if ((time >= MINWIDTH) && (time <= MAXWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
+          pinData[pin].lastGoodWidth = time;
+          pinData[pin].edge = FALLING_EDGE;
+        }
       }
     }
   }
@@ -140,11 +154,5 @@ void configureReceiver() {
 // Calculate PWM pulse width of receiver data
 // If invalid PWM measured, use last known good time
 unsigned int readReceiver(byte receiverPin) {
-  unsigned int time;
-  
-  time = pinData[receiverPin].fallTime - pinData[receiverPin].riseTime;
-  if ((time >= MINWIDTH) && (time <= MAXWIDTH))
-    pinData[receiverPin].lastGoodWidth = time;
-  
   return pinData[receiverPin].lastGoodWidth;
 }

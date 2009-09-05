@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3 - August 2009
+  AeroQuad v1.3 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -28,11 +28,11 @@
 //#define CalibrationAtPower
 
 // Define Motor PWM Approach
-//#define AnalogWrite
-#define ServoTimerTwo
+#define AnalogWrite
+//#define ServoTimerTwo
 
 // Camera Stabilization
-#define Camera
+//#define Camera
 
 // Experimental Auto Level (still under development)
 //#define AutoLevel
@@ -79,7 +79,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-#define SPARE_1 76
+#define MODESMOOTH_ADR 76
 #define ROLLSMOOTH_ADR 80
 #define PITCHSMOOTH_ADR 84
 #define YAWSMOOTH_ADR 88
@@ -93,6 +93,19 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEVEL_PITCH_PGAIN_ADR 136
 #define LEVEL_PITCH_IGAIN_ADR 140
 #define LEVEL_PITCH_DGAIN_ADR 144
+#define THROTTLESCALE_ADR 148
+#define THROTTLEOFFSET_ADR 152
+#define ROLLSCALE_ADR 156
+#define ROLLOFFSET_ADR 160
+#define PITCHSCALE_ADR 164
+#define PITCHOFFSET_ADR 168
+#define YAWSCALE_ADR 172
+#define YAWOFFSET_ADR 176
+#define MODESCALE_ADR 180
+#define MODEOFFSET_ADR 184
+#define AUXSCALE_ADR 188
+#define AUXOFFSET_ADR 192
+#define AUXSMOOTH_ADR 196
 
 // Motor control variables
 #define FRONTMOTORPIN 3
@@ -148,12 +161,14 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-#define MINWIDTH 975
-#define MAXWIDTH 2025
-//int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
-//int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, MODEPIN}; // defines Arduino pins
-int receiverPin[6] = {18, 21, 22, 20, 23, 23}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#ifndef Camera
+  int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
+  int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#endif
+#ifdef Camera
+  int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, MODEPIN}; // defines Arduino pins
+  int receiverPin[6] = {18, 21, 22, 20, 23, 23}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#endif
 int receiverData[6];
 int transmitterCommand[4] = {1500,1500,1500,1000};
 int transmitterCommandSmooth[4] = {0,0,0,0};
@@ -163,6 +178,8 @@ byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
 float xmitFactor; // Read in from EEPROM
+float mTransmitter[6];
+float bTransmitter[6];
 
 // These A/D values depend on how well the sensors are mounted
 // change these values to your unique configuration
@@ -216,7 +233,7 @@ int findZero[FINDZERO];
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
-float smoothTransmitter[4]; // Read in from EEPROM
+float smoothTransmitter[6]; // Read in from EEPROM
 
 // PID Values
 #define LASTAXIS 3
@@ -303,16 +320,16 @@ void loop () {
   if (currentTime > (receiverTime + 100)) {
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      receiverData[channel] = readReceiver(receiverPin[channel]);
+      receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
-    for (axis = ROLL; axis < MODE; axis++)
-      transmitterCommandSmooth[axis] = smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]);
+    for (axis = ROLL; axis < LASTCHANNEL; axis++)
+      transmitterCommandSmooth[axis] = limitRange(smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]), MINCOMMAND, MAXCOMMAND);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((transmitterCommandSmooth[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
-    // No xmitFactor reduction applied for throttle
-    if ((receiverData[THROTTLE] >= MINCOMMAND) && (receiverData[THROTTLE] <= MAXCOMMAND)) // Check if within range to prevent throttle spikes
-      transmitterCommand[THROTTLE] = smooth(transmitterCommandSmooth[THROTTLE], transmitterCommand[THROTTLE], smoothTransmitter[THROTTLE]);
+    // No xmitFactor reduction applied for throttle, mode and AUX
+    for (axis = THROTTLE; axis < LASTCHANNEL; axis++)
+      transmitterCommand[axis] = transmitterCommandSmooth[axis];
     // Read quad configuration commands from transmitter when throttle down
     if (receiverData[THROTTLE] < MINCHECK) {
       zeroIntegralError();

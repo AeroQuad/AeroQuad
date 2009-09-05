@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - August 2009
+  AeroQuad v1.3 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -78,11 +78,23 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'N': // Send motor smoothing values
-    for (axis= ROLL; axis < LASTAXIS; axis++) {
+    for (axis = ROLL; axis < AUX; axis++) {
       Serial.print(smoothTransmitter[axis]);
       comma();
     }
-    Serial.println(smoothTransmitter[THROTTLE]);
+    Serial.println(smoothTransmitter[AUX]);
+    queryType = 'X';
+    break;
+  case 'P': // Send transmitter calibration data
+    for (axis = ROLL; axis < AUX; axis++) {
+      Serial.print(mTransmitter[axis]);
+      comma();
+      Serial.print(bTransmitter[axis]);
+      comma();
+    }
+    Serial.print(mTransmitter[AUX]);
+    comma();
+    Serial.println(bTransmitter[AUX]);
     queryType = 'X';
     break;
   case 'Q': // Send sensor data

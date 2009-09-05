@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.2 - August 2009
+  AeroQuad v1.3 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -71,6 +71,19 @@ void readEEPROM() {
   PID[LEVELPITCH].D = readFloat(LEVEL_PITCH_DGAIN_ADR);
   PID[LEVELPITCH].lastPosition = 0;
   PID[LEVELPITCH].integratedError = 0;  
+  
+  mTransmitter[THROTTLE] = readFloat(THROTTLESCALE_ADR);
+  bTransmitter[THROTTLE] = readFloat(THROTTLEOFFSET_ADR);
+  mTransmitter[ROLL] = readFloat(ROLLSCALE_ADR);
+  bTransmitter[ROLL] = readFloat(ROLLOFFSET_ADR);
+  mTransmitter[PITCH] = readFloat(PITCHSCALE_ADR);
+  bTransmitter[PITCH] = readFloat(PITCHOFFSET_ADR);
+  mTransmitter[YAW] = readFloat(YAWSCALE_ADR);
+  bTransmitter[YAW] = readFloat(YAWOFFSET_ADR);
+  mTransmitter[MODE] = readFloat(MODESCALE_ADR);
+  bTransmitter[MODE] = readFloat(MODEOFFSET_ADR);
+  mTransmitter[AUX] = readFloat(AUXSCALE_ADR);
+  bTransmitter[AUX] = readFloat(AUXOFFSET_ADR);
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
@@ -82,6 +95,8 @@ void readEEPROM() {
   smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR);
   smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR);
   smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR);
+  smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR);
+  smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR);
   accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
   accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
   accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
@@ -89,26 +104,4 @@ void readEEPROM() {
   gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
   gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
-  
-  // Check if certain key values are not populated
-  // Put default value in if it is zero
-  if (PID[ROLL].P == 0) PID[ROLL].P = 3.0;
-  if (PID[PITCH].P == 0) PID[PITCH].P = 3.0;
-  if (PID[YAW].P == 0) PID[YAW].P = 10.0;
-  if (smoothFactor[GYRO] == 0) smoothFactor[GYRO] = 0.20;
-  if (smoothFactor[ACCEL] == 0) smoothFactor[ACCEL] = 0.20;
-  if (timeConstant == 0) timeConstant = 5.0;  
-  if (windupGuard == 0) windupGuard = 2000.0;
-  if (xmitFactor == 0) xmitFactor = 0.20;  
-  if (levelLimit == 0) levelLimit = 2000.0;
-  if (levelOff == 0) levelOff = 50;  
-  if (smoothTransmitter[THROTTLE] == 0) smoothTransmitter[THROTTLE] = 1.0;
-  if (smoothTransmitter[ROLL] == 0) smoothTransmitter[ROLL] = 1.0;
-  if (smoothTransmitter[PITCH] == 0) smoothTransmitter[PITCH] = 1.0;
-  if (smoothTransmitter[YAW] == 0) smoothTransmitter[YAW] = 1.0;  
-  if (accelZero[ROLL] == 0) {
-    zeroGyros();
-    zeroAccelerometers();
-    zeroIntegralError();
-  }
 }
