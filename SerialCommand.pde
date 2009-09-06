@@ -83,6 +83,8 @@ void readSerialCommand() {
       bTransmitter[PITCH] = readFloatSerial();
       mTransmitter[YAW] = readFloatSerial();
       bTransmitter[YAW] = readFloatSerial();
+      //break;
+    //case 'P':
       mTransmitter[THROTTLE] = readFloatSerial();
       bTransmitter[THROTTLE] = readFloatSerial();
       mTransmitter[MODE] = readFloatSerial();
@@ -116,6 +118,8 @@ void readSerialCommand() {
       writeFloat(smoothTransmitter[ROLL], ROLLSMOOTH_ADR);
       writeFloat(smoothTransmitter[PITCH], PITCHSMOOTH_ADR);
       writeFloat(smoothTransmitter[YAW], YAWSMOOTH_ADR);
+      writeFloat(smoothTransmitter[MODE], MODESMOOTH_ADR);
+      writeFloat(smoothTransmitter[AUX], AUXSMOOTH_ADR);
       writeFloat(timeConstant, FILTERTERM_ADR);
       writeFloat(mTransmitter[THROTTLE], THROTTLESCALE_ADR);
       writeFloat(bTransmitter[THROTTLE], THROTTLEOFFSET_ADR);
@@ -156,9 +160,9 @@ void readSerialCommand() {
       smoothFactor[GYRO] = 0.20;
       smoothFactor[ACCEL] = 0.20;
       timeConstant = 3.0;   
-      for (axis = ROLL; axis < LASTCHANNEL; axis++) {
-        mTransmitter[axis] = 1.0;
-        bTransmitter[axis] = 0.0;
+      for (channel = ROLL; channel < LASTCHANNEL; channel++) {
+        mTransmitter[channel] = 1.0;
+        bTransmitter[channel] = 0.0;
       }
   
       // Will implement this properly in next version of Configurator

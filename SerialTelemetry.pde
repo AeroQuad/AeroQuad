@@ -85,18 +85,6 @@ void sendSerialTelemetry() {
     Serial.println(smoothTransmitter[AUX]);
     queryType = 'X';
     break;
-  case 'P': // Send transmitter calibration data
-    for (axis = ROLL; axis < AUX; axis++) {
-      Serial.print(mTransmitter[axis]);
-      comma();
-      Serial.print(bTransmitter[axis]);
-      comma();
-    }
-    Serial.print(mTransmitter[AUX]);
-    comma();
-    Serial.println(bTransmitter[AUX]);
-    queryType = 'X';
-    break;
   case 'Q': // Send sensor data
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(gyroADC[axis]);
@@ -186,6 +174,18 @@ void sendSerialTelemetry() {
     Serial.println(receiverData[AUX]);
     break;
   case 'X': // Stop sending messages
+    break;
+  case 'P': // Send transmitter calibration data
+    for (axis = ROLL; axis < AUX; axis++) {
+      Serial.print(mTransmitter[axis]);
+      comma();
+      Serial.print(bTransmitter[axis]);
+      comma();
+    }
+    Serial.print(mTransmitter[AUX]);
+    comma();
+    Serial.println(bTransmitter[AUX]);
+    queryType = 'X';
     break;
   }
 }

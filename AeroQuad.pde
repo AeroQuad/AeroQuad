@@ -43,7 +43,7 @@
 #include <math.h>
 #include <EEPROM.h>
 #ifdef ServoTimerTwo
-  #include <Servo.h>
+  #include <ServoTimer2.h>
 #endif
 
 #define BAUD 115200
@@ -119,10 +119,10 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define LEFT 3
 #define LASTMOTOR 4
 #ifdef ServoTimerTwo
-  Servo frontMotor;
-  Servo rearMotor;
-  Servo rightMotor;
-  Servo leftMotor;
+  ServoTimer2 frontMotor;
+  ServoTimer2 rearMotor;
+  ServoTimer2 rightMotor;
+  ServoTimer2 leftMotor;
 #endif
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
@@ -322,15 +322,15 @@ void loop () {
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
-    for (axis = ROLL; axis < LASTCHANNEL; axis++)
-      transmitterCommandSmooth[axis] = smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]);
+    for (channel = ROLL; channel < LASTCHANNEL; channel++)
+      transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], smoothTransmitter[channel]);
       //transmitterCommandSmooth[axis] = limitRange(smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]), MINCOMMAND, MAXCOMMAND);
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (axis = ROLL; axis < LASTAXIS; axis++)
-      transmitterCommand[axis] = ((transmitterCommandSmooth[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];
+    for (channel = ROLL; channel < LASTAXIS; channel++)
+      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and AUX
-    for (axis = THROTTLE; axis < LASTCHANNEL; axis++)
-      transmitterCommand[axis] = transmitterCommandSmooth[axis];
+    for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
+      transmitterCommand[channel] = transmitterCommandSmooth[channel];
     // Read quad configuration commands from transmitter when throttle down
     if (receiverData[THROTTLE] < MINCHECK) {
       zeroIntegralError();
