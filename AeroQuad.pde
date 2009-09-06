@@ -178,8 +178,8 @@ byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
 float xmitFactor; // Read in from EEPROM
-float mTransmitter[6];
-float bTransmitter[6];
+float mTransmitter[6] = {1,1,1,1,1,1};
+float bTransmitter[6] = {0,0,0,0,0,0};
 
 // These A/D values depend on how well the sensors are mounted
 // change these values to your unique configuration
@@ -323,7 +323,8 @@ void loop () {
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
     for (axis = ROLL; axis < LASTCHANNEL; axis++)
-      transmitterCommandSmooth[axis] = limitRange(smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]), MINCOMMAND, MAXCOMMAND);
+      transmitterCommandSmooth[axis] = smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]);
+      //transmitterCommandSmooth[axis] = limitRange(smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]), MINCOMMAND, MAXCOMMAND);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (axis = ROLL; axis < LASTAXIS; axis++)
       transmitterCommand[axis] = ((transmitterCommandSmooth[axis] - transmitterZero[axis]) * xmitFactor) + transmitterZero[axis];

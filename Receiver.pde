@@ -27,8 +27,8 @@
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
-#define MINWIDTH 800
-#define MAXWIDTH 2200
+#define MINWIDTH 900
+#define MAXWIDTH 2100
 
 
 volatile uint8_t *port_to_pcmask[] = {
@@ -122,12 +122,12 @@ static void measurePulseWidthISR(uint8_t port) {
         pinData[pin].edge = RISING_EDGE;
       }
       else {
-        pinData[pin].fallTime = currentTime;
-        time = pinData[pin].fallTime - pinData[pin].riseTime;
+        time = currentTime - pinData[pin].riseTime;
         if ((time >= MINWIDTH) && (time <= MAXWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
+          //pinData[pin].fallTime = currentTime;
           pinData[pin].lastGoodWidth = time;
           pinData[pin].edge = FALLING_EDGE;
-        }
+        } 
       }
     }
   }
@@ -148,6 +148,7 @@ void configureReceiver() {
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
     pinMode(channel, INPUT);
     attachPinChangeInterrupt(receiverChannel[channel]);
+    pinData[receiverChannel[channel]].edge == FALLING_EDGE;
   }
 }
 
