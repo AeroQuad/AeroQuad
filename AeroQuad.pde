@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3 - September 2009
+  AeroQuad v1.3.1 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -27,7 +27,7 @@
 // Calibration At Powerup
 //#define CalibrationAtPower
 
-// Define Motor PWM Approach
+// Define PWM Motor Control
 #define AnalogWrite
 //#define ServoTimerTwo
 
