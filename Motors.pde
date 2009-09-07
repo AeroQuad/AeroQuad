@@ -65,7 +65,7 @@ void commandAllMotors(int motorCommand) {
     analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
     analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
   #endif
-}
+  }
 
 void pulseMotors(byte quantity) {
   for (byte i = 0; i < quantity; i++) {      

@@ -247,6 +247,10 @@ struct PIDdata {
 } PID[5];
 float windupGuard; // Read in from EEPROM
 
+// ESC Calibration
+byte calibrateESC = 0;
+int testCommand = 1000;
+
 // Communication
 char queryType = 'X';
 byte tlmType = 0;
@@ -429,8 +433,19 @@ void loop () {
   }
   // If motor output disarmed, force motor output to minimum
   if (armed == 0) {
-    for (motor = FRONT; motor < LASTMOTOR; motor++)
-      motorCommand[motor] = MINCOMMAND;
+    switch (calibrateESC) {
+    case 1:
+      for (motor = FRONT; motor < LASTMOTOR; motor++)
+        motorCommand[motor] = MAXCOMMAND;
+      break;
+    case 3:
+      for (motor = FRONT; motor < LASTMOTOR; motor++)
+        motorCommand[motor] = testCommand;
+      break;
+    default:
+      for (motor = FRONT; motor < LASTMOTOR; motor++)
+        motorCommand[motor] = MINCOMMAND;
+    }
   }
 
 // *********************** Command Motors **********************

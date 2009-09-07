@@ -83,8 +83,6 @@ void readSerialCommand() {
       bTransmitter[PITCH] = readFloatSerial();
       mTransmitter[YAW] = readFloatSerial();
       bTransmitter[YAW] = readFloatSerial();
-      //break;
-    //case 'P':
       mTransmitter[THROTTLE] = readFloatSerial();
       bTransmitter[THROTTLE] = readFloatSerial();
       mTransmitter[MODE] = readFloatSerial();
@@ -178,6 +176,24 @@ void readSerialCommand() {
       zeroAccelerometers();
       zeroIntegralError();
       break;
+    case '1': // Calibrate ESCS's by setting Throttle high on all channels
+      armed = 0;
+      calibrateESC = 1;
+      break;
+    case '2': // Calibrate ESC's by setting Throttle low on all channels
+      armed = 0;
+      calibrateESC = 2;
+      break;
+    case '3': // Test ESC calibration
+      armed = 0;
+      testCommand = readFloatSerial();
+      calibrateESC = 3;
+      break;
+    case '4': // Turn off ESC calibration
+      armed = 0;
+      calibrateESC = 0;
+      testCommand = 1000;
+      break;      
     }
   digitalWrite(LEDPIN, HIGH);
   }
