@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.1 - September 2009
+  AeroQuad v1.3.2 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -20,8 +20,7 @@
 
 void configureMotors() {
   #ifdef ServoTimerTwo  
-    //frontMotor.attach(FRONTMOTORPIN);
-    frontMotor.attach(AUXPIN);
+    frontMotor.attach(FRONTMOTORPIN);
     rearMotor.attach(REARMOTORPIN);
     rightMotor.attach(RIGHTMOTORPIN);
     leftMotor.attach(LEFTMOTORPIN);
@@ -33,7 +32,7 @@ void configureMotors() {
       analogWrite(RIGHTMOTORPIN, 124);
       analogWrite(LEFTMOTORPIN, 124);
     }
-   #endif
+  #endif
 }
 
 void commandMotors() {

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.1 - September 2009
+  AeroQuad v1.3.2 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -185,6 +185,10 @@ void sendSerialTelemetry() {
     Serial.print(mTransmitter[AUX]);
     comma();
     Serial.println(bTransmitter[AUX]);
+    queryType = 'X';
+    break;
+  case '!': // Send flight software version
+    Serial.println("1.3");
     queryType = 'X';
     break;
   }

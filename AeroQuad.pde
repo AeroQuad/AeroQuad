@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.1 - September 2009
+  AeroQuad v1.3.2 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -24,8 +24,9 @@
 //#define plusConfig
 #define XConfig
 
-// Calibration At Powerup
-//#define CalibrationAtPower
+// Calibration At Start Up
+//#define CalibrationAtStartup
+#define GyroCalibrationAtStartup
 
 // Define PWM Motor Control
 #define AnalogWrite
@@ -35,7 +36,7 @@
 //#define Camera
 
 // Experimental Auto Level (still under development)
-//#define AutoLevel
+#define AutoLevel
 
 // *************************************************************
 
@@ -126,7 +127,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #endif
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
-int motor, minCommand = 0;
+int motor = 0;
 // If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
 // Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
 // use y = mx + b 
@@ -161,14 +162,8 @@ float bMotorCommand = 2;
 #define MODE 4
 #define AUX 5
 #define LASTCHANNEL 6
-#ifndef Camera
-  int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
-  int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-#endif
-#ifdef Camera
-  int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, MODEPIN}; // defines Arduino pins
-  int receiverPin[6] = {18, 21, 22, 20, 23, 23}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-#endif
+int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
+int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
 int transmitterCommand[6] = {1500,1500,1500,1000,1000,1000};
 int transmitterCommandSmooth[6] = {0,0,0,0,0,0};
@@ -180,6 +175,7 @@ byte channel;
 float xmitFactor; // Read in from EEPROM
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
+int minCommand = MINCOMMAND;
 
 // These A/D values depend on how well the sensors are mounted
 // change these values to your unique configuration
@@ -221,8 +217,8 @@ float timeConstant; // Read in from EEPROM
 float mCamera = 5.556;
 float bCamera = 1500;
 #ifdef Camera
-  Servo rollCamera;
-  Servo pitchCamera;
+  ServoTimer2 rollCamera;
+  ServoTimer2 pitchCamera;
 #endif
 
 // Calibration parameters
@@ -294,6 +290,9 @@ void setup() {
     zeroAccelerometers();
     zeroIntegralError();
   #endif
+  #ifdef GyroCalibrationAtStartup
+    zeroGyros();
+  #endif
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
@@ -328,7 +327,6 @@ void loop () {
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], smoothTransmitter[channel]);
-      //transmitterCommandSmooth[axis] = limitRange(smooth(receiverData[axis], transmitterCommandSmooth[axis], smoothTransmitter[axis]), MINCOMMAND, MAXCOMMAND);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < LASTAXIS; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
@@ -364,6 +362,9 @@ void loop () {
     // Prevents too little power applied to motors during hard manuevers
     if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
     if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
+    // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
+    if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
+      minCommand = MINTHROTTLE;
     receiverTime = currentTime;
   }
   
@@ -382,6 +383,7 @@ void loop () {
 
 // ****************** Calculate Absolute Angle *****************
   dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
+  //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
   flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
   flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);  
 

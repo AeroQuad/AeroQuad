@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.1 - September 2009
+  AeroQuad v1.3.2 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -168,7 +168,7 @@ void readSerialCommand() {
       smoothTransmitter[THROTTLE] = 1.0;
       smoothTransmitter[ROLL] = 1.0;
       smoothTransmitter[PITCH] = 1.0;
-      smoothTransmitter[YAW] = 1.0;  
+      smoothTransmitter[YAW] = 0.5;  
       smoothTransmitter[MODE] = 1.0;
       smoothTransmitter[AUX] = 1.0;
 
@@ -193,7 +193,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 0;
       testCommand = 1000;
-      break;      
+      break;
     }
   digitalWrite(LEDPIN, HIGH);
   }

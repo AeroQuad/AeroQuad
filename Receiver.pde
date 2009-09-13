@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.1 - September 2009
+  AeroQuad v1.3.2 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -27,8 +27,8 @@
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
-#define MINWIDTH 900
-#define MAXWIDTH 2100
+#define MINWIDTH 955
+#define MAXWIDTH 2080
 
 
 volatile uint8_t *port_to_pcmask[] = {
@@ -155,5 +155,12 @@ void configureReceiver() {
 // Calculate PWM pulse width of receiver data
 // If invalid PWM measured, use last known good time
 unsigned int readReceiver(byte receiverPin) {
-  return pinData[receiverPin].lastGoodWidth;
+  uint16_t data;
+  uint8_t oldSREG;
+  
+  oldSREG = SREG;
+  cli();
+  data = pinData[receiverPin].lastGoodWidth;
+  SREG = oldSREG;
+  return data;
 }
