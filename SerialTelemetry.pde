@@ -136,7 +136,7 @@ void sendSerialTelemetry() {
      Serial.print(armed, BIN);
     comma();
     #ifdef AutoLevel
-      Serial.println(receiverData[MODE]);
+      Serial.println(transmitterCommandSmooth[MODE]);
     #endif
     #ifndef AutoLevel
       Serial.println(1000);

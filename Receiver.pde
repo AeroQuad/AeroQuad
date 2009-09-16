@@ -27,9 +27,10 @@
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
-#define MINWIDTH 955
-#define MAXWIDTH 2080
-
+#define MINONWIDTH 950
+#define MAXONWIDTH 2075
+#define MINOFFWIDTH 12000
+#define MAXOFFWIDTH 24000
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
@@ -118,13 +119,17 @@ static void measurePulseWidthISR(uint8_t port) {
       pin = port * 8 + i;
       // for each pin changed, record time of change
       if (bit & PCintLast[port]) {
-        pinData[pin].riseTime = currentTime;
-        pinData[pin].edge = RISING_EDGE;
+        time = currentTime - pinData[pin].fallTime;
+        pinData[pin].riseTime = currentTime;        
+        if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
+          pinData[pin].edge = RISING_EDGE;
+        else
+          pinData[pin].edge == FALLING_EDGE; // invalid rising edge detected
       }
       else {
         time = currentTime - pinData[pin].riseTime;
-        if ((time >= MINWIDTH) && (time <= MAXWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
-          //pinData[pin].fallTime = currentTime;
+        pinData[pin].fallTime = currentTime;
+        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
           pinData[pin].lastGoodWidth = time;
           pinData[pin].edge = FALLING_EDGE;
         } 
@@ -157,10 +162,10 @@ void configureReceiver() {
 unsigned int readReceiver(byte receiverPin) {
   uint16_t data;
   uint8_t oldSREG;
-  
+    
   oldSREG = SREG;
   cli();
   data = pinData[receiverPin].lastGoodWidth;
-  SREG = oldSREG;
+  SREG = oldSREG;  
   return data;
 }

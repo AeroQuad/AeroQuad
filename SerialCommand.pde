@@ -164,11 +164,10 @@ void readSerialCommand() {
       }
   
       // Will implement this properly in next version of Configurator
-      // For now, force all values to 1
       smoothTransmitter[THROTTLE] = 1.0;
       smoothTransmitter[ROLL] = 1.0;
       smoothTransmitter[PITCH] = 1.0;
-      smoothTransmitter[YAW] = 0.5;  
+      smoothTransmitter[YAW] = 0.5;
       smoothTransmitter[MODE] = 1.0;
       smoothTransmitter[AUX] = 1.0;
 

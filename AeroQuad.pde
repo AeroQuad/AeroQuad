@@ -262,8 +262,11 @@ byte timeSlot;
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
-unsigned long receiverTime =0;
+unsigned long receiverTime = 0;
 unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
+unsigned long analogInputTime = 0;
+unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
+unsigned long cameraTime = 0;
 float dt = 0;
 
 // ************************************************************
@@ -369,100 +372,109 @@ void loop () {
   }
   
 // *********************** Read Sensors **********************
-  // Apply low pass filter to sensor values and center around zero
-  // Did not convert to engineering units, since will experiment to find P gain anyway
-  for (axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-    accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-  }
-  // Compiler seems to like calculating this in separate loop better
-  for (axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
-    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
-  }
-
-// ****************** Calculate Absolute Angle *****************
-  dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
-  //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
-  flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
-  flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);  
-
-// ********************* Check Flight Mode *********************
-  #ifdef AutoLevel
-    if (receiverData[MODE] < 1200) {
-      // Acrobatic Mode
-      levelAdjust[ROLL] = 0;
-      levelAdjust[PITCH] = 0;
+// Apply low pass filter to sensor values and center around zero
+// Did not convert to engineering units, since will experiment to find P gain anyway
+  if (currentTime > analogInputTime + 2) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
     }
-    else {
-      // Stable Mode
-      for (axis = ROLL; axis < YAW; axis++)
-        levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
-      // Turn off Stable Mode if transmitter stick applied
-      if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
-        levelAdjust[PITCH] = 0;
-      if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+    // Compiler seems to like calculating this in separate loop better
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
+    }
+
+    // ****************** Calculate Absolute Angle *****************
+    dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
+    //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
+    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
+    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
+    analogInputTime = currentTime;
+  } // End of analog input loop
+
+  // ********************* Check Flight Mode *********************
+  if (currentTime > controlLoopTime + 10) {
+    #ifdef AutoLevel
+      if (transmitterCommandSmooth[MODE] < 1500) {
+        // Acrobatic Mode
         levelAdjust[ROLL] = 0;
-    }
-  #endif
-  
-// ************************* Update PID ************************
-  motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
-  motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
-  motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
-  
-// ****************** Calculate Motor Commands *****************
-  if (armed && safetyCheck) {
-    #ifdef plusConfig
-      motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        levelAdjust[PITCH] = 0;
+      }
+      else {
+        // Stable Mode
+        for (axis = ROLL; axis < YAW; axis++)
+          levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
+        // Turn off Stable Mode if transmitter stick applied
+        if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
+          levelAdjust[PITCH] = 0;
+        if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+          levelAdjust[ROLL] = 0;
+      }
     #endif
-    #ifdef XConfig
-      // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-      motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-      motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-    #endif
-  }
   
-  // If throttle in minimum position, don't apply yaw
-  if (transmitterCommand[THROTTLE] < MINCHECK) {
-    for (motor = FRONT; motor < LASTMOTOR; motor++)
-      motorCommand[motor] = minCommand;
-  }
-  // If motor output disarmed, force motor output to minimum
-  if (armed == 0) {
-    switch (calibrateESC) {
-    case 1:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = MAXCOMMAND;
-      break;
-    case 3:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = testCommand;
-      break;
-    default:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = MINCOMMAND;
+    // ************************* Update PID ************************
+    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
+    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
+    motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
+  
+    // ****************** Calculate Motor Commands *****************
+    if (armed && safetyCheck) {
+      #ifdef plusConfig
+        motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+      #endif
+      #ifdef XConfig
+        // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
+        motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+      #endif
     }
-  }
+  
+    // If throttle in minimum position, don't apply yaw
+    if (transmitterCommand[THROTTLE] < MINCHECK) {
+      for (motor = FRONT; motor < LASTMOTOR; motor++)
+        motorCommand[motor] = minCommand;
+    }
+    // If motor output disarmed, force motor output to minimum
+    if (armed == 0) {
+      switch (calibrateESC) {
+      case 1:
+        for (motor = FRONT; motor < LASTMOTOR; motor++)
+          motorCommand[motor] = MAXCOMMAND;
+        break;
+      case 3:
+        for (motor = FRONT; motor < LASTMOTOR; motor++)
+          motorCommand[motor] = testCommand;
+        break;
+      default:
+        for (motor = FRONT; motor < LASTMOTOR; motor++)
+          motorCommand[motor] = MINCOMMAND;
+      }
+    }
 
-// *********************** Command Motors **********************
-  commandMotors();
+    // *********************** Command Motors **********************
+    commandMotors();
+    currentTime = controlLoopTime;
+  } // End of control loop
   
 // **************** Command & Telemetry Functions **************
   readSerialCommand();
   if (currentTime > (telemetryTime + 100)) {
     sendSerialTelemetry();
     telemetryTime = currentTime;
-  }
+  } // End of telemetry loop
   
 // ******************* Camera Stailization *********************
 #ifdef Camera
-  rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
-  pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
+  if (currentTime > (cameraTime + 20)) {
+    rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
+    pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
+    currentTime = cameraTime;
+  }
 #endif
 }
