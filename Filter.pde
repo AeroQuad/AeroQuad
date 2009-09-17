@@ -21,6 +21,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include "Filter.h"
+
 void configureFilter(float timeConstant) {
   flightAngle[ROLL] = atan2(analogRead(accelChannel[ROLL]) - accelZero[ROLL], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;
   flightAngle[PITCH] = atan2(analogRead(accelChannel[PITCH]) - accelZero[PITCH], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;

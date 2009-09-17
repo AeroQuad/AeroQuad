@@ -18,6 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include "Sensors.h"
+
 int findMode(int *data, int arraySize) {
   // The mode of a set of numbers is the value that occurs most frequently
   boolean done = 0;

@@ -18,6 +18,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include <stdlib.h>
+#include <math.h>
+#include <EEPROM.h>
+#include "AeroQuad.h"
+#include "EEPROM_AQ.h"
+#include "Filter.h"
+#include "PID.h"
+#include "Receiver.h"
+#include "Sensors.h"
+#include "Motors.h"
+
 // ************************ User Options ***********************
 
 // Define Flight Configuration
@@ -40,234 +51,9 @@
 
 // *************************************************************
 
-#include <stdlib.h>
-#include <math.h>
-#include <EEPROM.h>
 #ifdef ServoTimerTwo
-  #include <ServoTimer2.h>
+#include <ServoTimer2.h>
 #endif
-
-#define BAUD 115200
-#define LEDPIN 13
-
-// Sensor pin assignments
-#define PITCHACCELPIN 0
-#define ROLLACCELPIN 1
-#define ZACCELPIN 2
-#define PITCHRATEPIN 3
-#define ROLLRATEPIN 4
-#define YAWRATEPIN 5
-int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
-int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
-
-// EEPROM storage
-#define PGAIN_ADR 0
-#define IGAIN_ADR 4
-#define DGAIN_ADR 8
-#define LEVEL_PGAIN_ADR 12
-#define LEVEL_IGAIN_ADR 16
-#define LEVEL_DGAIN_ADR 20
-#define YAW_PGAIN_ADR 24
-#define YAW_IGAIN_ADR 28
-#define YAW_DGAIN_ADR 32
-#define WINDUPGUARD_ADR 36
-#define LEVELLIMIT_ADR 40
-#define LEVELOFF_ADR 44
-#define XMITFACTOR_ADR 48
-#define GYROSMOOTH_ADR 52
-#define ACCSMOOTH_ADR 56
-#define LEVELPITCHCAL_ADR 60
-#define LEVELROLLCAL_ADR 64
-#define LEVELZCAL_ADR 68
-#define FILTERTERM_ADR 72
-#define MODESMOOTH_ADR 76
-#define ROLLSMOOTH_ADR 80
-#define PITCHSMOOTH_ADR 84
-#define YAWSMOOTH_ADR 88
-#define THROTTLESMOOTH_ADR 92
-#define GYRO_ROLL_ZERO_ADR 96
-#define GYRO_PITCH_ZERO_ADR 100
-#define GYRO_YAW_ZERO_ADR 104
-#define PITCH_PGAIN_ADR 124
-#define PITCH_IGAIN_ADR 128
-#define PITCH_DGAIN_ADR 132
-#define LEVEL_PITCH_PGAIN_ADR 136
-#define LEVEL_PITCH_IGAIN_ADR 140
-#define LEVEL_PITCH_DGAIN_ADR 144
-#define THROTTLESCALE_ADR 148
-#define THROTTLEOFFSET_ADR 152
-#define ROLLSCALE_ADR 156
-#define ROLLOFFSET_ADR 160
-#define PITCHSCALE_ADR 164
-#define PITCHOFFSET_ADR 168
-#define YAWSCALE_ADR 172
-#define YAWOFFSET_ADR 176
-#define MODESCALE_ADR 180
-#define MODEOFFSET_ADR 184
-#define AUXSCALE_ADR 188
-#define AUXOFFSET_ADR 192
-#define AUXSMOOTH_ADR 196
-
-// Motor control variables
-#define FRONTMOTORPIN 3
-#define REARMOTORPIN 9
-#define RIGHTMOTORPIN 10
-#define LEFTMOTORPIN 11
-#define LASTMOTORPIN 12
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define LASTMOTOR 4
-#ifdef ServoTimerTwo
-  ServoTimer2 frontMotor;
-  ServoTimer2 rearMotor;
-  ServoTimer2 rightMotor;
-  ServoTimer2 leftMotor;
-#endif
-int motorCommand[4] = {1000,1000,1000,1000};
-int motorAxisCommand[3] = {0,0,0};
-int motor = 0;
-// If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
-// Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
-// use y = mx + b 
-float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
-float bMotorRate = 1500;   // b = y1 - m * x1
-// Scale motor commands to analogWrite
-// m = (250-126)/(2000-1000) = 0.124
-// b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-float mMotorCommand = 0.124;
-float bMotorCommand = 2;
-
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
-#define ROLLPIN 2
-#define THROTTLEPIN 4
-#define PITCHPIN 5
-#define YAWPIN 6
-#define MODEPIN 7
-#define AUXPIN 8
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define LASTCHANNEL 6
-int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
-int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-int receiverData[6];
-int transmitterCommand[6] = {1500,1500,1500,1000,1000,1000};
-int transmitterCommandSmooth[6] = {0,0,0,0,0,0};
-int transmitterZero[3] = {1500,1500,1500};
-int transmitterCenter[2] = {1500,1500};
-byte channel;
-// Controls the strength of the commands sent from the transmitter
-// xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
-float xmitFactor; // Read in from EEPROM
-float mTransmitter[6] = {1,1,1,1,1,1};
-float bTransmitter[6] = {0,0,0,0,0,0};
-int minCommand = MINCOMMAND;
-
-// These A/D values depend on how well the sensors are mounted
-// change these values to your unique configuration
-// #define XMIN 405
-// #define XMAX 607
-// #define YMIN 409
-// #define YMAX 618
-#define ZMIN 454
-#define ZMAX 687
-#define ZAXIS 2
-#define ZEROLIMIT 2
-int axis;
-
-// Accelerometer setup
-int accelData[3] = {0,0,0};
-int accelZero[3] = {0,0,0};
-int accelADC[3] = {0,0,0};
-
-// Auto level setup
-int levelAdjust[2] = {0,0};
-int levelLimit; // Read in from EEPROM
-int levelOff; // Read in from EEPROM
-
-// Gyro setup
-int gyroData[3] = {0,0,0};
-int gyroZero[3] = {0,0,0};
-int gyroADC[3] = {0,0,0};
-
-// Complementary roll/pitch angle
-float flightAngle[2] = {0,0};
-float filterTermRoll[4] = {0,0,0,0};
-float filterTermPitch[4] = {0,0,0,0};
-float timeConstant; // Read in from EEPROM
-
-// Camera stabilization variables
-#define ROLLCAMERAPIN 12
-#define PITCHCAMERAPIN 13
-// map +/-90 degrees to 1000-2000
-float mCamera = 5.556;
-float bCamera = 1500;
-#ifdef Camera
-  ServoTimer2 rollCamera;
-  ServoTimer2 pitchCamera;
-#endif
-
-// Calibration parameters
-#define FINDZERO 50
-int findZero[FINDZERO];
-
-// Low pass filter parameters
-#define GYRO 0
-#define ACCEL 1
-float smoothFactor[2]; // Read in from EEPROM
-float smoothTransmitter[6]; // Read in from EEPROM
-
-// PID Values
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-struct PIDdata {
-  float P, I, D;
-  float lastPosition;
-  float integratedError;
-} PID[5];
-float windupGuard; // Read in from EEPROM
-
-// ESC Calibration
-byte calibrateESC = 0;
-int testCommand = 1000;
-
-// Communication
-char queryType = 'X';
-byte tlmType = 0;
-char string[32];
-byte armed = 0;
-byte safetyCheck = 0;
-byte update = 0;
-
-// Interrupt handler variables
-byte timeSlot;
-
-// Timing
-unsigned long previousTime = 0;
-unsigned long currentTime = 0;
-unsigned long deltaTime = 0;
-unsigned long receiverTime = 0;
-unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
-unsigned long analogInputTime = 0;
-unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
-unsigned long cameraTime = 0;
-float dt = 0;
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -321,9 +107,13 @@ void loop () {
   currentTime = millis();
   deltaTime = currentTime - previousTime;
   previousTime = currentTime;
-  
-// ******************* Transmitter Commands *******************
-  if (currentTime > (receiverTime + 100)) {
+  #ifdef DEBUG
+    if (testSignal == LOW) testSignal = HIGH;
+    else testSignal = LOW;
+    digitalWrite(LEDPIN, testSignal);
+  #endif
+  // ****************** Transmitter Commands Loop *******************
+  if ((currentTime > (receiverTime + 100)) && (receiverLoop == ON)) { // 10Hz
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
@@ -369,12 +159,13 @@ void loop () {
     if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
       minCommand = MINTHROTTLE;
     receiverTime = currentTime;
-  }
+  } // End of transmitter loop time
   
-// *********************** Read Sensors **********************
-// Apply low pass filter to sensor values and center around zero
-// Did not convert to engineering units, since will experiment to find P gain anyway
-  if (currentTime > analogInputTime + 2) {
+  // ********************* Analog Input Loop *******************
+  if ((currentTime > (analogInputTime + 2)) && (analogInputLoop == ON)) { // 500Hz
+    // *********************** Read Sensors **********************
+    // Apply low pass filter to sensor values and center around zero
+    // Did not convert to engineering units, since will experiment to find P gain anyway
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
@@ -393,8 +184,9 @@ void loop () {
     analogInputTime = currentTime;
   } // End of analog input loop
 
+  // *********************** Flight Control Loop ************************
+  if ((currentTime > controlLoopTime + 2) && (controlLoop == ON)) { // 500Hz
   // ********************* Check Flight Mode *********************
-  if (currentTime > controlLoopTime + 10) {
     #ifdef AutoLevel
       if (transmitterCommandSmooth[MODE] < 1500) {
         // Acrobatic Mode
@@ -459,19 +251,19 @@ void loop () {
 
     // *********************** Command Motors **********************
     commandMotors();
-    currentTime = controlLoopTime;
+    controlLoopTime = currentTime;
   } // End of control loop
   
 // **************** Command & Telemetry Functions **************
-  readSerialCommand();
-  if (currentTime > (telemetryTime + 100)) {
+  if ((currentTime > telemetryTime + 100) && (telemetryLoop == ON)) { // 10Hz    
+    readSerialCommand();
     sendSerialTelemetry();
     telemetryTime = currentTime;
   } // End of telemetry loop
   
 // ******************* Camera Stailization *********************
 #ifdef Camera
-  if (currentTime > (cameraTime + 20)) {
+  if ((currentTime > (cameraTime + 20)) && cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
     pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
     currentTime = cameraTime;

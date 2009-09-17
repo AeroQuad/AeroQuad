@@ -23,32 +23,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "pins_arduino.h"
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
-
-volatile uint8_t *port_to_pcmask[] = {
-  &PCMSK0,
-  &PCMSK1,
-  &PCMSK2
-};
-
-volatile static uint8_t PCintLast[3];
-
-// Channel data 
-typedef struct {
-  byte edge;
-  unsigned long riseTime;    
-  unsigned long fallTime; 
-  unsigned long lastGoodWidth;
-} pinTimingData;  
-
-volatile static pinTimingData pinData[24]; 
+#include "Receiver.h"
 
 // Attaches PCINT to Arduino Pin
 void attachPinChangeInterrupt(uint8_t pin) {

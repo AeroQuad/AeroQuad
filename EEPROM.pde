@@ -18,6 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include "EEPROM_AQ.h"
+
 // Utilities for writing and reading from the EEPROM
 float readFloat(int address) {
   union floatStore {
