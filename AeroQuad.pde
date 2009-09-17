@@ -32,8 +32,8 @@
 // ************************ User Options ***********************
 
 // Define Flight Configuration
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
