@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.2 - September 2009
+  AeroQuad v1.4 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -35,7 +35,6 @@ float filterData(float previousAngle, int gyroADC, float angle, float *filterTer
   // http://www.rcgroups.com/forums/showpost.php?p=12082524&postcount=1286
   static float filter;
   float accel, gyro;
-  float aref = 3.0;
   
   // For Sparkfun 5DOF IMU
   // accelerometerOutput = (N-512)/1024*(double)10.78; (rad)

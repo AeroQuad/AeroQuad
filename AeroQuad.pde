@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.2 - September 2009
+  AeroQuad v1.4 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -156,8 +156,8 @@ void loop () {
     if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
     if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
     // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
-    if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
-      minCommand = MINTHROTTLE;
+    //if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
+      //minCommand = MINTHROTTLE;
     receiverTime = currentTime;
   } // End of transmitter loop time
   
@@ -181,11 +181,18 @@ void loop () {
     //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
     flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
     flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
+    //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroData[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, dt);
+    //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroData[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, dt);
     analogInputTime = currentTime;
   } // End of analog input loop
-
+  
   // *********************** Flight Control Loop ************************
   if ((currentTime > controlLoopTime + 2) && (controlLoop == ON)) { // 500Hz
+
+  // ******************** Calculate Heading Hold ************************
+    //heading = (((gyroData[YAW] / 1024.0) * aref / 0.002) * dt) * 1000.0;
+    heading = heading + ((gyroData[YAW] / 1024.0) * aref / 0.002 * dt);
+
   // ********************* Check Flight Mode *********************
     #ifdef AutoLevel
       if (transmitterCommandSmooth[MODE] < 1500) {
@@ -204,6 +211,9 @@ void loop () {
           levelAdjust[ROLL] = 0;
       }
     #endif
+    
+    // *********************** Calculate Heading *******************
+    heading = heading + (((gyroData[YAW] / 1024) * aref / 0.002) * dt);
   
     // ************************* Update PID ************************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);

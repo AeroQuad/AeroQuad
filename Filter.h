@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.2 - September 2009
+  AeroQuad v1.4 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -36,5 +36,6 @@ float smoothTransmitter[6]; // Read in from EEPROM
 void configureFilter(float timeConstant);
 float filterData(float previousAngle, int gyroADC, float angle, float *filterTerm, float dt);
 int smooth(int currentData, int previousData, float smoothFactor);
+float arctan2(float y, float x);
 
 #endif

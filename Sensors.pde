@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.2 - September 2009
+  AeroQuad v1.4 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -87,3 +87,25 @@ int limitRange(int data, int minLimit, int maxLimit) {
   else if (data > maxLimit) return maxLimit;
   else return data;
 }
+
+float arctan2(float y, float x) {
+  // Taken from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
+   float coeff_1 = PI/4;
+   float coeff_2 = 3*coeff_1;
+   float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
+   float r, angle;
+   
+   if (x >= 0) {
+     r = (x - abs_y) / (x + abs_y);
+     angle = coeff_1 - coeff_1 * r;
+   }
+   else {
+     r = (x + abs_y) / (abs_y - x);
+     angle = coeff_2 - coeff_1 * r;
+   }
+   if (y < 0)
+     return(-angle);     // negate if in quad III or IV
+   else
+     return(angle);
+}
+

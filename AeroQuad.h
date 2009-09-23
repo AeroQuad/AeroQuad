@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.3.2 - September 2009
+  AeroQuad v1.4 - September 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -29,6 +29,10 @@
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
+
+// Heading hold
+float heading = 0;
+float aref = 2.896 * 3.0; // With 4.7k Ohm resistor
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
