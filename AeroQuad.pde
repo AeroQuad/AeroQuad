@@ -148,6 +148,7 @@ void loop () {
         minCommand = MINTHROTTLE;
         transmitterCenter[PITCH] = receiverData[PITCH];
         transmitterCenter[ROLL] = receiverData[ROLL];
+        heading = commandedYaw;
       }
       // Prevents accidental arming of motor output if no transmitter command received
       if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
@@ -177,7 +178,7 @@ void loop () {
     }
 
     // ****************** Calculate Absolute Angle *****************
-    dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
+    //dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
     //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
     flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
     flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
@@ -188,10 +189,6 @@ void loop () {
   
   // *********************** Flight Control Loop ************************
   if ((currentTime > controlLoopTime + 2) && (controlLoop == ON)) { // 500Hz
-
-  // ******************** Calculate Heading Hold ************************
-    //heading = (((gyroData[YAW] / 1024.0) * aref / 0.002) * dt) * 1000.0;
-    heading = heading + ((gyroData[YAW] / 1024.0) * aref / 0.002 * dt);
 
   // ********************* Check Flight Mode *********************
     #ifdef AutoLevel
@@ -213,13 +210,17 @@ void loop () {
     #endif
     
     // *********************** Calculate Heading *******************
-    heading = heading + (((gyroData[YAW] / 1024) * aref / 0.002) * dt);
+    heading = heading + (gyroData[YAW] * headingScaleFactor * dt);
+    if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) {
+      commandedYaw = commandedYaw + ((transmitterCommand[YAW] - 1500) * yawFactor);
+    }
   
     // ************************* Update PID ************************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
     motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
-    motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
-  
+    //motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
+    motorAxisCommand[YAW] = updatePID(commandedYaw, heading, &PID[YAW]);
+    
     // ****************** Calculate Motor Commands *****************
     if (armed && safetyCheck) {
       #ifdef plusConfig

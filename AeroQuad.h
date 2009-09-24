@@ -32,7 +32,12 @@ int levelOff; // Read in from EEPROM
 
 // Heading hold
 float heading = 0;
-float aref = 2.896 * 3.0; // With 4.7k Ohm resistor
+float aref = 2.896; // With 4.7k Ohm resistor
+// aref / 1024 = voltage per A/D bit
+// 0.002 = V / deg/sec (from gyro data sheet)
+float headingScaleFactor = aref / 1024.0 / 0.002;
+float commandedYaw = 0;
+float yawFactor = 0.0005;
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -87,6 +92,6 @@ unsigned long telemetryTime = 50; // make telemetry output 50ms offset from rece
 unsigned long analogInputTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
 unsigned long cameraTime = 0;
-float dt = 0;
+float dt = 0.002;
 
 #endif

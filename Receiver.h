@@ -79,7 +79,7 @@ int receiverData[6];
 int transmitterCommand[6] = {1500,1500,1500,1000,1000,1000};
 int transmitterCommandSmooth[6] = {0,0,0,0,0,0};
 int transmitterZero[3] = {1500,1500,1500};
-int transmitterCenter[2] = {1500,1500};
+int transmitterCenter[3] = {1500,1500,1500};
 byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)

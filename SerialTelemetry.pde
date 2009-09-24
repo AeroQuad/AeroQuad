@@ -188,9 +188,9 @@ void sendSerialTelemetry() {
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
-    Serial.print(gyroData[YAW]);
+    Serial.print(heading);
     comma();
-    Serial.println(heading);
+    Serial.println(commandedYaw);
     break;
   case '!': // Send flight software version
     Serial.println("1.3");
