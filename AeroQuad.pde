@@ -112,6 +112,7 @@ void loop () {
     else testSignal = LOW;
     digitalWrite(LEDPIN, testSignal);
   #endif
+  
   // ****************** Transmitter Commands Loop *******************
   if ((currentTime > (receiverTime + 100)) && (receiverLoop == ON)) { // 10Hz
     // Buffer receiver values read from pin change interrupt handler
@@ -135,7 +136,7 @@ void loop () {
         commandAllMotors(MINCOMMAND);
       }    
       // Zero sensors (left stick lower left, right stick lower right corner)
-      if (receiverData[YAW] < MINCHECK && receiverData[ROLL] > MAXCHECK && receiverData[PITCH] < MINCHECK) {
+      if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
         zeroGyros();
         zeroAccelerometers();
         zeroIntegralError();
@@ -209,11 +210,14 @@ void loop () {
       }
     #endif
     
-    // *********************** Calculate Heading *******************
+    // ************************ Heading Hold ***********************
     heading = heading + (gyroData[YAW] * headingScaleFactor * dt);
-    if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) {
-      commandedYaw = commandedYaw + ((transmitterCommand[YAW] - 1500) * yawFactor);
+    if (transmitterCommand[THROTTLE] > MINCHECK ) {
+      if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25)))
+        commandedYaw = commandedYaw + ((transmitterCommand[YAW] - transmitterCenter[YAW]) * yawFactor);
     }
+    else
+      commandedYaw = heading;
   
     // ************************* Update PID ************************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);

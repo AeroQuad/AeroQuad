@@ -188,6 +188,10 @@ void sendSerialTelemetry() {
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
+    Serial.print(transmitterCommand[YAW]);
+    comma();
+    Serial.print(transmitterCenter[YAW]);
+    comma();
     Serial.print(heading);
     comma();
     Serial.println(commandedYaw);

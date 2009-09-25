@@ -37,7 +37,7 @@ float aref = 2.896; // With 4.7k Ohm resistor
 // 0.002 = V / deg/sec (from gyro data sheet)
 float headingScaleFactor = aref / 1024.0 / 0.002;
 float commandedYaw = 0;
-float yawFactor = 0.0005;
+float yawFactor = 0.001;
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
