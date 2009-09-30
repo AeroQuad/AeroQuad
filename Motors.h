@@ -22,7 +22,7 @@
 #define MOTORS_H
 
 #define byte uint8_t 
-#define FRONTMOTORPIN 3
+#define FRONTMOTORPIN 8
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
@@ -32,12 +32,12 @@
 #define RIGHT 2
 #define LEFT 3
 #define LASTMOTOR 4
-#ifdef ServoTimerTwo
-  ServoTimer2 frontMotor;
-  ServoTimer2 rearMotor;
-  ServoTimer2 rightMotor;
-  ServoTimer2 leftMotor;
-#endif
+
+#include <Servo.h>
+Servo frontMotor;
+Servo rearMotor;
+Servo rightMotor;
+Servo leftMotor;
 
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
@@ -47,11 +47,6 @@ int motor = 0;
 // use y = mx + b 
 float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
 float bMotorRate = 1500;   // b = y1 - m * x1
-// Scale motor commands to analogWrite
-// m = (250-126)/(2000-1000) = 0.124
-// b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-float mMotorCommand = 0.124;
-float bMotorCommand = 2;
 
 void configureMotors();
 void commandMotors();

@@ -18,17 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <stdlib.h>
-#include <math.h>
-#include <EEPROM.h>
-#include "AeroQuad.h"
-#include "EEPROM_AQ.h"
-#include "Filter.h"
-#include "PID.h"
-#include "Receiver.h"
-#include "Sensors.h"
-#include "Motors.h"
-
 // ************************ User Options ***********************
 
 // Define Flight Configuration
@@ -39,21 +28,28 @@
 //#define CalibrationAtStartup
 #define GyroCalibrationAtStartup
 
-// Define PWM Motor Control
-#define AnalogWrite
-//#define ServoTimerTwo
-
-// Camera Stabilization
+// Camera Stabilization (experimental)
 //#define Camera
 
-// Experimental Auto Level (still under development)
-#define AutoLevel
+// Heading Hold (experimental)
+//#define HeadingHold
+
+// Auto Level (experimental)
+//#define AutoLevel
 
 // *************************************************************
 
-#ifdef ServoTimerTwo
-#include <ServoTimer2.h>
-#endif
+#include <stdlib.h>
+#include <math.h>
+#include <EEPROM.h>
+#include <Servo.h>
+#include "EEPROM_AQ.h"
+#include "Filter.h"
+#include "PID.h"
+#include "Receiver.h"
+#include "Sensors.h"
+#include "Motors.h"
+#include "AeroQuad.h"
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -149,7 +145,6 @@ void loop () {
         minCommand = MINTHROTTLE;
         transmitterCenter[PITCH] = receiverData[PITCH];
         transmitterCenter[ROLL] = receiverData[ROLL];
-        heading = commandedYaw;
       }
       // Prevents accidental arming of motor output if no transmitter command received
       if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
@@ -211,19 +206,25 @@ void loop () {
     #endif
     
     // ************************ Heading Hold ***********************
-    heading = heading + (gyroData[YAW] * headingScaleFactor * dt);
-    if (transmitterCommand[THROTTLE] > MINCHECK ) {
-      if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25)))
-        commandedYaw = commandedYaw + ((transmitterCommand[YAW] - transmitterCenter[YAW]) * yawFactor);
-    }
-    else
-      commandedYaw = heading;
+    #ifdef HeadingHold
+      heading = heading + (gyroData[YAW] * headingScaleFactor * dt);
+      if (transmitterCommand[THROTTLE] > MINCHECK ) {
+        if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25)))
+          commandedYaw = commandedYaw + ((transmitterCommand[YAW] - transmitterCenter[YAW]) * yawFactor);
+      }
+      else
+        commandedYaw = heading;
+    #endif
   
     // ************************* Update PID ************************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
     motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
-    //motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
-    motorAxisCommand[YAW] = updatePID(commandedYaw, heading, &PID[YAW]);
+    #ifdef HeadingHold
+      motorAxisCommand[YAW] = updatePID(commandedYaw, heading, &PID[YAW]);
+    #endif
+    #ifndef HeadingHold
+      motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
+    #endif
     
     // ****************** Calculate Motor Commands *****************
     if (armed && safetyCheck) {

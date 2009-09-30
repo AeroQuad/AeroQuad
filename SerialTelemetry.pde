@@ -187,6 +187,7 @@ void sendSerialTelemetry() {
     break;
   case 'X': // Stop sending messages
     break;
+  #ifdef HeadingHold
   case 'Z': // Send heading
     Serial.print(transmitterCommand[YAW]);
     comma();
@@ -196,6 +197,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(commandedYaw);
     break;
+  #endif
   case '!': // Send flight software version
     Serial.println("1.3");
     queryType = 'X';

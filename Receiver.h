@@ -39,7 +39,7 @@
 #define PITCHPIN 5
 #define YAWPIN 6
 #define MODEPIN 7
-#define AUXPIN 8
+#define AUXPIN 3
 #define ROLL 0
 #define PITCH 1
 #define YAW 2
@@ -74,7 +74,9 @@ typedef struct {
 volatile static pinTimingData pinData[24]; 
 
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
-int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+// To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
+//int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 int receiverData[6];
 int transmitterCommand[6] = {1500,1500,1500,1000,1000,1000};
 int transmitterCommandSmooth[6] = {0,0,0,0,0,0};

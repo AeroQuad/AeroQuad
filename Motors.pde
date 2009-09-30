@@ -21,52 +21,26 @@
 #include "Motors.h"
 
 void configureMotors() {
-  #ifdef ServoTimerTwo  
-    frontMotor.attach(FRONTMOTORPIN);
-    rearMotor.attach(REARMOTORPIN);
-    rightMotor.attach(RIGHTMOTORPIN);
-    leftMotor.attach(LEFTMOTORPIN);
-  #endif
-  #ifdef AnalogWrite
-    for (motor = FRONTMOTORPIN; motor < LASTMOTORPIN; motor++) {
-      analogWrite(FRONTMOTORPIN, 124);
-      analogWrite(REARMOTORPIN, 124);
-      analogWrite(RIGHTMOTORPIN, 124);
-      analogWrite(LEFTMOTORPIN, 124);
-    }
-  #endif
+  frontMotor.attach(FRONTMOTORPIN);
+  rearMotor.attach(REARMOTORPIN);
+  rightMotor.attach(RIGHTMOTORPIN);
+  leftMotor.attach(LEFTMOTORPIN);
 }
 
 void commandMotors() {
-  #ifdef ServoTimerTwo
-    frontMotor.write(motorCommand[FRONT]);
-    rearMotor.write(motorCommand[REAR]);
-    rightMotor.write(motorCommand[RIGHT]);
-    leftMotor.write(motorCommand[LEFT]);
-  #endif
-  #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
-  #endif
+  frontMotor.write(motorCommand[FRONT]);
+  rearMotor.write(motorCommand[REAR]);
+  rightMotor.write(motorCommand[RIGHT]);
+  leftMotor.write(motorCommand[LEFT]);
 }
 
 // Sends commands to all motors
 void commandAllMotors(int motorCommand) {
-  #ifdef ServoTimerTwo
-    frontMotor.write(motorCommand);
-    rearMotor.write(motorCommand);
-    rightMotor.write(motorCommand);
-    leftMotor.write(motorCommand);
-  #endif
-  #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);
-  #endif
-  }
+  frontMotor.write(motorCommand);
+  rearMotor.write(motorCommand);
+  rightMotor.write(motorCommand);
+  leftMotor.write(motorCommand);
+}
 
 void pulseMotors(byte quantity) {
   for (byte i = 0; i < quantity; i++) {      

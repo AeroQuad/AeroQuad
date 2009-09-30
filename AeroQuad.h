@@ -31,13 +31,14 @@ int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
 
 // Heading hold
-float heading = 0;
-float aref = 2.896; // With 4.7k Ohm resistor
-// aref / 1024 = voltage per A/D bit
-// 0.002 = V / deg/sec (from gyro data sheet)
-float headingScaleFactor = aref / 1024.0 / 0.002;
-float commandedYaw = 0;
-float yawFactor = 0.001;
+#ifdef HeadingHold
+  float heading = 0;
+  // aref / 1024 = voltage per A/D bit
+  // 0.002 = V / deg/sec (from gyro data sheet)
+  float headingScaleFactor = aref / 1024.0 / 0.002;
+  float commandedYaw = 0;
+  float yawFactor = 0.002;
+#endif
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -54,6 +55,10 @@ float bCamera = 1500;
 // ESC Calibration
 byte calibrateESC = 0;
 int testCommand = 1000;
+
+// Analog Reference Value
+float aref = 2.896; // With 4.7k Ohm resistor
+
 
 // Communication
 char queryType = 'X';
