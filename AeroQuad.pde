@@ -18,7 +18,13 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// This version is only compatible with Arduino 0017 or greater
+
 // ************************ User Options ***********************
+// Before your first flight, change the following line in Servo.h
+// which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
+// For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
+// For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 
 // Define Flight Configuration
 #define plusConfig
@@ -279,7 +285,7 @@ void loop () {
   
 // ******************* Camera Stailization *********************
 #ifdef Camera
-  if ((currentTime > (cameraTime + 20)) && cameraLoop == ON)) { // 50Hz
+  if ((currentTime > (cameraTime + 20)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
     pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
     currentTime = cameraTime;

@@ -48,8 +48,8 @@ int levelOff; // Read in from EEPROM
 float mCamera = 5.556;
 float bCamera = 1500;
 #ifdef Camera
-  ServoTimer2 rollCamera;
-  ServoTimer2 pitchCamera;
+  Servo rollCamera;
+  Servo pitchCamera;
 #endif
 
 // ESC Calibration
@@ -76,7 +76,7 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = OFF; // Note: stabilization camera software is still under development
+byte cameraLoop = ON; // Note: stabilization camera software is still under development
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
 // All loops on = 2.4 ms
