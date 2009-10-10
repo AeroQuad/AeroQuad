@@ -68,7 +68,7 @@ void readSerialCommand() {
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
       break;
-    case 'M': // Receive motor smoothing values
+    case 'M': // Receive transmitter smoothing values
       smoothTransmitter[ROLL] = readFloatSerial();
       smoothTransmitter[PITCH] = readFloatSerial();
       smoothTransmitter[YAW] = readFloatSerial();
@@ -192,6 +192,13 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 0;
       testCommand = 1000;
+      break;
+    case 'a': // Enable/disable fast data transfer of sensor data
+      queryType = 'X'; // Stop any other telemetry streaming
+      if (readFloatSerial() == 1)
+        fastTransfer = ON;
+      else
+        fastTransfer = OFF;
       break;
     }
   digitalWrite(LEDPIN, HIGH);

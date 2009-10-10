@@ -42,12 +42,12 @@ int levelOff; // Read in from EEPROM
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
-#define ROLLCAMERAPIN 12
-#define PITCHCAMERAPIN 13
-// map +/-90 degrees to 1000-2000
-float mCamera = 5.556;
-float bCamera = 1500;
 #ifdef Camera
+  #define ROLLCAMERAPIN 12
+  #define PITCHCAMERAPIN 13
+  // map +/-90 degrees to 1000-2000
+  float mCamera = 5.556;
+  float bCamera = 1500;
   Servo rollCamera;
   Servo pitchCamera;
 #endif
@@ -58,7 +58,6 @@ int testCommand = 1000;
 
 // Analog Reference Value
 float aref = 2.896; // With 4.7k Ohm resistor
-
 
 // Communication
 char queryType = 'X';
@@ -76,7 +75,7 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = ON; // Note: stabilization camera software is still under development
+byte cameraLoop = OFF; // Note: stabilization camera software is still under development
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
 // All loops on = 2.4 ms
@@ -87,6 +86,10 @@ byte testSignal = LOW;
 // Control loop on = 0.4 ms
 // Receiver loop = 0.4 ms
 // Telemetry loop = .04 ms (with no telemetry transmitted)
+// Fast Telemetry Transfer (sending 12 bytes = 1.1 ms, sending 14 bytes = 1.3 ms, sending 16 bytes = 1.45 ms, sending 18 bytes = 1.625 ms) 2 bytes = 0.175 ms
+
+// Sensor fast data transfer;
+byte fastTransfer = OFF;
 
 // Timing
 unsigned long previousTime = 0;
@@ -97,6 +100,7 @@ unsigned long telemetryTime = 50; // make telemetry output 50ms offset from rece
 unsigned long analogInputTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
 unsigned long cameraTime = 0;
+unsigned long fastTelemetryTime = 0;
 float dt = 0.002;
 
 #endif

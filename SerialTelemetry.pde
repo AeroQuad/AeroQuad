@@ -199,7 +199,7 @@ void sendSerialTelemetry() {
     break;
   #endif
   case '!': // Send flight software version
-    Serial.println("1.3");
+    Serial.println("1.4");
     queryType = 'X';
     break;
   }
@@ -207,4 +207,14 @@ void sendSerialTelemetry() {
 
 void comma() {
   Serial.print(',');
+}
+
+void printInt(int data) {
+  byte msb, lsb;
+  
+  msb = data >> 8;
+  lsb = data & 0xff;
+  
+  Serial.print(msb, BYTE);
+  Serial.print(lsb, BYTE);
 }

@@ -27,8 +27,8 @@
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 
 // Define Flight Configuration
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
@@ -270,7 +270,14 @@ void loop () {
           motorCommand[motor] = MINCOMMAND;
       }
     }
-
+  // ****************** Fast Transfer Of Sensor Data ****************
+    if (fastTransfer == ON) {    
+      printInt(21845); // Start word of 0x5555
+      for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyroADC[axis]);
+      for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accelADC[axis]);
+      printInt(32767); // Stop word of 0x7FFF
+    }
+    
     // *********************** Command Motors **********************
     commandMotors();
     controlLoopTime = currentTime;
@@ -288,7 +295,7 @@ void loop () {
   if ((currentTime > (cameraTime + 20)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
     pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
-    currentTime = cameraTime;
+    cameraTime = currentTime;
   }
 #endif
 }
