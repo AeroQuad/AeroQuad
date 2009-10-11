@@ -27,12 +27,22 @@
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 
 // Define Flight Configuration
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
 #define GyroCalibrationAtStartup
+
+// Motor Control Method (ServoControl = higher ESC resolution, cooler motors, slight jitter in control, AnalogWrite = lower ESC resolution, warmer motors, no jitter)
+// Before your first flight, to use the ServoControl method change the following line in Servo.h
+// which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
+// For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
+// For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
+// For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
+//#define ServoControl
+// For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
+#define AnalogWrite
 
 // Camera Stabilization (experimental)
 //#define Camera
@@ -265,17 +275,14 @@ void loop () {
         for (motor = FRONT; motor < LASTMOTOR; motor++)
           motorCommand[motor] = testCommand;
         break;
+      case 5:
+        for (motor = FRONT; motor < LASTMOTOR; motor++)
+          motorCommand[motor] = remoteCommand[motor];
+        break;
       default:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
           motorCommand[motor] = MINCOMMAND;
       }
-    }
-  // ****************** Fast Transfer Of Sensor Data ****************
-    if (fastTransfer == ON) {    
-      printInt(21845); // Start word of 0x5555
-      for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyroADC[axis]);
-      for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accelADC[axis]);
-      printInt(32767); // Stop word of 0x7FFF
     }
     
     // *********************** Command Motors **********************
@@ -298,4 +305,13 @@ void loop () {
     cameraTime = currentTime;
   }
 #endif
+
+// ****************** Fast Transfer Of Sensor Data ****************
+  if ((currentTime > (fastTelemetryTime + 5)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
+    printInt(21845); // Start word of 0x5555
+    for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyroADC[axis]);
+    for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accelADC[axis]);
+    printInt(32767); // Stop word of 0x7FFF
+    fastTelemetryTime = currentTime;
+  }
 }

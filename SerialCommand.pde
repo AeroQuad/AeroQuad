@@ -193,6 +193,12 @@ void readSerialCommand() {
       calibrateESC = 0;
       testCommand = 1000;
       break;
+    case '5': // Send individual motor commands (motor, command)
+      armed = 0;
+      calibrateESC = 5;
+      for (motor = FRONT; motor < LASTMOTOR; motor++)
+        remoteCommand[motor] = readFloatSerial();
+      break;
     case 'a': // Enable/disable fast data transfer of sensor data
       queryType = 'X'; // Stop any other telemetry streaming
       if (readFloatSerial() == 1)

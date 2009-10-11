@@ -21,8 +21,13 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#define byte uint8_t 
-#define FRONTMOTORPIN 8
+#define byte uint8_t
+#ifdef ServoControl
+  #define FRONTMOTORPIN 8
+#endif
+#ifdef AnalogWrite
+  #define FRONTMOTORPIN 3
+#endif
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
@@ -33,11 +38,20 @@
 #define LEFT 3
 #define LASTMOTOR 4
 
-#include <Servo.h>
-Servo frontMotor;
-Servo rearMotor;
-Servo rightMotor;
-Servo leftMotor;
+#ifdef ServoControl
+  #include <Servo.h>
+  Servo frontMotor;
+  Servo rearMotor;
+  Servo rightMotor;
+  Servo leftMotor;
+#endif
+#ifdef AnalogWrite
+  // Scale motor commands to analogWrite		
+  // m = (250-126)/(2000-1000) = 0.124		
+  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
+  float mMotorCommand = 0.124;		
+  float bMotorCommand = 2;
+#endif
 
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};

@@ -56,6 +56,9 @@ int levelOff; // Read in from EEPROM
 byte calibrateESC = 0;
 int testCommand = 1000;
 
+// Ground station control (experimental)
+int remoteCommand[4] = {1000,1000,1000,1000};
+
 // Analog Reference Value
 float aref = 2.896; // With 4.7k Ohm resistor
 

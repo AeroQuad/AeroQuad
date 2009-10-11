@@ -198,6 +198,13 @@ void sendSerialTelemetry() {
     Serial.println(commandedYaw);
     break;
   #endif
+  case '6': // Report remote commands
+    for (motor = FRONT; motor < LEFT; motor++) {
+      Serial.print(remoteCommand[motor]);
+      comma();
+    }
+    Serial.println(remoteCommand[LEFT]);
+    break;
   case '!': // Send flight software version
     Serial.println("1.4");
     queryType = 'X';
