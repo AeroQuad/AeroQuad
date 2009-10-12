@@ -76,7 +76,7 @@ void readSerialCommand() {
       smoothTransmitter[MODE] = readFloatSerial();
       smoothTransmitter[AUX] = readFloatSerial();
       break;
-    case 'O': // Received transmitter calibrtion values
+    case 'O': // Receive transmitter calibration values
       mTransmitter[ROLL] = readFloatSerial();
       bTransmitter[ROLL] = readFloatSerial();
       mTransmitter[PITCH] = readFloatSerial();
@@ -162,8 +162,6 @@ void readSerialCommand() {
         mTransmitter[channel] = 1.0;
         bTransmitter[channel] = 0.0;
       }
-  
-      // Will implement this properly in next version of Configurator
       smoothTransmitter[THROTTLE] = 1.0;
       smoothTransmitter[ROLL] = 1.0;
       smoothTransmitter[PITCH] = 1.0;

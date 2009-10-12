@@ -48,7 +48,7 @@
 //#define Camera
 
 // Heading Hold (experimental)
-//#define HeadingHold
+#define HeadingHold
 
 // Auto Level (experimental)
 //#define AutoLevel

@@ -25,6 +25,9 @@
 #define BAUD 115200
 #define LEDPIN 13
 
+// Analog Reference Value
+float aref = 2.896; // With 4.7k Ohm resistor
+
 // Auto level setup
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
@@ -58,9 +61,6 @@ int testCommand = 1000;
 
 // Ground station control (experimental)
 int remoteCommand[4] = {1000,1000,1000,1000};
-
-// Analog Reference Value
-float aref = 2.896; // With 4.7k Ohm resistor
 
 // Communication
 char queryType = 'X';
