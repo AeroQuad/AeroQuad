@@ -223,7 +223,8 @@ void loop () {
     
     // ************************ Heading Hold ***********************
     #ifdef HeadingHold
-      heading = heading + (gyroData[YAW] * headingScaleFactor * dt);
+      heading = smooth((gyroData[YAW] * headingScaleFactor * dt), heading, smoothHeading);
+      //heading = heading + (gyroData[YAW] * headingScaleFactor * dt); 
       if (transmitterCommand[THROTTLE] > MINCHECK ) {
         if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25)))
           commandedYaw = commandedYaw + ((transmitterCommand[YAW] - transmitterCenter[YAW]) * yawFactor);

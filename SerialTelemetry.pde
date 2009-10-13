@@ -209,6 +209,9 @@ void sendSerialTelemetry() {
     Serial.println("1.4");
     queryType = 'X';
     break;
+  case 'e': // Send Heading smooth value
+    Serial.println(smoothHeading);
+    break;
   }
 }
 

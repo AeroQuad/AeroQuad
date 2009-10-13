@@ -38,9 +38,9 @@ int levelOff; // Read in from EEPROM
   float heading = 0;
   // aref / 1024 = voltage per A/D bit
   // 0.002 = V / deg/sec (from gyro data sheet)
-  float headingScaleFactor = aref / 1024.0 / 0.002;
+  float headingScaleFactor = (aref / 1024.0) / 0.002;
   float commandedYaw = 0;
-  float yawFactor = 0.002;
+  float yawFactor = 0.0015;
 #endif
 
 // Camera stabilization variables

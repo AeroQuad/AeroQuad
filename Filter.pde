@@ -74,3 +74,11 @@ float filterData(float previousAngle, int gyroADC, float angle, float *filterTer
 int smooth(int currentData, int previousData, float smoothFactor) {
   return (previousData * (1 - smoothFactor) + (currentData * smoothFactor));
 }
+
+// fast way to approximate atan2
+/*uns8 Arctan(uns8 niprop) {
+	if( niprop >= 16 )
+		return((uns8)45);
+	skip(niprop);     /* 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15 */
+/*	#pragma return[] =   0,  2,  6,  9, 13, 16, 19, 23, 26, 28, 31, 34, 36, 38, 41, 43
+}*/

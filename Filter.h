@@ -32,6 +32,7 @@ float timeConstant; // Read in from EEPROM
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
 float smoothTransmitter[6]; // Read in from EEPROM
+float smoothHeading; // Read in from EEPROM
 
 void configureFilter(float timeConstant);
 float filterData(float previousAngle, int gyroADC, float angle, float *filterTerm, float dt);

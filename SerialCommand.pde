@@ -168,6 +168,7 @@ void readSerialCommand() {
       smoothTransmitter[YAW] = 0.5;
       smoothTransmitter[MODE] = 1.0;
       smoothTransmitter[AUX] = 1.0;
+      smoothHeading = 1.0;
 
       zeroGyros();
       zeroAccelerometers();
@@ -204,6 +205,14 @@ void readSerialCommand() {
       else
         fastTransfer = OFF;
       break;
+    case 'b': // calibrate gyros
+      zeroGyros();
+      break;
+    case 'c': // calibrate accels
+      zeroAccelerometers();
+      break;
+    case 'd': // update Heading smoothing
+      smoothHeading = readFloatSerial();
     }
   digitalWrite(LEDPIN, HIGH);
   }

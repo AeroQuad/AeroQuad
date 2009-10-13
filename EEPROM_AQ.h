@@ -68,6 +68,7 @@
 #define AUXSCALE_ADR 188
 #define AUXOFFSET_ADR 192
 #define AUXSMOOTH_ADR 196
+#define HEADINGSMOOTH_ADR 200
 
 float readFloat(int address);
 void writeFloat(float value, int address);

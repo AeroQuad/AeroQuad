@@ -106,4 +106,5 @@ void readEEPROM() {
   gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
   gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
+  smoothHeading = readFloat(HEADINGSMOOTH_ADR);
 }
