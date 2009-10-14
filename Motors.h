@@ -22,11 +22,16 @@
 #define MOTORS_H
 
 #define byte uint8_t
-#ifdef ServoControl
-  #define FRONTMOTORPIN 8
+#ifdef AQ14
+  #ifdef ServoControl
+    #define FRONTMOTORPIN 8
+  #endif
+  #ifdef AnalogWrite
+    #define FRONTMOTORPIN 3
+  #endif
 #endif
-#ifdef AnalogWrite
-  #define FRONTMOTORPIN 3
+#ifdef AQ15
+  #define FRONTMOTORPIN 8
 #endif
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10

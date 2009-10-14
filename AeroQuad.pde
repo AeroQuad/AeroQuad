@@ -40,11 +40,16 @@
 // For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 // For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
-//#define ServoControl
+#define ServoControl
 // For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
-#define AnalogWrite
+//#define AnalogWrite
+
+// Receiver/Motor Pinouts
+//#define AQ14
+#define AQ15
 
 // Camera Stabilization (experimental)
+// Will move development to Arduino Mega (needs analogWrite support for additional pins)
 //#define Camera
 
 // Heading Hold (experimental)
@@ -52,6 +57,10 @@
 
 // Auto Level (experimental)
 //#define AutoLevel
+
+// Yaw Gyro Type
+//#define IDG // InvenSense
+#define LPY // STMicroelectronics
 
 // *************************************************************
 
@@ -83,7 +92,8 @@ void setup() {
   readEEPROM();
   
   // Setup receiver pins for pin change interrupts
-  configureReceiver();
+  if (receiverLoop == ON)
+     configureReceiver();
   
   #ifdef CalibrationAtStartup
     // Calibrate sensors
@@ -183,6 +193,11 @@ void loop () {
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
     }
+
+    #ifdef LPY
+      gyroADC[YAW] = -gyroADC[YAW];
+    #endif
+  
     // Compiler seems to like calculating this in separate loop better
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
@@ -232,7 +247,7 @@ void loop () {
       else
         commandedYaw = heading;
     #endif
-  
+    
     // ************************* Update PID ************************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
     motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
@@ -299,7 +314,7 @@ void loop () {
   } // End of telemetry loop
   
 // ******************* Camera Stailization *********************
-#ifdef Camera
+#ifdef Camera // Development moved to Arduino Mega
   if ((currentTime > (cameraTime + 20)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
     pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
