@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -40,7 +40,13 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[YAW].I);
     comma();
-    Serial.println(PID[YAW].D);
+    Serial.print(PID[YAW].D);
+    comma();
+    Serial.print(PID[HEADING].P);
+    comma();
+    Serial.print(PID[HEADING].I);
+    comma();
+    Serial.println(PID[HEADING].D);
     queryType = 'X';
     break;
   case 'F': // Send roll and pitch auto level PID values
@@ -171,7 +177,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(motorAxisCommand[YAW]);
     break;
-  case 'U': // Send receiver values
+  case 'U': // Send smoothed receiver values
     for (channel = ROLL; channel < AUX; channel++) {
       Serial.print(transmitterCommandSmooth[channel]);
       comma();
@@ -191,11 +197,11 @@ void sendSerialTelemetry() {
   case 'Z': // Send heading
     Serial.print(transmitterCommand[YAW]);
     comma();
-    Serial.print(transmitterCenter[YAW]);
+    Serial.print(headingHold);
     comma();
     Serial.print(heading);
     comma();
-    Serial.println(commandedYaw);
+    Serial.println(currentHeading);
     break;
   #endif
   case '6': // Report remote commands
@@ -208,9 +214,6 @@ void sendSerialTelemetry() {
   case '!': // Send flight software version
     Serial.println("1.4");
     queryType = 'X';
-    break;
-  case 'e': // Send Heading smooth value
-    Serial.println(smoothHeading);
     break;
   }
 }

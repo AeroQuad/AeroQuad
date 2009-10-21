@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -42,6 +42,11 @@ void readSerialCommand() {
       PID[YAW].D = readFloatSerial();
       PID[YAW].lastPosition = 0;
       PID[YAW].integratedError = 0;
+      PID[HEADING].P = readFloatSerial();
+      PID[HEADING].I = readFloatSerial();
+      PID[HEADING].D = readFloatSerial();
+      PID[HEADING].lastPosition = 0;
+      PID[HEADING].integratedError = 0;
       break;
     case 'E': // Receive roll and pitch auto level PID
       PID[LEVELROLL].P = readFloatSerial();
@@ -106,6 +111,9 @@ void readSerialCommand() {
       writeFloat(PID[YAW].P, YAW_PGAIN_ADR);
       writeFloat(PID[YAW].I, YAW_IGAIN_ADR);
       writeFloat(PID[YAW].D, YAW_DGAIN_ADR);
+      writeFloat(PID[HEADING].P, HEADING_PGAIN_ADR);
+      writeFloat(PID[HEADING].I, HEADING_IGAIN_ADR);
+      writeFloat(PID[HEADING].D, HEADING_DGAIN_ADR);
       writeFloat(windupGuard, WINDUPGUARD_ADR);  
       writeFloat(levelLimit, LEVELLIMIT_ADR);   
       writeFloat(levelOff, LEVELOFF_ADR); 
@@ -131,6 +139,7 @@ void readSerialCommand() {
       writeFloat(bTransmitter[MODE], MODEOFFSET_ADR);
       writeFloat(mTransmitter[AUX], AUXSCALE_ADR);
       writeFloat(bTransmitter[AUX], AUXOFFSET_ADR);
+      writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
       zeroIntegralError();
       // Complementary filter setup
       configureFilter(timeConstant);
@@ -151,6 +160,9 @@ void readSerialCommand() {
       PID[LEVELPITCH].P = 2;
       PID[LEVELPITCH].I = 0;
       PID[LEVELPITCH].D = 0;
+      PID[HEADING].P = 1;
+      PID[HEADING].I = 0;
+      PID[HEADING].D = 0;
       windupGuard = 2000.0;
       xmitFactor = 0.20;  
       levelLimit = 2000.0;
@@ -196,7 +208,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 5;
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        remoteCommand[motor] = readFloatSerial();
+        remoteCommand[motor] = limitRange(readFloatSerial(), 1000, 2000);
       break;
     case 'a': // Enable/disable fast data transfer of sensor data
       queryType = 'X'; // Stop any other telemetry streaming
@@ -211,8 +223,6 @@ void readSerialCommand() {
     case 'c': // calibrate accels
       zeroAccelerometers();
       break;
-    case 'd': // update Heading smoothing
-      smoothHeading = readFloatSerial();
     }
   digitalWrite(LEDPIN, HIGH);
   }

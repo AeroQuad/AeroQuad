@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -63,10 +63,10 @@ void zeroGyros() {
   for (axis = ROLL; axis < LASTAXIS; axis++) {
     for (int i=0; i<FINDZERO; i++) findZero[i] = analogRead(gyroChannel[axis]);
     gyroZero[axis] = findMode(findZero, FINDZERO);
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
+  writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+  writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+  writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
 }
 
 // Allows user to zero accelerometers on command

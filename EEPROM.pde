@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -72,7 +72,13 @@ void readEEPROM() {
   PID[LEVELPITCH].I = readFloat(LEVEL_PITCH_IGAIN_ADR);
   PID[LEVELPITCH].D = readFloat(LEVEL_PITCH_DGAIN_ADR);
   PID[LEVELPITCH].lastPosition = 0;
-  PID[LEVELPITCH].integratedError = 0;  
+  PID[LEVELPITCH].integratedError = 0;
+  
+  PID[HEADING].P = readFloat(HEADING_PGAIN_ADR);
+  PID[HEADING].I = readFloat(HEADING_IGAIN_ADR);
+  PID[HEADING].D = readFloat(HEADING_DGAIN_ADR);
+  PID[HEADING].lastPosition = 0;
+  PID[HEADING].integratedError = 0;
   
   mTransmitter[THROTTLE] = readFloat(THROTTLESCALE_ADR);
   bTransmitter[THROTTLE] = readFloat(THROTTLEOFFSET_ADR);

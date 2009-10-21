@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -26,11 +26,13 @@
 #define LEVELROLL 3
 #define LEVELPITCH 4
 #define LASTLEVELAXIS 5
+#define HEADING 5 // other axes defined in Receiver.h
+
 struct PIDdata {
   float P, I, D;
   float lastPosition;
   float integratedError;
-} PID[5];
+} PID[6];
 float windupGuard; // Read in from EEPROM
 
 float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters);

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -27,8 +27,8 @@
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 
 // Define Flight Configuration
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
@@ -40,13 +40,13 @@
 // For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 // For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
-#define ServoControl
+//#define ServoControl
 // For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
-//#define AnalogWrite
+#define AnalogWrite
 
 // Receiver/Motor Pinouts
-//#define AQ14
-#define AQ15
+#define AQ14 // AeroQuad v1.4 Shield
+//#define AQ15 // AeroQuad v1.5 Shield
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs analogWrite support for additional pins)
@@ -59,8 +59,8 @@
 //#define AutoLevel
 
 // Yaw Gyro Type
-//#define IDG // InvenSense
-#define LPY // STMicroelectronics
+#define IDG // InvenSense
+//#define LPY // STMicroelectronics
 
 // *************************************************************
 
@@ -135,8 +135,10 @@ void loop () {
     digitalWrite(LEDPIN, testSignal);
   #endif
   
-  // ****************** Transmitter Commands Loop *******************
-  if ((currentTime > (receiverTime + 100)) && (receiverLoop == ON)) { // 10Hz
+// ************************************************************************
+// ****************** Transmitter/Receiver Command Loop *******************
+// ************************************************************************
+  if ((currentTime > (receiverTime + RECEIVERLOOPTIME)) && (receiverLoop == ON)) { // 10Hz
     // Buffer receiver values read from pin change interrupt handler
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
@@ -182,10 +184,15 @@ void loop () {
     //if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
       //minCommand = MINTHROTTLE;
     receiverTime = currentTime;
-  } // End of transmitter loop time
+  } 
+//////////////////////////////////
+// End of transmitter loop time //
+//////////////////////////////////
   
-  // ********************* Analog Input Loop *******************
-  if ((currentTime > (analogInputTime + 2)) && (analogInputLoop == ON)) { // 500Hz
+// ***********************************************************
+// ********************* Analog Input Loop *******************
+// ***********************************************************
+  if ((currentTime > (analogInputTime + AILOOPTIME)) && (analogInputLoop == ON)) { // 500Hz
     // *********************** Read Sensors **********************
     // Apply low pass filter to sensor values and center around zero
     // Did not convert to engineering units, since will experiment to find P gain anyway
@@ -207,15 +214,20 @@ void loop () {
     // ****************** Calculate Absolute Angle *****************
     //dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
     //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
-    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, dt);
-    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, dt);
+    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
+    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
     //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroData[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, dt);
     //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroData[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, dt);
     analogInputTime = currentTime;
-  } // End of analog input loop
+  } 
+//////////////////////////////
+// End of analog input loop //
+//////////////////////////////
   
-  // *********************** Flight Control Loop ************************
-  if ((currentTime > controlLoopTime + 2) && (controlLoop == ON)) { // 500Hz
+// ********************************************************************
+// *********************** Flight Control Loop ************************
+// ********************************************************************
+  if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
 
   // ********************* Check Flight Mode *********************
     #ifdef AutoLevel
@@ -236,24 +248,32 @@ void loop () {
       }
     #endif
     
-    // ************************ Heading Hold ***********************
-    #ifdef HeadingHold
-      heading = smooth((gyroData[YAW] * headingScaleFactor * dt), heading, smoothHeading);
-      //heading = heading + (gyroData[YAW] * headingScaleFactor * dt); 
-      if (transmitterCommand[THROTTLE] > MINCHECK ) {
-        if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25)))
-          commandedYaw = commandedYaw + ((transmitterCommand[YAW] - transmitterCenter[YAW]) * yawFactor);
-      }
-      else
-        commandedYaw = heading;
-    #endif
-    
-    // ************************* Update PID ************************
+    // ************************** Update Roll/Pitch ***********************
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
     motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
+
+    // ***************************** Update Yaw ***************************
+    // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
+    // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
     #ifdef HeadingHold
-      motorAxisCommand[YAW] = updatePID(commandedYaw, heading, &PID[YAW]);
+      currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
+      if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+        if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
+          headingHold = 0;
+          heading = currentHeading;
+        }
+        else // no yaw input, calculate current heading vs. desired heading heading hold
+          headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
+      }
+      else {
+        heading = 0;
+        currentHeading = 0;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
+      }
+      motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     #endif
+    
     #ifndef HeadingHold
       motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     #endif
@@ -282,7 +302,7 @@ void loop () {
     }
     // If motor output disarmed, force motor output to minimum
     if (armed == 0) {
-      switch (calibrateESC) {
+      switch (calibrateESC) { // used for calibrating ESC's
       case 1:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
           motorCommand[motor] = MAXCOMMAND;
@@ -294,6 +314,7 @@ void loop () {
       case 5:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
           motorCommand[motor] = remoteCommand[motor];
+        safetyCheck = 1;
         break;
       default:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
@@ -304,30 +325,48 @@ void loop () {
     // *********************** Command Motors **********************
     commandMotors();
     controlLoopTime = currentTime;
-  } // End of control loop
+  } 
+/////////////////////////
+// End of control loop //
+/////////////////////////
   
+// *************************************************************
 // **************** Command & Telemetry Functions **************
-  if ((currentTime > telemetryTime + 100) && (telemetryLoop == ON)) { // 10Hz    
+// *************************************************************
+  if ((currentTime > telemetryTime + TELEMETRYLOOPTIME) && (telemetryLoop == ON)) { // 10Hz    
     readSerialCommand();
     sendSerialTelemetry();
     telemetryTime = currentTime;
-  } // End of telemetry loop
+  }
+///////////////////////////
+// End of telemetry loop //
+///////////////////////////
   
+// *************************************************************
 // ******************* Camera Stailization *********************
+// *************************************************************
 #ifdef Camera // Development moved to Arduino Mega
-  if ((currentTime > (cameraTime + 20)) && (cameraLoop == ON)) { // 50Hz
+  if ((currentTime > (cameraTime + CAMERALOOPTIME)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
     pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
     cameraTime = currentTime;
   }
 #endif
+////////////////////////
+// End of camera loop //
+////////////////////////
 
+// ****************************************************************
 // ****************** Fast Transfer Of Sensor Data ****************
-  if ((currentTime > (fastTelemetryTime + 5)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
+// ****************************************************************
+  if ((currentTime > (fastTelemetryTime + FASTTELEMETRYTIME)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
     printInt(21845); // Start word of 0x5555
     for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyroADC[axis]);
     for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accelADC[axis]);
     printInt(32767); // Stop word of 0x7FFF
     fastTelemetryTime = currentTime;
   }
+////////////////////////////////
+// End of fast telemetry loop //
+////////////////////////////////
 }

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - September 2009
+  AeroQuad v1.4 - October 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -69,6 +69,9 @@
 #define AUXOFFSET_ADR 192
 #define AUXSMOOTH_ADR 196
 #define HEADINGSMOOTH_ADR 200
+#define HEADING_PGAIN_ADR 204
+#define HEADING_IGAIN_ADR 208
+#define HEADING_DGAIN_ADR 212
 
 float readFloat(int address);
 void writeFloat(float value, int address);
