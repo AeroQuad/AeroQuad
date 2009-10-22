@@ -28,29 +28,18 @@
 // To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
 // These pins need to correspond to the ROLL/PITCH/YAW/THROTTLE/MODE/AUXPIN below
 // Pin 2=18, Pin 3=19, Pin 4=20, Pin 5=21, Pin 6=22, Pin 7=23
-#ifdef AQ14
-  #define ROLLPIN 2
-  #define PITCHPIN 5
-  #define YAWPIN 6
-  #define THROTTLEPIN 4
-  #define MODEPIN 7
-  #ifdef ServoControl
-    #define AUXPIN 3
-    int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-  #endif
-  #ifdef AnalogWrite
-    #define AUXPIN 8
-    int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-  #endif
+#define ROLLPIN 2
+#define PITCHPIN 5
+#define YAWPIN 6
+#define THROTTLEPIN 4
+#define MODEPIN 7
+#ifdef ServoControl
+  #define AUXPIN 3
+  int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 #endif
-#ifdef AQ15
-  #define ROLLPIN 6
-  #define PITCHPIN 5
-  #define YAWPIN 4
-  #define THROTTLEPIN 7
-  #define MODEPIN 3
-  #define AUXPIN 2
-  int receiverPin[6] = {22,21,20,23,19,18}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#ifdef AnalogWrite
+  #define AUXPIN 8
+  int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 #endif
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
 

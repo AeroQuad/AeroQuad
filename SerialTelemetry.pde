@@ -193,7 +193,6 @@ void sendSerialTelemetry() {
     break;
   case 'X': // Stop sending messages
     break;
-  #ifdef HeadingHold
   case 'Z': // Send heading
     Serial.print(transmitterCommand[YAW]);
     comma();
@@ -203,7 +202,6 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(currentHeading);
     break;
-  #endif
   case '6': // Report remote commands
     for (motor = FRONT; motor < LEFT; motor++) {
       Serial.print(remoteCommand[motor]);

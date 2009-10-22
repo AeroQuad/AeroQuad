@@ -18,17 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// This version is only compatible with Arduino 0017 or greater
-
-// ************************ User Options ***********************
-// Before your first flight, change the following line in Servo.h
-// which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
-// For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
-// For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
-
 // Define Flight Configuration
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
@@ -40,20 +32,16 @@
 // For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 // For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
-//#define ServoControl
+//#define ServoControl // This is only compatible with Arduino 0017 or greater
 // For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
 #define AnalogWrite
-
-// Receiver/Motor Pinouts
-#define AQ14 // AeroQuad v1.4 Shield
-//#define AQ15 // AeroQuad v1.5 Shield
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs analogWrite support for additional pins)
 //#define Camera
 
 // Heading Hold (experimental)
-#define HeadingHold
+//#define HeadingHold // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
 
 // Auto Level (experimental)
 //#define AutoLevel
