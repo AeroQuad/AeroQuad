@@ -46,6 +46,9 @@
 // Auto Level (experimental)
 //#define AutoLevel
 
+// 5DOF IMU Version
+//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300
+
 // Yaw Gyro Type
 #define IDG // InvenSense
 //#define LPY // STMicroelectronics
@@ -189,6 +192,10 @@ void loop () {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
     }
 
+    #ifndef OriginalIMU
+      gyroADC[ROLL] = -gyroADC[ROLL];
+      gyroADC[PITCH] = -gyroADC[PITCH];
+    #endif
     #ifdef LPY
       gyroADC[YAW] = -gyroADC[YAW];
     #endif
