@@ -160,7 +160,7 @@ void readSerialCommand() {
       PID[LEVELPITCH].P = 2;
       PID[LEVELPITCH].I = 0;
       PID[LEVELPITCH].D = 0;
-      PID[HEADING].P = 1;
+      PID[HEADING].P = 3;
       PID[HEADING].I = 0;
       PID[HEADING].D = 0;
       windupGuard = 2000.0;
@@ -182,6 +182,7 @@ void readSerialCommand() {
       smoothTransmitter[AUX] = 1.0;
       smoothHeading = 1.0;
 
+      autoZeroGyros();
       zeroGyros();
       zeroAccelerometers();
       zeroIntegralError();
@@ -208,7 +209,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 5;
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        remoteCommand[motor] = limitRange(readFloatSerial(), 1000, 2000);
+        remoteCommand[motor] = readFloatSerial();
       break;
     case 'a': // Enable/disable fast data transfer of sensor data
       queryType = 'X'; // Stop any other telemetry streaming
@@ -218,6 +219,7 @@ void readSerialCommand() {
         fastTransfer = OFF;
       break;
     case 'b': // calibrate gyros
+      autoZeroGyros();
       zeroGyros();
       break;
     case 'c': // calibrate accels

@@ -74,6 +74,8 @@ void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL); // Current external ref is connected to 3.3V
   pinMode (LEDPIN, OUTPUT);
+  pinMode (AZPIN, OUTPUT);
+  digitalWrite(AZPIN, LOW);
   
   // Configure motors
   configureMotors();
@@ -85,6 +87,9 @@ void setup() {
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON)
      configureReceiver();
+  
+  //  Auto Zero Gyros
+  autoZeroGyros();
   
   #ifdef CalibrationAtStartup
     // Calibrate sensors
@@ -152,6 +157,7 @@ void loop () {
       }    
       // Zero sensors (left stick lower left, right stick lower right corner)
       if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
+        autoZeroGyros();
         zeroGyros();
         zeroAccelerometers();
         zeroIntegralError();
@@ -304,11 +310,11 @@ void loop () {
         break;
       case 3:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
-          motorCommand[motor] = testCommand;
+          motorCommand[motor] = limitRange(testCommand, 1000, 1200);
         break;
       case 5:
         for (motor = FRONT; motor < LASTMOTOR; motor++)
-          motorCommand[motor] = remoteCommand[motor];
+          motorCommand[motor] = limitRange(remoteCommand[motor], 1000, 1200);
         safetyCheck = 1;
         break;
       default:

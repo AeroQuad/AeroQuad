@@ -24,6 +24,7 @@
 
 #define BAUD 115200
 #define LEDPIN 13
+#define AZPIN 12
 
 // Analog Reference Value
 float aref = 2.892; // Measured with a DMM

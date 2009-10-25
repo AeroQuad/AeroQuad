@@ -69,6 +69,15 @@ void zeroGyros() {
   writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
 }
 
+void autoZeroGyros() {
+  digitalWrite(AZPIN, LOW);
+  delay(1);
+  digitalWrite(AZPIN, HIGH);
+  delayMicroseconds(750);
+  digitalWrite(AZPIN, LOW);
+  delay(8);
+}
+
 // Allows user to zero accelerometers on command
 void zeroAccelerometers() {
   for (axis = ROLL; axis < YAW; axis++) {

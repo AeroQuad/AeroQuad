@@ -59,6 +59,7 @@ int findZero[FINDZERO];
 
 int findMode(int *data, int arraySize);
 void zeroGyros();
+void autoZeroGyros();
 void zeroAccelerometers();
 int limitRange(int data, int minLimit, int maxLimit);
 
