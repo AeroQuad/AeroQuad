@@ -123,8 +123,13 @@ SIGNAL(PCINT2_vect) {
 
 // Configure each receiver pin for PCINT
 void configureReceiver() {
+/*  pinMode(THROTTLEPIN, INPUT);
+  pinMode(ROLLPIN, INPUT);
+  pinMode(PITCHPIN, INPUT);
+  pinMode(YAWPIN, INPUT);
+  pinMode(MODEPIN, INPUT);
+  pinMode(AUXPIN, INPUT);*/
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
-    pinMode(channel, INPUT);
     attachPinChangeInterrupt(receiverChannel[channel]);
     pinData[receiverChannel[channel]].edge == FALLING_EDGE;
   }

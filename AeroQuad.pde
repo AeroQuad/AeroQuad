@@ -36,6 +36,11 @@
 // For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
 #define AnalogWrite
 
+// Arduino Mega with AeroQuad Shield v1.x
+// If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently.
+// Throttle = AI08, Aileron = AI09, Elevator = AI10, Rudder = AI11, Gear = AI12, AUX1 = AI13
+#define Mega_AQ1x
+
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs analogWrite support for additional pins)
 //#define Camera

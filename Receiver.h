@@ -28,19 +28,31 @@
 // To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
 // These pins need to correspond to the ROLL/PITCH/YAW/THROTTLE/MODE/AUXPIN below
 // Pin 2=18, Pin 3=19, Pin 4=20, Pin 5=21, Pin 6=22, Pin 7=23
-#define ROLLPIN 2
-#define PITCHPIN 5
-#define YAWPIN 6
-#define THROTTLEPIN 4
-#define MODEPIN 7
-#ifdef ServoControl
-  #define AUXPIN 3
-  int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#ifndef Mega_AQ1x
+  #define ROLLPIN 2
+  #define PITCHPIN 5
+  #define YAWPIN 6
+  #define THROTTLEPIN 4
+  #define MODEPIN 7
+  #ifdef ServoControl
+    #define AUXPIN 3
+    int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+  #endif
+  #ifdef AnalogWrite
+    #define AUXPIN 8
+    int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+  #endif
 #endif
-#ifdef AnalogWrite
-  #define AUXPIN 8
-  int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+#ifdef Mega_AQ1x
+  #define ROLLPIN 52    
+  #define PITCHPIN 51
+  #define YAWPIN 53
+  #define THROTTLEPIN 50
+  #define MODEPIN 14
+  #define AUXPIN 15
+  int receiverPin[6] = {1, 2, 0, 3, 10, 9}; // defines ATmega1280 pins (Arduino pins converted to ATmega1280 pinouts)
 #endif
+
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins
 
 // Receiver variables
