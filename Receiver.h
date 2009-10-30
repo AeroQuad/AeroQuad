@@ -48,9 +48,9 @@
   #define PITCHPIN 51
   #define YAWPIN 53
   #define THROTTLEPIN 50
-  #define MODEPIN 14
-  #define AUXPIN 15
-  int receiverPin[6] = {1, 2, 0, 3, 10, 9}; // defines ATmega1280 pins (Arduino pins converted to ATmega1280 pinouts)
+  #define MODEPIN 62
+  #define AUXPIN 63
+  int receiverPin[6] = {1, 2, 0, 3, 16, 17}; // defines ATmega1280 pins (Arduino pins converted to ATmega1280 pinouts)
 #endif
 
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins

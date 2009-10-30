@@ -247,16 +247,22 @@ void loop () {
         for (axis = ROLL; axis < YAW; axis++)
           levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
         // Turn off Stable Mode if transmitter stick applied
-        if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff))
-          levelAdjust[PITCH] = 0;
-        if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff))
+        if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff)) {
           levelAdjust[ROLL] = 0;
+          PID[axis].integratedError = 0;
+        }
+        if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff)) {
+          levelAdjust[PITCH] = 0;
+          PID[PITCH].integratedError = 0;
+        }
+        if (abs(flightAngle[ROLL] < 0.25)) PID[ROLL].integratedError = 0;
+        if (abs(flightAngle[PITCH] < 0.25)) PID[PITCH].integratedError = 0;
       }
     #endif
     
     // ************************** Update Roll/Pitch ***********************
-    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
-    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
+    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]) + levelAdjust[ROLL];
+    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]) - levelAdjust[PITCH];
 
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
