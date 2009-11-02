@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - October 2009
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -43,14 +43,17 @@
     int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
   #endif
 #endif
-#ifdef Mega_AQ1x
-  #define ROLLPIN 52    
-  #define PITCHPIN 51
-  #define YAWPIN 53
-  #define THROTTLEPIN 50
-  #define MODEPIN 62
-  #define AUXPIN 63
-  int receiverPin[6] = {1, 2, 0, 3, 16, 17}; // defines ATmega1280 pins (Arduino pins converted to ATmega1280 pinouts)
+#ifdef Mega_AQ1x //Receiver pin assignments for the Arduino Mega using an AeroQuad v1.x Shield
+  //The defines below are for documentation only of the Mega receiver input
+  //The real pin assignments happen in initializeMegaPcInt2()
+  //If you are using an AQ 1.x Shield, put a jumper wire between the Shield and Mega as indicated in the comments below
+  #define ROLLPIN 67 // AI13, Place jumper between AQ Shield pin 2 and Mega AI13
+  #define PITCHPIN 65 // AI11, Place jumper between AQ Shield pin 5 and Mega AI11
+  #define YAWPIN 64 // AI10, Place jumper between AQ Shield pin 6 and Mega AI10
+  #define THROTTLEPIN 66 // AI12, Place jumper between AQ Shield pin 4 and Mega AI12
+  #define MODEPIN 63 // AI9, Place jumper between AQ Shield pin 7 and Mega AI9
+  #define AUXPIN 62 // AI8, Place jumper between AQ Shield 8 and Mega AI8
+  int receiverPin[6] = {5,3,2,4,1,0};
 #endif
 
 int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPIN}; // defines Arduino pins

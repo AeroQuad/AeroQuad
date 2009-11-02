@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - October 2009
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -52,13 +52,13 @@ void sendSerialTelemetry() {
   case 'F': // Send roll and pitch auto level PID values
     Serial.print(PID[LEVELROLL].P);
     comma();
-    Serial.print(PID[LEVELROLL].I);
+    Serial.print(PID[LEVELROLL].I * 100);
     comma();
     Serial.print(PID[LEVELROLL].D);
     comma();
     Serial.print(PID[LEVELPITCH].P);
     comma();
-    Serial.print(PID[LEVELPITCH].I);
+    Serial.print(PID[LEVELPITCH].I * 100);
     comma();
     Serial.println(PID[LEVELPITCH].D);
     queryType = 'X';
@@ -210,7 +210,7 @@ void sendSerialTelemetry() {
     Serial.println(remoteCommand[LEFT]);
     break;
   case '!': // Send flight software version
-    Serial.println("1.4");
+    Serial.println("1.5");
     queryType = 'X';
     break;
   }

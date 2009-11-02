@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - October 2009
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -37,7 +37,7 @@ int levelOff; // Read in from EEPROM
 // Heading hold
   // aref / 1024 = voltage per A/D bit
   // 0.002 = V / deg/sec (from gyro data sheet)
-  float headingScaleFactor = (aref / 1024.0) / 0.002;
+  float headingScaleFactor = (aref / 1024.0) / 0.002 * PI;
   float heading = 0; // measured heading from yaw gyro (process variable)
   float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
   float currentHeading = 0; // current heading the quad is set to (set point)
@@ -78,6 +78,7 @@ byte update = 0;
 #define FASTTELEMETRYTIME 10
 #define AILOOPTIME 2
 #define CONTROLLOOPTIME 2
+#define AUTOZEROTIME 30000
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
@@ -87,6 +88,7 @@ byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
 byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte autoZeroGyro = ON;
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
 // All loops on = 2.4 ms
@@ -112,6 +114,7 @@ unsigned long analogInputTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
 unsigned long cameraTime = 0;
 unsigned long fastTelemetryTime = 0;
-float dt = 0.002;
+unsigned long autoZeroGyroTime = 0;
+//float dt = 0.002;
 
 #endif

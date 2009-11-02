@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - October 2009
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -23,6 +23,7 @@
 
 #include "Receiver.h"
 
+#ifndef Mega_AQ1x
 // Attaches PCINT to Arduino Pin
 void attachPinChangeInterrupt(uint8_t pin) {
   uint8_t bit = digitalPinToBitMask(pin);
@@ -120,19 +121,88 @@ SIGNAL(PCINT1_vect) {
 SIGNAL(PCINT2_vect) {
   measurePulseWidthISR(2);
 }
+#endif
+
+#ifdef Mega_AQ1x
+void initializeMegaPcInt2() {
+  DDRK = 0;
+  PORTK = 0;
+  PCMSK2 |= 0x3F;
+  PCICR |= 0x1 << 2;
+}
+
+static void MegaPcIntISR() {
+  uint8_t bit;
+  uint8_t curr;
+  uint8_t mask;
+  uint8_t pin;
+  uint32_t currentTime;
+  uint32_t time;
+
+  //curr = PORTK;
+  curr = *portInputRegister(11);
+  mask = curr ^ PCintLast[0];
+  PCintLast[0] = curr;  
+
+  //Serial.println(curr,DEC);
+
+  // mask is pins that have changed. screen out non pcint pins.
+  if ((mask &= PCMSK2) == 0) {
+    return;
+  }
+
+  currentTime = micros();
+
+  // mask is pcint pins that have changed.
+  for (uint8_t i=0; i < 8; i++) {
+    bit = 0x01 << i;
+    if (bit & mask) {
+      pin = i;
+      // for each pin changed, record time of change
+      if (bit & PCintLast[0]) {
+       time = currentTime - pinData[pin].fallTime;
+        pinData[pin].riseTime = currentTime;
+        if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
+          pinData[pin].edge = RISING_EDGE;
+        else
+          pinData[pin].edge == FALLING_EDGE; // invalid rising edge detected
+      }
+      else {
+        time = currentTime - pinData[pin].riseTime;
+        pinData[pin].fallTime = currentTime;
+        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
+          pinData[pin].lastGoodWidth = time;
+          pinData[pin].edge = FALLING_EDGE;
+        } 
+      }
+    }
+  }
+}
+
+SIGNAL(PCINT2_vect) {
+  MegaPcIntISR();
+}
+#endif
 
 // Configure each receiver pin for PCINT
 void configureReceiver() {
-/*  pinMode(THROTTLEPIN, INPUT);
+  #ifndef Mega_AQ1x
+  pinMode(THROTTLEPIN, INPUT);
   pinMode(ROLLPIN, INPUT);
   pinMode(PITCHPIN, INPUT);
   pinMode(YAWPIN, INPUT);
   pinMode(MODEPIN, INPUT);
-  pinMode(AUXPIN, INPUT);*/
+  pinMode(AUXPIN, INPUT);
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
     attachPinChangeInterrupt(receiverChannel[channel]);
     pinData[receiverChannel[channel]].edge == FALLING_EDGE;
   }
+  #endif
+  #ifdef Mega_AQ1x
+  initializeMegaPcInt2();
+  for (channel = ROLL; channel < LASTCHANNEL; channel++)
+    pinData[receiverChannel[channel]].edge == FALLING_EDGE;
+  #endif
 }
 
 // Calculate PWM pulse width of receiver data

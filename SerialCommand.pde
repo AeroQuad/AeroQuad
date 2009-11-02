@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.4 - October 2009
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -50,12 +50,12 @@ void readSerialCommand() {
       break;
     case 'E': // Receive roll and pitch auto level PID
       PID[LEVELROLL].P = readFloatSerial();
-      PID[LEVELROLL].I = readFloatSerial();
+      PID[LEVELROLL].I = readFloatSerial() / 100;
       PID[LEVELROLL].D = readFloatSerial();
       PID[LEVELROLL].lastPosition = 0;
       PID[LEVELROLL].integratedError = 0;
       PID[LEVELPITCH].P = readFloatSerial();
-      PID[LEVELPITCH].I = readFloatSerial();
+      PID[LEVELPITCH].I = readFloatSerial() / 100;
       PID[LEVELPITCH].D = readFloatSerial();
       PID[LEVELPITCH].lastPosition = 0;
       PID[LEVELPITCH].integratedError = 0;

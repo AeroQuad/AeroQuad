@@ -1,5 +1,5 @@
-/*
-  AeroQuad v1.4 - October 2009
+ /*
+  AeroQuad v1.5 - Novmeber 2009
   www.AeroQuad.info
   Copyright (c) 2009 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -18,9 +18,16 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+
+/**************************************************************************** 
+   Before flight, select the different user options for your AeroQuad below
+   Also, consult the ReadMe.html file for additional details
+   If you need additional assitance go to http://forum.AeroQuad.info
+*****************************************************************************/
+
 // Define Flight Configuration
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
@@ -28,7 +35,7 @@
 
 // Motor Control Method (ServoControl = higher ESC resolution, cooler motors, slight jitter in control, AnalogWrite = lower ESC resolution, warmer motors, no jitter)
 // Before your first flight, to use the ServoControl method change the following line in Servo.h
-// which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
+// Which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
 // For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
 // For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
 // For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
@@ -36,25 +43,32 @@
 // For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
 #define AnalogWrite
 
-// Arduino Mega with AeroQuad Shield v1.x
-// If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently.
-// Throttle = AI08, Aileron = AI09, Elevator = AI10, Rudder = AI11, Gear = AI12, AUX1 = AI13
-#define Mega_AQ1x
-
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs analogWrite support for additional pins)
 //#define Camera
 
 // Heading Hold (experimental)
-//#define HeadingHold // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
+// Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
+//#define HeadingHold
 
 // Auto Level (experimental)
-//#define AutoLevel
+#define AutoLevel
 
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300
 
-// Yaw Gyro Type
+// Arduino Mega with AeroQuad Shield v1.x
+// If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
+// Put a jumper wire between the Shield and Mega as indicated below
+// For Roll (Aileron) Channel, place jumper between AQ Shield pin 2 and Mega AI13
+// For Pitch (Elevator) Channel, place jumper between AQ Shield pin 5 and Mega AI11
+// For Yaw (Rudder) Channel, place jumper between AQ Shield pin 6 and Mega AI10
+// For Throttle Channel, place jumper between AQ Shield pin 4 and Mega AI12
+// For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
+// For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
+//#define Mega_AQ1x
+
+// Yaw Gyro Type (experimental, used for investigation of lower cost gyros)
 #define IDG // InvenSense
 //#define LPY // STMicroelectronics
 
@@ -81,6 +95,7 @@ void setup() {
   pinMode (LEDPIN, OUTPUT);
   pinMode (AZPIN, OUTPUT);
   digitalWrite(AZPIN, LOW);
+  delay(1);
   
   // Configure motors
   configureMotors();
@@ -187,9 +202,9 @@ void loop () {
       //minCommand = MINTHROTTLE;
     receiverTime = currentTime;
   } 
-//////////////////////////////////
-// End of transmitter loop time //
-//////////////////////////////////
+/////////////////////////////
+// End of transmitter loop //
+/////////////////////////////
   
 // ***********************************************************
 // ********************* Analog Input Loop *******************
@@ -218,12 +233,11 @@ void loop () {
     }
 
     // ****************** Calculate Absolute Angle *****************
-    //dt = deltaTime / 1000.0; // Convert to seconds from milliseconds for complementary filter
     //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
-    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
-    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
-    //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroData[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, dt);
-    //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroData[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, dt);
+    //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
+    //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
+    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, AIdT);
+    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, AIdT);
     analogInputTime = currentTime;
   } 
 //////////////////////////////
@@ -255,14 +269,16 @@ void loop () {
           levelAdjust[PITCH] = 0;
           PID[PITCH].integratedError = 0;
         }
-        if (abs(flightAngle[ROLL] < 0.25)) PID[ROLL].integratedError = 0;
-        if (abs(flightAngle[PITCH] < 0.25)) PID[PITCH].integratedError = 0;
+        //if (abs(flightAngle[ROLL] < 0.25)) PID[ROLL].integratedError = 0;
+        //if (abs(flightAngle[PITCH] < 0.25)) PID[PITCH].integratedError = 0;
       }
     #endif
     
     // ************************** Update Roll/Pitch ***********************
-    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]) + levelAdjust[ROLL];
-    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]) - levelAdjust[PITCH];
+    // updatedPID(target, measured, PIDsettings);
+    // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
+    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
+    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
 
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
@@ -368,9 +384,9 @@ void loop () {
 // End of camera loop //
 ////////////////////////
 
-// ****************************************************************
-// ****************** Fast Transfer Of Sensor Data ****************
-// ****************************************************************
+// **************************************************************
+// ***************** Fast Transfer Of Sensor Data ***************
+// **************************************************************
   if ((currentTime > (fastTelemetryTime + FASTTELEMETRYTIME)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
     printInt(21845); // Start word of 0x5555
     for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyroADC[axis]);
@@ -381,4 +397,19 @@ void loop () {
 ////////////////////////////////
 // End of fast telemetry loop //
 ////////////////////////////////
+
+// **************************************************************
+// ******************* Auto Zero Of Gyros ***********************
+// **************************************************************
+#ifdef HeadingHold
+  // This is only compatible if you wire the AutoZero pin to Arduino pin 12 (this is done with AeroQuad Shield v1.5)
+  if ((currentTime > (autoZeroGyroTime + AUTOZEROTIME)) && (autoZeroGyro == ON)) { // every 30 seconds
+    autoZeroGyros();
+    autoZeroGyroTime = currentTime;
+  }
+#endif
+////////////////////////////////
+// End of gyro auto zero loop //
+////////////////////////////////
+
 }
