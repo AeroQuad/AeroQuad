@@ -24,12 +24,21 @@
 #include "Filter.h"
 
 void configureFilter(float timeConstant) {
-  flightAngle[ROLL] = atan2(analogRead(accelChannel[ROLL]) - accelZero[ROLL], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;
-  flightAngle[PITCH] = atan2(analogRead(accelChannel[PITCH]) - accelZero[PITCH], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;
-  filterTermRoll[2] = -(analogRead(gyroChannel[ROLL]) - gyroZero[ROLL]) / 29473.792 * 57.2957795;
-  filterTermPitch[2] = -(analogRead(gyroChannel[PITCH]) - gyroZero[PITCH]) / 29473.792 * 57.2957795;
+  #ifndef KalmanFilter
+    flightAngle[ROLL] = atan2(analogRead(accelChannel[ROLL]) - accelZero[ROLL], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;
+    flightAngle[PITCH] = atan2(analogRead(accelChannel[PITCH]) - accelZero[PITCH], analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS]) * 57.2957795;
+    filterTermRoll[2] = -(analogRead(gyroChannel[ROLL]) - gyroZero[ROLL]) / 29473.792 * 57.2957795;
+    filterTermPitch[2] = -(analogRead(gyroChannel[PITCH]) - gyroZero[PITCH]) / 29473.792 * 57.2957795;
+  #endif
+  #ifdef KalmanFilter
+    // These parameters need to be further optimized
+    initGyro1DKalman(&rollFilter, 0.001, 0.003, 0.03);
+    initGyro1DKalman(&pitchFilter, 0.001, 0.003, 0.03);
+  #endif
 }
 
+
+#ifndef KalmanFilter
 float filterData(float previousAngle, int gyroADC, float angle, float *filterTerm, float dt) {
   // Written by RoyLB at:
   // http://www.rcgroups.com/forums/showpost.php?p=12082524&postcount=1286
@@ -40,7 +49,7 @@ float filterData(float previousAngle, int gyroADC, float angle, float *filterTer
   // accelerometerOutput = (N-512)/1024*(double)10.78; (rad)
   // gyroOutput = (N-512)/1024*(double)28.783; (rad/sec)
   accel = angle * 57.2957795;
-  //gyro = gyroADC / 29473.792 * 57.2957795;
+  //gyro = (N-512)/1024 * (double) 28.783;
   gyro = (gyroADC / 1024) * aref / 0.002;
   
   ///////////////////////
@@ -70,6 +79,41 @@ float filterData(float previousAngle, int gyroADC, float angle, float *filterTer
   filterTerm[1] = filterTerm[2] + (accel - previousAngle) * 2 * timeConstant + gyro;
   return (dt * filterTerm[1]) + previousAngle;
 }
+#endif
+
+#ifdef KalmanFilter
+// The Kalman filter implementation is directly taken from the work
+// of Tom Pycke at: http://tom.pycke.be/mav/90/sparkfuns-5dof
+void initGyro1DKalman(struct Gyro1DKalman *filterdata, float Q_angle, float Q_gyro, float R_angle) {
+	filterdata->Q_angle = Q_angle;
+	filterdata->Q_gyro  = Q_gyro;
+	filterdata->R_angle = R_angle;
+}
+
+void predictKalman(struct Gyro1DKalman *filterdata, const float dotAngle, const float dt) {
+	filterdata->x_angle += dt * (dotAngle - filterdata->x_bias);
+	filterdata->P_00 +=  - dt * (filterdata->P_10 + filterdata->P_01) + filterdata->Q_angle * dt;
+	filterdata->P_01 +=  - dt * filterdata->P_11;
+	filterdata->P_10 +=  - dt * filterdata->P_11;
+	filterdata->P_11 +=  + filterdata->Q_gyro * dt;
+}
+
+float updateKalman(struct Gyro1DKalman *filterdata, const float angle_m) {
+	const float y = angle_m - filterdata->x_angle;
+	const float S = filterdata->P_00 + filterdata->R_angle;
+	const float K_0 = filterdata->P_00 / S;
+	const float K_1 = filterdata->P_10 / S;
+	
+	filterdata->x_angle +=  K_0 * y;
+	filterdata->x_bias  +=  K_1 * y;
+	filterdata->P_00 -= K_0 * filterdata->P_00;
+	filterdata->P_01 -= K_0 * filterdata->P_01;
+	filterdata->P_10 -= K_1 * filterdata->P_00;
+	filterdata->P_11 -= K_1 * filterdata->P_01;
+
+	return filterdata->x_angle;
+}
+#endif
 
 int smooth(int currentData, int previousData, float smoothFactor) {
   return (previousData * (1 - smoothFactor) + (currentData * smoothFactor));

@@ -26,8 +26,8 @@
 *****************************************************************************/
 
 // Define Flight Configuration
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Calibration At Start Up
 //#define CalibrationAtStartup
@@ -71,6 +71,11 @@
 // Yaw Gyro Type (experimental, used for investigation of lower cost gyros)
 #define IDG // InvenSense
 //#define LPY // STMicroelectronics
+
+// Sensor Filter
+// The Kalman Filter implementation is here for comparison against the Complementary Filter
+// To adjust the KF parameters, look at initGyro1DKalman() found inside ConfigureFilter() in Filter.pde
+//#define KalmanFilter
 
 // *************************************************************
 
@@ -233,11 +238,21 @@ void loop () {
     }
 
     // ****************** Calculate Absolute Angle *****************
-    //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
-    //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
-    //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
-    flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, AIdT);
-    flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, AIdT);
+    #ifndef KalmanFilter
+      //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
+      flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
+      flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
+      //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroData[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, AIdT);
+      //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroData[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, AIdT);
+    #endif
+      
+    #ifdef KalmanFilter
+      predictKalman(&rollFilter, (gyroADC[ROLL]/1024) * aref * 8.72, AIdT);
+      flightAngle[ROLL] = updateKalman(&rollFilter, atan2(accelADC[ROLL], accelADC[ZAXIS])) * 57.2957795;
+      predictKalman(&pitchFilter, (gyroADC[PITCH]/1024) * aref * 8.72, AIdT);
+      flightAngle[PITCH] = updateKalman(&pitchFilter, atan2(accelADC[PITCH], accelADC[ZAXIS])) * 57.2957795;
+    #endif
+    
     analogInputTime = currentTime;
   } 
 //////////////////////////////
@@ -269,8 +284,6 @@ void loop () {
           levelAdjust[PITCH] = 0;
           PID[PITCH].integratedError = 0;
         }
-        //if (abs(flightAngle[ROLL] < 0.25)) PID[ROLL].integratedError = 0;
-        //if (abs(flightAngle[PITCH] < 0.25)) PID[PITCH].integratedError = 0;
       }
     #endif
     
@@ -396,20 +409,6 @@ void loop () {
   }
 ////////////////////////////////
 // End of fast telemetry loop //
-////////////////////////////////
-
-// **************************************************************
-// ******************* Auto Zero Of Gyros ***********************
-// **************************************************************
-#ifdef HeadingHold
-  // This is only compatible if you wire the AutoZero pin to Arduino pin 12 (this is done with AeroQuad Shield v1.5)
-  if ((currentTime > (autoZeroGyroTime + AUTOZEROTIME)) && (autoZeroGyro == ON)) { // every 30 seconds
-    autoZeroGyros();
-    autoZeroGyroTime = currentTime;
-  }
-#endif
-////////////////////////////////
-// End of gyro auto zero loop //
 ////////////////////////////////
 
 }

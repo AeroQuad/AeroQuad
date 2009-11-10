@@ -21,18 +21,34 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-// Complementary roll/pitch angle
-float flightAngle[2] = {0,0};
-float filterTermRoll[4] = {0,0,0,0};
-float filterTermPitch[4] = {0,0,0,0};
-float timeConstant; // Read in from EEPROM
-
 // Low pass filter parameters
 #define GYRO 0
 #define ACCEL 1
 float smoothFactor[2]; // Read in from EEPROM
 float smoothTransmitter[6]; // Read in from EEPROM
 float smoothHeading; // Read in from EEPROM
+
+// Sensor Filter
+float flightAngle[2] = {0,0};
+float timeConstant; // Read in from EEPROM
+
+#ifndef KalmanFilter
+  // Complementary roll/pitch angle
+  float filterTermRoll[4] = {0,0,0,0};
+  float filterTermPitch[4] = {0,0,0,0};
+#endif
+
+#ifdef KalmanFilter
+  // Kalman filter
+  struct Gyro1DKalman {
+    float x_angle, x_bias;
+    float P_00, P_01, P_10, P_11;	
+    float Q_angle, Q_gyro;
+    float R_angle;
+  };
+  struct Gyro1DKalman rollFilter;
+  struct Gyro1DKalman pitchFilter;
+#endif
 
 void configureFilter(float timeConstant);
 float filterData(float previousAngle, int gyroADC, float angle, float *filterTerm, float dt);
