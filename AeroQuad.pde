@@ -18,7 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-
 /**************************************************************************** 
    Before flight, select the different user options for your AeroQuad below
    Also, consult the ReadMe.html file for additional details
@@ -52,7 +51,7 @@
 //#define HeadingHold
 
 // Auto Level (experimental)
-#define AutoLevel
+//#define AutoLevel
 
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300
