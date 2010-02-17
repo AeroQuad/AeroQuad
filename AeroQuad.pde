@@ -28,33 +28,12 @@
 #define plusConfig
 //#define XConfig
 
-// Calibration At Start Up
-//#define CalibrationAtStartup
-#define GyroCalibrationAtStartup
-
-// Motor Control Method (ServoControl = higher ESC resolution, cooler motors, slight jitter in control, AnalogWrite = lower ESC resolution, warmer motors, no jitter)
-// Before your first flight, to use the ServoControl method change the following line in Servo.h
-// Which can be found in \arduino-0017\hardware\libraries\Servo\Servo.h
-// For camera stabilization off, update line 54 with: #define REFRESH_INTERVAL 8000
-// For camera stabilization on, update line 54 with: #define REFRESH_INTERVAL 12000
-// For ServoControl method connect AUXPIN=3, MOTORPIN=8 for compatibility with PCINT
-//#define ServoControl // This is only compatible with Arduino 0017 or greater
-// For AnalogWrite method connect AUXPIN=8, MOTORPIN=3
-#define AnalogWrite
-
-// Camera Stabilization (experimental)
-// Will move development to Arduino Mega (needs analogWrite support for additional pins)
-//#define Camera
-
-// Heading Hold (experimental)
-// Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-//#define HeadingHold
-
-// Auto Level (experimental)
-//#define AutoLevel
-
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300
+
+// Yaw Gyro Type
+#define IXZ // IXZ-500 Flat Yaw Gyro
+//#define IDG // IDG-500 Dual Axis Gyro
 
 // Arduino Mega with AeroQuad Shield v1.x
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -67,14 +46,21 @@
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 //#define Mega_AQ1x
 
-// Yaw Gyro Type (experimental, used for investigation of lower cost gyros)
-#define IDG // InvenSense
-//#define LPY // STMicroelectronics
-
 // Sensor Filter
 // The Kalman Filter implementation is here for comparison against the Complementary Filter
 // To adjust the KF parameters, look at initGyro1DKalman() found inside ConfigureFilter() in Filter.pde
 //#define KalmanFilter
+
+// Heading Hold (experimental)
+// Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
+//#define HeadingHold
+
+// Auto Level (experimental)
+//#define AutoLevel
+
+// Camera Stabilization (experimental)
+// Will move development to Arduino Mega (needs analogWrite support for additional pins)
+//#define Camera
 
 // *************************************************************
 
@@ -82,7 +68,8 @@
 #include <math.h>
 #include <EEPROM.h>
 #include <Servo.h>
-#include "EEPROM_AQ.h"
+#define byte uint8_t
+#include "Eeprom.h"
 #include "Filter.h"
 #include "PID.h"
 #include "Receiver.h"
@@ -115,15 +102,9 @@ void setup() {
   //  Auto Zero Gyros
   autoZeroGyros();
   
-  #ifdef CalibrationAtStartup
-    // Calibrate sensors
-    zeroGyros();
-    zeroAccelerometers();
-    zeroIntegralError();
-  #endif
-  #ifdef GyroCalibrationAtStartup
-    zeroGyros();
-  #endif
+  // Calibrate sensors
+  zeroGyros();
+  zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
@@ -191,16 +172,14 @@ void loop () {
       if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
         armed = 1;
         zeroIntegralError();
-        minCommand = MINTHROTTLE;
         transmitterCenter[PITCH] = receiverData[PITCH];
         transmitterCenter[ROLL] = receiverData[ROLL];
+        for (motor=FRONT; motor < LASTMOTOR; motor++)
+          minCommand[motor] = MINTHROTTLE;
       }
       // Prevents accidental arming of motor output if no transmitter command received
       if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
     }
-    // Prevents too little power applied to motors during hard manuevers
-    if (receiverData[THROTTLE] > (MIDCOMMAND - MINDELTA)) minCommand = receiverData[THROTTLE] - MINDELTA;
-    if (receiverData[THROTTLE] < MINTHROTTLE) minCommand = MINTHROTTLE;
     // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
     //if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
       //minCommand = MINTHROTTLE;
@@ -226,7 +205,7 @@ void loop () {
       gyroADC[ROLL] = -gyroADC[ROLL];
       gyroADC[PITCH] = -gyroADC[PITCH];
     #endif
-    #ifdef LPY
+    #ifdef IXZ
       gyroADC[YAW] = -gyroADC[YAW];
     #endif
   
@@ -317,28 +296,66 @@ void loop () {
     #ifndef HeadingHold
       motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     #endif
-    
+  
     // ****************** Calculate Motor Commands *****************
     if (armed && safetyCheck) {
       #ifdef plusConfig
-        motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
+        motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
+        motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+        motorCommand[LEFT] = transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
       #endif
       #ifdef XConfig
         // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-        motorCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW], minCommand, MAXCOMMAND);
-        motorCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW], minCommand, MAXCOMMAND);
+        motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW];
+        motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW]);
+        motorCommand[LEFT] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+        motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW]);
       #endif
     }
   
+    // Prevents too little power applied to motors during hard manuevers
+    // Also even motor power on both sides if limit enabled
+    if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
+      delta = transmitterCommand[THROTTLE] - 1100;
+      maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+      maxCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+    }
+    else if ((motorCommand[FRONT] >= MAXCOMMAND) || (motorCommand[REAR] >= MAXCOMMAND)) {
+      delta = MAXCOMMAND - transmitterCommand[THROTTLE];
+      minCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+      minCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    }     
+    else {
+      maxCommand[RIGHT] = MAXCOMMAND;
+      maxCommand[LEFT] = MAXCOMMAND;
+      minCommand[RIGHT] = MINTHROTTLE;
+      minCommand[LEFT] = MINTHROTTLE;
+    }
+    if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
+      delta = transmitterCommand[THROTTLE] - 1100;
+      maxCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+      maxCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+    }
+    else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
+      delta = MAXCOMMAND - transmitterCommand[THROTTLE];
+      minCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+      minCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    }     
+    else {
+      maxCommand[FRONT] = MAXCOMMAND;
+      maxCommand[REAR] = MAXCOMMAND;
+      minCommand[FRONT] = MINTHROTTLE;
+      minCommand[REAR] = MINTHROTTLE;
+    }
+    
+    for (motor = FRONT; motor < LASTMOTOR; motor++)
+      motorCommand[motor] = limitRange(motorCommand[motor], minCommand[motor], maxCommand[motor]);
+
     // If throttle in minimum position, don't apply yaw
     if (transmitterCommand[THROTTLE] < MINCHECK) {
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = minCommand;
+        motorCommand[motor] = MINTHROTTLE;
     }
     // If motor output disarmed, force motor output to minimum
     if (armed == 0) {

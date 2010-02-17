@@ -22,7 +22,6 @@
 #define RECEIVER_H
 
 #include "pins_arduino.h"
-#define byte uint8_t 
 
 // Receiver pin definitions
 // To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
@@ -34,14 +33,8 @@
   #define YAWPIN 6
   #define THROTTLEPIN 4
   #define MODEPIN 7
-  #ifdef ServoControl
-    #define AUXPIN 3
-    int receiverPin[6] = {18, 21, 22, 20, 23, 19}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-  #endif
-  #ifdef AnalogWrite
-    #define AUXPIN 8
-    int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-  #endif
+  #define AUXPIN 8
+  int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 #endif
 #ifdef Mega_AQ1x //Receiver pin assignments for the Arduino Mega using an AeroQuad v1.x Shield
   //The defines below are for documentation only of the Mega receiver input
@@ -112,6 +105,5 @@ byte channel;
 float xmitFactor; // Read in from EEPROM
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
-int minCommand = MINCOMMAND;
 
 #endif

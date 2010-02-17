@@ -21,13 +21,7 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#define byte uint8_t
-#ifdef ServoControl
-  #define FRONTMOTORPIN 8
-#endif
-#ifdef AnalogWrite
-  #define FRONTMOTORPIN 3
-#endif
+#define FRONTMOTORPIN 3
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
@@ -38,20 +32,11 @@
 #define LEFT 3
 #define LASTMOTOR 4
 
-#ifdef ServoControl
-  #include <Servo.h>
-  Servo frontMotor;
-  Servo rearMotor;
-  Servo rightMotor;
-  Servo leftMotor;
-#endif
-#ifdef AnalogWrite
-  // Scale motor commands to analogWrite		
-  // m = (250-126)/(2000-1000) = 0.124		
-  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
-  float mMotorCommand = 0.124;		
-  float bMotorCommand = 2;
-#endif
+// Scale motor commands to analogWrite		
+// m = (250-126)/(2000-1000) = 0.124		
+// b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
+float mMotorCommand = 0.124;		
+float bMotorCommand = 2;
 
 int motorCommand[4] = {1000,1000,1000,1000};
 int motorAxisCommand[3] = {0,0,0};
@@ -61,6 +46,10 @@ int motor = 0;
 // use y = mx + b 
 float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
 float bMotorRate = 1500;   // b = y1 - m * x1
+
+int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
+int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
+int delta = 0;
 
 void configureMotors();
 void commandMotors();

@@ -21,49 +21,25 @@
 #include "Motors.h"
 
 void configureMotors() {
-  #ifdef ServoControl
-    frontMotor.attach(FRONTMOTORPIN);
-    rearMotor.attach(REARMOTORPIN);
-    rightMotor.attach(RIGHTMOTORPIN);
-    leftMotor.attach(LEFTMOTORPIN);
-  #endif
-  #ifdef AnalogWrite
-    analogWrite(FRONTMOTORPIN, 124);		
-    analogWrite(REARMOTORPIN, 124);		
-    analogWrite(RIGHTMOTORPIN, 124);		
-    analogWrite(LEFTMOTORPIN, 124);		
-  #endif
+  analogWrite(FRONTMOTORPIN, 124);		
+  analogWrite(REARMOTORPIN, 124);		
+  analogWrite(RIGHTMOTORPIN, 124);		
+  analogWrite(LEFTMOTORPIN, 124);		
 }
 
 void commandMotors() {
-  #ifdef ServoControl
-    frontMotor.write(motorCommand[FRONT]);
-    rearMotor.write(motorCommand[REAR]);
-    rightMotor.write(motorCommand[RIGHT]);
-    leftMotor.write(motorCommand[LEFT]);
-  #endif
-  #ifdef AnalogWrite		
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);		
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);		
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);		
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);		
-  #endif  
+  analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);		
+  analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);		
+  analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);		
+  analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);		
 }
 
 // Sends commands to all motors
 void commandAllMotors(int motorCommand) {
-  #ifdef ServoControl
-    frontMotor.write(motorCommand);
-    rearMotor.write(motorCommand);
-    rightMotor.write(motorCommand);
-    leftMotor.write(motorCommand);
-  #endif
-  #ifdef AnalogWrite		
-    analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
-    analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
-    analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
-    analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
-  #endif
+  analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
+  analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
+  analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
+  analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand) + bMotorCommand);		
 }
 
 void pulseMotors(byte quantity) {
