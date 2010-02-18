@@ -68,19 +68,19 @@
 #include "PID.h"
 #include "Receiver.h"
 #include "Sensors.h"
-#include "Motors.h"
 #include "AeroQuad.h"
 
 #include "FlightAngle.h"
 FlightAngle_CompFilter angle[2];
 //FlightAngle_KalmanFilter angle[2];
 
-
 #include "Filter.h"
 Filter transmitterFilter[6];
 Filter gyroFilter[3];
 Filter accelFilter[3];
 
+#include "Motors.h"
+Motors_PWM motors;
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -94,8 +94,7 @@ void setup() {
   delay(1);
   
   // Configure motors
-  configureMotors();
-  commandAllMotors(MINCOMMAND);
+  motors.initialize();
 
   // Read user values from EEPROM
   readEEPROM();
@@ -169,7 +168,7 @@ void loop () {
       // Disarm motors (left stick lower left corner)
       if (receiverData[YAW] < MINCHECK && armed == 1) {
         armed = 0;
-        commandAllMotors(MINCOMMAND);
+        motors.commandAllMotors(MINCOMMAND);
       }    
       // Zero sensors (left stick lower left, right stick lower right corner)
       if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
@@ -177,7 +176,7 @@ void loop () {
         zeroGyros();
         zeroAccelerometers();
         zeroIntegralError();
-        pulseMotors(3);
+        motors.pulseMotors(3);
       }   
       // Arm motors (left stick lower right corner)
       if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
@@ -265,7 +264,7 @@ void loop () {
     #endif
     
     // ************************** Update Roll/Pitch ***********************
-    // updatedPID(target, measured, PIDsettings);
+    // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
     motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
@@ -314,7 +313,7 @@ void loop () {
     }
   
     // Prevents too little power applied to motors during hard manuevers
-    // Also even motor power on both sides if limit enabled
+    // Also even motor power on both sides if limit encountered
     if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
       delta = transmitterCommand[THROTTLE] - 1100;
       maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
@@ -379,7 +378,7 @@ void loop () {
     }
     
     // *********************** Command Motors **********************
-    commandMotors();
+    motors.write(motorCommand); // Defined in Motors.h
     controlLoopTime = currentTime;
   } 
 /////////////////////////
