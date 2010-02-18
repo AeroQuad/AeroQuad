@@ -46,11 +46,6 @@
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 //#define Mega_AQ1x
 
-// Sensor Filter
-// The Kalman Filter implementation is here for comparison against the Complementary Filter
-// To adjust the KF parameters, look at initGyro1DKalman() found inside ConfigureFilter() in Filter.pde
-//#define KalmanFilter
-
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
 //#define HeadingHold
@@ -75,7 +70,17 @@
 #include "Sensors.h"
 #include "Motors.h"
 #include "AeroQuad.h"
+
+#include "FlightAngle.h"
+FlightAngle_CompFilter angle[2];
+//FlightAngle_KalmanFilter angle[2];
+
+
 #include "Filter.h"
+Filter transmitterFilter[6];
+Filter gyroFilter[3];
+Filter accelFilter[3];
+
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -107,15 +112,21 @@ void setup() {
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
+  for (axis = ROLL; axis < YAW; axis++)
+    angle[axis].initialize(axis);
+    
+  for (channel = ROLL; channel < LASTCHANNEL; channel++)
+    transmitterFilter[channel].initialize(smoothTransmitter[channel]);
+  for (axis = ROLL; axis < LASTAXIS; axis++) {
+    gyroFilter[axis].initialize(smoothFactor[GYRO]);
+    accelFilter[axis].initialize(smoothFactor[ACCEL]);
+  }
   
   // Camera stabilization setup
   #ifdef Camera
     rollCamera.attach(ROLLCAMERAPIN);
     pitchCamera.attach(PITCHCAMERAPIN);
   #endif
-  
-  // Complementary filter setup
-  configureFilter(timeConstant);
   
   previousTime = millis();
   digitalWrite(LEDPIN, HIGH);
@@ -145,7 +156,7 @@ void loop () {
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], smoothTransmitter[channel]);
+      transmitterCommandSmooth[channel] = transmitterFilter[channel].smooth(receiverData[channel]);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < LASTAXIS; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
@@ -211,24 +222,14 @@ void loop () {
   
     // Compiler seems to like calculating this in separate loop better
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
+      gyroData[axis] = gyroFilter[axis].smooth(gyroADC[axis]);
+      accelData[axis] = accelFilter[axis].smooth(accelADC[axis]);
     }
 
     // ****************** Calculate Absolute Angle *****************
-    #ifndef KalmanFilter
-      //filterData(previousAngle, newAngle, rate, *filterTerm, dt)
-      flightAngle[ROLL] = filterData(flightAngle[ROLL], angleDeg(ROLL), rateDegPerSec(ROLL), filterTermRoll, AIdT);
-      flightAngle[PITCH] = filterData(flightAngle[PITCH], angleDeg(PITCH), rateDegPerSec(PITCH), filterTermPitch, AIdT);
-    #endif
-      
-    #ifdef KalmanFilter
-      predictKalman(&rollFilter, rateDegPerSec(ROLL), AIdT);
-      flightAngle[ROLL] = updateKalman(&rollFilter, angleDeg(ROLL));
-      predictKalman(&pitchFilter, rateDegPerSec(PITCH), AIdT);
-      flightAngle[PITCH] = updateKalman(&pitchFilter, angleDeg(PITCH));
-    #endif
-    
+    // angle[axis].calculate() defined in FlightAngle.h
+    flightAngle[ROLL] = angle[ROLL].calculate(angleDeg(ROLL), rateDegPerSec(ROLL));
+    flightAngle[PITCH] = angle[PITCH].calculate(angleDeg(PITCH), rateDegPerSec(PITCH));
     analogInputTime = currentTime;
   } 
 //////////////////////////////

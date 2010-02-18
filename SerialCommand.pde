@@ -142,7 +142,8 @@ void readSerialCommand() {
       writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
       zeroIntegralError();
       // Complementary filter setup
-      configureFilter(timeConstant);
+      for (axis = ROLL; axis < YAW; axis++)
+        angle[axis].initialize(axis); // defined in FlightAngle.h
       break;
     case 'Y': // Initialize EEPROM with default values
       PID[ROLL].P = 3.75;

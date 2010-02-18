@@ -32,12 +32,12 @@ int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
 
 // Heading hold
-  // aref / 1024 = voltage per A/D bit
-  // 0.002 = V / deg/sec (from gyro data sheet)
-  float headingScaleFactor = (aref / 1024.0) / 0.002 * (PI/2.0);
-  float heading = 0; // measured heading from yaw gyro (process variable)
-  float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-  float currentHeading = 0; // current heading the quad is set to (set point)
+// aref / 1024 = voltage per A/D bit
+// 0.002 = V / deg/sec (from gyro data sheet)
+float headingScaleFactor = (aref / 1024.0) / 0.002 * (PI/2.0);
+float heading = 0; // measured heading from yaw gyro (process variable)
+float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
+float currentHeading = 0; // current heading the quad is set to (set point)
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -111,5 +111,14 @@ unsigned long cameraTime = 0;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
 //float dt = 0.002;
+
+// Filter parameters
+#define GYRO 0
+#define ACCEL 1
+float timeConstant;
+float smoothTransmitter[6];
+float smoothFactor[2];
+float smoothHeading;
+float flightAngle[2];
 
 #endif
