@@ -1,8 +1,8 @@
 /*
-  AeroQuad v1.5 - Novmeber 2009
-  www.AeroQuad.info
-  Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+  AeroQuad v1.6 - February 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -25,9 +25,6 @@
 #define BAUD 115200
 #define LEDPIN 13
 #define AZPIN 12
-
-// Analog Reference Value
-float aref = 2.892; // Measured with a DMM
 
 // Auto level setup
 int levelAdjust[2] = {0,0};

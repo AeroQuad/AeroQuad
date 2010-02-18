@@ -1,8 +1,8 @@
- /*
-  AeroQuad v1.5 - Novmeber 2009
-  www.AeroQuad.info
-  Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+/*
+  AeroQuad v1.6 - February 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -70,12 +70,12 @@
 #include <Servo.h>
 #define byte uint8_t
 #include "Eeprom.h"
-#include "Filter.h"
 #include "PID.h"
 #include "Receiver.h"
 #include "Sensors.h"
 #include "Motors.h"
 #include "AeroQuad.h"
+#include "Filter.h"
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -217,18 +217,16 @@ void loop () {
 
     // ****************** Calculate Absolute Angle *****************
     #ifndef KalmanFilter
-      //filterData(previousAngle, gyroADC, angle, *filterTerm, dt)
-      flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroADC[ROLL], atan2(accelADC[ROLL], accelADC[ZAXIS]), filterTermRoll, AIdT);
-      flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroADC[PITCH], atan2(accelADC[PITCH], accelADC[ZAXIS]), filterTermPitch, AIdT);
-      //flightAngle[ROLL] = filterData(flightAngle[ROLL], gyroData[ROLL], atan2(accelData[ROLL], accelData[ZAXIS]), filterTermRoll, AIdT);
-      //flightAngle[PITCH] = filterData(flightAngle[PITCH], gyroData[PITCH], atan2(accelData[PITCH], accelData[ZAXIS]), filterTermPitch, AIdT);
+      //filterData(previousAngle, newAngle, rate, *filterTerm, dt)
+      flightAngle[ROLL] = filterData(flightAngle[ROLL], angleDeg(ROLL), rateDegPerSec(ROLL), filterTermRoll, AIdT);
+      flightAngle[PITCH] = filterData(flightAngle[PITCH], angleDeg(PITCH), rateDegPerSec(PITCH), filterTermPitch, AIdT);
     #endif
       
     #ifdef KalmanFilter
-      predictKalman(&rollFilter, (gyroADC[ROLL]/1024) * aref * 8.72, AIdT);
-      flightAngle[ROLL] = updateKalman(&rollFilter, atan2(accelADC[ROLL], accelADC[ZAXIS])) * 57.2957795;
-      predictKalman(&pitchFilter, (gyroADC[PITCH]/1024) * aref * 8.72, AIdT);
-      flightAngle[PITCH] = updateKalman(&pitchFilter, atan2(accelADC[PITCH], accelADC[ZAXIS])) * 57.2957795;
+      predictKalman(&rollFilter, rateDegPerSec(ROLL), AIdT);
+      flightAngle[ROLL] = updateKalman(&rollFilter, angleDeg(ROLL));
+      predictKalman(&pitchFilter, rateDegPerSec(PITCH), AIdT);
+      flightAngle[PITCH] = updateKalman(&pitchFilter, angleDeg(PITCH));
     #endif
     
     analogInputTime = currentTime;

@@ -1,8 +1,8 @@
 /*
-  AeroQuad v1.5 - Novmeber 2009
-  www.AeroQuad.info
-  Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+  AeroQuad v1.6 - February 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -37,8 +37,8 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 // #define XMAX 607
 // #define YMIN 409
 // #define YMAX 618
-#define ZMIN 454
-#define ZMAX 687
+#define ZMIN 479
+#define ZMAX 715
 #define ZAXIS 2
 #define ZEROLIMIT 2
 int axis;
@@ -54,13 +54,21 @@ int gyroZero[3] = {0,0,0};
 int gyroADC[3] = {0,0,0};
 
 // Calibration parameters
-#define FINDZERO 50
+#define FINDZERO 10
 int findZero[FINDZERO];
+
+// Analog Reference Value
+float aref = 2.8; // Measured with a DMM
+float gyroScaleFactor = 0.002; // From datasheet
 
 int findMode(int *data, int arraySize);
 void zeroGyros();
 void autoZeroGyros();
 void zeroAccelerometers();
 int limitRange(int data, int minLimit, int maxLimit);
+float rateDegPerSec(byte axis);
+float rateRadPerSec(byte axis);
+float angleDeg(byte axis);
+float angleRad(byte axis);
 
 #endif

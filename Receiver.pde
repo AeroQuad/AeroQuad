@@ -1,8 +1,8 @@
 /*
-  AeroQuad v1.5 - Novmeber 2009
-  www.AeroQuad.info
-  Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+  AeroQuad v1.6 - February 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
   
   Interrupt based method inspired by Dror Caspi
   http://www.rcgroups.com/forums/showpost.php?p=12356667&postcount=1639

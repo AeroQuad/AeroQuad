@@ -1,8 +1,8 @@
 /*
-  AeroQuad v1.5 - Novmeber 2009
-  www.AeroQuad.info
-  Copyright (c) 2009 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+  AeroQuad v1.6 - February 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -61,7 +61,10 @@ int findMode(int *data, int arraySize) {
 // Allows user to zero gyros on command
 void zeroGyros() {
   for (axis = ROLL; axis < LASTAXIS; axis++) {
-    for (int i=0; i<FINDZERO; i++) findZero[i] = analogRead(gyroChannel[axis]);
+    for (int i=0; i<FINDZERO; i++) {
+      findZero[i] = analogRead(gyroChannel[axis]);
+      delay(25);
+    }
     gyroZero[axis] = findMode(findZero, FINDZERO);
   }
   writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
@@ -79,7 +82,10 @@ void autoZeroGyros() {
 // Allows user to zero accelerometers on command
 void zeroAccelerometers() {
   for (axis = ROLL; axis < YAW; axis++) {
-    for (int i=0; i<FINDZERO; i++) findZero[i] = analogRead(accelChannel[axis]);
+    for (int i=0; i<FINDZERO; i++) {
+      findZero[i] = analogRead(accelChannel[axis]);
+      delay(25);
+    }
     accelZero[axis] = findMode(findZero, FINDZERO);
   }
   accelZero[ZAXIS] = ZMAX - ((ZMAX - ZMIN)/2);
@@ -115,4 +121,29 @@ float arctan2(float y, float x) {
    else
      return(angle);
 }
+
+float rateDegPerSec(byte axis) {
+  return (gyroADC[axis] / 1024) * aref / gyroScaleFactor;
+}
+
+float rateRadPerSec(byte axis) {
+  return radians((gyroADC[axis] / 1024) * aref / gyroScaleFactor);
+}
+
+float angleDeg(byte axis) {
+  return degrees(angleRad(axis));
+} 
+
+float angleRad(byte axis) {
+  if (axis == PITCH) return arctan2(accelADC[PITCH], sqrt((accelADC[ROLL] * accelADC[ROLL]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
+  if (axis == ROLL) return arctan2(accelADC[ROLL], sqrt((accelADC[PITCH] * accelADC[PITCH]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
+}
+
+/*float angleDegRoll(void) {
+  return arctan2(accelADC[ROLL], sqrt((accelADC[PITCH] * accelADC[PITCH]) + (accelADC[ZAXIS] * accelADC[ZAXIS]))) * 57.2957795;
+}
+
+float angleDegPitch(void) {
+  return arctan2(accelADC[PITCH], sqrt((accelADC[ROLL] * accelADC[ROLL]) + (accelADC[ZAXIS] * accelADC[ZAXIS]))) * 57.2957795;
+}*/
 
