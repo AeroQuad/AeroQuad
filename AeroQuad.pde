@@ -162,6 +162,7 @@ void loop () {
     // No xmitFactor reduction applied for throttle, mode and AUX
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
+
     // Read quad configuration commands from transmitter when throttle down
     if (receiverData[THROTTLE] < MINCHECK) {
       zeroIntegralError();

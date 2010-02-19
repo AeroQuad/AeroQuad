@@ -210,7 +210,7 @@ void sendSerialTelemetry() {
     Serial.println(remoteCommand[LEFT]);
     break;
   case '!': // Send flight software version
-    Serial.println("1.5");
+    Serial.println("1.6");
     queryType = 'X';
     break;
   }
