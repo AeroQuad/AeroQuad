@@ -34,11 +34,23 @@
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 
+// Motors
+int motorCommand[4] = {1000,1000,1000,1000};
+int motorAxisCommand[3] = {0,0,0};
+int motor = 0;
+int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
+int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
+int delta = 0;
+// If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
+// Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
+// use y = mx + b 
+float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
+float bMotorRate = 1500;   // b = y1 - m * x1
+// Ground station control
+int remoteCommand[4] = {1000,1000,1000,1000};
 
 class Motors_PWM {
 private:
-  //int motorCommand[4];
-  //int motorAxisCommand[3];
   int motor;
   float mMotorCommand;
   float bMotorCommand;

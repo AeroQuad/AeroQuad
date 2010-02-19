@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - March 2010
+  AeroQuad v1.6 - February 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -19,6 +19,12 @@
 */
 
 // This class is responsible for calculating vehicle attitude
+
+#ifndef FLIGHTANGLE_H
+#define FLIGHTANGLE_H
+
+float timeConstant;
+float flightAngle[2];
 
 class FlightAngle_CompFilter {
 private:
@@ -108,3 +114,4 @@ public:
   }
 };
 
+#endif

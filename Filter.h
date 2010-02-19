@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - March 2010
+  AeroQuad v1.6 - February 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -20,6 +20,13 @@
 
 #ifndef __FILTER_H__
 #define __FILTER_H__
+
+// Filter parameters
+#define GYRO 0
+#define ACCEL 1
+float smoothTransmitter[6];
+float smoothFactor[2];
+float smoothHeading;
 
 class Filter {
 private:

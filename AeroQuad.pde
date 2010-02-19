@@ -24,6 +24,12 @@
    If you need additional assitance go to http://forum.AeroQuad.info
 *****************************************************************************/
 
+/****************************************************************************
+
+              THIS IS A BETA VERSION - USE AT YOUR OWN RISK!
+              
+*****************************************************************************/
+
 // Define Flight Configuration
 #define plusConfig
 //#define XConfig
@@ -59,28 +65,22 @@
 
 // *************************************************************
 
-#include <stdlib.h>
-#include <math.h>
 #include <EEPROM.h>
 #include <Servo.h>
-#define byte uint8_t
-#include "Eeprom.h"
-#include "PID.h"
-#include "Receiver.h"
-#include "Sensors.h"
 #include "AeroQuad.h"
 
 #include "FlightAngle.h"
-FlightAngle_CompFilter angle[2];
-//FlightAngle_KalmanFilter angle[2];
+FlightAngle_CompFilter angle[2]; // Use Complementary Filter
+//FlightAngle_KalmanFilter angle[2];  Use Kalman Filter
+
+#include "Motors.h"
+Motors_PWM motors; // Use PWM ESC's
+//Motors_I2C motors; // Future capability under construction
 
 #include "Filter.h"
 Filter transmitterFilter[6];
 Filter gyroFilter[3];
 Filter accelFilter[3];
-
-#include "Motors.h"
-Motors_PWM motors;
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -307,9 +307,9 @@ void loop () {
       #ifdef XConfig
         // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
         motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW];
-        motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW]);
+        motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
         motorCommand[LEFT] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-        motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW]);
+        motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW];
       #endif
     }
   

@@ -20,11 +20,19 @@
 
 #ifndef AEROQUAD_H
 #define AEROQUAD_H
+#include <stdlib.h>
+#include <math.h>
 #include "WProgram.h"
+#include "Eeprom.h"
+#include "PID.h"
+#include "Receiver.h"
+#include "Sensors.h"
 
 #define BAUD 115200
 #define LEDPIN 13
-#define AZPIN 12
+#define ON 1
+#define OFF 0
+#define byte uint8_t
 
 // Auto level setup
 int levelAdjust[2] = {0,0};
@@ -55,9 +63,6 @@ float currentHeading = 0; // current heading the quad is set to (set point)
 byte calibrateESC = 0;
 int testCommand = 1000;
 
-// Ground station control (experimental)
-int remoteCommand[4] = {1000,1000,1000,1000};
-
 // Communication
 char queryType = 'X';
 byte tlmType = 0;
@@ -65,11 +70,11 @@ char string[32];
 byte armed = 0;
 byte safetyCheck = 0;
 byte update = 0;
+byte fastTransfer = OFF;
 
-// Enable/disable control loops for debug
-//#define DEBUG
-#define ON 1
-#define OFF 0
+/**************************************************************/
+/******************* Loop timing parameters *******************/
+/**************************************************************/
 #define RECEIVERLOOPTIME 100
 #define TELEMETRYLOOPTIME 100
 #define FASTTELEMETRYTIME 10
@@ -79,6 +84,22 @@ byte update = 0;
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
 
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
+unsigned long deltaTime = 0;
+unsigned long receiverTime = 0;
+unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
+unsigned long analogInputTime = 0;
+unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
+unsigned long cameraTime = 0;
+unsigned long fastTelemetryTime = 0;
+unsigned long autoZeroGyroTime = 0;
+
+/**************************************************************/
+/********************** Debug Parameters **********************/
+/**************************************************************/
+// Enable/disable control loops for debug
+//#define DEBUG
 byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte analogInputLoop = ON;
@@ -95,43 +116,5 @@ byte testSignal = LOW;
 // Receiver loop = 0.4 ms
 // Telemetry loop = .04 ms (with no telemetry transmitted)
 // Fast Telemetry Transfer (sending 12 bytes = 1.1 ms, sending 14 bytes = 1.3 ms, sending 16 bytes = 1.45 ms, sending 18 bytes = 1.625 ms) 2 bytes = 0.175 ms
-
-// Sensor fast data transfer;
-byte fastTransfer = OFF;
-
-// Timing
-unsigned long previousTime = 0;
-unsigned long currentTime = 0;
-unsigned long deltaTime = 0;
-unsigned long receiverTime = 0;
-unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
-unsigned long analogInputTime = 0;
-unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
-unsigned long cameraTime = 0;
-unsigned long fastTelemetryTime = 0;
-unsigned long autoZeroGyroTime = 0;
-//float dt = 0.002;
-
-// Filter parameters
-#define GYRO 0
-#define ACCEL 1
-float timeConstant;
-float smoothTransmitter[6];
-float smoothFactor[2];
-float smoothHeading;
-float flightAngle[2];
-
-// Motors
-int motorCommand[4] = {1000,1000,1000,1000};
-int motorAxisCommand[3] = {0,0,0};
-int motor = 0;
-int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
-int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
-int delta = 0;
-// If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
-// Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
-// use y = mx + b 
-float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
-float bMotorRate = 1500;   // b = y1 - m * x1
 
 #endif

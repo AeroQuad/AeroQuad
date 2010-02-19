@@ -146,10 +146,10 @@ void readSerialCommand() {
         angle[axis].initialize(axis); // defined in FlightAngle.h
       break;
     case 'Y': // Initialize EEPROM with default values
-      PID[ROLL].P = 3.75;
+      PID[ROLL].P = 5;
       PID[ROLL].I = 0;
       PID[ROLL].D = -10;
-      PID[PITCH].P = 3.75;
+      PID[PITCH].P = 5;
       PID[PITCH].I = 0;
       PID[PITCH].D = -10;
       PID[YAW].P = 12.0;
@@ -168,9 +168,9 @@ void readSerialCommand() {
       xmitFactor = 0.20;  
       levelLimit = 2000.0;
       levelOff = 50;  
-      smoothFactor[GYRO] = 0.20;
-      smoothFactor[ACCEL] = 0.20;
-      timeConstant = 3.0;   
+      smoothFactor[GYRO] = 0.50;
+      smoothFactor[ACCEL] = 0.50;
+      timeConstant = 4.0;   
       for (channel = ROLL; channel < LASTCHANNEL; channel++) {
         mTransmitter[channel] = 1.0;
         bTransmitter[channel] = 0.0;

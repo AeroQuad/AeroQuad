@@ -28,6 +28,8 @@
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
+#define AZPIN 12 // Auto zero pin for IDG500 gyros
+
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
