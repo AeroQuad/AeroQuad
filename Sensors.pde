@@ -61,10 +61,8 @@ int findMode(int *data, int arraySize) {
 // Allows user to zero gyros on command
 void zeroGyros() {
   for (axis = ROLL; axis < LASTAXIS; axis++) {
-    for (int i=0; i<FINDZERO; i++) {
+    for (int i=0; i<FINDZERO; i++)
       findZero[i] = analogRead(gyroChannel[axis]);
-      delay(25);
-    }
     gyroZero[axis] = findMode(findZero, FINDZERO);
   }
   writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
@@ -82,10 +80,8 @@ void autoZeroGyros() {
 // Allows user to zero accelerometers on command
 void zeroAccelerometers() {
   for (axis = ROLL; axis < YAW; axis++) {
-    for (int i=0; i<FINDZERO; i++) {
+    for (int i=0; i<FINDZERO; i++)
       findZero[i] = analogRead(accelChannel[axis]);
-      delay(25);
-    }
     accelZero[axis] = findMode(findZero, FINDZERO);
   }
   accelZero[ZAXIS] = ZMAX - ((ZMAX - ZMIN)/2);

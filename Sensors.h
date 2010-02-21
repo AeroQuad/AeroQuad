@@ -56,7 +56,7 @@ int gyroZero[3] = {0,0,0};
 int gyroADC[3] = {0,0,0};
 
 // Calibration parameters
-#define FINDZERO 10
+#define FINDZERO 50
 int findZero[FINDZERO];
 
 // Analog Reference Value
