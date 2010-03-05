@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - February 2010
+  AeroQuad v1.6 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,16 +18,21 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include <EEPROM.h>
+#include <Servo.h>
+#include "AeroQuad.h"
+#include "FlightAngle.h"
+#include "Motors.h"
+
+#include "Filter.h"
+Filter transmitterFilter[6];
+Filter gyroFilter[3];
+Filter accelFilter[3];
+
 /**************************************************************************** 
    Before flight, select the different user options for your AeroQuad below
    Also, consult the ReadMe.html file for additional details
    If you need additional assitance go to http://forum.AeroQuad.info
-*****************************************************************************/
-
-/****************************************************************************
-
-              THIS IS A BETA VERSION - USE AT YOUR OWN RISK!
-              
 *****************************************************************************/
 
 // Define Flight Configuration
@@ -63,24 +68,13 @@
 // Will move development to Arduino Mega (needs analogWrite support for additional pins)
 //#define Camera
 
-// *************************************************************
+// Class definition for angle estimation found in FlightAngle.h
+FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
+//FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
 
-#include <EEPROM.h>
-#include <Servo.h>
-#include "AeroQuad.h"
-
-#include "FlightAngle.h"
-FlightAngle_CompFilter angle[2]; // Use Complementary Filter
-//FlightAngle_KalmanFilter angle[2];  Use Kalman Filter
-
-#include "Motors.h"
-Motors_PWM motors; // Use PWM ESC's
+// Class definition for motor control found in Motors.h
+Motors_PWM motors; // Use this for PWM ESC's
 //Motors_I2C motors; // Future capability under construction
-
-#include "Filter.h"
-Filter transmitterFilter[6];
-Filter gyroFilter[3];
-Filter accelFilter[3];
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -317,13 +311,13 @@ void loop () {
     // Also even motor power on both sides if limit encountered
     if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
       delta = transmitterCommand[THROTTLE] - 1100;
-      maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
-      maxCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+      maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+      maxCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
     }
     else if ((motorCommand[FRONT] >= MAXCOMMAND) || (motorCommand[REAR] >= MAXCOMMAND)) {
       delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-      minCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCHECK);
-      minCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCHECK);
+      minCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+      minCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
     }     
     else {
       maxCommand[RIGHT] = MAXCOMMAND;
@@ -333,13 +327,13 @@ void loop () {
     }
     if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
       delta = transmitterCommand[THROTTLE] - 1100;
-      maxCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
-      maxCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCOMMAND);
+      maxCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+      maxCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
     }
     else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
       delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-      minCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCHECK);
-      minCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCHECK);
+      minCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+      minCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
     }     
     else {
       maxCommand[FRONT] = MAXCOMMAND;

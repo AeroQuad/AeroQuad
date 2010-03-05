@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - February 2010
+  AeroQuad v1.6 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -60,7 +60,7 @@ int gyroADC[3] = {0,0,0};
 int findZero[FINDZERO];
 
 // Analog Reference Value
-float aref = 2.8; // Measured with a DMM
+float aref = 2.99; // Measured with a DMM
 float gyroScaleFactor = 0.002; // From datasheet
 
 int findMode(int *data, int arraySize);

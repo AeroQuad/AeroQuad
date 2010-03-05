@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/related; boundary="----=_NextPart_01CAB105.DF712ED0"
+Content-Type: multipart/related; boundary="----=_NextPart_01CABBFA.210738E0"
 
 This document is a Single File Web Page, also known as a Web Archive file.  If you are seeing this message, your browser or editor doesn't support Web Archive files.  Please download a browser that supports Web Archive, such as Windows® Internet Explorer®.
 
-------=_NextPart_01CAB105.DF712ED0
+------=_NextPart_01CABBFA.210738E0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst.htm
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/html; charset="us-ascii"
@@ -25,17 +25,17 @@ xmlns=3D"http://www.w3.org/TR/REC-html40">
   <o:Author>Ted Carancho</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>Ted</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>99</o:TotalTime>
+  <o:Revision>3</o:Revision>
+  <o:TotalTime>102</o:TotalTime>
   <o:Created>2010-02-19T09:50:00Z</o:Created>
-  <o:LastSaved>2010-02-19T09:50:00Z</o:LastSaved>
+  <o:LastSaved>2010-03-05T08:23:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>1174</o:Words>
-  <o:Characters>6696</o:Characters>
+  <o:Words>1228</o:Words>
+  <o:Characters>7003</o:Characters>
   <o:Company>Carancho Engineering</o:Company>
-  <o:Lines>55</o:Lines>
-  <o:Paragraphs>15</o:Paragraphs>
-  <o:CharactersWithSpaces>7855</o:CharactersWithSpaces>
+  <o:Lines>58</o:Lines>
+  <o:Paragraphs>16</o:Paragraphs>
+  <o:CharactersWithSpaces>8215</o:CharactersWithSpaces>
   <o:Version>12.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -113,8 +113,8 @@ ue"
 ue"
    QFormat=3D"true" Name=3D"caption"/>
   <w:LsdException Locked=3D"false" QFormat=3D"true" Name=3D"Title"/>
-  <w:LsdException Locked=3D"false" Priority=3D"1" Name=3D"Default Paragraph=
- Font"/>
+  <w:LsdException Locked=3D"false" Priority=3D"1" Name=3D"Default Paragraph =
+Font"/>
   <w:LsdException Locked=3D"false" QFormat=3D"true" Name=3D"Subtitle"/>
   <w:LsdException Locked=3D"false" QFormat=3D"true" Name=3D"Strong"/>
   <w:LsdException Locked=3D"false" QFormat=3D"true" Name=3D"Emphasis"/>
@@ -789,7 +789,7 @@ ul
 <meta http-equiv=3DContent-Style-Type content=3D"text/css">
 <meta name=3DCocoaVersion content=3D824.48>
 <!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext=3D"edit" spidmax=3D"4098"/>
+ <o:shapedefaults v:ext=3D"edit" spidmax=3D"5122"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext=3D"edit">
   <o:idmap v:ext=3D"edit" data=3D"1"/>
@@ -804,25 +804,36 @@ ul
 Roman"'>AeroQuad</span></span><span
 style=3D'mso-fareast-font-family:"Times New Roman"'> Flight Software Source=
  Code
-v1.6 Beta<o:p></o:p></span></h1>
+v1.6<o:p></o:p></span></h1>
 
 <p class=3Dp1><a href=3D"http://www.aeroquad.info/">http://www.aeroquad.inf=
 o</a></p>
 
-<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.6 B=
-eta
-Release Notes<o:p></o:p></span></h2>
+<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.6 R=
+elease
+Notes (3/5/2010)<o:p></o:p></span></h2>
 
-<p class=3DMsoNormal>This release fixes a yaw bug that exhibits itself with=
- the
-new capacitors installed which allows the user to use higher PID values.<sp=
-an
-style=3D'mso-spacerun:yes'>&nbsp; </span>Also the comments were fixed to re=
-flect
-usage of IDG500 or IXZ500 gyros.<span style=3D'mso-spacerun:yes'>&nbsp; </s=
-pan>If
-the user does not select the correct gyro, the yaw axis may become inverted=
-.</p>
+<p class=3DMsoNormal>This release fixes a yaw bug that exhibits <span
+class=3DGramE>itself</span> with the new capacitors installed which allows =
+the
+user to use higher PID values.<span style=3D'mso-spacerun:yes'>&nbsp; </spa=
+n>Also
+the comments were fixed to reflect usage of IDG500 or IXZ500 gyros.<span
+style=3D'mso-spacerun:yes'>&nbsp; </span>If the user does not select the co=
+rrect
+gyro, the yaw axis may become inverted.<span style=3D'mso-spacerun:yes'>&nb=
+sp;
+</span><span class=3DGramE>Started implementing certain functions using cla=
+sses
+(C++).</span><span style=3D'mso-spacerun:yes'>&nbsp; </span>The <span
+class=3DSpellE>FlightAngle</span> class defines the algorithm to use for an=
+gle
+estimation, the Motors class defines how PWM works and the Filter class all=
+ows
+multiple filter objects to be called to reduce the number of global variabl=
+es
+needed and to encapsulate and retain the data needed for those filters to w=
+ork.</p>
 
 <h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.5 R=
 elease
@@ -831,15 +842,13 @@ Notes<o:p></o:p></span></h2>
 <p class=3DMsoNormal>This is a maintenance release for users of an <span
 class=3DSpellE>Arduino</span> Mega with an <span class=3DSpellE>AeroQuad</s=
 pan>
-Shield v1.5 which provides receiver support. <span
-style=3D'mso-spacerun:yes'>&nbsp;</span>There is a bug in the <span class=
-=3DSpellE>Arduino</span>
-core code which doesn&#8217;t allow the proper PCINT assignments to PCINT
-8-23.<span style=3D'mso-spacerun:yes'>&nbsp; </span>This release will hardc=
-ode AI
-pins 8-13 (PCINT 16-21) for use as receiver pins.<span
-style=3D'mso-spacerun:yes'>&nbsp; </span>To enable this capability, please
-uncomment #define Mega_AQ1x located in AeroQuad.pde.</p>
+Shield v1.5 which provides receiver support.<span
+style=3D'mso-spacerun:yes'>&nbsp; </span>There is a bug in the <span
+class=3DSpellE>Arduino</span> core code which doesn&#8217;t allow the proper
+PCINT assignments to PCINT 8-23.<span style=3D'mso-spacerun:yes'>&nbsp;
+</span>This release will hardcode AI pins 8-13 (PCINT 16-21) for use as
+receiver pins.<span style=3D'mso-spacerun:yes'>&nbsp; </span>To enable this
+capability, please uncomment #define Mega_AQ1x located in AeroQuad.pde.</p>
 
 <p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
@@ -923,13 +932,12 @@ style=3D'mso-spacerun:yes'>&nbsp; </span>Failure to do so will result in un=
 stable
 flight.<span style=3D'mso-spacerun:yes'>&nbsp; </span>When <span class=3DSp=
 ellE>Sparkfun</span>
-updated the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were
-inverted.<span style=3D'mso-spacerun:yes'>&nbsp; </span>The default <span
-class=3DSpellE>AeroQuad</span> Flight Software behavior is to assume the us=
-er is
-using the latest <span class=3DSpellE>Sparkfun</span> 5DOF IMU to make it e=
-asier
-for new users.</p>
+updated the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were inver=
+ted.<span
+style=3D'mso-spacerun:yes'>&nbsp; </span>The default <span class=3DSpellE>A=
+eroQuad</span>
+Flight Software behavior is to assume the user is using the latest <span
+class=3DSpellE>Sparkfun</span> 5DOF IMU to make it easier for new users.</p>
 
 <p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
@@ -1012,11 +1020,10 @@ for Futaba transmitters.<span style=3D'mso-spacerun:yes'>&nbsp; </span>The
 variable declaration section in the main AeroQuad.pde sketch has been organ=
 ized
 into separate header files for easier maintainability into the future.<span
-style=3D'mso-spacerun:yes'>&nbsp; </span>The new default EEPROM values now =
-include
-a suggested setting for yaw to allow a smoother yaw transition (in the past=
- it
-would cause the quad to pop up and down a bit).<span
+style=3D'mso-spacerun:yes'>&nbsp; </span>The new default EEPROM values now
+include a suggested setting for yaw to allow a smoother yaw transition (in =
+the
+past it would cause the quad to pop up and down a bit).<span
 style=3D'mso-spacerun:yes'>&nbsp; </span>The main loop is now organized into
 different timed loops, to make sure the sampling of the sensors and control
 algorithm execution are now performed at regular timed intervals (500Hz). <=
@@ -1132,8 +1139,8 @@ ures:<o:p></o:p></span></h3>
 of the
      appropriate #define statement in AeroQuad.pde.<span
      style=3D'mso-spacerun:yes'>&nbsp; </span>This was done to remove preve=
-nt confusion
-     by new users.</li>
+nt
+     confusion by new users.</li>
  <li class=3DMsoNormal style=3D'mso-list:l0 level1 lfo3;tab-stops:list .5in=
 '>If any
      critical flight parameters are zero, it is automatically filled in wit=
@@ -1209,7 +1216,7 @@ fo</a></p>
 
 </html>
 
-------=_NextPart_01CAB105.DF712ED0
+------=_NextPart_01CABBFA.210738E0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/themedata.thmx
 Content-Transfer-Encoding: base64
 Content-Type: application/vnd.ms-officetheme
@@ -1270,7 +1277,7 @@ dGhlbWUxLnhtbFBLAQItABQABgAIAAAAIQAN0ZCftgAAABsBAAAnAAAAAAAAAAAAAAAAAJsJAAB0
 aGVtZS90aGVtZS9fcmVscy90aGVtZU1hbmFnZXIueG1sLnJlbHNQSwUGAAAAAAUABQBdAQAAlgoA
 AAAA
 
-------=_NextPart_01CAB105.DF712ED0
+------=_NextPart_01CABBFA.210738E0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/colorschememapping.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml
@@ -1280,7 +1287,7 @@ Content-Type: text/xml
  bg1=3D"lt1" tx1=3D"dk1" bg2=3D"lt2" tx2=3D"dk2" accent1=3D"accent1" accent=
 2=3D"accent2" accent3=3D"accent3" accent4=3D"accent4" accent5=3D"accent5" a=
 ccent6=3D"accent6" hlink=3D"hlink" folHlink=3D"folHlink"/>
-------=_NextPart_01CAB105.DF712ED0
+------=_NextPart_01CABBFA.210738E0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/filelist.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml; charset="utf-8"
@@ -1291,4 +1298,4 @@ Content-Type: text/xml; charset="utf-8"
  <o:File HRef=3D"colorschememapping.xml"/>
  <o:File HRef=3D"filelist.xml"/>
 </xml>
-------=_NextPart_01CAB105.DF712ED0--
+------=_NextPart_01CABBFA.210738E0--

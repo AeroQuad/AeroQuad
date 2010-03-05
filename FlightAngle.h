@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - February 2010
+  AeroQuad v1.6 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -35,12 +35,10 @@ private:
   float filterTerm0;
   float filterTerm1;
   float filterTerm2;
-  float timeConstantCF; // Read in from EEPROM
+  float timeConstantCF;
 
 public:
-  //Required methods to impliment for a SubSystem
   FlightAngle_CompFilter() {
-    //timeConstant = eeprom.read(FILTERTERM_ADR);
     dt = 0;
     filterTerm0 = 0;
     filterTerm1 = 0;
@@ -50,7 +48,9 @@ public:
     previousAngle = angleDeg(axis);
     filterTerm2 = rateDegPerSec(axis);
     dt = AIdT;
-    timeConstantCF = timeConstant;
+    timeConstantCF = timeConstant; // timeConstant is a global variable read in from EEPROM
+    // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
+    // Will take care of better OO implementation in future revision
   }
   
   float calculate(float newAngle, float newRate) {
@@ -59,8 +59,6 @@ public:
     filterTerm2 += filterTerm0 * dt;
     filterTerm1 = filterTerm2 + (newAngle - previousAngle) * 2 *  timeConstantCF + newRate;
     previousAngle = (filterTerm1 * dt) + previousAngle;
-    //Serial.println(availableMemory());
-    //Serial.println(filterTerm0);
     return previousAngle; // This is actually the current angle, but is stored for the next iteration
   }
 };
