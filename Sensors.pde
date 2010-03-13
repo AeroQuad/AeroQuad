@@ -119,11 +119,11 @@ float arctan2(float y, float x) {
 }
 
 float rateDegPerSec(byte axis) {
-  return (gyroADC[axis] / 1024) * aref / gyroScaleFactor;
+  return (gyroADC[axis] / 1024.0) * aref / gyroScaleFactor;
 }
 
 float rateRadPerSec(byte axis) {
-  return radians((gyroADC[axis] / 1024) * aref / gyroScaleFactor);
+  return radians((gyroADC[axis] / 1024.0) * aref / gyroScaleFactor);
 }
 
 float angleDeg(byte axis) {
@@ -134,12 +134,3 @@ float angleRad(byte axis) {
   if (axis == PITCH) return arctan2(accelADC[PITCH], sqrt((accelADC[ROLL] * accelADC[ROLL]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
   if (axis == ROLL) return arctan2(accelADC[ROLL], sqrt((accelADC[PITCH] * accelADC[PITCH]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
 }
-
-/*float angleDegRoll(void) {
-  return arctan2(accelADC[ROLL], sqrt((accelADC[PITCH] * accelADC[PITCH]) + (accelADC[ZAXIS] * accelADC[ZAXIS]))) * 57.2957795;
-}
-
-float angleDegPitch(void) {
-  return arctan2(accelADC[PITCH], sqrt((accelADC[ROLL] * accelADC[ROLL]) + (accelADC[ZAXIS] * accelADC[ZAXIS]))) * 57.2957795;
-}*/
-

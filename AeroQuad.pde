@@ -59,10 +59,10 @@
 //#define HeadingHold
 
 // Auto Level (experimental)
-//#define AutoLevel
+#define AutoLevel
 
 // Camera Stabilization (experimental)
-// Will move development to Arduino Mega (needs analogWrite support for additional pins)
+// Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
 
 // Class definition for angle estimation found in FlightAngle.h
@@ -253,7 +253,7 @@ void loop () {
         // Turn off Stable Mode if transmitter stick applied
         if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff)) {
           levelAdjust[ROLL] = 0;
-          PID[axis].integratedError = 0;
+          PID[ROLL].integratedError = 0;
         }
         if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff)) {
           levelAdjust[PITCH] = 0;
