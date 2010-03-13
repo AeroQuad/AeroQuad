@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - March 2010
+  AeroQuad v1.7 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -45,6 +45,15 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define ZEROLIMIT 2
 int axis;
 
+// Analog Reference Value
+// Use a DMM to measure the voltage between AREF and GND
+// Enter the measured voltage below to define your value for aref
+// If you don't have a DMM use the following:
+// AeroQuad Shield v1.7, aref = 3.0
+// AeroQuad Shield v1.6 or below, aref = 2.8
+float aref = 3.0; // Measure with a DMM for best accuracy
+float gyroScaleFactor = 0.002; // From datasheet
+
 // Accelerometer setup
 int accelData[3] = {0,0,0};
 int accelZero[3] = {0,0,0};
@@ -58,10 +67,6 @@ int gyroADC[3] = {0,0,0};
 // Calibration parameters
 #define FINDZERO 50
 int findZero[FINDZERO];
-
-// Analog Reference Value
-float aref = 2.99; // Measured with a DMM
-float gyroScaleFactor = 0.002; // From datasheet
 
 int findMode(int *data, int arraySize);
 void zeroGyros();

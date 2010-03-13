@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.6 - March 2010
+  AeroQuad v1.7 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,27 +24,24 @@
 #include "FlightAngle.h"
 #include "Motors.h"
 
-#include "Filter.h"
-Filter transmitterFilter[6];
-Filter gyroFilter[3];
-Filter accelFilter[3];
-
 /**************************************************************************** 
    Before flight, select the different user options for your AeroQuad below
-   Also, consult the ReadMe.html file for additional details
+   Also, consult the ReadMe.mht file for additional details
    If you need additional assitance go to http://forum.AeroQuad.info
 *****************************************************************************/
 
 // Define Flight Configuration
+// Use only one of the following definitions
 #define plusConfig
 //#define XConfig
 
 // 5DOF IMU Version
-//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300
+//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500
 
 // Yaw Gyro Type
+// Use only one of the following definitions
 #define IXZ // IXZ-500 Flat Yaw Gyro
-//#define IDG // IDG-500 Dual Axis Gyro
+//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Arduino Mega with AeroQuad Shield v1.x
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -69,12 +66,19 @@ Filter accelFilter[3];
 //#define Camera
 
 // Class definition for angle estimation found in FlightAngle.h
+// Use only one of the following variable declarations
 FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
 
 // Class definition for motor control found in Motors.h
+// Use only one of the following variable declarations
 Motors_PWM motors; // Use this for PWM ESC's
 //Motors_I2C motors; // Future capability under construction
+
+#include "Filter.h"
+Filter transmitterFilter[6];
+Filter gyroFilter[3];
+Filter accelFilter[3];
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
