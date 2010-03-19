@@ -79,15 +79,14 @@ void autoZeroGyros() {
 
 // Allows user to zero accelerometers on command
 void zeroAccelerometers() {
+  // Z accel zero point is determined in calibration through Configurator
   for (axis = ROLL; axis < YAW; axis++) {
     for (int i=0; i<FINDZERO; i++)
       findZero[i] = analogRead(accelChannel[axis]);
     accelZero[axis] = findMode(findZero, FINDZERO);
   }
-  accelZero[ZAXIS] = ZMAX - ((ZMAX - ZMIN)/2);
   writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
   writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
-  writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
 }
 
 // Works faster and is smaller than the constrain() function
@@ -131,6 +130,6 @@ float angleDeg(byte axis) {
 } 
 
 float angleRad(byte axis) {
-  if (axis == PITCH) return arctan2(accelADC[PITCH], sqrt((accelADC[ROLL] * accelADC[ROLL]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
-  if (axis == ROLL) return arctan2(accelADC[ROLL], sqrt((accelADC[PITCH] * accelADC[PITCH]) + (accelADC[ZAXIS] * accelADC[ZAXIS])));
+  if (axis == PITCH) return arctan2(accelADC[PITCH], sqrt((long(accelADC[ROLL]) * accelADC[ROLL]) + (long(accelADC[ZAXIS]) * accelADC[ZAXIS])));
+  if (axis == ROLL) return arctan2(accelADC[ROLL], sqrt((long(accelADC[PITCH]) * accelADC[PITCH]) + (long(accelADC[ZAXIS]) * accelADC[ZAXIS])));
 }

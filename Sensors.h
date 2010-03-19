@@ -44,6 +44,7 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 #define ZAXIS 2
 #define ZEROLIMIT 2
 int axis;
+int zMid;
 
 // Analog Reference Value
 // Use a DMM to measure the voltage between AREF and GND
@@ -51,7 +52,7 @@ int axis;
 // If you don't have a DMM use the following:
 // AeroQuad Shield v1.7, aref = 3.0
 // AeroQuad Shield v1.6 or below, aref = 2.8
-float aref = 3.0; // Measure with a DMM for best accuracy
+float aref; // Measure with a DMM for best accuracy
 float gyroScaleFactor = 0.002; // From datasheet
 
 // Accelerometer setup

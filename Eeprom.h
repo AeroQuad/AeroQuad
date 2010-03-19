@@ -72,6 +72,7 @@
 #define HEADING_PGAIN_ADR 204
 #define HEADING_IGAIN_ADR 208
 #define HEADING_DGAIN_ADR 212
+#define AREF_ADR 216
 
 float readFloat(int address);
 void writeFloat(float value, int address);
