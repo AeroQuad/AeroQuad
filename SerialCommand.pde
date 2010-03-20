@@ -188,7 +188,7 @@ void readSerialCommand() {
       autoZeroGyros();
       zeroGyros();
       zeroAccelerometers();
-      accelZero[ZAXIS] = 3.0; // Use 2.8 if you are using an AeroQuad Shield < v1.7
+      aref = 3.0; // Use 2.8 if you are using an AeroQuad Shield < v1.7
       zeroIntegralError();
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
@@ -229,9 +229,8 @@ void readSerialCommand() {
     case 'c': // calibrate accels
       zeroAccelerometers();
       break;
-    case 'd': // calibrate aref and accel Z midpoint
+    case 'd': // send aref
       aref = readFloatSerial();
-      accelZero[ZAXIS] = readFloatSerial();
       break;
     }
   digitalWrite(LEDPIN, HIGH);

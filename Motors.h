@@ -41,11 +41,12 @@ int motor = 0;
 int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
 int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
 int delta = 0;
-// If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V 
-// Scale gyro output (-465 to +465) to motor commands (1000 to 2000) 
-// use y = mx + b 
-float mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465)) 
-float bMotorRate = 1500;   // b = y1 - m * x1
+// Use motor output as common unit to scale to (1000 - 2000)
+// y2 = 2000, y1 = 1000, x2 = 802, x1 = 120
+// m = (y2 - y1) / (x2 - x1)
+float mMotorRate = (2000 - 1000) / (GYROMAX - GYROMIN);
+// b = y1 - m*x1
+float bMotorRate = 1000 - (mMotorRate * GYROMIN);
 // Ground station control
 int remoteCommand[4] = {1000,1000,1000,1000};
 
@@ -63,7 +64,9 @@ private:
 
 public:
   Motors_PWM() {
-    // Scale motor commands to analogWrite		
+    // Scale motor commands to analogWrite
+    // Only supports commands from 0-255 => 0 - 100% duty cycle
+    // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
     // m = (250-126)/(2000-1000) = 0.124		
     // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
     mMotorCommand = 0.124;		

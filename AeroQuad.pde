@@ -36,7 +36,7 @@
 //#define XConfig
 
 // 5DOF IMU Version
-//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500
+//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500      
 
 // Yaw Gyro Type
 // Use only one of the following definitions

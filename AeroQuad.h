@@ -34,6 +34,20 @@
 #define OFF 0
 #define byte uint8_t
 
+// Sensor definitions
+// Update these defines if using a different gyro
+// IDG/IXZ500 full scale output = +/- 500 deg/sec
+// IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+// IDG/IXZ500 zero bias = 1.35V
+#define GYRORANGE 500
+#define GYROSCALE 0.002
+#define GYROZERO 1.35
+// If AREF = 3V
+// Gyro output = 500 * 0.002 = 1V, with zero bias of 1.35, max output = 2.35V and min output is 0.35V
+// Gyro voltage output = V/AREF*1024, (2.35/3.0)*1024 = 802, (0.35/3.0)*1024 = 120
+#define GYROMAX (GYROZERO + (GYRORANGE * GYROSCALE)) / aref * 1024
+#define GYROMIN (GYROZERO - (GYRORANGE * GYROSCALE)) / aref * 1024
+
 // Auto level setup
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM

@@ -103,6 +103,7 @@ byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
 float xmitFactor; // Read in from EEPROM
+// This scale not fully implemented, kept for future use
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
 

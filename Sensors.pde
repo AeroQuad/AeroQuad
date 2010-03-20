@@ -85,8 +85,10 @@ void zeroAccelerometers() {
       findZero[i] = analogRead(accelChannel[axis]);
     accelZero[axis] = findMode(findZero, FINDZERO);
   }
+  accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
   writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
   writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
+  writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
 }
 
 // Works faster and is smaller than the constrain() function
