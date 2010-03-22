@@ -213,6 +213,22 @@ void sendSerialTelemetry() {
     Serial.println("1.7");
     queryType = 'X';
     break;
+  case 'e': // Send AREF value
+    Serial.println(aref);
+    queryType = 'X';
+    break;
+  case '=': // Reserved debug command to view any variable from Serial Monitor
+    /*Serial.print(gyroMaxOutput);
+    comma();
+    Serial.print(gyroMinOutput);
+    comma();
+    Serial.print(gyroZeroOutputVoltage);
+    comma();*/
+    Serial.print(aref);
+    comma();
+    Serial.println(headingScaleFactor);
+    queryType = 'X';
+    break;
   }
 }
 

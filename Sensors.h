@@ -29,31 +29,25 @@
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
+#define ZAXIS 2
 
 int gyroChannel[3] = {ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN};
 int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 
-// These A/D values depend on how well the sensors are mounted
-// change these values to your unique configuration
-// #define XMIN 405
-// #define XMAX 607
-// #define YMIN 409
-// #define YMAX 618
-#define ZMIN 479
-#define ZMAX 715
-#define ZAXIS 2
-#define ZEROLIMIT 2
-int axis;
-int zMid;
-
 // Analog Reference Value
+// This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
 // Enter the measured voltage below to define your value for aref
 // If you don't have a DMM use the following:
 // AeroQuad Shield v1.7, aref = 3.0
 // AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Measure with a DMM for best accuracy
-float gyroScaleFactor = 0.002; // From datasheet
+float aref; // Read in from EEPROM
+int axis;
+
+// Gyro Values
+// Update these variables if using a different gyro
+float gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
+float gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 
 // Accelerometer setup
 int accelData[3] = {0,0,0};
@@ -66,8 +60,10 @@ int gyroZero[3] = {0,0,0};
 int gyroADC[3] = {0,0,0};
 
 // Calibration parameters
+#define ZEROLIMIT 2
 #define FINDZERO 50
 int findZero[FINDZERO];
+
 
 int findMode(int *data, int arraySize);
 void zeroGyros();

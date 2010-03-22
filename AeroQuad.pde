@@ -59,7 +59,7 @@
 //#define HeadingHold
 
 // Auto Level (experimental)
-#define AutoLevel
+//#define AutoLevel
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -85,8 +85,10 @@ Filter accelFilter[3];
 // ************************************************************
 void setup() {
   Serial.begin(BAUD);
-  analogReference(EXTERNAL); // Current external ref is connected to 3.3V
+  analogReference(EXTERNAL);
   pinMode (LEDPIN, OUTPUT);
+  
+  // Configure gyro auto zero pins
   pinMode (AZPIN, OUTPUT);
   digitalWrite(AZPIN, LOW);
   delay(1);
@@ -104,6 +106,10 @@ void setup() {
   //  Auto Zero Gyros
   autoZeroGyros();
   
+  // Heading hold
+  // aref is read in from EEPROM and originates from Configurator
+  headingScaleFactor = (aref / 1024.0) / 0.002 * (PI/2.0);
+  
   // Calibrate sensors
   zeroGyros();
   zeroIntegralError();
@@ -112,6 +118,7 @@ void setup() {
   for (axis = ROLL; axis < YAW; axis++)
     angle[axis].initialize(axis);
     
+  // Initialize noise filters
   for (channel = ROLL; channel < LASTCHANNEL; channel++)
     transmitterFilter[channel].initialize(smoothTransmitter[channel]);
   for (axis = ROLL; axis < LASTAXIS; axis++) {
@@ -265,34 +272,33 @@ void loop () {
     // ************************** Update Roll/Pitch ***********************
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], (gyroData[ROLL] * mMotorRate) + bMotorRate, &PID[ROLL]);
-    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], (gyroData[PITCH] * mMotorRate) + bMotorRate, &PID[PITCH]);
+    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
+    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
 
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
     // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
     #ifdef HeadingHold
-      currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
-      if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
-        if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
-          headingHold = 0;
-          heading = currentHeading;
+      if (transmitterCommandSmooth[AUX] < 1800) {
+        currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
+        if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+          if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
+            headingHold = 0;
+            heading = currentHeading;
+          }
+          else // no yaw input, calculate current heading vs. desired heading heading hold
+            headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
         }
-        else // no yaw input, calculate current heading vs. desired heading heading hold
-          headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
+        else {
+          heading = 0;
+          currentHeading = 0;
+          headingHold = 0;
+          PID[HEADING].integratedError = 0;
+        }
       }
-      else {
-        heading = 0;
-        currentHeading = 0;
-        headingHold = 0;
-        PID[HEADING].integratedError = 0;
-      }
-      motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
     #endif
     
-    #ifndef HeadingHold
-      motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW], (gyroData[YAW] * mMotorRate) + bMotorRate, &PID[YAW]);
-    #endif
+    motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyroData[YAW] + 1500, &PID[YAW]);
   
     // ****************** Calculate Motor Commands *****************
     if (armed && safetyCheck) {

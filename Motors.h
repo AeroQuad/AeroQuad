@@ -41,12 +41,7 @@ int motor = 0;
 int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
 int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
 int delta = 0;
-// Use motor output as common unit to scale to (1000 - 2000)
-// y2 = 2000, y1 = 1000, x2 = 802, x1 = 120
-// m = (y2 - y1) / (x2 - x1)
-float mMotorRate = (2000 - 1000) / (GYROMAX - GYROMIN);
-// b = y1 - m*x1
-float bMotorRate = 1000 - (mMotorRate * GYROMIN);
+
 // Ground station control
 int remoteCommand[4] = {1000,1000,1000,1000};
 
@@ -70,7 +65,7 @@ public:
     // m = (250-126)/(2000-1000) = 0.124		
     // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
     mMotorCommand = 0.124;		
-    bMotorCommand = 2;
+    bMotorCommand = 2.0;
 
     for (motor = FRONT; motor < LASTMOTOR; motor++) {
       //motorCommand[motor] = 1000;
