@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.7 - March 2010
+  AeroQuad v1.7.1 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -75,6 +75,7 @@ FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 Motors_PWM motors; // Use this for PWM ESC's
 //Motors_I2C motors; // Future capability under construction
 
+#include "Receiver.h"
 #include "Filter.h"
 Filter transmitterFilter[6];
 Filter gyroFilter[3];

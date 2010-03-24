@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.7 - March 2010
+  AeroQuad v1.7.1 - March 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,7 +25,6 @@
 #include "WProgram.h"
 #include "Eeprom.h"
 #include "PID.h"
-#include "Receiver.h"
 #include "Sensors.h"
 
 #define BAUD 115200
