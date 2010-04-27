@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.7.1 - March 2010
+  AeroQuad v1.8 - April 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -20,5 +20,8 @@
 
 #ifndef __FILTER_H__
 #define __FILTER_H__
+
+// Currently implemented directly in code
+// Will delete this before final release
 
 #endif
