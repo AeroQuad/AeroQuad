@@ -21,40 +21,4 @@
 #ifndef __FILTER_H__
 #define __FILTER_H__
 
-// Filter parameters
-#define GYRO 0
-#define ACCEL 1
-float smoothTransmitter[6];
-float smoothFactor[2];
-float smoothHeading;
-
-class Filter {
-private:
-  float _smoothFactor;
-  int _previousData;
-  int _smoothedData;
-
-public:
-  Filter() {
-    _smoothFactor = 1.0;
-    _previousData = 0;
-  }
-  
-  void initialize(float smoothFactor) {
-    if (smoothFactor > 1.0) smoothFactor = 1.0;
-    if (smoothFactor <= 0) smoothFactor = 0.001;
-    _smoothFactor = smoothFactor;
-    _previousData = 0;
-  }
-    
-  int smooth(int currentData) {
-    _smoothedData = (_previousData * (1 - _smoothFactor)) + (currentData * _smoothFactor);
-    _previousData = currentData;
-    return _smoothedData;
-  }
-  
-  void setSmoothFactor(float value) {_smoothFactor = value;}
-  float getSmoothFactor(void) {return _smoothFactor;}
-};
-
 #endif

@@ -21,6 +21,16 @@
 void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
+  case '=': // Reserved debug command to view any variable from Serial Monitor
+    //Serial.print(smoothTransmitter[channel]);
+    //comma();
+    Serial.print(flightAngle[ROLL]);
+    comma();
+    Serial.print(transmitterCommand[ROLL] * mLevelTransmitter + bLevelTransmitter);
+    comma();
+    Serial.println(PID[LEVELROLL].integratedError);
+    //queryType = 'X';
+    break;
   case 'B': // Send roll and pitch gyro PID values
     Serial.print(PID[ROLL].P);
     comma();
@@ -215,18 +225,6 @@ void sendSerialTelemetry() {
     break;
   case 'e': // Send AREF value
     Serial.println(aref);
-    queryType = 'X';
-    break;
-  case '=': // Reserved debug command to view any variable from Serial Monitor
-    /*Serial.print(gyroMaxOutput);
-    comma();
-    Serial.print(gyroMinOutput);
-    comma();
-    Serial.print(gyroZeroOutputVoltage);
-    comma();*/
-    Serial.print(receiverPin[ROLL]);
-    comma();
-    Serial.println(readReceiver(receiverPin[ROLL]));
     queryType = 'X';
     break;
   }

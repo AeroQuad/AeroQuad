@@ -26,6 +26,7 @@
 #include "Eeprom.h"
 #include "PID.h"
 #include "Sensors.h"
+#include "Filter.h"
 
 #define BAUD 115200
 #define LEDPIN 13
@@ -33,10 +34,20 @@
 #define OFF 0
 #define byte uint8_t
 
+// Filter parameters
+#define GYRO 0
+#define ACCEL 1
+float smoothTransmitter[6];
+float smoothFactor[2];
+float smoothHeading;
+
 // Auto level setup
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
+// Scale to convert 1000-2000 PWM to +/- 45 degrees
+float mLevelTransmitter = 0.09;
+float bLevelTransmitter = -135;
 
 // Heading hold
 // aref / 1024 = voltage per A/D bit
@@ -45,6 +56,13 @@ float headingScaleFactor;
 float heading = 0; // measured heading from yaw gyro (process variable)
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float currentHeading = 0; // current heading the quad is set to (set point)
+
+// Altitude Adjust
+float zAccelHover;
+int throttleAdjust;
+int throttleAdjustGain = 10; // Look to make this a command setting
+int minThrottleAdjust = -200;
+int maxThrottleAdjust = 200;
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development

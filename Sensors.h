@@ -44,6 +44,13 @@ int accelChannel[3] = {ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN};
 float aref; // Read in from EEPROM
 int axis;
 
+// Accelerometer Values
+// Output is ratiometric for ADXL 335
+// If Vs = 3.6V, then output sensitivity is 360mV/g
+// If Vs = 2V, then it's 195 mV/g
+// Then if Vs = 3.3V, then it's 329.062 mV/g
+float accelScaleFactor = 0.000329062;
+
 // Gyro Values
 // Update these variables if using a different gyro
 float gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec

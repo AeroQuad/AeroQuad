@@ -21,8 +21,7 @@
 #include "PID.h"
 
 // Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters)
-{
+float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
   float error;
   float dTerm;
 
@@ -41,3 +40,18 @@ void zeroIntegralError() {
   for (axis = ROLL; axis < LASTLEVELAXIS; axis++)
     PID[axis].integratedError = 0;
 }
+
+float updatePIDangle(float targetPosition, float currentPosition, int gyroData, struct PIDdata *PIDparameters) {
+  float error;
+  float dTerm;
+
+  error = targetPosition - currentPosition;
+  
+  PIDparameters->integratedError += error; // * controldT;
+  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
+  
+  dTerm = PIDparameters->D * gyroData;
+
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+}
+

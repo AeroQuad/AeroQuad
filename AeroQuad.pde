@@ -56,10 +56,10 @@
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-//#define HeadingHold
+#define HeadingHold
 
 // Auto Level (experimental)
-//#define AutoLevel
+#define AutoLevel
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -75,11 +75,7 @@ FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 Motors_PWM motors; // Use this for PWM ESC's
 //Motors_I2C motors; // Future capability under construction
 
-#include "Receiver.h"
-#include "Filter.h"
-Filter transmitterFilter[6];
-Filter gyroFilter[3];
-Filter accelFilter[3];
+#include "Receiver.h" // This needs to be here to correctly define Mega pins for #define Mega_AQ1x
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -119,14 +115,6 @@ void setup() {
   for (axis = ROLL; axis < YAW; axis++)
     angle[axis].initialize(axis);
     
-  // Initialize noise filters
-  for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    transmitterFilter[channel].initialize(smoothTransmitter[channel]);
-  for (axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroFilter[axis].initialize(smoothFactor[GYRO]);
-    accelFilter[axis].initialize(smoothFactor[ACCEL]);
-  }
-  
   // Camera stabilization setup
   #ifdef Camera
     rollCamera.attach(ROLLCAMERAPIN);
@@ -161,7 +149,7 @@ void loop () {
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      transmitterCommandSmooth[channel] = transmitterFilter[channel].smooth(receiverData[channel]);
+      transmitterCommandSmooth[channel] = (transmitterCommandSmooth[channel] * (1 - smoothTransmitter[channel])) + (receiverData[channel] * smoothTransmitter[channel]);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < LASTAXIS; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
@@ -228,8 +216,8 @@ void loop () {
   
     // Compiler seems to like calculating this in separate loop better
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroData[axis] = gyroFilter[axis].smooth(gyroADC[axis]);
-      accelData[axis] = accelFilter[axis].smooth(accelADC[axis]);
+      gyroData[axis] = (gyroData[axis] * (1 - smoothFactor[GYRO])) + gyroADC[axis] * smoothFactor[GYRO];
+      accelData[axis] = (accelData[axis] * (1 - smoothFactor[ACCEL])) + accelADC[axis] * smoothFactor[ACCEL];
     }
 
     // ****************** Calculate Absolute Angle *****************
@@ -248,34 +236,22 @@ void loop () {
   if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
 
   // ********************* Check Flight Mode *********************
-    #ifdef AutoLevel
       if (transmitterCommandSmooth[MODE] < 1500) {
         // Acrobatic Mode
-        levelAdjust[ROLL] = 0;
-        levelAdjust[PITCH] = 0;
+        // ************************** Update Roll/Pitch ***********************
+        // updatePID(target, measured, PIDsettings);
+        // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
+        motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
+        motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
       }
+      #ifdef AutoLevel
       else {
         // Stable Mode
-        for (axis = ROLL; axis < YAW; axis++)
-          levelAdjust[axis] = limitRange(updatePID(0, flightAngle[axis], &PID[LEVELROLL + axis]), -levelLimit, levelLimit);
-        // Turn off Stable Mode if transmitter stick applied
-        if ((abs(receiverData[ROLL] - transmitterCenter[ROLL]) > levelOff)) {
-          levelAdjust[ROLL] = 0;
-          PID[ROLL].integratedError = 0;
-        }
-        if ((abs(receiverData[PITCH] - transmitterCenter[PITCH]) > levelOff)) {
-          levelAdjust[PITCH] = 0;
-          PID[PITCH].integratedError = 0;
-        }
+        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], gyroData[ROLL], &PID[LEVELROLL]);
+        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], gyroData[PITCH], &PID[LEVELPITCH]);
       }
-    #endif
-    
-    // ************************** Update Roll/Pitch ***********************
-    // updatePID(target, measured, PIDsettings);
-    // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-    motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL] + levelAdjust[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
-    motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH] - levelAdjust[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
-
+      #endif
+      
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
     // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
@@ -300,8 +276,8 @@ void loop () {
     #endif
     
     motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyroData[YAW] + 1500, &PID[YAW]);
-  
-    // ****************** Calculate Motor Commands *****************
+      
+    // *********************** Calculate Motor Commands **********************
     if (armed && safetyCheck) {
       #ifdef plusConfig
         motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
@@ -317,7 +293,15 @@ void loop () {
         motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW];
       #endif
     }
-  
+    
+    // ****************************** Altitude Adjust *************************
+    // s = (at^2)/2, t = 0.002
+    //zAccelHover += ((accelData[ZAXIS] * accelScaleFactor) * 0.000004) * 0.5;
+    /*zAccelHover = accelADC[ROLL] / tan(angleRad(ROLL));
+    throttleAdjust = limitRange((zAccelHover - accelADC[ZAXIS]) * throttleAdjustGain, minThrottleAdjust, maxThrottleAdjust);
+    for (motor = FRONT; motor < LASTMOTOR; motor++)
+      motorCommand[motor] += throttleAdjust;*/
+
     // Prevents too little power applied to motors during hard manuevers
     // Also even motor power on both sides if limit encountered
     if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
