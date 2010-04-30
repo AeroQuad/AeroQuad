@@ -56,7 +56,7 @@
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-#define HeadingHold
+//#define HeadingHold
 
 // Auto Level (experimental)
 #define AutoLevel
@@ -247,8 +247,8 @@ void loop () {
       #ifdef AutoLevel
       else {
         // Stable Mode
-        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], gyroData[ROLL], &PID[LEVELROLL]);
-        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], gyroData[PITCH], &PID[LEVELPITCH]);
+        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], gyroData[ROLL], &PID[LEVELROLL], &PID[ROLL]);
+        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], gyroData[PITCH], &PID[LEVELPITCH], &PID[PITCH]);
       }
       #endif
       
