@@ -56,7 +56,7 @@
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-//#define HeadingHold
+#define HeadingHold
 
 // Auto Level (experimental)
 #define AutoLevel
@@ -69,6 +69,7 @@
 // Use only one of the following variable declarations
 FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
+//FlightAngle_FabQuad angle[2]; // developed by FabQuad (http://aeroquad.com/showthread.php?p=3995#post3995)
 
 // Class definition for motor control found in Motors.h
 // Use only one of the following variable declarations
@@ -105,14 +106,16 @@ void setup() {
   
   // Heading hold
   // aref is read in from EEPROM and originates from Configurator
-  headingScaleFactor = (aref / 1024.0) / 0.002 * (PI/2.0);
+  headingScaleFactor = (aref / 1024.0) / gyroScaleFactor * (PI/2.0);
   
   // Calibrate sensors
   zeroGyros();
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
+  //accelADC[ZAXIS] = analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS];
   for (axis = ROLL; axis < YAW; axis++)
+    //angle[axis].initialize(accelADC[ZAXIS]);
     angle[axis].initialize(axis);
     
   // Camera stabilization setup
@@ -223,7 +226,9 @@ void loop () {
     // ****************** Calculate Absolute Angle *****************
     // angle[axis].calculate() defined in FlightAngle.h
     flightAngle[ROLL] = angle[ROLL].calculate(angleDeg(ROLL), rateDegPerSec(ROLL));
+    //flightAngle[ROLL] = angle[ROLL].calculate(accelADC[ROLL], gyroData[ROLL]);
     flightAngle[PITCH] = angle[PITCH].calculate(angleDeg(PITCH), rateDegPerSec(PITCH));
+    //flightAngle[PITCH] = angle[PITCH].calculate(accelADC[PITCH], -gyroData[PITCH]);
     analogInputTime = currentTime;
   } 
 //////////////////////////////

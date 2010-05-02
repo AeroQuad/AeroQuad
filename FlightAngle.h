@@ -112,4 +112,55 @@ public:
   }
 };
 
+// Angle estimation routine by FabQuad
+// http://aeroquad.com/showthread.php?p=3995#post3995
+class FlightAngle_FabQuad {
+private:
+  float dT;
+  float _aref;
+  float _gyroScaleFactor;
+  float accelComplement;
+  float gyroAngle;
+  float previousAngle;
+  float currentAngle;
+  float adjustment;
+  float gyroMath;
+  float accelMath;
+  float accel_1g;
+
+public:
+  FlightAngle_FabQuad() {
+    accelComplement = 0.005; // 0.005
+    adjustment = 0.95; // 0.95
+    previousAngle = 0;
+    gyroAngle = 0;
+    currentAngle = 0;
+  }
+  
+  void initialize(float zAxis, float gyroScaleFactor, float AIdT) {
+    dT = AIdT;
+    _gyroScaleFactor = gyroScaleFactor;
+    _aref = aref;
+    
+    gyroMath = _aref / _gyroScaleFactor * dT * (PI/2);
+    accel_1g = zAxis;
+    accelMath = 90.0 * (PI/4);
+  }
+  
+  float calculate(int accelData, int gyroData) {
+    gyroAngle  = previousAngle  + float((gyroData) / 1024.0 * gyroMath);
+    currentAngle  = gyroAngle  * (1-accelComplement) + float(accelData) / accel_1g * accelMath * adjustment * accelComplement;
+    previousAngle = currentAngle;
+    return currentAngle;
+  }
+  
+  void setAccelComplement(float data) {
+    accelComplement = data;
+  }
+  
+  void setFabQuadFilterAdustment(float data) {
+    adjustment = data;
+  }
+    
+};
 #endif
