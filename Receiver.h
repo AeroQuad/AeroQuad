@@ -23,11 +23,27 @@
 
 #include "pins_arduino.h"
 
+#ifdef AeroQuadAPM
+#include <avr/interrupt.h>
+  volatile unsigned int Start_Pulse =0;
+  volatile unsigned int Stop_Pulse =0;
+  volatile unsigned int Pulse_Width =0;
+  volatile byte PPM_Counter=0;
+  volatile int PWM_RAW[8] = {2400,2400,2400,2400,2400,2400,2400,2400};
+  #define ROLLPIN 1
+  #define PITCHPIN 2
+  #define YAWPIN 3
+  #define THROTTLEPIN 0
+  #define MODEPIN 4
+  #define AUXPIN 5
+  int receiverPin[6] = {1,2,4,0,3,5};
+#endif
+
 // Receiver pin definitions
 // To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
 // These pins need to correspond to the ROLL/PITCH/YAW/THROTTLE/MODE/AUXPIN below
 // Pin 2=18, Pin 3=19, Pin 4=20, Pin 5=21, Pin 6=22, Pin 7=23
-#ifndef Mega_AQ1x
+#ifdef Duemilanove_AQ1x
   #define ROLLPIN 2
   #define PITCHPIN 5
   #define YAWPIN 6
@@ -36,6 +52,7 @@
   #define AUXPIN 8
   int receiverPin[6] = {18, 21, 22, 20, 23, 0}; // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
 #endif
+
 #ifdef Mega_AQ1x //Receiver pin assignments for the Arduino Mega using an AeroQuad v1.x Shield
   //The defines below are for documentation only of the Mega receiver input
   //The real pin assignments happen in initializeMegaPcInt2()

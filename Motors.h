@@ -21,11 +21,11 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#define FRONTMOTORPIN 3
-#define REARMOTORPIN 9
-#define RIGHTMOTORPIN 10
-#define LEFTMOTORPIN 11
-#define LASTMOTORPIN 12
+#define FRONTMOTORPIN 2
+#define REARMOTORPIN 3
+#define RIGHTMOTORPIN 46
+#define LEFTMOTORPIN 45
+//#define LASTMOTORPIN 46
 #define FRONT 0
 #define REAR 1
 #define RIGHT 2

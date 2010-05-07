@@ -19,7 +19,7 @@
 */
 
 #include <EEPROM.h>
-#include <Servo.h>
+//#include <Servo.h>
 #include "AeroQuad.h"
 #include "FlightAngle.h"
 #include "Motors.h"
@@ -53,6 +53,8 @@
 // For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 //#define Mega_AQ1x
+//#define Duemilanove_AQ1x
+#define AeroQuadAPM
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
@@ -84,6 +86,12 @@ Motors_PWM motors; // Use this for PWM ESC's
 void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL);
+  
+  //Init_PWM1(); //OUT2&3 
+  //Init_PWM3(); //OUT6&7
+  //Init_PWM5(); //OUT0&1
+  Init_PPM_PWM4(); //OUT4&5
+
   pinMode (LEDPIN, OUTPUT);
   
   // Configure gyro auto zero pins

@@ -24,11 +24,11 @@ void sendSerialTelemetry() {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     //Serial.print(smoothTransmitter[channel]);
     //comma();
-    Serial.print(flightAngle[ROLL]);
-    comma();
-    Serial.print(transmitterCommand[ROLL] * mLevelTransmitter + bLevelTransmitter);
-    comma();
-    Serial.println(PID[LEVELROLL].integratedError);
+   // Serial.print(flightAngle[ROLL]);
+    //comma();
+    //Serial.print(transmitterCommand[ROLL] * mLevelTransmitter + bLevelTransmitter);
+    //comma();
+    Serial.println(readReceiver(receiverPin[ROLL]));
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
