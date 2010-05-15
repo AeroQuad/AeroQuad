@@ -186,25 +186,6 @@ SIGNAL(PCINT2_vect) {
 #endif
 
 #ifdef AeroQuadAPM
-/*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos 
-  OCR4A is used as the top counter*/
-void Init_PPM_PWM4(void)
-{
-  pinMode(49, INPUT);
-  //pinMode(7,OUTPUT);
- // pinMode(8,OUTPUT);
-      //Remember the registers not declared here remains zero by default... 
-  TCCR4A =((1<<WGM40)|(1<<WGM41)|(1<<COM4C1)|(1<<COM4B1)|(1<<COM4A1));  
-  TCCR4B = ((1<<WGM43)|(1<<WGM42)|(1<<CS41)|(1<<ICES4)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
-  OCR4A = 40000; ///50hz freq...Datasheet says  (system_freq/prescaler)/target frequency. So (16000000hz/8)/50hz=40000, 
-  //must be 50hz because is the servo standard (every 20 ms, and 1hz = 1sec) 1000ms/20ms=50hz, elementary school stuff...   
-  OCR4B = 3000; //PH4, OUT5
-  OCR4C = 3000; //PH5, OUT4
- 
-  TIMSK4 |= (1<<ICIE4); //Timer interrupt mask
-  sei();
-}
-
 /****************************************************
   Interrupt Vector
  ****************************************************/
@@ -258,6 +239,23 @@ void configureReceiver() {
   initializeMegaPcInt2();
   for (channel = ROLL; channel < LASTCHANNEL; channel++)
     pinData[receiverChannel[channel]].edge == FALLING_EDGE;
+  #endif
+  #ifdef AeroQuadAPM
+  /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos 
+  OCR4A is used as the top counter*/
+  pinMode(49, INPUT);
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+      //Remember the registers not declared here remains zero by default... 
+  TCCR4A =((1<<WGM40)|(1<<WGM41)|(1<<COM4C1)|(1<<COM4B1)|(1<<COM4A1));  
+  TCCR4B = ((1<<WGM43)|(1<<WGM42)|(1<<CS41)|(1<<ICES4)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
+  OCR4A = 40000; ///50hz freq...Datasheet says  (system_freq/prescaler)/target frequency. So (16000000hz/8)/50hz=40000, 
+  //must be 50hz because is the servo standard (every 20 ms, and 1hz = 1sec) 1000ms/20ms=50hz, elementary school stuff...   
+  OCR4B = 3000; //PH4, OUT5
+  OCR4C = 3000; //PH5, OUT4
+ 
+  TIMSK4 |= (1<<ICIE4); //Timer interrupt mask
+  sei();
   #endif
 }
 

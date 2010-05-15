@@ -115,11 +115,11 @@ void sendSerialTelemetry() {
     break;
   case 'Q': // Send sensor data
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(gyroADC[axis]);
+      Serial.print(gyroData[axis]);
       comma();
     }
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(accelADC[axis]);
+      Serial.print(accelData[axis]);
       comma();
     }
     for (axis = ROLL; axis < YAW; axis++) {
@@ -220,7 +220,7 @@ void sendSerialTelemetry() {
     Serial.println(remoteCommand[LEFT]);
     break;
   case '!': // Send flight software version
-    Serial.println("1.7");
+    Serial.println("1.8");
     queryType = 'X';
     break;
   case 'e': // Send AREF value

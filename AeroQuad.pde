@@ -32,8 +32,8 @@
 
 // Define Flight Configuration
 // Use only one of the following definitions
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500      
@@ -58,10 +58,10 @@
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-#define HeadingHold
+//#define HeadingHold
 
 // Auto Level (experimental)
-#define AutoLevel
+//#define AutoLevel
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -76,6 +76,7 @@ FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 // Class definition for motor control found in Motors.h
 // Use only one of the following variable declarations
 Motors_PWM motors; // Use this for PWM ESC's
+//Motors_APM motors; // Use this for AMP compatability (connect OUT0-3)
 //Motors_I2C motors; // Future capability under construction
 
 #include "Receiver.h" // This needs to be here to correctly define Mega pins for #define Mega_AQ1x
@@ -86,14 +87,7 @@ Motors_PWM motors; // Use this for PWM ESC's
 void setup() {
   Serial.begin(BAUD);
   analogReference(EXTERNAL);
-  
-  //Init_PWM1(); //OUT2&3 
-  //Init_PWM3(); //OUT6&7
-  //Init_PWM5(); //OUT0&1
-  Init_PPM_PWM4(); //OUT4&5
-
   pinMode (LEDPIN, OUTPUT);
-  
   // Configure gyro auto zero pins
   pinMode (AZPIN, OUTPUT);
   digitalWrite(AZPIN, LOW);
@@ -198,7 +192,9 @@ void loop () {
     }
     // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
     //if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
-      //minCommand = MINTHROTTLE;
+    //  minCommand = MINCOMMAND;
+    //else
+    //  minCommand = MINTHROTTLE;
     receiverTime = currentTime;
   } 
 /////////////////////////////
