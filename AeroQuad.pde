@@ -63,7 +63,7 @@
 //#define HeadingHold
 
 // Auto Level (experimental)
-//#define AutoLevel
+#define AutoLevel
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)

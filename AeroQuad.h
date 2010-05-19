@@ -130,7 +130,7 @@ byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
 byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
-byte fastTransfer = ON;
+byte fastTransfer = OFF;
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
 // All loops on = 2.4 ms

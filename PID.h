@@ -55,25 +55,10 @@ float updatePIDangle(float targetPosition, float currentPosition, int gyroData, 
 
   error = targetPosition - currentPosition;
   
-  PIDparameters->integratedError += error; // * controldT;
+  PIDparameters->integratedError += error * controldT;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   dTerm = (((targetPosition - PIDparameters->lastPosition) * levelLimit) - gyroData) * PIDparameters->D;
 
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
-}
-
-float updatePIDdiy(float targetPosition, float currentPosition, float gyroAngle, struct PIDdata *PIDparameters) {
-  float error;
-  float dTerm;
-  
-  error = constrain(targetPosition - currentPosition, 30, 30);
-
-  PIDparameters->integratedError += error * controldT;
-  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -50, 50);
-
-  dTerm = (((targetPosition - PIDparameters->lastPosition) * levelLimit) - gyroAngle) * PIDparameters->D;
-  PIDparameters->lastPosition = targetPosition;
-  
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
 
