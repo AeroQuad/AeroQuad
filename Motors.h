@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,20 +21,20 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-//#ifdef AeroQuadAPM
+#ifdef AeroQuadAPM
 #define FRONTMOTORPIN 8
 #define REARMOTORPIN 7
 #define RIGHTMOTORPIN 3
 #define LEFTMOTORPIN 2
-//#endif
+#endif
 
-/*#ifndef AeroQuadAPM
+#ifndef AeroQuadAPM
 #define FRONTMOTORPIN 3
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
 #define LEFTMOTORPIN 11
 #define LASTMOTORPIN 12
-#endif*/
+#endif
 
 #define FRONT 0
 #define REAR 1
@@ -142,6 +142,7 @@ public:
   }
 };
 
+// Need to set this up as a #define because Duemilanove does not have Mega/APM register references
 #ifdef AeroQuadAPM
 class Motors_APM {
 private:

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,8 +21,10 @@
 #include <EEPROM.h>
 //#include <Servo.h>
 #include "AeroQuad.h"
-#include "FlightAngle.h"
-#include "Motors.h"
+#include "Filter.h"
+#include "Eeprom.h"
+#include "Sensors.h"
+#include "PID.h"
 
 /**************************************************************************** 
    Before flight, select the different user options for your AeroQuad below
@@ -53,8 +55,8 @@
 // For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 //#define Mega_AQ1x
-//#define Duemilanove_AQ1x
-#define AeroQuadAPM
+#define Duemilanove_AQ1x
+//#define AeroQuadAPM
 
 // Heading Hold (experimental)
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
@@ -69,12 +71,14 @@
 
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
+#include "FlightAngle.h"
 FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
 //FlightAngle_FabQuad angle[2]; // developed by FabQuad (http://aeroquad.com/showthread.php?p=3995#post3995)
 
 // Class definition for motor control found in Motors.h
 // Use only one of the following variable declarations
+#include "Motors.h"
 Motors_PWM motors; // Use this for PWM ESC's
 //Motors_APM motors; // Use this for AMP compatability (connect OUT0-3)
 //Motors_I2C motors; // Future capability under construction
@@ -154,7 +158,7 @@ void loop () {
       receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
-      transmitterCommandSmooth[channel] = (transmitterCommandSmooth[channel] * (1 - smoothTransmitter[channel])) + (receiverData[channel] * smoothTransmitter[channel]);
+      transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], smoothTransmitter[channel]);
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < LASTAXIS; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
@@ -223,8 +227,8 @@ void loop () {
   
     // Compiler seems to like calculating this in separate loop better
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroData[axis] = (gyroData[axis] * (1 - smoothFactor[GYRO])) + gyroADC[axis] * smoothFactor[GYRO];
-      accelData[axis] = (accelData[axis] * (1 - smoothFactor[ACCEL])) + accelADC[axis] * smoothFactor[ACCEL];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
     }
 
     // ****************** Calculate Absolute Angle *****************
@@ -245,19 +249,21 @@ void loop () {
   if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
 
   // ********************* Check Flight Mode *********************
+      #ifdef AutoLevel
       if (transmitterCommandSmooth[MODE] < 1500) {
+      #endif
         // Acrobatic Mode
         // ************************** Update Roll/Pitch ***********************
         // updatePID(target, measured, PIDsettings);
         // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
         motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
         motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
-      }
       #ifdef AutoLevel
+      }
       else {
         // Stable Mode
-        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], gyroData[ROLL], &PID[LEVELROLL], &PID[ROLL]);
-        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], gyroData[PITCH], &PID[LEVELPITCH], &PID[PITCH]);
+        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyroData[ROLL], &PID[ROLL]), &PID[LEVELROLL]);
+        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyroData[PITCH], &PID[PITCH]), &PID[LEVELPITCH]);
       }
       #endif
       
@@ -312,7 +318,7 @@ void loop () {
       motorCommand[motor] += throttleAdjust;*/
 
     // Prevents too little power applied to motors during hard manuevers
-    // Also even motor power on both sides if limit encountered
+    // Also provides even motor power on both sides if limit encountered
     if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
       delta = transmitterCommand[THROTTLE] - 1100;
       maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);

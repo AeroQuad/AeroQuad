@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,13 +21,6 @@
 #ifndef PID_H
 #define PID_H
 
-// PID Values
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5 // other axes defined in Receiver.h
-
 struct PIDdata {
   float P, I, D;
   float lastPosition;
@@ -35,7 +28,53 @@ struct PIDdata {
 } PID[6];
 float windupGuard; // Read in from EEPROM
 
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters);
-void zeroIntegralError();
+// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
+float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+  float error;
+  float dTerm;
+
+  error = targetPosition - currentPosition;
+  
+  PIDparameters->integratedError += error;
+  if (PIDparameters->integratedError < -windupGuard) PIDparameters->integratedError = -windupGuard;
+  else if (PIDparameters->integratedError > windupGuard) PIDparameters->integratedError = windupGuard;
+  
+  dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition);
+  PIDparameters->lastPosition = currentPosition;
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+}
+
+void zeroIntegralError() {
+  for (axis = ROLL; axis < LASTLEVELAXIS; axis++)
+    PID[axis].integratedError = 0;
+}
+
+float updatePIDangle(float targetPosition, float currentPosition, int gyroData, struct PIDdata *PIDparameters) {
+  float error;
+  float dTerm;
+
+  error = targetPosition - currentPosition;
+  
+  PIDparameters->integratedError += error; // * controldT;
+  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
+  dTerm = (((targetPosition - PIDparameters->lastPosition) * levelLimit) - gyroData) * PIDparameters->D;
+
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+}
+
+float updatePIDdiy(float targetPosition, float currentPosition, float gyroAngle, struct PIDdata *PIDparameters) {
+  float error;
+  float dTerm;
+  
+  error = constrain(targetPosition - currentPosition, 30, 30);
+
+  PIDparameters->integratedError += error * controldT;
+  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -50, 50);
+
+  dTerm = (((targetPosition - PIDparameters->lastPosition) * levelLimit) - gyroAngle) * PIDparameters->D;
+  PIDparameters->lastPosition = targetPosition;
+  
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+}
 
 #endif

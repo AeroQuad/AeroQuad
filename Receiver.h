@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -78,12 +78,6 @@ int receiverChannel[6] = {ROLLPIN, PITCHPIN, YAWPIN, THROTTLEPIN, MODEPIN, AUXPI
 #define MAXCHECK MAXCOMMAND - 100
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
 #define LASTCHANNEL 6
 
 #define RISING_EDGE 1

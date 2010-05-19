@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -73,9 +73,10 @@
 #define HEADING_IGAIN_ADR 208
 #define HEADING_DGAIN_ADR 212
 #define AREF_ADR 216
+#define FLIGHTMODE 220
 
 float readFloat(int address);
 void writeFloat(float value, int address);
-void readEEPROM();
+void readEEPROM(void);
 
 #endif

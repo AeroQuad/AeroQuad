@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -23,18 +23,27 @@
 #include <stdlib.h>
 #include <math.h>
 #include "WProgram.h"
-#include "Eeprom.h"
-#include "PID.h"
-#include "Sensors.h"
-#include "Filter.h"
 
 #define BAUD 115200
 #define LEDPIN 13
 #define ON 1
 #define OFF 0
-#define byte uint8_t
 
-// Filter parameters
+// Basic axis definitions
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define THROTTLE 3
+#define MODE 4
+#define AUX 5
+#define ZAXIS 2
+#define LASTAXIS 3
+#define LEVELROLL 3
+#define LEVELPITCH 4
+#define LASTLEVELAXIS 5
+#define HEADING 5
+
+// Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
 float smoothTransmitter[6];
@@ -87,7 +96,6 @@ char string[32];
 byte armed = 0;
 byte safetyCheck = 0;
 byte update = 0;
-byte fastTransfer = OFF;
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -122,6 +130,7 @@ byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
 byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte fastTransfer = ON;
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
 // All loops on = 2.4 ms

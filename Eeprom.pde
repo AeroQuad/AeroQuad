@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - April 2010
+  AeroQuad v1.8 - May 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -115,3 +115,4 @@ void readEEPROM() {
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
 }
+
