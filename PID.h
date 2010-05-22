@@ -25,7 +25,7 @@ struct PIDdata {
   float P, I, D;
   float lastPosition;
   float integratedError;
-} PID[6];
+} PID[8];
 float windupGuard; // Read in from EEPROM
 
 // Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso

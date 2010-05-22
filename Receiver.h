@@ -25,9 +25,9 @@
 
 #ifdef AeroQuadAPM
 #include <avr/interrupt.h>
-  volatile unsigned int Start_Pulse =0;
-  volatile unsigned int Stop_Pulse =0;
-  volatile unsigned int Pulse_Width =0;
+  volatile unsigned int Start_Pulse = 0;
+  volatile unsigned int Stop_Pulse = 0;
+  volatile unsigned int Pulse_Width = 0;
   volatile byte PPM_Counter=0;
   volatile int PWM_RAW[8] = {2400,2400,2400,2400,2400,2400,2400,2400};
   #define ROLLPIN 1

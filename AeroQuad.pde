@@ -19,7 +19,10 @@
 */
 
 #include <EEPROM.h>
+//#include <NewSoftSerial.h>
+//#include <TinyGPS.h>
 //#include <Servo.h>
+#include "GPS.h"
 #include "AeroQuad.h"
 #include "Filter.h"
 #include "Eeprom.h"
@@ -68,6 +71,9 @@
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
+
+// GPS
+//#define GPS
 
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
@@ -133,6 +139,13 @@ void setup() {
   previousTime = millis();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;
+
+  // GPS (Experimental)
+  // To make this work remember to disable LED pin 13
+  // Also disable PCINT0_vect
+  //nss.begin(9600);
+  //newdata = false;
+  //start = millis();
 }
 
 // ************************************************************
@@ -262,8 +275,8 @@ void loop () {
       }
       else {
         // Stable Mode
-        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyroData[ROLL], &PID[ROLL]), &PID[LEVELROLL]);
-        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyroData[PITCH], &PID[PITCH]), &PID[LEVELPITCH]);
+        motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyroData[ROLL], &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
+        motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyroData[PITCH], &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
       }
       #endif
       
@@ -397,6 +410,7 @@ void loop () {
     readSerialCommand();
     sendSerialTelemetry();
     telemetryTime = currentTime;
+      // Every 5 seconds we print an update
   }
 ///////////////////////////
 // End of telemetry loop //
@@ -430,4 +444,24 @@ void loop () {
 // End of fast telemetry loop //
 ////////////////////////////////
 
+// **************************************************************
+// ************************ GPS Prototype ***********************
+// **************************************************************
+/*
+  // Every 5 seconds we print an update
+  while (millis() - start < 5000)
+  {
+    if (feedgps())
+      newdata = true;
+      //Serial.println("Check");
+  }
+  
+  if (newdata)
+  {
+    Serial.println("Acquired Data");
+    Serial.println("-------------");
+    gpsdump(gps);
+    Serial.println("-------------");
+    Serial.println();
+  }*/
 }

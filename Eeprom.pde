@@ -80,6 +80,18 @@ void readEEPROM() {
   PID[HEADING].lastPosition = 0;
   PID[HEADING].integratedError = 0;
   
+  PID[LEVELGYROROLL].P = readFloat(LEVEL_GYRO_ROLL_PGAIN_ADR);
+  PID[LEVELGYROROLL].I = readFloat(LEVEL_GYRO_ROLL_IGAIN_ADR);
+  PID[LEVELGYROROLL].D = readFloat(LEVEL_GYRO_ROLL_DGAIN_ADR);
+  PID[LEVELGYROROLL].lastPosition = 0;
+  PID[LEVELGYROROLL].integratedError = 0;
+  
+  PID[LEVELGYROPITCH].P = readFloat(LEVEL_GYRO_PITCH_PGAIN_ADR);
+  PID[LEVELGYROPITCH].I = readFloat(LEVEL_GYRO_PITCH_IGAIN_ADR);
+  PID[LEVELGYROPITCH].D = readFloat(LEVEL_GYRO_PITCH_DGAIN_ADR);
+  PID[LEVELGYROPITCH].lastPosition = 0;
+  PID[LEVELGYROPITCH].integratedError = 0;
+
   mTransmitter[THROTTLE] = readFloat(THROTTLESCALE_ADR);
   bTransmitter[THROTTLE] = readFloat(THROTTLEOFFSET_ADR);
   mTransmitter[ROLL] = readFloat(ROLLSCALE_ADR);

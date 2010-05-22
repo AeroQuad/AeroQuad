@@ -62,15 +62,27 @@ void sendSerialTelemetry() {
   case 'F': // Send roll and pitch auto level PID values
     Serial.print(PID[LEVELROLL].P);
     comma();
-    Serial.print(PID[LEVELROLL].I * 100);
+    Serial.print(PID[LEVELROLL].I);
     comma();
     Serial.print(PID[LEVELROLL].D);
     comma();
     Serial.print(PID[LEVELPITCH].P);
     comma();
-    Serial.print(PID[LEVELPITCH].I * 100);
+    Serial.print(PID[LEVELPITCH].I);
     comma();
-    Serial.println(PID[LEVELPITCH].D);
+    Serial.print(PID[LEVELPITCH].D);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].P);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].I);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].D);
+    comma();
+    Serial.print(PID[LEVELGYROPITCH].P);
+    comma();
+    Serial.print(PID[LEVELGYROPITCH].I);
+    comma();
+    Serial.println(PID[LEVELGYROPITCH].D);
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
@@ -159,6 +171,10 @@ void sendSerialTelemetry() {
     }
     for (motor = FRONT; motor < LASTMOTOR; motor++) {
       Serial.print(motorCommand[motor]);
+      comma();
+    }
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(accelData[axis]);
       comma();
     }
      Serial.print(armed, BIN);

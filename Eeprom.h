@@ -74,6 +74,12 @@
 #define HEADING_DGAIN_ADR 212
 #define AREF_ADR 216
 #define FLIGHTMODE 220
+#define LEVEL_GYRO_ROLL_PGAIN_ADR 224
+#define LEVEL_GYRO_ROLL_IGAIN_ADR 228
+#define LEVEL_GYRO_ROLL_DGAIN_ADR 232
+#define LEVEL_GYRO_PITCH_PGAIN_ADR 236
+#define LEVEL_GYRO_PITCH_IGAIN_ADR 240
+#define LEVEL_GYRO_PITCH_DGAIN_ADR 244
 
 float readFloat(int address);
 void writeFloat(float value, int address);

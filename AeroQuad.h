@@ -42,6 +42,8 @@
 #define LEVELPITCH 4
 #define LASTLEVELAXIS 5
 #define HEADING 5
+#define LEVELGYROROLL 6
+#define LEVELGYROPITCH 7
 
 // Smoothing filter parameters
 #define GYRO 0
