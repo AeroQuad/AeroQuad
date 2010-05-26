@@ -126,5 +126,7 @@ void readEEPROM() {
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
+  flightMode = readFloat(FLIGHTMODE_ADR);
+  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 }
 

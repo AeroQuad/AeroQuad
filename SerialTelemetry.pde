@@ -56,7 +56,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[HEADING].I);
     comma();
-    Serial.println(PID[HEADING].D);
+    Serial.print(PID[HEADING].D);
+    comma();
+    Serial.println(headingHoldConfig);
     queryType = 'X';
     break;
   case 'F': // Send roll and pitch auto level PID values
@@ -95,6 +97,8 @@ void sendSerialTelemetry() {
     Serial.print(windupGuard);
     comma();
     Serial.println(xmitFactor);
+    comma();
+    Serial.println(flightMode);
     queryType = 'X';
     break;
   case 'L': // Send data filtering values

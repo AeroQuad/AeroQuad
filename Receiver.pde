@@ -98,7 +98,7 @@ static void measurePulseWidthISR(uint8_t port) {
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
           pinData[pin].edge = RISING_EDGE;
         else
-          pinData[pin].edge == FALLING_EDGE; // invalid rising edge detected
+          pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
       }
       else {
         time = currentTime - pinData[pin].riseTime;
@@ -165,7 +165,7 @@ static void MegaPcIntISR() {
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
           pinData[pin].edge = RISING_EDGE;
         else
-          pinData[pin].edge == FALLING_EDGE; // invalid rising edge detected
+          pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
       }
       else {
         time = currentTime - pinData[pin].riseTime;
@@ -232,13 +232,13 @@ void configureReceiver() {
   pinMode(AUXPIN, INPUT);
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
     attachPinChangeInterrupt(receiverChannel[channel]);
-    pinData[receiverChannel[channel]].edge == FALLING_EDGE;
+    pinData[receiverChannel[channel]].edge = FALLING_EDGE;
   }
   #endif
   #ifdef Mega_AQ1x
   initializeMegaPcInt2();
   for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    pinData[receiverChannel[channel]].edge == FALLING_EDGE;
+    pinData[receiverChannel[channel]].edge = FALLING_EDGE;
   #endif
   #ifdef AeroQuadAPM
   /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos 

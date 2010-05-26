@@ -45,6 +45,7 @@ void readSerialCommand() {
       PID[HEADING].P = readFloatSerial();
       PID[HEADING].I = readFloatSerial();
       PID[HEADING].D = readFloatSerial();
+      headingHoldConfig = readFloatSerial();
       PID[HEADING].lastPosition = 0;
       PID[HEADING].integratedError = 0;
       break;
@@ -77,6 +78,7 @@ void readSerialCommand() {
     case 'I': // Receive flight control configuration
       windupGuard = readFloatSerial();
       xmitFactor = readFloatSerial();
+      flightMode = readFloatSerial();
       break;
     case 'K': // Receive data filtering values
       smoothFactor[GYRO] = readFloatSerial();
@@ -158,6 +160,8 @@ void readSerialCommand() {
       writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
       writeFloat(aref, AREF_ADR);
       writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
+      writeFloat(flightMode, FLIGHTMODE_ADR);
+      writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
       zeroIntegralError();
       // Complementary filter setup
       for (axis = ROLL; axis < YAW; axis++)
@@ -206,6 +210,8 @@ void readSerialCommand() {
       smoothTransmitter[MODE] = 1.0;
       smoothTransmitter[AUX] = 1.0;
       smoothHeading = 1.0;
+      flightMode = ACRO;
+      headingHoldConfig = OFF;
 
       autoZeroGyros();
       zeroGyros();

@@ -52,6 +52,11 @@ float smoothTransmitter[6];
 float smoothFactor[2];
 float smoothHeading;
 
+// Flight Mode
+byte flightMode;
+#define ACRO 0
+#define STABLE 1
+
 // Auto level setup
 int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
@@ -63,6 +68,7 @@ float bLevelTransmitter = -135;
 // Heading hold
 // aref / 1024 = voltage per A/D bit
 // 0.002 = V / deg/sec (from gyro data sheet)
+byte headingHoldConfig;
 float headingScaleFactor;
 float heading = 0; // measured heading from yaw gyro (process variable)
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)

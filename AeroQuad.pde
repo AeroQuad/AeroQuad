@@ -65,9 +65,6 @@
 // Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
 //#define HeadingHold
 
-// Auto Level (experimental)
-#define AutoLevel
-
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
@@ -262,23 +259,22 @@ void loop () {
   if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
 
   // ********************* Check Flight Mode *********************
-      #ifdef AutoLevel
-      if (transmitterCommandSmooth[MODE] < 1500) {
-      #endif
+      if (flightMode = ACRO) {
         // Acrobatic Mode
         // ************************** Update Roll/Pitch ***********************
         // updatePID(target, measured, PIDsettings);
         // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
         motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
         motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
-      #ifdef AutoLevel
       }
-      else {
+      if (flightMode = STABLE) {
         // Stable Mode
+        // ************************** Update Roll/Pitch ***********************
+        // updatePID(target, measured, PIDsettings);
+        // measured = flight angle calculated from angle object
         motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyroData[ROLL], &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
         motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyroData[PITCH], &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
       }
-      #endif
       
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
