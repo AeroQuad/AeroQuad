@@ -275,22 +275,20 @@ void loop () {
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
     // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
     if (headingHoldConfig == ON) {
-      if (transmitterCommandSmooth[AUX] < 1800) {
-        currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
-        if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
-          if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
-            headingHold = 0;
-            heading = currentHeading;
-          }
-          else // no yaw input, calculate current heading vs. desired heading heading hold
-            headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
-        }
-        else {
-          heading = 0;
-          currentHeading = 0;
+      currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
+      if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+        if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
           headingHold = 0;
-          PID[HEADING].integratedError = 0;
+          heading = currentHeading;
         }
+        else // no yaw input, calculate current heading vs. desired heading heading hold
+          headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
+      }
+      else {
+        heading = 0;
+        currentHeading = 0;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
       }
     }   
     motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyroData[YAW] + 1500, &PID[YAW]);
