@@ -58,7 +58,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[HEADING].D);
     comma();
-    Serial.println(headingHoldConfig);
+    Serial.println(headingHoldConfig, BIN);
     queryType = 'X';
     break;
   case 'F': // Send roll and pitch auto level PID values
@@ -97,8 +97,6 @@ void sendSerialTelemetry() {
     Serial.print(windupGuard);
     comma();
     Serial.println(xmitFactor);
-    comma();
-    Serial.println(flightMode);
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
@@ -106,8 +104,10 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(smoothFactor[ACCEL]);
     comma();
-    Serial.println(timeConstant);
-    queryType = 'X';
+    Serial.print(timeConstant);
+    comma();
+    Serial.println(flightMode, DEC);
+   queryType = 'X';
     break;
   case 'N': // Send motor smoothing values
     for (axis = ROLL; axis < AUX; axis++) {
@@ -183,12 +183,10 @@ void sendSerialTelemetry() {
     }
      Serial.print(armed, BIN);
     comma();
-    #ifdef AutoLevel
-      Serial.println(transmitterCommandSmooth[MODE]);
-    #endif
-    #ifndef AutoLevel
+    if (flightMode == STABLE)
+      Serial.println(2000);
+    if (flightMode == ACRO)
       Serial.println(1000);
-    #endif
     break;
    case 'T': // Send processed transmitter values
     Serial.print(xmitFactor);

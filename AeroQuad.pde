@@ -204,11 +204,6 @@ void loop () {
       // Prevents accidental arming of motor output if no transmitter command received
       if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
     }
-    // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
-    //if ((receiverData[ROLL] < MINCHECK) || (receiverData[ROLL] > MAXCHECK) || (receiverData[PITCH] < MINCHECK) || (receiverData[PITCH] > MAXCHECK))
-    //  minCommand = MINCOMMAND;
-    //else
-    //  minCommand = MINTHROTTLE;
     receiverTime = currentTime;
   } 
 /////////////////////////////
@@ -259,7 +254,7 @@ void loop () {
   if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
 
   // ********************* Check Flight Mode *********************
-      if (flightMode = ACRO) {
+      if (flightMode == ACRO) {
         // Acrobatic Mode
         // ************************** Update Roll/Pitch ***********************
         // updatePID(target, measured, PIDsettings);
@@ -267,7 +262,7 @@ void loop () {
         motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyroData[ROLL] + 1500, &PID[ROLL]);
         motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyroData[PITCH] + 1500, &PID[PITCH]);
       }
-      if (flightMode = STABLE) {
+      if (flightMode == STABLE) {
         // Stable Mode
         // ************************** Update Roll/Pitch ***********************
         // updatePID(target, measured, PIDsettings);
@@ -279,7 +274,7 @@ void loop () {
     // ***************************** Update Yaw ***************************
     // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
     // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
-    #ifdef HeadingHold
+    if (headingHoldConfig == ON) {
       if (transmitterCommandSmooth[AUX] < 1800) {
         currentHeading += gyroData[YAW] * headingScaleFactor * controldT;
         if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
@@ -297,8 +292,7 @@ void loop () {
           PID[HEADING].integratedError = 0;
         }
       }
-    #endif
-    
+    }   
     motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyroData[YAW] + 1500, &PID[YAW]);
       
     // *********************** Calculate Motor Commands **********************
@@ -344,6 +338,7 @@ void loop () {
       minCommand[RIGHT] = MINTHROTTLE;
       minCommand[LEFT] = MINTHROTTLE;
     }
+    
     if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
       delta = transmitterCommand[THROTTLE] - 1100;
       maxCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
@@ -361,8 +356,57 @@ void loop () {
       minCommand[REAR] = MINTHROTTLE;
     }
     
+    // Apply limits to motor commands
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = limitRange(motorCommand[motor], minCommand[motor], maxCommand[motor]);
+ 
+    // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
+    if (flightMode == ACRO) {
+      #ifdef plusConfig
+      if (receiverData[ROLL] < MINCHECK) {
+        motorCommand[LEFT] = MINCOMMAND;
+        motorCommand[RIGHT] = MAXCOMMAND;
+      }
+      if (receiverData[ROLL] > MAXCHECK) {
+        motorCommand[LEFT] = MAXCOMMAND;
+        motorCommand[RIGHT] = MINCOMMAND;
+      }
+      if (receiverData[PITCH] < MINCHECK) {
+       motorCommand[FRONT] = MAXCOMMAND;
+       motorCommand[REAR] = MINCOMMAND;
+      }
+      if (receiverData[PITCH] > MAXCHECK) {
+       motorCommand[FRONT] = MINCOMMAND;
+       motorCommand[REAR] = MAXCOMMAND;
+      }
+      #endif
+      #ifdef XConfig
+      if (receiverData[ROLL] < MINCHECK) {
+        motorCommand[FRONT] = MINCOMMAND;
+        motorCommand[REAR] = MAXCOMMAND;
+        motorCommand[LEFT] = MINCOMMAND;
+        motorCommand[RIGHT] = MAXCOMMAND;
+      }
+      if (receiverData[ROLL] > MAXCHECK) {
+        motorCommand[FRONT] = MAXCOMMAND;
+        motorCommand[REAR] = MINCOMMAND;
+        motorCommand[LEFT] = MAXCOMMAND;
+        motorCommand[RIGHT] = MINCOMMAND;
+      }
+      if (receiverData[PITCH] < MINCHECK) {
+        motorCommand[FRONT] = MAXCOMMAND;
+        motorCommand[REAR] = MINCOMMAND;
+        motorCommand[LEFT] = MINCOMMAND;
+        motorCommand[RIGHT] = MAXCOMMAND;
+      }
+      if (receiverData[PITCH] > MAXCHECK) {
+        motorCommand[FRONT] = MINCOMMAND;
+        motorCommand[REAR] = MAXCOMMAND;
+        motorCommand[LEFT] = MAXCOMMAND;
+        motorCommand[RIGHT] = MINCOMMAND;
+      }
+      #endif
+    }
 
     // If throttle in minimum position, don't apply yaw
     if (transmitterCommand[THROTTLE] < MINCHECK) {

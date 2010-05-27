@@ -78,12 +78,12 @@ void readSerialCommand() {
     case 'I': // Receive flight control configuration
       windupGuard = readFloatSerial();
       xmitFactor = readFloatSerial();
-      flightMode = readFloatSerial();
       break;
     case 'K': // Receive data filtering values
       smoothFactor[GYRO] = readFloatSerial();
       smoothFactor[ACCEL] = readFloatSerial();
       timeConstant = readFloatSerial();
+      flightMode = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
       smoothTransmitter[ROLL] = readFloatSerial();
@@ -194,8 +194,8 @@ void readSerialCommand() {
       PID[LEVELGYROPITCH].D = -15;
       windupGuard = 2000.0;
       xmitFactor = 0.20;  
-      levelLimit = 2000.0;
-      levelOff = 50;  
+      levelLimit = 1.0;
+      levelOff = 0.0;  
       smoothFactor[GYRO] = 0.50;
       smoothFactor[ACCEL] = 0.50;
       timeConstant = 4.0;   
