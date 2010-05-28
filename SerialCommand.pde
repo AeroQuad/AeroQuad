@@ -45,9 +45,12 @@ void readSerialCommand() {
       PID[HEADING].P = readFloatSerial();
       PID[HEADING].I = readFloatSerial();
       PID[HEADING].D = readFloatSerial();
-      headingHoldConfig = readFloatSerial();
       PID[HEADING].lastPosition = 0;
       PID[HEADING].integratedError = 0;
+      headingHoldConfig = readFloatSerial();
+      heading = 0;
+      currentHeading = 0;
+      headingHold = 0;
       break;
     case 'E': // Receive roll and pitch auto level PID
       PID[LEVELROLL].P = readFloatSerial();
@@ -188,10 +191,10 @@ void readSerialCommand() {
       PID[HEADING].D = 0;
       PID[LEVELGYROROLL].P = 7;
       PID[LEVELGYROROLL].I = 0;
-      PID[LEVELGYROROLL].D = -15;
+      PID[LEVELGYROROLL].D = -25;
       PID[LEVELGYROPITCH].P = 7;
       PID[LEVELGYROPITCH].I = 0;
-      PID[LEVELGYROPITCH].D = -15;
+      PID[LEVELGYROPITCH].D = -25;
       windupGuard = 2000.0;
       xmitFactor = 0.20;  
       levelLimit = 1.0;

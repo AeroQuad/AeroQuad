@@ -55,6 +55,14 @@ float accelScaleFactor = 0.000329062;
 float gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
 float gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 
+// Adjust for gyro drift
+// http://aeroquad.com/entry.php?4-
+int lastAccel[2]={0,0};
+long accelAge[2]={0,0};
+int positiveGyroCount[2]={1,1};
+int negativeGyroCount[2]={1,1};
+int zeroGyroCount[2]={1,1};
+
 // Accelerometer setup
 int accelData[3] = {0,0,0};
 int accelZero[3] = {0,0,0};

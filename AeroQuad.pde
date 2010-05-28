@@ -235,6 +235,34 @@ void loop () {
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor[GYRO]);
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor[ACCEL]);
     }
+    
+    // ************ Correct for gyro drift by FabQuad **************
+    // ************ http://aeroquad.com/entry.php?4-  **************
+    for (axis = ROLL; axis < LASTAXIS; axis++) {              
+      if (abs(lastAccel[axis]-accelData[axis]) < 5) { // if accel is same as previous cycle
+        accelAge[axis]++;
+        if (accelAge[axis] >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
+          if (gyroData[axis] < 0) { 
+            negativeGyroCount[axis]++; // if gyro still indicates negative rotation, that's additional signal that gyrozero is too low
+          } else if (gyroData[axis] > 0) {
+            positiveGyroCount[axis]++;  // additional signal that gyrozero is too high
+          } else {
+            zeroGyroCount[axis]++; // additional signal that gyrozero is correct
+          }
+          accelAge[axis]=0;
+          if (zeroGyroCount[axis] + negativeGyroCount[axis] + positiveGyroCount[axis] > 200) {
+            if (negativeGyroCount[axis] >= 1.3*(zeroGyroCount[axis]+positiveGyroCount[axis])) gyroZero[axis]++;  // enough signals the gyrozero is too low
+            if (positiveGyroCount[axis] >= 1.3*(zeroGyroCount[axis]+negativeGyroCount[axis])) gyroZero[axis]--;  // enough signals the gyrozero is too high
+            zeroGyroCount[axis]=0;
+            negativeGyroCount[axis]=0;
+            positiveGyroCount[axis]=0;
+          }
+        }
+      } else { // accel different, restart
+        lastAccel[axis]=accelData[axis];
+        accelAge[axis]=0;
+      }
+    }
 
     // ****************** Calculate Absolute Angle *****************
     // angle[axis].calculate() defined in FlightAngle.h
