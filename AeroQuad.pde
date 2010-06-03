@@ -18,17 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <EEPROM.h>
-//#include <NewSoftSerial.h>
-//#include <TinyGPS.h>
-//#include <Servo.h>
-#include "GPS.h"
-#include "AeroQuad.h"
-#include "Filter.h"
-#include "Eeprom.h"
-#include "Sensors.h"
-#include "PID.h"
-
 /**************************************************************************** 
    Before flight, select the different user options for your AeroQuad below
    Also, consult the ReadMe.mht file for additional details
@@ -71,6 +60,17 @@
 
 // GPS
 //#define GPS
+
+#include <EEPROM.h>
+//#include <NewSoftSerial.h>
+//#include <TinyGPS.h>
+#include <Servo.h>
+#include "GPS.h"
+#include "AeroQuad.h"
+#include "Filter.h"
+#include "Eeprom.h"
+#include "Sensors.h"
+#include "PID.h"
 
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
@@ -382,58 +382,58 @@ void loop () {
       minCommand[REAR] = MINTHROTTLE;
     }
     
-    // Apply limits to motor commands
-    for (motor = FRONT; motor < LASTMOTOR; motor++)
-      motorCommand[motor] = limitRange(motorCommand[motor], minCommand[motor], maxCommand[motor]);
- 
     // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
     if (flightMode == ACRO) {
       #ifdef plusConfig
       if (receiverData[ROLL] < MINCHECK) {
-        motorCommand[LEFT] = MINCOMMAND;
-        motorCommand[RIGHT] = MAXCOMMAND;
+        minCommand[LEFT] = minAcro;
+        maxCommand[RIGHT] = MAXCOMMAND;
       }
-      if (receiverData[ROLL] > MAXCHECK) {
-        motorCommand[LEFT] = MAXCOMMAND;
-        motorCommand[RIGHT] = MINCOMMAND;
+      else if (receiverData[ROLL] > MAXCHECK) {
+        maxCommand[LEFT] = MAXCOMMAND;
+        minCommand[RIGHT] = minAcro;
       }
-      if (receiverData[PITCH] < MINCHECK) {
-       motorCommand[FRONT] = MAXCOMMAND;
-       motorCommand[REAR] = MINCOMMAND;
+      else if (receiverData[PITCH] < MINCHECK) {
+       maxCommand[FRONT] = MAXCOMMAND;
+       minCommand[REAR] = minAcro;
       }
-      if (receiverData[PITCH] > MAXCHECK) {
-       motorCommand[FRONT] = MINCOMMAND;
-       motorCommand[REAR] = MAXCOMMAND;
+      else if (receiverData[PITCH] > MAXCHECK) {
+       minCommand[FRONT] = minAcro;
+       maxCommand[REAR] = MAXCOMMAND;
       }
       #endif
       #ifdef XConfig
       if (receiverData[ROLL] < MINCHECK) {
-        motorCommand[FRONT] = MINCOMMAND;
-        motorCommand[REAR] = MAXCOMMAND;
-        motorCommand[LEFT] = MINCOMMAND;
-        motorCommand[RIGHT] = MAXCOMMAND;
+        minCommand[FRONT] = minAcro;
+        maxCommand[REAR] = MAXCOMMAND;
+        minCommand[LEFT] = minAcro;
+        maxCommand[RIGHT] = MAXCOMMAND;
       }
-      if (receiverData[ROLL] > MAXCHECK) {
-        motorCommand[FRONT] = MAXCOMMAND;
-        motorCommand[REAR] = MINCOMMAND;
-        motorCommand[LEFT] = MAXCOMMAND;
-        motorCommand[RIGHT] = MINCOMMAND;
+      else if (receiverData[ROLL] > MAXCHECK) {
+        maxCommand[FRONT] = MAXCOMMAND;
+        minCommand[REAR] = minAcro;
+        maxCommand[LEFT] = MAXCOMMAND;
+        minCommand[RIGHT] = minAcro;
       }
-      if (receiverData[PITCH] < MINCHECK) {
-        motorCommand[FRONT] = MAXCOMMAND;
-        motorCommand[REAR] = MINCOMMAND;
-        motorCommand[LEFT] = MINCOMMAND;
-        motorCommand[RIGHT] = MAXCOMMAND;
+      else if (receiverData[PITCH] < MINCHECK) {
+        maxCommand[FRONT] = MAXCOMMAND;
+        minCommand[REAR] = minAcro;
+        minCommand[LEFT] = minAcro;
+        maxCommand[RIGHT] = MAXCOMMAND;
       }
-      if (receiverData[PITCH] > MAXCHECK) {
-        motorCommand[FRONT] = MINCOMMAND;
-        motorCommand[REAR] = MAXCOMMAND;
-        motorCommand[LEFT] = MAXCOMMAND;
-        motorCommand[RIGHT] = MINCOMMAND;
+      else if (receiverData[PITCH] > MAXCHECK) {
+        minCommand[FRONT] = minAcro;
+        maxCommand[REAR] = MAXCOMMAND;
+        maxCommand[LEFT] = MAXCOMMAND;
+        minCommand[RIGHT] = minAcro;
       }
       #endif
     }
 
+    // Apply limits to motor commands
+    for (motor = FRONT; motor < LASTMOTOR; motor++)
+      motorCommand[motor] = limitRange(motorCommand[motor], minCommand[motor], maxCommand[motor]);
+ 
     // If throttle in minimum position, don't apply yaw
     if (transmitterCommand[THROTTLE] < MINCHECK) {
       for (motor = FRONT; motor < LASTMOTOR; motor++)
@@ -488,7 +488,7 @@ void loop () {
 #ifdef Camera // Development moved to Arduino Mega
   if ((currentTime > (cameraTime + CAMERALOOPTIME)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
-    pitchCamera.write(-(mCamera * flightAngle[PITCH]) + bCamera);
+    pitchCamera.write((mCamera * flightAngle[PITCH]) + bCamera);
     cameraTime = currentTime;
   }
 #endif

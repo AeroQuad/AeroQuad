@@ -81,6 +81,7 @@
 #define LEVEL_GYRO_PITCH_IGAIN_ADR 240
 #define LEVEL_GYRO_PITCH_DGAIN_ADR 244
 #define HEADINGHOLD_ADR 248
+#define MINACRO_ADR 252
 
 float readFloat(int address);
 void writeFloat(float value, int address);

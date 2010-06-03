@@ -128,5 +128,6 @@ void readEEPROM() {
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
+  minAcro = readFloat(MINACRO_ADR);
 }
 

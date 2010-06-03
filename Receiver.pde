@@ -113,12 +113,15 @@ static void measurePulseWidthISR(uint8_t port) {
 }
 
 SIGNAL(PCINT0_vect) {
+//ISR(PCINT0_vect, ISR_NOBLOCK) {
   measurePulseWidthISR(0);
 }
 SIGNAL(PCINT1_vect) {
+//ISR(PCINT1_vect, ISR_NOBLOCK) {
   measurePulseWidthISR(1);
 }
 SIGNAL(PCINT2_vect) {
+//ISR(PCINT2_vect, ISR_NOBLOCK) {
   measurePulseWidthISR(2);
 }
 #endif

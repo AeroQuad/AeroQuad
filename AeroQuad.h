@@ -53,9 +53,10 @@ float smoothFactor[2];
 float smoothHeading;
 
 // Flight Mode
-byte flightMode;
 #define ACRO 0
 #define STABLE 1
+byte flightMode;
+int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 // Auto level setup
 int levelAdjust[2] = {0,0};
@@ -84,7 +85,7 @@ int maxThrottleAdjust = 200;
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
 #ifdef Camera
-  #define ROLLCAMERAPIN 12
+  #define ROLLCAMERAPIN 8
   #define PITCHCAMERAPIN 13
   // map +/-90 degrees to 1000-2000
   float mCamera = 5.556;
@@ -113,6 +114,7 @@ byte update = 0;
 #define FASTTELEMETRYTIME 10
 #define AILOOPTIME 2
 #define CONTROLLOOPTIME 2
+#define CAMERALOOPTIME 20
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
@@ -137,7 +139,7 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte analogInputLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 byte fastTransfer = OFF;
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:

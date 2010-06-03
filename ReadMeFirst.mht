@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/related; boundary="----=_NextPart_01CAE5A5.01AE86E0"
+Content-Type: multipart/related; boundary="----=_NextPart_01CB0120.EA2007A0"
 
 This document is a Single File Web Page, also known as a Web Archive file.  If you are seeing this message, your browser or editor doesn't support Web Archive files.  Please download a browser that supports Web Archive, such as Windows® Internet Explorer®.
 
-------=_NextPart_01CAE5A5.01AE86E0
+------=_NextPart_01CB0120.EA2007A0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst.htm
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/html; charset="us-ascii"
@@ -25,17 +25,17 @@ xmlns=3D"http://www.w3.org/TR/REC-html40">
   <o:Author>Ted Carancho</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>Ted</o:LastAuthor>
-  <o:Revision>7</o:Revision>
-  <o:TotalTime>116</o:TotalTime>
+  <o:Revision>9</o:Revision>
+  <o:TotalTime>209</o:TotalTime>
   <o:Created>2010-02-19T09:50:00Z</o:Created>
-  <o:LastSaved>2010-04-27T08:00:00Z</o:LastSaved>
-  <o:Pages>2</o:Pages>
-  <o:Words>1424</o:Words>
-  <o:Characters>8119</o:Characters>
+  <o:LastSaved>2010-06-01T07:25:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>1409</o:Words>
+  <o:Characters>8032</o:Characters>
   <o:Company>Carancho Engineering</o:Company>
-  <o:Lines>67</o:Lines>
-  <o:Paragraphs>19</o:Paragraphs>
-  <o:CharactersWithSpaces>9524</o:CharactersWithSpaces>
+  <o:Lines>66</o:Lines>
+  <o:Paragraphs>18</o:Paragraphs>
+  <o:CharactersWithSpaces>9423</o:CharactersWithSpaces>
   <o:Version>12.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -789,7 +789,7 @@ ul
 <meta http-equiv=3DContent-Style-Type content=3D"text/css">
 <meta name=3DCocoaVersion content=3D824.48>
 <!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext=3D"edit" spidmax=3D"9218"/>
+ <o:shapedefaults v:ext=3D"edit" spidmax=3D"10242"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext=3D"edit">
   <o:idmap v:ext=3D"edit" data=3D"1"/>
@@ -809,17 +809,15 @@ v1.8<o:p></o:p></span></h1>
 <p class=3Dp1><a href=3D"http://www.aeroquad.info/">http://www.aeroquad.inf=
 o</a></p>
 
-<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.8 b=
-eta Release
-Notes (4/27/2010)<o:p></o:p></span></h2>
+<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.8 R=
+elease
+Notes (5/31/2010)<o:p></o:p></span></h2>
 
-<p class=3DMsoNormal>This code is still in beta!<span
-style=3D'mso-spacerun:yes'>&nbsp; </span><span class=3DGramE>Implemented ne=
-w Stable
-Mode algorithm.</span><span style=3D'mso-spacerun:yes'>&nbsp; </span>See <a
+<p class=3DMsoNormal><span class=3DGramE>Implemented new <a
 href=3D"http://aeroquad.com/showthread.php?359-Stable-flight-logic...&amp;p=
-=3D3796#post3796">http://aeroquad.com/showthread.php?359-Stable-flight-logi=
-c...&amp;p=3D3796#post3796</a></p>
+=3D3796#post3796">Stable
+Mode algorithm</a>.</span><span style=3D'mso-spacerun:yes'>&nbsp; </span>(I=
+ssue </p>
 
 <h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.7.1
 Release Notes (3/24/2010)<o:p></o:p></span></h2>
@@ -871,10 +869,10 @@ Notes (3/5/2010)<o:p></o:p></span></h2>
 
 <p class=3DMsoNormal>This release fixes a yaw bug that exhibits <span
 class=3DGramE>itself</span> with the new capacitors installed which allows =
-the user
-to use higher PID values.<span style=3D'mso-spacerun:yes'>&nbsp; </span>Als=
-o the
-comments were fixed to reflect usage of IDG500 or IXZ500 gyros.<span
+the
+user to use higher PID values.<span style=3D'mso-spacerun:yes'>&nbsp; </spa=
+n>Also
+the comments were fixed to reflect usage of IDG500 or IXZ500 gyros.<span
 style=3D'mso-spacerun:yes'>&nbsp; </span>If the user does not select the co=
 rrect
 gyro, the yaw axis may become inverted.<span style=3D'mso-spacerun:yes'>&nb=
@@ -918,7 +916,7 @@ class=3DSpellE>Arduino</span> Mega:</p>
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Roll (Aileron) Channel, place jumper between=
  AQ
 Shield pin 2 and Mega AI13</p>
@@ -928,7 +926,7 @@ l1 level1 lfo1'><![if !supportLists]><span
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Pitch (Elevator) Channel, place jumper betwe=
 en
 AQ Shield pin 5 and Mega AI11</p>
@@ -938,7 +936,7 @@ l1 level1 lfo1'><![if !supportLists]><span
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Yaw (Rudder) Channel, place jumper between AQ
 Shield pin 6 and Mega AI10</p>
 
@@ -947,7 +945,7 @@ l1 level1 lfo1'><![if !supportLists]><span
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Throttle Channel, place jumper between AQ Sh=
 ield
 pin 4 and Mega AI12</p>
@@ -957,7 +955,7 @@ l1 level1 lfo1'><![if !supportLists]><span
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Mode (Gear) Channel, place jumper between AQ
 Shield pin 7 and Mega AI9</p>
 
@@ -966,7 +964,7 @@ Shield pin 7 and Mega AI9</p>
 style=3D'font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-fa=
 mily:
 Symbol'><span style=3D'mso-list:Ignore'>&middot;<span style=3D'font:7.0pt "=
-Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Aux Channel, place jumper between AQ Shield 8
 and Mega AI8</p>
 
@@ -1049,8 +1047,9 @@ will then be able to return to flight.<span style=3D'mso-spacerun:yes'>&nbs=
 p;
 </span>This feature will be optimized during <span class=3DSpellE>Arduino</=
 span>
-Mega development since it is planned to implement heading hold with a
-magnetometer for that platform.</p>
+Mega development since it is planned to implement heading hold with a magne=
+tometer
+for that platform.</p>
 
 <p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
@@ -1076,11 +1075,12 @@ user. The Pin Change Interrupt (PCINT) code has been improved to work better
 for Futaba transmitters.<span style=3D'mso-spacerun:yes'>&nbsp; </span>The
 variable declaration section in the main AeroQuad.pde sketch has been organ=
 ized
-into separate header files for easier maintainability into the future.<span
-style=3D'mso-spacerun:yes'>&nbsp; </span>The new default EEPROM values now
-include a suggested setting for yaw to allow a smoother yaw transition (in =
-the
-past it would cause the quad to pop up and down a bit).<span
+into separate header files for easier maintainability into the future. <span
+style=3D'mso-spacerun:yes'>&nbsp;</span>The new default EEPROM values now i=
+nclude
+a suggested setting for yaw to allow a smoother yaw transition (in the past=
+ it
+would cause the quad to pop up and down a bit).<span
 style=3D'mso-spacerun:yes'>&nbsp; </span>The main loop is now organized into
 different timed loops, to make sure the sampling of the sensors and control
 algorithm execution are now performed at regular timed intervals (500Hz). <=
@@ -1137,9 +1137,9 @@ user
 to return EEPROM values to a default value (which is also useful for first =
 time
 setup).<span style=3D'mso-spacerun:yes'>&nbsp; </span>To use these features=
-, you must
-download the <span class=3DSpellE>AeroQuad</span> <span class=3DSpellE>Conf=
-igurator</span>
+, you
+must download the <span class=3DSpellE>AeroQuad</span> <span class=3DSpellE=
+>Configurator</span>
 v1.3.1 or greater.<span style=3D'mso-spacerun:yes'>&nbsp; </span>The transm=
 itter
 calibration is meant to fix the situation where the trims could potentially
@@ -1250,8 +1250,8 @@ ures:<o:p></o:p></span></h3>
 
 <ul style=3D'margin-top:0in' type=3Ddisc>
  <li class=3DMsoNormal style=3D'mso-list:l3 level1 lfo4;tab-stops:list .5in=
-'>400Hz
-     update rate to ESC's/Motors</li>
+'>400Hz update
+     rate to ESC's/Motors</li>
  <li class=3DMsoNormal style=3D'mso-list:l3 level1 lfo4;tab-stops:list .5in=
 '>Combined
      user configurable values into single tab in <span class=3DSpellE>Confi=
@@ -1273,7 +1273,7 @@ fo</a></p>
 
 </html>
 
-------=_NextPart_01CAE5A5.01AE86E0
+------=_NextPart_01CB0120.EA2007A0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/themedata.thmx
 Content-Transfer-Encoding: base64
 Content-Type: application/vnd.ms-officetheme
@@ -1334,7 +1334,7 @@ dGhlbWUxLnhtbFBLAQItABQABgAIAAAAIQAN0ZCftgAAABsBAAAnAAAAAAAAAAAAAAAAAJsJAAB0
 aGVtZS90aGVtZS9fcmVscy90aGVtZU1hbmFnZXIueG1sLnJlbHNQSwUGAAAAAAUABQBdAQAAlgoA
 AAAA
 
-------=_NextPart_01CAE5A5.01AE86E0
+------=_NextPart_01CB0120.EA2007A0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/colorschememapping.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml
@@ -1344,7 +1344,7 @@ Content-Type: text/xml
  bg1=3D"lt1" tx1=3D"dk1" bg2=3D"lt2" tx2=3D"dk2" accent1=3D"accent1" accent=
 2=3D"accent2" accent3=3D"accent3" accent4=3D"accent4" accent5=3D"accent5" a=
 ccent6=3D"accent6" hlink=3D"hlink" folHlink=3D"folHlink"/>
-------=_NextPart_01CAE5A5.01AE86E0
+------=_NextPart_01CB0120.EA2007A0
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/filelist.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml; charset="utf-8"
@@ -1355,4 +1355,4 @@ Content-Type: text/xml; charset="utf-8"
  <o:File HRef=3D"colorschememapping.xml"/>
  <o:File HRef=3D"filelist.xml"/>
 </xml>
-------=_NextPart_01CAE5A5.01AE86E0--
+------=_NextPart_01CB0120.EA2007A0--

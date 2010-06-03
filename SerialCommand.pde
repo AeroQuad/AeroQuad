@@ -35,6 +35,7 @@ void readSerialCommand() {
       PID[PITCH].D = readFloatSerial();
       PID[PITCH].lastPosition = 0;
       PID[PITCH].integratedError = 0;
+      minAcro = readFloatSerial();
       break;
     case 'C': // Receive yaw PID
       PID[YAW].P = readFloatSerial();
@@ -165,6 +166,7 @@ void readSerialCommand() {
       writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
       writeFloat(flightMode, FLIGHTMODE_ADR);
       writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
+      writeFloat(minAcro, MINACRO_ADR);
       zeroIntegralError();
       // Complementary filter setup
       for (axis = ROLL; axis < YAW; axis++)
@@ -215,6 +217,7 @@ void readSerialCommand() {
       smoothHeading = 1.0;
       flightMode = ACRO;
       headingHoldConfig = OFF;
+      minAcro = 1300;
 
       autoZeroGyros();
       zeroGyros();

@@ -45,15 +45,26 @@
 #define MAXCOMMAND 2000
 
 // Motors
-int motorCommand[4] = {1000,1000,1000,1000};
+// Assume maximum number of motors is 8, leave array indexes unused if lower number
+//int motorCommand[4] = {1000,1000,1000,1000};
+//int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
+//int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
 int motorAxisCommand[3] = {0,0,0};
+int motorAxisCommandRoll[8] = {0,0,0,0,0,0,0,0};
+int motorAxisCommandPitch[8] = {0,0,0,0,0,0,0,0};
+int motorAxisCommandYaw[8] = {0,0,0,0,0,0,0,0};
+int motorMixerSettingRoll[8] = {0,0,0,0,0,0,0,0};
+int motorMixerSettingPitch[8] = {0,0,0,0,0,0,0,0};
+int motorMixerSettingYaw[8] = {0,0,0,0,0,0,0,0};
+int motorCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
+int minCommand[8] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND,MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
+int maxCommand[8] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND,MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
 int motor = 0;
-int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
-int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
 int delta = 0;
 
 // Ground station control
-int remoteCommand[4] = {1000,1000,1000,1000};
+//int remoteCommand[4] = {1000,1000,1000,1000};
+int remoteCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
 
 class Motors_PWM {
 private:
