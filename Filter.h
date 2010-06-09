@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - May 2010
+  AeroQuad v1.8 - June 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -20,6 +20,39 @@
 
 #ifndef __FILTER_H__
 #define __FILTER_H__
+
+/*class Filter {
+private:
+  float _smoothFactor;
+  float _previousData;
+  float _smoothedData;
+  float newData, oldData;
+
+public:
+  Filter() {
+    _smoothFactor = 1.0;
+    _previousData = 0;
+  }
+  
+  void initialize(float smoothFactor) {
+    _smoothFactor = smoothFactor;
+    _previousData = 0;
+  }
+    
+  float smooth(int currentData) {
+    oldData = _previousData * (1.0 - _smoothFactor);
+    newData = (float)currentData * _smoothFactor;
+    _smoothedData = oldData + newData;
+    //_smoothedData = (_previousData * (1.0 - _smoothFactor)) + ((float)currentData * _smoothFactor);
+    _previousData = _smoothedData;
+    //Serial.print(oldData); Serial.print("   "); Serial.print(newData); Serial.print("   "); Serial.println(_smoothedData);
+    return _smoothedData;
+  }
+  
+  void setSmoothFactor(float value) {_smoothFactor = value;}
+  float getSmoothFactor(void) {return _smoothFactor;}
+  float getData(void) {return _smoothedData;}
+};*/
 
 int smooth(int currentData, int previousData, float smoothFactor) {
   return (previousData * (1 - smoothFactor) + (currentData * smoothFactor));

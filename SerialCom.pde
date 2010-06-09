@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - May 2010
+  AeroQuad v1.8 - June 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -163,7 +163,6 @@ void readSerialCommand() {
       writeFloat(bTransmitter[AUX], AUXOFFSET_ADR);
       writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
       writeFloat(aref, AREF_ADR);
-      writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
       writeFloat(flightMode, FLIGHTMODE_ADR);
       writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
       writeFloat(minAcro, MINACRO_ADR);
@@ -219,9 +218,8 @@ void readSerialCommand() {
       headingHoldConfig = OFF;
       minAcro = 1300;
 
-      autoZeroGyros();
-      zeroGyros();
-      zeroAccelerometers();
+      gyro.calibrate();
+      accel.calibrate();
       aref = 3.0; // Use 2.8 if you are using an AeroQuad Shield < v1.7
       zeroIntegralError();
       break;
@@ -257,17 +255,248 @@ void readSerialCommand() {
         fastTransfer = OFF;
       break;
     case 'b': // calibrate gyros
-      autoZeroGyros();
-      zeroGyros();
+      gyro.calibrate();
       break;
     case 'c': // calibrate accels
-      zeroAccelerometers();
+      accel.calibrate();
       break;
     case 'd': // send aref
       aref = readFloatSerial();
       break;
     }
   digitalWrite(LEDPIN, HIGH);
+  }
+}
+
+void sendSerialTelemetry() {
+  update = 0;
+  switch (queryType) {
+  case '=': // Reserved debug command to view any variable from Serial Monitor
+    Serial.print(accel.getRaw(ROLL));
+    comma();
+    Serial.print(accel.getRaw(PITCH));
+    comma();
+    Serial.print(accel.getRaw(ZAXIS));
+    comma();
+    Serial.println(accel.angleDeg(ROLL));
+    queryType = 'X';
+    break;
+  case 'B': // Send roll and pitch gyro PID values
+    Serial.print(PID[ROLL].P);
+    comma();
+    Serial.print(PID[ROLL].I);
+    comma();
+    Serial.print(PID[ROLL].D);
+    comma();
+    Serial.print(PID[PITCH].P);
+    comma();
+    Serial.print(PID[PITCH].I);
+    comma();
+    Serial.print(PID[PITCH].D);
+    comma();
+    Serial.println(minAcro);
+    queryType = 'X';
+    break;
+  case 'D': // Send yaw PID values
+    Serial.print(PID[YAW].P);
+    comma();
+    Serial.print(PID[YAW].I);
+    comma();
+    Serial.print(PID[YAW].D);
+    comma();
+    Serial.print(PID[HEADING].P);
+    comma();
+    Serial.print(PID[HEADING].I);
+    comma();
+    Serial.print(PID[HEADING].D);
+    comma();
+    Serial.println(headingHoldConfig, BIN);
+    queryType = 'X';
+    break;
+  case 'F': // Send roll and pitch auto level PID values
+    Serial.print(PID[LEVELROLL].P);
+    comma();
+    Serial.print(PID[LEVELROLL].I);
+    comma();
+    Serial.print(PID[LEVELROLL].D);
+    comma();
+    Serial.print(PID[LEVELPITCH].P);
+    comma();
+    Serial.print(PID[LEVELPITCH].I);
+    comma();
+    Serial.print(PID[LEVELPITCH].D);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].P);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].I);
+    comma();
+    Serial.print(PID[LEVELGYROROLL].D);
+    comma();
+    Serial.print(PID[LEVELGYROPITCH].P);
+    comma();
+    Serial.print(PID[LEVELGYROPITCH].I);
+    comma();
+    Serial.println(PID[LEVELGYROPITCH].D);
+    queryType = 'X';
+    break;
+  case 'H': // Send auto level configuration values
+    Serial.print(levelLimit);
+    comma();
+    Serial.println(levelOff);
+    queryType = 'X';
+    break;
+  case 'J': // Send flight control configuration values
+    Serial.print(windupGuard);
+    comma();
+    Serial.println(xmitFactor);
+    queryType = 'X';
+    break;
+  case 'L': // Send data filtering values
+    Serial.print(smoothFactor[GYRO]);
+    comma();
+    Serial.print(smoothFactor[ACCEL]);
+    comma();
+    Serial.print(timeConstant);
+    comma();
+    Serial.println(flightMode, DEC);
+   queryType = 'X';
+    break;
+  case 'N': // Send motor smoothing values
+    for (axis = ROLL; axis < AUX; axis++) {
+      Serial.print(smoothTransmitter[axis]);
+      comma();
+    }
+    Serial.println(smoothTransmitter[AUX]);
+    queryType = 'X';
+    break;
+  case 'P': // Send transmitter calibration data
+    for (axis = ROLL; axis < AUX; axis++) {
+      Serial.print(mTransmitter[axis]);
+      comma();
+      Serial.print(bTransmitter[axis]);
+      comma();
+    }
+    Serial.print(mTransmitter[AUX]);
+    comma();
+    Serial.println(bTransmitter[AUX]);
+    queryType = 'X';
+    break;
+  case 'Q': // Send sensor data
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(gyro.getData(axis));
+      comma();
+    }
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(accel.getData(axis));
+      comma();
+    }
+    for (axis = ROLL; axis < YAW; axis++) {
+      Serial.print(levelAdjust[axis]);
+      comma();
+    }
+    Serial.print(flightAngle[ROLL]);
+    comma();
+    Serial.print(flightAngle[PITCH]);
+    Serial.println();
+    break;
+  case 'R': // Send raw sensor data
+    Serial.print(analogRead(ROLLRATEPIN));
+    comma();
+    Serial.print(analogRead(PITCHRATEPIN));
+    comma();
+    Serial.print(analogRead(YAWRATEPIN));
+    comma();
+    Serial.print(analogRead(ROLLACCELPIN));
+    comma();
+    Serial.print(analogRead(PITCHACCELPIN));
+    comma();
+    Serial.println(analogRead(ZACCELPIN));
+    break;
+  case 'S': // Send all flight data
+    Serial.print(deltaTime);
+    comma();
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(gyro.getData(axis));
+      comma();
+    }
+    Serial.print(transmitterCommand[THROTTLE]);
+    comma();
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(motorAxisCommand[axis]);
+      comma();
+    }
+    for (motor = FRONT; motor < LASTMOTOR; motor++) {
+      Serial.print(motorCommand[motor]);
+      comma();
+    }
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(accel.getData(axis));
+      comma();
+    }
+     Serial.print(armed, BIN);
+    comma();
+    if (flightMode == STABLE)
+      Serial.println(2000);
+    if (flightMode == ACRO)
+      Serial.println(1000);
+    break;
+   case 'T': // Send processed transmitter values
+    Serial.print(xmitFactor);
+    comma();
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      Serial.print(transmitterCommand[axis]);
+      comma();
+    }
+    for (axis = ROLL; axis < YAW; axis++) {
+      Serial.print(levelAdjust[axis]);
+      comma();
+    }
+    Serial.print(motorAxisCommand[ROLL]);
+    comma();
+    Serial.print(motorAxisCommand[PITCH]);
+    comma();
+    Serial.println(motorAxisCommand[YAW]);
+    break;
+  case 'U': // Send smoothed receiver values
+    for (channel = ROLL; channel < AUX; channel++) {
+      Serial.print(transmitterCommandSmooth[channel]);
+      comma();
+    }
+    Serial.println(transmitterCommandSmooth[AUX]);
+    break;
+  case 'V': // Send receiver status
+    for (channel = ROLL; channel < AUX; channel++) {
+      Serial.print(receiverData[channel]);
+      comma();
+    }
+    Serial.println(receiverData[AUX]);
+    break;
+  case 'X': // Stop sending messages
+    break;
+  case 'Z': // Send heading
+    Serial.print(transmitterCommand[YAW]);
+    comma();
+    Serial.print(headingHold);
+    comma();
+    Serial.print(heading);
+    comma();
+    Serial.println(currentHeading);
+    break;
+  case '6': // Report remote commands
+    for (motor = FRONT; motor < LEFT; motor++) {
+      Serial.print(remoteCommand[motor]);
+      comma();
+    }
+    Serial.println(remoteCommand[LEFT]);
+    break;
+  case '!': // Send flight software version
+    Serial.println("1.8");
+    queryType = 'X';
+    break;
+  case 'e': // Send AREF value
+    Serial.println(aref);
+    queryType = 'X';
+    break;
   }
 }
 
@@ -289,4 +518,19 @@ float readFloatSerial() {
     }
   }  while ((data[limitRange(index-1, 0, 128)] != ';') && (timeout < 5) && (index < 128));
   return atof(data);
+}
+
+
+void comma() {
+  Serial.print(',');
+}
+
+void printInt(int data) {
+  byte msb, lsb;
+  
+  msb = data >> 8;
+  lsb = data & 0xff;
+  
+  Serial.print(msb, BYTE);
+  Serial.print(lsb, BYTE);
 }

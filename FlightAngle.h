@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - May 2010
+  AeroQuad v1.8 - June 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -23,9 +23,6 @@
 #ifndef FLIGHTANGLE_H
 #define FLIGHTANGLE_H
 
-float timeConstant;
-float flightAngle[2];
-
 class FlightAngle_CompFilter {
 private:
   float dt;
@@ -45,8 +42,8 @@ public:
   }
   
   void initialize(byte axis) {
-    previousAngle = angleDeg(axis);
-    filterTerm2 = rateDegPerSec(axis);
+    previousAngle = accel.angleDeg(axis);
+    filterTerm2 = gyro.rateDegPerSec(axis);
     dt = AIdT;
     timeConstantCF = timeConstant; // timeConstant is a global variable read in from EEPROM
     // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized

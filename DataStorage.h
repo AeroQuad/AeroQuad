@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - May 2010
+  AeroQuad v1.8 - June 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -17,8 +17,6 @@
   You should have received a copy of the GNU General Public License 
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
-
-#include "Eeprom.h"
 
 // Utilities for writing and reading from the EEPROM
 float readFloat(int address) {
@@ -117,12 +115,12 @@ void readEEPROM() {
   smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR);
   smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR);
   smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR);
-  accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
-  accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
-  accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-  gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-  gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-  gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
+  /*accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
+  accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
+  accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
+  gyro.setZero(ROLL, readFloat(GYRO_ROLL_ZERO_ADR));
+  gyro.setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));
+  gyro.setZero(YAW, readFloat(GYRO_YAW_ZERO_ADR));*/
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
@@ -130,4 +128,3 @@ void readEEPROM() {
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   minAcro = readFloat(MINACRO_ADR);
 }
-
