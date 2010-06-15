@@ -107,20 +107,20 @@ void readEEPROM() {
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
   xmitFactor = readFloat(XMITFACTOR_ADR);
-  smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR);
-  smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR);
+  //smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR); // Now loaded in gyro class
+  //smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR); //  Now loaded in accel class
   smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR);
   smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR);
   smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR);
   smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR);
   smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR);
   smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR);
-  /*accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
-  accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
-  accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
-  gyro.setZero(ROLL, readFloat(GYRO_ROLL_ZERO_ADR));
-  gyro.setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));
-  gyro.setZero(YAW, readFloat(GYRO_YAW_ZERO_ADR));*/
+  //accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));     // Now loaded in accel class
+  //accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));   // Now loaded in accel class
+  //accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));       // Now loaded in accel class
+  //gyro.setZero(ROLL, readFloat(GYRO_ROLL_ZERO_ADR));    // Now loaded in gyro class
+  //gyro.setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));  // Now loaded in gyro class
+  //gyro.setZero(YAW, readFloat(GYRO_YAW_ZERO_ADR));      // Now loaded in gyro class
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);

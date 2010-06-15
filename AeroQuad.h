@@ -206,6 +206,7 @@ byte channel;
 // Controls the strength of the commands sent from the transmitter
 // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
 float xmitFactor; // Read in from EEPROM
+float transmitterSmooth[6];
 // This scale not fully implemented, kept for future use
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
@@ -240,6 +241,9 @@ char string[32];
 byte armed = 0;
 byte safetyCheck = 0;
 byte update = 0;
+
+int findMode(int *data, int arraySize);
+float arctan2(float y, float x);
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/

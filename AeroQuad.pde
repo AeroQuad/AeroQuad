@@ -63,11 +63,7 @@
 #include "AeroQuad.h"
 #include "PID.h"
 #include "Receiver.h"
-
 #include "Filter.h"
-/*Filter accelFilter[3];
-Filter gyroFilter[3];
-Filter transmitterFilter[6];*/
 
 // Class definition for accelerometer found in Accel.h
 // Use only one of the following variable declarations
@@ -113,15 +109,6 @@ void setup() {
   // Configure motors
   motors.initialize();
 
-  // Initialize low pass filters
-  for (axis = ROLL; axis < LASTAXIS; axis++) {
-    accelFilter[axis].initialize(smoothFactor[ACCEL]);
-    gyroFilter[axis].initialize(smoothFactor[GYRO]);
-  }
-  for (channel = ROLL; channel < LASTCHANNEL; channel++) {
-    transmitterFilter[channel].initialize(smoothTransmitter[channel]);
-  }
-  
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON)
     configureReceiver();

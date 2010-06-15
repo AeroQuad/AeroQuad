@@ -25,16 +25,17 @@ void flightControl(void) {
       // ************************** Update Roll/Pitch ***********************
       // updatePID(target, measured, PIDsettings);
       // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-      motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyroFilter[ROLL].getData() + 1500, &PID[ROLL]);
-      motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyroFilter[PITCH].getData() + 1500, &PID[PITCH]);
+      motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyro.getData(ROLL) + 1500, &PID[ROLL]);
+      motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyro.getData(PITCH) + 1500, &PID[PITCH]);
     }
     if (flightMode == STABLE) {
       // Stable Mode
       // ************************** Update Roll/Pitch ***********************
       // updatePID(target, measured, PIDsettings);
       // measured = flight angle calculated from angle object
-      motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyroFilter[ROLL].getData(), &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
-      motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyroFilter[PITCH].getData(), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
+      // updatePID() and updatePIDangle() are defined in PID.h
+      motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
+      motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
     }
     
   // ***************************** Update Yaw ***************************
@@ -57,7 +58,7 @@ void flightControl(void) {
       PID[HEADING].integratedError = 0;
     }
   }   
-  motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyroFilter[YAW].getData() + 1500, &PID[YAW]);
+  motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]);
     
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
@@ -77,6 +78,7 @@ void flightControl(void) {
   }
 
   // ****************************** Altitude Adjust *************************
+  // Experimental / not functional
   // s = (at^2)/2, t = 0.002
   //zAccelHover += ((accelData[ZAXIS] * accelScaleFactor) * 0.000004) * 0.5;
   /*zAccelHover = accelADC[ROLL] / tan(angleRad(ROLL));

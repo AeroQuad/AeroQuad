@@ -25,6 +25,7 @@ class Gyro_IDG_IXZ_500 {
 private:
   float gyroFullScaleOutput;
   float gyroScaleFactor;
+  float smoothFactor;
   int gyroChannel[3];
   int gyroData[3];
   int gyroZero[3];
@@ -44,11 +45,13 @@ public:
     gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
   int measure(byte axis) {
-    gyroADC[axis] = analogRead(gyroChannel[axis]);
-    gyroData[axis] = gyroADC[axis] - gyroZero[axis];
+    gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
     return gyroData[axis];
   }
   
@@ -57,11 +60,6 @@ public:
   }
   
   int getData(byte axis) {
-    return gyroData[axis];
-  }
-  
-  int setData(byte axis, int value) {
-    gyroData[axis] = value;
     return gyroData[axis];
   }
   
@@ -74,14 +72,22 @@ public:
     return gyroZero[axis];
   }
   
-  int setZero(byte axis, int value) {
+  void setZero(byte axis, int value) {
     gyroZero[axis] = value;
-    return gyroZero[axis];
-  }    
+  }
   
-  float getScaleFactor() {
+  float getScaleFactor(void) {
     return gyroScaleFactor;
   }
+  
+  float getSmoothFactor(void) {
+    return smoothFactor;
+  }
+  
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
+  }
+  
 
   void calibrate() {
     autoZero();

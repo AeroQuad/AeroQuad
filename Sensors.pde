@@ -35,21 +35,15 @@ void readSensors(void) {
    gyro.invert(YAW);
  #endif
 
- for (axis = ROLL; axis < LASTAXIS; axis++) {
-   gyroFilter[axis].smooth(gyro.getData(axis));
-   accelFilter[axis].smooth(accel.getData(axis));
- }
- 
-
  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************
  for (axis = ROLL; axis < YAW; axis++) {              
-   if (abs(lastAccel[axis]-accelFilter[axis].getData()) < 5) { // if accel is same as previous cycle
+   if (abs(lastAccel[axis]-accel.getData(axis)) < 5) { // if accel is same as previous cycle
      accelAge[axis]++;
      if (accelAge[axis] >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
-       if (gyroFilter[axis].getData() < 0) { 
+       if (gyro.getData(axis) < 0) { 
          negativeGyroCount[axis]++; // if gyro still indicates negative rotation, that's additional signal that gyrozero is too low
-       } else if (gyroFilter[axis].getData() > 0) {
+       } else if (gyro.getData(axis) > 0) {
          positiveGyroCount[axis]++;  // additional signal that gyrozero is too high
        } else {
          zeroGyroCount[axis]++; // additional signal that gyrozero is correct
@@ -64,7 +58,7 @@ void readSensors(void) {
        }
      }
    } else { // accel different, restart
-     lastAccel[axis]=accelFilter[axis].getData();
+     lastAccel[axis]=accel.getData(axis);
      accelAge[axis]=0;
    }
  }

@@ -23,17 +23,19 @@
 /******************************************************/
 class Accel_ADXL330 {
 private:
+  float accelScaleFactor; // defined in initialize()
+  float smoothFactor;
   int accelChannel[3];
   int accelZero[3];
   int accelData[3];
   int accelADC[3];
-  float accelScaleFactor; // defined in initialize()
   
 public:
   Accel_ADXL330(void) {
     // Accelerometer Values
     // Update these variables if using a different accel
     // Output is ratiometric for ADXL 335
+    // Note: Vs is not AREF voltage
     // If Vs = 3.6V, then output sensitivity is 360mV/g
     // If Vs = 2V, then it's 195 mV/g
     // Then if Vs = 3.3V, then it's 329.062 mV/g
@@ -48,11 +50,13 @@ public:
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
   int measure(byte axis) {
-    accelADC[axis] = analogRead(accelChannel[axis]);
-    accelData[axis] = accelADC[axis] - accelZero[axis];
+    accelADC[axis] = analogRead(accelChannel[axis] - accelZero[axis]);
+    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     return accelData[axis];
   }
   
@@ -61,11 +65,6 @@ public:
   }
   
   int getData(byte axis) {
-    return accelData[axis];
-  }
-  
-  int setData(byte axis, int value) {
-    accelData[axis] = value;
     return accelData[axis];
   }
   
@@ -78,8 +77,20 @@ public:
     return accelZero[axis];
   }
   
-  float scaleFactor(void) {
+  void setZero(byte axis, int value) {
+    accelZero[axis] = value;
+  }
+  
+  float getScaleFactor(void) {
     return accelScaleFactor;
+  }
+  
+  float getSmoothFactor() {
+    return smoothFactor;
+  }
+  
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
   }
   
   // Allows user to zero accelerometers on command

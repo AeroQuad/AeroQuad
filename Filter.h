@@ -22,6 +22,8 @@
 #define __FILTER_H__
 
 /*class Filter {
+// This does not work as expected
+// Reverting back to proven C function call
 private:
   float _smoothFactor;
   float _previousData;
@@ -40,12 +42,8 @@ public:
   }
     
   float smooth(int currentData) {
-    oldData = _previousData * (1.0 - _smoothFactor);
-    newData = (float)currentData * _smoothFactor;
-    _smoothedData = oldData + newData;
-    //_smoothedData = (_previousData * (1.0 - _smoothFactor)) + ((float)currentData * _smoothFactor);
+    _smoothedData = (_previousData * (1.0 - _smoothFactor)) + ((float)currentData * _smoothFactor);
     _previousData = _smoothedData;
-    //Serial.print(oldData); Serial.print("   "); Serial.print(newData); Serial.print("   "); Serial.println(_smoothedData);
     return _smoothedData;
   }
   

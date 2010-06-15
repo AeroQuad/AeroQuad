@@ -18,6 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+//***************************************************************************************************
+//********************************** Serial Commands ************************************************
+//***************************************************************************************************
 void readSerialCommand() {
   // Check for serial message
   if (Serial.available()) {
@@ -84,8 +87,8 @@ void readSerialCommand() {
       xmitFactor = readFloatSerial();
       break;
     case 'K': // Receive data filtering values
-      smoothFactor[GYRO] = readFloatSerial();
-      smoothFactor[ACCEL] = readFloatSerial();
+      gyro.setSmoothFactor(readFloatSerial());
+      accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
       flightMode = readFloatSerial();
       break;
@@ -140,8 +143,8 @@ void readSerialCommand() {
       writeFloat(levelLimit, LEVELLIMIT_ADR);   
       writeFloat(levelOff, LEVELOFF_ADR); 
       writeFloat(xmitFactor, XMITFACTOR_ADR);
-      writeFloat(smoothFactor[GYRO], GYROSMOOTH_ADR);
-      writeFloat(smoothFactor[ACCEL], ACCSMOOTH_ADR);
+      writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
+      writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
       writeFloat(smoothTransmitter[THROTTLE], THROTTLESMOOTH_ADR);
       writeFloat(smoothTransmitter[ROLL], ROLLSMOOTH_ADR);
       writeFloat(smoothTransmitter[PITCH], PITCHSMOOTH_ADR);
@@ -199,9 +202,9 @@ void readSerialCommand() {
       windupGuard = 2000.0;
       xmitFactor = 0.20;  
       levelLimit = 1.0;
-      levelOff = 0.0;  
-      smoothFactor[GYRO] = 0.50;
-      smoothFactor[ACCEL] = 0.50;
+      levelOff = 0.0;
+      gyro.setSmoothFactor(0.50);
+      accel.setSmoothFactor(0.50);
       timeConstant = 4.0;   
       for (channel = ROLL; channel < LASTCHANNEL; channel++) {
         mTransmitter[channel] = 1.0;
@@ -268,6 +271,9 @@ void readSerialCommand() {
   }
 }
 
+//***************************************************************************************************
+//********************************* Serial Telemetry ************************************************
+//***************************************************************************************************
 void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
@@ -352,9 +358,9 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
-    Serial.print(smoothFactor[GYRO]);
+    Serial.print(gyro.getSmoothFactor());
     comma();
-    Serial.print(smoothFactor[ACCEL]);
+    Serial.print(accel.getSmoothFactor());
     comma();
     Serial.print(timeConstant);
     comma();

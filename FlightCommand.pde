@@ -24,7 +24,7 @@ void readPilotCommands() {
     receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
   // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
   for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], );
+    transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
   // Reduce transmitter commands using xmitFactor and center around 1500
   for (channel = ROLL; channel < LASTAXIS; channel++)
     transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
