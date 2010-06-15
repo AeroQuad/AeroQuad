@@ -18,48 +18,46 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-/******************************************************/
-/*************** Analog Accelerometer *****************/
-/******************************************************/
-class Gyro_IDG_IXZ_500 {
+class Gyro {
 private:
+  
+public:
   float gyroFullScaleOutput;
   float gyroScaleFactor;
-  float smoothFactor;
   int gyroChannel[3];
   int gyroData[3];
   int gyroZero[3];
   int gyroADC[3];
-  
-public:
-  Gyro_IDG_IXZ_500() {
-    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+
+  // The following function calls must be defined in any new subclasses
+  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+    this->_initialize(rollChannel, pitchChannel, yawChannel);
   }
+  virtual void calibrate(void);  
+  virtual int measure(byte axis);
   
-  void initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
+  Gyro(){}
+  // The following functions are common between all Gyro subclasses
+  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     gyroChannel[ROLL] = rollChannel;
     gyroChannel[PITCH] = pitchChannel;
-    gyroChannel[ZAXIS] = zAxisChannel;
+    gyroChannel[ZAXIS] = yawChannel;
     
     gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
-  
-  int measure(byte axis) {
-    gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
-    return gyroData[axis];
-  }
-  
+    
   int getRaw(byte axis) {
     return gyroADC[axis];
   }
   
   int getData(byte axis) {
+    return gyroData[axis];
+  }
+  
+  int setData(byte axis, int value) {
+    gyroData[axis] = value;
     return gyroData[axis];
   }
   
@@ -72,14 +70,49 @@ public:
     return gyroZero[axis];
   }
   
-  void setZero(byte axis, int value) {
+  int setZero(byte axis, int value) {
     gyroZero[axis] = value;
-  }
+    return gyroZero[axis];
+  }    
   
-  float getScaleFactor(void) {
+  float getScaleFactor() {
     return gyroScaleFactor;
   }
+
+  float rateDegPerSec(byte axis) {
+    return (gyroADC[axis] / 1024.0) * aref / gyroScaleFactor;
+  }
+
+  float rateRadPerSec(byte axis) {
+    return radians((gyroADC[axis] / 1024.0) * aref / gyroScaleFactor);
+  }
+};
+
+/******************************************************/
+/******************** Analog Gyro *********************/
+/******************************************************/
+
+class Gyro_IDG_IXZ_500 : public Gyro {
+private:
+  float smoothFactor;
   
+public:
+  Gyro_IDG_IXZ_500() : Gyro() {
+    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
+    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+  }
+  
+  void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+    this->_initialize(rollChannel, pitchChannel, yawChannel);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
+  }
+  
+  int measure(byte axis) {
+    gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
+    return gyroData[axis];
+  }
+
   float getSmoothFactor(void) {
     return smoothFactor;
   }
@@ -87,7 +120,6 @@ public:
   void setSmoothFactor(float value) {
     smoothFactor = value;
   }
-  
 
   void calibrate() {
     autoZero();
@@ -107,13 +139,5 @@ public:
     digitalWrite(AZPIN, LOW);
     delay(8);
   }    
-
-  float rateDegPerSec(byte axis) {
-    return (gyroADC[axis] / 1024.0) * aref / gyroScaleFactor;
-  }
-  
-  float rateRadPerSec(byte axis) {
-    return radians((gyroADC[axis] / 1024.0) * aref / gyroScaleFactor);
-  }
 };
 
