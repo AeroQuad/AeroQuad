@@ -280,9 +280,11 @@ void sendSerialTelemetry() {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     Serial.print(accel.getRaw(ROLL));
     comma();
-    Serial.print(accel.getRaw(PITCH));
+    Serial.print(accel.getZero(ROLL));
     comma();
-    Serial.print(accel.getRaw(ZAXIS));
+    Serial.print(accel.getData(ROLL));
+    comma();
+    Serial.print(accel.getSmoothFactor());
     comma();
     Serial.println(accel.angleDeg(ROLL));
     queryType = 'X';

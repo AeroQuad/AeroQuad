@@ -19,8 +19,6 @@
 */
 
 class Gyro {
-private:
-  
 public:
   float gyroFullScaleOutput;
   float gyroScaleFactor;
@@ -28,15 +26,15 @@ public:
   int gyroData[3];
   int gyroZero[3];
   int gyroADC[3];
+  Gyro(void){}
 
   // The following function calls must be defined in any new subclasses
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
   }
-  virtual void calibrate(void);  
   virtual int measure(byte axis);
+  virtual void calibrate(void);  
   
-  Gyro(){}
   // The following functions are common between all Gyro subclasses
   void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     gyroChannel[ROLL] = rollChannel;

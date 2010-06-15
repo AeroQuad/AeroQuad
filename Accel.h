@@ -18,31 +18,28 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-/******************************************************/
-/*************** Analog Accelerometer *****************/
-/******************************************************/
-class Accel_ADXL330 {
-private:
-  float accelScaleFactor; // defined in initialize()
-  float smoothFactor;
+class Accel {
+public:
+  float accelScaleFactor;
   int accelChannel[3];
   int accelZero[3];
   int accelData[3];
   int accelADC[3];
-  
-public:
-  Accel_ADXL330(void) {
-    // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;    
+  Accel(void) {}
+
+  // ******************************************************************
+  // The following function calls must be defined in any new subclasses
+  // ******************************************************************
+  virtual void initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
+    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
   }
-  
-  void initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
+  virtual int measure(byte axis);
+  virtual void calibrate(void);  
+
+  // **************************************************************
+  // The following functions are common between all Gyro subclasses
+  // **************************************************************
+  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
     accelChannel[ROLL] = rollChannel;
     accelChannel[PITCH] = pitchChannel;
     accelChannel[ZAXIS] = zAxisChannel;
@@ -50,14 +47,6 @@ public:
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-    
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
-  }
-  
-  int measure(byte axis) {
-    accelADC[axis] = analogRead(accelChannel[axis] - accelZero[axis]);
-    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
-    return accelData[axis];
   }
   
   int getRaw(byte axis) {
@@ -85,6 +74,46 @@ public:
     return accelScaleFactor;
   }
   
+  float angleRad(byte axis) {
+    if (axis == PITCH) return arctan2(accelData[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
+    if (axis == ROLL) return arctan2(accelData[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
+  }
+
+  float angleDeg(byte axis) {
+    return degrees(angleRad(axis));
+  } 
+};
+
+/******************************************************/
+/*************** Analog Accelerometer *****************/
+/******************************************************/
+class Accel_ADXL330 : public Accel {
+private:
+  float smoothFactor;
+  
+public:
+  Accel_ADXL330() : Accel(){
+    // Accelerometer Values
+    // Update these variables if using a different accel
+    // Output is ratiometric for ADXL 335
+    // Note: Vs is not AREF voltage
+    // If Vs = 3.6V, then output sensitivity is 360mV/g
+    // If Vs = 2V, then it's 195 mV/g
+    // Then if Vs = 3.3V, then it's 329.062 mV/g
+    accelScaleFactor = 0.000329062;    
+  }
+  
+  void initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
+    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
+  }
+  
+  int measure(byte axis) {
+    accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
+    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+    return accelData[axis];
+  }
+
   float getSmoothFactor() {
     return smoothFactor;
   }
@@ -106,14 +135,5 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-  
-  float angleRad(byte axis) {
-    if (axis == PITCH) return arctan2(accelData[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
-    if (axis == ROLL) return arctan2(accelData[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
-  }
-
-  float angleDeg(byte axis) {
-    return degrees(angleRad(axis));
-  } 
 };
 
