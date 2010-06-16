@@ -62,6 +62,7 @@ float smoothHeading;
 #define YAWRATEPIN 5
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
+
 // Analog Reference Value
 // This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
@@ -90,6 +91,7 @@ int findZero[FINDZERO];
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
+
 
 // Auto level setup
 int levelAdjust[2] = {0,0};
@@ -211,6 +213,7 @@ float transmitterSmooth[6];
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
 
+
 // Flight angle variables
 float timeConstant;
 float flightAngle[2];
@@ -242,8 +245,8 @@ byte armed = 0;
 byte safetyCheck = 0;
 byte update = 0;
 
-int findMode(int *data, int arraySize);
-float arctan2(float y, float x);
+int findMode(int *data, int arraySize); // defined in Sensors.pde
+float arctan2(float y, float x); // defined in Sensors.pde
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -358,8 +361,16 @@ byte testSignal = LOW;
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
 
-float readFloat(int address);
-void writeFloat(float value, int address);
-void readEEPROM(void);
+float readFloat(int address); // defined in DataStorage.h
+void writeFloat(float value, int address); // defined in DataStorage.h
+void readEEPROM(void); // defined in DataStorage.h
+void readPilotCommands(void); // defined in FlightCommand.pde
+void readSensors(void); // defined in Sensors.pde
+void flightControl(void); // defined in FlightControl.pde
+void readSerialCommand(void);  //defined in SerialCom.pde
+void sendSerialTelemetry(void); // defined in SerialCom.pde
+void printInt(int data); // defined in SerialCom.pde
+float readFloatSerial(void); // defined in SerialCom.pde
+void comma(void); // defined in SerialCom.pde
 
 #endif

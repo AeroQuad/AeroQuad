@@ -90,13 +90,13 @@ void flightControl(void) {
   // Also provides even motor power on both sides if limit encountered
   if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
     delta = transmitterCommand[THROTTLE] - 1100;
-    maxCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[RIGHT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[LEFT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
   }
   else if ((motorCommand[FRONT] >= MAXCOMMAND) || (motorCommand[REAR] >= MAXCOMMAND)) {
     delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-    minCommand[RIGHT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[LEFT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[RIGHT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[LEFT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
     maxCommand[RIGHT] = MAXCOMMAND;
@@ -107,13 +107,13 @@ void flightControl(void) {
 
   if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
     delta = transmitterCommand[THROTTLE] - 1100;
-    maxCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[REAR] = limitRange(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[FRONT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[REAR] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
   }
   else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
     delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-    minCommand[FRONT] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[REAR] = limitRange(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[FRONT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[REAR] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
     maxCommand[FRONT] = MAXCOMMAND;
@@ -172,7 +172,7 @@ void flightControl(void) {
 
   // Apply limits to motor commands
   for (motor = FRONT; motor < LASTMOTOR; motor++)
-    motorCommand[motor] = limitRange(motorCommand[motor], minCommand[motor], maxCommand[motor]);
+    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
 
   // If throttle in minimum position, don't apply yaw
   if (transmitterCommand[THROTTLE] < MINCHECK) {
@@ -188,11 +188,11 @@ void flightControl(void) {
       break;
     case 3:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = limitRange(testCommand, 1000, 1200);
+        motorCommand[motor] = constrain(testCommand, 1000, 1200);
       break;
     case 5:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = limitRange(remoteCommand[motor], 1000, 1200);
+        motorCommand[motor] = constrain(remoteCommand[motor], 1000, 1200);
       safetyCheck = 1;
       break;
     default:

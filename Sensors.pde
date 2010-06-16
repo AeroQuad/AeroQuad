@@ -69,13 +69,6 @@ void readSensors(void) {
  flightAngle[PITCH] = angle[PITCH].calculate(accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
 }
 
-// Works faster and is smaller than the constrain() function
-int limitRange(int data, int minLimit, int maxLimit) {
-  if (data < minLimit) return minLimit;
-  else if (data > maxLimit) return maxLimit;
-  else return data;
-}
-
 float arctan2(float y, float x) {
   // Taken from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
    float coeff_1 = PI/4;

@@ -24,10 +24,10 @@
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
 
-// Define Flight Configuration
-// Use only one of the following definitions
-//#define plusConfig
-#define XConfig
+// Sensor Configuration
+#define AeroQuad_v1         // AeroQuad Shield v1.x
+//#define APM                 // ArduPilot Mega Sensor Board
+//#define AeroQuad_Wii        // Wii Sensors
 
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500      
@@ -37,7 +37,12 @@
 #define IXZ // IXZ-500 Flat Yaw Gyro
 //#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
-// Arduino Mega with AeroQuad Shield v1.x
+// Define Flight Configuration
+// Use only one of the following definitions
+//#define plusConfig
+#define XConfig
+
+// Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
 // Put a jumper wire between the Shield and Mega as indicated below
 // For Roll (Aileron) Channel, place jumper between AQ Shield pin 2 and Mega AI13
@@ -50,30 +55,40 @@
 #define Duemilanove_AQ1x
 //#define AeroQuadAPM
 
-// Heading Hold (experimental)
-// Currently uses yaw gyro which drifts over time, for Mega development will use magnetometer
-//#define HeadingHold
-
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
 
+/***************************************************************************/
+
 #include <EEPROM.h>
 #include <Servo.h>
+#include <Wire.h>
 #include "AeroQuad.h"
 #include "PID.h"
 #include "Receiver.h"
 #include "Filter.h"
-
-// Class definition for accelerometer found in Accel.h
-// Use only one of the following variable declarations
+#include "DataAcquisition.h"
 #include "Accel.h"
-Accel_ADXL330 accel;
-//Accel_BMA180 accel;
-
 #include "Gyro.h"
-Gyro_IDG_IXZ_500 gyro;
-//Gyro_ITG3200 gyro;
+
+// Create objects defined from Sensor Configuration Section
+#ifdef AeroQuad_v1 
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v1 gyro;
+#endif
+
+#ifdef APM
+  Accel_APM accel;
+  Gyro_APM gyro;
+  //Altimeter_APM altimeter;
+  //Compass_APM compass;
+#endif
+
+#ifdef AeroQuad_Wii
+  Accel_Wii accel;
+  Gyro_Wii gyro;
+#endif
 
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
@@ -118,8 +133,8 @@ void setup() {
   headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
   
   // Initialize sensors
-  accel.initialize(ROLLACCELPIN, PITCHACCELPIN, ZACCELPIN);
-  gyro.initialize(ROLLRATEPIN, PITCHRATEPIN, YAWRATEPIN);
+  gyro.initialize(); // If sensors have a common initialization routine, insert it into the corresponding gyro subclass
+  accel.initialize();
   
   // Calibrate sensors
   gyro.autoZero();  

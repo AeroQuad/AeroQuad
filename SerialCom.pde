@@ -524,7 +524,7 @@ float readFloatSerial() {
       timeout = 0;
       index++;
     }
-  }  while ((data[limitRange(index-1, 0, 128)] != ';') && (timeout < 5) && (index < 128));
+  }  while ((data[constrain(index-1, 0, 128)] != ';') && (timeout < 5) && (index < 128));
   return atof(data);
 }
 
