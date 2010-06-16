@@ -153,6 +153,7 @@ public:
 class Gyro_APM : public Gyro {
 private:
   int findZero[FINDZERO];
+  int rawADC;
 
 public:
   Gyro_APM() : Gyro() {
@@ -169,23 +170,27 @@ public:
   }
   
   void initialize(void) {
-    // rollChannel = 2
-    // pitchChannel = 3
-    // yawChannel = 1
-    this->_initialize(2,3,1);
+    // rollChannel = 1
+    // pitchChannel = 2
+    // yawChannel = 0
+    this->_initialize(1, 2, 0);
     initialize_APM_ADC(); // this is needed for both gyros and accels, done once in this class
   }
   
   int measure(byte axis) {
-    gyroADC[axis] = analogRead_APM_ADC(gyroChannel[axis]) - gyroZero[axis];
+    rawADC = analogRead_APM_ADC(gyroChannel[axis]);
+    if (rawADC > 500) // Check if good measurement
+      gyroADC[axis] = rawADC - gyroZero[axis];
     gyroData[axis] = gyroADC[axis]; // no smoothing needed
     return gyroData[axis];
   }
 
   void calibrate() {
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++)
+      for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_APM_ADC(gyroChannel[calAxis]);
+        delay(10);
+      }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);

@@ -34,11 +34,15 @@ void readSensors(void) {
  #ifdef IXZ
    gyro.invert(YAW);
  #endif
-#ifdef AeroQuad_Wii
-  gyro.invert[PITCH];
-  gyro.inver[YAW];
-  accel.invert[ROLL];
-#endif
+ #ifdef APM
+   gyro.invert(ROLL);
+   gyro.invert(PITCH);
+ #endif
+ #ifdef AeroQuad_Wii
+   gyro.invert[PITCH];
+   gyro.inver[YAW];
+   accel.invert[ROLL];
+ #endif
 
  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************

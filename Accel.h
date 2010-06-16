@@ -152,6 +152,7 @@ public:
 class Accel_APM : public Accel {
 private:
   int findZero[FINDZERO];
+  int rawADC;
 
 public:
   Accel_APM() : Accel(){
@@ -171,7 +172,9 @@ public:
   }
   
   int measure(byte axis) {
-    accelADC[axis] = analogRead_APM_ADC(accelChannel[axis]) - accelZero[axis];
+    rawADC = analogRead_APM_ADC(accelChannel[axis]);
+    if (rawADC > 500) // Check if measurement good
+      accelADC[axis] = rawADC - accelZero[axis];
     accelData[axis] = accelADC[axis]; // no smoothing needed
     return accelData[axis];
   }
