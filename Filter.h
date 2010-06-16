@@ -21,37 +21,6 @@
 #ifndef __FILTER_H__
 #define __FILTER_H__
 
-/*class Filter {
-// This does not work as expected
-// Reverting back to proven C function call
-private:
-  float _smoothFactor;
-  float _previousData;
-  float _smoothedData;
-  float newData, oldData;
-
-public:
-  Filter() {
-    _smoothFactor = 1.0;
-    _previousData = 0;
-  }
-  
-  void initialize(float smoothFactor) {
-    _smoothFactor = smoothFactor;
-    _previousData = 0;
-  }
-    
-  float smooth(int currentData) {
-    _smoothedData = (_previousData * (1.0 - _smoothFactor)) + ((float)currentData * _smoothFactor);
-    _previousData = _smoothedData;
-    return _smoothedData;
-  }
-  
-  void setSmoothFactor(float value) {_smoothFactor = value;}
-  float getSmoothFactor(void) {return _smoothFactor;}
-  float getData(void) {return _smoothedData;}
-};*/
-
 int smooth(int currentData, int previousData, float smoothFactor) {
   return (previousData * (1 - smoothFactor) + (currentData * smoothFactor));
 }

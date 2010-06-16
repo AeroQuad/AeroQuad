@@ -29,7 +29,7 @@ public:
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
   Gyro(void){}
-
+  
   // The following function calls must be defined in any new subclasses
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
@@ -102,6 +102,9 @@ public:
 /******************************************************/
 #ifdef AeroQuad_v1
 class Gyro_AeroQuad_v1 : public Gyro {
+private:
+  int findZero[FINDZERO];
+
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
@@ -118,16 +121,16 @@ public:
   
   int measure(byte axis) {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     return gyroData[axis];
   }
 
   void calibrate() {
     autoZero();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(gyroChannel[axis]);
-      gyroZero[axis] = findMode(findZero, FINDZERO);
+        findZero[i] = analogRead(gyroChannel[calAxis]);
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -148,6 +151,9 @@ public:
 /******************************************************/
 #ifdef APM
 class Gyro_APM : public Gyro {
+private:
+  int findZero[FINDZERO];
+
 public:
   Gyro_APM() : Gyro() {
     // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
@@ -177,10 +183,10 @@ public:
   }
 
   void calibrate() {
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead_APM_ADC(gyroChannel[axis]);
-      gyroZero[axis] = findMode(findZero, FINDZERO);
+        findZero[i] = analogRead_APM_ADC(gyroChannel[calAxis]);
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -194,38 +200,34 @@ public:
 /******************************************************/
 #ifdef AeroQuad_Wii
 class Gyro_Wii : public Gyro {
+private:
+  int findZero[FINDZERO];
+
 public:
   Gyro_Wii() : Gyro() {
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-    // Tested values : 
-    //#define Gyro_Gain_X 0.4 //X axis Gyro gain
-    //#define Gyro_Gain_Y 0.41 //Y axis Gyro gain
-    //#define Gyro_Gain_Z 0.41 //Z axis Gyro gain
-    //#define Gyro_Scaled_X(x) x*ToRad(Gyro_Gain_X) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Y(x) x*ToRad(Gyro_Gain_Y) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Z(x) x*ToRad(Gyro_Gain_Z) //Return the scaled ADC raw data of the gyro in radians for second
-    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+    gyroFullScaleOutput = 0;
+    gyroScaleFactor = 0;
   }
   
   void initialize(void) {
     Init_Gyro_Acc(); // defined in DataAquisition.h
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
   int measure(byte axis) {
     updateControls(); // defined in DataAcquisition.h
     gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
-    gyroData[axis] = gyroADC[axis]; // no smoothing needed
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
     return gyroData[axis];
   }
 
   void calibrate() {
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
-        findZero[i] = NWMP_gyro[axis];
+        findZero[i] = NWMP_gyro[calAxis];
       }
-      gyroZero[axis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);

@@ -263,7 +263,7 @@ void updateControls() {
     }
   }
 
-  if ((wm==0)||(wn=0))
+  if ((wm==0)||(wn==0))
   {
     Init_Gyro_Acc();
     delay(100);

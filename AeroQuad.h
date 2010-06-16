@@ -49,8 +49,8 @@
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
+#define FINDZERO 50
 float smoothTransmitter[6];
-float smoothFactor[2];
 float smoothHeading;
 
 // Sensor pin assignments
@@ -80,11 +80,6 @@ long accelAge[3]={0,0,0};
 int positiveGyroCount[3]={1,1,1};
 int negativeGyroCount[3]={1,1,1};
 int zeroGyroCount[3]={1,1,1};
-
-// Calibration parameters
-#define ZEROLIMIT 2
-#define FINDZERO 50
-int findZero[FINDZERO];
 
 // Flight Mode
 #define ACRO 0
@@ -213,7 +208,6 @@ float transmitterSmooth[6];
 float mTransmitter[6] = {1,1,1,1,1,1};
 float bTransmitter[6] = {0,0,0,0,0,0};
 
-
 // Flight angle variables
 float timeConstant;
 float flightAngle[2];
@@ -266,7 +260,7 @@ unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 unsigned long receiverTime = 0;
 unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
-unsigned long analogInputTime = 0;
+unsigned long sensorTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
 unsigned long cameraTime = 0;
 unsigned long fastTelemetryTime = 0;
@@ -277,11 +271,11 @@ unsigned long autoZeroGyroTime = 0;
 /**************************************************************/
 // Enable/disable control loops for debug
 //#define DEBUG
-byte receiverLoop = ON;
+byte receiverLoop = OFF;
 byte telemetryLoop = ON;
-byte analogInputLoop = ON;
-byte controlLoop = ON;
-byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte sensorLoop = ON;
+byte controlLoop = OFF;
+byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
 byte fastTransfer = OFF;
 byte testSignal = LOW;
 // Measured test signal with an oscilloscope:
@@ -372,5 +366,6 @@ void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
+int findMode(int *data, int arraySize); // defined in Sensors.pde
 
 #endif

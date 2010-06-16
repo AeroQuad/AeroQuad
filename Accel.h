@@ -34,6 +34,7 @@ public:
   // ******************************************************************
   virtual void initialize(void) {
     this->_initialize(rollChannel, pitchChannel, zAxisChannel);
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   virtual int measure(byte axis);
   virtual void calibrate(void);  
@@ -91,7 +92,7 @@ public:
 
   float angleDeg(byte axis) {
     return degrees(angleRad(axis));
-  } 
+  }
 };
 
 /******************************************************/
@@ -100,7 +101,7 @@ public:
 #ifdef AeroQuad_v1
 class Accel_AeroQuad_v1 : public Accel {
 private:
-  float smoothFactor;
+  int findZero[FINDZERO];
   
 public:
   Accel_AeroQuad_v1() : Accel(){
@@ -130,12 +131,12 @@ public:
 
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(axis = ROLL; axis > ZAXIS; axis++) {
+    for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(accelChannel[axis]);
-      accelZero[axis] = findMode(findZero, FINDZERO);
+        findZero[i] = analogRead(accelChannel[calAxis]);
+      accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
-    
+
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
@@ -149,6 +150,9 @@ public:
 /******************************************************/
 #ifdef APM
 class Accel_APM : public Accel {
+private:
+  int findZero[FINDZERO];
+
 public:
   Accel_APM() : Accel(){
     // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
@@ -160,10 +164,10 @@ public:
   }
   
   void initialize(void) {
-    // rollChannel = 4
-    // pitchChannel = 5
+    // rollChannel = 5
+    // pitchChannel = 4
     // zAxisChannel = 6
-    this->_initialize(4, 5, 6);
+    this->_initialize(5, 4, 6);
   }
   
   int measure(byte axis) {
@@ -174,12 +178,13 @@ public:
 
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(axis = ROLL; axis > ZAXIS; axis++) {
-      for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead_APM_ADC(accelChannel[axis]);
-      accelZero[axis] = findMode(findZero, FINDZERO);
+    for(byte calAxis = 0; calAxis < ZAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        findZero[i] = analogRead_APM_ADC(accelChannel[calAxis]);
+        delay(10);
+      }
+      accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
-    
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
@@ -193,33 +198,32 @@ public:
 /******************************************************/
 #ifdef AeroQuad_Wii
 class Accel_Wii : public Accel {
+private:
+  int findZero[FINDZERO];
+
 public:
   Accel_Wii() : Accel(){
-    // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
-    // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
-    // Tested value : 414
-    // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
-    // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-    accelScaleFactor = 414.0 / 9.81;    
+    accelScaleFactor = 0;    
   }
   
   void initialize(void) {
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
   int measure(byte axis) {
     accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
-    accelData[axis] = accelADC[axis]; // no smoothing needed
+    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     return accelData[axis];
   }
 
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(axis = ROLL; axis > ZAXIS; axis++) {
+    for(byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
-        findZero[i] = NWMP_acc[0];
+        findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[axis] = findMode(findZero, FINDZERO);
+      accelZero[] = findMode(findZero, FINDZERO);
     }
     
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;

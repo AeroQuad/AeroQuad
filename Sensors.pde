@@ -34,6 +34,11 @@ void readSensors(void) {
  #ifdef IXZ
    gyro.invert(YAW);
  #endif
+#ifdef AeroQuad_Wii
+  gyro.invert[PITCH];
+  gyro.inver[YAW];
+  accel.invert[ROLL];
+#endif
 
  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************
@@ -90,40 +95,41 @@ float arctan2(float y, float x) {
      return(angle);
 }
 
-int findMode(int *data, int arraySize) {
-  // The mode of a set of numbers is the value that occurs most frequently
-  boolean done = 0;
-  byte i;
-  int temp, maxData, frequency, maxFrequency;
-  
-  // Sorts numbers from lowest to highest
-  while (done != 1) {        
-    done = 1;
-    for (i=0; i<(arraySize-1); i++) {
-      if (data[i] > data[i+1]) {     // numbers are out of order - swap
-        temp = data[i+1];
-        data[i+1] = data[i];
-        data[i] = temp;
-        done = 0;
+  int findMode(int *data, int arraySize) {
+    // The mode of a set of numbers is the value that occurs most frequently
+    boolean done = 0;
+    byte i;
+    int temp, maxData, frequency, maxFrequency;
+    
+    // Sorts numbers from lowest to highest
+    while (done != 1) {        
+      done = 1;
+      for (i=0; i<(arraySize-1); i++) {
+        if (data[i] > data[i+1]) {     // numbers are out of order - swap
+          temp = data[i+1];
+          data[i+1] = data[i];
+          data[i] = temp;
+          done = 0;
+        }
       }
     }
-  }
-  
-  temp = 0;
-  frequency = 0;
-  maxFrequency = 0;
-  
-  // Count number of times a value occurs in sorted array
-  for (i=0; i<arraySize; i++) {
-    if (data[i] > temp) {
-      frequency = 0;
-      temp = data[i];
-      frequency++;
-    } else if (data[i] == temp) frequency++;
-    if (frequency > maxFrequency) {
-      maxFrequency = frequency;
-      maxData = data[i];
+    
+    temp = 0;
+    frequency = 0;
+    maxFrequency = 0;
+    
+    // Count number of times a value occurs in sorted array
+    for (i=0; i<arraySize; i++) {
+      if (data[i] > temp) {
+        frequency = 0;
+        temp = data[i];
+        frequency++;
+      } else if (data[i] == temp) frequency++;
+      if (frequency > maxFrequency) {
+        maxFrequency = frequency;
+        maxData = data[i];
+      }
     }
+    return maxData;
   }
-  return maxData;
-}
+

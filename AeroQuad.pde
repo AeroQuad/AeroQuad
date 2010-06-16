@@ -25,8 +25,8 @@
 *****************************************************************************/
 
 // Sensor Configuration
-#define AeroQuad_v1         // AeroQuad Shield v1.x
-//#define APM                 // ArduPilot Mega Sensor Board
+//#define AeroQuad_v1         // AeroQuad Shield v1.x
+#define APM                 // ArduPilot Mega Sensor Board
 //#define AeroQuad_Wii        // Wii Sensors
 
 // 5DOF IMU Version
@@ -179,9 +179,9 @@ void loop () {
   }
   
   // Measures sensor data and calculates attitude
-  if ((currentTime > (analogInputTime + AILOOPTIME)) && (analogInputLoop == ON)) { // 500Hz
+  if ((currentTime > (sensorTime + AILOOPTIME)) && (sensorLoop == ON)) { // 500Hz
     readSensors(); // defined in Sensors.pde
-    analogInputTime = currentTime;
+    sensorTime = currentTime;
   } 
 
   // Combines external pilot commands and measured sensor data to generate motor commands
