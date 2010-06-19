@@ -90,31 +90,31 @@ void readEEPROM() {
   PID[LEVELGYROPITCH].lastPosition = 0;
   PID[LEVELGYROPITCH].integratedError = 0;
 
-  mTransmitter[THROTTLE] = readFloat(THROTTLESCALE_ADR);
-  bTransmitter[THROTTLE] = readFloat(THROTTLEOFFSET_ADR);
-  mTransmitter[ROLL] = readFloat(ROLLSCALE_ADR);
-  bTransmitter[ROLL] = readFloat(ROLLOFFSET_ADR);
-  mTransmitter[PITCH] = readFloat(PITCHSCALE_ADR);
-  bTransmitter[PITCH] = readFloat(PITCHOFFSET_ADR);
-  mTransmitter[YAW] = readFloat(YAWSCALE_ADR);
-  bTransmitter[YAW] = readFloat(YAWOFFSET_ADR);
-  mTransmitter[MODE] = readFloat(MODESCALE_ADR);
-  bTransmitter[MODE] = readFloat(MODEOFFSET_ADR);
-  mTransmitter[AUX] = readFloat(AUXSCALE_ADR);
-  bTransmitter[AUX] = readFloat(AUXOFFSET_ADR);
+  receiver.setTransmitterSlope(THROTTLE, THROTTLESCALE_ADR);
+  receiver.setTransmitterOffset(THROTTLE, THROTTLEOFFSET_ADR);
+  receiver.setTransmitterSlope(ROLL, ROLLSCALE_ADR);
+  receiver.setTransmitterOffset(ROLL, ROLLOFFSET_ADR);
+  receiver.setTransmitterSlope(PITCH, PITCHSCALE_ADR);
+  receiver.setTransmitterOffset(PITCH, PITCHOFFSET_ADR);
+  receiver.setTransmitterSlope(YAW, YAWSCALE_ADR);
+  receiver.setTransmitterOffset(YAW, YAWOFFSET_ADR);
+  receiver.setTransmitterSlope(MODE, MODESCALE_ADR);
+  receiver.setTransmitterOffset(MODE, MODEOFFSET_ADR);
+  receiver.setTransmitterSlope(AUX, AUXSCALE_ADR);
+  receiver.setTransmitterOffset(AUX, AUXOFFSET_ADR);
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
-  xmitFactor = readFloat(XMITFACTOR_ADR);
+  receiver.setXmitFactor(XMITFACTOR_ADR);
   //smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR); // Now loaded in gyro class
   //smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR); //  Now loaded in accel class
-  smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR);
-  smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR);
-  smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR);
-  smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR);
-  smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR);
-  smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR);
+  // smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR); // Now loaded in receiver class
+  // smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR); // Now loaded in receiver class
+  // smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR); // Now loaded in receiver class
+  // smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR); // Now loaded in receiver class
+  // smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR); // Now loaded in receiver class
+  // smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR); // Now loaded in receiver class
   //accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));     // Now loaded in accel class
   //accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));   // Now loaded in accel class
   //accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));       // Now loaded in accel class

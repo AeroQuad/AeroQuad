@@ -19,45 +19,31 @@
 */
 
 void readPilotCommands() {
-  // Buffer receiver values read from pin change interrupt handler
-  for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    receiverData[channel] = (mTransmitter[channel] * readReceiver(receiverPin[channel])) + bTransmitter[channel];
-  // Smooth the flight control transmitter inputs (roll, pitch, yaw, throttle)
-  for (channel = ROLL; channel < LASTCHANNEL; channel++)
-    transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-  // Reduce transmitter commands using xmitFactor and center around 1500
-  for (channel = ROLL; channel < LASTAXIS; channel++)
-    transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-  // No xmitFactor reduction applied for throttle, mode and AUX
-  for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
-    transmitterCommand[channel] = transmitterCommandSmooth[channel];
-
+  receiver.read();
   // Read quad configuration commands from transmitter when throttle down
-  if (receiverData[THROTTLE] < MINCHECK) {
+  if (receiver.getRaw(THROTTLE) < MINCHECK) {
     zeroIntegralError();
     // Disarm motors (left stick lower left corner)
-    if (receiverData[YAW] < MINCHECK && armed == 1) {
+    if (receiver.getRaw(YAW) < MINCHECK && armed == 1) {
       armed = 0;
       motors.commandAllMotors(MINCOMMAND);
     }    
     // Zero sensors (left stick lower left, right stick lower right corner)
-    if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
+    if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
       gyro.calibrate();
       accel.calibrate(); // defined in Accel.h
       zeroIntegralError();
       motors.pulseMotors(3);
     }   
     // Arm motors (left stick lower right corner)
-    if (receiverData[YAW] > MAXCHECK && armed == 0 && safetyCheck == 1) {
+    if (receiver.getRaw(YAW) > MAXCHECK && armed == 0 && safetyCheck == 1) {
       armed = 1;
       zeroIntegralError();
-      transmitterCenter[PITCH] = receiverData[PITCH];
-      transmitterCenter[ROLL] = receiverData[ROLL];
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         minCommand[motor] = MINTHROTTLE;
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiverData[YAW] > MINCHECK) safetyCheck = 1; 
+    if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = 1; 
   }
 }
 

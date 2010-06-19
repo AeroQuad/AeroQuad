@@ -18,9 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// This header file defines function calls and ISR's needed to communicate over SPI, I2C and other bus communication protocols
-
-
+// This header file defines function calls and ISR's needed to communicatw
+// over SPI, I2C and other bus communication protocols for measuring sensor data
 
 // *******************************************
 // SPI Communication for APM ADC
@@ -118,9 +117,10 @@ int analogRead_APM_ADC(unsigned char ch_num) {
 
 #endif
 
-// **********************************
+// ********************************************
 // I2C Communication with Wii Sensors
-// **********************************
+// Original code written by: Larmarche Matthieu
+// ********************************************
 #ifdef AeroQuad_Wii
 
 //Nunchuk

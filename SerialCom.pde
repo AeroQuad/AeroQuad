@@ -84,7 +84,7 @@ void readSerialCommand() {
       break;
     case 'I': // Receive flight control configuration
       windupGuard = readFloatSerial();
-      xmitFactor = readFloatSerial();
+      receiver.setXmitFactor(readFloatSerial());
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -93,26 +93,26 @@ void readSerialCommand() {
       flightMode = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
-      smoothTransmitter[ROLL] = readFloatSerial();
-      smoothTransmitter[PITCH] = readFloatSerial();
-      smoothTransmitter[YAW] = readFloatSerial();
-      smoothTransmitter[THROTTLE] = readFloatSerial();
-      smoothTransmitter[MODE] = readFloatSerial();
-      smoothTransmitter[AUX] = readFloatSerial();
+      receiver.setSmoothFactor(ROLL, readFloatSerial());
+      receiver.setSmoothFactor(PITCH, readFloatSerial());
+      receiver.setSmoothFactor(YAW, readFloatSerial());
+      receiver.setSmoothFactor(THROTTLE, readFloatSerial());
+      receiver.setSmoothFactor(MODE, readFloatSerial());
+      receiver.setSmoothFactor(AUX, readFloatSerial());
       break;
     case 'O': // Receive transmitter calibration values
-      mTransmitter[ROLL] = readFloatSerial();
-      bTransmitter[ROLL] = readFloatSerial();
-      mTransmitter[PITCH] = readFloatSerial();
-      bTransmitter[PITCH] = readFloatSerial();
-      mTransmitter[YAW] = readFloatSerial();
-      bTransmitter[YAW] = readFloatSerial();
-      mTransmitter[THROTTLE] = readFloatSerial();
-      bTransmitter[THROTTLE] = readFloatSerial();
-      mTransmitter[MODE] = readFloatSerial();
-      bTransmitter[MODE] = readFloatSerial();
-      mTransmitter[AUX] = readFloatSerial();
-      bTransmitter[AUX] = readFloatSerial();
+      receiver.setTransmitterSlope(ROLL, readFloatSerial());
+      receiver.setTransmitterOffset(ROLL, readFloatSerial());
+      receiver.setTransmitterSlope(PITCH, readFloatSerial());
+      receiver.setTransmitterOffset(PITCH, readFloatSerial());
+      receiver.setTransmitterSlope(YAW, readFloatSerial());
+      receiver.setTransmitterOffset(YAW, readFloatSerial());
+      receiver.setTransmitterSlope(THROTTLE, readFloatSerial());
+      receiver.setTransmitterOffset(THROTTLE, readFloatSerial());
+      receiver.setTransmitterSlope(MODE, readFloatSerial());
+      receiver.setTransmitterOffset(MODE, readFloatSerial());
+      receiver.setTransmitterSlope(AUX, readFloatSerial());
+      receiver.setTransmitterOffset(AUX, readFloatSerial());
       break;
     case 'W': // Write all user configurable values to EEPROM
       writeFloat(PID[ROLL].P, PGAIN_ADR);
@@ -142,28 +142,28 @@ void readSerialCommand() {
       writeFloat(windupGuard, WINDUPGUARD_ADR);  
       writeFloat(levelLimit, LEVELLIMIT_ADR);   
       writeFloat(levelOff, LEVELOFF_ADR); 
-      writeFloat(xmitFactor, XMITFACTOR_ADR);
+      writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
       writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
       writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
-      writeFloat(smoothTransmitter[THROTTLE], THROTTLESMOOTH_ADR);
-      writeFloat(smoothTransmitter[ROLL], ROLLSMOOTH_ADR);
-      writeFloat(smoothTransmitter[PITCH], PITCHSMOOTH_ADR);
-      writeFloat(smoothTransmitter[YAW], YAWSMOOTH_ADR);
-      writeFloat(smoothTransmitter[MODE], MODESMOOTH_ADR);
-      writeFloat(smoothTransmitter[AUX], AUXSMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(THROTTLE), THROTTLESMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(ROLL), ROLLSMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(PITCH), PITCHSMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(YAW), YAWSMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(MODE), MODESMOOTH_ADR);
+      writeFloat(receiver.getSmoothFactor(AUX), AUXSMOOTH_ADR);
       writeFloat(timeConstant, FILTERTERM_ADR);
-      writeFloat(mTransmitter[THROTTLE], THROTTLESCALE_ADR);
-      writeFloat(bTransmitter[THROTTLE], THROTTLEOFFSET_ADR);
-      writeFloat(mTransmitter[ROLL], ROLLSCALE_ADR);
-      writeFloat(bTransmitter[ROLL], ROLLOFFSET_ADR);
-      writeFloat(mTransmitter[PITCH], PITCHSCALE_ADR);
-      writeFloat(bTransmitter[PITCH], PITCHOFFSET_ADR);
-      writeFloat(mTransmitter[YAW], YAWSCALE_ADR);
-      writeFloat(bTransmitter[YAW], YAWOFFSET_ADR);
-      writeFloat(mTransmitter[MODE], MODESCALE_ADR);
-      writeFloat(bTransmitter[MODE], MODEOFFSET_ADR);
-      writeFloat(mTransmitter[AUX], AUXSCALE_ADR);
-      writeFloat(bTransmitter[AUX], AUXOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(THROTTLE), THROTTLESCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(THROTTLE), THROTTLEOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(ROLL), ROLLSCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(ROLL), ROLLOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(PITCH), PITCHSCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(PITCH), PITCHOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(YAW), YAWSCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(YAW), YAWOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(MODE), MODESCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(MODE), MODEOFFSET_ADR);
+      writeFloat(receiver.getTransmitterSlope(AUX), AUXSCALE_ADR);
+      writeFloat(receiver.getTransmitterOffset(AUX), AUXOFFSET_ADR);
       writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
       writeFloat(aref, AREF_ADR);
       writeFloat(flightMode, FLIGHTMODE_ADR);
@@ -200,22 +200,22 @@ void readSerialCommand() {
       PID[LEVELGYROPITCH].I = 0;
       PID[LEVELGYROPITCH].D = -25;
       windupGuard = 2000.0;
-      xmitFactor = 0.20;  
+      receiver.setXmitFactor(0.20);  
       levelLimit = 1.0;
       levelOff = 0.0;
       gyro.setSmoothFactor(0.50);
       accel.setSmoothFactor(0.50);
       timeConstant = 4.0;   
       for (channel = ROLL; channel < LASTCHANNEL; channel++) {
-        mTransmitter[channel] = 1.0;
-        bTransmitter[channel] = 0.0;
+        receiver.setTransmitterSlope(channel, 1.0);
+        receiver.setTransmitterOffset(channel, 0.0);
       }
-      smoothTransmitter[THROTTLE] = 1.0;
-      smoothTransmitter[ROLL] = 1.0;
-      smoothTransmitter[PITCH] = 1.0;
-      smoothTransmitter[YAW] = 0.5;
-      smoothTransmitter[MODE] = 1.0;
-      smoothTransmitter[AUX] = 1.0;
+      receiver.setSmoothFactor(THROTTLE, 1.0);
+      receiver.setSmoothFactor(ROLL, 1.0);
+      receiver.setSmoothFactor(PITCH, 1.0);
+      receiver.setSmoothFactor(YAW, 0.5);
+      receiver.setSmoothFactor(MODE, 1.0);
+      receiver.setSmoothFactor(AUX, 1.0);
       smoothHeading = 1.0;
       flightMode = ACRO;
       headingHoldConfig = OFF;
@@ -356,7 +356,7 @@ void sendSerialTelemetry() {
   case 'J': // Send flight control configuration values
     Serial.print(windupGuard);
     comma();
-    Serial.println(xmitFactor);
+    Serial.println(receiver.getXmitFactor());
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
@@ -371,22 +371,22 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send motor smoothing values
     for (axis = ROLL; axis < AUX; axis++) {
-      Serial.print(smoothTransmitter[axis]);
+      Serial.print(receiver.getSmoothFactor(axis));
       comma();
     }
-    Serial.println(smoothTransmitter[AUX]);
+    Serial.println(receiver.getSmoothFactor(AUX));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
     for (axis = ROLL; axis < AUX; axis++) {
-      Serial.print(mTransmitter[axis]);
+      Serial.print(receiver.getTransmitterSlope(axis));
       comma();
-      Serial.print(bTransmitter[axis]);
+      Serial.print(receiver.getTransmitterOffset(axis));
       comma();
     }
-    Serial.print(mTransmitter[AUX]);
+    Serial.print(receiver.getTransmitterSlope(AUX));
     comma();
-    Serial.println(bTransmitter[AUX]);
+    Serial.println(receiver.getTransmitterOffset(AUX));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -427,7 +427,7 @@ void sendSerialTelemetry() {
       Serial.print(gyro.getData(axis));
       comma();
     }
-    Serial.print(transmitterCommand[THROTTLE]);
+    Serial.print(receiver.getData(THROTTLE));
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(motorAxisCommand[axis]);
@@ -449,10 +449,10 @@ void sendSerialTelemetry() {
       Serial.println(1000);
     break;
    case 'T': // Send processed transmitter values
-    Serial.print(xmitFactor);
+    Serial.print(receiver.getXmitFactor());
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(transmitterCommand[axis]);
+      Serial.print(receiver.getData(axis));
       comma();
     }
     for (axis = ROLL; axis < YAW; axis++) {
@@ -467,22 +467,22 @@ void sendSerialTelemetry() {
     break;
   case 'U': // Send smoothed receiver values
     for (channel = ROLL; channel < AUX; channel++) {
-      Serial.print(transmitterCommandSmooth[channel]);
+      Serial.print(receiver.getData(channel));
       comma();
     }
-    Serial.println(transmitterCommandSmooth[AUX]);
+    Serial.println(receiver.getData(AUX));
     break;
   case 'V': // Send receiver status
     for (channel = ROLL; channel < AUX; channel++) {
-      Serial.print(receiverData[channel]);
+      Serial.print(receiver.getRaw(channel));
       comma();
     }
-    Serial.println(receiverData[AUX]);
+    Serial.println(receiver.getRaw(AUX));
     break;
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
-    Serial.print(transmitterCommand[YAW]);
+    Serial.print(receiver.getData(YAW));
     comma();
     Serial.print(headingHold);
     comma();

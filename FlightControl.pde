@@ -25,8 +25,8 @@ void flightControl(void) {
       // ************************** Update Roll/Pitch ***********************
       // updatePID(target, measured, PIDsettings);
       // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-      motorAxisCommand[ROLL] = updatePID(transmitterCommand[ROLL], gyro.getData(ROLL) + 1500, &PID[ROLL]);
-      motorAxisCommand[PITCH] = updatePID(transmitterCommand[PITCH], gyro.getData(PITCH) + 1500, &PID[PITCH]);
+      motorAxisCommand[ROLL] = updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]);
+      motorAxisCommand[PITCH] = updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]);
     }
     if (flightMode == STABLE) {
       // Stable Mode
@@ -34,8 +34,8 @@ void flightControl(void) {
       // updatePID(target, measured, PIDsettings);
       // measured = flight angle calculated from angle object
       // updatePID() and updatePIDangle() are defined in PID.h
-      motorAxisCommand[ROLL] = updatePIDangle(transmitterCommandSmooth[ROLL] * mLevelTransmitter + bLevelTransmitter, flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
-      motorAxisCommand[PITCH] = updatePIDangle(transmitterCommandSmooth[PITCH] * mLevelTransmitter + bLevelTransmitter, -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
+      motorAxisCommand[ROLL] = updatePIDangle(receiver.getData(ROLL), flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
+      motorAxisCommand[PITCH] = updatePIDangle(receiver.getData(PITCH), -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
     }
     
   // ***************************** Update Yaw ***************************
@@ -43,8 +43,8 @@ void flightControl(void) {
   // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
   if (headingHoldConfig == ON) {
     currentHeading += gyro.getData(YAW) * headingScaleFactor * controldT;
-    if (transmitterCommand[THROTTLE] > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
-      if ((transmitterCommand[YAW] > (MIDCOMMAND + 25)) || (transmitterCommand[YAW] < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
+    if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+      if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
         headingHold = 0;
         heading = currentHeading;
       }
@@ -58,22 +58,22 @@ void flightControl(void) {
       PID[HEADING].integratedError = 0;
     }
   }   
-  motorAxisCommand[YAW] = updatePID(transmitterCommand[YAW] + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]);
+  motorAxisCommand[YAW] = updatePID(receiver.getData(YAW) + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]);
     
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-      motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-      motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[LEFT] = transmitterCommand[THROTTLE] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+      motorCommand[FRONT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
+      motorCommand[REAR] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
+      motorCommand[RIGHT] = receiver.getData(THROTTLE) - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+      motorCommand[LEFT] = receiver.getData(THROTTLE) + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
     #endif
     #ifdef XConfig
       // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-      motorCommand[FRONT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW];
-      motorCommand[RIGHT] = transmitterCommand[THROTTLE] - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[LEFT] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[REAR] = transmitterCommand[THROTTLE] + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW];
+      motorCommand[FRONT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW];
+      motorCommand[RIGHT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+      motorCommand[LEFT] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+      motorCommand[REAR] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW];
     #endif
   }
 
@@ -89,14 +89,14 @@ void flightControl(void) {
   // Prevents too little power applied to motors during hard manuevers
   // Also provides even motor power on both sides if limit encountered
   if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
-    delta = transmitterCommand[THROTTLE] - 1100;
-    maxCommand[RIGHT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[LEFT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    delta = receiver.getData(THROTTLE) - 1100;
+    maxCommand[RIGHT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[LEFT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
   }
   else if ((motorCommand[FRONT] >= MAXCOMMAND) || (motorCommand[REAR] >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-    minCommand[RIGHT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[LEFT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    delta = MAXCOMMAND - receiver.getData(THROTTLE);
+    minCommand[RIGHT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[LEFT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
     maxCommand[RIGHT] = MAXCOMMAND;
@@ -106,14 +106,14 @@ void flightControl(void) {
   }
 
   if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
-    delta = transmitterCommand[THROTTLE] - 1100;
-    maxCommand[FRONT] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[REAR] = constrain(transmitterCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    delta = receiver.getData(THROTTLE) - 1100;
+    maxCommand[FRONT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
+    maxCommand[REAR] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
   }
   else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - transmitterCommand[THROTTLE];
-    minCommand[FRONT] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[REAR] = constrain(transmitterCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    delta = MAXCOMMAND - receiver.getData(THROTTLE);
+    minCommand[FRONT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
+    minCommand[REAR] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
     maxCommand[FRONT] = MAXCOMMAND;
@@ -143,29 +143,29 @@ void flightControl(void) {
     }
     #endif
     #ifdef XConfig
-    if (receiverData[ROLL] < MINCHECK) {
-      minCommand[FRONT] = minAcro;
+    if (receiver.getRaw(ROLL) < MINCHECK) {
+      maxCommand[FRONT] = minAcro;
       maxCommand[REAR] = MAXCOMMAND;
-      minCommand[LEFT] = minAcro;
+      maxCommand[LEFT] = minAcro;
       maxCommand[RIGHT] = MAXCOMMAND;
     }
-    else if (receiverData[ROLL] > MAXCHECK) {
+    else if (receiver.getRaw(ROLL) > MAXCHECK) {
       maxCommand[FRONT] = MAXCOMMAND;
-      minCommand[REAR] = minAcro;
+      maxCommand[REAR] = minAcro;
       maxCommand[LEFT] = MAXCOMMAND;
-      minCommand[RIGHT] = minAcro;
+      maxCommand[RIGHT] = minAcro;
     }
-    else if (receiverData[PITCH] < MINCHECK) {
+    else if (receiver.getRaw(PITCH) < MINCHECK) {
       maxCommand[FRONT] = MAXCOMMAND;
-      minCommand[REAR] = minAcro;
-      minCommand[LEFT] = minAcro;
+      maxCommand[REAR] = minAcro;
+      maxCommand[LEFT] = minAcro;
       maxCommand[RIGHT] = MAXCOMMAND;
     }
-    else if (receiverData[PITCH] > MAXCHECK) {
-      minCommand[FRONT] = minAcro;
+    else if (receiver.getRaw(PITCH) > MAXCHECK) {
+      maxCommand[FRONT] = minAcro;
       maxCommand[REAR] = MAXCOMMAND;
       maxCommand[LEFT] = MAXCOMMAND;
-      minCommand[RIGHT] = minAcro;
+      maxCommand[RIGHT] = minAcro;
     }
     #endif
   }
@@ -175,7 +175,7 @@ void flightControl(void) {
     motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
 
   // If throttle in minimum position, don't apply yaw
-  if (transmitterCommand[THROTTLE] < MINCHECK) {
+  if (receiver.getData(THROTTLE) < MINCHECK) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motorCommand[motor] = MINTHROTTLE;
   }

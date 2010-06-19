@@ -25,8 +25,9 @@
 *****************************************************************************/
 
 // Sensor Configuration
-//#define AeroQuad_v1         // AeroQuad Shield v1.x
-#define APM                 // ArduPilot Mega Sensor Board
+#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
+//#define APM                 // ArduPilot Mega Sensor Board
 //#define AeroQuad_Wii        // Wii Sensors
 
 // 5DOF IMU Version
@@ -66,8 +67,8 @@
 #include <Wire.h>
 #include "AeroQuad.h"
 #include "PID.h"
-#include "Receiver.h"
 #include "Filter.h"
+#include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Accel.h"
 #include "Gyro.h"
@@ -76,6 +77,7 @@
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
+  Receiver_AeroQuad_v1 receiver;
 #endif
 
 #ifdef APM
@@ -126,7 +128,7 @@ void setup() {
 
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON)
-    configureReceiver();
+    receiver.initialize();
      
   // Heading hold
   // aref is read in from EEPROM and originates from Configurator
