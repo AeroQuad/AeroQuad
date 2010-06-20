@@ -81,15 +81,15 @@ public:
     transmitterSmooth[AUX] = readFloat(AUXSMOOTH_ADR);
   }
   
-  int getRaw(byte channel) {
+  const int getRaw(byte channel) {
     return receiverData[channel];
   }
   
-  int getData(byte channel) {
+  const int getData(byte channel) {
     return transmitterCommand[channel];
   }
     
-  int getZero(byte channel) {
+  const int getZero(byte channel) {
     return transmitterZero[channel];
   }
   
@@ -97,7 +97,7 @@ public:
     transmitterZero[channel] = value;
   }
   
-  float getSmoothFactor(byte channel) {
+  const float getSmoothFactor(byte channel) {
     return transmitterSmooth[channel];
   }
   
@@ -105,15 +105,15 @@ public:
     transmitterSmooth[channel] = value;
   }
   
-  float getXmitFactor(void) {
+  const float getXmitFactor(void) {
     return xmitFactor;
   }
   
-  void setXmitFactor(int value) {
+  void setXmitFactor(float value) {
     xmitFactor = value;
   }
   
-  float getTransmitterSlope(byte channel) {
+  const float getTransmitterSlope(byte channel) {
     return mTransmitter[channel];
   }
   
@@ -121,7 +121,7 @@ public:
     mTransmitter[channel] = value;
   }
   
-  float getTransmitterOffset(byte channel) {
+  const float getTransmitterOffset(byte channel) {
     return bTransmitter[channel];
   }
   
@@ -271,9 +271,15 @@ public:
     oldSREG = SREG;
     cli();
     // Buffer receiver values read from pin change interrupt handler
-    for (channel = ROLL; channel < LASTCHANNEL; channel++) {
-      data[channel] = pinData[receiverPin[channel]].lastGoodWidth;
-    }
+    //for (channel = ROLL; channel < LASTCHANNEL; channel++) {
+    //  data[channel] = pinData[receiverPin[channel]].lastGoodWidth;
+    //}
+    data[ROLL] = pinData[receiverPin[ROLL]].lastGoodWidth;
+    data[PITCH] = pinData[receiverPin[PITCH]].lastGoodWidth;
+    data[THROTTLE] = pinData[receiverPin[THROTTLE]].lastGoodWidth;
+    data[YAW] = pinData[receiverPin[YAW]].lastGoodWidth;
+    data[MODE] = pinData[receiverPin[MODE]].lastGoodWidth;
+    data[AUX] = pinData[receiverPin[AUX]].lastGoodWidth;
     SREG = oldSREG;  
     
     for(channel = ROLL; channel < LASTCHANNEL; channel++) {
@@ -283,7 +289,7 @@ public:
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (channel = ROLL; channel < THROTTLE; channel ++)
+    for (channel = ROLL; channel < THROTTLE; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and 
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)

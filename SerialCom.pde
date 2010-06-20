@@ -465,7 +465,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.println(motorAxisCommand[YAW]);
     break;
-  case 'U': // Send smoothed receiver values
+  case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (channel = ROLL; channel < AUX; channel++) {
       Serial.print(receiver.getData(channel));
       comma();

@@ -40,8 +40,8 @@
 
 // Define Flight Configuration
 // Use only one of the following definitions
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -113,12 +113,7 @@ Motors_PWM motors; // Use this for PWM ESC's
 // ************************************************************
 void setup() {
   Serial.begin(BAUD);
-  analogReference(EXTERNAL);
   pinMode (LEDPIN, OUTPUT);
-  // Configure gyro auto zero pins
-  pinMode (AZPIN, OUTPUT);
-  digitalWrite(AZPIN, LOW);
-  delay(1);
   
   // Read user values from EEPROM
   readEEPROM();

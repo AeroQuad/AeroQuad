@@ -36,7 +36,7 @@ public:
     this->_initialize(rollChannel, pitchChannel, zAxisChannel);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
-  virtual int measure(byte axis);
+  virtual const int measure(byte axis);
   virtual void calibrate(void);  
 
   // **************************************************************
@@ -52,20 +52,20 @@ public:
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
   }
   
-  int getRaw(byte axis) {
+  const int getRaw(byte axis) {
     return accelADC[axis];
   }
   
-  int getData(byte axis) {
+  const int getData(byte axis) {
     return accelData[axis];
   }
   
-  int invert(byte axis) {
+  const int invert(byte axis) {
     accelData[axis] = -accelData[axis];
     return accelData[axis];
   }
   
-  int getZero(byte axis) {
+  const int getZero(byte axis) {
     return accelZero[axis];
   }
   
@@ -73,11 +73,11 @@ public:
     accelZero[axis] = value;
   }
   
-  float getScaleFactor(void) {
+  const float getScaleFactor(void) {
     return accelScaleFactor;
   }
   
-  float getSmoothFactor() {
+  const float getSmoothFactor() {
     return smoothFactor;
   }
   
@@ -85,12 +85,12 @@ public:
     smoothFactor = value;
   }
   
-  float angleRad(byte axis) {
+  const float angleRad(byte axis) {
     if (axis == PITCH) return arctan2(accelData[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
     if (axis == ROLL) return arctan2(accelData[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
   }
 
-  float angleDeg(byte axis) {
+  const float angleDeg(byte axis) {
     return degrees(angleRad(axis));
   }
 };
@@ -123,7 +123,7 @@ public:
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     return accelData[axis];

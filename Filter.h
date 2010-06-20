@@ -21,8 +21,8 @@
 #ifndef __FILTER_H__
 #define __FILTER_H__
 
-int smooth(int currentData, int previousData, float smoothFactor) {
-  return (previousData * (1 - smoothFactor) + (currentData * smoothFactor));
+float smooth(float currentData, float previousData, float smoothFactor) {
+  return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor));
 }
 
 #endif

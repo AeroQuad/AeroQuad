@@ -34,7 +34,7 @@ public:
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
   }
-  virtual int measure(byte axis);
+  virtual const int measure(byte axis);
   virtual void calibrate(void);
   virtual void autoZero(void){};
   
@@ -49,38 +49,36 @@ public:
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
   }
     
-  int getRaw(byte axis) {
+  const int getRaw(byte axis) {
     return gyroADC[axis];
   }
   
-  int getData(byte axis) {
+  const int getData(byte axis) {
     return gyroData[axis];
   }
   
-  int setData(byte axis, int value) {
+  void setData(byte axis, int value) {
     gyroData[axis] = value;
-    return gyroData[axis];
   }
   
-  int invert(byte axis) {
+  const int invert(byte axis) {
     gyroData[axis] = -gyroData[axis];
     return gyroData[axis];
   }
   
-  int getZero(byte axis) {
+  const int getZero(byte axis) {
     return gyroZero[axis];
   }
   
-  int setZero(byte axis, int value) {
+  void setZero(byte axis, int value) {
     gyroZero[axis] = value;
-    return gyroZero[axis];
   }    
   
-  float getScaleFactor() {
+  const float getScaleFactor() {
     return gyroScaleFactor;
   }
 
-  float getSmoothFactor(void) {
+  const float getSmoothFactor(void) {
     return smoothFactor;
   }
   
@@ -88,11 +86,11 @@ public:
     smoothFactor = value;
   }
 
-  float rateDegPerSec(byte axis) {
+  const float rateDegPerSec(byte axis) {
     return (gyroADC[axis] / 1024.0) * gyroScaleFactor;
   }
 
-  float rateRadPerSec(byte axis) {
+  const float rateRadPerSec(byte axis) {
     return radians((gyroADC[axis] / 1024.0) * gyroScaleFactor);
   }
 };
@@ -112,6 +110,12 @@ public:
   }
   
   void initialize(void) {
+    analogReference(EXTERNAL);
+    // Configure gyro auto zero pins
+    pinMode (AZPIN, OUTPUT);
+    digitalWrite(AZPIN, LOW);
+    delay(1);
+
     // rollChannel = 4
     // pitchChannel = 3
     // yawChannel = 5
@@ -119,7 +123,7 @@ public:
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
     gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     return gyroData[axis];

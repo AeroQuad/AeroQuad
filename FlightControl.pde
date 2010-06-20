@@ -125,19 +125,19 @@ void flightControl(void) {
   // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
   if (flightMode == ACRO) {
     #ifdef plusConfig
-    if (receiverData[ROLL] < MINCHECK) {
+    if (receiver.getRaw(ROLL) < MINCHECK) {
       minCommand[LEFT] = minAcro;
       maxCommand[RIGHT] = MAXCOMMAND;
     }
-    else if (receiverData[ROLL] > MAXCHECK) {
+    else if (receiver.getRaw(ROLL) > MAXCHECK) {
       maxCommand[LEFT] = MAXCOMMAND;
       minCommand[RIGHT] = minAcro;
     }
-    else if (receiverData[PITCH] < MINCHECK) {
+    else if (receiver.getRaw(PITCH) < MINCHECK) {
      maxCommand[FRONT] = MAXCOMMAND;
      minCommand[REAR] = minAcro;
     }
-    else if (receiverData[PITCH] > MAXCHECK) {
+    else if (receiver.getRaw(PITCH) > MAXCHECK) {
      minCommand[FRONT] = minAcro;
      maxCommand[REAR] = MAXCOMMAND;
     }
