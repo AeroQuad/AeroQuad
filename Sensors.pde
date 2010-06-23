@@ -46,7 +46,7 @@ void readSensors(void) {
 
  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************
- for (axis = ROLL; axis < YAW; axis++) {              
+ /*for (axis = ROLL; axis < YAW; axis++) {              
    if (abs(lastAccel[axis]-accel.getData(axis)) < 5) { // if accel is same as previous cycle
      accelAge[axis]++;
      if (accelAge[axis] >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
@@ -70,7 +70,7 @@ void readSensors(void) {
      lastAccel[axis]=accel.getData(axis);
      accelAge[axis]=0;
    }
- }
+ }*/
 
  // ****************** Calculate Absolute Angle *****************
  // angle[axis].calculate() defined in FlightAngle.h

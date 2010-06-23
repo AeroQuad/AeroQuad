@@ -181,7 +181,7 @@ public:
     initialize_APM_ADC(); // this is needed for both gyros and accels, done once in this class
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     rawADC = analogRead_APM_ADC(gyroChannel[axis]);
     if (rawADC > 500) // Check if good measurement
       gyroADC[axis] = rawADC - gyroZero[axis];

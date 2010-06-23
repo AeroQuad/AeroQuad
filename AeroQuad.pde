@@ -25,9 +25,9 @@
 *****************************************************************************/
 
 // Sensor Configuration
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
-//#define APM                 // ArduPilot Mega Sensor Board
+#define APM                 // ArduPilot Mega Sensor Board
 //#define AeroQuad_Wii        // Wii Sensors
 
 // 5DOF IMU Version
@@ -40,8 +40,8 @@
 
 // Define Flight Configuration
 // Use only one of the following definitions
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -53,7 +53,7 @@
 // For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 //#define Mega_AQ1x
-#define Duemilanove_AQ1x
+//#define Duemilanove_AQ1x
 //#define AeroQuadAPM
 
 // Camera Stabilization (experimental)
@@ -85,6 +85,7 @@
   Gyro_APM gyro;
   //Altimeter_APM altimeter;
   //Compass_APM compass;
+  Receiver_APM receiver;
 #endif
 
 #ifdef AeroQuad_Wii

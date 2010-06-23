@@ -171,7 +171,7 @@ public:
     this->_initialize(5, 4, 6);
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     rawADC = analogRead_APM_ADC(accelChannel[axis]);
     if (rawADC > 500) // Check if measurement good
       accelADC[axis] = rawADC - accelZero[axis];

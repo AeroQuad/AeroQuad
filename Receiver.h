@@ -254,7 +254,7 @@ public:
 
   // Configure each receiver pin for PCINT
   void initialize() {
-    this->_initialize(); // load in xmitFactor from EEPROM
+    this->_initialize(); // load in calibration xmitFactor from EEPROM
     for (channel = ROLL; channel < LASTCHANNEL; channel++) {
       pinMode(receiverChannel[channel], INPUT);
       pinData[receiverChannel[channel]].edge = FALLING_EDGE;
@@ -475,18 +475,20 @@ private:
 
 class Receiver_APM : public Receiver {
 private:
-  #define ROLLPIN 1
-  #define PITCHPIN 2
-  #define YAWPIN 3
-  #define THROTTLEPIN 0
-  #define MODEPIN 4
-  #define AUXPIN 5
-  int receiverPin[6] = {1,2,4,0,3,5};
+  int receiverPin[6];
 
 public:
-  Receiver_AeroQuadMega_v1() : Receiver(){}
+  Receiver_APM() : Receiver(){
+    receiverPin[ROLL] = 0;
+    receiverPin[PITCH] = 1;
+    receiverPin[YAW] = 3;
+    receiverPin[THROTTLE] = 2;
+    receiverPin[MODE] = 4;
+    receiverPin[AUX] = 5;
+  }
 
-  void initialize() {
+  void initialize(void) {
+    this->_initialize(); // load in calibration and xmitFactor from EEPROM
     /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos 
     OCR4A is used as the top counter*/
     pinMode(49, INPUT);
@@ -504,8 +506,19 @@ public:
     sei();
   }
   
-  unsigned int read(byte receiverPin) {
-    return (PWM_RAW[receiverPin]+600)/2;
+  void read(void) {
+    for(channel = ROLL; channel < LASTCHANNEL; channel++) {
+      // Apply transmitter calibration adjustment
+      receiverData[channel] = (mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + bTransmitter[channel];
+      // Smooth the flight control transmitter inputs 
+      transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+    }
+    // Reduce transmitter commands using xmitFactor and center around 1500
+    for (channel = ROLL; channel < THROTTLE; channel++)
+      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+    // No xmitFactor reduction applied for throttle, mode and 
+    for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
+      transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
 };
 #endif
