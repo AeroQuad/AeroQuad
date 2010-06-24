@@ -21,14 +21,14 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#ifdef AeroQuadAPM
+#ifdef APM
 #define FRONTMOTORPIN 8
 #define REARMOTORPIN 7
 #define RIGHTMOTORPIN 3
 #define LEFTMOTORPIN 2
 #endif
 
-#ifndef AeroQuadAPM
+#ifndef AeroQuad_v1
 #define FRONTMOTORPIN 3
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
@@ -154,7 +154,7 @@ public:
 };
 
 // Need to set this up as a #define because Duemilanove does not have Mega/APM register references
-#ifdef AeroQuadAPM
+#ifdef APM
 class Motors_APM {
 private:
   int motor;

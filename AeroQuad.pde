@@ -103,8 +103,8 @@ FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 // Class definition for motor control found in Motors.h
 // Use only one of the following variable declarations
 #include "Motors.h"
-Motors_PWM motors; // Use this for PWM ESC's
-//Motors_APM motors; // Use this for AMP compatability (connect OUT0-3)
+//Motors_PWM motors; // Use this for PWM ESC's
+Motors_APM motors; // Use this for AMP compatability (connect OUT0-3)
 //Motors_I2C motors; // Future capability under construction
 
 #include "DataStorage.h"
