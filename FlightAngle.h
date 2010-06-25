@@ -20,9 +20,6 @@
 
 // This class is responsible for calculating vehicle attitude
 
-#ifndef FLIGHTANGLE_H
-#define FLIGHTANGLE_H
-
 class FlightAngle_CompFilter {
 private:
   float dt;
@@ -160,4 +157,3 @@ public:
   }
     
 };
-#endif

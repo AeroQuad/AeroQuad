@@ -18,9 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef MOTORS_H
-#define MOTORS_H
-
 #ifdef APM
 #define FRONTMOTORPIN 8
 #define REARMOTORPIN 7
@@ -28,7 +25,7 @@
 #define LEFTMOTORPIN 2
 #endif
 
-#ifndef AeroQuad_v1
+#if defined(AeroQuad_v1) || defined (AeroQuad_Wii)
 #define FRONTMOTORPIN 3
 #define REARMOTORPIN 9
 #define RIGHTMOTORPIN 10
@@ -251,6 +248,4 @@ public:
     return bMotorCommand;
   }
 };
-#endif
-
 #endif

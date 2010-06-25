@@ -18,9 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef RECEIVER_H
-#define RECEIVER_H
-
 class  Receiver {
 public:
   int receiverData[6];
@@ -133,7 +130,7 @@ public:
 /*************************************************/
 /************** AeroQuad v1 PCINT ****************/
 /*************************************************/
-#ifdef AeroQuad_v1
+#if defined (AeroQuad_v1) || defined (AeroQuad_Wii)
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
@@ -521,5 +518,4 @@ public:
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
 };
-#endif
 #endif

@@ -18,8 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef AEROQUAD_H
-#define AEROQUAD_H
 #include <stdlib.h>
 #include <math.h>
 #include "WProgram.h"
@@ -291,4 +289,3 @@ float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 
-#endif

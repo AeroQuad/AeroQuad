@@ -39,9 +39,9 @@ void readSensors(void) {
    gyro.invert(PITCH);
  #endif
  #ifdef AeroQuad_Wii
-   gyro.invert[PITCH];
-   gyro.inver[YAW];
-   accel.invert[ROLL];
+   gyro.invert(PITCH);
+   gyro.invert(YAW);
+   accel.invert(ROLL);
  #endif
 
  // ************ Correct for gyro drift by FabQuad **************

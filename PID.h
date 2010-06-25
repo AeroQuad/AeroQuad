@@ -18,9 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef PID_H
-#define PID_H
-
 struct PIDdata {
   float P, I, D;
   float lastPosition;
@@ -62,5 +59,3 @@ float updatePIDangle(float targetPosition, float currentPosition, int gyroData, 
   
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
-
-#endif

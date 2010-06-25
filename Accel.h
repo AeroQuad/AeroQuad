@@ -213,7 +213,7 @@ public:
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
     accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     return accelData[axis];
@@ -226,7 +226,7 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
     
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;

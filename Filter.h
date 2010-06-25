@@ -18,11 +18,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef __FILTER_H__
-#define __FILTER_H__
-
 float smooth(float currentData, float previousData, float smoothFactor) {
   return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor));
 }
 
-#endif

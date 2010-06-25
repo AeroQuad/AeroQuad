@@ -24,11 +24,12 @@
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
 
-// Sensor Configuration
-//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
-#define APM                 // ArduPilot Mega Sensor Board
-//#define AeroQuad_Wii        // Wii Sensors
+// Hardware Configuration
+#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
+//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
+//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
 
 // 5DOF IMU Version
 //#define OriginalIMU // Use this if you have the 5DOF IMU which uses the IDG300 or IDG500      
@@ -40,8 +41,8 @@
 
 // Define Flight Configuration
 // Use only one of the following definitions
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 
 // Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -52,9 +53,6 @@
 // For Throttle Channel, place jumper between AQ Shield pin 4 and Mega AI12
 // For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
-//#define Mega_AQ1x
-//#define Duemilanove_AQ1x
-//#define AeroQuadAPM
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -72,12 +70,21 @@
 #include "DataAcquisition.h"
 #include "Accel.h"
 #include "Gyro.h"
+#include "Motors.h"
 
-// Create objects defined from Sensor Configuration Section
+// Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad_v1 receiver;
+  Motors_PWM motors;
+#endif
+
+#ifdef AeroQuadMega_v1 
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v1 gyro;
+  Receiver_AeroQuadMega_v1 receiver;
+  Motors_PWM motors;
 #endif
 
 #ifdef APM
@@ -86,11 +93,21 @@
   //Altimeter_APM altimeter;
   //Compass_APM compass;
   Receiver_APM receiver;
+  Motors_APM motors;
 #endif
 
 #ifdef AeroQuad_Wii
   Accel_Wii accel;
   Gyro_Wii gyro;
+  Receiver_AeroQuad_v1 receiver;
+  Motors_PWM motors;
+#endif
+
+#ifdef AeroQuadMega_Wii
+  Accel_Wii accel;
+  Gyro_Wii gyro;
+  Receiver_AeroQuadMega_v1 receiver;
+  Motors_PWM motors;
 #endif
 
 // Class definition for angle estimation found in FlightAngle.h
@@ -99,13 +116,6 @@
 FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
 //FlightAngle_FabQuad angle[2]; // developed by FabQuad (http://aeroquad.com/showthread.php?p=3995#post3995)
-
-// Class definition for motor control found in Motors.h
-// Use only one of the following variable declarations
-#include "Motors.h"
-//Motors_PWM motors; // Use this for PWM ESC's
-Motors_APM motors; // Use this for AMP compatability (connect OUT0-3)
-//Motors_I2C motors; // Future capability under construction
 
 #include "DataStorage.h"
 

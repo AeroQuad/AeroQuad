@@ -223,7 +223,7 @@ public:
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
-  int measure(byte axis) {
+  const int measure(byte axis) {
     updateControls(); // defined in DataAcquisition.h
     gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
     gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
