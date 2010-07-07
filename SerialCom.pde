@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -248,7 +248,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 5;
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        remoteCommand[motor] = readFloatSerial();
+        motors.setRemoteCommand(motor, readFloatSerial());
       break;
     case 'a': // Enable/disable fast data transfer of sensor data
       queryType = 'X'; // Stop any other telemetry streaming
@@ -430,11 +430,11 @@ void sendSerialTelemetry() {
     Serial.print(receiver.getData(THROTTLE));
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(motorAxisCommand[axis]);
+      Serial.print(motors.getMotorAxisCommand(axis));
       comma();
     }
     for (motor = FRONT; motor < LASTMOTOR; motor++) {
-      Serial.print(motorCommand[motor]);
+      Serial.print(motors.getMotorCommand(motor));
       comma();
     }
     for (axis = ROLL; axis < LASTAXIS; axis++) {
@@ -459,11 +459,11 @@ void sendSerialTelemetry() {
       Serial.print(levelAdjust[axis]);
       comma();
     }
-    Serial.print(motorAxisCommand[ROLL]);
+    Serial.print(motors.getMotorAxisCommand(ROLL));
     comma();
-    Serial.print(motorAxisCommand[PITCH]);
+    Serial.print(motors.getMotorAxisCommand(PITCH));
     comma();
-    Serial.println(motorAxisCommand[YAW]);
+    Serial.println(motors.getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (channel = ROLL; channel < AUX; channel++) {
@@ -492,13 +492,13 @@ void sendSerialTelemetry() {
     break;
   case '6': // Report remote commands
     for (motor = FRONT; motor < LEFT; motor++) {
-      Serial.print(remoteCommand[motor]);
+      Serial.print(motors.getRemoteCommand(motor));
       comma();
     }
-    Serial.println(remoteCommand[LEFT]);
+    Serial.println(motors.getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
-    Serial.println("1.8");
+    Serial.println("2.0");
     queryType = 'X';
     break;
   case 'e': // Send AREF value

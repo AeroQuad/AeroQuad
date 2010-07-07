@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -130,7 +130,7 @@ public:
 /*************************************************/
 /************** AeroQuad v1 PCINT ****************/
 /*************************************************/
-#if defined (AeroQuad_v1) || defined (AeroQuad_Wii)
+#if defined (AeroQuad_v1) || defined (AeroQuad_v2) || defined (AeroQuad_Wii)
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,

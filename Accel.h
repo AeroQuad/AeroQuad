@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -98,7 +98,7 @@ public:
 /******************************************************/
 /************** AeroQuad Accelerometer ****************/
 /******************************************************/
-#ifdef AeroQuad_v1
+#if defined (AeroQuad_v1) || defined (AeroQuad_v2)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   int findZero[FINDZERO];
@@ -197,7 +197,7 @@ public:
 #endif
 
 /******************************************************/
-/*************** APM ADC Accelerometer ****************/
+/****************** Wii Accelerometer *****************/
 /******************************************************/
 #ifdef AeroQuad_Wii
 class Accel_Wii : public Accel {

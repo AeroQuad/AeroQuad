@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -59,6 +59,15 @@ float smoothHeading;
 #define YAWRATEPIN 5
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
+// Motor control variables
+#define FRONT 0
+#define REAR 1
+#define RIGHT 2
+#define LEFT 3
+#define LASTMOTOR 4
+#define MINCOMMAND 1000
+#define MAXCOMMAND 2000
+byte motor;
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -83,7 +92,6 @@ int zeroGyroCount[3]={1,1,1};
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-
 
 // Auto level setup
 int levelAdjust[2] = {0,0};
@@ -121,6 +129,7 @@ int maxThrottleAdjust = 200;
 #define LEVELOFF 100
 #define LASTCHANNEL 6
 byte channel;
+int delta;
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0

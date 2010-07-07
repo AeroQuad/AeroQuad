@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,7 +25,8 @@
 *****************************************************************************/
 
 // Hardware Configuration
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
@@ -41,8 +42,8 @@
 
 // Define Flight Configuration
 // Use only one of the following definitions
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
@@ -76,6 +77,13 @@
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
+  Receiver_AeroQuad_v1 receiver;
+  Motors_PWM motors;
+#endif
+
+#ifdef AeroQuad_v2 
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v2 gyro;
   Receiver_AeroQuad_v1 receiver;
   Motors_PWM motors;
 #endif

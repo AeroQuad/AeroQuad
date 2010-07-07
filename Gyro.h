@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -131,11 +131,6 @@ public:
 
   void calibrate() {
     autoZero();
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
-    }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
@@ -146,7 +141,127 @@ public:
     delayMicroseconds(750);
     digitalWrite(AZPIN, LOW);
     delay(8);
+
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++)
+        findZero[i] = analogRead(gyroChannel[calAxis]);
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+    }
   }    
+};
+#endif
+
+/******************************************************/
+/****************** AeroQuad_v2 Gyro ******************/
+/******************************************************/
+#ifdef AeroQuad_v2
+/*
+  Tested on a 3.3V 8MHz Arduino Pro
+  10kOhm pull-ups on I2C lines.
+  VDD & VIO = 3.3V
+  SDA -> A4 (PC4)
+  SCL -> A5 (PC5)
+  INT -> D2 (PB2) (or no connection, not used here)
+  CLK -> GND
+*/
+class Gyro_AeroQuad_v2 : public Gyro {
+private:
+  int findZero[FINDZERO];
+  int gyroAddress;
+  int data;
+  
+public:
+  Gyro_AeroQuad_v2() : Gyro() {
+    gyroAddress = 0x69;
+    gyroFullScaleOutput = 2000.0;   // IDG/IXZ500 full scale output = +/- 2000 deg/sec
+    gyroScaleFactor = 0.06103515625;       // IDG/IXZ500 sensitivity (need to double check this)
+  }
+  
+  void initialize(void) {
+    this->_initialize(0,1,2);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
+    
+    // Check if gyro is connected
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x00);
+    Wire.endTransmission();
+    Wire.requestFrom(gyroAddress, 1);
+    delay(100);
+    data = Wire.receive();
+    Serial.println(data);
+    if (data != gyroAddress)
+      Serial.println("Gyro not found!");
+        
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x3E);
+    Wire.send(0x80);  //send a reset to the device
+    Wire.endTransmission(); //end transmission
+
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x15);
+    Wire.send(0x00);   // 1kHz sample rate
+    Wire.endTransmission(); //end transmission
+
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x16);
+    Wire.send(0x1D); // 10Hz low pass filter
+    Wire.endTransmission(); //end transmission
+
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x17);
+    Wire.send(0x05);   // enable send raw values
+    Wire.endTransmission(); //end transmission
+    
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x3E);
+    Wire.send(0x00);  //use internal oscillator
+    Wire.endTransmission(); //end transmission
+  }
+  
+  const int measure(byte axis) {
+    Wire.beginTransmission(gyroAddress);
+    Wire.send((axis * 2) + 0x1D); // request high byte
+    Wire.endTransmission();
+    Wire.requestFrom(gyroAddress, 1);
+    while (Wire.available() == 0) {/* wait for incoming data */};
+    data = Wire.receive();  // receive high byte (overwrites previous reading)
+    data = data << 8;    // shift high byte to be high 8 bits
+    Wire.beginTransmission(gyroAddress);
+    Wire.send((axis * 2) + 0x1E); // request low byte
+    Wire.endTransmission();
+    Wire.requestFrom(gyroAddress, 1);
+    while (Wire.available() == 0) {/* wait for incoming data */};    
+    data |= Wire.receive(); // receive low byte as lower 8 bits
+    
+    gyroADC[axis] = data - gyroZero[axis];
+    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
+    return gyroData[axis];
+  }
+
+  void calibrate() {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        Wire.beginTransmission(gyroAddress);
+        Wire.send((calAxis * 2) + 0x1D); // request high byte
+        Wire.endTransmission();
+        Wire.requestFrom(gyroAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};
+        data = Wire.receive();  // receive high byte (overwrites previous reading)
+        data = data << 8;    // shift high byte to be high 8 bits
+        Wire.beginTransmission(gyroAddress);
+        Wire.send((calAxis * 2) + 0x1E); // request low byte
+        Wire.endTransmission();
+        Wire.requestFrom(gyroAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};    
+        data |= Wire.receive(); // receive low byte as lower 8 bits
+        findZero[i] = data;
+      }
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+    }
+    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  }
 };
 #endif
 

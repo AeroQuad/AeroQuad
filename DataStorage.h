@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -109,12 +109,12 @@ void readEEPROM() {
   receiver.setXmitFactor(XMITFACTOR_ADR);
   //smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR); // Now loaded in gyro class
   //smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR); //  Now loaded in accel class
-  // smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR); // Now loaded in receiver class
-  // smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR); // Now loaded in receiver class
-  // smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR); // Now loaded in receiver class
-  // smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR); // Now loaded in receiver class
-  // smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR); // Now loaded in receiver class
-  // smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR); // Now loaded in receiver class
+  //smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR); // Now loaded in receiver class
   //accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));     // Now loaded in accel class
   //accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));   // Now loaded in accel class
   //accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));       // Now loaded in accel class

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,8 +25,8 @@ void flightControl(void) {
       // ************************** Update Roll/Pitch ***********************
       // updatePID(target, measured, PIDsettings);
       // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-      motorAxisCommand[ROLL] = updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]);
-      motorAxisCommand[PITCH] = updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]);
+      motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]));
     }
     if (flightMode == STABLE) {
       // Stable Mode
@@ -34,8 +34,8 @@ void flightControl(void) {
       // updatePID(target, measured, PIDsettings);
       // measured = flight angle calculated from angle object
       // updatePID() and updatePIDangle() are defined in PID.h
-      motorAxisCommand[ROLL] = updatePIDangle(receiver.getData(ROLL), flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]);
-      motorAxisCommand[PITCH] = updatePIDangle(receiver.getData(PITCH), -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]);
+      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
     }
     
   // ***************************** Update Yaw ***************************
@@ -58,22 +58,22 @@ void flightControl(void) {
       PID[HEADING].integratedError = 0;
     }
   }   
-  motorAxisCommand[YAW] = updatePID(receiver.getData(YAW) + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]);
+  motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]));
     
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motorCommand[FRONT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-      motorCommand[REAR] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-      motorCommand[RIGHT] = receiver.getData(THROTTLE) - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[LEFT] = receiver.getData(THROTTLE) + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
+      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW);
+      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW);
+      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW);
+      motors.setMotorCommand(LEFT], receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW);
     #endif
     #ifdef XConfig
       // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-      motorCommand[FRONT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] + motorAxisCommand[ROLL] - motorAxisCommand[YAW];
-      motorCommand[RIGHT] = receiver.getData(THROTTLE) - motorAxisCommand[PITCH] - motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[LEFT] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] + motorAxisCommand[ROLL] + motorAxisCommand[YAW];
-      motorCommand[REAR] = receiver.getData(THROTTLE) + motorAxisCommand[PITCH] - motorAxisCommand[ROLL] - motorAxisCommand[YAW];
+      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
     #endif
   }
 
@@ -88,119 +88,119 @@ void flightControl(void) {
 
   // Prevents too little power applied to motors during hard manuevers
   // Also provides even motor power on both sides if limit encountered
-  if ((motorCommand[FRONT] <= MINTHROTTLE) || (motorCommand[REAR] <= MINTHROTTLE)){
-    delta = receiver.getData(THROTTLE) - 1100;
-    maxCommand[RIGHT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[LEFT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
+  if ((motors.getMotorCommand(FRONT) <= MINTHROTTLE) || (motors.getMotorCommand(REAR) <= MINTHROTTLE)){
+    delta = receiver.getData(THROTTLE) - MINTHROTTLE;
+    motors.setMaxCommand(RIGHT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    motors.setMaxCommand(LEFT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
   }
-  else if ((motorCommand[FRONT] >= MAXCOMMAND) || (motorCommand[REAR] >= MAXCOMMAND)) {
+  else if ((motors.getMotorCommand(FRONT) >= MAXCOMMAND) || (motors.getMotorCommand(REAR) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver.getData(THROTTLE);
-    minCommand[RIGHT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[LEFT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
+    motors.setMinCommand(RIGHT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    motors.setMinCommand(LEFT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
   }     
   else {
-    maxCommand[RIGHT] = MAXCOMMAND;
-    maxCommand[LEFT] = MAXCOMMAND;
-    minCommand[RIGHT] = MINTHROTTLE;
-    minCommand[LEFT] = MINTHROTTLE;
+    motors.setMaxCommand(RIGHT, MAXCOMMAND);
+    motors.setMaxCommand(LEFT, MAXCOMMAND);
+    motors.setMinCommand(RIGHT, MINTHROTTLE);
+    motors.setMinCommand(LEFT, MINTHROTTLE);
   }
 
-  if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
-    delta = receiver.getData(THROTTLE) - 1100;
-    maxCommand[FRONT] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    maxCommand[REAR] = constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
+  if ((motors.getMotorCommand(LEFT) <= MINTHROTTLE) || (motors.getMotorCommand(RIGHT) <= MINTHROTTLE)){
+    delta = receiver.getData(THROTTLE) - MINTHROTTLE;
+    motors.setMaxCommand(FRONT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    motors.setMaxCommand(REAR, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
   }
-  else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
+  else if ((motors.getMotorCommand(LEFT) >= MAXCOMMAND) || (motors.getMotorCommand(RIGHT) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver.getData(THROTTLE);
-    minCommand[FRONT] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    minCommand[REAR] = constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
+    motors.setMinCommand(FRONT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    motors.setMinCommand(REAR, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
   }     
   else {
-    maxCommand[FRONT] = MAXCOMMAND;
-    maxCommand[REAR] = MAXCOMMAND;
-    minCommand[FRONT] = MINTHROTTLE;
-    minCommand[REAR] = MINTHROTTLE;
+    motors.setMaxCommand(FRONT, MAXCOMMAND);
+    motors.setMaxCommand(REAR, MAXCOMMAND);
+    motors.setMinCommand(FRONT, MINTHROTTLE);
+    motors.setMinCommand(REAR, MINTHROTTLE);
   }
 
   // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
   if (flightMode == ACRO) {
     #ifdef plusConfig
     if (receiver.getRaw(ROLL) < MINCHECK) {
-      minCommand[LEFT] = minAcro;
-      maxCommand[RIGHT] = MAXCOMMAND;
+      motors.setMinCommand(LEFT, minAcro);
+      motors.setMaxCommand(RIGHT, MAXCOMMAND);
     }
     else if (receiver.getRaw(ROLL) > MAXCHECK) {
-      maxCommand[LEFT] = MAXCOMMAND;
-      minCommand[RIGHT] = minAcro;
+      motors.setMaxCommand(LEFT, MAXCOMMAND);
+      motors.setMinCommand(RIGHT, minAcro);
     }
     else if (receiver.getRaw(PITCH) < MINCHECK) {
-     maxCommand[FRONT] = MAXCOMMAND;
-     minCommand[REAR] = minAcro;
+      motors.setMaxCommand(FRONT, MAXCOMMAND);
+      motors.setMinCommand(REAR, minAcro);
     }
     else if (receiver.getRaw(PITCH) > MAXCHECK) {
-     minCommand[FRONT] = minAcro;
-     maxCommand[REAR] = MAXCOMMAND;
+      motors.setMinCommand(FRONT, minAcro);
+      motors.setMaxCommand(REAR, MAXCOMMAND);
     }
     #endif
     #ifdef XConfig
     if (receiver.getRaw(ROLL) < MINCHECK) {
-      maxCommand[FRONT] = minAcro;
-      maxCommand[REAR] = MAXCOMMAND;
-      maxCommand[LEFT] = minAcro;
-      maxCommand[RIGHT] = MAXCOMMAND;
+      motors.setMaxCommand(FRONT, minAcro);
+      motors.setMaxCommand(REAR, MAXCOMMAND);
+      motors.setMaxCommand(LEFT, minAcro);
+      motors.setMaxCommand(RIGHT, MAXCOMMAND);
     }
     else if (receiver.getRaw(ROLL) > MAXCHECK) {
-      maxCommand[FRONT] = MAXCOMMAND;
-      maxCommand[REAR] = minAcro;
-      maxCommand[LEFT] = MAXCOMMAND;
-      maxCommand[RIGHT] = minAcro;
+      motors.setMaxCommand(FRONT, MAXCOMMAND);
+      motors.setMaxCommand(REAR, minAcro);
+      motors.setMaxCommand(LEFT, MAXCOMMAND);
+      motors.setMaxCommand(RIGHT, minAcro);
     }
     else if (receiver.getRaw(PITCH) < MINCHECK) {
-      maxCommand[FRONT] = MAXCOMMAND;
-      maxCommand[REAR] = minAcro;
-      maxCommand[LEFT] = minAcro;
-      maxCommand[RIGHT] = MAXCOMMAND;
+      motors.setMaxCommand(FRONT, MAXCOMMAND);
+      motors.setMaxCommand(REAR, minAcro);
+      motors.setMaxCommand(LEFT, minAcro);
+      motors.setMaxCommand(RIGHT, MAXCOMMAND);
     }
     else if (receiver.getRaw(PITCH) > MAXCHECK) {
-      maxCommand[FRONT] = minAcro;
-      maxCommand[REAR] = MAXCOMMAND;
-      maxCommand[LEFT] = MAXCOMMAND;
-      maxCommand[RIGHT] = minAcro;
+      motors.setMaxCommand(FRONT, minAcro);
+      motors.setMaxCommand(REAR, MAXCOMMAND);
+      motors.setMaxCommand(LEFT, MAXCOMMAND);
+      motors.setMaxCommand(RIGHT, minAcro);
     }
     #endif
   }
 
   // Apply limits to motor commands
   for (motor = FRONT; motor < LASTMOTOR; motor++)
-    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
+    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
-      motorCommand[motor] = MINTHROTTLE;
+      motors.setMotorCommand(motor, MINTHROTTLE);
   }
   // If motor output disarmed, force motor output to minimum
   if (armed == 0) {
     switch (calibrateESC) { // used for calibrating ESC's
     case 1:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = MAXCOMMAND;
+        motors.setMotorCommand(motor, MAXCOMMAND);
       break;
     case 3:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = constrain(testCommand, 1000, 1200);
+        motors.setMotorCommand(motor, constrain(testCommand, 1000, 1200));
       break;
     case 5:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = constrain(remoteCommand[motor], 1000, 1200);
+        motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
       safetyCheck = 1;
       break;
     default:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
-        motorCommand[motor] = MINCOMMAND;
+        motors.setMotorCommand(motor, MINCOMMAND);
     }
   }
 
   // *********************** Command Motors **********************
-  motors.write(motorCommand); // Defined in Motors.h
+  motors.write(); // Defined in Motors.h
 }

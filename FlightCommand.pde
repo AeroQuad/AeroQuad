@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -40,7 +40,7 @@ void readPilotCommands() {
       armed = 1;
       zeroIntegralError();
       for (motor=FRONT; motor < LASTMOTOR; motor++)
-        minCommand[motor] = MINTHROTTLE;
+        motors.setMinCommand(motor, MINTHROTTLE);
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = 1; 

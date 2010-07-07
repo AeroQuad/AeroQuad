@@ -1,5 +1,5 @@
 /*
-  AeroQuad v1.8 - June 2010
+  AeroQuad v2.0 - July 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,65 +18,128 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifdef APM
-#define FRONTMOTORPIN 8
-#define REARMOTORPIN 7
-#define RIGHTMOTORPIN 3
-#define LEFTMOTORPIN 2
-#endif
-
-#if defined(AeroQuad_v1) || defined (AeroQuad_Wii)
-#define FRONTMOTORPIN 3
-#define REARMOTORPIN 9
-#define RIGHTMOTORPIN 10
-#define LEFTMOTORPIN 11
-#define LASTMOTORPIN 12
-#endif
-
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define LASTMOTOR 4
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-
-// Motors
-// Assume maximum number of motors is 8, leave array indexes unused if lower number
-//int motorCommand[4] = {1000,1000,1000,1000};
-//int minCommand[4] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
-//int maxCommand[4] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
-int motorAxisCommand[3] = {0,0,0};
-int motorAxisCommandRoll[8] = {0,0,0,0,0,0,0,0};
-int motorAxisCommandPitch[8] = {0,0,0,0,0,0,0,0};
-int motorAxisCommandYaw[8] = {0,0,0,0,0,0,0,0};
-int motorMixerSettingRoll[8] = {0,0,0,0,0,0,0,0};
-int motorMixerSettingPitch[8] = {0,0,0,0,0,0,0,0};
-int motorMixerSettingYaw[8] = {0,0,0,0,0,0,0,0};
-int motorCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
-int minCommand[8] = {MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND,MINCOMMAND, MINCOMMAND, MINCOMMAND,MINCOMMAND};
-int maxCommand[8] = {MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND,MAXCOMMAND, MAXCOMMAND, MAXCOMMAND,MAXCOMMAND};
-int motor = 0;
-int delta = 0;
-
-// Ground station control
-//int remoteCommand[4] = {1000,1000,1000,1000};
-int remoteCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
-
-class Motors_PWM {
-private:
+class Motors {
+public:
+  // Assume maximum number of motors is 8, leave array indexes unused if lower number
+  int motorAxisCommand[3];
+  int motorAxisCommandRoll[8];
+  int motorAxisCommandPitch[8];
+  int motorAxisCommandYaw[8];
+  int motorMixerSettingRoll[8];
+  int motorMixerSettingPitch[8];
+  int motorMixerSettingYaw[8];
+  int motorCommand[8];
+  int minCommand[8];
+  int maxCommand[8];
   int motor;
+  int delta;
+  byte axis;
+  // Ground station control
+  int remoteCommand[8];
   float mMotorCommand;
   float bMotorCommand;
+
+
+  Motors(void){
+    motorAxisCommand[ROLL] = 0;
+    motorAxisCommand[PITCH] = 0;
+    motorAxisCommand[YAW] = 0;
+    for (motor = 0; motor < 8; motor++) {
+      motorAxisCommandRoll[motor] = 0;
+      motorAxisCommandPitch[motor] = 0;
+      motorAxisCommandYaw[motor] = 0;
+      motorMixerSettingRoll[motor] = 0;
+      motorMixerSettingPitch[motor] = 0;
+      motorMixerSettingYaw[motor] = 0;
+      motorCommand[motor] = 1000;
+      minCommand[motor] = MINCOMMAND;
+      maxCommand[motor] = MAXCOMMAND;
+      remoteCommand[motor] = 1000;
+    }
+    motor = 0;
+    delta = 0;  
+  };
+  
+  // The following function calls must be defined in any new subclasses
+  virtual void initialize(void);
+  virtual void write (void);
+  virtual void commandAllMotors(int motorCommand);
+  
+  //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
+  void pulseMotors(byte quantity) {
+    for (byte i = 0; i < quantity; i++) {      
+      commandAllMotors(MINCOMMAND + 100);
+      delay(250);
+      commandAllMotors(MINCOMMAND);
+      delay(250);
+    }
+  }
+  
+  void setRemoteCommand(byte motor, int value) {
+    remoteCommand[motor] = value;
+  }
+  
+  const int getRemoteCommand(byte motor) {
+    return remoteCommand[motor];
+  }
+  
+  const float getMotorSlope(void) {
+    return mMotorCommand;
+  }
+  
+  const float getMotorOffset(void) {
+    return bMotorCommand;
+  }
+    
+  void setMinCommand(byte motor, int value) {
+    minCommand[motor] = value;
+  }
+  
+  const int getMinCommand(byte motor) {
+    return minCommand[motor];
+  }
+  
+  void setMaxCommand(byte motor, int value) {
+    maxCommand[motor] = value;
+  }
+  
+  const int getMaxCommand(byte motor) {
+    return maxCommand[motor];
+  }
+  
+  void setMotorAxisCommand(byte motor, int value) {
+    motorAxisCommand[motor] = value;
+  }
+  
+  const int getMotorAxisCommand(byte motor) {
+    return motorAxisCommand[motor];
+  }
+  
+  void setMotorCommand(byte motor, int value) {
+    motorCommand[motor] = value;
+  }
+  
+  const int getMotorCommand(byte motor) {
+    return motorCommand[motor];
+  }
+};
+
+/******************************************************/
+/********************* PWM Motors *********************/
+/******************************************************/
+class Motors_PWM : public Motors {
+private:
   int minCommand;
-  byte axis;
   byte pin;
   
-  // Ground station control (experimental)
-  int remoteCommand[4];
+  #define FRONTMOTORPIN 3
+  #define REARMOTORPIN 9
+  #define RIGHTMOTORPIN 10
+  #define LEFTMOTORPIN 11
+  #define LASTMOTORPIN 12
 
 public:
-  Motors_PWM() {
+  Motors_PWM() : Motors(){
     // Scale motor commands to analogWrite
     // Only supports commands from 0-255 => 0 - 100% duty cycle
     // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
@@ -84,14 +147,6 @@ public:
     // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
     mMotorCommand = 0.124;		
     bMotorCommand = 2.0;
-
-    for (motor = FRONT; motor < LASTMOTOR; motor++) {
-      //motorCommand[motor] = 1000;
-      remoteCommand[motor] = 1000;
-    }
-    //for (axis = ROLL; axis < LASTAXIS; axis++)
-    //  motorAxisCommand[axis] = 0;
-    motor = 0;
   }
 
   void initialize(void) {
@@ -105,80 +160,43 @@ public:
     analogWrite(LEFTMOTORPIN, 124);
   }
 
-  void write (int *motorCommand) {
+  void write (void) {
     analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
     analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
     analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
     analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
   }
   
-  //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
-  void commandAllMotors(int motorCommand) {   // Sends commands to all motors
-    analogWrite(FRONTMOTORPIN, (motorCommand * mMotorCommand + bMotorCommand));
-    analogWrite(REARMOTORPIN, (motorCommand * mMotorCommand + bMotorCommand));		
-    analogWrite(RIGHTMOTORPIN, (motorCommand * mMotorCommand + bMotorCommand));		
-    analogWrite(LEFTMOTORPIN, (motorCommand * mMotorCommand + bMotorCommand));
-  }
-
-  void pulseMotors(byte quantity) {
-    for (byte i = 0; i < quantity; i++) {      
-      commandAllMotors(MINCOMMAND + 100);
-      delay(250);
-      commandAllMotors(MINCOMMAND);
-      delay(250);
-    }
-  }
-  
-  void setRemoteMotorCommand(byte motor, int value) {
-    remoteCommand[motor] = value;
- }
-  
-  int getRemoteMotorCommand(byte motor) {
-    return remoteCommand[motor];
-  }
-  
-  int getMotorCommand(byte motor) {
-    return motorCommand[motor];
-  }
-  
-  float getMotorSlope(void) {
-    return mMotorCommand;
-  }
-  
-  float getMotorOffset(void) {
-    return bMotorCommand;
+  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+    analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
   }
 };
 
-// Need to set this up as a #define because Duemilanove does not have Mega/APM register references
+/******************************************************/
+/********************* APM Motors *********************/
+/******************************************************/
 #ifdef APM
-class Motors_APM {
-private:
-  int motor;
-  float mMotorCommand;
-  float bMotorCommand;
-  int minCommand;
-  byte axis;
-  byte pin;
-  
-  // Ground station control (experimental)
-  int remoteCommand[4];
-
+class Motors_APM : public Motors {
 public:
-  Motors_APM() {
-    mMotorCommand = 1.0;		
-    bMotorCommand = 0.0;
-
-    for (motor = FRONT; motor < LASTMOTOR; motor++) {
-      //motorCommand[motor] = 1000;
-      remoteCommand[motor] = 1000;
-    }
-    //for (axis = ROLL; axis < LASTAXIS; axis++)
-    //  motorAxisCommand[axis] = 0;
-    motor = 0;
-  }
+  Motors_APM() : Motors() {}
 
   void initialize(void) {
+    // Init PWM Timer 1
+    //pinMode(11,OUTPUT); //     (PB5/OC1A)
+    pinMode(12,OUTPUT); //OUT2 (PB6/OC1B)
+    pinMode(13,OUTPUT); //OUT3 (PB7/OC1C)
+  
+    //Remember the registers not declared here remains zero by default... 
+    TCCR1A =((1<<WGM11)|(1<<COM1B1)|(1<<COM1C1)); //Please read page 131 of DataSheet, we are changing the registers settings of WGM11,COM1B1,COM1A1 to 1 thats all... 
+    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); //Prescaler set to 8, that give us a resolution of 0.5us, read page 134 of data sheet
+    //OCR1A = 3000; //PB5, none
+    OCR1B = 3000; //PB6, OUT2
+    OCR1C = 3000; //PB7  OUT3
+    ICR1 = 6600; //300hz freq...
+  
     // Init PWM Timer 3
     pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
     pinMode(3,OUTPUT); //OUT6 (PE5/OC3C)
@@ -188,9 +206,8 @@ public:
     //OCR3A = 3000; //PE3, NONE
     OCR3B = 3000; //PE4, OUT7
     OCR3C = 3000; //PE5, OUT6
-    //ICR3 = 40000; //50hz freq (standard servos)
-    ICR3 = 6600; //50hz freq (standard servos)
-
+    ICR3 = 40000; //50hz freq (standard servos)
+  
     // Init PWM Timer 5
     pinMode(44,OUTPUT);  //OUT1 (PL5/OC5C)
     pinMode(45,OUTPUT);  //OUT0 (PL4/OC5B)
@@ -202,50 +219,38 @@ public:
     OCR5B = 3000; //PL4, OUT0
     OCR5C = 3000; //PL5, OUT1
     ICR5 = 6600; //300hz freq
+  
+    // Init PPM input and PWM Timer 4
+    pinMode(49, INPUT);  // ICP4 pin (PL0) (PPM input)
+    pinMode(7,OUTPUT);   //OUT5 (PH4/OC4B)
+    pinMode(8,OUTPUT);   //OUT4 (PH5/OC4C)
+        
+    TCCR4A =((1<<WGM40)|(1<<WGM41)|(1<<COM4C1)|(1<<COM4B1)|(1<<COM4A1));  
+    //Prescaler set to 8, that give us a resolution of 0.5us
+    // Input Capture rising edge
+    TCCR4B = ((1<<WGM43)|(1<<WGM42)|(1<<CS41)|(1<<ICES4));
+    
+    OCR4A = 40000; ///50hz freq. (standard servos)
+    OCR4B = 3000; //PH4, OUT5
+    OCR4C = 3000; //PH5, OUT4
+   
+    //TCCR4B |=(1<<ICES4); //Changing edge detector (rising edge). 
+    //TCCR4B &=(~(1<<ICES4)); //Changing edge detector. (falling edge)
+    TIMSK4 |= (1<<ICIE4); // Enable Input Capture interrupt. Timer interrupt mask
   }
 
-  void write (int *motorCommand) {
-    OCR5B = motorCommand[FRONT] * 2;
-    OCR5C = motorCommand[REAR] * 2;
-    OCR3C = motorCommand[RIGHT] * 2;
-    OCR3B = motorCommand[LEFT] * 2;
-  }
-  
-  //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
-  void commandAllMotors(int motorCommand) {   // Sends commands to all motors
-    OCR5B=motorCommand * 2;
-    OCR5C=motorCommand * 2;
-    OCR1B=motorCommand * 2;
-    OCR1C=motorCommand * 2;
+  void write (void) {
+    OCR1B = motorCommand[FRONT] * 2;
+    OCR1C = motorCommand[REAR] * 2;
+    OCR5B = motorCommand[RIGHT] * 2;
+    OCR5C = motorCommand[LEFT] * 2;
   }
 
-  void pulseMotors(byte quantity) {
-    for (byte i = 0; i < quantity; i++) {      
-      commandAllMotors(MINCOMMAND + 100);
-      delay(250);
-      commandAllMotors(MINCOMMAND);
-      delay(250);
-    }
-  }
-  
-  void setRemoteMotorCommand(byte motor, int value) {
-    remoteCommand[motor] = value;
- }
-  
-  int getRemoteMotorCommand(byte motor) {
-    return remoteCommand[motor];
-  }
-  
-  int getMotorCommand(byte motor) {
-    return motorCommand[motor];
-  }
-  
-  float getMotorSlope(void) {
-    return mMotorCommand;
-  }
-  
-  float getMotorOffset(void) {
-    return bMotorCommand;
+  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+    OCR1B = _motorCommand * 2;
+    OCR1C = _motorCommand * 2;
+    OCR5B = _motorCommand * 2;
+    OCR5C = _motorCommand * 2;
   }
 };
 #endif
