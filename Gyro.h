@@ -169,6 +169,7 @@ private:
   int findZero[FINDZERO];
   int gyroAddress;
   int data;
+  int rawData[3];
   
 public:
   Gyro_AeroQuad_v2() : Gyro() {
@@ -180,15 +181,17 @@ public:
   void initialize(void) {
     this->_initialize(0,1,2);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
+    data =  0x0;
+    
+    Wire.begin();
     
     // Check if gyro is connected
-    Wire.beginTransmission(gyroAddress);
+    Wire.beginTransmission(0x69);
     Wire.send(0x00);
     Wire.endTransmission();
-    Wire.requestFrom(gyroAddress, 1);
-    delay(100);
+    delay(50);
+    Wire.requestFrom(0x69, 1);
     data = Wire.receive();
-    Serial.println(data);
     if (data != gyroAddress)
       Serial.println("Gyro not found!");
         
@@ -196,7 +199,7 @@ public:
     Wire.send(0x3E);
     Wire.send(0x80);  //send a reset to the device
     Wire.endTransmission(); //end transmission
-
+    
     Wire.beginTransmission(gyroAddress);
     Wire.send(0x15);
     Wire.send(0x00);   // 1kHz sample rate
@@ -204,7 +207,7 @@ public:
 
     Wire.beginTransmission(gyroAddress);
     Wire.send(0x16);
-    Wire.send(0x1D); // 10Hz low pass filter
+    Wire.send(0x1D); // 10Hz low pass filter (0x1D)
     Wire.endTransmission(); //end transmission
 
     Wire.beginTransmission(gyroAddress);
@@ -216,26 +219,24 @@ public:
     Wire.send(0x3E);
     Wire.send(0x00);  //use internal oscillator
     Wire.endTransmission(); //end transmission
+    
+    //Wire.onReceive(measureGyroData);
   }
   
   const int measure(byte axis) {
-    Wire.beginTransmission(gyroAddress);
-    Wire.send((axis * 2) + 0x1D); // request high byte
-    Wire.endTransmission();
-    Wire.requestFrom(gyroAddress, 1);
-    while (Wire.available() == 0) {/* wait for incoming data */};
-    data = Wire.receive();  // receive high byte (overwrites previous reading)
-    data = data << 8;    // shift high byte to be high 8 bits
-    Wire.beginTransmission(gyroAddress);
-    Wire.send((axis * 2) + 0x1E); // request low byte
-    Wire.endTransmission();
-    Wire.requestFrom(gyroAddress, 1);
-    while (Wire.available() == 0) {/* wait for incoming data */};    
-    data |= Wire.receive(); // receive low byte as lower 8 bits
-    
-    gyroADC[axis] = data - gyroZero[axis];
+    gyroADC[axis] = rawData[axis] - gyroZero[axis];
     gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     return gyroData[axis];
+  }
+  
+  void aquireData(void) {
+    Wire.beginTransmission(gyroAddress);
+    Wire.send(0x1D); // request high byte
+    Wire.endTransmission();
+    Wire.requestFrom(gyroAddress, 6);
+    rawData[ROLL] = (Wire.receive()<<8) | Wire.receive();
+    rawData[PITCH] = (Wire.receive()<<8) | Wire.receive();
+    rawData[YAW] = (Wire.receive()<<8) | Wire.receive();
   }
 
   void calibrate() {

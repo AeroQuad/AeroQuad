@@ -81,7 +81,7 @@
   Motors_PWM motors;
 #endif
 
-#ifdef AeroQuad_v2 
+#ifdef AeroQuad_v2
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v2 gyro;
   Receiver_AeroQuad_v1 receiver;
@@ -151,7 +151,6 @@ void setup() {
   // Initialize sensors
   gyro.initialize(); // If sensors have a common initialization routine, insert it into the corresponding gyro subclass
   accel.initialize();
-  
   // Calibrate sensors
   gyro.autoZero();  
   zeroIntegralError();

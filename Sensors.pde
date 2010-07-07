@@ -22,6 +22,7 @@ void readSensors(void) {
  // *********************** Read Sensors **********************
  // Apply low pass filter to sensor values and center around zero
  // Did not convert to engineering units, since will experiment to find P gain anyway
+ gyro.aquireData();
  for (axis = ROLL; axis < LASTAXIS; axis++) {
    gyro.measure(axis);
    accel.measure(axis);
