@@ -34,7 +34,7 @@ public:
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
   }
-  virtual const int measure(byte axis);
+  virtual void measure(void);
   virtual void calibrate(void);
   virtual void autoZero(void){};
   
@@ -123,10 +123,11 @@ public:
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
-  const int measure(byte axis) {
-    gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
-    return gyroData[axis];
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
+    }
   }
 
   void calibrate() {
@@ -223,13 +224,7 @@ public:
     //Wire.onReceive(measureGyroData);
   }
   
-  const int measure(byte axis) {
-    gyroADC[axis] = rawData[axis] - gyroZero[axis];
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
-    return gyroData[axis];
-  }
-  
-  void aquireData(void) {
+  void measure(void) {
     Wire.beginTransmission(gyroAddress);
     Wire.send(0x1D); // request high byte
     Wire.endTransmission();
@@ -237,6 +232,11 @@ public:
     rawData[ROLL] = (Wire.receive()<<8) | Wire.receive();
     rawData[PITCH] = (Wire.receive()<<8) | Wire.receive();
     rawData[YAW] = (Wire.receive()<<8) | Wire.receive();
+    
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = rawData[axis] - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
+    }
   }
 
   void calibrate() {
@@ -297,12 +297,13 @@ public:
     initialize_APM_ADC(); // this is needed for both gyros and accels, done once in this class
   }
   
-  const int measure(byte axis) {
-    rawADC = analogRead_APM_ADC(gyroChannel[axis]);
-    if (rawADC > 500) // Check if good measurement
-      gyroADC[axis] = rawADC - gyroZero[axis];
-    gyroData[axis] = gyroADC[axis]; // no smoothing needed
-    return gyroData[axis];
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      rawADC = analogRead_APM_ADC(gyroChannel[axis]);
+      if (rawADC > 500) // Check if good measurement
+        gyroADC[axis] = rawADC - gyroZero[axis];
+      gyroData[axis] = gyroADC[axis]; // no smoothing needed
+    }
   }
 
   void calibrate() {
@@ -339,11 +340,12 @@ public:
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
-  const int measure(byte axis) {
+  void measure(void) {
     updateControls(); // defined in DataAcquisition.h
-    gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
-    gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
-    return gyroData[axis];
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
+    }
   }
 
   void calibrate() {

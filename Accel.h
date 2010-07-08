@@ -36,7 +36,7 @@ public:
     this->_initialize(rollChannel, pitchChannel, zAxisChannel);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
-  virtual const int measure(byte axis);
+  virtual void measure(void);
   virtual void calibrate(void);  
 
   // **************************************************************
@@ -123,10 +123,11 @@ public:
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
-  const int measure(byte axis) {
-    accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
-    return accelData[axis];
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+    }
   }
 
   // Allows user to zero accelerometers on command
@@ -171,12 +172,13 @@ public:
     this->_initialize(5, 4, 6);
   }
   
-  const int measure(byte axis) {
-    rawADC = analogRead_APM_ADC(accelChannel[axis]);
-    if (rawADC > 500) // Check if measurement good
-      accelADC[axis] = rawADC - accelZero[axis];
-    accelData[axis] = accelADC[axis]; // no smoothing needed
-    return accelData[axis];
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      rawADC = analogRead_APM_ADC(accelChannel[axis]);
+      if (rawADC > 500) // Check if measurement good
+        accelADC[axis] = rawADC - accelZero[axis];
+      accelData[axis] = accelADC[axis]; // no smoothing needed
+    }
   }
 
   // Allows user to zero accelerometers on command
@@ -213,10 +215,13 @@ public:
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   
-  const int measure(byte axis) {
-    accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
-    accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
-    return accelData[axis];
+  void measure(void) {
+    // Actual measurement performed in gyro class
+    // We just update the appropriate variables here
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+    }
   }
 
   // Allows user to zero accelerometers on command
