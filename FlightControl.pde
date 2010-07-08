@@ -63,10 +63,10 @@ void flightControl(void) {
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW);
-      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW);
-      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW);
-      motors.setMotorCommand(LEFT], receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW);
+      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
     #endif
     #ifdef XConfig
       // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 

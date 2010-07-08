@@ -19,27 +19,24 @@
 */
 
 void readSensors(void) {
- // *********************** Read Sensors **********************
- // Apply low pass filter to sensor values and center around zero
- gyro.measure(); // defined in Gyro.h
- accel.measure(); // defined in Accel.h
+  // *********************** Read Sensors **********************
+  // Apply low pass filter to sensor values and center around zero
+  gyro.measure(); // defined in Gyro.h
+  accel.measure(); // defined in Accel.h
  
- #ifndef OriginalIMU
-   gyro.invert(ROLL);
-   gyro.invert(PITCH);
- #endif
- #ifdef IXZ
-   gyro.invert(YAW);
- #endif
- #ifdef APM
-   gyro.invert(ROLL);
-   gyro.invert(PITCH);
- #endif
- #ifdef AeroQuad_Wii
-   gyro.invert(PITCH);
-   gyro.invert(YAW);
-   accel.invert(ROLL);
- #endif
+  #ifdef OriginalIMU
+    gyro.invert(ROLL);
+    gyro.invert(PITCH);
+  #endif
+  #ifdef IDG
+    gyro.invert(YAW);
+  #endif
+  #ifdef APM
+    gyro.invert(YAW);
+  #endif
+  #ifdef AeroQuad_Wii
+    accel.invert(ROLL);
+  #endif
 
  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************
@@ -77,23 +74,23 @@ void readSensors(void) {
 
 float arctan2(float y, float x) {
   // Taken from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
-   float coeff_1 = PI/4;
-   float coeff_2 = 3*coeff_1;
-   float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
-   float r, angle;
+  float coeff_1 = PI/4;
+  float coeff_2 = 3*coeff_1;
+  float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
+  float r, angle;
    
-   if (x >= 0) {
-     r = (x - abs_y) / (x + abs_y);
-     angle = coeff_1 - coeff_1 * r;
-   }
-   else {
-     r = (x + abs_y) / (abs_y - x);
-     angle = coeff_2 - coeff_1 * r;
-   }
-   if (y < 0)
-     return(-angle);     // negate if in quad III or IV
-   else
-     return(angle);
+  if (x >= 0) {
+    r = (x - abs_y) / (x + abs_y);
+    angle = coeff_1 - coeff_1 * r;
+  }
+  else {
+    r = (x + abs_y) / (abs_y - x);
+    angle = coeff_2 - coeff_1 * r;
+  }
+  if (y < 0)
+    return(-angle);     // negate if in quad III or IV
+  else
+    return(angle);
 }
 
   int findMode(int *data, int arraySize) {
@@ -133,4 +130,3 @@ float arctan2(float y, float x) {
     }
     return maxData;
   }
-

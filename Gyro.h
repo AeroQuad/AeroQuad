@@ -125,7 +125,7 @@ public:
   
   void measure(void) {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
   }
@@ -157,7 +157,6 @@ public:
 /******************************************************/
 #ifdef AeroQuad_v2
 /*
-  Tested on a 3.3V 8MHz Arduino Pro
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V
   SDA -> A4 (PC4)
@@ -229,12 +228,11 @@ public:
     Wire.send(0x1D); // request high byte
     Wire.endTransmission();
     Wire.requestFrom(gyroAddress, 6);
-    rawData[ROLL] = (Wire.receive()<<8) | Wire.receive();
-    rawData[PITCH] = (Wire.receive()<<8) | Wire.receive();
-    rawData[YAW] = (Wire.receive()<<8) | Wire.receive();
-    
+    rawData[ROLL] = (Wire.receive() << 8) | Wire.receive();
+    rawData[PITCH] = (Wire.receive() << 8) | Wire.receive();
+    rawData[YAW] = (Wire.receive() << 8) | Wire.receive();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = rawData[axis] - gyroZero[axis];
+      gyroADC[axis] = (rawData[axis] - gyroZero[axis]) >> 3; // divide raw ADC by 8 based on experience with IXZ/IDG gyros
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
   }
@@ -301,7 +299,7 @@ public:
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_APM_ADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
-        gyroADC[axis] = rawADC - gyroZero[axis];
+        gyroADC[axis] = gyroZero[axis] - rawADC;
       gyroData[axis] = gyroADC[axis]; // no smoothing needed
     }
   }
