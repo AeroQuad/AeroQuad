@@ -25,8 +25,8 @@
 *****************************************************************************/
 
 // Hardware Configuration
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-//#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
@@ -82,7 +82,7 @@
 #endif
 
 #ifdef AeroQuad_v2
-  Accel_AeroQuad_v1 accel;
+  Accel_AeroQuad_v2 accel;
   Gyro_AeroQuad_v2 gyro;
   Receiver_AeroQuad_v1 receiver;
   Motors_PWM motors;
@@ -134,6 +134,11 @@ void setup() {
   Serial.begin(BAUD);
   pinMode (LEDPIN, OUTPUT);
   
+
+  #if defined (AeroQuad_v2) || defined (AeroQuad_Wii)
+    Wire.begin();
+  #endif
+
   // Read user values from EEPROM
   readEEPROM();
   

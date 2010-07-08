@@ -183,8 +183,6 @@ public:
     smoothFactor = readFloat(GYROSMOOTH_ADR);
     data =  0x0;
     
-    Wire.begin();
-    
     // Check if gyro is connected
     Wire.beginTransmission(0x69);
     Wire.send(0x00);

@@ -96,9 +96,9 @@ public:
 };
 
 /******************************************************/
-/************** AeroQuad Accelerometer ****************/
+/************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-#if defined (AeroQuad_v1) || defined (AeroQuad_v2)
+#ifdef AeroQuad_v1
 class Accel_AeroQuad_v1 : public Accel {
 private:
   int findZero[FINDZERO];
@@ -135,6 +135,121 @@ public:
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
+      accelZero[calAxis] = findMode(findZero, FINDZERO);
+    }
+
+    accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
+    writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
+    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
+  }
+};
+#endif
+
+/******************************************************/
+/************ AeroQuad v2 Accelerometer ***************/
+/******************************************************/
+#ifdef AeroQuad_v2
+class Accel_AeroQuad_v2 : public Accel {
+private:
+  int findZero[FINDZERO];
+  int accelAddress;
+  int data[6];
+  int rawData[3];
+  
+public:
+  Accel_AeroQuad_v2() : Accel(){
+    accelAddress = 0x40; // page 54 and 61 of datasheet
+    // Accelerometer Values
+    // Update these variables if using a different accel
+    // Output is ratiometric for ADXL 335
+    // Note: Vs is not AREF voltage
+    // If Vs = 3.6V, then output sensitivity is 360mV/g
+    // If Vs = 2V, then it's 195 mV/g
+    // Then if Vs = 3.3V, then it's 329.062 mV/g
+    accelScaleFactor = 0.000329062;
+  }
+  
+  void initialize(void) {
+    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
+    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
+    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
+    
+    // Check if accel is connected
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x00);
+    Wire.endTransmission();
+    delay(50);
+    Wire.requestFrom(accelAddress, 1);
+    data[0] = Wire.receive();
+    if (data[0] != 0x03) // page 52 of datasheet
+      Serial.println("Accelerometer not found!");
+
+    // In datasheet, summary register map is page 21
+    // Low pass filter settings is page 27
+    // Range settings is page 28
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x0D);  // register ctrl_reg0
+    Wire.send(0x10);  // enable writing to control registers
+    Wire.endTransmission();
+    
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x20); // register bw_tcs (bits 4-7)
+    Wire.endTransmission();
+    Wire.requestFrom(accelAddress, 1);
+    data[0] = Wire.receive();
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x20);
+    Wire.send(data[0] & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
+    Wire.endTransmission();
+
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x35); // register offset_lsb1 (bits 1-3)
+    Wire.endTransmission();
+    Wire.requestFrom(accelAddress, 1);
+    data[0] = Wire.receive();
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x35);
+    Wire.send(data[0] & ~0x0E); // set range to +/-1g (value = xxxx000x)
+    Wire.endTransmission();
+  }
+  
+  void measure(void) {
+    Wire.beginTransmission(accelAddress);
+    Wire.send(0x02);
+    Wire.endTransmission();
+    Wire.requestFrom(accelAddress, 6);
+    for (byte i = 1; i < 6; i++)
+      data[i] = Wire.receive();
+    rawData[ROLL] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
+    rawData[PITCH] = ((data[3] << 8) | data[2]) >> 2;
+    rawData[ZAXIS] = ((data[5] << 8) | data[4]) >> 2;
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = rawData[axis] - accelZero[axis];
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+    }
+  }
+
+  // Allows user to zero accelerometers on command
+  void calibrate(void) {
+    for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        Wire.beginTransmission(accelAddress);
+        Wire.send((calAxis * 2) + 0x02); // request high byte
+        Wire.endTransmission();
+        Wire.requestFrom(accelAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};
+        data[1] = Wire.receive();  // receive high byte (overwrites previous reading)
+        data[1] = data[1] << 8;    // shift high byte to be high 8 bits
+        Wire.beginTransmission(accelAddress);
+        Wire.send((calAxis * 2) + 0x03); // request low byte
+        Wire.endTransmission();
+        Wire.requestFrom(accelAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};    
+        data[0] = Wire.receive(); // receive low byte as lower 8 bits
+        findZero[i] = (data[1] & data[0]) >> 2; // last two bits are not part of measurement
+      }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
 

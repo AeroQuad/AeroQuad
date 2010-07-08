@@ -160,8 +160,6 @@ void updateControls();
 void Init_Gyro_Acc(void) {
   int i;
 
-  Wire.begin();
-
   //Init WM+ and Nunchuk
   Wire.beginTransmission(0x53);
   Wire.send(0xFE);
