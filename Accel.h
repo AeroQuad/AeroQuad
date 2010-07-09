@@ -220,35 +220,58 @@ public:
     Wire.send(0x02);
     Wire.endTransmission();
     Wire.requestFrom(accelAddress, 6);
-    for (byte i = 1; i < 6; i++)
+    //data[0] = Wire.receive();
+    //Wire.beginTransmission(accelAddress);
+    //Wire.send(0x03);
+    //Wire.endTransmission();
+    //Wire.requestFrom(accelAddress, 1);
+    //data[1] = Wire.receive();
+    for (byte i = 0; i < 6; i++)
       data[i] = Wire.receive();
-    rawData[ROLL] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
-    rawData[PITCH] = ((data[3] << 8) | data[2]) >> 2;
+    rawData[PITCH] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
+    rawData[ROLL] = ((data[3] << 8) | data[2]) >> 2;
     rawData[ZAXIS] = ((data[5] << 8) | data[4]) >> 2;
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = rawData[axis] - accelZero[axis];
+      accelADC[axis] = (rawData[axis] - accelZero[axis]) >> 5;
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
+    //Serial.print(rawData[ROLL]);Serial.print(',');Serial.println(accelZero[ROLL]);
   }
 
   // Allows user to zero accelerometers on command
-  void calibrate(void) {
+  void calibrate(void) {  
+    int msb;
+    int lsb;
+    
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+      switch(calAxis) {
+        case ROLL:
+          msb = 0x05;
+          lsb = 0x04;
+          break;
+        case PITCH:
+          msb = 0x03;
+          lsb = 0x02;
+          break;
+        case ZAXIS:
+          msb = 0x07;
+          lsb = 0x06;
+      }
       for (int i=0; i<FINDZERO; i++) {
         Wire.beginTransmission(accelAddress);
-        Wire.send((calAxis * 2) + 0x02); // request high byte
+        Wire.send(msb); // request high byte
         Wire.endTransmission();
         Wire.requestFrom(accelAddress, 1);
         while (Wire.available() == 0) {/* wait for incoming data */};
         data[1] = Wire.receive();  // receive high byte (overwrites previous reading)
         data[1] = data[1] << 8;    // shift high byte to be high 8 bits
         Wire.beginTransmission(accelAddress);
-        Wire.send((calAxis * 2) + 0x03); // request low byte
+        Wire.send(lsb); // request low byte
         Wire.endTransmission();
         Wire.requestFrom(accelAddress, 1);
         while (Wire.available() == 0) {/* wait for incoming data */};    
         data[0] = Wire.receive(); // receive low byte as lower 8 bits
-        findZero[i] = (data[1] & data[0]) >> 2; // last two bits are not part of measurement
+        findZero[i] = (data[1] | data[0]) >> 2; // last two bits are not part of measurement
       }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }

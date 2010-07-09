@@ -259,6 +259,28 @@ public:
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
+  
+  void autoZero() {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        Wire.beginTransmission(gyroAddress);
+        Wire.send((calAxis * 2) + 0x1D); // request high byte
+        Wire.endTransmission();
+        Wire.requestFrom(gyroAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};
+        data = Wire.receive();  // receive high byte (overwrites previous reading)
+        data = data << 8;    // shift high byte to be high 8 bits
+        Wire.beginTransmission(gyroAddress);
+        Wire.send((calAxis * 2) + 0x1E); // request low byte
+        Wire.endTransmission();
+        Wire.requestFrom(gyroAddress, 1);
+        while (Wire.available() == 0) {/* wait for incoming data */};    
+        data |= Wire.receive(); // receive low byte as lower 8 bits
+        findZero[i] = data;
+      }
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+    }
+  }
 };
 #endif
 

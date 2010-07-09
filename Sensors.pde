@@ -28,10 +28,7 @@ void readSensors(void) {
     gyro.invert(ROLL);
     gyro.invert(PITCH);
   #endif
-  #ifdef IDG
-    gyro.invert(YAW);
-  #endif
-  #ifdef APM
+  #if defined (IDG) | defined (APM) | defined (AeroQuad_v2)
     gyro.invert(YAW);
   #endif
   #ifdef AeroQuad_Wii
@@ -112,7 +109,7 @@ float arctan2(float y, float x) {
       }
     }
     
-    temp = 0;
+    temp = -32768;
     frequency = 0;
     maxFrequency = 0;
     
