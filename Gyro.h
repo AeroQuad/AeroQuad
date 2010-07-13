@@ -155,7 +155,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#ifdef AeroQuad_v2
+#ifdef AeroQuadMega_v2
 /*
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V
@@ -164,7 +164,7 @@ public:
   INT -> D2 (PB2) (or no connection, not used here)
   CLK -> GND
 */
-class Gyro_AeroQuad_v2 : public Gyro {
+class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int findZero[FINDZERO];
   int gyroAddress;
@@ -172,7 +172,7 @@ private:
   int rawData[3];
   
 public:
-  Gyro_AeroQuad_v2() : Gyro() {
+  Gyro_AeroQuadMega_v2() : Gyro() {
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // IDG/IXZ500 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = 0.06103515625;       // IDG/IXZ500 sensitivity (need to double check this)

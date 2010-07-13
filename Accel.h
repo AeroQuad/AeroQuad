@@ -147,10 +147,10 @@ public:
 #endif
 
 /******************************************************/
-/************ AeroQuad v2 Accelerometer ***************/
+/********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-#ifdef AeroQuad_v2
-class Accel_AeroQuad_v2 : public Accel {
+#ifdef AeroQuadMega_v2
+class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int findZero[FINDZERO];
   int accelAddress;
@@ -158,7 +158,7 @@ private:
   int rawData[3];
   
 public:
-  Accel_AeroQuad_v2() : Accel(){
+  Accel_AeroQuadMega_v2() : Accel(){
     accelAddress = 0x40; // page 54 and 61 of datasheet
     // Accelerometer Values
     // Update these variables if using a different accel

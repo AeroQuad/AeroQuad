@@ -128,9 +128,9 @@ public:
 };
 
 /*************************************************/
-/************** AeroQuad v1 PCINT ****************/
+/*************** AeroQuad PCINT ******************/
 /*************************************************/
-#if defined (AeroQuad_v1) || defined (AeroQuad_v2) || defined (AeroQuad_Wii)
+#if defined (AeroQuad_v1) || defined (AeroQuad_Wii)
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
@@ -222,13 +222,13 @@ SIGNAL(PCINT2_vect) {
   measurePulseWidthISR(2);
 }
 
-class Receiver_AeroQuad_v1 : public Receiver {
+class Receiver_AeroQuad : public Receiver {
 private:
   int receiverChannel[6];
   int receiverPin[6];
 
 public:
-  Receiver_AeroQuad_v1() : Receiver(){
+  Receiver_AeroQuad() : Receiver(){
     // Receiver pin definitions
     // To pick your own PCINT pins look at page 2 of Atmega 328 data sheet and the Duemilanove data sheet and match the PCINT pin with the Arduino pinout
     // These pins need to correspond to the ROLL/PITCH/YAW/THROTTLE/MODE/AUXPIN below
@@ -296,9 +296,9 @@ public:
 #endif
 
 /******************************************************/
-/************** AeroQuad Mega v1 PCINT ****************/
+/*************** AeroQuad Mega PCINT ******************/
 /******************************************************/
-#ifdef AeroQuadMega_v1
+#if defined (AeroQuadMega_v1) || defined (AeroQuadMega_v2)
 
   volatile uint8_t *port_to_pcmask[] = {
     &PCMSK0,
@@ -368,7 +368,7 @@ public:
     MegaPcIntISR();
   }
   
-class Receiver_AeroQuadMega_v1 : public Receiver {
+class Receiver_AeroQuadMega : public Receiver {
 private:
   int receiverChannel[6];
   int receiverPin[6];
@@ -378,7 +378,7 @@ private:
   //If you are using an AQ 1.x Shield, put a jumper wire between the Shield and Mega as indicated in the comments below
   
   public:
-  Receiver_AeroQuadMega_v1() : Receiver(){}
+  Receiver_AeroQuadMega() : Receiver(){}
 
   void initialize() {
     this->_initialize(); // load in calibration xmitFactor from EEPROM

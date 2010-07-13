@@ -23,28 +23,6 @@
    Also, consult the ReadMe.mht file for additional details
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
-
-// Hardware Configuration
-//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-//#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
-#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
-//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
-//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
-
-// 5DOF IMU Version
-//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the older IDG300 or IDG500 gyros
-
-// Yaw Gyro Type
-// Use only one of the following definitions
-#define IXZ // IXZ-500 Flat Yaw Gyro
-//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
-
-// Define Flight Configuration
-// Use only one of the following definitions
-#define plusConfig
-//#define XConfig
-
 // Receiver Input Configuration
 // If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
 // Put a jumper wire between the Shield and Mega as indicated below
@@ -54,12 +32,34 @@
 // For Throttle Channel, place jumper between AQ Shield pin 4 and Mega AI12
 // For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
 // For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
+/****************************************************************************/
+
+// Hardware Configuration
+#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
+//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
+
+// Define Flight Configuration
+// Use only one of the following definitions
+#define plusConfig
+//#define XConfig
+
+// 5DOF IMU Version
+//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the older IDG300 or IDG500 gyros
+
+// Yaw Gyro Type
+// Use only one of the following definitions
+#define IXZ // IXZ-500 Flat Yaw Gyro
+//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
 
-/***************************************************************************/
+/****************************************************************************/
 
 #include <EEPROM.h>
 #include <Servo.h>
@@ -77,21 +77,21 @@
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
-  Receiver_AeroQuad_v1 receiver;
-  Motors_PWM motors;
-#endif
-
-#ifdef AeroQuad_v2
-  Accel_AeroQuad_v2 accel;
-  Gyro_AeroQuad_v2 gyro;
-  Receiver_AeroQuad_v1 receiver;
+  Receiver_AeroQuad receiver;
   Motors_PWM motors;
 #endif
 
 #ifdef AeroQuadMega_v1 
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
-  Receiver_AeroQuadMega_v1 receiver;
+  Receiver_AeroQuadMega receiver;
+  Motors_PWM motors;
+#endif
+
+#ifdef AeroQuadMega_v2
+  Accel_AeroQuadMega_v2 accel;
+  Gyro_AeroQuadMega_v2 gyro;
+  Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
 #endif
 
@@ -107,14 +107,14 @@
 #ifdef AeroQuad_Wii
   Accel_Wii accel;
   Gyro_Wii gyro;
-  Receiver_AeroQuad_v1 receiver;
+  Receiver_AeroQuad receiver;
   Motors_PWM motors;
 #endif
 
 #ifdef AeroQuadMega_Wii
   Accel_Wii accel;
   Gyro_Wii gyro;
-  Receiver_AeroQuadMega_v1 receiver;
+  Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
 #endif
 
