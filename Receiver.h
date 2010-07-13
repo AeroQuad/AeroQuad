@@ -370,26 +370,37 @@ public:
   
 class Receiver_AeroQuadMega_v1 : public Receiver {
 private:
+  int receiverChannel[6];
+  int receiverPin[6];
   //Receiver pin assignments for the Arduino Mega using an AeroQuad v1.x Shield
   //The defines below are for documentation only of the Mega receiver input
   //The real pin assignments happen in initializeMegaPcInt2()
   //If you are using an AQ 1.x Shield, put a jumper wire between the Shield and Mega as indicated in the comments below
-  #define ROLLPIN 67 // AI13, Place jumper between AQ Shield pin 2 and Mega AI13
-  #define PITCHPIN 65 // AI11, Place jumper between AQ Shield pin 5 and Mega AI11
-  #define YAWPIN 64 // AI10, Place jumper between AQ Shield pin 6 and Mega AI10
-  #define THROTTLEPIN 66 // AI12, Place jumper between AQ Shield pin 4 and Mega AI12
-  #define MODEPIN 63 // AI9, Place jumper between AQ Shield pin 7 and Mega AI9
-  #define AUXPIN 62 // AI8, Place jumper between AQ Shield 8 and Mega AI8
-  int receiverPin[6] = {5,3,2,4,1,0};  // Attaches PCINT to Arduino Pin
   
   public:
   Receiver_AeroQuadMega_v1() : Receiver(){}
 
   void initialize() {
+    this->_initialize(); // load in calibration xmitFactor from EEPROM
     DDRK = 0;
     PORTK = 0;
     PCMSK2 |= 0x3F;
     PCICR |= 0x1 << 2;
+    
+    receiverChannel[ROLL] = 67;
+    receiverChannel[PITCH] = 65;
+    receiverChannel[YAW] = 64;
+    receiverChannel[THROTTLE] = 66;
+    receiverChannel[MODE] = 63;
+    receiverChannel[AUX] = 62;
+        
+    // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+    receiverPin[ROLL] = 5;
+    receiverPin[PITCH] = 3;
+    receiverPin[YAW] = 2;
+    receiverPin[THROTTLE] = 4;
+    receiverPin[MODE] = 1;
+    receiverPin[AUX] = 0;
 
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       pinData[receiverChannel[channel]].edge = FALLING_EDGE;
@@ -415,7 +426,7 @@ private:
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (channel = ROLL; channel < THROTTLE; channel ++)
+    for (channel = ROLL; channel < THROTTLE; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and 
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)

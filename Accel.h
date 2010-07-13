@@ -98,7 +98,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-#ifdef AeroQuad_v1
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   int findZero[FINDZERO];

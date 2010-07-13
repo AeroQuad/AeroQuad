@@ -26,8 +26,8 @@
 
 // Hardware Configuration
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
+//#define AeroQuad_v2         // Arduino 2009 with AeroQuad Shield v2.x
+#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (needs debug)
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)

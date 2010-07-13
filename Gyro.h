@@ -98,7 +98,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
-#ifdef AeroQuad_v1
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Gyro_AeroQuad_v1 : public Gyro {
 private:
   int findZero[FINDZERO];
