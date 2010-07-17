@@ -140,10 +140,11 @@ int delta;
 
 // Flight angle variables
 float timeConstant;
-float flightAngle[2];
 float rateRadPerSec(byte axis);
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
+float Kp_ROLLPITCH = 0.002;
+float Ki_ROLLPITCH = 0.0000005;
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -184,6 +185,7 @@ float arctan2(float y, float x); // defined in Sensors.pde
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
+float G_Dt = 0.02;    // Integration time for the gyros (DCM algorithm)
 
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;

@@ -121,9 +121,9 @@
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
 #include "FlightAngle.h"
-FlightAngle_CompFilter angle[2]; // Use this for Complementary Filter
-//FlightAngle_KalmanFilter angle[2];  Use this for Kalman Filter
-//FlightAngle_FabQuad angle[2]; // developed by FabQuad (http://aeroquad.com/showthread.php?p=3995#post3995)
+//FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
+//FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
+FlightAngle_DCM flightAngle; // Use this for DCM
 
 #include "DataStorage.h"
 
@@ -162,10 +162,7 @@ void setup() {
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
-  // Angle estimation intialization
-  for (axis = ROLL; axis < YAW; axis++)
-    //angle[axis].initialize(accelADC[ZAXIS]);
-    angle[axis].initialize(axis);
+  flightAngle.initialize();
     
   // Camera stabilization setup
   #ifdef Camera
@@ -222,8 +219,8 @@ void loop () {
 // *************************************************************
 #ifdef Camera // Development moved to Arduino Mega
   if ((currentTime > (cameraTime + CAMERALOOPTIME)) && (cameraLoop == ON)) { // 50Hz
-    rollCamera.write((mCamera * flightAngle[ROLL]) + bCamera);
-    pitchCamera.write((mCamera * flightAngle[PITCH]) + bCamera);
+    rollCamera.write((mCamera * flightAngle.get(ROLL)) + bCamera);
+    pitchCamera.write((mCamera * flightAngle.get(PITCH)) + bCamera);
     cameraTime = currentTime;
   }
 #endif

@@ -34,8 +34,8 @@ void flightControl(void) {
       // updatePID(target, measured, PIDsettings);
       // measured = flight angle calculated from angle object
       // updatePID() and updatePIDangle() are defined in PID.h
-      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
     }
     
   // ***************************** Update Yaw ***************************

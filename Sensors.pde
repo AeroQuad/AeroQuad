@@ -64,9 +64,7 @@ void readSensors(void) {
  }*/
 
  // ****************** Calculate Absolute Angle *****************
- // angle[axis].calculate() defined in FlightAngle.h
- flightAngle[ROLL] = angle[ROLL].calculate(accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
- flightAngle[PITCH] = angle[PITCH].calculate(accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
+ flightAngle.calculate(); // defined in FlightAngle.h
 }
 
 float arctan2(float y, float x) {

@@ -170,9 +170,7 @@ void readSerialCommand() {
       writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
       writeFloat(minAcro, MINACRO_ADR);
       zeroIntegralError();
-      // Complementary filter setup
-      for (axis = ROLL; axis < YAW; axis++)
-        angle[axis].initialize(axis); // defined in FlightAngle.h
+      flightAngle.initialize();
       break;
     case 'Y': // Initialize EEPROM with default values
       PID[ROLL].P = 5;
@@ -403,9 +401,9 @@ void sendSerialTelemetry() {
       Serial.print(levelAdjust[axis]);
       comma();
     }
-    Serial.print(flightAngle[ROLL]);
+    Serial.print(flightAngle.getData(ROLL));
     comma();
-    Serial.print(flightAngle[PITCH]);
+    Serial.print(flightAngle.getData(PITCH));
     Serial.println();
     break;
   case 'R': // Send raw sensor data
