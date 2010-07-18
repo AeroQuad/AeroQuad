@@ -18,6 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// FlightCommand.pde is responsible for decoding transmitter stick combinations
+// for setting up AeroQuad modes such as motor arming and disarming
+
 void readPilotCommands() {
   receiver.read();
   // Read quad configuration commands from transmitter when throttle down

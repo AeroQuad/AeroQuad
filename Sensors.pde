@@ -18,6 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// Sensors.pde is responsible for taking on board sensor measuremens of the AeroQuad
+
 void readSensors(void) {
   // *********************** Read Sensors **********************
   // Apply low pass filter to sensor values and center around zero
@@ -67,8 +69,8 @@ void readSensors(void) {
  flightAngle.calculate(); // defined in FlightAngle.h
 }
 
+// Alternate method to calculate arctangent from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 float arctan2(float y, float x) {
-  // Taken from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
   float coeff_1 = PI/4;
   float coeff_2 = 3*coeff_1;
   float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
@@ -88,40 +90,41 @@ float arctan2(float y, float x) {
     return(angle);
 }
 
-  int findMode(int *data, int arraySize) {
-    // The mode of a set of numbers is the value that occurs most frequently
-    boolean done = 0;
-    byte i;
-    int temp, maxData, frequency, maxFrequency;
-    
-    // Sorts numbers from lowest to highest
-    while (done != 1) {        
-      done = 1;
-      for (i=0; i<(arraySize-1); i++) {
-        if (data[i] > data[i+1]) {     // numbers are out of order - swap
-          temp = data[i+1];
-          data[i+1] = data[i];
-          data[i] = temp;
-          done = 0;
-        }
+// Used for sensor calibration
+// The mode of a set of numbers returns the value that occurs most frequently
+int findMode(int *data, int arraySize) {
+  boolean done = 0;
+  byte i;
+  int temp, maxData, frequency, maxFrequency;
+  
+  // Sorts numbers from lowest to highest
+  while (done != 1) {        
+    done = 1;
+    for (i=0; i<(arraySize-1); i++) {
+      if (data[i] > data[i+1]) {     // numbers are out of order - swap
+        temp = data[i+1];
+        data[i+1] = data[i];
+        data[i] = temp;
+        done = 0;
       }
     }
-    
-    temp = -32768;
-    frequency = 0;
-    maxFrequency = 0;
-    
-    // Count number of times a value occurs in sorted array
-    for (i=0; i<arraySize; i++) {
-      if (data[i] > temp) {
-        frequency = 0;
-        temp = data[i];
-        frequency++;
-      } else if (data[i] == temp) frequency++;
-      if (frequency > maxFrequency) {
-        maxFrequency = frequency;
-        maxData = data[i];
-      }
-    }
-    return maxData;
   }
+  
+  temp = -32768;
+  frequency = 0;
+  maxFrequency = 0;
+  
+  // Count number of times a value occurs in sorted array
+  for (i=0; i<arraySize; i++) {
+    if (data[i] > temp) {
+      frequency = 0;
+      temp = data[i];
+      frequency++;
+    } else if (data[i] == temp) frequency++;
+    if (frequency > maxFrequency) {
+      maxFrequency = frequency;
+      maxData = data[i];
+    }
+  }
+  return maxData;
+}

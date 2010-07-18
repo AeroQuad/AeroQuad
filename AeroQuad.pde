@@ -48,12 +48,13 @@
 //#define XConfig
 
 // 5DOF IMU Version
-//#define OriginalIMU // Use this if you have the 5DOF IMU which uses the older IDG300 or IDG500 gyros
+// Uncomment this if you have the version of the 5DOF IMU which uses the older IDG300 or IDG500 gyros
+//#define OriginalIMU 
 
 // Yaw Gyro Type
 // Use only one of the following definitions
-#define IXZ // IXZ-500 Flat Yaw Gyro
-//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
+//#define IXZ // IXZ-500 Flat Yaw Gyro
+#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -143,26 +144,27 @@ void setup() {
   readEEPROM();
   
   // Configure motors
-  motors.initialize();
+  motors.initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON)
-    receiver.initialize();
+    receiver.initialize(); // defined in Received.h
      
   // Heading hold
   // aref is read in from EEPROM and originates from Configurator
   headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
   
   // Initialize sensors
-  gyro.initialize(); // If sensors have a common initialization routine, insert it into the corresponding gyro subclass
-  accel.initialize();
+  // If sensors have a common initialization routine, insert it into the corresponding gyro subclass
+  gyro.initialize(); // defined in Gyro.h
+  accel.initialize(); // defined in Accel.h
   // Calibrate sensors
-  gyro.autoZero();  
+  gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
-  flightAngle.initialize();
+  flightAngle.initialize(); // defined in FlightAngle.h
     
   // Camera stabilization setup
   #ifdef Camera
@@ -182,6 +184,7 @@ void loop () {
   // Measure loop rate
   currentTime = millis();
   deltaTime = currentTime - previousTime;
+  G_Dt = deltaTime / 1000.0;
   previousTime = currentTime;
   #ifdef DEBUG
     if (testSignal == LOW) testSignal = HIGH;

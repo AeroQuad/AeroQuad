@@ -42,7 +42,7 @@ public:
 /*************** Complementary Filter *****************/
 /******************************************************/
 // Originally authored by RoyLB
-// At http://www.rcgroups.com/forums/showpost.php?p=12082524&postcount=1286    
+// http://www.rcgroups.com/forums/showpost.php?p=12082524&postcount=1286    
 class FlightAngle_CompFilter : public FlightAngle {
 private:
   float dt;
@@ -92,6 +92,8 @@ public:
 /******************************************************/
 /****************** Kalman Filter *********************/
 /******************************************************/
+// Originally authored by Tom Pycke
+// http://tom.pycke.be/mav/71/kalman-filtering-of-imu-data
 class FlightAngle_KalmanFilter : public FlightAngle {
 private:
     float x_angle, x_bias;
@@ -149,6 +151,8 @@ public:
 /******************************************************/
 /*********************** DCM **************************/
 /******************************************************/
+// Written by William Premerlani
+// http://diydrones.com/profiles/blogs/dcm-imu-theory-first-draft
 class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;
@@ -170,6 +174,122 @@ private:
   float errorCourse;
   float COGX; //Course overground X axis
   float COGY; //Course overground Y axis
+  
+  //Computes the dot product of two vectors
+  float Vector_Dot_Product(float vector1[3],float vector2[3]) {
+    float op=0;
+
+    for(int c=0; c<3; c++)
+      op+=vector1[c]*vector2[c];
+    return op; 
+  }
+
+  //Computes the cross product of two vectors
+  void Vector_Cross_Product(float vectorOut[3], float v1[3],float v2[3]) {
+    vectorOut[0]= (v1[1]*v2[2]) - (v1[2]*v2[1]);
+    vectorOut[1]= (v1[2]*v2[0]) - (v1[0]*v2[2]);
+    vectorOut[2]= (v1[0]*v2[1]) - (v1[1]*v2[0]);
+  }
+
+  //Multiply the vector by a scalar. 
+  void Vector_Scale(float vectorOut[3],float vectorIn[3], float scale2) {
+    for(int c=0; c<3; c++)
+      vectorOut[c]=vectorIn[c]*scale2; 
+  }
+
+  void Vector_Add(float vectorOut[3],float vectorIn1[3], float vectorIn2[3]){
+    for(int c=0; c<3; c++)
+      vectorOut[c]=vectorIn1[c]+vectorIn2[c];
+  }
+
+  /********* MATRIX FUNCTIONS *****************************************/
+  //Multiply two 3x3 matrixs. This function developed by Jordi can be easily adapted to multiple n*n matrix's. (Pero me da flojera!). 
+  void Matrix_Multiply(float a[3][3], float b[3][3],float mat[3][3]) {
+    float op[3]; 
+    for(int x=0; x<3; x++) {
+      for(int y=0; y<3; y++) {
+        for(int w=0; w<3; w++)
+         op[w]=a[x][w]*b[w][y];
+        mat[x][y]=0;
+        mat[x][y]=op[0]+op[1]+op[2];
+        float test=mat[x][y];
+      }
+    }
+  }
+  
+public:
+  FlightAngle_DCM() :FlightAngle() {
+    /*float Accel_Vector[3] = {0,0,0}; //Store the acceleration in a vector
+    float Accel_Vector_unfiltered[3] = {0,0,0}; //Store the acceleration in a vector
+    float Gyro_Vector[3] = {0,0,0};//Store the gyros rutn rate in a vector
+    float Omega_Vector[3] = {0,0,0}; //Corrected Gyro_Vector data
+    float Omega_P[3] = {0,0,0};//Omega Proportional correction
+    float Omega_I[3] = {0,0,0};//Omega Integrator
+    float Omega[3] = {0,0,0};
+    float DCM_Matrix[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+    float Update_Matrix[3][3] = {{0,1,2},{3,4,5},{6,7,8}}; //Gyros here
+    float Temporary_Matrix[3][3]={{0,0,0},{0,0,0},{0,0,0}};
+    float errorRollPitch[3]= {0,0,0};
+    float errorYaw[3]= {0,0,0};*/
+    for (byte i=0; i<3; i++) {
+      Accel_Vector[i] = 0; //Store the acceleration in a vector
+      Accel_Vector_unfiltered[i] = 0; //Store the acceleration in a vector
+      Gyro_Vector[i] = 0;//Store the gyros rutn rate in a vector
+      Omega_Vector[i] = 0; //Corrected Gyro_Vector data
+      Omega_P[i] = 0;//Omega Proportional correction
+      Omega_I[i] = 0;//Omega Integrator
+      Omega[i] = 0;
+      errorRollPitch[i]= 0;
+      errorYaw[i]= 0;
+    }
+    DCM_Matrix[0][0] = 1;
+    DCM_Matrix[0][1] = 0;
+    DCM_Matrix[0][2] = 0;
+    DCM_Matrix[1][0] = 0;
+    DCM_Matrix[1][1] = 1;
+    DCM_Matrix[1][2] = 0;
+    DCM_Matrix[2][0] = 0;
+    DCM_Matrix[2][1] = 0;
+    DCM_Matrix[2][2] = 1;
+    Update_Matrix[0][0] = 0;
+    Update_Matrix[0][1] = 1;
+    Update_Matrix[0][2] = 2;
+    Update_Matrix[1][0] = 3;
+    Update_Matrix[1][1] = 4;
+    Update_Matrix[1][2] = 5;
+    Update_Matrix[2][0] = 6;
+    Update_Matrix[2][1] = 7;
+    Update_Matrix[2][2] = 8;
+    Temporary_Matrix[0][0] = 0;
+    Temporary_Matrix[0][1] = 0;
+    Temporary_Matrix[0][2] = 0;
+    Temporary_Matrix[1][0] = 0;
+    Temporary_Matrix[1][1] = 0;
+    Temporary_Matrix[1][2] = 0;
+    Temporary_Matrix[2][0] = 0;
+    Temporary_Matrix[2][1] = 0;
+    Temporary_Matrix[2][2] = 0;
+    
+    errorCourse = 0;
+    COGX = 0; //Course overground X axis
+    COGY = 1; //Course overground Y axis    
+    dt = 0;
+    // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 2.93mV/ADC step => 0.8/3.33 = 0.683
+    Gyro_Gain_X = radians(0.683);
+    Gyro_Gain_Y = radians(0.683);
+    Gyro_Gain_Z = radians(0.683);
+  }
+  
+  void initialize(void) {    
+  }
+  
+  void calculate(void) {
+    Matrix_update(); 
+    Normalize();
+    Drift_correction();
+    Euler_angles();
+    
+  }
   
   void Normalize(void) {
     float error=0;
@@ -234,7 +354,7 @@ private:
       Vector_Add(Omega_I,Omega_I,Scaled_Omega_I);//adding integrator to the Omega_I
     }*/
   }
-  
+
   /*void Accel_adjust(void) {
     // ADC : Voltage reference 3.0V / 10bits(1024 steps) => 2.93mV/ADC step
     // ADXL335 Sensitivity(from datasheet) => 330mV/g, 2.93mV/ADC step => 330/0.8 = 102
@@ -246,11 +366,11 @@ private:
   }*/
 
   void Matrix_update(void) {
-    Gyro_Vector[0]=Gyro_Gain_X * gyro.getData(ROLL); //gyro x roll
-    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(PITCH); //gyro y pitch
+    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH); //gyro x roll
+    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
     Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
     
-    Accel_Vector[0]=accel.getData(ROLL); // acc x
+    Accel_Vector[0]=-accel.getData(ROLL); // acc x
     Accel_Vector[1]=accel.getData(PITCH); // acc y
     Accel_Vector[2]=accel.getData(ZAXIS); // acc z
     
@@ -273,7 +393,9 @@ private:
     Update_Matrix[2][0]=-G_Dt*Omega_Vector[1];//-y
     Update_Matrix[2][1]=G_Dt*Omega_Vector[0];//x
     Update_Matrix[2][2]=0;
-  
+
+    //Serial.println(DCM_Matrix[2][0], 6);
+
     Matrix_Multiply(DCM_Matrix,Update_Matrix,Temporary_Matrix); //a*b=c
   
     for(int x=0; x<3; x++) {  //Matrix Addition (update)
@@ -283,85 +405,8 @@ private:
   }
 
   void Euler_angles(void) {
-      angle[ROLL] = asin(-DCM_Matrix[2][0]);
-      angle[PITCH] = atan2(DCM_Matrix[2][1],DCM_Matrix[2][2]);
-      angle[YAW] = atan2(DCM_Matrix[1][0],DCM_Matrix[0][0]);
-  }
-
-  //Computes the dot product of two vectors
-  float Vector_Dot_Product(float vector1[3],float vector2[3]) {
-    float op=0;
-
-    for(int c=0; c<3; c++)
-      op+=vector1[c]*vector2[c];
-    return op; 
-  }
-
-  //Computes the cross product of two vectors
-  void Vector_Cross_Product(float vectorOut[3], float v1[3],float v2[3]) {
-    vectorOut[0]= (v1[1]*v2[2]) - (v1[2]*v2[1]);
-    vectorOut[1]= (v1[2]*v2[0]) - (v1[0]*v2[2]);
-    vectorOut[2]= (v1[0]*v2[1]) - (v1[1]*v2[0]);
-  }
-
-  //Multiply the vector by a scalar. 
-  void Vector_Scale(float vectorOut[3],float vectorIn[3], float scale2) {
-    for(int c=0; c<3; c++)
-      vectorOut[c]=vectorIn[c]*scale2; 
-  }
-
-  void Vector_Add(float vectorOut[3],float vectorIn1[3], float vectorIn2[3]){
-    for(int c=0; c<3; c++)
-      vectorOut[c]=vectorIn1[c]+vectorIn2[c];
-  }
-
-  /********* MATRIX FUNCTIONS *****************************************/
-  //Multiply two 3x3 matrixs. This function developed by Jordi can be easily adapted to multiple n*n matrix's. (Pero me da flojera!). 
-  void Matrix_Multiply(float a[3][3], float b[3][3],float mat[3][3]) {
-    float op[3]; 
-    for(int x=0; x<3; x++) {
-      for(int y=0; y<3; y++) {
-        for(int w=0; w<3; w++)
-         op[w]=a[x][w]*b[w][y];
-        mat[x][y]=0;
-        mat[x][y]=op[0]+op[1]+op[2];
-        float test=mat[x][y];
-      }
-    }
-  }
-  
-public:
-  FlightAngle_DCM() :FlightAngle() {
-    float Accel_Vector[3] = {0,0,0}; //Store the acceleration in a vector
-    float Accel_Vector_unfiltered[3] = {0,0,0}; //Store the acceleration in a vector
-    float Gyro_Vector[3] = {0,0,0};//Store the gyros rutn rate in a vector
-    float Omega_Vector[3] = {0,0,0}; //Corrected Gyro_Vector data
-    float Omega_P[3] = {0,0,0};//Omega Proportional correction
-    float Omega_I[3] = {0,0,0};//Omega Integrator
-    float Omega[3] = {0,0,0};
-    float DCM_Matrix[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
-    float Update_Matrix[3][3] = {{0,1,2},{3,4,5},{6,7,8}}; //Gyros here
-    float Temporary_Matrix[3][3]={{0,0,0},{0,0,0},{0,0,0}};
-    float errorRollPitch[3]= {0,0,0};
-    float errorYaw[3]= {0,0,0};
-    
-    errorCourse = 0;
-    COGX = 0; //Course overground X axis
-    COGY = 1; //Course overground Y axis    
-    dt = 0;
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 2.93mV/ADC step => 0.8/3.33 = 0.683
-    Gyro_Gain_X = radians(0.683);
-    Gyro_Gain_Y = radians(0.683);
-    Gyro_Gain_Z = radians(0.683);
-  }
-  
-  void initialize(void) {    
-  }
-  
-  void calculate(void) {
-    Matrix_update(); 
-    Normalize();
-    Drift_correction();
-    Euler_angles();
+      angle[ROLL] = degrees(asin(-DCM_Matrix[2][0]));
+      angle[PITCH] = degrees(atan2(DCM_Matrix[2][1],DCM_Matrix[2][2]));
+      angle[YAW] = degrees(atan2(DCM_Matrix[1][0],DCM_Matrix[0][0]));
   }
 };

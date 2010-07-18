@@ -18,6 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// FlightControl.pde is responsible for combining sensor measurements and
+// transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
+
 void flightControl(void) {
   // ********************* Check Flight Mode *********************
     if (flightMode == ACRO) {
@@ -122,7 +125,7 @@ void flightControl(void) {
     motors.setMinCommand(REAR, MINTHROTTLE);
   }
 
-  // Allows quad to do acrobatics by turning off opposite motors during hard manuevers
+  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == ACRO) {
     #ifdef plusConfig
     if (receiver.getRaw(ROLL) < MINCHECK) {

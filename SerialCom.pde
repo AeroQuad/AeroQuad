@@ -18,6 +18,11 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// SerialCom.pde is responsible for the serial communication for commands and telemetry from the AeroQuad
+// This comtains readSerialCommand() which listens for a serial command and it's arguments
+// This also contains readSerialTelemetry() which listens for a telemetry request and responds with the requested data
+// For more information on each command/telemetry look at: http://aeroquad.com/content.php?117
+
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
@@ -276,11 +281,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(accel.getRaw(ROLL));
-    comma();
-    Serial.print(accel.getZero(ROLL));
-    comma();
-    Serial.print(accel.getData(ROLL));
+    Serial.print(G_Dt, 6);
+    //comma();
+    //Serial.print(accel.getZero(ROLL));
+    //comma();
+    //Serial.print(accel.getData(ROLL));
     //comma();
     //Serial.print(accel.getSmoothFactor());
     //comma();
