@@ -281,15 +281,15 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(G_Dt, 6);
-    //comma();
-    //Serial.print(accel.getZero(ROLL));
-    //comma();
-    //Serial.print(accel.getData(ROLL));
-    //comma();
-    //Serial.print(accel.getSmoothFactor());
-    //comma();
-    //Serial.println(accel.angleDeg(ROLL));
+    Serial.print(gyro.getZero(ROLL));
+    comma();
+    Serial.print(gyro.getRaw(ROLL));
+    comma();
+    Serial.print(gyro.getData(ROLL));
+    comma();
+    Serial.print(gyro.getSmoothFactor());
+    comma();
+    Serial.print(accel.angleDeg(ROLL));
     Serial.println();
     //queryType = 'X';
     break;

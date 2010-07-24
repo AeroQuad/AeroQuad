@@ -26,8 +26,13 @@ public:
   int accelZero[3];
   int accelData[3];
   int accelADC[3];
+  int sign[3];
   byte rollChannel, pitchChannel, zAxisChannel;
-  Accel(void) {}
+  Accel(void) {
+    sign[ROLL] = 1;
+    sign[PITCH] = 1;
+    sign[YAW] = 1;
+  }
 
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
@@ -53,16 +58,16 @@ public:
   }
   
   const int getRaw(byte axis) {
-    return accelADC[axis];
+    return accelADC[axis] * sign[axis];
   }
   
   const int getData(byte axis) {
-    return accelData[axis];
+    return accelData[axis] * sign[axis];
   }
   
   const int invert(byte axis) {
-    accelData[axis] = -accelData[axis];
-    return accelData[axis];
+    sign[axis] = -sign[axis];
+    return sign[axis];
   }
   
   const int getZero(byte axis) {
@@ -86,8 +91,8 @@ public:
   }
   
   const float angleRad(byte axis) {
-    if (axis == PITCH) return arctan2(accelData[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
-    if (axis == ROLL) return arctan2(accelData[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
+    if (axis == PITCH) return arctan2(accelData[PITCH] * sign[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
+    if (axis == ROLL) return arctan2(accelData[ROLL] * sign[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
   }
 
   const float angleDeg(byte axis) {

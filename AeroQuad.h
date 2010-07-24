@@ -35,6 +35,8 @@
 #define THROTTLE 3
 #define MODE 4
 #define AUX 5
+#define XAXIS 0
+#define YAXIS 1
 #define ZAXIS 2
 #define LASTAXIS 3
 #define LEVELROLL 3

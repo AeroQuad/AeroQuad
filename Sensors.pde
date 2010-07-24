@@ -26,18 +26,7 @@ void readSensors(void) {
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
  
-  #ifdef OriginalIMU
-    gyro.invert(ROLL);
-    gyro.invert(PITCH);
-  #endif
-  #if defined (IDG) | defined (APM) | defined (AeroQuad_v2)
-    gyro.invert(YAW);
-  #endif
-  #ifdef AeroQuad_Wii
-    accel.invert(ROLL);
-  #endif
-
- // ************ Correct for gyro drift by FabQuad **************
+  // ************ Correct for gyro drift by FabQuad **************
  // ************ http://aeroquad.com/entry.php?4-  **************
  /*for (axis = ROLL; axis < YAW; axis++) {              
    if (abs(lastAccel[axis]-accel.getData(axis)) < 5) { // if accel is same as previous cycle

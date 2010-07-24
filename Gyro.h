@@ -28,7 +28,13 @@ public:
   int gyroZero[3];
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
-  Gyro(void){}
+  int sign[3];
+  
+  Gyro(void){
+    sign[ROLL] = 1;
+    sign[PITCH] = 1;
+    sign[YAW] = 1;
+  }
   
   // The following function calls must be defined in any new subclasses
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
@@ -50,11 +56,11 @@ public:
   }
     
   const int getRaw(byte axis) {
-    return gyroADC[axis];
+    return gyroADC[axis] * sign[axis];
   }
   
   const int getData(byte axis) {
-    return gyroData[axis];
+    return gyroData[axis] * sign[axis];
   }
   
   void setData(byte axis, int value) {
@@ -62,8 +68,8 @@ public:
   }
   
   const int invert(byte axis) {
-    gyroData[axis] = -gyroData[axis];
-    return gyroData[axis];
+    sign[axis] = -sign[axis];
+    return sign[axis];
   }
   
   const int getZero(byte axis) {
@@ -87,11 +93,11 @@ public:
   }
 
   const float rateDegPerSec(byte axis) {
-    return (gyroADC[axis] / 1024.0) * gyroScaleFactor;
+    return ((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor;
   }
 
   const float rateRadPerSec(byte axis) {
-    return radians((gyroADC[axis] / 1024.0) * gyroScaleFactor);
+    return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
   }
 };
 
@@ -125,7 +131,7 @@ public:
   
   void measure(void) {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
+      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
   }

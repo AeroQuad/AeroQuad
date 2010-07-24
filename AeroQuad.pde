@@ -35,8 +35,8 @@
 /****************************************************************************/
 
 // Hardware Configuration
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
@@ -53,8 +53,8 @@
 
 // Yaw Gyro Type
 // Use only one of the following definitions
-//#define IXZ // IXZ-500 Flat Yaw Gyro
-#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
+#define IXZ // IXZ-500 Flat Yaw Gyro
+//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization (experimental)
 // Will move development to Arduino Mega (needs Servo support for additional pins)
@@ -119,12 +119,14 @@
   Motors_PWM motors;
 #endif
 
+// Select angle estimation method
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
 #include "FlightAngle.h"
-//FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
+FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-FlightAngle_DCM flightAngle; // Use this for DCM
+//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
+//FlightAngle_IMU flightAngle; // Use this for IMU filter
 
 #include "DataStorage.h"
 
@@ -135,7 +137,6 @@ void setup() {
   Serial.begin(BAUD);
   pinMode (LEDPIN, OUTPUT);
   
-
   #if defined (AeroQuad_v2) || defined (AeroQuad_Wii)
     Wire.begin();
   #endif
@@ -163,6 +164,21 @@ void setup() {
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
+  
+  // Setup correct sensor orientation
+  #if defined (AeroQuad_v1) || defined (AeroQuadMega_v1)
+    gyro.invert(ROLL);
+  #endif 
+  #ifdef OriginalIMU
+    gyro.invert(PITCH);
+    gyro.invert(ROLL);
+  #endif
+  #if defined (IXZ) || defined (APM)
+    gyro.invert(YAW);
+  #endif
+  #ifdef AeroQuad_Wii
+    accel.invert(ROLL);
+  #endif
   
   flightAngle.initialize(); // defined in FlightAngle.h
     
