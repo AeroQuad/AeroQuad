@@ -94,6 +94,7 @@ int zeroGyroCount[3]={1,1,1};
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
+float gyroAngle[2] = {0,0};
 
 // Auto level setup
 int levelAdjust[2] = {0,0};
@@ -187,7 +188,7 @@ float arctan2(float y, float x); // defined in Sensors.pde
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
-float G_Dt = 0.02;    // Integration time for the gyros (DCM algorithm)
+float G_Dt = 0.02;
 
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;

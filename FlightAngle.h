@@ -403,6 +403,8 @@ public:
 // Written by Sebastian O.H. Madgwick
 // http://code.google.com/p/imumargalgorithm30042010sohm/
 
+// Do note use, experimental code
+
 class FlightAngle_IMU : public FlightAngle {
 private:
   // System constants

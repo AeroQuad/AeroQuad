@@ -126,7 +126,7 @@
 FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
 //FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
-//FlightAngle_IMU flightAngle; // Use this for IMU filter
+//FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
 
 #include "DataStorage.h"
 

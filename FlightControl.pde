@@ -37,15 +37,19 @@ void flightControl(void) {
       // updatePID(target, measured, PIDsettings);
       // measured = flight angle calculated from angle object
       // updatePID() and updatePIDangle() are defined in PID.h
-      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+      gyroAngle[ROLL] += gyro.rateDegPerSec(ROLL) * G_Dt;
+      gyroAngle[PITCH] += gyro.rateDegPerSec(PITCH) * G_Dt;
+      //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+      //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
     }
     
   // ***************************** Update Yaw ***************************
   // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
   // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
   if (headingHoldConfig == ON) {
-    currentHeading += gyro.getData(YAW) * headingScaleFactor * controldT;
+    currentHeading += gyro.getData(YAW) * headingScaleFactor * G_Dt;
     if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
         headingHold = 0;

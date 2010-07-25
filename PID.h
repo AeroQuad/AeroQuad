@@ -52,10 +52,11 @@ float updatePIDangle(float targetPosition, float currentPosition, int gyroData, 
 
   error = targetPosition - currentPosition;
   
-  PIDparameters->integratedError += error * controldT;
+  PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
-  dTerm = (((targetPosition - PIDparameters->lastPosition) * 1.0) - gyroData) * PIDparameters->D;
+  //dTerm = (((targetPosition - PIDparameters->lastPosition) * 1.0) - gyroData) * PIDparameters->D;
   //dTerm = -gyroData * PIDparameters->D;
+  dTerm = gyroData * PIDparameters->D;
   
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
