@@ -36,16 +36,16 @@
 
 // Hardware Configuration
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
-#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
 
 // Define Flight Configuration
 // Use only one of the following definitions
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 
 // 5DOF IMU Version
 // Uncomment this if you have the version of the 5DOF IMU which uses the older IDG300 or IDG500 gyros
@@ -73,6 +73,7 @@
 #include "Accel.h"
 #include "Gyro.h"
 #include "Motors.h"
+#include "FixedPoint.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
@@ -94,6 +95,7 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
+  Servo servo[10];
 #endif
 
 #ifdef APM
@@ -135,9 +137,14 @@ FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 // ************************************************************
 void setup() {
   Serial.begin(BAUD);
-  pinMode (LEDPIN, OUTPUT);
+  pinMode(LEDPIN, OUTPUT);
   
-  #if defined (AeroQuad_v2) || defined (AeroQuad_Wii)
+  #ifdef AeroQuadMega_v2
+    pinMode(LED2PIN, OUTPUT);
+    digitalWrite(LED2PIN, LOW);
+  #endif
+  
+  #if defined (AeroQuadMega_v2) || defined (AeroQuad_Wii)
     Wire.begin();
   #endif
 

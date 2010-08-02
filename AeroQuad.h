@@ -28,6 +28,10 @@
 #define ON 1
 #define OFF 0
 
+#ifdef AeroQuadMega_v2  
+  #define LED2PIN 3
+#endif
+
 // Basic axis definitions
 #define ROLL 0
 #define PITCH 1

@@ -387,20 +387,36 @@ private:
     PCMSK2 |= 0x3F;
     PCICR |= 0x1 << 2;
     
-    receiverChannel[ROLL] = 67;
-    receiverChannel[PITCH] = 65;
-    receiverChannel[YAW] = 64;
-    receiverChannel[THROTTLE] = 66;
-    receiverChannel[MODE] = 63;
-    receiverChannel[AUX] = 62;
-        
-    // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
-    receiverPin[ROLL] = 5;
-    receiverPin[PITCH] = 3;
-    receiverPin[YAW] = 2;
-    receiverPin[THROTTLE] = 4;
-    receiverPin[MODE] = 1;
-    receiverPin[AUX] = 0;
+    #ifdef AeroQuadMega_v1
+      receiverChannel[ROLL] = 67;
+      receiverChannel[PITCH] = 65;
+      receiverChannel[YAW] = 64;
+      receiverChannel[THROTTLE] = 66;
+      receiverChannel[MODE] = 63;
+      receiverChannel[AUX] = 62;
+      // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+      receiverPin[ROLL] = 5;
+      receiverPin[PITCH] = 3;
+      receiverPin[YAW] = 2;
+      receiverPin[THROTTLE] = 4;
+      receiverPin[MODE] = 1;
+      receiverPin[AUX] = 0;
+    #endif
+    #ifdef AeroQuadMega_v2
+      receiverChannel[ROLL] = 63;
+      receiverChannel[PITCH] = 64;
+      receiverChannel[YAW] = 65;
+      receiverChannel[THROTTLE] = 62;
+      receiverChannel[MODE] = 66;
+      receiverChannel[AUX] = 67;
+      // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
+      receiverPin[ROLL] = 1;
+      receiverPin[PITCH] = 2;
+      receiverPin[YAW] = 3;
+      receiverPin[THROTTLE] = 0;
+      receiverPin[MODE] = 4;
+      receiverPin[AUX] = 5;
+    #endif
 
     for (channel = ROLL; channel < LASTCHANNEL; channel++)
       pinData[receiverChannel[channel]].edge = FALLING_EDGE;

@@ -52,15 +52,15 @@ private:
   float timeConstantCF;
 
   void _initialize(byte axis) {
-    previousAngle[axis] = accel.angleDeg(axis);
-    filterTerm2[axis] = gyro.rateDegPerSec(axis);
+    previousAngle[axis] = (fixed)accel.angleDeg(axis);
+    filterTerm2[axis] = (fixed)gyro.rateDegPerSec(axis);
     timeConstantCF = timeConstant; // timeConstant is a global variable read in from EEPROM
     // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
     // Will take care of better OO implementation in future revision
   }
   
   float _calculate(byte axis, float newAngle, float newRate) {
-    filterTerm0[axis] = (newAngle - previousAngle[axis]) * timeConstant *  timeConstantCF;
+    filterTerm0[axis] = (newAngle - previousAngle[axis]) * timeConstantCF *  timeConstantCF;
     filterTerm2[axis] += filterTerm0[axis] * G_Dt;
     filterTerm1[axis] = filterTerm2[axis] + (newAngle - previousAngle[axis]) * 2 *  timeConstantCF + newRate;
     previousAngle[axis] = (filterTerm1[axis] * G_Dt) + previousAngle[axis];

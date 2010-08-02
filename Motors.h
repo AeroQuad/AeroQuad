@@ -132,12 +132,20 @@ private:
   int minCommand;
   byte pin;
   
-  #define FRONTMOTORPIN 3
-  #define REARMOTORPIN 9
-  #define RIGHTMOTORPIN 10
-  #define LEFTMOTORPIN 11
-  #define LASTMOTORPIN 12
-
+  #if defined (AeroQuad_v1) || defined (AeroQuadMega_v1)
+    #define FRONTMOTORPIN 3
+    #define REARMOTORPIN 9
+    #define RIGHTMOTORPIN 10
+    #define LEFTMOTORPIN 11
+    #define LASTMOTORPIN 12
+  #endif
+  #ifdef AeroQuadMega_v2
+    #define FRONTMOTORPIN 2
+    #define REARMOTORPIN 3
+    #define RIGHTMOTORPIN 5
+    #define LEFTMOTORPIN 6
+    #define LASTMOTORPIN 7
+  #endif  
 public:
   Motors_PWM() : Motors(){
     // Scale motor commands to analogWrite
@@ -157,7 +165,13 @@ public:
     pinMode(RIGHTMOTORPIN, OUTPUT);
     analogWrite(RIGHTMOTORPIN, 124);		
     pinMode(LEFTMOTORPIN, OUTPUT);
-    analogWrite(LEFTMOTORPIN, 124);
+    //analogWrite(6, 250);
+    //analogWrite(3, 124);
+    //analogWrite(8, 250);
+    //analogWrite(9, 124);
+    //analogWrite(10, 250);
+    //analogWrite(11, 186);
+    //analogWrite(12, 124);
   }
 
   void write (void) {
