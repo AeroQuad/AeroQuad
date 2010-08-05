@@ -48,6 +48,11 @@ void readPilotCommands() {
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = 1; 
   }
+  
+  if (receiver.getRaw(MODE) > 1500)
+    flightMode = STABLE;
+  else
+    flightMode = ACRO;
 }
 
 

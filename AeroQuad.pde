@@ -35,6 +35,7 @@
 /****************************************************************************/
 
 // Hardware Configuration
+// Select which hardware you wish to use with the AeroQuad Flight Software
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -53,7 +54,7 @@
 
 // Yaw Gyro Type
 // Use only one of the following definitions
-#define IXZ // IXZ-500 Flat Yaw Gyro
+#define IXZ // IXZ-500 Flat Yaw Gyro or ITG-3200 Triple Axis Gyro
 //#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization (experimental)
@@ -125,9 +126,9 @@
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
 #include "FlightAngle.h"
-FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
+//FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
+FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 //FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
 
 #include "DataStorage.h"
@@ -142,6 +143,8 @@ void setup() {
   #ifdef AeroQuadMega_v2
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
+    pinMode(LED3PIN, OUTPUT);
+    digitalWrite(LED3PIN, LOW);
   #endif
   
   #if defined (AeroQuadMega_v2) || defined (AeroQuad_Wii)

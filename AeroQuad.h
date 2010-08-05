@@ -30,6 +30,7 @@
 
 #ifdef AeroQuadMega_v2  
   #define LED2PIN 3
+  #define LED3PIN 31
 #endif
 
 // Basic axis definitions
@@ -98,7 +99,6 @@ int zeroGyroCount[3]={1,1,1};
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-float gyroAngle[2] = {0,0};
 
 // Auto level setup
 int levelAdjust[2] = {0,0};

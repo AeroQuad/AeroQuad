@@ -25,24 +25,21 @@ void flightControl(void) {
   // ********************* Check Flight Mode *********************
     if (flightMode == ACRO) {
       // Acrobatic Mode
-      // ************************** Update Roll/Pitch ***********************
       // updatePID(target, measured, PIDsettings);
       // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
+      // updatePID() is defined in PID.h
       motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]));
       motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]));
     }
     if (flightMode == STABLE) {
       // Stable Mode
-      // ************************** Update Roll/Pitch ***********************
-      // updatePID(target, measured, PIDsettings);
-      // measured = flight angle calculated from angle object
-      // updatePID() and updatePIDangle() are defined in PID.h
-      gyroAngle[ROLL] += gyro.rateDegPerSec(ROLL) * G_Dt;
-      gyroAngle[PITCH] += gyro.rateDegPerSec(PITCH) * G_Dt;
+      // updatePIDangle() is defined in PID.h      
+      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.gyroAngle[ROLL], &PID[LEVELROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), flightAngle.gyroAngle[PITCH], &PID[LEVELPITCH]));
       //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
       //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
-      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+      //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+      //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
     }
     
   // ***************************** Update Yaw ***************************

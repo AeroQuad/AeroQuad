@@ -159,8 +159,9 @@ class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int findZero[FINDZERO];
   int accelAddress;
-  int data[6];
+  int data[2];
   int rawData[3];
+  byte select; // use to select which axis is being read
   
 public:
   Accel_AeroQuadMega_v2() : Accel(){
@@ -180,6 +181,7 @@ public:
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
+    select = PITCH;
     
     // Check if accel is connected
     Wire.beginTransmission(accelAddress);
@@ -221,26 +223,19 @@ public:
   }
   
   void measure(void) {
+    // round robin between each axis so that I2C blocking time is low
     Wire.beginTransmission(accelAddress);
-    Wire.send(0x02);
+    if (select == ROLL) Wire.send(0x04);
+    if (select == PITCH) Wire.send(0x02);
+    if (select == ZAXIS) Wire.send(0x06);
     Wire.endTransmission();
-    Wire.requestFrom(accelAddress, 6);
-    //data[0] = Wire.receive();
-    //Wire.beginTransmission(accelAddress);
-    //Wire.send(0x03);
-    //Wire.endTransmission();
-    //Wire.requestFrom(accelAddress, 1);
-    //data[1] = Wire.receive();
-    for (byte i = 0; i < 6; i++)
-      data[i] = Wire.receive();
-    rawData[PITCH] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
-    rawData[ROLL] = ((data[3] << 8) | data[2]) >> 2;
-    rawData[ZAXIS] = ((data[5] << 8) | data[4]) >> 2;
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = (rawData[axis] - accelZero[axis]) >> 5;
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
-    }
-    //Serial.print(rawData[ROLL]);Serial.print(',');Serial.println(accelZero[ROLL]);
+    Wire.requestFrom(accelAddress, 2);
+    data[0] = Wire.receive();
+    data[1] = Wire.receive();
+    rawData[select] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
+    accelADC[select] = (rawData[select] - accelZero[select]) >> 5; // reduce ADC value
+    accelData[select] = smooth(accelADC[select], accelData[select], smoothFactor);
+    if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
 
   // Allows user to zero accelerometers on command

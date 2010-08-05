@@ -46,7 +46,7 @@ void zeroIntegralError() {
     PID[axis].integratedError = 0;
 }
 
-float updatePIDangle(float targetPosition, float currentPosition, int gyroData, struct PIDdata *PIDparameters) {
+float updatePIDangle(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
   float error;
   float dTerm;
 
@@ -55,8 +55,8 @@ float updatePIDangle(float targetPosition, float currentPosition, int gyroData, 
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   //dTerm = (((targetPosition - PIDparameters->lastPosition) * 1.0) - gyroData) * PIDparameters->D;
-  //dTerm = -gyroData * PIDparameters->D;
-  dTerm = gyroData * PIDparameters->D;
+  //dTerm = -gyroData * PIDparameters->D;  
+  dTerm = currentPosition * PIDparameters->D;
   
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }

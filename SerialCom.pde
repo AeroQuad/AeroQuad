@@ -72,7 +72,7 @@ void readSerialCommand() {
       PID[LEVELPITCH].D = readFloatSerial();
       PID[LEVELPITCH].lastPosition = 0;
       PID[LEVELPITCH].integratedError = 0;
-      PID[LEVELGYROROLL].P = readFloatSerial();
+      /*PID[LEVELGYROROLL].P = readFloatSerial();
       PID[LEVELGYROROLL].I = readFloatSerial();
       PID[LEVELGYROROLL].D = readFloatSerial();
       PID[LEVELGYROROLL].lastPosition = 0;
@@ -81,7 +81,7 @@ void readSerialCommand() {
       PID[LEVELGYROPITCH].I = readFloatSerial();
       PID[LEVELGYROPITCH].D = readFloatSerial();
       PID[LEVELGYROPITCH].lastPosition = 0;
-      PID[LEVELGYROPITCH].integratedError = 0;
+      PID[LEVELGYROPITCH].integratedError = 0;*/
       break;
     case 'G': // Receive auto level configuration
       levelLimit = readFloatSerial();
@@ -95,7 +95,7 @@ void readSerialCommand() {
       gyro.setSmoothFactor(readFloatSerial());
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
-      flightMode = readFloatSerial();
+      //flightMode = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setSmoothFactor(ROLL, readFloatSerial());
@@ -336,8 +336,8 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[LEVELPITCH].I);
     comma();
-    Serial.print(PID[LEVELPITCH].D);
-    comma();
+    Serial.println(PID[LEVELPITCH].D);
+    /*comma();
     Serial.print(PID[LEVELGYROROLL].P);
     comma();
     Serial.print(PID[LEVELGYROROLL].I);
@@ -348,7 +348,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[LEVELGYROPITCH].I);
     comma();
-    Serial.println(PID[LEVELGYROPITCH].D);
+    Serial.println(PID[LEVELGYROPITCH].D);*/
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
@@ -368,9 +368,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(accel.getSmoothFactor());
     comma();
-    Serial.print(timeConstant);
-    comma();
-    Serial.println(flightMode, DEC);
+    Serial.println(timeConstant);
+    // comma();
+    // Serial.println(flightMode, DEC);
    queryType = 'X';
     break;
   case 'N': // Send motor smoothing values

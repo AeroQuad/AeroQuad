@@ -83,7 +83,8 @@ public:
   }
   
   const int getData(byte channel) {
-    return transmitterCommand[channel];
+    // reduce sensitivity of transmitter input by xmitFactor
+    return transmitterCommand[channel] * xmitFactor;
   }
     
   const int getZero(byte channel) {
@@ -124,6 +125,13 @@ public:
   
   void setTransmitterOffset(byte channel, float value) {
     bTransmitter[channel] = value;
+  }
+  
+  const float getAngle(byte channel) {
+    // Scale 1000-2000 usecs to 0 to 90 degrees
+    // m = 0.09, b = -90
+    // reduce transmitterCommand by xmitFactor to lower sensitivity of transmitter input
+    return (0.09 * (transmitterCommand[channel] * xmitFactor)) - 90;
   }
 };
 
@@ -287,7 +295,7 @@ public:
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel])) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and 
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
@@ -443,7 +451,7 @@ private:
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel])) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and 
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
@@ -539,7 +547,7 @@ public:
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel])) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and 
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];

@@ -43,7 +43,7 @@ public:
   virtual void measure(void);
   virtual void calibrate(void);
   virtual void autoZero(void){};
-  
+
   // The following functions are common between all Gyro subclasses
   void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     gyroChannel[ROLL] = rollChannel;
@@ -154,7 +154,7 @@ public:
         findZero[i] = analogRead(gyroChannel[calAxis]);
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
-  }    
+  }
 };
 #endif
 
@@ -176,6 +176,7 @@ private:
   int gyroAddress;
   int data;
   int rawData[3];
+  byte select;  // use to select which axis is being read
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
@@ -188,6 +189,7 @@ public:
     this->_initialize(0,1,2);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
     data =  0x0;
+    select = ROLL;
     
     // Check if gyro is connected
     Wire.beginTransmission(0x69);
@@ -228,17 +230,17 @@ public:
   }
   
   void measure(void) {
+    // round robin between each axis so that I2C blocking time is low
     Wire.beginTransmission(gyroAddress);
-    Wire.send(0x1D); // request high byte
+    if (select == ROLL) Wire.send(0x1D);
+    if (select == PITCH) Wire.send(0x1F);
+    if (select == YAW) Wire.send(0x21);
     Wire.endTransmission();
-    Wire.requestFrom(gyroAddress, 6);
-    rawData[ROLL] = (Wire.receive() << 8) | Wire.receive();
-    rawData[PITCH] = (Wire.receive() << 8) | Wire.receive();
-    rawData[YAW] = (Wire.receive() << 8) | Wire.receive();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = (rawData[axis] - gyroZero[axis]) >> 3; // divide raw ADC by 8 based on experience with IXZ/IDG gyros
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
-    }
+    Wire.requestFrom(gyroAddress, 2);
+    rawData[select] = (Wire.receive() << 8) | Wire.receive();
+    gyroADC[select] = (rawData[select] - gyroZero[select]) >> 3; // reduce ADC value
+    gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
+    if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
 
   void calibrate() {

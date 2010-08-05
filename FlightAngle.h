@@ -19,22 +19,35 @@
 */
 
 // This class is responsible for calculating vehicle attitude
-
 class FlightAngle {
 public:
+  #define CF 0
+  #define KF 1
+  #define DCM 2
+  #define IMU 3
+  byte type;
   float angle[3];
+  float gyroAngle[2];
   
   FlightAngle(void) {
     angle[ROLL] = 0;
     angle[PITCH] = 0;
     angle[YAW] = 0;
+    gyroAngle[ROLL] = 0;
+    gyroAngle[PITCH] = 0;
   }
   
   virtual void initialize();
   virtual void calculate();
+  virtual float getGyroAngle(byte axis);
   
   const float getData(byte axis) {
     return angle[axis];
+  }
+  
+  const byte getType(void) {
+    // This is set in each subclass to identify which algorithm used
+    return type;
   }
 };
 
@@ -73,6 +86,7 @@ public:
     filterTerm1[ROLL] = 0;
     filterTerm0[PITCH] = 0;
     filterTerm1[PITCH] = 0;
+    type = CF;
   }
   
   void initialize(void) {
@@ -83,6 +97,10 @@ public:
   void calculate(void) {
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
+  }
+
+  float getGyroAngle(byte axis) {
+    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -132,6 +150,7 @@ public:
       P_10[axis] = 0;
       P_11[axis] = 0;
     }
+    type = KF;
   }
   
   void initialize(void) {
@@ -143,7 +162,11 @@ public:
   void calculate(void) {
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
-  }    
+  }
+  
+  float getGyroAngle(byte axis) {
+    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
+  }
 };
 
 /******************************************************/
@@ -216,7 +239,7 @@ private:
   }
   
 public:
-  FlightAngle_DCM() :FlightAngle() {
+  FlightAngle_DCM():FlightAngle() {
     for (byte i=0; i<3; i++) {
       Accel_Vector[i] = 0; //Store the acceleration in a vector
       Accel_Vector_unfiltered[i] = 0; //Store the acceleration in a vector
@@ -264,6 +287,7 @@ public:
     Gyro_Gain_X = radians(0.683);
     Gyro_Gain_Y = radians(0.683);
     Gyro_Gain_Z = radians(0.683);
+    type = DCM;
   }
   
   void initialize(void) {    
@@ -274,7 +298,10 @@ public:
     Normalize();
     Drift_correction();
     Euler_angles();
-    
+  }
+  
+  float getGyroAngle(byte axis) {
+    return degrees(Omega[axis]);
   }
   
   void Normalize(void) {
@@ -419,7 +446,7 @@ private:
     float f_1, f_2, f_3; // objective function elements
     float J_11or24, J_12or23, J_13or22, J_14or21, J_32, J_33; // objective function Jacobian elements
     float SEqHatDot_1, SEqHatDot_2, SEqHatDot_3, SEqHatDot_4; // estimated direction of the gyroscope error
-    // Axulirary variables to avoid reapeated calcualtions
+    // Axulirary variables to avoid repeated calcualtions
     float halfSEq_1 = 0.5f * SEq_1;
     float halfSEq_2 = 0.5f * SEq_2;
     float halfSEq_3 = 0.5f * SEq_3;
@@ -487,6 +514,10 @@ public:
     angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
     angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
     angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
+  }
+  
+  float getGyroAngle(byte axis) {
+    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
