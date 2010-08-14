@@ -71,9 +71,20 @@ float smoothHeading;
 #define REAR 1
 #define RIGHT 2
 #define LEFT 3
-#define LASTMOTOR 4
+#define MOTORID1 0		
+#define MOTORID2 1		
+#define MOTORID3 2		
+#define MOTORID4 3		
+#define MOTORID5 4		
+#define MOTORID6 5
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
+#if defined(plugConfig) || defined(XConfig)
+  #define LASTMOTOR 4
+#endif
+#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+  #define LASTMOTOR 6
+#endif
 byte motor;
 
 // Analog Reference Value

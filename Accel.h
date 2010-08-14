@@ -379,3 +379,58 @@ public:
   }
 };
 #endif
+
+/******************************************************/
+/************* MultiPilot Accelerometer ***************/
+/******************************************************/
+#if defined(Multipilot) || defined(MultipilotI2C)
+class Accel_Multipilot : public Accel {
+private:
+  int findZero[FINDZERO];
+  
+public:
+  Accel_Multipilot() : Accel(){
+    // Accelerometer Values
+    // Update these variables if using a different accel
+    // Output is ratiometric for ADXL 335
+    // Note: Vs is not AREF voltage
+    // If Vs = 3.6V, then output sensitivity is 360mV/g
+    // If Vs = 2V, then it's 195 mV/g
+    // Then if Vs = 3.3V, then it's 329.062 mV/g
+    // Accelerometer Values for LIS344ALH set fs to +- 2G
+    // Vdd = 3.3 Volt
+    // Zero = Vdd / 2
+    // 3300 mV / 5  (+-2G ) = 660
+    accelScaleFactor = 0.000660;
+  }
+  
+  void initialize(void) {
+    // rollChannel = 6
+    // pitchChannel = 7
+    // zAxisChannel = 5
+    this->_initialize(6, 7, 5);
+    smoothFactor = readFloat(ACCSMOOTH_ADR);
+  }
+  
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+    }
+  }
+
+  // Allows user to zero accelerometers on command
+  void calibrate(void) {
+    for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++)
+        findZero[i] = analogRead(accelChannel[calAxis]);
+      accelZero[calAxis] = findMode(findZero, FINDZERO);
+    }
+
+    accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
+    writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
+    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
+  }
+};
+#endif

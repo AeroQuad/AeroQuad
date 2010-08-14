@@ -388,3 +388,60 @@ public:
   }
 };
 #endif
+
+/******************************************************/
+/******************* Multipilot Gyro ******************/
+/******************************************************/
+#if defined(Multipilot) || defined(MultipilotI2C)
+class Gyro_Multipilot : public Gyro {
+private:
+  int findZero[FINDZERO];
+
+public:
+  Gyro_Multipilot() : Gyro() {
+    gyroFullScaleOutput = 300.0;        // ADXR610 full scale output = +/- 300 deg/sec
+    gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)
+  }
+  
+  void initialize(void) {
+    analogReference(EXTERNAL);
+    // Configure gyro auto zero pins
+    pinMode (AZPIN, OUTPUT);
+    digitalWrite(AZPIN, LOW);
+    delay(1);
+
+    // rollChannel = 1
+    // pitchChannel = 2
+    // yawChannel = 0
+    this->_initialize(1,2,0);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
+  }
+  
+  void measure(void) {
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
+    }
+  }
+
+  void calibrate() {
+    autoZero();
+    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  }
+  
+  void autoZero() {
+    digitalWrite(AZPIN, HIGH);
+    delayMicroseconds(750);
+    digitalWrite(AZPIN, LOW);
+    delay(8);
+
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++)
+        findZero[i] = analogRead(gyroChannel[calAxis]);
+      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+    }
+  }
+};
+#endif

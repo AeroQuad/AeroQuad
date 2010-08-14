@@ -22,25 +22,27 @@
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
 void flightControl(void) {
-  // ********************* Check Flight Mode *********************
-    if (flightMode == ACRO) {
-      // Acrobatic Mode
-      // updatePID(target, measured, PIDsettings);
-      // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
-      // updatePID() is defined in PID.h
-      motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]));
-      motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]));
-    }
-    if (flightMode == STABLE) {
-      // Stable Mode
-      // updatePIDangle() is defined in PID.h      
-      motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.gyroAngle[ROLL], &PID[LEVELROLL]));
-      motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), flightAngle.gyroAngle[PITCH], &PID[LEVELPITCH]));
-      //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-      //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
-      //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-      //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
-    }
+  // ********************* Check Flight Mode *********************    
+  if (flightMode == ACRO) {
+    // Acrobatic Mode
+    // updatePID(target, measured, PIDsettings);
+    // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
+    // updatePID() is defined in PID.h
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]));
+  }
+  if (flightMode == STABLE) {
+    // Stable Mode
+    // updatePIDangle() is defined in PID.h      
+    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.gyroAngle[ROLL], &PID[LEVELROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), flightAngle.gyroAngle[PITCH], &PID[LEVELPITCH]));
+    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.angle[ROLL], &PID[LEVELROLL]));
+    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.angle[PITCH], &PID[LEVELPITCH]));
+    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
+    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+  }
     
   // ***************************** Update Yaw ***************************
   // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
@@ -78,6 +80,10 @@ void flightControl(void) {
       motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
+    #endif
+    #ifdef MultipilotI2C
+      // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
+      motors.setThrottle(receiver.getData(THROTTLE));
     #endif
   }
 
@@ -206,5 +212,6 @@ void flightControl(void) {
   }
 
   // *********************** Command Motors **********************
+ if (armed == 1 && safetyCheck == 1)
   motors.write(); // Defined in Motors.h
 }

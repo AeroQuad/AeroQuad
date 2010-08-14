@@ -37,6 +37,8 @@
 // Hardware Configuration
 // Select which hardware you wish to use with the AeroQuad Flight Software
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x
+//#define Multipilot          //Multipilot board with Lys344 and ADXL 610 Gyro
+//#define MultipilotI2C       // Active Multipilot I2C and Mixertable
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
@@ -47,6 +49,8 @@
 // Use only one of the following definitions
 //#define plusConfig
 #define XConfig
+//#define HEXACOAXIAL
+//#define HEXARADIAL
 
 // 5DOF IMU Version
 // Uncomment this if you have the version of the 5DOF IMU which uses the older IDG300 or IDG500 gyros
@@ -122,6 +126,24 @@
   Motors_PWM motors;
 #endif
 
+#ifdef Multipilot
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v1 gyro;
+  Receiver_Multipilot receiver;
+  Motors_PWM motors;
+  //#define PRINT_MIXERTABLE
+  //#define TELEMETRY_DEBUG
+#endif
+
+#ifdef MultipilotI2C  
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v1 gyro;
+  Receiver_Multipilot receiver;
+  Motors_I2C motors;
+  //#define PRINT_MIXERTABLE
+  //#define TELEMETRY_DEBUG
+#endif
+
 // Select angle estimation method
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
@@ -189,7 +211,10 @@ void setup() {
   #ifdef AeroQuad_Wii
     accel.invert(ROLL);
   #endif
-  
+  #ifdef Multipilot
+    accel.invert(PITCH);
+    gyro.invert(ROLL);
+  #endif
   flightAngle.initialize(); // defined in FlightAngle.h
     
   // Camera stabilization setup

@@ -31,13 +31,31 @@ void readPilotCommands() {
       armed = 0;
       motors.commandAllMotors(MINCOMMAND);
     }    
-    // Zero sensors (left stick lower left, right stick lower right corner)
+    // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
       gyro.calibrate();
       accel.calibrate(); // defined in Accel.h
       zeroIntegralError();
       motors.pulseMotors(3);
     }   
+    // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
+    if ((receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
+      accel.calibrate(); // defined in Accel.h
+      zeroIntegralError();
+      motors.pulseMotors(3);
+      #ifdef TELEMETRY_DEBUG
+        Serial.println("ZeroG Accel");
+      #endif
+    }   
+    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
+    if ((receiver.getRaw(ROLL) < MINCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
+      gyro.calibrate();
+      zeroIntegralError();
+      motors.pulseMotors(4);
+      #ifdef TELEMETRY_DEBUG
+        Serial.println("ZeroG Gyro");
+      #endif 
+  }
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == 0 && safetyCheck == 1) {
       armed = 1;
