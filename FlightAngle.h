@@ -65,8 +65,8 @@ private:
   float timeConstantCF;
 
   void _initialize(byte axis) {
-    previousAngle[axis] = (fixed)accel.angleDeg(axis);
-    filterTerm2[axis] = (fixed)gyro.rateDegPerSec(axis);
+    previousAngle[axis] = accel.angleDeg(axis);
+    filterTerm2[axis] = gyro.rateDegPerSec(axis);
     timeConstantCF = timeConstant; // timeConstant is a global variable read in from EEPROM
     // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
     // Will take care of better OO implementation in future revision

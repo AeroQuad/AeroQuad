@@ -79,7 +79,7 @@ float smoothHeading;
 #define MOTORID6 5
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
-#if defined(plugConfig) || defined(XConfig)
+#if defined(plusConfig) || defined(XConfig)
   #define LASTMOTOR 4
 #endif
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)

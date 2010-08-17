@@ -161,7 +161,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#ifdef AeroQuadMega_v2
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 /*
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V

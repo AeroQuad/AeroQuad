@@ -141,7 +141,7 @@ private:
   int minCommand;
   byte pin;
   
-  #if defined (AeroQuad_v1) || defined (AeroQuadMega_v1) || defined (Multipliot)
+  #if defined (AeroQuad_v1) || defined (AeroQuad_v18) || defined (AeroQuadMega_v1) || defined (Multipliot)
     #define FRONTMOTORPIN 3
     #define REARMOTORPIN 9
     #define RIGHTMOTORPIN 10
@@ -174,16 +174,9 @@ public:
     pinMode(RIGHTMOTORPIN, OUTPUT);
     analogWrite(RIGHTMOTORPIN, 124);		
     pinMode(LEFTMOTORPIN, OUTPUT);
-    //analogWrite(6, 250);
-    //analogWrite(3, 124);
-    //analogWrite(8, 250);
-    //analogWrite(9, 124);
-    //analogWrite(10, 250);
-    //analogWrite(11, 186);
-    //analogWrite(12, 124);
   }
 
-  void write (void) {
+  void write(void) {
     analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
     analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
     analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
