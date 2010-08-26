@@ -34,15 +34,31 @@ void flightControl(void) {
   if (flightMode == STABLE) {
     // Stable Mode
     // updatePIDangle() is defined in PID.h      
-    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.gyroAngle[ROLL], &PID[LEVELROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), flightAngle.gyroAngle[PITCH], &PID[LEVELPITCH]));
-    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.angle[ROLL], &PID[LEVELROLL]));
-    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.angle[PITCH], &PID[LEVELPITCH]));
-    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), flightAngle.getData(ROLL), updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), -flightAngle.getData(PITCH), updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
-    //motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getData(ROLL), gyroAngle[ROLL], updatePID(0, gyro.getData(ROLL), &PID[LEVELGYROROLL]), &PID[LEVELROLL]));
-    //motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getData(PITCH), gyroAngle[PITCH], updatePID(0, gyro.getData(PITCH), &PID[LEVELGYROPITCH]), &PID[LEVELPITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), -flightAngle.getGyroAngle(YAXIS), &PID[LEVELROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(XAXIS), &PID[LEVELPITCH]));
   }
+/*
+  if (flightMode == STABLE) {
+    // Stable Mode
+    levelOff = 5;
+    levelAdjust[ROLL] = 0;
+    levelAdjust[PITCH] = 0; 
+    levelAdjust[ROLL] = updatePID(0, flightAngle.getData(ROLL), &PID[LEVELROLL]);
+    levelAdjust[PITCH] = updatePID(0, -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
+    
+    if (abs(receiver.getAngle(ROLL)) > levelOff) {
+      levelAdjust[ROLL] = 0;
+      PID[LEVELROLL].integratedError = 0;
+    }
+    if (abs(receiver.getAngle(PITCH)) > levelOff) {
+      levelAdjust[PITCH] = 0;
+      PID[LEVELPITCH].integratedError = 0;
+    }
+    
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getData(ROLL) + 1500, &PID[LEVELGYROROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getData(PITCH) + 1500, &PID[LEVELGYROPITCH]));
+  }
+*/
     
   // ***************************** Update Yaw ***************************
   // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
@@ -209,6 +225,7 @@ void flightControl(void) {
       for (motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MINCOMMAND);
     }
+    motors.write(); // Defined in Motors.h
   }
 
   // *********************** Command Motors **********************

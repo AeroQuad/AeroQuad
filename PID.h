@@ -32,9 +32,8 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
 
   error = targetPosition - currentPosition;
   
-  PIDparameters->integratedError += error;
-  if (PIDparameters->integratedError < -windupGuard) PIDparameters->integratedError = -windupGuard;
-  else if (PIDparameters->integratedError > windupGuard) PIDparameters->integratedError = windupGuard;
+  PIDparameters->integratedError += error * G_Dt;
+  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   
   dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition);
   PIDparameters->lastPosition = currentPosition;
@@ -46,17 +45,20 @@ void zeroIntegralError() {
     PID[axis].integratedError = 0;
 }
 
-float updatePIDangle(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+float updatePIDangle(float targetPosition, float currentPosition, float gyroData, struct PIDdata *PIDparameters) {
   float error;
   float dTerm;
 
   error = targetPosition - currentPosition;
+  error = constrain(error, -10, 10);
   
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
-  //dTerm = (((targetPosition - PIDparameters->lastPosition) * 1.0) - gyroData) * PIDparameters->D;
-  //dTerm = -gyroData * PIDparameters->D;  
-  dTerm = currentPosition * PIDparameters->D;
+  dTerm = (((currentPosition - PIDparameters->lastPosition) * 5.0) - gyroData) * PIDparameters->D;
+  PIDparameters->lastPosition = targetPosition;
+  
+  //Serial.print(error);comma();Serial.print(PIDparameters->integratedError);Serial.println();
   
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
+

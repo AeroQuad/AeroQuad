@@ -37,19 +37,19 @@
 // Hardware Configuration
 // Select which hardware you wish to use with the AeroQuad Flight Software
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x (<1.8)
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (<1.8)
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
 
 // Define Flight Configuration
 // Use only one of the following definitions
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -107,7 +107,7 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
-  Servo servo[10];
+  //Servo servo[10];
 #endif
 
 #ifdef APM
@@ -155,9 +155,9 @@
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
 #include "FlightAngle.h"
-FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
+//FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
+FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 //FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
 
 #include "DataStorage.h"
