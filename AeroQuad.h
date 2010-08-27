@@ -161,7 +161,7 @@ float timeConstant;
 float rateRadPerSec(byte axis);
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
-float Kp_ROLLPITCH = 0.04; //0.002; // need to add this to Configurator
+float Kp_ROLLPITCH = 0.005; //0.002; // need to add this to Configurator
 float Ki_ROLLPITCH = 0.0000005; // need to add this to Configurator
 
 // Camera stabilization variables

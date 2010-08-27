@@ -28,8 +28,8 @@ void flightControl(void) {
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     // updatePID() is defined in PID.h
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getData(ROLL) + 1500, &PID[ROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getData(PITCH) + 1500, &PID[PITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getFlightData(ROLL) + 1500, &PID[ROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
   }
   if (flightMode == STABLE) {
     // Stable Mode

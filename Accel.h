@@ -42,7 +42,8 @@ public:
     smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   virtual void measure(void);
-  virtual void calibrate(void);  
+  virtual void calibrate(void);
+  virtual const int getFlightData(byte);
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -111,13 +112,9 @@ private:
 public:
   Accel_AeroQuad_v1() : Accel(){
     // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;    
+    // If BMA180 setup for 1G
+    // Page 27 of datasheet = 0.00013g/LSB
+    accelScaleFactor = 0.00013;    
   }
   
   void initialize(void) {
@@ -135,6 +132,10 @@ public:
     }
   }
 
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+  
   // Allows user to zero accelerometers on command
   void calibrate(void) {
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
@@ -211,6 +212,14 @@ public:
     Wire.send(data[0] & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
     Wire.endTransmission();
 
+    // From page 27 of BMA180 Datasheet
+    //  1.0g = 0.13 mg/LSB
+    //  1.5g = 0.19 mg/LSB
+    //  2.0g = 0.25 mg/LSB
+    //  3.0g = 0.38 mg/LSB
+    //  4.0g = 0.50 mg/LSB
+    //  8.0g = 0.99 mg/LSB
+    // 16.0g = 1.98 mg/LSB
     Wire.beginTransmission(accelAddress);
     Wire.send(0x35); // register offset_lsb1 (bits 1-3)
     Wire.endTransmission();
@@ -233,11 +242,15 @@ public:
     data[0] = Wire.receive();
     data[1] = Wire.receive();
     rawData[select] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
-    accelADC[select] = (rawData[select] - accelZero[select]) >> 5; // reduce ADC value
+    accelADC[select] = rawData[select] - accelZero[select]; // reduce ADC value
     accelData[select] = smooth(accelADC[select], accelData[select], smoothFactor);
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
 
+  const int getFlightData(byte axis) {
+    return getRaw(axis) >> 4;
+  }
+  
   // Allows user to zero accelerometers on command
   void calibrate(void) {  
     int msb;
@@ -319,6 +332,10 @@ public:
     }
   }
 
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+  
   // Allows user to zero accelerometers on command
   void calibrate(void) {
     for(byte calAxis = 0; calAxis < ZAXIS; calAxis++) {
@@ -361,7 +378,11 @@ public:
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
   }
-
+  
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+ 
   // Allows user to zero accelerometers on command
   void calibrate(void) {
     for(byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
@@ -418,7 +439,11 @@ public:
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
   }
-
+  
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+  
   // Allows user to zero accelerometers on command
   void calibrate(void) {
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {

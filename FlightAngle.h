@@ -283,10 +283,9 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 2.93mV/ADC step => 0.8/3.33 = 0.683
-    Gyro_Gain_X = radians(0.683);
-    Gyro_Gain_Y = radians(0.683);
-    Gyro_Gain_Z = radians(0.683);
+    Gyro_Gain_X = gyro.getScaleFactor() * 0.0174532925; // convert to rad/sec
+    Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
+    Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
     type = DCM;
   }
   
@@ -383,10 +382,10 @@ public:
     Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
     Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
     
-    Accel_Vector[0]=-accel.getData(ROLL); // acc x
-    Accel_Vector[1]=accel.getData(PITCH); // acc y
-    Accel_Vector[2]=accel.getData(ZAXIS); // acc z
-    
+    Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
+    Accel_Vector[1]=accel.getFlightData(PITCH); // acc y
+    Accel_Vector[2]=accel.getFlightData(ZAXIS); // acc z
+
     // Low pass filter on accelerometer data (to filter vibrations)
     //Accel_Vector[0]=Accel_Vector[0]*0.5 + (float)read_adc(3)*0.5; // acc x
     //Accel_Vector[1]=Accel_Vector[1]*0.5 + (float)read_adc(4)*0.5; // acc y

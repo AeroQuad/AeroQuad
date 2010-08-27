@@ -43,6 +43,7 @@ public:
   virtual void measure(void);
   virtual void calibrate(void);
   virtual void autoZero(void){};
+  virtual const int getFlightData(byte);
 
   // The following functions are common between all Gyro subclasses
   void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
@@ -136,7 +137,11 @@ public:
     }
   }
 
-  void calibrate() {
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+  
+ void calibrate() {
     autoZero();
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -181,8 +186,8 @@ private:
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
     gyroAddress = 0x69;
-    gyroFullScaleOutput = 2000.0;   // IDG/IXZ500 full scale output = +/- 2000 deg/sec
-    gyroScaleFactor = 0.06103515625;       // IDG/IXZ500 sensitivity (need to double check this)
+    gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
+    gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
   }
   
   void initialize(void) {
@@ -238,9 +243,13 @@ public:
     Wire.endTransmission();
     Wire.requestFrom(gyroAddress, 2);
     rawData[select] = (Wire.receive() << 8) | Wire.receive();
-    gyroADC[select] = (rawData[select] - gyroZero[select]) >> 3; // reduce ADC value
+    gyroADC[select] = rawData[select] - gyroZero[select];
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
+  }
+
+  const int getFlightData(byte axis) {
+    return getRaw(axis) >> 3;
   }
 
   void calibrate() {
@@ -332,6 +341,10 @@ public:
     }
   }
 
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
+  }
+
   void calibrate() {
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
@@ -372,6 +385,10 @@ public:
       gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
     }
+  }
+
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
   }
 
   void calibrate() {
@@ -422,6 +439,10 @@ public:
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
+  }
+
+  const int getFlightData(byte axis) {
+    return getRaw(axis);
   }
 
   void calibrate() {

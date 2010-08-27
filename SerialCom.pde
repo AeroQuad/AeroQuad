@@ -281,13 +281,6 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(levelAdjust[ROLL]);
-    comma();
-    Serial.print(levelAdjust[PITCH]);
-    comma();
-    Serial.print(flightMode, DEC);
-    comma();
-    Serial.print(calibrateESC, DEC);
     Serial.println();
     //queryType = 'X';
     break;
@@ -426,7 +419,7 @@ void sendSerialTelemetry() {
     Serial.print(deltaTime);
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(gyro.getData(axis));
+      Serial.print(gyro.getFlightData(axis));
       comma();
     }
     Serial.print(receiver.getData(THROTTLE));
@@ -440,7 +433,7 @@ void sendSerialTelemetry() {
       comma();
     }
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      Serial.print(accel.getData(axis));
+      Serial.print(accel.getFlightData(axis));
       comma();
     }
      Serial.print(armed, BIN);
