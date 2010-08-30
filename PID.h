@@ -45,20 +45,25 @@ void zeroIntegralError() {
     PID[axis].integratedError = 0;
 }
 
-float updatePIDangle(float targetPosition, float currentPosition, float gyroData, struct PIDdata *PIDparameters) {
+// Adapted from control method by Jose Julio
+float updatePIDangle(float targetPosition, float currentPosition, float gyroData, int receiverData, struct PIDdata *PIDparameters) {
   float error;
   float dTerm;
+  float errorRollRate;
 
   error = targetPosition - currentPosition;
-  error = constrain(error, -10, 10);
+  error = constrain(error, -25, 25);
   
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
-  dTerm = (((currentPosition - PIDparameters->lastPosition) * 5.0) - gyroData) * PIDparameters->D;
-  PIDparameters->lastPosition = targetPosition;
   
-  //Serial.print(error);comma();Serial.print(PIDparameters->integratedError);Serial.println();
+ // errorRollRate = ((receiverData - 1500) >> 1) - gyroData;
+  //dTerm = -gyroData;
+  //PIDparameters->lastPosition = targetPosition;
   
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+  //Serial.print(error);comma();Serial.print(PIDparameters->integratedError);comma();Serial.print(dTerm);comma();Serial.print(errorRollRate);Serial.println();
+  //Serial.print(errorRollRate);comma();Serial.println(errorRollRate * 0.4);
+  
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + (gyroData * PIDparameters->D);// * (errorRollRate * 0.4);
 }
 

@@ -72,7 +72,7 @@ void readSerialCommand() {
       PID[LEVELPITCH].D = readFloatSerial();
       PID[LEVELPITCH].lastPosition = 0;
       PID[LEVELPITCH].integratedError = 0;
-      PID[LEVELGYROROLL].P = readFloatSerial();
+      /*PID[LEVELGYROROLL].P = readFloatSerial();
       PID[LEVELGYROROLL].I = readFloatSerial();
       PID[LEVELGYROROLL].D = readFloatSerial();
       PID[LEVELGYROROLL].lastPosition = 0;
@@ -81,7 +81,7 @@ void readSerialCommand() {
       PID[LEVELGYROPITCH].I = readFloatSerial();
       PID[LEVELGYROPITCH].D = readFloatSerial();
       PID[LEVELGYROPITCH].lastPosition = 0;
-      PID[LEVELGYROPITCH].integratedError = 0;
+      PID[LEVELGYROPITCH].integratedError = 0;*/
       break;
     case 'G': // Receive auto level configuration
       levelLimit = readFloatSerial();
@@ -281,6 +281,13 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
+    Serial.print(receiver.getAngle(ROLL));
+    comma();
+    Serial.print(flightAngle.getData(ROLL));
+    comma();
+    Serial.print(flightAngle.getGyroAngle(ROLL));
+    comma();
+    Serial.print(receiver.getRaw(ROLL));
     Serial.println();
     //queryType = 'X';
     break;
@@ -327,9 +334,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[LEVELPITCH].I);
     comma();
-    Serial.print(PID[LEVELPITCH].D);
+    Serial.println(PID[LEVELPITCH].D);
     comma();
-    Serial.print(PID[LEVELGYROROLL].P);
+    /*Serial.print(PID[LEVELGYROROLL].P);
     comma();
     Serial.print(PID[LEVELGYROROLL].I);
     comma();
@@ -339,7 +346,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[LEVELGYROPITCH].I);
     comma();
-    Serial.println(PID[LEVELGYROPITCH].D);
+    Serial.println(PID[LEVELGYROPITCH].D);*/
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values

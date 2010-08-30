@@ -34,8 +34,8 @@ void flightControl(void) {
   if (flightMode == STABLE) {
     // Stable Mode
     // updatePIDangle() is defined in PID.h      
-    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), -flightAngle.getGyroAngle(YAXIS), &PID[LEVELROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(XAXIS), &PID[LEVELPITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), flightAngle.getGyroAngle(ROLL), receiver.getRaw(ROLL), &PID[LEVELROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(PITCH), receiver.getRaw(PITCH), &PID[LEVELPITCH]));
   }
 /*
   if (flightMode == STABLE) {
@@ -80,7 +80,7 @@ void flightControl(void) {
       PID[HEADING].integratedError = 0;
     }
   }   
-  motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getData(YAW) + 1500, &PID[YAW]));
+  motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {

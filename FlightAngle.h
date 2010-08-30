@@ -300,7 +300,10 @@ public:
   }
   
   float getGyroAngle(byte axis) {
-    return degrees(Omega[axis]);
+    if (axis == ROLL)
+      return degrees(Omega[1]);
+    if (axis == PITCH)
+      return degrees(-Omega[0]);
   }
   
   void Normalize(void) {
