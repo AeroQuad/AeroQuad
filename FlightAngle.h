@@ -289,7 +289,7 @@ public:
     type = DCM;
   }
   
-  void initialize(void) {    
+  void initialize(void) { // None
   }
   
   void calculate(void) {

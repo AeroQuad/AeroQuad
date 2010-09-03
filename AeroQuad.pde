@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,36 +18,32 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-/**************************************************************************** 
+/****************************************************************************
    Before flight, select the different user options for your AeroQuad below
    Also, consult the ReadMe.mht file for additional details
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
-// Receiver Input Configuration
-// If you are using the Arduino Mega with an AeroQuad Shield v1.x, the receiver pins must be configured differently due to bug in Arduino core.
-// Put a jumper wire between the Shield and Mega as indicated below
-// For Roll (Aileron) Channel, place jumper between AQ Shield pin 2 and Mega AI13
-// For Pitch (Elevator) Channel, place jumper between AQ Shield pin 5 and Mega AI11
-// For Yaw (Rudder) Channel, place jumper between AQ Shield pin 6 and Mega AI10
-// For Throttle Channel, place jumper between AQ Shield pin 4 and Mega AI12
-// For Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
-// For Aux Channel, place jumper between AQ Shield 8 and Mega AI8
-/****************************************************************************/
 
-// Hardware Configuration
+/****************************************************************************
+ ************************* Hardware Configuration ***************************
+ ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
-//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.x (<1.8)
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
+//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.x (<1.8)
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
-//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
-//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
 
-// Define Flight Configuration
+/****************************************************************************
+ *********************** Define Flight Configuration ************************
+ ****************************************************************************/
 // Use only one of the following definitions
+
 //#define plusConfig
 #define XConfig
 //#define HEXACOAXIAL
@@ -66,12 +62,15 @@
 // Will move development to Arduino Mega (needs Servo support for additional pins)
 //#define Camera
 
-/****************************************************************************/
+/****************************************************************************
+ ********************** End of User Defiition Section ***********************
+ ****************************************************************************/
 
 #include <EEPROM.h>
 //#include <Servo.h>
 #include <Wire.h>
 #include "AeroQuad.h"
+#include "I2C.h"
 #include "PID.h"
 #include "Filter.h"
 #include "Receiver.h"
@@ -86,6 +85,9 @@
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_CompFilter flightAngle;
 #endif
 
 #ifdef AeroQuad_v18
@@ -93,6 +95,10 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_CompFilter flightAngle;
+  //FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuadMega_v1 
@@ -100,6 +106,9 @@
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuadMega_v2
@@ -107,16 +116,19 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
-  //Servo servo[10];
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef APM
   Accel_APM accel;
   Gyro_APM gyro;
-  //Altimeter_APM altimeter;
-  //Compass_APM compass;
   Receiver_APM receiver;
   Motors_APM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuad_Wii
@@ -124,6 +136,10 @@
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_CompFilter flightAngle;
+  //FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuadMega_Wii
@@ -131,6 +147,9 @@
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef Multipilot
@@ -140,6 +159,9 @@
   Motors_PWM motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef MultipilotI2C  
@@ -149,18 +171,20 @@
   Motors_I2C motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
+  #include "DataStorage.h"
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
 #endif
 
-// Select angle estimation method
+// Angle Estimation Objects
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
-#include "FlightAngle.h"
+// Insert into the appropriate #idef's above
+//#include "FlightAngle.h"
 //FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
+//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 //FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
-
-#include "DataStorage.h"
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -292,13 +316,13 @@ void loop () {
 // **************************************************************
 // ***************** Fast Transfer Of Sensor Data ***************
 // **************************************************************
-  if ((currentTime > (fastTelemetryTime + FASTTELEMETRYTIME)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
+/*  if ((currentTime > (fastTelemetryTime + FASTTELEMETRYTIME)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
     printInt(21845); // Start word of 0x5555
     for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyro.getRaw(axis));
     for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accel.getRaw(axis));
     printInt(32767); // Stop word of 0x7FFF
     fastTelemetryTime = currentTime;
-  }
+  }*/
 ////////////////////////////////
 // End of fast telemetry loop //
 ////////////////////////////////

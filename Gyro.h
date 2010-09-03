@@ -197,52 +197,22 @@ public:
     select = ROLL;
     
     // Check if gyro is connected
-    Wire.beginTransmission(0x69);
-    Wire.send(0x00);
-    Wire.endTransmission();
-    delay(50);
-    Wire.requestFrom(0x69, 1);
-    data = Wire.receive();
-    if (data != gyroAddress)
+    if (readWhoI2C(gyroAddress) != gyroAddress)
       Serial.println("Gyro not found!");
         
-    Wire.beginTransmission(gyroAddress);
-    Wire.send(0x3E);
-    Wire.send(0x80);  //send a reset to the device
-    Wire.endTransmission(); //end transmission
-    
-    Wire.beginTransmission(gyroAddress);
-    Wire.send(0x15);
-    Wire.send(0x00);   // 1kHz sample rate
-    Wire.endTransmission(); //end transmission
-
-    Wire.beginTransmission(gyroAddress);
-    Wire.send(0x16);
-    Wire.send(0x1D); // 10Hz low pass filter (0x1D)
-    Wire.endTransmission(); //end transmission
-
-    Wire.beginTransmission(gyroAddress);
-    Wire.send(0x17);
-    Wire.send(0x05);   // enable send raw values
-    Wire.endTransmission(); //end transmission
-    
-    Wire.beginTransmission(gyroAddress);
-    Wire.send(0x3E);
-    Wire.send(0x00);  //use internal oscillator
-    Wire.endTransmission(); //end transmission
-    
-    //Wire.onReceive(measureGyroData);
+    updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
+    updateRegisterI2C(gyroAddress, 0x15, 0x00); // 1kHz sample rate
+    updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
+    updateRegisterI2C(gyroAddress, 0x17, 0x05); // enable send raw values
+    updateRegisterI2C(gyroAddress, 0x3E, 0x00); // use internal oscillator    
   }
   
   void measure(void) {
     // round robin between each axis so that I2C blocking time is low
-    Wire.beginTransmission(gyroAddress);
-    if (select == ROLL) Wire.send(0x1D);
-    if (select == PITCH) Wire.send(0x1F);
-    if (select == YAW) Wire.send(0x21);
-    Wire.endTransmission();
-    Wire.requestFrom(gyroAddress, 2);
-    rawData[select] = (Wire.receive() << 8) | Wire.receive();
+    if (select == ROLL) sendByteI2C(gyroAddress, 0x1D);
+    if (select == PITCH) sendByteI2C(gyroAddress, 0x1F);
+    if (select == YAW) sendByteI2C(gyroAddress, 0x21);
+    rawData[select] = readWordI2C(gyroAddress);
     gyroADC[select] = rawData[select] - gyroZero[select];
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
@@ -255,20 +225,8 @@ public:
   void calibrate() {
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        Wire.beginTransmission(gyroAddress);
-        Wire.send((calAxis * 2) + 0x1D); // request high byte
-        Wire.endTransmission();
-        Wire.requestFrom(gyroAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};
-        data = Wire.receive();  // receive high byte (overwrites previous reading)
-        data = data << 8;    // shift high byte to be high 8 bits
-        Wire.beginTransmission(gyroAddress);
-        Wire.send((calAxis * 2) + 0x1E); // request low byte
-        Wire.endTransmission();
-        Wire.requestFrom(gyroAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};    
-        data |= Wire.receive(); // receive low byte as lower 8 bits
-        findZero[i] = data;
+        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+        findZero[i] = readWordI2C(gyroAddress);
       }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }
@@ -280,20 +238,8 @@ public:
   void autoZero() {
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        Wire.beginTransmission(gyroAddress);
-        Wire.send((calAxis * 2) + 0x1D); // request high byte
-        Wire.endTransmission();
-        Wire.requestFrom(gyroAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};
-        data = Wire.receive();  // receive high byte (overwrites previous reading)
-        data = data << 8;    // shift high byte to be high 8 bits
-        Wire.beginTransmission(gyroAddress);
-        Wire.send((calAxis * 2) + 0x1E); // request low byte
-        Wire.endTransmission();
-        Wire.requestFrom(gyroAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};    
-        data |= Wire.receive(); // receive low byte as lower 8 bits
-        findZero[i] = data;
+        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+        findZero[i] = readWordI2C(gyroAddress);
       }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }

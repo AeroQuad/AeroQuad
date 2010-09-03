@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -185,32 +185,16 @@ public:
     select = PITCH;
     
     // Check if accel is connected
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x00);
-    Wire.endTransmission();
-    delay(50);
-    Wire.requestFrom(accelAddress, 1);
-    data[0] = Wire.receive();
-    if (data[0] != 0x03) // page 52 of datasheet
+    if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
       Serial.println("Accelerometer not found!");
 
     // In datasheet, summary register map is page 21
     // Low pass filter settings is page 27
     // Range settings is page 28
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x0D);  // register ctrl_reg0
-    Wire.send(0x10);  // enable writing to control registers
-    Wire.endTransmission();
-    
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x20); // register bw_tcs (bits 4-7)
-    Wire.endTransmission();
-    Wire.requestFrom(accelAddress, 1);
-    data[0] = Wire.receive();
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x20);
-    Wire.send(data[0] & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
-    Wire.endTransmission();
+    updateRegisterI2C(accelAddress, 0x0D, 0x10); //enable writing to control registers
+    sendByteI2C(accelAddress, 0x20); // register bw_tcs (bits 4-7)
+    data[0] = readByteI2C(accelAddress); // get current register value
+    updateRegisterI2C(accelAddress, 0x20, data[0] & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
 
     // From page 27 of BMA180 Datasheet
     //  1.0g = 0.13 mg/LSB
@@ -220,28 +204,17 @@ public:
     //  4.0g = 0.50 mg/LSB
     //  8.0g = 0.99 mg/LSB
     // 16.0g = 1.98 mg/LSB
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x35); // register offset_lsb1 (bits 1-3)
-    Wire.endTransmission();
-    Wire.requestFrom(accelAddress, 1);
-    data[0] = Wire.receive();
-    Wire.beginTransmission(accelAddress);
-    Wire.send(0x35);
-    Wire.send(data[0] & ~0x0E); // set range to +/-1g (value = xxxx000x)
-    Wire.endTransmission();
+    sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
+    data[0] = readByteI2C(accelAddress);
+    updateRegisterI2C(accelAddress, 0x35, data[0] & ~0x0E); // set range to +/-1g (value = xxxx000x)
   }
   
   void measure(void) {
     // round robin between each axis so that I2C blocking time is low
-    Wire.beginTransmission(accelAddress);
-    if (select == ROLL) Wire.send(0x04);
-    if (select == PITCH) Wire.send(0x02);
-    if (select == ZAXIS) Wire.send(0x06);
-    Wire.endTransmission();
-    Wire.requestFrom(accelAddress, 2);
-    data[0] = Wire.receive();
-    data[1] = Wire.receive();
-    rawData[select] = ((data[1] << 8) | data[0]) >> 2; // last 2 bits are not part of measurement
+    if (select == ROLL) sendByteI2C(accelAddress, 0x04);
+    if (select == PITCH) sendByteI2C(accelAddress, 0x02);
+    if (select == ZAXIS) sendByteI2C(accelAddress, 0x06);
+    rawData[select] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
     accelADC[select] = rawData[select] - accelZero[select]; // reduce ADC value
     accelData[select] = smooth(accelADC[select], accelData[select], smoothFactor);
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
@@ -253,38 +226,15 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {  
-    int msb;
-    int lsb;
+    int dataAddress;
     
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
-      switch(calAxis) {
-        case ROLL:
-          msb = 0x05;
-          lsb = 0x04;
-          break;
-        case PITCH:
-          msb = 0x03;
-          lsb = 0x02;
-          break;
-        case ZAXIS:
-          msb = 0x07;
-          lsb = 0x06;
-      }
+      if (calAxis == ROLL) dataAddress = 0x04;
+      if (calAxis == PITCH) dataAddress = 0x02;
+      if (calAxis == ZAXIS) dataAddress = 0x06;
       for (int i=0; i<FINDZERO; i++) {
-        Wire.beginTransmission(accelAddress);
-        Wire.send(msb); // request high byte
-        Wire.endTransmission();
-        Wire.requestFrom(accelAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};
-        data[1] = Wire.receive();  // receive high byte (overwrites previous reading)
-        data[1] = data[1] << 8;    // shift high byte to be high 8 bits
-        Wire.beginTransmission(accelAddress);
-        Wire.send(lsb); // request low byte
-        Wire.endTransmission();
-        Wire.requestFrom(accelAddress, 1);
-        while (Wire.available() == 0) {/* wait for incoming data */};    
-        data[0] = Wire.receive(); // receive low byte as lower 8 bits
-        findZero[i] = (data[1] | data[0]) >> 2; // last two bits are not part of measurement
+        sendByteI2C(accelAddress, dataAddress);
+        findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
       }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }

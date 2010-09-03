@@ -254,11 +254,11 @@ void readSerialCommand() {
         motors.setRemoteCommand(motor, readFloatSerial());
       break;
     case 'a': // Enable/disable fast data transfer of sensor data
-      queryType = 'X'; // Stop any other telemetry streaming
+      /*queryType = 'X'; // Stop any other telemetry streaming
       if (readFloatSerial() == 1)
         fastTransfer = ON;
       else
-        fastTransfer = OFF;
+        fastTransfer = OFF;*/
       break;
     case 'b': // calibrate gyros
       gyro.calibrate();
@@ -281,7 +281,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(receiver.getAngle(ROLL));
+    /*Serial.print(receiver.getAngle(ROLL));
     comma();
     Serial.print(flightAngle.getData(ROLL));
     comma();
@@ -289,7 +289,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(receiver.getRaw(ROLL));
     Serial.println();
-    //queryType = 'X';
+    //queryType = 'X';*/
     break;
   case 'B': // Send roll and pitch gyro PID values
     Serial.print(PID[ROLL].P);
@@ -371,7 +371,7 @@ void sendSerialTelemetry() {
     // Serial.println(flightMode, DEC);
    queryType = 'X';
     break;
-  case 'N': // Send motor smoothing values
+  case 'N': // Send transmitter smoothing values
     for (axis = ROLL; axis < AUX; axis++) {
       Serial.print(receiver.getSmoothFactor(axis));
       comma();
@@ -410,7 +410,7 @@ void sendSerialTelemetry() {
     Serial.println();
     break;
   case 'R': // Send raw sensor data
-    Serial.print(analogRead(ROLLRATEPIN));
+    /*Serial.print(analogRead(ROLLRATEPIN));
     comma();
     Serial.print(analogRead(PITCHRATEPIN));
     comma();
@@ -420,7 +420,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(analogRead(PITCHACCELPIN));
     comma();
-    Serial.println(analogRead(ZACCELPIN));
+    Serial.println(analogRead(ZACCELPIN));*/
     break;
   case 'S': // Send all flight data
     Serial.print(deltaTime);
@@ -451,7 +451,7 @@ void sendSerialTelemetry() {
       Serial.println(1000);
     break;
    case 'T': // Send processed transmitter values
-    Serial.print(receiver.getXmitFactor());
+    /*Serial.print(receiver.getXmitFactor());
     comma();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       Serial.print(receiver.getData(axis));
@@ -465,7 +465,7 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(motors.getMotorAxisCommand(PITCH));
     comma();
-    Serial.println(motors.getMotorAxisCommand(YAW));
+    Serial.println(motors.getMotorAxisCommand(YAW));*/
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (channel = ROLL; channel < AUX; channel++) {
