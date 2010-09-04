@@ -34,17 +34,15 @@ void flightControl(void) {
   if (flightMode == STABLE) {
     // Stable Mode
     // updatePIDangle() is defined in PID.h      
-    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), flightAngle.getGyroAngle(ROLL), receiver.getRaw(ROLL), &PID[LEVELROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(PITCH), receiver.getRaw(PITCH), &PID[LEVELPITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), flightAngle.getGyroAngle(ROLL), &PID[LEVELROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(PITCH), &PID[LEVELPITCH]));
   }
 /*
   if (flightMode == STABLE) {
     // Stable Mode
-    levelOff = 5;
-    levelAdjust[ROLL] = 0;
-    levelAdjust[PITCH] = 0; 
-    levelAdjust[ROLL] = updatePID(0, flightAngle.getData(ROLL), &PID[LEVELROLL]);
-    levelAdjust[PITCH] = updatePID(0, -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
+    levelOff = 50;
+    levelAdjust[ROLL] = updatePID(receiver.getAngle(), flightAngle.getData(ROLL), &PID[LEVELROLL]);
+    levelAdjust[PITCH] = updatePID(receiver.getAngle(), -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
     
     if (abs(receiver.getAngle(ROLL)) > levelOff) {
       levelAdjust[ROLL] = 0;
@@ -55,8 +53,8 @@ void flightControl(void) {
       PID[LEVELPITCH].integratedError = 0;
     }
     
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getData(ROLL) + 1500, &PID[LEVELGYROROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getData(PITCH) + 1500, &PID[LEVELGYROPITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePID(levelAdjust[ROLL], gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(levelAdjust[PITCH], gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
   }
 */
     
