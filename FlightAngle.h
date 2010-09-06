@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based quadrocopter.
@@ -173,7 +173,15 @@ public:
 /*********************** DCM **************************/
 /******************************************************/
 // Written by William Premerlani
+// Modified by Jose Julio for multicopters
 // http://diydrones.com/profiles/blogs/dcm-imu-theory-first-draft
+#ifdef ArduCopter
+  float Kp_ROLLPITCH = 0.025; // need to add this to Configurator
+  float Ki_ROLLPITCH = 0.00000015; // need to add this to Configurator
+#else
+  float Kp_ROLLPITCH = 0.005; // need to add this to Configurator
+  float Ki_ROLLPITCH = 0.0000005; // need to add this to Configurator
+#endif
 class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;

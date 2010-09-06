@@ -30,12 +30,12 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors (needs debug)
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
-//#define APM                 // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable
 
@@ -44,8 +44,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -59,11 +59,11 @@
 //#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization (experimental)
-// Will move development to Arduino Mega (needs Servo support for additional pins)
+// Not yet fully tested and implemented
 //#define Camera
 
 /****************************************************************************
- ********************** End of User Defiition Section ***********************
+ ********************* End of User Definition Section ***********************
  ****************************************************************************/
 
 #include <EEPROM.h>
@@ -74,10 +74,10 @@
 #include "PID.h"
 #include "Filter.h"
 #include "Receiver.h"
+#include "DataAcquisition.h"
 #include "Accel.h"
 #include "Gyro.h"
 #include "Motors.h"
-#include "DataAcquisition.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
@@ -121,11 +121,11 @@
   FlightAngle_DCM flightAngle;
 #endif
 
-#ifdef APM
-  Accel_APM accel;
-  Gyro_APM gyro;
-  Receiver_APM receiver;
-  Motors_APM motors;
+#ifdef ArduCopter
+  Gyro_ArduCopter gyro;
+  Accel_ArduCopter accel;
+  Receiver_ArduCopter receiver;
+  Motors_ArduCopter motors;
   #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
@@ -192,8 +192,9 @@
 void setup() {
   Serial.begin(BAUD);
   pinMode(LEDPIN, OUTPUT);
+  digitalWrite(LEDPIN, LOW);
   
-  #ifdef AeroQuadMega_v2
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
@@ -205,7 +206,7 @@ void setup() {
   #endif
 
   // Read user values from EEPROM
-  readEEPROM();
+  readEEPROM(); // defined in DataStorage.h
   
   // Configure motors
   motors.initialize(); // defined in Motors.h
@@ -219,7 +220,8 @@ void setup() {
   headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
   
   // Initialize sensors
-  // If sensors have a common initialization routine, insert it into the corresponding gyro subclass
+  // If sensors have a common initialization routine
+  // insert it into the gyro class because it executes first
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
   // Calibrate sensors
@@ -236,16 +238,18 @@ void setup() {
     gyro.invert(PITCH);
     gyro.invert(ROLL);
   #endif
-  #if defined (IXZ) || defined (APM)
+  #if defined (IXZ) || defined (ArduCopter)
     gyro.invert(YAW);
   #endif
-  #ifdef AeroQuad_Wii
+  #if defined (AeroQuad_Wii) || defined (AeroQuadMega_Wii)
     accel.invert(ROLL);
+    gyro.invert(YAW);
   #endif
   #ifdef Multipilot
     accel.invert(PITCH);
     gyro.invert(ROLL);
   #endif
+  // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
     
   // Camera stabilization setup
@@ -299,31 +303,12 @@ void loop () {
     telemetryTime = currentTime;
   }
   
-// *************************************************************
-// ******************* Camera Stailization *********************
-// *************************************************************
-#ifdef Camera // Development moved to Arduino Mega
+#ifdef Camera // Experimental, not fully implemented yet
+  // Command camera stabilization servos (requires #include <servo.h>)
   if ((currentTime > (cameraTime + CAMERALOOPTIME)) && (cameraLoop == ON)) { // 50Hz
     rollCamera.write((mCamera * flightAngle.get(ROLL)) + bCamera);
     pitchCamera.write((mCamera * flightAngle.get(PITCH)) + bCamera);
     cameraTime = currentTime;
   }
 #endif
-////////////////////////
-// End of camera loop //
-////////////////////////
-
-// **************************************************************
-// ***************** Fast Transfer Of Sensor Data ***************
-// **************************************************************
-/*  if ((currentTime > (fastTelemetryTime + FASTTELEMETRYTIME)) && (fastTransfer == ON)) { // 200Hz means up to 100Hz signal can be detected by FFT
-    printInt(21845); // Start word of 0x5555
-    for (axis = ROLL; axis < LASTAXIS; axis++) printInt(gyro.getRaw(axis));
-    for (axis = ROLL; axis < LASTAXIS; axis++) printInt(accel.getRaw(axis));
-    printInt(32767); // Stop word of 0x7FFF
-    fastTelemetryTime = currentTime;
-  }*/
-////////////////////////////////
-// End of fast telemetry loop //
-////////////////////////////////
 }

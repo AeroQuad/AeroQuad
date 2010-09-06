@@ -25,7 +25,7 @@
 // SPI Communication for APM ADC
 // Code written by: Jordi Munoz and Jose Julio
 // *******************************************
-#ifdef APM
+#ifdef ArduCopter
 
 #include <inttypes.h>
 #include <avr/interrupt.h>
@@ -74,7 +74,7 @@ ISR (TIMER2_OVF_vect) {
   TCNT2 = 104;        // 400 Hz
 }
 
-void initialize_APM_ADC(void) {
+void initialize_ArduCopter_ADC(void) {
   unsigned char tmp;
   
   pinMode(ADC_CHIP_SELECT,OUTPUT);
@@ -101,7 +101,7 @@ void initialize_APM_ADC(void) {
   TIMSK2 =  _BV(TOIE2) ; // enable the overflow interrupt
 }
 
-int analogRead_APM_ADC(unsigned char ch_num) {
+int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   int result;
 
   cli();  // We stop interrupts to read the variables
@@ -119,37 +119,12 @@ int analogRead_APM_ADC(unsigned char ch_num) {
 
 // ********************************************
 // I2C Communication with Wii Sensors
-// Original code written by: Larmarche Matthieu
+// Original code written by lamarche_mathieu
+// Modifications by jihlein 
 // ********************************************
-#ifdef AeroQuad_Wii
+#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 
-//Nunchuk
-unsigned char sx;
-unsigned char sy;
-unsigned char bc;
-unsigned char bz;
-short ax;
-short ay;
-short az;
-short axm;
-short aym;
-short azm;
-
-//Wii Motion Plus
-short yaw;
-short pitch;
-short roll;
-short yawm;
-short pitchm;
-short rollm;
-
-short yaw0;
-short pitch0;
-short roll0;
-
-short ax0 = 238;
-short ay0 = 263;
-short az0 = 237;
+// I2C function calls defined in I2C.h
 
 short NWMP_acc[3];
 short NWMP_gyro[3];
@@ -158,114 +133,35 @@ void Init_Gyro_acc();
 void updateControls();
 
 void Init_Gyro_Acc(void) {
-  int i;
-
   //Init WM+ and Nunchuk
-  Wire.beginTransmission(0x53);
-  Wire.send(0xFE);
-  Wire.send(0x05);
-  Wire.endTransmission();
+  updateRegisterI2C(0x53, 0xFE, 0x05);
   delay(100);
-
-  Wire.beginTransmission(0x53);
-  Wire.send(0xF0);
-  Wire.send(0x55);
-  Wire.endTransmission();
-  delay(100);
-
-  yaw0 = 0;
-  pitch0 = 0;
-  roll0 = 0;
-
-  delay(250);
-
-  for(i=0;i<10;i++)
-  {
-    updateControls();
-    yaw0 += yaw / 10;
-    pitch0 += pitch / 10;
-    roll0 += roll / 10;
-  }
+  updateRegisterI2C(0x53, 0xF0, 0x55);
   delay(100);
 };
 
 void updateControls() {
   int i,j;
-  char wn = 0;
-  char wm = 0;
-
   unsigned char buffer[6];
 
-  for(j=0;j<2;j++)
-  {
-    Wire.beginTransmission(0x52);
-    Wire.send(0x00);
-    Wire.endTransmission();
-
+  for(j=0;j<2;j++) {
+    sendByteI2C(0x52, 0x00);
     Wire.requestFrom(0x52,6);
-    for(i = 0; i < 6; i++)
-    {
+    for(i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
-    } 
-    if (buffer[5] & 0x02)
-    { //If WiiMP
-      wm=1;
-      yaw  =((buffer[3]>>2)<<8) +  buffer[0];
-      pitch=((buffer[4]>>2)<<8) +  buffer[1];
-      roll =((buffer[5]>>2)<<8) +  buffer[2];
-
-      NWMP_gyro[0]=(roll/16);
-      NWMP_gyro[1]=(pitch/16);
-      NWMP_gyro[2]=(yaw/16);
-
-
-      yaw = yaw / 8;
-      pitch = pitch / 8;
-      roll = roll / 8;
-
-      yawm = yaw - yaw0;
-      pitchm = pitch - pitch0;
-      rollm = roll - roll0;
-
+    if (buffer[5] & 0x02) { //If WiiMP
+      NWMP_gyro[0]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
+      NWMP_gyro[1]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
+      NWMP_gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
     }
-    else
-    {//If Nunchuk
-      wn=1;
-      sx=buffer[0];
-      sy=buffer[1];
-      bc=(buffer[5]>>3)&0x01;
-      bz=(buffer[5]>>2)&0x01;
-
-      ax=(buffer[2]<<1)|((buffer[5]>>4)&0x01);
-      ay=(buffer[3]<<1)|((buffer[5]>>5)&0x01);
-
-      az=buffer[4];
-      az=az<<1;
-      az=az & 0xFFFC;
-      az=az|((buffer[5]>>6)&0x03);
-
-
-      /*
-       ax = ax / 4;
-       ay = ay / 4;
-       az = az / 4;
-       */
-
-      NWMP_acc[0]=ax;
-      NWMP_acc[1]=ay;
-      NWMP_acc[2]=az;
-
-      axm = ax - ax0;
-      aym = ay - ay0;
-      azm = az - az0;
+    else {//If Nunchuk
+      NWMP_acc[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01);  //hji
+      NWMP_acc[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01);  //hji
+      NWMP_acc[2]=buffer[4];                             //hji
+      NWMP_acc[2]=NWMP_acc[2]<<1;                        //hji
+      NWMP_acc[2]=NWMP_acc[2] & 0xFFFC;                  //hji
+      NWMP_acc[2]=NWMP_acc[2]|((buffer[5]>>6)&0x03);     //hji
     }
-  }
-
-  if ((wm==0)||(wn==0))
-  {
-    Init_Gyro_Acc();
-    delay(100);
   }
 }
-
 #endif

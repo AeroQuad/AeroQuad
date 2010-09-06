@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -105,7 +105,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
 class Gyro_AeroQuad_v1 : public Gyro {
 private:
   int findZero[FINDZERO];
@@ -248,16 +248,16 @@ public:
 #endif
 
 /******************************************************/
-/********************** APM Gyro **********************/
+/**************** ArduCopter Gyro *********************/
 /******************************************************/
-#ifdef APM
-class Gyro_APM : public Gyro {
+#ifdef ArduCopter
+class Gyro_ArduCopter : public Gyro {
 private:
   int findZero[FINDZERO];
   int rawADC;
 
 public:
-  Gyro_APM() : Gyro() {
+  Gyro_ArduCopter() : Gyro() {
     // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
     // Tested values : 
     //#define Gyro_Gain_X 0.4 //X axis Gyro gain
@@ -275,12 +275,12 @@ public:
     // pitchChannel = 2
     // yawChannel = 0
     this->_initialize(1, 2, 0);
-    initialize_APM_ADC(); // this is needed for both gyros and accels, done once in this class
+    initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
   }
   
   void measure(void) {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_APM_ADC(gyroChannel[axis]);
+      rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
         gyroADC[axis] = gyroZero[axis] - rawADC;
       gyroData[axis] = gyroADC[axis]; // no smoothing needed
@@ -294,7 +294,7 @@ public:
   void calibrate() {
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogRead_APM_ADC(gyroChannel[calAxis]);
+        findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
         delay(10);
       }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
@@ -309,7 +309,7 @@ public:
 /******************************************************/
 /********************** Wii Gyro **********************/
 /******************************************************/
-#ifdef AeroQuad_Wii
+#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Gyro_Wii : public Gyro {
 private:
   int findZero[FINDZERO];
@@ -323,14 +323,19 @@ public:
   void initialize(void) {
     Init_Gyro_Acc(); // defined in DataAquisition.h
     smoothFactor = readFloat(GYROSMOOTH_ADR);
+    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
   }
   
   void measure(void) {
     updateControls(); // defined in DataAcquisition.h
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor) ;
-    }
+    gyroADC[ROLL] = NWMP_gyro[1] - gyroZero[ROLL];
+    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor);
+    gyroADC[PITCH] = NWMP_gyro[0] - gyroZero[PITCH];
+    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor);
+    gyroADC[YAW] = NWMP_gyro[YAW] - gyroZero[YAW];
+    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor);
   }
 
   const int getFlightData(byte axis) {

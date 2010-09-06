@@ -104,7 +104,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   int findZero[FINDZERO];
@@ -248,16 +248,16 @@ public:
 #endif
 
 /******************************************************/
-/*************** APM ADC Accelerometer ****************/
+/*********** ArduCopter ADC Accelerometer *************/
 /******************************************************/
-#ifdef APM
-class Accel_APM : public Accel {
+#ifdef ArduCopter
+class Accel_ArduCopter : public Accel {
 private:
   int findZero[FINDZERO];
   int rawADC;
 
 public:
-  Accel_APM() : Accel(){
+  Accel_ArduCopter() : Accel(){
     // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
     // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
     // Tested value : 414
@@ -275,7 +275,7 @@ public:
   
   void measure(void) {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_APM_ADC(accelChannel[axis]);
+      rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         accelADC[axis] = rawADC - accelZero[axis];
       accelData[axis] = accelADC[axis]; // no smoothing needed
@@ -290,7 +290,7 @@ public:
   void calibrate(void) {
     for(byte calAxis = 0; calAxis < ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogRead_APM_ADC(accelChannel[calAxis]);
+        findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
         delay(10);
       }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
@@ -306,7 +306,7 @@ public:
 /******************************************************/
 /****************** Wii Accelerometer *****************/
 /******************************************************/
-#ifdef AeroQuad_Wii
+#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Accel_Wii : public Accel {
 private:
   int findZero[FINDZERO];
@@ -318,6 +318,9 @@ public:
   
   void initialize(void) {
     smoothFactor = readFloat(ACCSMOOTH_ADR);
+    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
+    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
+    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
   }
   
   void measure(void) {

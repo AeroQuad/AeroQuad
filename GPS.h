@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -19,8 +19,9 @@
 */
 
 /**************************************************************/
-/***************************** GPS ****************************/
+/************************** GPS *******************************/
 /**************************************************************/
+// This is experimental, it is not yet functional
 
 #ifdef GPS
 

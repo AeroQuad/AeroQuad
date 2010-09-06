@@ -29,8 +29,12 @@
 #define OFF 0
 
 #ifdef AeroQuadMega_v2  
-  #define LED2PIN 3
+  #define LED2PIN 4
   #define LED3PIN 31
+#endif
+#ifdef AeroQuad_v18
+  #define LED2PIN 12
+  #define LED3PIN 12
 #endif
 
 // Basic axis definitions
@@ -161,8 +165,6 @@ float timeConstant;
 float rateRadPerSec(byte axis);
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
-float Kp_ROLLPITCH = 0.005; //0.002; // need to add this to Configurator
-float Ki_ROLLPITCH = 0.0000005; // need to add this to Configurator
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -197,9 +199,9 @@ float arctan2(float y, float x); // defined in Sensors.pde
 #define RECEIVERLOOPTIME 100
 #define TELEMETRYLOOPTIME 100
 #define FASTTELEMETRYTIME 10
-#define AILOOPTIME 2
 #define CONTROLLOOPTIME 2
 #define CAMERALOOPTIME 20
+#define AILOOPTIME 2
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;

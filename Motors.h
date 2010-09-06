@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -138,24 +138,24 @@ public:
 /******************************************************/
 class Motors_PWM : public Motors {
 private:
-  int minCommand;
-  byte pin;
-  
-  #if defined (AeroQuad_v1) || defined (AeroQuad_v18) || defined (AeroQuadMega_v1) || defined (Multipliot)
+  #if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C) || defined(AeroQuad_Wii) || defined(ArduCopter)
     #define FRONTMOTORPIN 3
     #define REARMOTORPIN 9
     #define RIGHTMOTORPIN 10
     #define LEFTMOTORPIN 11
     #define LASTMOTORPIN 12
   #endif
-  #ifdef AeroQuadMega_v2
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
     #define FRONTMOTORPIN 2
     #define REARMOTORPIN 3
     #define RIGHTMOTORPIN 5
     #define LEFTMOTORPIN 6
     #define LASTMOTORPIN 7
   #endif  
-public:
+  int minCommand;
+  byte pin;
+  
+ public:
   Motors_PWM() : Motors(){
     // Scale motor commands to analogWrite
     // Only supports commands from 0-255 => 0 - 100% duty cycle
@@ -192,12 +192,12 @@ public:
 };
 
 /******************************************************/
-/********************* APM Motors *********************/
+/***************** ArduCopter Motors ******************/
 /******************************************************/
-#ifdef APM
-class Motors_APM : public Motors {
+#ifdef ArduCopter
+class Motors_ArduCopter : public Motors {
 public:
-  Motors_APM() : Motors() {}
+  Motors_ArduCopter() : Motors() {}
 
   void initialize(void) {
     // Init PWM Timer 1
@@ -268,6 +268,7 @@ public:
     OCR5B = _motorCommand * 2;
     OCR5C = _motorCommand * 2;
   }
+};
 #endif
 
 /*************************************************************/

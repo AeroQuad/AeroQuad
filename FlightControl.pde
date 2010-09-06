@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -33,30 +33,11 @@ void flightControl(void) {
   }
   if (flightMode == STABLE) {
     // Stable Mode
-    // updatePIDangle() is defined in PID.h      
-    motors.setMotorAxisCommand(ROLL, updatePIDangle(receiver.getAngle(ROLL), flightAngle.getData(ROLL), flightAngle.getGyroAngle(ROLL), &PID[LEVELROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePIDangle(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), flightAngle.getGyroAngle(PITCH), &PID[LEVELPITCH]));
+    levelAdjust[ROLL] = updatePID(0, flightAngle.getData(ROLL), &PID[LEVELROLL]);
+    levelAdjust[PITCH] = updatePID(0, -flightAngle.getData(PITCH), &PID[LEVELPITCH]);  
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]));
   }
-/*
-  if (flightMode == STABLE) {
-    // Stable Mode
-    levelOff = 50;
-    levelAdjust[ROLL] = updatePID(receiver.getAngle(), flightAngle.getData(ROLL), &PID[LEVELROLL]);
-    levelAdjust[PITCH] = updatePID(receiver.getAngle(), -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
-    
-    if (abs(receiver.getAngle(ROLL)) > levelOff) {
-      levelAdjust[ROLL] = 0;
-      PID[LEVELROLL].integratedError = 0;
-    }
-    if (abs(receiver.getAngle(PITCH)) > levelOff) {
-      levelAdjust[PITCH] = 0;
-      PID[LEVELPITCH].integratedError = 0;
-    }
-    
-    motors.setMotorAxisCommand(ROLL, updatePID(levelAdjust[ROLL], gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(levelAdjust[PITCH], gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
-  }
-*/
     
   // ***************************** Update Yaw ***************************
   // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer

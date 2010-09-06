@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - July 2010
+  AeroQuad v2.0 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -306,7 +306,7 @@ public:
 /******************************************************/
 /*************** AeroQuad Mega PCINT ******************/
 /******************************************************/
-#if defined (AeroQuadMega_v1) || defined (AeroQuadMega_v2)
+#if defined (AeroQuadMega_v1) || defined (AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
 
   volatile uint8_t *port_to_pcmask[] = {
     &PCMSK0,
@@ -460,9 +460,9 @@ private:
 #endif
 
 /*********************************************/
-/************** APM PPM Input ****************/
+/********** ArduCopter PPM Input *************/
 /*********************************************/
-#ifdef APM
+#ifdef ArduCopter
 
   #include <avr/interrupt.h>
   volatile unsigned int Start_Pulse = 0;
@@ -505,12 +505,12 @@ private:
     //Counter++;
   }
 
-class Receiver_APM : public Receiver {
+class Receiver_ArduCopter : public Receiver {
 private:
   int receiverPin[6];
 
 public:
-  Receiver_APM() : Receiver(){
+  Receiver_ArduCopter() : Receiver(){
     receiverPin[ROLL] = 0;
     receiverPin[PITCH] = 1;
     receiverPin[YAW] = 3;
@@ -558,7 +558,7 @@ public:
 /*************************************************/
 /*************** Multipilot PCINT ****************/
 /*************************************************/
-#if defined (Multipilot)   
+#if defined(Multipilot) || defined(MultipilotI2C)
 
 #define ROLLCH 4
 #define PITCHCH 3
@@ -596,7 +596,7 @@ public:
   void read(void) {
     uint16_t data[6]; 
 
-     if( ServoDecode.getState()!= READY_state) 
+     if(ServoDecode.getState()!= READY_state) 
       {
         for (channel = ROLL; channel < LASTCHANNEL; channel++)
         {
