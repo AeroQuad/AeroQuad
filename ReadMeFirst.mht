@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/related; boundary="----=_NextPart_01CB4D5F.0301C2B0"
+Content-Type: multipart/related; boundary="----=_NextPart_01CB4D60.044AEF10"
 
 This document is a Single File Web Page, also known as a Web Archive file.  If you are seeing this message, your browser or editor doesn't support Web Archive files.  Please download a browser that supports Web Archive, such as Windows® Internet Explorer®.
 
-------=_NextPart_01CB4D5F.0301C2B0
+------=_NextPart_01CB4D60.044AEF10
 Content-Location: file:///C:/0E9656D4/ReadMeFirst.htm
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/html; charset="us-ascii"
@@ -25,17 +25,17 @@ xmlns=3D"http://www.w3.org/TR/REC-html40">
   <o:Author>Ted Carancho</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>Ted</o:LastAuthor>
-  <o:Revision>10</o:Revision>
-  <o:TotalTime>224</o:TotalTime>
+  <o:Revision>11</o:Revision>
+  <o:TotalTime>227</o:TotalTime>
   <o:Created>2010-02-19T09:50:00Z</o:Created>
-  <o:LastSaved>2010-09-06T08:01:00Z</o:LastSaved>
+  <o:LastSaved>2010-09-06T08:08:00Z</o:LastSaved>
   <o:Pages>2</o:Pages>
-  <o:Words>1454</o:Words>
-  <o:Characters>8293</o:Characters>
+  <o:Words>1640</o:Words>
+  <o:Characters>9352</o:Characters>
   <o:Company>Carancho Engineering</o:Company>
-  <o:Lines>69</o:Lines>
-  <o:Paragraphs>19</o:Paragraphs>
-  <o:CharactersWithSpaces>9728</o:CharactersWithSpaces>
+  <o:Lines>77</o:Lines>
+  <o:Paragraphs>21</o:Paragraphs>
+  <o:CharactersWithSpaces>10971</o:CharactersWithSpaces>
   <o:Version>12.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -204,8 +204,8 @@ cent 2"/>
 cent 2"/>
   <w:LsdException Locked=3D"false" Priority=3D"73" Name=3D"Colorful Grid Ac=
 cent 2"/>
-  <w:LsdException Locked=3D"false" Priority=3D"60" Name=3D"Light Shading Acc=
-ent 3"/>
+  <w:LsdException Locked=3D"false" Priority=3D"60" Name=3D"Light Shading Ac=
+cent 3"/>
   <w:LsdException Locked=3D"false" Priority=3D"61" Name=3D"Light List Accen=
 t 3"/>
   <w:LsdException Locked=3D"false" Priority=3D"62" Name=3D"Light Grid Accen=
@@ -789,7 +789,7 @@ ul
 <meta http-equiv=3DContent-Style-Type content=3D"text/css">
 <meta name=3DCocoaVersion content=3D824.48>
 <!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext=3D"edit" spidmax=3D"11266"/>
+ <o:shapedefaults v:ext=3D"edit" spidmax=3D"12290"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext=3D"edit">
   <o:idmap v:ext=3D"edit" data=3D"1"/>
@@ -814,11 +814,12 @@ Notes (9/6/2010)<o:p></o:p></span></h2>
 <p class=3DMsoNormal>This is a major architecture change from the v1.x flig=
 ht
 software release.<span style=3D'mso-spacerun:yes'>&nbsp; </span>Major hardw=
-are
-and algorithm components are now implemented as C++ classes to allow common
-flight software support.<span style=3D'mso-spacerun:yes'>&nbsp; </span>Impr=
-oved
-Stable Mode implemented.<span style=3D'mso-spacerun:yes'>&nbsp; </span><span
+are and
+algorithm components are now implemented as C++ classes to allow common fli=
+ght
+software support.<span style=3D'mso-spacerun:yes'>&nbsp; </span>Improved St=
+able
+Mode implemented.<span style=3D'mso-spacerun:yes'>&nbsp; </span><span
 class=3DGramE>Hardware support for new v1.8 and v2.0 AeroQuad Shields using
 ITG-3200 gyros and BMA-180 accelerometers.</span><span
 style=3D'mso-spacerun:yes'>&nbsp; </span>Hardware support for <span class=
@@ -826,6 +827,91 @@ style=3D'mso-spacerun:yes'>&nbsp; </span>Hardware support for <span class=
 sensors, ArduCopter (APM and <span class=3DSpellE>Oilpan</span>) and <span
 class=3DSpellE>Multipilot</span> (all new platforms still need flight testi=
 ng).</p>
+
+<p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=3DMsoNormal>Flight software configuration support <span class=3DGr=
+amE>for
+multiple hardware</span> has changed.<span style=3D'mso-spacerun:yes'>&nbsp;
+</span>Look for the lines listed below at the start of AeroQuad.pde and
+uncomment the appropriate selection:</p>
+
+<p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=3DMsoNormal>/*****************************************************=
+***********************</p>
+
+<p class=3DMsoNormal><span
+style=3D'mso-spacerun:yes'>&nbsp;</span>************************* Hardware
+Configuration ***************************</p>
+
+<p class=3DMsoNormal><span
+style=3D'mso-spacerun:yes'>&nbsp;</span>***********************************=
+*****************************************/</p>
+
+<p class=3DMsoNormal>// Select which hardware you wish to use with the Aero=
+Quad
+Flight Software</p>
+
+<p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=3DMsoNormal>//#define AeroQuad_v1<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// <span class=3DSpellE>Arduino</span> 2009 with AeroQuad Shield v1.=
+7 and
+below</p>
+
+<p class=3DMsoNormal>#define AeroQuad_v18<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </spa=
+n>// <span
+class=3DSpellE>Arduino</span> 2009 with AeroQuad Shield v1.8</p>
+
+<p class=3DMsoNormal>//#define <span class=3DSpellE>AeroQuad_Wii</span><span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </spa=
+n>// <span
+class=3DSpellE>Arduino</span> 2009 with <span class=3DSpellE>Wii</span> Sen=
+sors</p>
+
+<p class=3DMsoNormal>//#define AeroQuadMega_v1<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp; </span>// <span class=
+=3DSpellE>Arduino</span>
+Mega with AeroQuad Shield v1.7 and below</p>
+
+<p class=3DMsoNormal>//#define AeroQuadMega_v2<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp; </span>// <span class=
+=3DSpellE>Arduino</span>
+Mega with AeroQuad Shield v2.x</p>
+
+<p class=3DMsoNormal>//#define <span class=3DSpellE>AeroQuadMega_Wii</span>=
+<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>// <span class=3DSpell=
+E>Arduino</span>
+Mega with <span class=3DSpellE>Wii</span> Sensors (needs debug)</p>
+
+<p class=3DMsoNormal>//#define ArduCopter<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;
+</span>// <span class=3DSpellE>ArduPilot</span> Mega (APM) with APM Sensor =
+Board</p>
+
+<p class=3DMsoNormal>//#define <span class=3DSpellE>Multipilot</span><span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;
+</span>// <span class=3DSpellE>Multipilot</span> board with Lys344 and ADXL=
+ 610
+Gyro</p>
+
+<p class=3DMsoNormal>//#define MultipilotI2C<span
+style=3D'mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// A=
+ctive <span
+class=3DSpellE>Multipilot</span> I2C and <span class=3DSpellE>Mixertable</s=
+pan></p>
+
+<p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=3DMsoNormal>Review the rest of the #defines also to match the uniq=
+ue
+setup of you multicopter.</p>
 
 <h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.7.1
 Release Notes (3/24/2010)<o:p></o:p></span></h2>
@@ -990,13 +1076,11 @@ gyros, please review AeroQuad.pde and uncomment the line: #define <span
 class=3DSpellE>OriginalIMU</span>.<span style=3D'mso-spacerun:yes'>&nbsp;
 </span>Failure to do so will result in unstable flight.<span
 style=3D'mso-spacerun:yes'>&nbsp; </span>When <span class=3DSpellE>Sparkfun=
-</span> updated
-the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were inverted.<span
-style=3D'mso-spacerun:yes'>&nbsp; </span>The default AeroQuad Flight Softwa=
-re
-behavior is to assume the user is using the latest <span class=3DSpellE>Spa=
-rkfun</span>
-5DOF IMU to make it easier for new users.</p>
+</span>
+updated the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were
+inverted.<span style=3D'mso-spacerun:yes'>&nbsp; </span>The default AeroQuad
+Flight Software behavior is to assume the user is using the latest <span
+class=3DSpellE>Sparkfun</span> 5DOF IMU to make it easier for new users.</p>
 
 <p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
@@ -1038,15 +1122,16 @@ t some
 drift during flight, which will cause the heading hold to eventually also
 drift.<span style=3D'mso-spacerun:yes'>&nbsp; </span>This can be alleviated=
  by
-landing the AeroQuad, disarm motor output, and then perform a manual sensor=
- calibration
-(TX left stick to the lower left, TX right stick to the lower right).<span
-style=3D'mso-spacerun:yes'>&nbsp; </span>The user will then be able to retu=
-rn to
-flight.<span style=3D'mso-spacerun:yes'>&nbsp; </span>This feature will be
-optimized during <span class=3DSpellE>Arduino</span> Mega development since=
- it is
-planned to implement heading hold with a magnetometer for that platform.</p>
+landing the AeroQuad, disarm motor output, and then perform a manual sensor
+calibration (TX left stick to the lower left, TX right stick to the lower
+right).<span style=3D'mso-spacerun:yes'>&nbsp; </span>The user will then be=
+ able
+to return to flight.<span style=3D'mso-spacerun:yes'>&nbsp; </span>This fea=
+ture
+will be optimized during <span class=3DSpellE>Arduino</span> Mega developme=
+nt
+since it is planned to implement heading hold with a magnetometer for that
+platform.</p>
 
 <p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
@@ -1122,9 +1207,8 @@ the <span class=3DGramE>code,</span> or installation of the ServoTimer2 lib=
 rary
 is necessary for this default.</p>
 
-<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.3.1=
- Release
-Notes<o:p></o:p></span></h2>
+<h2><span style=3D'mso-fareast-font-family:"Times New Roman"'>Version 1.3.1
+Release Notes<o:p></o:p></span></h2>
 
 <p class=3DMsoNormal>This version allows the user to calibrate a transmitte=
 r in
@@ -1191,8 +1275,8 @@ ures:<o:p></o:p></span></h3>
 of the
      appropriate #define statement in AeroQuad.pde.<span
      style=3D'mso-spacerun:yes'>&nbsp; </span>This was done to remove preve=
-nt confusion
-     by new users.</li>
+nt
+     confusion by new users.</li>
  <li class=3DMsoNormal style=3D'mso-list:l0 level1 lfo3;tab-stops:list .5in=
 '>If any
      critical flight parameters are zero, it is automatically filled in wit=
@@ -1266,7 +1350,7 @@ fo</a></p>
 
 </html>
 
-------=_NextPart_01CB4D5F.0301C2B0
+------=_NextPart_01CB4D60.044AEF10
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/themedata.thmx
 Content-Transfer-Encoding: base64
 Content-Type: application/vnd.ms-officetheme
@@ -1327,7 +1411,7 @@ dGhlbWUxLnhtbFBLAQItABQABgAIAAAAIQAN0ZCftgAAABsBAAAnAAAAAAAAAAAAAAAAAJsJAAB0
 aGVtZS90aGVtZS9fcmVscy90aGVtZU1hbmFnZXIueG1sLnJlbHNQSwUGAAAAAAUABQBdAQAAlgoA
 AAAA
 
-------=_NextPart_01CB4D5F.0301C2B0
+------=_NextPart_01CB4D60.044AEF10
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/colorschememapping.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml
@@ -1337,7 +1421,7 @@ Content-Type: text/xml
  bg1=3D"lt1" tx1=3D"dk1" bg2=3D"lt2" tx2=3D"dk2" accent1=3D"accent1" accent=
 2=3D"accent2" accent3=3D"accent3" accent4=3D"accent4" accent5=3D"accent5" a=
 ccent6=3D"accent6" hlink=3D"hlink" folHlink=3D"folHlink"/>
-------=_NextPart_01CB4D5F.0301C2B0
+------=_NextPart_01CB4D60.044AEF10
 Content-Location: file:///C:/0E9656D4/ReadMeFirst_files/filelist.xml
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/xml; charset="utf-8"
@@ -1348,4 +1432,4 @@ Content-Type: text/xml; charset="utf-8"
  <o:File HRef=3D"colorschememapping.xml"/>
  <o:File HRef=3D"filelist.xml"/>
 </xml>
-------=_NextPart_01CB4D5F.0301C2B0--
+------=_NextPart_01CB4D60.044AEF10--
