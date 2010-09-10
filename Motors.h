@@ -138,19 +138,18 @@ public:
 /******************************************************/
 class Motors_PWM : public Motors {
 private:
-  #if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C) || defined(AeroQuad_Wii) || defined(ArduCopter)
-    #define FRONTMOTORPIN 3
-    #define REARMOTORPIN 9
-    #define RIGHTMOTORPIN 10
-    #define LEFTMOTORPIN 11
-    #define LASTMOTORPIN 12
-  #endif
   #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
     #define FRONTMOTORPIN 2
     #define REARMOTORPIN 3
     #define RIGHTMOTORPIN 5
     #define LEFTMOTORPIN 6
     #define LASTMOTORPIN 7
+  #else
+    #define FRONTMOTORPIN 3
+    #define REARMOTORPIN 9
+    #define RIGHTMOTORPIN 10
+    #define LEFTMOTORPIN 11
+    #define LASTMOTORPIN 12
   #endif  
   int minCommand;
   byte pin;

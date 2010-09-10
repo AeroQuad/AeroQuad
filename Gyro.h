@@ -105,7 +105,6 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
 class Gyro_AeroQuad_v1 : public Gyro {
 private:
   int findZero[FINDZERO];
@@ -161,12 +160,10 @@ public:
     }
   }
 };
-#endif
 
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 /*
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V
@@ -245,7 +242,6 @@ public:
     }
   }
 };
-#endif
 
 /******************************************************/
 /**************** ArduCopter Gyro *********************/
@@ -309,7 +305,6 @@ public:
 /******************************************************/
 /********************** Wii Gyro **********************/
 /******************************************************/
-#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Gyro_Wii : public Gyro {
 private:
   int findZero[FINDZERO];
@@ -355,12 +350,10 @@ public:
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
 };
-#endif
 
 /******************************************************/
 /******************* Multipilot Gyro ******************/
 /******************************************************/
-#if defined(Multipilot) || defined(MultipilotI2C)
 class Gyro_Multipilot : public Gyro {
 private:
   int findZero[FINDZERO];
@@ -416,4 +409,4 @@ public:
     }
   }
 };
-#endif
+

@@ -138,8 +138,7 @@ public:
 /*************************************************/
 /*************** AeroQuad PCINT ******************/
 /*************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuad_Wii)
-
+#if !defined(__AVR_ATmega1280__)
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
@@ -306,8 +305,7 @@ public:
 /******************************************************/
 /*************** AeroQuad Mega PCINT ******************/
 /******************************************************/
-#if defined (AeroQuadMega_v1) || defined (AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
-
+#if defined(__AVR_ATmega1280__)
   volatile uint8_t *port_to_pcmask[] = {
     &PCMSK0,
     &PCMSK1,
@@ -463,7 +461,6 @@ private:
 /********** ArduCopter PPM Input *************/
 /*********************************************/
 #ifdef ArduCopter
-
   #include <avr/interrupt.h>
   volatile unsigned int Start_Pulse = 0;
   volatile unsigned int Stop_Pulse = 0;

@@ -246,74 +246,6 @@ private:
     }
   }
   
-public:
-  FlightAngle_DCM():FlightAngle() {
-    for (byte i=0; i<3; i++) {
-      Accel_Vector[i] = 0; //Store the acceleration in a vector
-      Accel_Vector_unfiltered[i] = 0; //Store the acceleration in a vector
-      Gyro_Vector[i] = 0;//Store the gyros rutn rate in a vector
-      Omega_Vector[i] = 0; //Corrected Gyro_Vector data
-      Omega_P[i] = 0;//Omega Proportional correction
-      Omega_I[i] = 0;//Omega Integrator
-      Omega[i] = 0;
-      errorRollPitch[i]= 0;
-      errorYaw[i]= 0;
-    }
-    DCM_Matrix[0][0] = 1;
-    DCM_Matrix[0][1] = 0;
-    DCM_Matrix[0][2] = 0;
-    DCM_Matrix[1][0] = 0;
-    DCM_Matrix[1][1] = 1;
-    DCM_Matrix[1][2] = 0;
-    DCM_Matrix[2][0] = 0;
-    DCM_Matrix[2][1] = 0;
-    DCM_Matrix[2][2] = 1;
-    Update_Matrix[0][0] = 0;
-    Update_Matrix[0][1] = 1;
-    Update_Matrix[0][2] = 2;
-    Update_Matrix[1][0] = 3;
-    Update_Matrix[1][1] = 4;
-    Update_Matrix[1][2] = 5;
-    Update_Matrix[2][0] = 6;
-    Update_Matrix[2][1] = 7;
-    Update_Matrix[2][2] = 8;
-    Temporary_Matrix[0][0] = 0;
-    Temporary_Matrix[0][1] = 0;
-    Temporary_Matrix[0][2] = 0;
-    Temporary_Matrix[1][0] = 0;
-    Temporary_Matrix[1][1] = 0;
-    Temporary_Matrix[1][2] = 0;
-    Temporary_Matrix[2][0] = 0;
-    Temporary_Matrix[2][1] = 0;
-    Temporary_Matrix[2][2] = 0;
-    
-    errorCourse = 0;
-    COGX = 0; //Course overground X axis
-    COGY = 1; //Course overground Y axis    
-    dt = 0;
-    Gyro_Gain_X = gyro.getScaleFactor() * 0.0174532925; // convert to rad/sec
-    Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
-    Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
-    type = DCM;
-  }
-  
-  void initialize(void) { // None
-  }
-  
-  void calculate(void) {
-    Matrix_update(); 
-    Normalize();
-    Drift_correction();
-    Euler_angles();
-  }
-  
-  float getGyroAngle(byte axis) {
-    if (axis == ROLL)
-      return degrees(Omega[1]);
-    if (axis == PITCH)
-      return degrees(-Omega[0]);
-  }
-  
   void Normalize(void) {
     float error=0;
     float temporary[3][3];
@@ -431,6 +363,74 @@ public:
       angle[ROLL] = degrees(asin(-DCM_Matrix[2][0]));
       angle[PITCH] = degrees(atan2(DCM_Matrix[2][1],DCM_Matrix[2][2]));
       angle[YAW] = degrees(atan2(DCM_Matrix[1][0],DCM_Matrix[0][0]));
+  } 
+  
+public:
+  FlightAngle_DCM():FlightAngle() {
+    for (byte i=0; i<3; i++) {
+      Accel_Vector[i] = 0; //Store the acceleration in a vector
+      Accel_Vector_unfiltered[i] = 0; //Store the acceleration in a vector
+      Gyro_Vector[i] = 0;//Store the gyros rutn rate in a vector
+      Omega_Vector[i] = 0; //Corrected Gyro_Vector data
+      Omega_P[i] = 0;//Omega Proportional correction
+      Omega_I[i] = 0;//Omega Integrator
+      Omega[i] = 0;
+      errorRollPitch[i]= 0;
+      errorYaw[i]= 0;
+    }
+    DCM_Matrix[0][0] = 1;
+    DCM_Matrix[0][1] = 0;
+    DCM_Matrix[0][2] = 0;
+    DCM_Matrix[1][0] = 0;
+    DCM_Matrix[1][1] = 1;
+    DCM_Matrix[1][2] = 0;
+    DCM_Matrix[2][0] = 0;
+    DCM_Matrix[2][1] = 0;
+    DCM_Matrix[2][2] = 1;
+    Update_Matrix[0][0] = 0;
+    Update_Matrix[0][1] = 1;
+    Update_Matrix[0][2] = 2;
+    Update_Matrix[1][0] = 3;
+    Update_Matrix[1][1] = 4;
+    Update_Matrix[1][2] = 5;
+    Update_Matrix[2][0] = 6;
+    Update_Matrix[2][1] = 7;
+    Update_Matrix[2][2] = 8;
+    Temporary_Matrix[0][0] = 0;
+    Temporary_Matrix[0][1] = 0;
+    Temporary_Matrix[0][2] = 0;
+    Temporary_Matrix[1][0] = 0;
+    Temporary_Matrix[1][1] = 0;
+    Temporary_Matrix[1][2] = 0;
+    Temporary_Matrix[2][0] = 0;
+    Temporary_Matrix[2][1] = 0;
+    Temporary_Matrix[2][2] = 0;
+    
+    errorCourse = 0;
+    COGX = 0; //Course overground X axis
+    COGY = 1; //Course overground Y axis    
+    dt = 0;
+    Gyro_Gain_X = gyro.getScaleFactor() * 0.0174532925; // convert to rad/sec
+    Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
+    Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
+    type = DCM;
+  }
+  
+  void initialize(void) { // None
+  }
+  
+  void calculate(void) {
+    Matrix_update(); 
+    Normalize();
+    Drift_correction();
+    Euler_angles();
+  }
+  
+  float getGyroAngle(byte axis) {
+    if (axis == ROLL)
+      return degrees(Omega[1]);
+    if (axis == PITCH)
+      return degrees(-Omega[0]);
   }
 };
 

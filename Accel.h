@@ -104,7 +104,6 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   int findZero[FINDZERO];
@@ -150,12 +149,10 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 };
-#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int findZero[FINDZERO];
@@ -245,7 +242,6 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 };
-#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -306,7 +302,6 @@ public:
 /******************************************************/
 /****************** Wii Accelerometer *****************/
 /******************************************************/
-#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Accel_Wii : public Accel {
 private:
   int findZero[FINDZERO];
@@ -352,12 +347,10 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 };
-#endif
 
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   int findZero[FINDZERO];
@@ -411,4 +404,3 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 };
-#endif

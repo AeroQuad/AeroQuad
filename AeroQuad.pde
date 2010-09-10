@@ -36,8 +36,8 @@
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
-//#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro
-//#define MultipilotI2C       // Active Multipilot I2C and Mixertable
+//#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
+//#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************

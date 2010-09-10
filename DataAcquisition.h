@@ -26,7 +26,6 @@
 // Code written by: Jordi Munoz and Jose Julio
 // *******************************************
 #ifdef ArduCopter
-
 #include <inttypes.h>
 #include <avr/interrupt.h>
 #include "WConstants.h"
@@ -114,7 +113,6 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   sei();
   return(result);
 }
-
 #endif
 
 // ********************************************
@@ -122,8 +120,6 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
 // Original code written by lamarche_mathieu
 // Modifications by jihlein 
 // ********************************************
-#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-
 // I2C function calls defined in I2C.h
 
 short NWMP_acc[3];
@@ -164,4 +160,4 @@ void updateControls() {
     }
   }
 }
-#endif
+

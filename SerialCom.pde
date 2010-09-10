@@ -400,6 +400,31 @@ void sendSerialTelemetry() {
     Serial.println("2.0");
     queryType = 'X';
     break;
+  case '#': // Send software configuration
+    // Determine which hardware is used to define max/min sensor values for Configurator plots
+    #if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
+      Serial.print('0');
+    #elif defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+      Serial.print('1');
+    #elif defined(AeroQuad_Wii)
+      Serial.print('2');
+    #elif defined(ArduCopter)
+      Serial.print('3');
+    #endif
+    comma();
+    // Determine which motor flight configuration for Configurator GUI
+    #if defined(plusConfig)
+      Serial.print('0');
+    #elif defined(XConfig)
+      Serial.print('1');
+    #elif defined(HEXACOAXIAL)
+      Serial.print('2');
+    #elif defined(HEXARADIAL)
+      Serial.print('3');
+    #endif
+    Serial.println();
+    queryType = 'X';
+    break;  
   case 'e': // Send AREF value
     Serial.println(aref);
     queryType = 'X';
