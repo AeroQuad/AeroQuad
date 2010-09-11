@@ -33,10 +33,14 @@ void flightControl(void) {
   }
   if (flightMode == STABLE) {
     // Stable Mode
-    levelAdjust[ROLL] = updatePID(0, flightAngle.getData(ROLL), &PID[LEVELROLL]);
-    levelAdjust[PITCH] = updatePID(0, -flightAngle.getData(PITCH), &PID[LEVELPITCH]);  
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]));
+    //levelAdjust[ROLL] = updatePID(receiver.getAngle(ROLL), flightAngle.getData(ROLL), &PID[LEVELROLL]);
+    //levelAdjust[PITCH] = updatePID(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
+    levelAdjust[ROLL] = (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * PID[LEVELROLL].P;
+    levelAdjust[PITCH] = (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * PID[LEVELPITCH].P;
+    PID[LEVELROLL].integratedError += (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt; // next try removing dT
+    PID[LEVELPITCH].integratedError += (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * G_Dt;
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
   }
     
   // ***************************** Update Yaw ***************************
