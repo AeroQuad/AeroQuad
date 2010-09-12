@@ -55,11 +55,11 @@ void readPilotCommands() {
       #ifdef TELEMETRY_DEBUG
         Serial.println("ZeroG Gyro");
       #endif 
-  }
+    }
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == 0 && safetyCheck == 1) {
-      armed = 1;
       zeroIntegralError();
+      armed = 1;
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
     }
@@ -67,10 +67,28 @@ void readPilotCommands() {
     if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = 1; 
   }
   
-  if (receiver.getRaw(MODE) > 1500)
+  // Get center value of roll/pitch/yaw channels when enough throttle to lift off
+  /*if (receiver.getRaw(THROTTLE) < 1300) {
+    receiver.setZero(ROLL, receiver.getRaw(ROLL));
+    receiver.setZero(PITCH, receiver.getRaw(PITCH));
+    //receiver.setZero(YAW, receiver.getRaw(YAW));
+  }*/
+  
+  // Check Mode switch for Acro or Stable
+  if (receiver.getRaw(MODE) > 1500) {
+    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+      if (flightMode == ACRO)
+        digitalWrite(LED2PIN, HIGH);
+    #endif
     flightMode = STABLE;
-  else
+ }
+  else {
+    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+      if (flightMode == STABLE)
+        digitalWrite(LED2PIN, LOW);
+    #endif
     flightMode = ACRO;
+  }
 }
 
 

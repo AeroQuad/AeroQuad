@@ -30,15 +30,28 @@ void flightControl(void) {
     // updatePID() is defined in PID.h
     motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getFlightData(ROLL) + 1500, &PID[ROLL]));
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
-  }
+    zeroIntegralError();
+ }
   if (flightMode == STABLE) {
     // Stable Mode
     //levelAdjust[ROLL] = updatePID(receiver.getAngle(ROLL), flightAngle.getData(ROLL), &PID[LEVELROLL]);
     //levelAdjust[PITCH] = updatePID(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
     levelAdjust[ROLL] = (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * PID[LEVELROLL].P;
     levelAdjust[PITCH] = (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * PID[LEVELPITCH].P;
-    PID[LEVELROLL].integratedError += (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt; // next try removing dT
-    PID[LEVELPITCH].integratedError += (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * G_Dt;
+    // Check if pilot commands are not in hover, don't auto trim
+    if ((abs(receiver.getRaw(ROLL) - receiver.getZero(ROLL)) > levelOff) || (abs(receiver.getRaw(PITCH) - receiver.getZero(PITCH)) > levelOff)) {
+      zeroIntegralError();
+      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+        digitalWrite(LED2PIN, LOW);
+      #endif
+    }
+    else {
+      PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + ((receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt), -levelLimit, levelLimit);
+      PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + ((receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * G_Dt), -levelLimit, levelLimit);
+      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+        digitalWrite(LED2PIN, HIGH);
+      #endif
+    }
     motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
   }

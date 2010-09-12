@@ -214,7 +214,7 @@ unsigned long receiverTime = 0;
 unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
 unsigned long sensorTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
-unsigned long cameraTime = 0;
+unsigned long cameraTime = 10;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
 

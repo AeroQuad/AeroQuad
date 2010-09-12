@@ -178,14 +178,18 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    /*Serial.print(receiver.getAngle(ROLL));
-    comma();
+    Serial.print(receiver.getRaw(ROLL)); Serial.print(" - "); Serial.print(receiver.getZero(ROLL)); Serial.print(" = ");
+    Serial.print(receiver.getRaw(ROLL) - receiver.getZero(ROLL));
+    Serial.println();
+     Serial.print(receiver.getRaw(PITCH)); Serial.print(" - "); Serial.print(receiver.getZero(PITCH)); Serial.print(" = ");
+    Serial.print(receiver.getRaw(ROLL) - receiver.getZero(PITCH));
+    Serial.println();
+   /*comma();
     Serial.print(flightAngle.getData(ROLL));
     comma();
     Serial.print(flightAngle.getGyroAngle(ROLL));
     comma();
     Serial.print(receiver.getRaw(ROLL));
-    Serial.println();
     //queryType = 'X';*/
     break;
   case 'B': // Send roll and pitch gyro PID values

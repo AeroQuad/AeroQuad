@@ -86,7 +86,7 @@ public:
     // reduce sensitivity of transmitter input by xmitFactor
     return transmitterCommand[channel];
   }
-    
+  
   const int getZero(byte channel) {
     return transmitterZero[channel];
   }

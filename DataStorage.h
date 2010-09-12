@@ -69,8 +69,8 @@ void initializeEEPROM(void) {
   PID[LEVELGYROPITCH].D = -15;
   windupGuard = 2000.0;
   receiver.setXmitFactor(0.60);  
-  levelLimit = 90.0;
-  levelOff = 0.0;
+  levelLimit = 500.0;
+  levelOff = 50.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   timeConstant = 7.0;   
