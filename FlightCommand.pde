@@ -68,11 +68,11 @@ void readPilotCommands() {
   }
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
-  /*if (receiver.getRaw(THROTTLE) < 1300) {
-    receiver.setZero(ROLL, receiver.getRaw(ROLL));
-    receiver.setZero(PITCH, receiver.getRaw(PITCH));
-    //receiver.setZero(YAW, receiver.getRaw(YAW));
-  }*/
+  if (receiver.getRaw(THROTTLE) < 1300) {
+    receiver.setTransmitterTrim(ROLL, receiver.getRaw(ROLL));
+    receiver.setTransmitterTrim(PITCH, receiver.getRaw(PITCH));
+    receiver.setTransmitterTrim(YAW, receiver.getRaw(YAW));
+  }
   
   // Check Mode switch for Acro or Stable
   if (receiver.getRaw(MODE) > 1500) {

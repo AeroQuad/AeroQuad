@@ -24,6 +24,7 @@ public:
   int transmitterCommand[6];
   int transmitterCommandSmooth[6];
   int transmitterZero[3];
+  int transmitterTrim[3];
   // Controls the strength of the commands sent from the transmitter
   // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
   float xmitFactor; // Read in from EEPROM
@@ -87,12 +88,24 @@ public:
     return transmitterCommand[channel];
   }
   
+  const int getTrimData(byte channel) {
+    return receiverData[channel] - transmitterTrim[channel];
+  }
+  
   const int getZero(byte channel) {
     return transmitterZero[channel];
   }
   
   void setZero(byte channel, int value) {
     transmitterZero[channel] = value;
+  }
+  
+  const int getTransmitterTrim(byte channel) {
+    return transmitterTrim[channel];
+  }
+  
+  void setTransmitterTrim(byte channel, int value) {
+    transmitterTrim[channel] = value;
   }
   
   const float getSmoothFactor(byte channel) {

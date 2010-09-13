@@ -39,7 +39,7 @@ void flightControl(void) {
     levelAdjust[ROLL] = (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * PID[LEVELROLL].P;
     levelAdjust[PITCH] = (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * PID[LEVELPITCH].P;
     // Check if pilot commands are not in hover, don't auto trim
-    if ((abs(receiver.getRaw(ROLL) - receiver.getZero(ROLL)) > levelOff) || (abs(receiver.getRaw(PITCH) - receiver.getZero(PITCH)) > levelOff)) {
+    if ((abs(receiver.getTrimData(ROLL)) > levelOff) || (abs(receiver.getTrimData(PITCH)) > levelOff)) {
       zeroIntegralError();
       #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
         digitalWrite(LED2PIN, LOW);
