@@ -46,8 +46,8 @@ void flightControl(void) {
       #endif
     }
     else {
-      PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + ((receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt), -levelLimit, levelLimit);
-      PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + ((receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * G_Dt), -levelLimit, levelLimit);
+      PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
+      PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
       #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
         digitalWrite(LED2PIN, HIGH);
       #endif
