@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - September 2010
+  AeroQuad v2.0.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -325,9 +325,9 @@ public:
   
   void measure(void) {
     updateControls(); // defined in DataAcquisition.h
-    gyroADC[ROLL] = NWMP_gyro[1] - gyroZero[ROLL];
+    gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
     gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor);
-    gyroADC[PITCH] = NWMP_gyro[0] - gyroZero[PITCH];
+    gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
     gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor);
     gyroADC[YAW] = NWMP_gyro[YAW] - gyroZero[YAW];
     gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor);

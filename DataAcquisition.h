@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - September 2010
+  AeroQuad v2.0.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -146,8 +146,8 @@ void updateControls() {
     for(i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
     if (buffer[5] & 0x02) { //If WiiMP
-      NWMP_gyro[0]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
-      NWMP_gyro[1]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
+      NWMP_gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
+      NWMP_gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
       NWMP_gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
     }
     else {//If Nunchuk

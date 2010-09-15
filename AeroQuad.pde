@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - September 2010
+  AeroQuad v2.0.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -201,7 +201,7 @@ void setup() {
     digitalWrite(LED3PIN, LOW);
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
     Wire.begin();
   #endif
 
@@ -244,6 +244,7 @@ void setup() {
   #endif
   #if defined (AeroQuad_Wii) || defined (AeroQuadMega_Wii)
     accel.invert(ROLL);
+    gyro.invert(PITCH);
     gyro.invert(YAW);
   #endif
   #ifdef Multipilot

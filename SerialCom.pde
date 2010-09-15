@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0 - September 2010
+  AeroQuad v2.0.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -410,7 +410,7 @@ void sendSerialTelemetry() {
       Serial.print('0');
     #elif defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       Serial.print('1');
-    #elif defined(AeroQuad_Wii)
+    #elif defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
       Serial.print('2');
     #elif defined(ArduCopter)
       Serial.print('3');
