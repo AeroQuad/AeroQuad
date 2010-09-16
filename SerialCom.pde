@@ -178,19 +178,13 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(receiver.getRaw(ROLL)); Serial.print(" - "); Serial.print(receiver.getZero(ROLL)); Serial.print(" = ");
-    Serial.print(receiver.getRaw(ROLL) - receiver.getZero(ROLL));
-    Serial.println();
-     Serial.print(receiver.getRaw(PITCH)); Serial.print(" - "); Serial.print(receiver.getZero(PITCH)); Serial.print(" = ");
-    Serial.print(receiver.getRaw(ROLL) - receiver.getZero(PITCH));
-    Serial.println();
    /*comma();
     Serial.print(flightAngle.getData(ROLL));
     comma();
     Serial.print(flightAngle.getGyroAngle(ROLL));
     comma();
-    Serial.print(receiver.getRaw(ROLL));
-    //queryType = 'X';*/
+    Serial.println(receiver.getRaw(ROLL));
+    queryType = 'X';*/
     break;
   case 'B': // Send roll and pitch gyro PID values
     Serial.print(PID[ROLL].P);
@@ -406,14 +400,24 @@ void sendSerialTelemetry() {
     break;
   case '#': // Send software configuration
     // Determine which hardware is used to define max/min sensor values for Configurator plots
-    #if defined(AeroQuad_v1) || defined(AeroQuadMega_v1) || defined(Multipilot) || defined(MultipilotI2C)
+    #if defined(AeroQuad_v1)
       Serial.print('0');
-    #elif defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+    #elif defined(AeroQuadMega_v1)
       Serial.print('1');
-    #elif defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+    #elif defined(AeroQuad_v18)
       Serial.print('2');
-    #elif defined(ArduCopter)
+    #elif defined(AeroQuadMega_v2)
       Serial.print('3');
+    #elif defined(AeroQuad_Wii)
+      Serial.print('4');
+    #elif defined(AeroQuadMega_Wii)
+      Serial.print('5');
+    #elif defined(ArduCopter)
+      Serial.print('6');
+    #elif defined(Multipilot)
+      Serial.print('7');
+    #elif defined(MultipilotI2C)
+      Serial.print('8');
     #endif
     comma();
     // Determine which motor flight configuration for Configurator GUI
