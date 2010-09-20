@@ -43,34 +43,34 @@ void writeFloat(float value, int address) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.0;
+  PID[ROLL].P = 1.2;
   PID[ROLL].I = 0.0;
   PID[ROLL].D = -7.0;
-  PID[PITCH].P = 1.0;
+  PID[PITCH].P = 1.2;
   PID[PITCH].I = 0.0;
   PID[PITCH].D = -7.0;
   PID[YAW].P = 3.0;
   PID[YAW].I = 0.0;
   PID[YAW].D = 0.0;
-  PID[LEVELROLL].P = 15.0;
-  PID[LEVELROLL].I = 0.0;
+  PID[LEVELROLL].P = 7.0;
+  PID[LEVELROLL].I = 20.0;
   PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 15;
-  PID[LEVELPITCH].I = 0.0;
+  PID[LEVELPITCH].P = 7.0;
+  PID[LEVELPITCH].I = 20.0;
   PID[LEVELPITCH].D = 0.0;
-  PID[HEADING].P = 3;
-  PID[HEADING].I = 0;
-  PID[HEADING].D = 0;
-  PID[LEVELGYROROLL].P = 0.6;
+  PID[HEADING].P = 3.0;
+  PID[HEADING].I = 0.0;
+  PID[HEADING].D = 0.0;
+  PID[LEVELGYROROLL].P = 1.2;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -15;
-  PID[LEVELGYROPITCH].P = 0.6;
+  PID[LEVELGYROROLL].D = -14.0;
+  PID[LEVELGYROPITCH].P = 1.2;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -15;
-  windupGuard = 2000.0;
+  PID[LEVELGYROPITCH].D = -14.0;
+  windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
   levelLimit = 500.0;
-  levelOff = 50.0;
+  levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   accel.setOneG(500);
@@ -89,7 +89,7 @@ void initializeEEPROM(void) {
   flightMode = ACRO;
   headingHoldConfig = OFF;
   minAcro = 1300;
-  aref = 3.0; // Use 2.8 if you are using an AeroQuad Shield < v1.7
+  aref = 5.0; // Use 2.8 if you are using an AeroQuad Shield < v1.7
 }
 
 void readEEPROM(void) {

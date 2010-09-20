@@ -177,7 +177,6 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(accel.getOneG()); Serial.print(" - "); Serial.print(accel.getRaw(ZAXIS)); Serial.print(" = "); Serial.println(accel.getOneG() - accel.getRaw(ZAXIS));
    /*comma();
     Serial.print(flightAngle.getData(ROLL));
     comma();
@@ -252,10 +251,7 @@ void sendSerialTelemetry() {
     Serial.println(levelOff);
     queryType = 'X';
     break;
-  case 'J': // Send flight control configuration values
-    //Serial.print(windupGuard);
-    //comma();
-    //Serial.println(receiver.getXmitFactor());
+  case 'J': // Spare
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
