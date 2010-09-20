@@ -420,8 +420,7 @@ private:
       receiverPin[THROTTLE] = 4;
       receiverPin[MODE] = 1;
       receiverPin[AUX] = 0;
-    #endif
-    #ifdef AeroQuadMega_v2
+    #else
       receiverChannel[ROLL] = 63;
       receiverChannel[PITCH] = 64;
       receiverChannel[YAW] = 65;

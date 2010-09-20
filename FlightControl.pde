@@ -22,7 +22,19 @@
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
 void flightControl(void) {
-  // ********************* Check Flight Mode *********************    
+  // If in Stable Mode and Z Axis indicates not in hover, switch to Acro Mode
+  
+  // Experiment to see if we can detect motion by looking at Z Axis
+  // If there is a change in Z Axis accel, change from Stable to Acro Mode
+  /*if (flightMode == STABLE) {
+    if ((accel.getOneG() - accel.getRaw(ZAXIS)) > 25) {
+      flightMode = ACRO;
+      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+        digitalWrite(LED2PIN, LOW);
+      #endif
+    }
+  }*/
+  
   if (flightMode == ACRO) {
     // Acrobatic Mode
     // updatePID(target, measured, PIDsettings);
@@ -32,10 +44,9 @@ void flightControl(void) {
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
     zeroIntegralError();
  }
+ 
   if (flightMode == STABLE) {
     // Stable Mode
-    //levelAdjust[ROLL] = updatePID(receiver.getAngle(ROLL), flightAngle.getData(ROLL), &PID[LEVELROLL]);
-    //levelAdjust[PITCH] = updatePID(receiver.getAngle(PITCH), -flightAngle.getData(PITCH), &PID[LEVELPITCH]);
     levelAdjust[ROLL] = (receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * PID[LEVELROLL].P;
     levelAdjust[PITCH] = (receiver.getAngle(PITCH) + flightAngle.getData(PITCH)) * PID[LEVELPITCH].P;
     // Check if pilot commands are not in hover, don't auto trim

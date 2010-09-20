@@ -102,7 +102,6 @@ void initialize_ArduCopter_ADC(void) {
 
 int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   int result;
-
   cli();  // We stop interrupts to read the variables
   if (adc_counter[ch_num]>0)
 	result = adc_value[ch_num]/adc_counter[ch_num];
@@ -112,6 +111,13 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   adc_counter[ch_num] = 0;
   sei();
   return(result);
+}
+  
+void zero_ArduCopter_ADC(void) {
+  for (byte n; n<8; n++) {
+    adc_value[n] = 0;
+    adc_counter[n] = 0;
+  }
 }
 #endif
 

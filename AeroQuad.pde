@@ -30,11 +30,11 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
-//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
@@ -88,6 +88,7 @@
   #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_CompFilter flightAngle;
+  //FlightAngle_MultiWii flightAngle;
 #endif
 
 #ifdef AeroQuad_v18
@@ -126,9 +127,9 @@
   Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #include "DataStorage.h"
 #endif
 
 #ifdef AeroQuad_Wii
@@ -183,8 +184,12 @@
 //#include "FlightAngle.h"
 //FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 //FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
+//FlightAngle_MultiWii flightAngle;
+
+// DCM gyro null values are defined in flightAngle.initalize()
+// Review those values is you add a new #define which uses FlightAngle_DCM
+//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -248,6 +253,8 @@ void setup() {
   #endif
   #ifdef ArduCopter
     gyro.invert(YAW);
+    gyro.invert(PITCH);
+    gyro.invert(ROLL);
   #endif
   #ifdef AeroQuad_Wii
     accel.invert(ROLL);
@@ -263,6 +270,7 @@ void setup() {
     accel.invert(PITCH);
     gyro.invert(ROLL);
   #endif
+  
   // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
     

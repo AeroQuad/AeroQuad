@@ -82,14 +82,13 @@ void readSerialCommand() {
       PID[LEVELGYROPITCH].D = readFloatSerial();
       PID[LEVELGYROPITCH].lastPosition = 0;
       PID[LEVELGYROPITCH].integratedError = 0;
+      windupGuard = readFloatSerial();
       break;
     case 'G': // Receive auto level configuration
       levelLimit = readFloatSerial();
       levelOff = readFloatSerial();
       break;
-    case 'I': // Receive flight control configuration
-      windupGuard = readFloatSerial();
-      receiver.setXmitFactor(readFloatSerial());
+    case 'I': // Spare
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -98,6 +97,7 @@ void readSerialCommand() {
       //flightMode = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
+      receiver.setXmitFactor(readFloatSerial());
       receiver.setSmoothFactor(ROLL, readFloatSerial());
       receiver.setSmoothFactor(PITCH, readFloatSerial());
       receiver.setSmoothFactor(YAW, readFloatSerial());
@@ -122,7 +122,6 @@ void readSerialCommand() {
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
-      flightAngle.initialize();
       break;
     case 'Y': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
@@ -178,6 +177,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
+    Serial.print(accel.getOneG()); Serial.print(" - "); Serial.print(accel.getRaw(ZAXIS)); Serial.print(" = "); Serial.println(accel.getOneG() - accel.getRaw(ZAXIS));
    /*comma();
     Serial.print(flightAngle.getData(ROLL));
     comma();
@@ -241,7 +241,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[LEVELGYROPITCH].I);
     comma();
-    Serial.println(PID[LEVELGYROPITCH].D);
+    Serial.print(PID[LEVELGYROPITCH].D);
+    comma();
+    Serial.println(windupGuard);
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
@@ -251,9 +253,9 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'J': // Send flight control configuration values
-    Serial.print(windupGuard);
-    comma();
-    Serial.println(receiver.getXmitFactor());
+    //Serial.print(windupGuard);
+    //comma();
+    //Serial.println(receiver.getXmitFactor());
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
@@ -267,6 +269,8 @@ void sendSerialTelemetry() {
    queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
+    Serial.print(receiver.getXmitFactor());
+    comma();
     for (axis = ROLL; axis < AUX; axis++) {
       Serial.print(receiver.getSmoothFactor(axis));
       comma();

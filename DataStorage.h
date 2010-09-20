@@ -73,6 +73,7 @@ void initializeEEPROM(void) {
   levelOff = 50.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
+  accel.setOneG(500);
   timeConstant = 7.0;   
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);
@@ -157,20 +158,6 @@ void readEEPROM(void) {
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
   receiver.setXmitFactor(XMITFACTOR_ADR);
-  //smoothFactor[GYRO] = readFloat(GYROSMOOTH_ADR); // Now loaded in gyro class
-  //smoothFactor[ACCEL] = readFloat(ACCSMOOTH_ADR); //  Now loaded in accel class
-  //smoothTransmitter[THROTTLE] = readFloat(THROTTLESMOOTH_ADR); // Now loaded in receiver class
-  //smoothTransmitter[ROLL] = readFloat(ROLLSMOOTH_ADR); // Now loaded in receiver class
-  //smoothTransmitter[PITCH] = readFloat(PITCHSMOOTH_ADR); // Now loaded in receiver class
-  //smoothTransmitter[YAW] = readFloat(YAWSMOOTH_ADR); // Now loaded in receiver class
-  //smoothTransmitter[MODE] = readFloat(MODESMOOTH_ADR); // Now loaded in receiver class
-  //smoothTransmitter[AUX] = readFloat(AUXSMOOTH_ADR); // Now loaded in receiver class
-  //accel.setZero(ROLL, readFloat(LEVELROLLCAL_ADR));     // Now loaded in accel class
-  //accel.setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));   // Now loaded in accel class
-  //accel.setZero(ZAXIS, readFloat(LEVELZCAL_ADR));       // Now loaded in accel class
-  //gyro.setZero(ROLL, readFloat(GYRO_ROLL_ZERO_ADR));    // Now loaded in gyro class
-  //gyro.setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));  // Now loaded in gyro class
-  //gyro.setZero(YAW, readFloat(GYRO_YAW_ZERO_ADR));      // Now loaded in gyro class
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
@@ -180,6 +167,7 @@ void readEEPROM(void) {
 }
 
 void writeEEPROM(void){
+  cli(); // Needed so that APM sensor data doesn't overflow
   writeFloat(PID[ROLL].P, PGAIN_ADR);
   writeFloat(PID[ROLL].I, IGAIN_ADR);
   writeFloat(PID[ROLL].D, DGAIN_ADR);
@@ -234,4 +222,5 @@ void writeEEPROM(void){
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(minAcro, MINACRO_ADR);
+  sei(); // Restart interrupts
 }

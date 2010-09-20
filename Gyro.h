@@ -291,7 +291,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
-        delay(10);
+        delay(1);
       }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
     }

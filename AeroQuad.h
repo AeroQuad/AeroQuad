@@ -162,9 +162,10 @@ int delta;
 
 // Flight angle variables
 float timeConstant;
-float rateRadPerSec(byte axis);
+/*float rateRadPerSec(byte axis);
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
+*/
 
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
@@ -196,7 +197,7 @@ float arctan2(float y, float x); // defined in Sensors.pde
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-#define RECEIVERLOOPTIME 100
+#define RECEIVERLOOPTIME 20
 #define TELEMETRYLOOPTIME 100
 #define FASTTELEMETRYTIME 10
 #define CONTROLLOOPTIME 2
@@ -210,7 +211,7 @@ float G_Dt = 0.02;
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
-unsigned long receiverTime = 0;
+unsigned long receiverTime = 5;
 unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
 unsigned long sensorTime = 0;
 unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
@@ -306,6 +307,7 @@ byte testSignal = LOW;
 #define LEVEL_GYRO_PITCH_DGAIN_ADR 244
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
+#define ACCEL1G_ADR 256
 
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h

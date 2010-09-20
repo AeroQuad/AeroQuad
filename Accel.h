@@ -27,6 +27,7 @@ public:
   int accelData[3];
   int accelADC[3];
   int sign[3];
+  int accelOneG;
   byte rollChannel, pitchChannel, zAxisChannel;
   Accel(void) {
     sign[ROLL] = 1;
@@ -56,6 +57,7 @@ public:
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    accelOneG = readFloat(ACCEL1G_ADR);
   }
   
   const int getRaw(byte axis) {
@@ -99,6 +101,14 @@ public:
   const float angleDeg(byte axis) {
     return degrees(angleRad(axis));
   }
+  
+  void setOneG(int value) {
+    accelOneG = value;
+  }
+  
+  const int getOneG(void) {
+    return accelOneG;
+  }
 };
 
 /******************************************************/
@@ -137,13 +147,18 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
-
+    
+    // store accel value that represents 1g
+    accelOneG = accelZero[ZAXIS];
+    // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    
+    writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
@@ -178,6 +193,7 @@ public:
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    accelOneG = readFloat(ACCEL1G_ADR);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
     select = PITCH;
     
@@ -232,11 +248,18 @@ public:
       for (int i=0; i<FINDZERO; i++) {
         sendByteI2C(accelAddress, dataAddress);
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
+        delay(1);
       }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
 
+    // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    // store accel value that represents 1g
+    measure();
+    accelOneG = getRaw(ZAXIS);
+    
+    writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
@@ -284,14 +307,20 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(byte calAxis = 0; calAxis < ZAXIS; calAxis++) {
+    for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
-        delay(10);
+        delay(1);
       }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
+
+    // store accel value that represents 1g
+    accelOneG = accelZero[ZAXIS];
+    // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    
+    writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
@@ -316,6 +345,7 @@ public:
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    accelOneG = readFloat(ACCEL1G_ADR);
   }
   
   void measure(void) {
@@ -333,7 +363,7 @@ public:
  
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+    for(byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
@@ -341,7 +371,12 @@ public:
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
     
+    // store accel value that represents 1g
+    accelOneG = accelZero[ZAXIS];
+    // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    
+    writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
@@ -392,13 +427,18 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
 
+    // store accel value that represents 1g
+    accelOneG = accelZero[ZAXIS];
+    // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    
+    writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
