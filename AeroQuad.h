@@ -127,11 +127,13 @@ float bLevelTransmitter = -135;
 // aref / 1024 = voltage per A/D bit
 // 0.002 = V / deg/sec (from gyro data sheet)
 byte headingHoldConfig;
-float headingScaleFactor;
+//float headingScaleFactor;
 float heading = 0; // measured heading from yaw gyro (process variable)
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float currentHeading = 0; // current heading the quad is set to (set point)
-float absoluteHeading;
+float absoluteHeading = 0;;
+float headingDiff = 0;
+unsigned long suppressHeadingHoldTime = 0;
 
 // Altitude Adjust
 float zAccelHover;
@@ -217,7 +219,7 @@ unsigned long controlLoopTime = 1; // offset control loop from analog input loop
 unsigned long cameraTime = 10;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
-unsigned long compassTime = 0;
+unsigned long compassTime = 25;
 
 /**************************************************************/
 /********************** Debug Parameters **********************/

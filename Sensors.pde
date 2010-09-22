@@ -55,11 +55,13 @@ void readSensors(void) {
  }*/
  
  // ********************* Read Slower Sensors *******************
- if ((currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
-   compass.measure();
-   absoluteHeading = compass.getHeading();
-   compassTime = currentTime;
- }
+ #if defined(AeroQuadMega_v2)
+   if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
+     compass.measure();
+     absoluteHeading = compass.getHeading();
+     compassTime = currentTime;
+   }
+ #endif
 
  // ****************** Calculate Absolute Angle *****************
  flightAngle.calculate(); // defined in FlightAngle.h

@@ -33,12 +33,13 @@ private:
   float magY;
   
 public: 
+  int compassAddress;
   float heading;
   int measuredMagX;
   int measuredMagY;
   int measuredMagZ;
   
-  compass(void) { 
+  Compass(void) { 
     // this is the constructor of the object and must have the same name 
     // can be used to initialize any of the variables declared above 
   }
@@ -47,16 +48,18 @@ public:
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
   virtual void initialize(void); 
-  virtual void measure(byte); 
+  virtual void measure(void); 
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
   const float getHeading(void) {
-    cosRoll = cos(flightAngle.getData(ROLL) * 0.01745329252);
-    sinRoll = sin(flightAngle.getData(ROLL) * 0.01745329252);
-    cosPitch = cos(flightAngle.getData(PITCH) * 0.01745329252);
-    sinPitch = sin(flightAngle.getData(PITCH) * 0.01745329252);
+    // Heading calculation based on code written by FabQuad
+    // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
+    cosRoll = cos(radians(flightAngle.getData(ROLL)));
+    sinRoll = sin(radians(flightAngle.getData(ROLL)));
+    cosPitch = cos(radians(flightAngle.getData(PITCH)));
+    sinPitch = sin(radians(flightAngle.getData(PITCH)));
     magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
     return degrees(atan2(-magY, magX));
@@ -66,12 +69,11 @@ public:
 // ***********************************************************************
 // ************************ Example Subclass *****************************
 // ***********************************************************************
-class Compass : public Compass_AeroQuad_v2 { 
-private:
-  int compassAddress;
+class Compass_AeroQuad_v2 : public Compass {
+// This sets up the HMC5843 from Sparkfun
 public: 
-  Compass() : Compass_AeroQuad_v2(){
-    compassAddress = 0x3D;
+  Compass_AeroQuad_v2() : Compass(){
+    compassAddress = 0x1E;
   }
 
   // ***********************************************************
@@ -80,14 +82,15 @@ public:
   void initialize(void) {
     // Should do a WhoAmI to know if mag is present
     updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
+    delay(100);
   }
   
   void measure(void) {
-    sendByteI2c(compassAddress, 0x03);
+    sendByteI2C(compassAddress, 0x03);
     Wire.requestFrom(compassAddress, 6);
-    measuredMagY = (Wire.receive() << 8) | Wire.receive();
     measuredMagX = (Wire.receive() << 8) | Wire.receive();
-    MeasuredMagZ = (Wire.receive() << 8) | Wire.receive();
-    Wire.endTransmittion();
+    measuredMagY = (Wire.receive() << 8) | Wire.receive();
+    measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+    Wire.endTransmission();
   }
 };

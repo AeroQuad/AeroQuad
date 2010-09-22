@@ -68,23 +68,33 @@ void flightControl(void) {
   }
     
   // ***************************** Update Yaw ***************************
-  // Note: gyro tends to drift over time, this will be better implemented when determining heading with magnetometer
-  // Current method of calculating heading with gyro does not give an absolute heading, but rather is just used relatively to get a number to lock heading when no yaw input applied
+  // Heading hold method using magnetometer from code by FabQuad
+  // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
-    currentHeading += gyro.getData(YAW) * headingScaleFactor * G_Dt;
+    currentHeading = gyro.getHeading();
+    if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
+    if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
+    headingDiff = absoluteHeading - currentHeading;
+    if (headingDiff > 180) headingDiff = headingDiff - 360;  // choose CCW because more nearby than CW
+    if (headingDiff < -180) headingDiff = 360 + headingDiff; // choose CW because more nearby than CCW
+    currentHeading = currentHeading + headingDiff * 0.003;  // the correction of the gyro yaw
+
     if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
-        headingHold = 0;
+        suppressHeadingHoldTime = currentTime;
+      }
+      if ((currentTime - suppressHeadingHoldTime) < 2000) {  // suppress HeadingHold up to 2 seconds after commanding yaw
         heading = currentHeading;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
       }
       else // no yaw input, calculate current heading vs. desired heading heading hold
         headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
     }
     else {
-      heading = 0;
-      currentHeading = 0;
-      headingHold = 0;
-      PID[HEADING].integratedError = 0;
+        heading = currentHeading;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
     }
   }   
   motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getFlightData(YAW) + 1500, &PID[YAW]));

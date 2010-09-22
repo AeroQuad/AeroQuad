@@ -29,11 +29,13 @@ public:
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
+  float currentHeading;
   
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = 1;
+    currentHeading = 0;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -99,6 +101,11 @@ public:
 
   const float rateRadPerSec(byte axis) {
     return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
+  }
+  
+  const float getHeading(void) {
+    currentHeading += getData(YAW) * gyroScaleFactor * G_Dt;
+    return currentHeading;
   }
 };
 

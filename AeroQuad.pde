@@ -221,22 +221,26 @@ void setup() {
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON)
     receiver.initialize(); // defined in Received.h
-     
-  // Heading hold
-  // aref is read in from EEPROM and originates from Configurator
-  headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
-  
+       
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
+  
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
+  // Heading hold
+  // aref is read in from EEPROM and originates from Configurator
+  //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
+  #if defined(AeroQuadMega_v2)
+    compass.initialize();
+  #endif
+
   // Setup correct sensor orientation
   #ifdef AeroQuad_v1
     gyro.invert(PITCH);
