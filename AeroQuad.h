@@ -131,6 +131,7 @@ float headingScaleFactor;
 float heading = 0; // measured heading from yaw gyro (process variable)
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float currentHeading = 0; // current heading the quad is set to (set point)
+float absoluteHeading;
 
 // Altitude Adjust
 float zAccelHover;
@@ -191,9 +192,6 @@ byte armed = 0;
 byte safetyCheck = 0;
 byte update = 0;
 
-int findMode(int *data, int arraySize); // defined in Sensors.pde
-float arctan2(float y, float x); // defined in Sensors.pde
-
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
@@ -203,6 +201,7 @@ float arctan2(float y, float x); // defined in Sensors.pde
 #define CONTROLLOOPTIME 2
 #define CAMERALOOPTIME 20
 #define AILOOPTIME 2
+#define COMPASSLOOPTIME 100
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
@@ -218,6 +217,7 @@ unsigned long controlLoopTime = 1; // offset control loop from analog input loop
 unsigned long cameraTime = 10;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
+unsigned long compassTime = 0;
 
 /**************************************************************/
 /********************** Debug Parameters **********************/
@@ -309,6 +309,8 @@ byte testSignal = LOW;
 #define MINACRO_ADR 252
 #define ACCEL1G_ADR 256
 
+int findMode(int *data, int arraySize); // defined in Sensors.pde
+float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h
 void readEEPROM(void); // defined in DataStorage.h

@@ -120,6 +120,8 @@
   #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #include "Compass.h"
+  Compass_AeroQuad_v2 compass;
 #endif
 
 #ifdef ArduCopter

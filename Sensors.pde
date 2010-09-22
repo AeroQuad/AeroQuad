@@ -21,7 +21,7 @@
 // Sensors.pde is responsible for taking on board sensor measuremens of the AeroQuad
 
 void readSensors(void) {
-  // *********************** Read Sensors **********************
+  // *********************** Read Critical Sensors **********************
   // Apply low pass filter to sensor values and center around zero
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
@@ -53,6 +53,13 @@ void readSensors(void) {
      accelAge[axis]=0;
    }
  }*/
+ 
+ // ********************* Read Slower Sensors *******************
+ if ((currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
+   compass.measure();
+   absoluteHeading = compass.getHeading();
+   compassTime = currentTime;
+ }
 
  // ****************** Calculate Absolute Angle *****************
  flightAngle.calculate(); // defined in FlightAngle.h
