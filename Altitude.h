@@ -27,7 +27,7 @@ class Altitude {
 private: 
   
 public:
-  float altitude;
+  int altitude;
   Altitude (void) { 
     altitude = 0;
   }
@@ -41,7 +41,7 @@ public:
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData(void) {
+  const int getData(void) {
     return altitude;
   }
 };
@@ -56,16 +56,18 @@ private:
   unsigned int ac1, ac2, ac3;
   unsigned int ac4, ac5, ac6;
   unsigned int b1, b2, mb, mc, md;
-  unsigned byte oss;
+  byte oss;
   long pressure, groundPressure;
   int temperature, groundTemperature;
-  int groundAltitude;
+  int altitudeAddress, groundAltitude;
+  long rawPressure, rawTemperature;
+  byte count;
   
   long readRawPressure(void) {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(oss<<6));
     sendByteI2C(altitudeAddress, 0xF6);
-    Wire.requestFrom(altitudeAddress);
-    return (Wire.available() << 16) | (Wire.available() << 8) | (Wire.available() << (8-oss));
+    Wire.requestFrom(altitudeAddress, 3);
+    return (Wire.available() << 16) | (Wire.available() << 8) | (Wire.available() >> (8-oss));
   }
 
   long readRawTemperature(void) {
@@ -80,9 +82,10 @@ public:
     oss = 3;
     pressure = 0;
     groundPressure = 0;
-    temperature = 0
+    temperature = 0;
     groundTemperature = 0;
     groundAltitude = 0;
+    count = 0;
   }
 
   // ***********************************************************
@@ -106,11 +109,15 @@ public:
     delay(100);
     
     // measure initial ground pressure (multiple samples)
-    for (int i=0; i < 100; i++) {
+    for (int i=0; i < 20; i++) {
       measure();
       groundTemperature = smooth(temperature, groundTemperature, 0.5);
+      //Serial.print(groundTemperature);comma();
       groundPressure = smooth(pressure, groundPressure, 0.5);
+      //Serial.print(groundPressure);comma();
       groundAltitude = smooth(altitude, groundAltitude, 0.5);
+      //Serial.println(groundAltitude);
+      delay(30);
     }
   }
   
@@ -118,10 +125,18 @@ public:
     long x1, x2, x3, b3, b5, b6, p, tmp;
     unsigned long b4, b7;
     
+    if (count == 0) {
+      rawTemperature = readRawTemperature();
+      count++;
+    }
+    else if (count == 4)
+      count = 0;
+    rawPressure = readRawPressure();
+    
     // See Datasheet page 13 for these formulas
     // Based also on Jee Labs BMP085 example code. Thanks for sharing.
     // Temperature calculations
-    x1 = ((long)readRawTemperature() - ac6) * ac5 >> 15;
+    x1 = ((long)rawTemperature - ac6) * ac5 >> 15;
     x2 = ((long) mc << 11) / (x1 + md);
     b5 = x1 + x2;
     temperature = (b5 + 8) >> 4;
@@ -138,7 +153,7 @@ public:
     x2 = (b1 * (b6 * b6 >> 12)) >> 16;
     x3 = ((x1 + x2) + 2) >> 2;
     b4 = (ac4 * (uint32_t) (x3 + 32768)) >> 15;
-    b7 = ((uint32_t) readRawPressure() - b3) * (50000 >> oss);
+    b7 = ((long)rawPressure - b3) * (50000 >> oss);
     p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
     
     x1 = (p >> 8) * (p >> 8);
@@ -150,11 +165,19 @@ public:
   }
   
   // For debug purposes
-  const long getRawPressure(void) {
-    return readRawPressure();
+  const long getPressure(void) {
+    return pressure;
   }
 
   // For debug purposes
+  const long getTemperature(void) {
+    return temperature;
+  }
+  
+  const long getRawPressure(void) {
+    return readRawPressure();
+  }
+  
   const long getRawTemperature(void) {
     return readRawTemperature();
   }

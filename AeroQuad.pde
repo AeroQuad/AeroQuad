@@ -122,6 +122,8 @@
   FlightAngle_DCM flightAngle;
   #include "Compass.h"
   Compass_AeroQuad_v2 compass;
+  #include "Altitude.h"
+  Altitude_AeroQuad_v2 altitude;
 #endif
 
 #ifdef ArduCopter
@@ -239,6 +241,7 @@ void setup() {
   //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
   #if defined(AeroQuadMega_v2)
     compass.initialize();
+    altitude.initialize();
   #endif
 
   // Setup correct sensor orientation

@@ -141,6 +141,8 @@ int throttleAdjust;
 int throttleAdjustGain = 10; // Look to make this a command setting
 int minThrottleAdjust = -200;
 int maxThrottleAdjust = 200;
+int currentAltitude;
+long pressure, temperature;
 
 // Receiver variables
 #define TIMEOUT 25000
@@ -204,6 +206,7 @@ byte update = 0;
 #define CAMERALOOPTIME 20
 #define AILOOPTIME 2
 #define COMPASSLOOPTIME 100
+#define ALTITUDELOOPTIME 30
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;
@@ -220,6 +223,7 @@ unsigned long cameraTime = 10;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
 unsigned long compassTime = 25;
+unsigned long altitudeTime = 0;
 
 /**************************************************************/
 /********************** Debug Parameters **********************/

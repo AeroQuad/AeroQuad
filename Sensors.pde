@@ -61,6 +61,11 @@ void readSensors(void) {
      absoluteHeading = compass.getHeading();
      compassTime = currentTime;
    }
+   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 33Hz
+     altitude.measure();
+     currentAltitude = altitude.getData();
+     altitudeTime = currentTime;
+   }
  #endif
 
  // ****************** Calculate Absolute Angle *****************
