@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.0.1 - September 2010
+  AeroQuad v2.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -67,7 +67,7 @@ public:
 };
 
 // ***********************************************************************
-// ************************ Example Subclass *****************************
+// ************************ HMC5843 Subclass *****************************
 // ***********************************************************************
 class Compass_AeroQuad_v2 : public Compass {
 // This sets up the HMC5843 from Sparkfun
