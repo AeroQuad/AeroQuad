@@ -61,13 +61,15 @@ void readSensors(void) {
      absoluteHeading = compass.getHeading();
      compassTime = currentTime;
    }
-   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 33Hz
+ #endif
+ #if defined(AeroQuadMega_v2) || defined(ArduCopter)
+   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 37Hz
      altitude.measure();
-     currentAltitude = altitude.getData();
+     currentAltitude = smooth(altitude.getData(), currentAltitude, 0.2); // filter noise from altitude
      altitudeTime = currentTime;
    }
  #endif
-
+  
  // ****************** Calculate Absolute Angle *****************
  flightAngle.calculate(); // defined in FlightAngle.h
 }

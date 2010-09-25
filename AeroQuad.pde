@@ -134,6 +134,8 @@
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
   #include "DataStorage.h"
+  #include "Altitude.h"
+  Altitude_AeroQuad_v2 altitude;
 #endif
 
 #ifdef AeroQuad_Wii
@@ -243,7 +245,10 @@ void setup() {
     compass.initialize();
     altitude.initialize();
   #endif
-
+  #if defined(ArduCopter)
+    altitude.initialize();
+  #endif
+  
   // Setup correct sensor orientation
   #ifdef AeroQuad_v1
     gyro.invert(PITCH);

@@ -177,7 +177,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(currentAltitude);comma();Serial.print(altitude.getPressure());comma();Serial.print(altitude.getTemperature());
+    Serial.print(currentAltitude);
     //comma();
     Serial.println();
     //queryType = 'X';
@@ -313,10 +313,7 @@ void sendSerialTelemetry() {
     Serial.print(analogRead(PITCHACCELPIN));
     comma();
     Serial.println(analogRead(ZACCELPIN));*/
-    Serial.print(altitude.getRawPressure());
-    comma();
-    Serial.println(altitude.getRawTemperature());
-    queryType = 'X';
+    //queryType = 'X';
     break;
   case 'S': // Send all flight data
     Serial.print(deltaTime);

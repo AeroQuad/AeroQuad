@@ -136,12 +136,15 @@ float headingDiff = 0;
 unsigned long suppressHeadingHoldTime = 0;
 
 // Altitude Adjust
+#define TEMPERATURE 0
+#define PRESSURE 1
+#define ALTITUDE 2
 float zAccelHover;
 int throttleAdjust;
 int throttleAdjustGain = 10; // Look to make this a command setting
 int minThrottleAdjust = -200;
 int maxThrottleAdjust = 200;
-int currentAltitude;
+float currentAltitude;
 long pressure, temperature;
 
 // Receiver variables
@@ -206,7 +209,7 @@ byte update = 0;
 #define CAMERALOOPTIME 20
 #define AILOOPTIME 2
 #define COMPASSLOOPTIME 100
-#define ALTITUDELOOPTIME 30
+#define ALTITUDELOOPTIME 26
 
 float AIdT = AILOOPTIME / 1000.0;
 float controldT = CONTROLLOOPTIME / 1000.0;

@@ -21,13 +21,18 @@
 // Class to define sensors that can determine altitude
 
 // ***********************************************************************
-// ************************** Altitude Class ******************************
+// ************************** Altitude Class *****************************
 // ***********************************************************************
+
 class Altitude {
 private: 
   
 public:
-  int altitude;
+  float altitude;
+  float groundTemperature; // remove later
+  float groundPressure; // remove later
+  float groundAltitude;
+  
   Altitude (void) { 
     altitude = 0;
   }
@@ -36,13 +41,23 @@ public:
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
   virtual void initialize(void); 
-  virtual void measure(void); 
+  virtual void measure(void);
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const int getData(void) {
+  const float getData(void) {
     return altitude;
+  }
+  
+  void measureGround(void) {
+    // measure initial ground pressure (multiple samples)
+    for (int i=0; i < 20; i++) {
+      measure();
+      delay(26);
+      groundAltitude = smooth(altitude, groundAltitude, 0.5);
+      //Serial.println(groundAltitude);
+    }
   }
 };
 
@@ -51,27 +66,36 @@ public:
 // ***********************************************************************
 class Altitude_AeroQuad_v2 : public Altitude {
 // This sets up the BMP085 from Sparkfun
-// From original code of Jordi Munoz and Jose Julio (DIYDrones.com)
+// Code from http://wiring.org.co/learning/libraries/bmp085.html
+// Also made bug fixes based on BMP085 library from Jordi Munoz and Jose Julio
 private:
-  unsigned int ac1, ac2, ac3;
+  byte overSamplingSetting;
+  int ac1, ac2, ac3;
   unsigned int ac4, ac5, ac6;
-  unsigned int b1, b2, mb, mc, md;
-  byte oss;
-  long pressure, groundPressure;
-  int temperature, groundTemperature;
-  int altitudeAddress, groundAltitude;
+  int b1, b2, mb, mc, md;
+  long pressure;
+  int temperature;
+  int altitudeAddress;
   long rawPressure, rawTemperature;
-  byte count;
+  byte select, pressureCount;
+  float pressureFactor;
+  
+  void requestRawPressure(void) {
+    updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
+  }
   
   long readRawPressure(void) {
-    updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(oss<<6));
+    unsigned char msb, lsb, xlsb;
     sendByteI2C(altitudeAddress, 0xF6);
-    Wire.requestFrom(altitudeAddress, 3);
-    return (Wire.available() << 16) | (Wire.available() << 8) | (Wire.available() >> (8-oss));
+    Wire.requestFrom(altitudeAddress, 3); // request three bytes
+    return (((long)Wire.receive()<<16) | ((long)Wire.receive()<<8) | ((long)Wire.receive())) >>(8-overSamplingSetting);
   }
 
-  long readRawTemperature(void) {
+  void requestRawTemperature(void) {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x2E);
+  }
+  
+  long readRawTemperature(void) {
     sendByteI2C(altitudeAddress, 0xF6);
     return readWordI2C(altitudeAddress);
   }
@@ -79,106 +103,97 @@ private:
 public: 
   Altitude_AeroQuad_v2() : Altitude(){
     altitudeAddress = 0x77;
-    oss = 3;
+    // oversampling setting
+    // 0 = ultra low power
+    // 1 = standard
+    // 2 = high
+    // 3 = ultra high resolution
+    overSamplingSetting = 3;
     pressure = 0;
     groundPressure = 0;
     temperature = 0;
     groundTemperature = 0;
     groundAltitude = 0;
-    count = 0;
+    pressureFactor = 1/5.255;
   }
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
+    int buffer[22];
+    
     sendByteI2C(altitudeAddress, 0xAA); // Read calibration data registers
     Wire.requestFrom(altitudeAddress, 22);
-    ac1 = (Wire.receive() << 8) | Wire.receive();
-    ac2 = (Wire.receive() << 8) | Wire.receive();
-    ac3 = (Wire.receive() << 8) | Wire.receive();
-    ac4 = (Wire.receive() << 8) | Wire.receive();
-    ac5 = (Wire.receive() << 8) | Wire.receive();
-    ac6 = (Wire.receive() << 8) | Wire.receive();
-    b1 = (Wire.receive() << 8) | Wire.receive();
-    b2 = (Wire.receive() << 8) | Wire.receive();
-    mb = (Wire.receive() << 8) | Wire.receive();
-    mc = (Wire.receive() << 8) | Wire.receive();
-    md = (Wire.receive() << 8) | Wire.receive();
+    for (int i=0; i<22; i++) {
+      while(!Wire.available()); // wait until data available
+      buffer[i] = Wire.receive();
+    }    
+    ac1 = (buffer[0] << 8) | buffer[1];
+    ac2 = (buffer[2] << 8) | buffer[3];
+    ac3 = (buffer[4] << 8) | buffer[5];
+    ac4 = (buffer[6] << 8) | buffer[7];
+    ac5 = (buffer[8] << 8) | buffer[9];
+    ac6 = (buffer[10] << 8) | buffer[11];
+    b1 = (buffer[12] << 8) | buffer[13];
+    b2 = (buffer[14] << 8) | buffer[15];
+    mb = (buffer[16] << 8) | buffer[17];
+    mc = (buffer[18] << 8) | buffer[19];
+    md = (buffer[20] << 8) | buffer[21];
     Wire.endTransmission();
-    delay(100);
-    
-    // measure initial ground pressure (multiple samples)
-    for (int i=0; i < 20; i++) {
-      measure();
-      groundTemperature = smooth(temperature, groundTemperature, 0.5);
-      //Serial.print(groundTemperature);comma();
-      groundPressure = smooth(pressure, groundPressure, 0.5);
-      //Serial.print(groundPressure);comma();
-      groundAltitude = smooth(altitude, groundAltitude, 0.5);
-      //Serial.println(groundAltitude);
-      delay(30);
-    }
+    requestRawTemperature(); // setup up next measure() for temperature
+    select = TEMPERATURE;
+    pressureCount = 0;
+    delay(5);
   }
   
   void measure(void) {
     long x1, x2, x3, b3, b5, b6, p, tmp;
     unsigned long b4, b7;
-    
-    if (count == 0) {
-      rawTemperature = readRawTemperature();
-      count++;
+
+    // switch between pressure and tempature measurements
+    // each loop, since it's slow to measure pressure
+    if (select == PRESSURE) {
+      rawPressure = readRawPressure();
+      if (pressureCount == 3) {
+        requestRawTemperature();
+        pressureCount = 0;
+       select = TEMPERATURE;
+      }
+      else
+        requestRawPressure();
+      pressureCount++;
     }
-    else if (count == 4)
-      count = 0;
-    rawPressure = readRawPressure();
+    else { // select must equal TEMPERATURE
+      rawTemperature = readRawTemperature();
+      requestRawPressure();
+      select = PRESSURE;
+    }
     
-    // See Datasheet page 13 for these formulas
-    // Based also on Jee Labs BMP085 example code. Thanks for sharing.
-    // Temperature calculations
-    x1 = ((long)rawTemperature - ac6) * ac5 >> 15;
+    //calculate true temperature
+    x1 = ((long)rawTemperature - ac6) * ac5 >> 15; // rawTemperature from requestRaw();
     x2 = ((long) mc << 11) / (x1 + md);
     b5 = x1 + x2;
     temperature = (b5 + 8) >> 4;
   
-    // Pressure calculations
+    //calculate true pressure
     b6 = b5 - 4000;
     x1 = (b2 * (b6 * b6 >> 12)) >> 11; 
     x2 = ac2 * b6 >> 11;
     x3 = x1 + x2;
-    tmp = ac1;
-    tmp = (tmp*4 + x3)<<oss;
-    b3 = (tmp+2)/4;
+    b3 = (((ac1*4 + x3)<<overSamplingSetting)+2)/4;
     x1 = ac3 * b6 >> 13;
     x2 = (b1 * (b6 * b6 >> 12)) >> 16;
     x3 = ((x1 + x2) + 2) >> 2;
     b4 = (ac4 * (uint32_t) (x3 + 32768)) >> 15;
-    b7 = ((long)rawPressure - b3) * (50000 >> oss);
+    b7 = ((uint32_t) rawPressure - b3) * (50000 >> overSamplingSetting); // rawPressure from requestRaw();
     p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
     
     x1 = (p >> 8) * (p >> 8);
     x1 = (x1 * 3038) >> 16;
     x2 = (-7357 * p) >> 16;
-    pressure = p + ((x1 + x2 + 3791) >> 4);
+    pressure = (p + ((x1 + x2 + 3791) >> 4));
     
-    altitude = (int)((log((double)groundPressure / (double)pressure) * ((float)groundTemperature / 10.f + 273.15f) * 29271.267f) / 10) + groundAltitude;
-  }
-  
-  // For debug purposes
-  const long getPressure(void) {
-    return pressure;
-  }
-
-  // For debug purposes
-  const long getTemperature(void) {
-    return temperature;
-  }
-  
-  const long getRawPressure(void) {
-    return readRawPressure();
-  }
-  
-  const long getRawTemperature(void) {
-    return readRawTemperature();
+    altitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
   }
 };
