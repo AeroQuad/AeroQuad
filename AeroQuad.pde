@@ -44,8 +44,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
