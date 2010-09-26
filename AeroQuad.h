@@ -101,14 +101,6 @@ byte motor;
 float aref; // Read in from EEPROM
 int axis;
 
-// Adjust for gyro drift
-// http://aeroquad.com/entry.php?4-
-int lastAccel[3]={0,0,0};
-long accelAge[3]={0,0,0};
-int positiveGyroCount[3]={1,1,1};
-int negativeGyroCount[3]={1,1,1};
-int zeroGyroCount[3]={1,1,1};
-
 // Flight Mode
 #define ACRO 0
 #define STABLE 1
@@ -122,6 +114,14 @@ int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 float mLevelTransmitter = 0.09;
 float bLevelTransmitter = -135;
+
+// Adjust for gyro drift
+// http://aeroquad.com/entry.php?4-
+int lastAccel[3]={0,0,0};
+long accelAge[3]={0,0,0};
+int positiveGyroCount[3]={1,1,1};
+int negativeGyroCount[3]={1,1,1};
+int zeroGyroCount[3]={1,1,1};
 
 // Heading hold
 // aref / 1024 = voltage per A/D bit
@@ -144,8 +144,6 @@ int throttleAdjust;
 int throttleAdjustGain = 10; // Look to make this a command setting
 int minThrottleAdjust = -200;
 int maxThrottleAdjust = 200;
-float currentAltitude;
-long pressure, temperature;
 
 // Receiver variables
 #define TIMEOUT 25000

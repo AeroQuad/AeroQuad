@@ -72,18 +72,18 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
     currentHeading = gyro.getHeading();
-    if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
-    if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
-    headingDiff = absoluteHeading - currentHeading;
-    if (headingDiff > 180) headingDiff = headingDiff - 360;  // choose CCW because more nearby than CW
-    if (headingDiff < -180) headingDiff = 360 + headingDiff; // choose CW because more nearby than CCW
+    //if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
+    //if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
+    headingDiff = compass.getData() - currentHeading;
+    //if (headingDiff > 180) headingDiff = headingDiff - 360;  // choose CCW because more nearby than CW
+    //if (headingDiff < -180) headingDiff = 360 + headingDiff; // choose CW because more nearby than CCW
     currentHeading = currentHeading + headingDiff * 0.003;  // the correction of the gyro yaw
 
     if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
         suppressHeadingHoldTime = currentTime;
       }
-      if ((currentTime - suppressHeadingHoldTime) < 2000) {  // suppress HeadingHold up to 2 seconds after commanding yaw
+      if ((currentTime - suppressHeadingHoldTime) < 1000) {  // suppress HeadingHold up to 1 seconds after commanding yaw
         heading = currentHeading;
         headingHold = 0;
         PID[HEADING].integratedError = 0;

@@ -57,15 +57,14 @@ void readSensors(void) {
  // ********************* Read Slower Sensors *******************
  #if defined(AeroQuadMega_v2)
    if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
-     compass.measure();
-     absoluteHeading = compass.getHeading();
+     compass.measure(); // defined in compass.h
+     absoluteHeading = compass.getData();
      compassTime = currentTime;
    }
  #endif
  #if defined(AeroQuadMega_v2) || defined(ArduCopter)
    if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 37Hz
-     altitude.measure();
-     currentAltitude = smooth(altitude.getData(), currentAltitude, 0.2); // filter noise from altitude
+     altitude.measure(); // defined in altitude.h
      altitudeTime = currentTime;
    }
  #endif

@@ -25,16 +25,16 @@
 // ***********************************************************************
 
 class Altitude {
-private: 
-  
 public:
-  float altitude;
+  float altitude, rawAltitude;
   float groundTemperature; // remove later
   float groundPressure; // remove later
   float groundAltitude;
+  float smoothFactor;
   
   Altitude (void) { 
     altitude = 0;
+    smoothFactor = 0.1;
   }
 
   // **********************************************************************
@@ -50,6 +50,10 @@ public:
     return altitude;
   }
   
+  const float getRawData(void) {
+    return rawAltitude;
+  }
+  
   void measureGround(void) {
     // measure initial ground pressure (multiple samples)
     for (int i=0; i < 20; i++) {
@@ -58,6 +62,18 @@ public:
       groundAltitude = smooth(altitude, groundAltitude, 0.5);
       //Serial.println(groundAltitude);
     }
+  }
+  
+  void setGroundAltitude(float value) {
+    groundAltitude = value;
+  }
+  
+  const float getGroundAltitude(void) {
+    return groundAltitude;
+  }
+  
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
   }
 };
 
@@ -171,7 +187,7 @@ public:
     }
     
     //calculate true temperature
-    x1 = ((long)rawTemperature - ac6) * ac5 >> 15; // rawTemperature from requestRaw();
+    x1 = ((long)rawTemperature - ac6) * ac5 >> 15; // rawTemperature from requestRawTemperature();
     x2 = ((long) mc << 11) / (x1 + md);
     b5 = x1 + x2;
     temperature = (b5 + 8) >> 4;
@@ -186,7 +202,7 @@ public:
     x2 = (b1 * (b6 * b6 >> 12)) >> 16;
     x3 = ((x1 + x2) + 2) >> 2;
     b4 = (ac4 * (uint32_t) (x3 + 32768)) >> 15;
-    b7 = ((uint32_t) rawPressure - b3) * (50000 >> overSamplingSetting); // rawPressure from requestRaw();
+    b7 = ((uint32_t) rawPressure - b3) * (50000 >> overSamplingSetting); // rawPressure from requestRawPressure();
     p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
     
     x1 = (p >> 8) * (p >> 8);
@@ -194,6 +210,7 @@ public:
     x2 = (-7357 * p) >> 16;
     pressure = (p + ((x1 + x2 + 3791) >> 4));
     
-    altitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
+    rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
+    altitude = smooth(rawAltitude, altitude, smoothFactor); // smoothFactor defined in main class
   }
 };

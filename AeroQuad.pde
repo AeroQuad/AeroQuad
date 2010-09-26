@@ -238,17 +238,6 @@ void setup() {
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
-  // Heading hold
-  // aref is read in from EEPROM and originates from Configurator
-  //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
-  #if defined(AeroQuadMega_v2)
-    compass.initialize();
-    altitude.initialize();
-  #endif
-  #if defined(ArduCopter)
-    altitude.initialize();
-  #endif
-  
   // Setup correct sensor orientation
   #ifdef AeroQuad_v1
     gyro.invert(PITCH);
@@ -287,6 +276,17 @@ void setup() {
   
   // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
+
+  // Heading hold
+  // aref is read in from EEPROM and originates from Configurator
+  //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
+  #if defined(AeroQuadMega_v2)
+    compass.initialize();
+    altitude.initialize();
+  #endif
+  #if defined(ArduCopter)
+    altitude.initialize();
+  #endif
     
   // Camera stabilization setup
   #ifdef Camera

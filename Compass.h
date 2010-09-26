@@ -34,14 +34,13 @@ private:
   
 public: 
   int compassAddress;
-  float heading;
+  float smoothedHeading, heading, compass, smoothFactor;
   int measuredMagX;
   int measuredMagY;
   int measuredMagZ;
   
   Compass(void) { 
-    // this is the constructor of the object and must have the same name 
-    // can be used to initialize any of the variables declared above 
+    smoothFactor = 0.8; 
   }
 
   // **********************************************************************
@@ -53,7 +52,7 @@ public:
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getHeading(void) {
+  const float getData(void) {
     // Heading calculation based on code written by FabQuad
     // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
     cosRoll = cos(radians(flightAngle.getData(ROLL)));
@@ -62,7 +61,15 @@ public:
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
     magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
-    return degrees(atan2(-magY, magX));
+    compass = -degrees(atan2(-magY, magX));
+    return compass;
+  }
+  
+  const float getHeading(void) {
+    if (compass < 0) heading = 360 + compass;
+    else heading = compass;
+    smoothedHeading = smooth(heading, smoothedHeading, smoothFactor);
+    return smoothedHeading;
   }
 };
 

@@ -177,7 +177,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(currentAltitude);
+    Serial.print(altitude.getData());
     //comma();
     Serial.println();
     //queryType = 'X';
@@ -339,9 +339,14 @@ void sendSerialTelemetry() {
      Serial.print(armed, BIN);
     comma();
     if (flightMode == STABLE)
-      Serial.println(2000);
+      Serial.print(2000);
     if (flightMode == ACRO)
-      Serial.println(1000);
+      Serial.print(1000);
+    comma();
+    Serial.print(compass.getHeading());
+    comma();
+    Serial.print(altitude.getData());
+    Serial.println();
     break;
    case 'T': // Send processed transmitter values
     Serial.print(receiver.getXmitFactor());
