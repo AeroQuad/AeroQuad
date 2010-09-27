@@ -26,34 +26,6 @@ void readSensors(void) {
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
  
-  // ************ Correct for gyro drift by FabQuad **************
- // ************ http://aeroquad.com/entry.php?4-  **************
- /*for (axis = ROLL; axis < YAW; axis++) {              
-   if (abs(lastAccel[axis]-accel.getData(axis)) < 5) { // if accel is same as previous cycle
-     accelAge[axis]++;
-     if (accelAge[axis] >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
-       if (gyro.getData(axis) < 0) { 
-         negativeGyroCount[axis]++; // if gyro still indicates negative rotation, that's additional signal that gyrozero is too low
-       } else if (gyro.getData(axis) > 0) {
-         positiveGyroCount[axis]++;  // additional signal that gyrozero is too high
-       } else {
-         zeroGyroCount[axis]++; // additional signal that gyrozero is correct
-       }
-       accelAge[axis]=0;
-       if (zeroGyroCount[axis] + negativeGyroCount[axis] + positiveGyroCount[axis] > 200) {
-         if (negativeGyroCount[axis] >= 1.3*(zeroGyroCount[axis]+positiveGyroCount[axis])) gyro.setZero(axis, gyro.getZero(axis) + 1);  // enough signals the gyrozero is too low
-         if (positiveGyroCount[axis] >= 1.3*(zeroGyroCount[axis]+negativeGyroCount[axis])) gyro.setZero(axis, gyro.getZero(axis) - 1);  // enough signals the gyrozero is too high
-         zeroGyroCount[axis]=0;
-         negativeGyroCount[axis]=0;
-         positiveGyroCount[axis]=0;
-       }
-     }
-   } else { // accel different, restart
-     lastAccel[axis]=accel.getData(axis);
-     accelAge[axis]=0;
-   }
- }*/
- 
  // ********************* Read Slower Sensors *******************
  #if defined(AeroQuadMega_v2)
    if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz

@@ -177,13 +177,14 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(holdAltitude);
-    comma();
-    Serial.print(storeAltitude, DEC);
-    comma();
-    Serial.print(altitudeHold, DEC);
-    Serial.println();
+    //Serial.print(gyro.getRawHeading());
+    //comma();
+    //Serial.print(gyro.getHeading());
+    //comma();
+    //Serial.print(compass.getData());
+    //Serial.println();
     //queryType = 'X';
+    compass.getData();
     break;
   case 'B': // Send roll and pitch gyro PID values
     Serial.print(PID[ROLL].P);

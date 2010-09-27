@@ -29,13 +29,14 @@ public:
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
-  float currentHeading;
+  float currentHeading, degHeading, startHeading, rawHeading;
   
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = 1;
     currentHeading = 0;
+    degHeading = 0;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -103,9 +104,28 @@ public:
     return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
   }
   
-  const float getHeading(void) {
+  void calculateHeading(void) {
+    // returns abolute heading as calculated from yaw gyro
     currentHeading += getData(YAW) * gyroScaleFactor * G_Dt;
-    return currentHeading;
+    degHeading = currentHeading + startHeading; // starting heading from compass class
+    if (degHeading > 360) degHeading -= 360;
+    if (degHeading < 0) degHeading += 360;
+  }
+
+  const float getRawHeading(void) {
+    // return relative heading (-180 to zero, zero to +180)
+    if (currentHeading < -180)
+    return rawHeading;
+  }
+  
+  const float getHeading(void) {
+    // return heading between 0-360 degrees
+    return degHeading;
+  }
+  
+  void setStartHeading(float value) {
+    // since a relative heading, get starting absolute heading from compass class
+    startHeading = value;
   }
 };
 
@@ -218,6 +238,8 @@ public:
     if (select == YAW) sendByteI2C(gyroAddress, 0x21);
     rawData[select] = readWordI2C(gyroAddress);
     gyroADC[select] = rawData[select] - gyroZero[select];
+    // remove drift if very small gyro delta fro zero
+    if ((gyroADC[select] < 5) && (gyroADC[select] > -5)) gyroADC[select] = 0;
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
