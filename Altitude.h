@@ -26,7 +26,7 @@
 
 class Altitude {
 public:
-  float altitude, rawAltitude;
+  double altitude, rawAltitude;
   float groundTemperature; // remove later
   float groundPressure; // remove later
   float groundAltitude;
@@ -90,7 +90,7 @@ private:
   unsigned int ac4, ac5, ac6;
   int b1, b2, mb, mc, md;
   long pressure;
-  int temperature;
+  long temperature;
   int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
@@ -117,9 +117,9 @@ private:
     updateRegisterI2C(altitudeAddress, 0xF4, 0x2E);
   }
   
-  long readRawTemperature(void) {
+  unsigned int readRawTemperature(void) {
     sendByteI2C(altitudeAddress, 0xF6);
-    return (long)readWordI2C(altitudeAddress);
+    return readWordWaitI2C(altitudeAddress);
   }
 
 public: 
@@ -143,26 +143,28 @@ public:
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
-    int buffer[22];
-    
-    sendByteI2C(altitudeAddress, 0xAA); // Read calibration data registers
-    Wire.requestFrom(altitudeAddress, 22);
-    for (int i=0; i<22; i++) {
-      while(!Wire.available()); // wait until data available
-      buffer[i] = Wire.receive();
-    }    
-    ac1 = (buffer[0] << 8) | buffer[1];
-    ac2 = (buffer[2] << 8) | buffer[3];
-    ac3 = (buffer[4] << 8) | buffer[5];
-    ac4 = (buffer[6] << 8) | buffer[7];
-    ac5 = (buffer[8] << 8) | buffer[9];
-    ac6 = (buffer[10] << 8) | buffer[11];
-    b1 = (buffer[12] << 8) | buffer[13];
-    b2 = (buffer[14] << 8) | buffer[15];
-    mb = (buffer[16] << 8) | buffer[17];
-    mc = (buffer[18] << 8) | buffer[19];
-    md = (buffer[20] << 8) | buffer[21];
-    Wire.endTransmission();
+    sendByteI2C(altitudeAddress, 0xAA);
+    ac1 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xAC);
+    ac2 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xAE);
+    ac3 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xB0);
+    ac4 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xB2);
+    ac5 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xB4);
+    ac6 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xB6);
+    b1 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xB8);
+    b2 = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xBA);
+    mb = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xBC);
+    mc = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(altitudeAddress, 0xBE);
+    md = readWordWaitI2C(altitudeAddress);
     requestRawTemperature(); // setup up next measure() for temperature
     select = TEMPERATURE;
     pressureCount = 0;
@@ -188,7 +190,7 @@ public:
       pressureCount++;
     }
     else { // select must equal TEMPERATURE
-      rawTemperature = readRawTemperature();
+      rawTemperature = (long)readRawTemperature();
       requestRawPressure();
       select = PRESSURE;
     }

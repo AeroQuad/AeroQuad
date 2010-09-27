@@ -88,6 +88,10 @@ public:
     return transmitterCommand[channel];
   }
   
+  void adjustThrottle(int value) {
+    transmitterCommand[THROTTLE] += value;
+  }
+  
   const int getTrimData(byte channel) {
     return receiverData[channel] - transmitterTrim[channel];
   }

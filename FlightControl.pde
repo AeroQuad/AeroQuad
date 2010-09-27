@@ -99,10 +99,24 @@ void flightControl(void) {
   }   
   motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
+  // ****************************** Altitude Adjust *************************
+  // Experimental / not functional
+  // s = (at^2)/2, t = 0.002
+  //zAccelHover += ((accelData[ZAXIS] * accelScaleFactor) * 0.000004) * 0.5;
+  /*zAccelHover = accelADC[ROLL] / tan(angleRad(ROLL));
+  throttleAdjust = limitRange((zAccelHover - accelADC[ZAXIS]) * throttleAdjustGain, minThrottleAdjust, maxThrottleAdjust);
+  for (motor = FRONT; motor < LASTMOTOR; motor++)
+    motorCommand[motor] += throttleAdjust;*/
+  if (altitudeHold == ON)
+    throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
+  else
+    throttleAdjust = 0;
+  receiver.adjustThrottle(throttleAdjust);
+
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) + throttleAdjust - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
@@ -118,16 +132,7 @@ void flightControl(void) {
       // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
       motors.setThrottle(receiver.getData(THROTTLE));
     #endif
-  }
-
-  // ****************************** Altitude Adjust *************************
-  // Experimental / not functional
-  // s = (at^2)/2, t = 0.002
-  //zAccelHover += ((accelData[ZAXIS] * accelScaleFactor) * 0.000004) * 0.5;
-  /*zAccelHover = accelADC[ROLL] / tan(angleRad(ROLL));
-  throttleAdjust = limitRange((zAccelHover - accelADC[ZAXIS]) * throttleAdjustGain, minThrottleAdjust, maxThrottleAdjust);
-  for (motor = FRONT; motor < LASTMOTOR; motor++)
-    motorCommand[motor] += throttleAdjust;*/
+  } 
 
   // Prevents too little power applied to motors during hard manuevers
   // Also provides even motor power on both sides if limit encountered
@@ -222,6 +227,7 @@ void flightControl(void) {
     for (motor = FRONT; motor < LASTMOTOR; motor++)
       motors.setMotorCommand(motor, MINTHROTTLE);
   }
+  
   // If motor output disarmed, force motor output to minimum
   if (armed == 0) {
     switch (calibrateESC) { // used for calibrating ESC's

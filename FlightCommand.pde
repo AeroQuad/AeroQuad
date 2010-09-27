@@ -26,6 +26,8 @@ void readPilotCommands() {
   // Read quad configuration commands from transmitter when throttle down
   if (receiver.getRaw(THROTTLE) < MINCHECK) {
     zeroIntegralError();
+    throttleAdjust = 0;
+    receiver.adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
     if (receiver.getRaw(YAW) < MINCHECK && armed == 1) {
       armed = 0;
@@ -91,6 +93,22 @@ void readPilotCommands() {
         digitalWrite(LED2PIN, LOW);
     #endif
     flightMode = ACRO;
+  }
+  
+  // Check if altitude hold is enabled
+  if (receiver.getRaw(AUX) < 1400) {
+    // return to preset altitude or land?
+  }
+  else if (receiver.getRaw(AUX) < 1700) {
+    if (storeAltitude == ON) {
+      holdAltitude = altitude.getData();
+      storeAltitude = OFF;
+    }
+    altitudeHold = ON;
+  }
+  else {
+    storeAltitude = ON;
+    altitudeHold = OFF;
   }
 }
 

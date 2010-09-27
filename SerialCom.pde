@@ -177,8 +177,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(altitude.getData());
-    //comma();
+    Serial.print(holdAltitude);
+    comma();
+    Serial.print(storeAltitude, DEC);
+    comma();
+    Serial.print(altitudeHold, DEC);
     Serial.println();
     //queryType = 'X';
     break;

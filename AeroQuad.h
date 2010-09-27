@@ -144,6 +144,9 @@ int throttleAdjust;
 int throttleAdjustGain = 10; // Look to make this a command setting
 int minThrottleAdjust = -200;
 int maxThrottleAdjust = 200;
+float holdAltitude;
+byte storeAltitude = OFF;
+byte altitudeHold = OFF;
 
 // Receiver variables
 #define TIMEOUT 25000
