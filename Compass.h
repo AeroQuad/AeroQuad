@@ -24,27 +24,12 @@
 // ************************** Compass Class ******************************
 // ***********************************************************************
 class Compass {
-private:
-  float filter1, filter2;
-  
 public: 
   int compassAddress;
-  float heading, smoothedHeading, gyroStartHeading, smoothFactor;
-  int measuredMagX;
-  int measuredMagY;
-  int measuredMagZ;
-  float compass, rawCompass, oldCompass, rawCompassFactor;
-  byte factorChange;
+  float heading, absoluteHeading, gyroStartHeading;
+  float compass;
   
-  Compass(void) { 
-    // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
-    // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
-    smoothFactor = 0.1; 
-    filter1 = smoothFactor / (smoothFactor + G_Dt);
-    filter2 = 1 - filter1;
-    rawCompassFactor = 0;
-    factorChange = ON;
-  }
+  Compass(void) { }
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
@@ -55,33 +40,16 @@ public:
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getRawData(void) {
+  const float getData(void) {
     return compass;
   }
   
-  const float getData(void) {
-    if ((oldCompass <= -179) && (oldCompass > -180) && (compass >= 179) && (compass <= 180) && (factorChange == ON)) {
-      rawCompassFactor--;
-      factorChange = OFF;
-    }
-    if ((oldCompass >= 179) && (oldCompass <= 180) && (compass <= -179) && (compass > -180) && (factorChange == ON)) {
-      rawCompassFactor++;
-      factorChange = OFF;
-    }
-    rawCompass = compass + (rawCompassFactor * 360);
-    if ((oldCompass < 170)  && (compass < 170))
-      factorChange = ON;
-    if ((oldCompass > -170) && (compass > -170))
-      factorChange = ON;
-    Serial.print(rawCompassFactor); comma(); Serial.print(oldCompass); comma(); Serial.print(compass); comma(); Serial.println(rawCompass);
-  }
-
   const float getHeading(void) {
-    if (compass < 0) heading = 360 + compass;
-    else heading = compass;
-    // Complementry filter from http://chiefdelphi.com/media/papers/2010
-    smoothedHeading = (filter1 * gyro.getHeading()) + (filter2 * heading);
-    return smoothedHeading;
+    return heading;
+  }
+  
+  const float getAbsoluteHeading(void) {
+    return absoluteHeading;
   }
 };
 
@@ -97,10 +65,21 @@ private:
   float sinPitch;
   float magX;
   float magY;
-
+  int measuredMagX;
+  int measuredMagY;
+  int measuredMagZ;
+  float smoothFactor; // time constant for complementary filter
+  float filter1, filter2; // coefficients for complementary filter
+  
+  
 public: 
   Compass_AeroQuad_v2() : Compass(){
     compassAddress = 0x1E;
+    // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
+    // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
+    smoothFactor = 0.1; 
+    filter1 = smoothFactor / (smoothFactor + G_Dt);
+    filter2 = 1 - filter1;
   }
 
   // ***********************************************************
@@ -131,7 +110,15 @@ public:
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
     magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
-    oldCompass = compass;
     compass = -degrees(atan2(-magY, magX));
+    
+    // Complementry filter from http://chiefdelphi.com/media/papers/2010
+    heading = (filter1 * gyro.getHeading()) + (filter2 * compass);
+    //Serial.print(gyro.getHeading()); comma(); Serial.print(compass); comma(); Serial.print(heading);
+
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+    //comma(); Serial.println(absoluteHeading);
   }
 };

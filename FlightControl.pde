@@ -72,7 +72,7 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
     gyro.calculateHeading();
-    currentHeading = gyro.getRawHeading();
+    currentHeading = gyro.getHeading();
     //if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
     //if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
     headingDiff = compass.getData() - currentHeading;

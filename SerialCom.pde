@@ -177,12 +177,12 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //Serial.print(gyro.getRawHeading());
-    //comma();
-    //Serial.print(gyro.getHeading());
-    //comma();
-    //Serial.print(compass.getData());
-    //Serial.println();
+    Serial.print(gyro.getHeading());
+    comma();
+    Serial.print(compass.getHeading());
+    comma();
+    Serial.print(compass.getAbsoluteHeading());
+    Serial.println();
     //queryType = 'X';
     compass.getData();
     break;
@@ -347,7 +347,7 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       Serial.print(1000);
     comma();
-    Serial.print(compass.getHeading());
+    Serial.print(compass.getAbsoluteHeading());
     comma();
     Serial.print(altitude.getData());
     Serial.println();

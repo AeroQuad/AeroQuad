@@ -30,7 +30,6 @@ void readSensors(void) {
  #if defined(AeroQuadMega_v2)
    if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
      compass.measure(); // defined in compass.h
-     absoluteHeading = compass.getData();
      compassTime = currentTime;
    }
  #endif

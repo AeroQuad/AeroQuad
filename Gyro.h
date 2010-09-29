@@ -29,14 +29,13 @@ public:
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
-  float currentHeading, degHeading, startHeading, rawHeading;
+  float rawHeading, startHeading, gyroHeading;
   
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = 1;
     currentHeading = 0;
-    degHeading = 0;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -105,27 +104,25 @@ public:
   }
   
   void calculateHeading(void) {
-    // returns abolute heading as calculated from yaw gyro
-    currentHeading += getData(YAW) * gyroScaleFactor * G_Dt;
-    degHeading = currentHeading + startHeading; // starting heading from compass class
-    if (degHeading > 360) degHeading -= 360;
-    if (degHeading < 0) degHeading += 360;
+    // calculates unwrapped heading centered around zero
+    rawHeading += getData(YAW) * gyroScaleFactor * G_Dt;
   }
 
-  const float getRawHeading(void) {
-    // return relative heading (-180 to zero, zero to +180)
-    if (currentHeading < -180)
-    return rawHeading;
-  }
-  
+  // returns heading as +/- 180 degrees
   const float getHeading(void) {
-    // return heading between 0-360 degrees
-    return degHeading;
+    div_t integerDivide;
+    
+    integerDivide = div(rawHeading, 360);
+    gyroHeading = rawHeading + (integerDivide.quot * -360);
+    if (gyroHeading > 180) gyroHeading -= 360;
+    if (gyroHeading < -180) gyroHeading += 360;
+    return gyroHeading;
   }
   
   void setStartHeading(float value) {
     // since a relative heading, get starting absolute heading from compass class
     startHeading = value;
+    rawHeading = startHeading;
   }
 };
 
