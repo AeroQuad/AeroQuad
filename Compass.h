@@ -70,6 +70,7 @@ private:
   int measuredMagZ;
   float smoothFactor; // time constant for complementary filter
   float filter1, filter2; // coefficients for complementary filter
+  float adjustedGyroHeading;
   
   
 public: 
@@ -112,8 +113,14 @@ public:
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
     compass = -degrees(atan2(-magY, magX));
     
+    // check if gyro changed to > -180 while compass is still < +180 or
+    // if gyro < 180 while compass is > -180
+    adjustedGyroHeading = gyro.getHeading();
+    if ((compass > 0) && adjustedGyroHeading < 0) adjustedGyroHeading += 360;
+    if ((compass < 0) && adjustedGyroHeading > 0) adjustedGyroHeading -= 360;
+    
     // Complementry filter from http://chiefdelphi.com/media/papers/2010
-    heading = (filter1 * gyro.getHeading()) + (filter2 * compass);
+    heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
     //Serial.print(gyro.getHeading()); comma(); Serial.print(compass); comma(); Serial.print(heading);
 
     // Change from +/-180 to 0-360

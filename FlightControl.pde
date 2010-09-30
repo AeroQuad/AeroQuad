@@ -72,15 +72,16 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
     gyro.calculateHeading();
-    currentHeading = gyro.getHeading();
+    currentHeading = compass.getHeading();
+    //currentHeading = gyro.getHeading();
+
     //if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
     //if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
-    headingDiff = compass.getData() - currentHeading;
+    //headingDiff = compass.getData() - currentHeading;
     //if (headingDiff > 180) headingDiff = headingDiff - 360;  // choose CCW because more nearby than CW
     //if (headingDiff < -180) headingDiff = 360 + headingDiff; // choose CW because more nearby than CCW
-    currentHeading = currentHeading + headingDiff * 0.003;  // the correction of the gyro yaw
-
-    if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+    //currentHeading = currentHeading + headingDiff * 0.003;  // the correction of the gyro yaw
+    /*if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
         suppressHeadingHoldTime = currentTime;
       }
@@ -96,8 +97,24 @@ void flightControl(void) {
         heading = currentHeading;
         headingHold = 0;
         PID[HEADING].integratedError = 0;
+    }*/
+    
+    if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+      if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) {
+        // If commanding yaw, turn off heading hold and store latest heading
+        heading = currentHeading;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
+      }
+      else // No new yaw input, calculate current heading vs. desired heading heading hold
+        headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
     }
-  }   
+    else {
+        heading = currentHeading;
+        headingHold = 0;
+        PID[HEADING].integratedError = 0;
+    }
+  }
   motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
   // ****************************** Altitude Adjust *************************
@@ -249,6 +266,7 @@ void flightControl(void) {
       for (motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MINCOMMAND);
     }
+    // Send calibration commands to motors
     motors.write(); // Defined in Motors.h
   }
 
