@@ -58,7 +58,7 @@ void readSerialCommand() {
       PID[HEADING].integratedError = 0;
       headingHoldConfig = readFloatSerial();
       heading = 0;
-      currentHeading = 0;
+      relativeHeading = 0;
       headingHold = 0;
       break;
     case 'E': // Receive roll and pitch auto level PID
@@ -178,6 +178,8 @@ void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     Serial.print(gyro.getHeading());
+    comma();
+    Serial.print(compass.getData());
     comma();
     Serial.print(compass.getHeading());
     comma();
@@ -390,9 +392,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(headingHold);
     comma();
-    Serial.print(heading);
+    Serial.print(setHeading);
     comma();
-    Serial.println(currentHeading);
+    Serial.println(relativeHeading);
     break;
   case '6': // Report remote commands
     for (motor = FRONT; motor < LEFT; motor++) {

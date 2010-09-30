@@ -78,7 +78,7 @@ public:
     compassAddress = 0x1E;
     // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
     // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
-    smoothFactor = 0.1; 
+    smoothFactor = 0.5; 
     filter1 = smoothFactor / (smoothFactor + G_Dt);
     filter2 = 1 - filter1;
   }
@@ -113,19 +113,18 @@ public:
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
     compass = -degrees(atan2(-magY, magX));
     
-    // check if gyro changed to > -180 while compass is still < +180 or
-    // if gyro < 180 while compass is > -180
+    //Serial.print(compass);comma();Serial.print(gyro.getHeading()
     adjustedGyroHeading = gyro.getHeading();
-    if ((compass > 0) && adjustedGyroHeading < 0) adjustedGyroHeading += 360;
-    if ((compass < 0) && adjustedGyroHeading > 0) adjustedGyroHeading -= 360;
+    // if compass is positive while gyro is negative force gyro positive past 180
+    if ((compass > 90) && adjustedGyroHeading < -90) adjustedGyroHeading += 360;
+    // if compass is negative whie gyro is positive force gyro negative past -180
+    if ((compass < -90) && adjustedGyroHeading > 90) adjustedGyroHeading -= 360;
     
     // Complementry filter from http://chiefdelphi.com/media/papers/2010
     heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
-    //Serial.print(gyro.getHeading()); comma(); Serial.print(compass); comma(); Serial.print(heading);
 
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
     else absoluteHeading = heading;
-    //comma(); Serial.println(absoluteHeading);
   }
 };

@@ -115,25 +115,15 @@ int levelOff; // Read in from EEPROM
 float mLevelTransmitter = 0.09;
 float bLevelTransmitter = -135;
 
-// Adjust for gyro drift
-// http://aeroquad.com/entry.php?4-
-int lastAccel[3]={0,0,0};
-long accelAge[3]={0,0,0};
-int positiveGyroCount[3]={1,1,1};
-int negativeGyroCount[3]={1,1,1};
-int zeroGyroCount[3]={1,1,1};
-
 // Heading hold
-// aref / 1024 = voltage per A/D bit
-// 0.002 = V / deg/sec (from gyro data sheet)
 byte headingHoldConfig;
 //float headingScaleFactor;
 float heading = 0; // measured heading from yaw gyro (process variable)
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-float currentHeading = 0; // current heading the quad is set to (set point)
+float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
-float headingDiff = 0;
-unsigned long suppressHeadingHoldTime = 0;
+float setHeading = 0;
+float commandedYaw = 0;
 
 // Altitude Adjust
 #define TEMPERATURE 0

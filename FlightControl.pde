@@ -72,50 +72,37 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
     gyro.calculateHeading();
-    currentHeading = compass.getHeading();
-    //currentHeading = gyro.getHeading();
-
-    //if (currentHeading > 180.0) currentHeading = -360 + currentHeading;
-    //if (currentHeading < -180.0) currentHeading = 360 - currentHeading;
-    //headingDiff = compass.getData() - currentHeading;
-    //if (headingDiff > 180) headingDiff = headingDiff - 360;  // choose CCW because more nearby than CW
-    //if (headingDiff < -180) headingDiff = 360 + headingDiff; // choose CW because more nearby than CCW
-    //currentHeading = currentHeading + headingDiff * 0.003;  // the correction of the gyro yaw
-    /*if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
-      if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) { // if commanding yaw, turn off heading hold
-        suppressHeadingHoldTime = currentTime;
-      }
-      if ((currentTime - suppressHeadingHoldTime) < 1000) {  // suppress HeadingHold up to 1 seconds after commanding yaw
-        heading = currentHeading;
-        headingHold = 0;
-        PID[HEADING].integratedError = 0;
-      }
-      else // no yaw input, calculate current heading vs. desired heading heading hold
-        headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
-    }
-    else {
-        heading = currentHeading;
-        headingHold = 0;
-        PID[HEADING].integratedError = 0;
-    }*/
+    heading = compass.getHeading();
     
-    if (receiver.getData(THROTTLE) > MINCHECK ) { // apply heading hold only when throttle high enough to start flight
+    // Always center relative heading around absolte heading chosen during yaw command
+    // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
+    // This is done so that AeroQuad does accidentally hit transition between 0 and 360 or -180 and 180
+    relativeHeading = heading - setHeading;
+    if (heading <= (setHeading - 180)) relativeHeading += 360;
+    if (heading >= (setHeading + 180)) relativeHeading -= 360;
+    
+    // apply heading hold only when throttle high enough to start flight
+    if (receiver.getData(THROTTLE) > MINCHECK ) { 
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) {
         // If commanding yaw, turn off heading hold and store latest heading
-        heading = currentHeading;
+        setHeading = heading;
         headingHold = 0;
         PID[HEADING].integratedError = 0;
       }
-      else // No new yaw input, calculate current heading vs. desired heading heading hold
-        headingHold = updatePID(heading, currentHeading, &PID[HEADING]);
+      else 
+        // No new yaw input, calculate current heading vs. desired heading heading hold
+        // Relative heading is always centered around zero
+        headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
     }
     else {
-        heading = currentHeading;
+        // minimum throttle not reached, use off settings
+        setHeading = heading;
         headingHold = 0;
         PID[HEADING].integratedError = 0;
     }
   }
-  motors.setMotorAxisCommand(YAW, updatePID(receiver.getData(YAW) + headingHold, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
+  commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
+  motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
   // ****************************** Altitude Adjust *************************
   // Experimental / not functional

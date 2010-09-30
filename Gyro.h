@@ -35,7 +35,6 @@ public:
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = 1;
-    currentHeading = 0;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -103,11 +102,10 @@ public:
     return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
   }
   
-  void calculateHeading(void) {
-    // calculates unwrapped heading centered around zero
+  void calculateHeading() {
     rawHeading += getData(YAW) * gyroScaleFactor * G_Dt;
   }
-
+ 
   // returns heading as +/- 180 degrees
   const float getHeading(void) {
     div_t integerDivide;
@@ -235,14 +233,18 @@ public:
     if (select == YAW) sendByteI2C(gyroAddress, 0x21);
     rawData[select] = readWordI2C(gyroAddress);
     gyroADC[select] = rawData[select] - gyroZero[select];
-    // remove drift if very small gyro delta fro zero
-    if ((gyroADC[select] < 5) && (gyroADC[select] > -5)) gyroADC[select] = 0;
+    if ((gyroADC[YAW] < 5) && (gyroADC[YAW] > -5)) gyroADC[YAW] = 0;
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
+    if ((gyroData[YAW] < 5) && (gyroData[YAW] > -5)) gyroData[YAW] = 0;
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
 
   const int getFlightData(byte axis) {
-    return getRaw(axis) >> 3;
+    int reducedData;
+    
+    reducedData = getRaw(axis) >> 3;
+    if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
+    return reducedData;
   }
 
   void calibrate() {
@@ -307,7 +309,7 @@ public:
         gyroADC[axis] = gyroZero[axis] - rawADC;
       gyroData[axis] = gyroADC[axis]; // no smoothing needed
     }
-  }
+   }
 
   const int getFlightData(byte axis) {
     return getRaw(axis);
