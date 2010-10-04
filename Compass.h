@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - September 2010
+  AeroQuad v2.1 - October 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -121,10 +121,12 @@ public:
     if ((compass < -90) && adjustedGyroHeading > 90) adjustedGyroHeading -= 360;
     
     // Complementry filter from http://chiefdelphi.com/media/papers/2010
-    heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
+    // Don't use, gyro drift so far away from compass, that causes glitches in relative heading
+    //heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
+    heading = smooth(compass, heading, 0.1);
 
     // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
+    if (compass < 0) absoluteHeading = smooth(360 + compass, absoluteHeading, 0.2);
+    else absoluteHeading = smooth(compass, absoluteHeading, 0.2);
   }
 };

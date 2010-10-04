@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - September 2010
+  AeroQuad v2.1 - October 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -103,9 +103,9 @@
 #endif
 
 #ifdef AeroQuadMega_v1 
+  Receiver_AeroQuadMega receiver;
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
-  Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "DataStorage.h"
   #include "FlightAngle.h"
@@ -113,10 +113,10 @@
 #endif
 
 #ifdef AeroQuadMega_v2
-  Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
+  Accel_AeroQuadMega_v2 accel;
+  Gyro_AeroQuadMega_v2 gyro;
   #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
@@ -282,6 +282,7 @@ void setup() {
   //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
   #if defined(AeroQuadMega_v2)
     compass.initialize();
+    setHeading = compass.getHeading();
     altitude.initialize();
   #endif
   #if defined(ArduCopter)

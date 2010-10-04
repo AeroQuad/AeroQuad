@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - September 2010
+  AeroQuad v2.1 - October 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -31,6 +31,14 @@ public:
   int sign[3];
   float rawHeading, startHeading, gyroHeading;
   
+  // ************ Correct for gyro drift by FabQuad **************  
+  // ************ http://aeroquad.com/entry.php?4-  **************     
+  int lastReceiverYaw, receiverYaw;
+  long yawAge;
+  int positiveGyroYawCount;
+  int negativeGyroYawCount;
+  int zeroGyroYawCount;
+    
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
@@ -122,6 +130,10 @@ public:
     startHeading = value;
     rawHeading = startHeading;
   }
+  
+  void setReceiverYaw(int value) {
+    receiverYaw = value;
+  }
 };
 
 /******************************************************/
@@ -207,6 +219,12 @@ public:
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
+    
+    lastReceiverYaw=0;
+    yawAge=0;
+    positiveGyroYawCount=1;
+    negativeGyroYawCount=1;
+    zeroGyroYawCount=1;
   }
   
   void initialize(void) {
@@ -233,10 +251,46 @@ public:
     if (select == YAW) sendByteI2C(gyroAddress, 0x21);
     rawData[select] = readWordI2C(gyroAddress);
     gyroADC[select] = rawData[select] - gyroZero[select];
-    if ((gyroADC[YAW] < 5) && (gyroADC[YAW] > -5)) gyroADC[YAW] = 0;
+    //if ((gyroADC[YAW] < 5) && (gyroADC[YAW] > -5)) gyroADC[YAW] = 0;
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor);
-    if ((gyroData[YAW] < 5) && (gyroData[YAW] > -5)) gyroData[YAW] = 0;
+    //if ((gyroData[YAW] < 5) && (gyroData[YAW] > -5)) gyroData[YAW] = 0;
+    if (select == YAW) {
+      calculateHeading();
+      //Serial.print(rawData[YAW]); comma(); Serial.print(gyroADC[YAW]); comma(); Serial.print(gyroData[YAW]); comma(); Serial.println(G_Dt,4);
+    }
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
+    
+    // ************ Correct for gyro drift by FabQuad **************  
+    // ************ http://aeroquad.com/entry.php?4-  **************
+    // Modified FabQuad's approach to use yaw transmitter command instead of checking accelerometer
+    //Serial.print(lastReceiverYaw);comma();Serial.print(receiverYaw);comma();Serial.print(yawAge);comma();Serial.print(negativeGyroYawCount);comma();Serial.print(positiveGyroYawCount);comma();Serial.print(zeroGyroYawCount);comma();
+    //Serial.print(rawData[YAW]);comma();Serial.print(gyroZero[YAW]);comma();Serial.print(gyroADC[YAW]);comma();Serial.println(gyroData[YAW]);
+    if (abs(lastReceiverYaw - receiverYaw) < 15) {
+      yawAge++;
+      if (yawAge >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
+        if (gyroData[YAW] < 0) { 
+          negativeGyroYawCount++; // if gyro still indicates negative rotation, that's additional signal that gyrozero is too low
+        }
+        else if (gyroData[YAW] > 0) {
+          positiveGyroYawCount++;  // additional signal that gyrozero is too high
+        }
+        else {
+          zeroGyroYawCount++; // additional signal that gyrozero is correct
+        }
+        yawAge = 0;
+        if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
+          if (negativeGyroYawCount >= 1.3*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyrozero is too low
+          if (positiveGyroYawCount >= 1.3*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyrozero is too high
+          zeroGyroYawCount=0;
+          negativeGyroYawCount=0;
+          positiveGyroYawCount=0;
+        }
+      }
+    }
+    else { // accel different, restart
+      lastReceiverYaw = receiverYaw;
+      yawAge = 0;
+    }
   }
 
   const int getFlightData(byte axis) {

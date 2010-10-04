@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - September 2010
+  AeroQuad v2.1 - October 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -71,12 +71,12 @@ void flightControl(void) {
   // Heading hold method using magnetometer from code by FabQuad
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
-    gyro.calculateHeading();
+    //gyro.calculateHeading();
     heading = compass.getHeading();
     
     // Always center relative heading around absolte heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
-    // This is done so that AeroQuad does accidentally hit transition between 0 and 360 or -180 and 180
+    // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
     relativeHeading = heading - setHeading;
     if (heading <= (setHeading - 180)) relativeHeading += 360;
     if (heading >= (setHeading + 180)) relativeHeading -= 360;

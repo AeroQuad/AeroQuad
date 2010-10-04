@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - September 2010
+  AeroQuad v2.1 - October 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -110,6 +110,9 @@ void readPilotCommands() {
     storeAltitude = ON;
     altitudeHold = OFF;
   }
+  
+  // User for correcting gyro drift with v2.0 Shield
+  gyro.setReceiverYaw(receiver.getData(YAW));
 }
 
 
