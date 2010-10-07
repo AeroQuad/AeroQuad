@@ -71,7 +71,7 @@ void flightControl(void) {
   // Heading hold method using magnetometer from code by FabQuad
   // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
-    //gyro.calculateHeading();
+    gyro.calculateHeading();
     heading = compass.getHeading();
     
     // Always center relative heading around absolte heading chosen during yaw command

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - September 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -70,17 +70,18 @@ private:
   int measuredMagZ;
   float smoothFactor; // time constant for complementary filter
   float filter1, filter2; // coefficients for complementary filter
-  float adjustedGyroHeading;
-  
+  float adjustedGyroHeading, previousHead;
+  int gyroZero;
   
 public: 
   Compass_AeroQuad_v2() : Compass(){
     compassAddress = 0x1E;
     // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
     // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
-    smoothFactor = 0.5; 
+    smoothFactor = 1.0; 
     filter1 = smoothFactor / (smoothFactor + G_Dt);
     filter2 = 1 - filter1;
+    gyroZero = gyro.getZero(YAW);
   }
 
   // ***********************************************************
@@ -113,7 +114,13 @@ public:
     magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
     compass = -degrees(atan2(-magY, magX));
     
-    //Serial.print(compass);comma();Serial.print(gyro.getHeading()
+    // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value
+    if (gyroZero != gyro.getZero(YAW)) {
+      gyro.setStartHeading(heading);
+      gyroZero = gyro.getZero(YAW);
+    }
+    
+    //Serial.print(compass);comma();Serial.print(gyro.getHeading());comma();
     adjustedGyroHeading = gyro.getHeading();
     // if compass is positive while gyro is negative force gyro positive past 180
     if ((compass > 90) && adjustedGyroHeading < -90) adjustedGyroHeading += 360;
@@ -121,12 +128,11 @@ public:
     if ((compass < -90) && adjustedGyroHeading > 90) adjustedGyroHeading -= 360;
     
     // Complementry filter from http://chiefdelphi.com/media/papers/2010
-    // Don't use, gyro drift so far away from compass, that causes glitches in relative heading
-    //heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
-    heading = smooth(compass, heading, 0.1);
-
+    heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
+    //Serial.println(heading);
+    
     // Change from +/-180 to 0-360
-    if (compass < 0) absoluteHeading = smooth(360 + compass, absoluteHeading, 0.2);
-    else absoluteHeading = smooth(compass, absoluteHeading, 0.2);
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
   }
 };

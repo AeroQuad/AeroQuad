@@ -29,7 +29,8 @@ public:
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
-  float rawHeading, startHeading, gyroHeading;
+  float rawHeading, gyroHeading;
+  unsigned long currentTime, previousTime;
   
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
@@ -63,6 +64,8 @@ public:
     gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+    
+    previousTime = millis();
   }
     
   const int getRaw(byte axis) {
@@ -111,7 +114,10 @@ public:
   }
   
   void calculateHeading() {
-    rawHeading += getData(YAW) * gyroScaleFactor * G_Dt;
+    currentTime = millis();
+    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000.0);
+    //Serial.print(getData(YAW));comma();Serial.print(gyroScaleFactor);comma();Serial.print(currentTime-previousTime);comma();Serial.println(rawHeading);
+    previousTime = currentTime;
   }
  
   // returns heading as +/- 180 degrees
@@ -127,8 +133,7 @@ public:
   
   void setStartHeading(float value) {
     // since a relative heading, get starting absolute heading from compass class
-    startHeading = value;
-    rawHeading = startHeading;
+    rawHeading = value;
   }
   
   void setReceiverYaw(int value) {
@@ -267,27 +272,28 @@ public:
     //Serial.print(rawData[YAW]);comma();Serial.print(gyroZero[YAW]);comma();Serial.print(gyroADC[YAW]);comma();Serial.println(gyroData[YAW]);
     if (abs(lastReceiverYaw - receiverYaw) < 15) {
       yawAge++;
-      if (yawAge >= 4) {  // if accel was the same long enough, we can assume that there is no (fast) rotation
+      if (yawAge >= 4) {  // if gyro was the same long enough, we can assume that there is no (fast) rotation
         if (gyroData[YAW] < 0) { 
-          negativeGyroYawCount++; // if gyro still indicates negative rotation, that's additional signal that gyrozero is too low
+          negativeGyroYawCount++; // if gyro still indicates negative rotation, that's additional signal that gyroZero is too low
         }
         else if (gyroData[YAW] > 0) {
-          positiveGyroYawCount++;  // additional signal that gyrozero is too high
+          positiveGyroYawCount++;  // additional signal that gyroZero is too high
         }
         else {
-          zeroGyroYawCount++; // additional signal that gyrozero is correct
+          zeroGyroYawCount++; // additional signal that gyroZero is correct
         }
         yawAge = 0;
         if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
-          if (negativeGyroYawCount >= 1.3*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyrozero is too low
-          if (positiveGyroYawCount >= 1.3*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyrozero is too high
+          if (negativeGyroYawCount >= 1.3*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyroZero is too low
+          if (positiveGyroYawCount >= 1.3*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyroZero is too high
           zeroGyroYawCount=0;
           negativeGyroYawCount=0;
           positiveGyroYawCount=0;
+          
         }
       }
     }
-    else { // accel different, restart
+    else { // gyro different, restart
       lastReceiverYaw = receiverYaw;
       yawAge = 0;
     }
@@ -297,7 +303,7 @@ public:
     int reducedData;
     
     reducedData = getRaw(axis) >> 3;
-    if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
+    //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
     return reducedData;
   }
 
