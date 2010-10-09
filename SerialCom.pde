@@ -88,7 +88,12 @@ void readSerialCommand() {
       levelLimit = readFloatSerial();
       levelOff = readFloatSerial();
       break;
-    case 'I': // Spare
+    case 'I': // Receiver altitude hold PID
+      PID[ALTITUDE].P = readFloatSerial();
+      PID[ALTITUDE].I = readFloatSerial();
+      PID[ALTITUDE].D = readFloatSerial();
+      PID[ALTITUDE].lastPosition = 0;
+      PID[ALTITUDE].integratedError = 0;    
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -255,6 +260,11 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'J': // Spare
+    Serial.print(PID[ALTITUDE].P);
+    comma();
+    Serial.print(PID[ALTITUDE].I);
+    comma();
+    Serial.println(PID[ALTITUDE].D);
     queryType = 'X';
     break;
   case 'L': // Send data filtering values

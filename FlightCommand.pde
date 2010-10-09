@@ -111,7 +111,7 @@ void readPilotCommands() {
     altitudeHold = OFF;
   }
   
-  // User for correcting gyro drift with v2.0 Shield
+  // Use for correcting gyro drift with v2.0 Shield
   gyro.setReceiverYaw(receiver.getData(YAW));
 }
 

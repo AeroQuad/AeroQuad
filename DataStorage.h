@@ -67,6 +67,9 @@ void initializeEEPROM(void) {
   PID[LEVELGYROPITCH].P = 1.2;
   PID[LEVELGYROPITCH].I = 0.0;
   PID[LEVELGYROPITCH].D = -14.0;
+  PID[ALTITUDE].P = 0.0;
+  PID[ALTITUDE].I = 0.0;
+  PID[ALTITUDE].D = 0.0;
   windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
   levelLimit = 500.0;
@@ -140,6 +143,12 @@ void readEEPROM(void) {
   PID[LEVELGYROPITCH].D = readFloat(LEVEL_GYRO_PITCH_DGAIN_ADR);
   PID[LEVELGYROPITCH].lastPosition = 0;
   PID[LEVELGYROPITCH].integratedError = 0;
+  
+  PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
+  PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
+  PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
+  PID[ALTITUDE].lastPosition = 0;
+  PID[ALTITUDE].integratedError = 0;
 
   receiver.setTransmitterSlope(THROTTLE, THROTTLESCALE_ADR);
   receiver.setTransmitterOffset(THROTTLE, THROTTLEOFFSET_ADR);
@@ -192,6 +201,9 @@ void writeEEPROM(void){
   writeFloat(PID[LEVELGYROPITCH].P, LEVEL_GYRO_PITCH_PGAIN_ADR);
   writeFloat(PID[LEVELGYROPITCH].I, LEVEL_GYRO_PITCH_IGAIN_ADR);
   writeFloat(PID[LEVELGYROPITCH].D, LEVEL_GYRO_PITCH_DGAIN_ADR);
+  writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
+  writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
+  writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   
   writeFloat(levelOff, LEVELOFF_ADR); 

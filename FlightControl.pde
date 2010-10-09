@@ -116,12 +116,13 @@ void flightControl(void) {
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
   else
     throttleAdjust = 0;
+  // Add throttleAdjust to latest command throttle
   receiver.adjustThrottle(throttleAdjust);
 
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) + throttleAdjust - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
       motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));

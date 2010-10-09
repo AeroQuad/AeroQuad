@@ -54,6 +54,7 @@
 #define HEADING 5
 #define LEVELGYROROLL 6
 #define LEVELGYROPITCH 7
+#define ALTITUDE 8
 
 // Smoothing filter parameters
 #define GYRO 0
@@ -308,6 +309,9 @@ byte testSignal = LOW;
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
 #define ACCEL1G_ADR 256
+#define ALTITUDE_PGAIN_ADR 260
+#define ALTITUDE_IGAIN_ADR 264
+#define ALTITUDE_DGAIN_ADR 268
 
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 float arctan2(float y, float x); // defined in Sensors.pde

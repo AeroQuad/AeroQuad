@@ -466,7 +466,7 @@ private:
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < THROTTLE; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    // No xmitFactor reduction applied for throttle, mode and 
+    // No xmitFactor reduction applied for throttle, mode and AUX
     for (channel = THROTTLE; channel < LASTCHANNEL; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
