@@ -27,7 +27,7 @@ void readPilotCommands() {
   if (receiver.getRaw(THROTTLE) < MINCHECK) {
     zeroIntegralError();
     throttleAdjust = 0;
-    receiver.adjustThrottle(throttleAdjust);
+    //receiver.adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
     if (receiver.getRaw(YAW) < MINCHECK && armed == 1) {
       armed = 0;

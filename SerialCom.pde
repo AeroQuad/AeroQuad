@@ -182,13 +182,19 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(gyro.getHeading());
+    Serial.print(altitudeHold,DEC);
     comma();
-    Serial.print(compass.getData());
+    Serial.print(storeAltitude,DEC);
     comma();
-    Serial.print(compass.getHeading());
+    Serial.print(holdAltitude);
     comma();
-    Serial.print(compass.getAbsoluteHeading());
+    Serial.print(throttleAdjust);
+    comma();
+    Serial.print(altitude.getData());
+    comma();
+    Serial.print(receiver.getData(THROTTLE));
+    comma();
+    Serial.print(motors.getMotorCommand(RIGHT));
     Serial.println();
     //queryType = 'X';
     compass.getData();
@@ -414,7 +420,7 @@ void sendSerialTelemetry() {
     Serial.println(motors.getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
-    Serial.println("2.0");
+    Serial.println(VERSION, 1);
     queryType = 'X';
     break;
   case '#': // Send software configuration

@@ -34,7 +34,7 @@ public:
   
   Altitude (void) { 
     altitude = 0;
-    smoothFactor = 0.03;
+    smoothFactor = 0.02;
   }
 
   // **********************************************************************
@@ -47,21 +47,29 @@ public:
   // The following functions are common between all subclasses
   // *********************************************************
   const float getData(void) {
-    return altitude;
+    //Serial.print(rawAltitude);comma();Serial.print(altitude);comma();Serial.print(groundAltitude);comma();Serial.println(altitude - groundAltitude);
+    return altitude - groundAltitude;
   }
   
   const float getRawData(void) {
     return rawAltitude;
   }
   
+  void setStartAltitude(float value) {
+    altitude = value;
+  }
+  
   void measureGround(void) {
     // measure initial ground pressure (multiple samples)
-    for (int i=0; i < 20; i++) {
+    groundAltitude = 0;
+    for (int i=0; i < 25; i++) {
       measure();
+      //Serial.println(rawAltitude);
       delay(26);
-      groundAltitude = smooth(altitude, groundAltitude, 0.5);
-      //Serial.println(groundAltitude);
+      groundAltitude += rawAltitude;
     }
+    groundAltitude = groundAltitude / 25.0;
+    //Serial.println(groundAltitude);Serial.println();
   }
   
   void setGroundAltitude(float value) {
@@ -143,6 +151,8 @@ public:
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
+    float verifyGroundAltitude;
+    
     sendByteI2C(altitudeAddress, 0xAA);
     ac1 = readWordWaitI2C(altitudeAddress);
     sendByteI2C(altitudeAddress, 0xAC);
@@ -168,7 +178,17 @@ public:
     requestRawTemperature(); // setup up next measure() for temperature
     select = TEMPERATURE;
     pressureCount = 0;
-    delay(5);
+    measure();
+    delay(5); // delay for temperature
+    measure();
+    delay(26); // delay for pressure
+    measureGround();
+    // check if measured ground altitude is valid
+    while (abs(getRawData() - getGroundAltitude()) > 10) {
+      delay(26);
+      measureGround();
+    }
+    setStartAltitude(getGroundAltitude());
   }
   
   void measure(void) {
