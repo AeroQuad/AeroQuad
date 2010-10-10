@@ -242,11 +242,14 @@ public:
     if (readWhoI2C(gyroAddress) != gyroAddress)
       Serial.println("Gyro not found!");
         
+    // Thanks to SwiftingSpeed for updates on these settings
+    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
     updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
-    updateRegisterI2C(gyroAddress, 0x15, 0x00); // 1kHz sample rate
+    //updateRegisterI2C(gyroAddress, 0x15, 0x00); // 1kHz sample rate
     updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
-    updateRegisterI2C(gyroAddress, 0x17, 0x05); // enable send raw values
-    updateRegisterI2C(gyroAddress, 0x3E, 0x00); // use internal oscillator    
+    //updateRegisterI2C(gyroAddress, 0x17, 0x05); // enable send raw values
+    //updateRegisterI2C(gyroAddress, 0x3E, 0x00); // use internal oscillator
+    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
   }
   
   void measure(void) {

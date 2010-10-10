@@ -201,6 +201,11 @@ public:
     if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
       Serial.println("Accelerometer not found!");
 
+    // Thanks to SwiftingSpeed for updates on these settings
+    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
+    updateRegisterI2C(accelAddress, 0x10, 0xb6); //reset device
+    delay(10);  //sleep 10 ms after reset (page 25)
+
     // In datasheet, summary register map is page 21
     // Low pass filter settings is page 27
     // Range settings is page 28
