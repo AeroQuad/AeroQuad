@@ -88,10 +88,6 @@ public:
     return transmitterCommand[channel];
   }
   
-  void adjustThrottle(int value) {
-    transmitterCommand[THROTTLE] += value;
-  }
-  
   const int getTrimData(byte channel) {
     return receiverData[channel] - transmitterTrim[channel];
   }
@@ -462,6 +458,7 @@ private:
       receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs 
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+      //transmitterCommandSmooth[channel] = transmitterFilter[channel].filter(receiverData[channel]);
     }
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (channel = ROLL; channel < THROTTLE; channel++)

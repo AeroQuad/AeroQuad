@@ -73,6 +73,7 @@
 #include "I2C.h"
 #include "PID.h"
 #include "Filter.h"
+MedianFilter transmitterFilter[8];
 #include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Accel.h"
@@ -226,8 +227,10 @@ void setup() {
   motors.initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON)
+  if (receiverLoop == ON) {
+    for (channel = ROLL; channel < LASTCHANNEL; channel++) transmitterFilter[channel].initialize();
     receiver.initialize(); // defined in Received.h
+  }
        
   // Initialize sensors
   // If sensors have a common initialization routine

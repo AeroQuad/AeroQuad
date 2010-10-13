@@ -22,3 +22,47 @@ float smooth(float currentData, float previousData, float smoothFactor) {
   return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor));
 }
 
+// ***********************************************************************
+// *************************** Filter Class ******************************
+// ***********************************************************************
+// Made this as a class so that don't need to carry global array for each
+// measurement to use median filter on.
+class MedianFilter {
+public: 
+  #define DATASIZE 25
+  float data[DATASIZE], sortData[DATASIZE];
+  int dataIndex;
+  MedianFilter(void) {}
+
+  void initialize(void) {
+    for (int index = 0; index < DATASIZE; index++) {
+      data[index] = 0;
+      sortData[index] = 0;
+    }
+    dataIndex = 0;
+  }
+  
+  const float filter(float newData) {
+    int temp, i, j; // used to sort array
+
+    // Insert new data into raw data array round robin style
+    data[dataIndex] = newData;
+    if (dataIndex < (DATASIZE-1)) dataIndex++;
+    else dataIndex = 0;    
+    
+    // Copy raw data to sort data array
+    memcpy(sortData, data, sizeof(data));
+    
+    // Insertion Sort
+    for(i=1; i<=(DATASIZE-1); i++) {
+      temp = sortData[i];
+      j = i-1;
+      while(temp<sortData[j] && j>=0) {
+        sortData[j+1] = sortData[j];
+        j = j-1;
+      }
+      sortData[j+1] = temp;
+    }
+    return data[(DATASIZE)>>1]; // return data value in middle of sorted array
+  } 
+};

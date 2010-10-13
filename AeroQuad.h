@@ -197,7 +197,7 @@ byte update = 0;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-#define RECEIVERLOOPTIME 100
+#define RECEIVERLOOPTIME 20
 #define TELEMETRYLOOPTIME 100
 #define FASTTELEMETRYTIME 10
 #define CONTROLLOOPTIME 2
