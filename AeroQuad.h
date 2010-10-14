@@ -132,7 +132,6 @@ float commandedYaw = 0;
 // Altitude Adjust
 #define TEMPERATURE 0
 #define PRESSURE 1
-#define ALTITUDE 2
 float zAccelHover;
 int throttleAdjust;
 int throttleAdjustGain = 10; // Look to make this a command setting

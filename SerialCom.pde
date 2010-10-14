@@ -182,7 +182,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(altitudeHold,DEC);
+    /*Serial.print(altitudeHold,DEC);
     comma();
     Serial.print(storeAltitude,DEC);
     comma();
@@ -194,7 +194,9 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(receiver.getData(THROTTLE));
     comma();
-    Serial.print(motors.getMotorCommand(RIGHT));
+    Serial.print(motors.getMotorCommand(RIGHT));*/
+    Serial.print(YAW, DEC);comma();
+    Serial.print(ALTITUDE, DEC);
     Serial.println();
     //queryType = 'X';
     compass.getData();

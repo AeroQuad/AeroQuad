@@ -22,6 +22,7 @@ struct PIDdata {
   float P, I, D;
   float lastPosition;
   float integratedError;
+  float windupGuard;
 } PID[9];
 // This struct above declares the variable PID[] to hold each of the PID values for various functions
 // The following constants are declared in AeroQuad.h
