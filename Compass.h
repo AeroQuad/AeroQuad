@@ -120,7 +120,6 @@ public:
       gyroZero = gyro.getZero(YAW);
     }
     
-    //Serial.print(compass);comma();Serial.print(gyro.getHeading());comma();
     adjustedGyroHeading = gyro.getHeading();
     // if compass is positive while gyro is negative force gyro positive past 180
     if ((compass > 90) && adjustedGyroHeading < -90) adjustedGyroHeading += 360;
@@ -129,7 +128,6 @@ public:
     
     // Complementry filter from http://chiefdelphi.com/media/papers/2010
     heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
-    //Serial.println(heading);
     
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;

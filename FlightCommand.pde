@@ -29,8 +29,8 @@ void readPilotCommands() {
     throttleAdjust = 0;
     //receiver.adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
-    if (receiver.getRaw(YAW) < MINCHECK && armed == 1) {
-      armed = 0;
+    if (receiver.getRaw(YAW) < MINCHECK && armed == ON) {
+      armed = OFF;
       motors.commandAllMotors(MINCOMMAND);
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
@@ -62,14 +62,14 @@ void readPilotCommands() {
       #endif
     }
     // Arm motors (left stick lower right corner)
-    if (receiver.getRaw(YAW) > MAXCHECK && armed == 0 && safetyCheck == 1) {
+    if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
-      armed = 1;
+      armed = ON;
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = 1; 
+    if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = ON; 
   }
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
@@ -95,21 +95,24 @@ void readPilotCommands() {
     flightMode = ACRO;
   }
   
-  // Check if altitude hold is enabled
-  if (receiver.getRaw(AUX) < 1400) {
-    // return to preset altitude or land?
-  }
-  else if (receiver.getRaw(AUX) < 1700) {
-    if (storeAltitude == ON) {
-      holdAltitude = altitude.getData();
-      storeAltitude = OFF;
+  #ifdef AltitudeHold
+    // Check if altitude hold is enabled
+    if (receiver.getRaw(AUX) < 1400) {
+      // return to preset altitude or land?
     }
-    altitudeHold = ON;
-  }
-  else {
-    storeAltitude = ON;
-    altitudeHold = OFF;
-  }
+    else if (receiver.getRaw(AUX) < 1700) {
+      if (storeAltitude == ON) {
+        holdAltitude = altitude.getData();
+        PID[ALTITUDE].integratedError = 0;
+        storeAltitude = OFF;
+      }
+      altitudeHold = ON;
+    }
+    else {
+      storeAltitude = ON;
+      altitudeHold = OFF;
+    }
+  #endif
   
   // Use for correcting gyro drift with v2.0 Shield
   gyro.setReceiverYaw(receiver.getData(YAW));

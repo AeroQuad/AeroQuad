@@ -24,6 +24,16 @@
 // ************************** Altitude Class *****************************
 // ***********************************************************************
 
+// Altitude Adjust Globals
+#define TEMPERATURE 0
+#define PRESSURE 1
+int throttleAdjust = 0;
+int minThrottleAdjust = -25;
+int maxThrottleAdjust = 100;
+float holdAltitude;
+byte storeAltitude = OFF;
+byte altitudeHold = OFF;
+
 class Altitude {
 public:
   double altitude, rawAltitude;
@@ -47,7 +57,6 @@ public:
   // The following functions are common between all subclasses
   // *********************************************************
   const float getData(void) {
-    //Serial.print(rawAltitude);comma();Serial.print(altitude);comma();Serial.print(groundAltitude);comma();Serial.println(altitude - groundAltitude);
     return altitude - groundAltitude;
   }
   
@@ -64,12 +73,10 @@ public:
     groundAltitude = 0;
     for (int i=0; i < 25; i++) {
       measure();
-      //Serial.println(rawAltitude);
       delay(26);
       groundAltitude += rawAltitude;
     }
     groundAltitude = groundAltitude / 25.0;
-    //Serial.println(groundAltitude);Serial.println();
   }
   
   void setGroundAltitude(float value) {

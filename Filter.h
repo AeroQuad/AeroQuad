@@ -18,15 +18,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+// Low pass filter, kept as regular C function for speed
 float smooth(float currentData, float previousData, float smoothFactor) {
   return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor));
 }
 
 // ***********************************************************************
-// *************************** Filter Class ******************************
+// *********************** Median Filter Class ***************************
 // ***********************************************************************
-// Made this as a class so that don't need to carry global array for each
-// measurement to use median filter on.
+// Median filter currently not used, but kept if needed for the future
+// To declar use: MedianFilter filterSomething;
+
 class MedianFilter {
 public: 
   #define DATASIZE 25

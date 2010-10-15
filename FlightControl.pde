@@ -22,19 +22,6 @@
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
 void flightControl(void) {
-  // If in Stable Mode and Z Axis indicates not in hover, switch to Acro Mode
-  
-  // Experiment to see if we can detect motion by looking at Z Axis
-  // If there is a change in Z Axis accel, change from Stable to Acro Mode
-  /*if (flightMode == STABLE) {
-    if ((accel.getOneG() - accel.getRaw(ZAXIS)) > 25) {
-      flightMode = ACRO;
-      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-        digitalWrite(LED2PIN, LOW);
-      #endif
-    }
-  }*/
-  
   if (flightMode == ACRO) {
     // Acrobatic Mode
     // updatePID(target, measured, PIDsettings);
@@ -68,20 +55,23 @@ void flightControl(void) {
   }
     
   // ***************************** Update Yaw ***************************
-  // Heading hold method using magnetometer from code by FabQuad
-  // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
   if (headingHoldConfig == ON) {
     gyro.calculateHeading();
-    heading = compass.getHeading();
+
+    #ifdef HeadingMagHold
+      heading = compass.getHeading();
+    #else
+      heading = gyro.getHeading();
+    #endif
     
-    // Always center relative heading around absolte heading chosen during yaw command
+    // Always center relative heading around absolute heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
     // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
     relativeHeading = heading - setHeading;
     if (heading <= (setHeading - 180)) relativeHeading += 360;
     if (heading >= (setHeading + 180)) relativeHeading -= 360;
     
-    // apply heading hold only when throttle high enough to start flight
+    // Apply heading hold only when throttle high enough to start flight
     if (receiver.getData(THROTTLE) > MINCHECK ) { 
       if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) {
         // If commanding yaw, turn off heading hold and store latest heading
@@ -105,17 +95,12 @@ void flightControl(void) {
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
   // ****************************** Altitude Adjust *************************
-  // Experimental / not functional
-  // s = (at^2)/2, t = 0.002
-  //zAccelHover += ((accelData[ZAXIS] * accelScaleFactor) * 0.000004) * 0.5;
-  /*zAccelHover = accelADC[ROLL] / tan(angleRad(ROLL));
-  throttleAdjust = limitRange((zAccelHover - accelADC[ZAXIS]) * throttleAdjustGain, minThrottleAdjust, maxThrottleAdjust);
-  for (motor = FRONT; motor < LASTMOTOR; motor++)
-    motorCommand[motor] += throttleAdjust;*/
-  if (altitudeHold == ON)
-    throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-  else
-    throttleAdjust = 0;
+  #ifdef AltitudeHold
+    if (altitudeHold == ON)
+      throttleAdjust = constrain(updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]), minThrottleAdjust, maxThrottleAdjust);
+    else
+      throttleAdjust = 0;
+  #endif
 
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
@@ -232,8 +217,8 @@ void flightControl(void) {
       motors.setMotorCommand(motor, MINTHROTTLE);
   }
   
-  // If motor output disarmed, force motor output to minimum
-  if (armed == 0) {
+  // ESC Calibration
+  if (armed == OFF) {
     switch (calibrateESC) { // used for calibrating ESC's
     case 1:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
@@ -246,7 +231,7 @@ void flightControl(void) {
     case 5:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
-      safetyCheck = 1;
+      safetyCheck = ON;
       break;
     default:
       for (motor = FRONT; motor < LASTMOTOR; motor++)
@@ -257,6 +242,6 @@ void flightControl(void) {
   }
 
   // *********************** Command Motors **********************
- if (armed == 1 && safetyCheck == 1)
+ if (armed == ON && safetyCheck == ON)
   motors.write(); // Defined in Motors.h
 }

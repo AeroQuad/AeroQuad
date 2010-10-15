@@ -116,7 +116,6 @@ public:
   void calculateHeading() {
     currentTime = millis();
     rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000.0);
-    //Serial.print(getData(YAW));comma();Serial.print(gyroScaleFactor);comma();Serial.print(currentTime-previousTime);comma();Serial.println(rawHeading);
     previousTime = currentTime;
   }
  

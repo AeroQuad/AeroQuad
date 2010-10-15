@@ -27,13 +27,13 @@ void readSensors(void) {
   accel.measure(); // defined in Accel.h
  
  // ********************* Read Slower Sensors *******************
- #if defined(AeroQuadMega_v2)
+ #if defined(HeadingMagHold)
    if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
      compass.measure(); // defined in compass.h
      compassTime = currentTime;
    }
  #endif
- #if defined(AeroQuadMega_v2) || defined(ArduCopter)
+ #if defined(AltitudeHold)
    if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 37Hz
      altitude.measure(); // defined in altitude.h
      altitudeTime = currentTime;

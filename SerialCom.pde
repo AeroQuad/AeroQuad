@@ -195,11 +195,7 @@ void sendSerialTelemetry() {
     Serial.print(receiver.getData(THROTTLE));
     comma();
     Serial.print(motors.getMotorCommand(RIGHT));*/
-    Serial.print(YAW, DEC);comma();
-    Serial.print(ALTITUDE, DEC);
-    Serial.println();
     //queryType = 'X';
-    compass.getData();
     break;
   case 'B': // Send roll and pitch gyro PID values
     Serial.print(PID[ROLL].P);
@@ -366,10 +362,14 @@ void sendSerialTelemetry() {
       Serial.print(2000);
     if (flightMode == ACRO)
       Serial.print(1000);
-    comma();
-    Serial.print(compass.getAbsoluteHeading());
-    comma();
-    Serial.print(altitude.getData());
+    #ifdef HeadingMagHold
+      comma();
+      Serial.print(compass.getAbsoluteHeading());
+    #endif
+    #ifdef AltitudeHold
+      comma();
+      Serial.print(altitude.getData());
+    #endif
     Serial.println();
     break;
    case 'T': // Send processed transmitter values

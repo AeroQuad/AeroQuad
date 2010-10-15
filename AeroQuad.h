@@ -129,18 +129,6 @@ float absoluteHeading = 0;;
 float setHeading = 0;
 float commandedYaw = 0;
 
-// Altitude Adjust
-#define TEMPERATURE 0
-#define PRESSURE 1
-float zAccelHover;
-int throttleAdjust;
-int throttleAdjustGain = 10; // Look to make this a command setting
-int minThrottleAdjust = -200;
-int maxThrottleAdjust = 200;
-float holdAltitude;
-byte storeAltitude = OFF;
-byte altitudeHold = OFF;
-
 // Receiver variables
 #define TIMEOUT 25000
 #define MINCOMMAND 1000
@@ -189,8 +177,8 @@ int testCommand = 1000;
 char queryType = 'X';
 byte tlmType = 0;
 char string[32];
-byte armed = 0;
-byte safetyCheck = 0;
+byte armed = OFF;
+byte safetyCheck = OFF;
 byte update = 0;
 
 /**************************************************************/

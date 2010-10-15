@@ -62,6 +62,10 @@
 // Not yet fully tested and implemented
 //#define Camera
 
+// Optional Sensors
+#define HeadingMagHold // Enables HMC5843 Magnetometer
+#define AltitudeHold // Enables BMP083 Barometer
+
 /****************************************************************************
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
@@ -73,7 +77,6 @@
 #include "I2C.h"
 #include "PID.h"
 #include "Filter.h"
-MedianFilter transmitterFilter[8];
 #include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Accel.h"
@@ -121,10 +124,6 @@ MedianFilter transmitterFilter[8];
   #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
-  #include "Compass.h"
-  Compass_AeroQuad_v2 compass;
-  #include "Altitude.h"
-  Altitude_AeroQuad_v2 altitude;
 #endif
 
 #ifdef ArduCopter
@@ -132,11 +131,9 @@ MedianFilter transmitterFilter[8];
   Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
+  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
-  #include "DataStorage.h"
-  #include "Altitude.h"
-  Altitude_AeroQuad_v2 altitude;
 #endif
 
 #ifdef AeroQuad_Wii
@@ -184,6 +181,18 @@ MedianFilter transmitterFilter[8];
   FlightAngle_DCM flightAngle;
 #endif
 
+// Optional Sensors
+// Current defined for the AeroQuad v2.0 Shield
+// Defined separately in case other configurations want to incorporate these sensors
+#ifdef HeadingMagHold
+  #include "Compass.h"
+  Compass_AeroQuad_v2 compass; // HMC5843
+#endif
+#ifdef AltitudeHold
+  #include "Altitude.h"
+  Altitude_AeroQuad_v2 altitude;  //BMP085
+#endif
+
 // Angle Estimation Objects
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
@@ -215,7 +224,9 @@ void setup() {
   
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
     Wire.begin();
-    // Recommendation from Mgros increase I2C speed
+  #endif
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+    // Recommendation from Mgros to increase I2C speed
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
     TWBR = 12; // Need to figure out a way to disable this for Wii sensors
   #endif
@@ -227,10 +238,8 @@ void setup() {
   motors.initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON) {
-    for (channel = ROLL; channel < LASTCHANNEL; channel++) transmitterFilter[channel].initialize();
+  if (receiverLoop == ON)
     receiver.initialize(); // defined in Received.h
-  }
        
   // Initialize sensors
   // If sensors have a common initialization routine
@@ -283,15 +292,12 @@ void setup() {
   // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
 
-  // Heading hold
-  // aref is read in from EEPROM and originates from Configurator
-  //headingScaleFactor = (aref / 1024.0) / gyro.getScaleFactor() * (PI/2.0);
-  #if defined(AeroQuadMega_v2)
+  // Optional Sensors
+  #ifdef HeadingMagHold
     compass.initialize();
     setHeading = compass.getHeading();
-    altitude.initialize();
   #endif
-  #if defined(ArduCopter)
+  #ifdef AltitudeHold
     altitude.initialize();
   #endif
     
