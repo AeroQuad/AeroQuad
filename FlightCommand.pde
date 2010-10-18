@@ -67,6 +67,8 @@ void readPilotCommands() {
       armed = ON;
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
+      delay(50);
+      accel.setOneG(accel.getData(ZAXIS));
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = ON; 

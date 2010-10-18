@@ -22,6 +22,7 @@ class Accel {
 public:
   float accelScaleFactor;
   float smoothFactor;
+  float rawAltitude;
   int accelChannel[3];
   int accelZero[3];
   int accelData[3];
@@ -29,6 +30,7 @@ public:
   int sign[3];
   int accelOneG;
   byte rollChannel, pitchChannel, zAxisChannel;
+  unsigned long currentTime, previousTime;
   Accel(void) {
     sign[ROLL] = 1;
     sign[PITCH] = 1;
@@ -109,6 +111,21 @@ public:
   const int getOneG(void) {
     return accelOneG;
   }
+  
+  const int getZaxis() {
+    return getData(ZAXIS) - accelOneG;
+  }
+  
+  void calculateAltitude() {
+    currentTime = millis();
+    if ((abs(getData(ROLL)) < 1800) || (abs(getData(PITCH)) < 1800))
+      rawAltitude += (getData(ZAXIS) - accelOneG) * accelScaleFactor * ((currentTime - previousTime) / 1000.0);
+    previousTime = currentTime;
+  } 
+  
+  const float getAltitude(void) {
+    return rawAltitude;
+  }
 };
 
 /******************************************************/
@@ -121,9 +138,13 @@ private:
 public:
   Accel_AeroQuad_v1() : Accel(){
     // Accelerometer Values
-    // If BMA180 setup for 1G
-    // Page 27 of datasheet = 0.00013g/LSB
-    accelScaleFactor = 0.00013;    
+    // Update these variables if using a different accel
+    // Output is ratiometric for ADXL 335
+    // Note: Vs is not AREF voltage
+    // If Vs = 3.6V, then output sensitivity is 360mV/g
+    // If Vs = 2V, then it's 195 mV/g
+    // Then if Vs = 3.3V, then it's 329.062 mV/g
+    accelScaleFactor = 0.000329062;
   }
   
   void initialize(void) {
@@ -179,14 +200,9 @@ private:
 public:
   Accel_AeroQuadMega_v2() : Accel(){
     accelAddress = 0x40; // page 54 and 61 of datasheet
-    // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;
+    // Accelerometer value if BMA180 setup for 1.5G
+    // Page 27 of datasheet = 0.00013g/LSB
+    accelScaleFactor = 0.00019;    
   }
   
   void initialize(void) {
@@ -203,7 +219,7 @@ public:
 
     // Thanks to SwiftingSpeed for updates on these settings
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
-    updateRegisterI2C(accelAddress, 0x10, 0xb6); //reset device
+    updateRegisterI2C(accelAddress, 0x10, 0xB6); //reset device
     delay(10);  //sleep 10 ms after reset (page 25)
 
     // In datasheet, summary register map is page 21
@@ -224,7 +240,13 @@ public:
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
     data[0] = readByteI2C(accelAddress);
-    updateRegisterI2C(accelAddress, 0x35, data[0] & ~0x0E); // set range to +/-1g (value = xxxx000x)
+    //Serial.println(data[0], HEX);
+    data[0] &= 0xF1;
+    data[0] |= 1<<1;
+    updateRegisterI2C(accelAddress, 0x35, data[0]); // set range to +/-1.5g (value = xxxx001x)
+    //sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
+    //data[0] = readByteI2C(accelAddress);
+    //Serial.println(data[0], HEX);    
   }
   
   void measure(void) {
@@ -233,8 +255,9 @@ public:
     if (select == PITCH) sendByteI2C(accelAddress, 0x02);
     if (select == ZAXIS) sendByteI2C(accelAddress, 0x06);
     rawData[select] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
-    accelADC[select] = rawData[select] - accelZero[select]; // reduce ADC value
+    accelADC[select] = rawData[select] - accelZero[select]; // center accel data around zero
     accelData[select] = smooth(accelADC[select], accelData[select], smoothFactor);
+    if (select == ZAXIS) calculateAltitude();
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
   }
 

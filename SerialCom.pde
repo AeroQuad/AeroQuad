@@ -93,7 +93,10 @@ void readSerialCommand() {
       PID[ALTITUDE].I = readFloatSerial();
       PID[ALTITUDE].D = readFloatSerial();
       PID[ALTITUDE].lastPosition = 0;
-      PID[ALTITUDE].integratedError = 0;    
+      PID[ALTITUDE].integratedError = 0;
+      minThrottleAdjust = readFloatSerial();
+      maxThrottleAdjust = readFloatSerial();
+      altitude.setSmoothFactor(readFloatSerial());
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -182,19 +185,20 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    /*Serial.print(altitudeHold,DEC);
+    /*Serial.print(accel.getData(ROLL));
     comma();
-    Serial.print(storeAltitude,DEC);
+    Serial.print(accel.getData(PITCH));
     comma();
-    Serial.print(holdAltitude);
+    Serial.print(accel.getData(ZAXIS));
+    comma();
+    Serial.print(accel.getOneG());
+    comma();
+    Serial.print(accel.getData(ZAXIS) - accel.getOneG());
+    comma();*/
+    Serial.print(accel.getZaxis());
     comma();
     Serial.print(throttleAdjust);
-    comma();
-    Serial.print(altitude.getData());
-    comma();
-    Serial.print(receiver.getData(THROTTLE));
-    comma();
-    Serial.print(motors.getMotorCommand(RIGHT));*/
+    Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -268,7 +272,13 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(PID[ALTITUDE].I);
     comma();
-    Serial.println(PID[ALTITUDE].D);
+    Serial.print(PID[ALTITUDE].D);
+    comma();
+    Serial.print(minThrottleAdjust);
+    comma();
+    Serial.print(maxThrottleAdjust);
+    comma();
+    Serial.println(altitude.getSmoothFactor());
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
@@ -365,10 +375,20 @@ void sendSerialTelemetry() {
     #ifdef HeadingMagHold
       comma();
       Serial.print(compass.getAbsoluteHeading());
+    #else
+      comma();
+      Serial.print('0');
     #endif
     #ifdef AltitudeHold
       comma();
       Serial.print(altitude.getData());
+      comma();
+      Serial.print(altitudeHold, DEC);
+    #else
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
     #endif
     Serial.println();
     break;

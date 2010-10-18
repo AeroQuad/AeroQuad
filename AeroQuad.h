@@ -302,6 +302,9 @@ byte testSignal = LOW;
 #define ALTITUDE_PGAIN_ADR 260
 #define ALTITUDE_IGAIN_ADR 264
 #define ALTITUDE_DGAIN_ADR 268
+#define ALTITUDE_MAX_THROTTLE_ADR 272
+#define ALTITUDE_MIN_THROTTLE_ADR 276
+#define ALTITUDE_SMOOTH_ADR  280
 
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 float arctan2(float y, float x); // defined in Sensors.pde

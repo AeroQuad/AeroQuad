@@ -28,8 +28,8 @@
 #define TEMPERATURE 0
 #define PRESSURE 1
 int throttleAdjust = 0;
-int minThrottleAdjust = -25;
-int maxThrottleAdjust = 100;
+int minThrottleAdjust = -50;
+int maxThrottleAdjust = 50;
 float holdAltitude;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
@@ -89,6 +89,10 @@ public:
   
   void setSmoothFactor(float value) {
     smoothFactor = value;
+  }
+  
+  const float getSmoothFactor(void) {
+    return smoothFactor;
   }
 };
 

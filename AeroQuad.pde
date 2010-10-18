@@ -89,7 +89,6 @@
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_CompFilter flightAngle;
   //FlightAngle_MultiWii flightAngle;
@@ -100,7 +99,6 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_CompFilter flightAngle;
   //FlightAngle_DCM flightAngle;
@@ -111,7 +109,6 @@
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
   Motors_PWM motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -121,7 +118,6 @@
   Motors_PWM motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -131,7 +127,6 @@
   Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -141,7 +136,6 @@
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_CompFilter flightAngle;
   //FlightAngle_DCM flightAngle;
@@ -152,7 +146,6 @@
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -164,7 +157,6 @@
   Motors_PWM motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -176,14 +168,12 @@
   Motors_I2C motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
-  #include "DataStorage.h"
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
 
-// Optional Sensors
-// Current defined for the AeroQuad v2.0 Shield
-// Defined separately in case other configurations want to incorporate these sensors
+// Optional Sensors, currently defined for the AeroQuad v2.0 Shield
+// Defined here in case other configurations want to incorporate these sensors
 #ifdef HeadingMagHold
   #include "Compass.h"
   Compass_AeroQuad_v2 compass; // HMC5843
@@ -193,10 +183,13 @@
   Altitude_AeroQuad_v2 altitude;  //BMP085
 #endif
 
+// Include this last as it contains objects from above declarations
+#include "DataStorage.h"
+
 // Angle Estimation Objects
 // Class definition for angle estimation found in FlightAngle.h
 // Use only one of the following variable declarations
-// Insert into the appropriate #idef's above
+// Insert into the appropriate #ifdef's above
 //#include "FlightAngle.h"
 //FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
 //FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter

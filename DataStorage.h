@@ -70,6 +70,9 @@ void initializeEEPROM(void) {
   PID[ALTITUDE].P = 0.0;
   PID[ALTITUDE].I = 0.0;
   PID[ALTITUDE].D = 0.0;
+  minThrottleAdjust = -25.0;
+  maxThrottleAdjust = 25.0;
+  altitude.setSmoothFactor(0.05);
   windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
   levelLimit = 500.0;
@@ -149,30 +152,20 @@ void readEEPROM(void) {
   PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
   PID[ALTITUDE].lastPosition = 0;
   PID[ALTITUDE].integratedError = 0;
-
-  receiver.setTransmitterSlope(THROTTLE, THROTTLESCALE_ADR);
-  receiver.setTransmitterOffset(THROTTLE, THROTTLEOFFSET_ADR);
-  receiver.setTransmitterSlope(ROLL, ROLLSCALE_ADR);
-  receiver.setTransmitterOffset(ROLL, ROLLOFFSET_ADR);
-  receiver.setTransmitterSlope(PITCH, PITCHSCALE_ADR);
-  receiver.setTransmitterOffset(PITCH, PITCHOFFSET_ADR);
-  receiver.setTransmitterSlope(YAW, YAWSCALE_ADR);
-  receiver.setTransmitterOffset(YAW, YAWOFFSET_ADR);
-  receiver.setTransmitterSlope(MODE, MODESCALE_ADR);
-  receiver.setTransmitterOffset(MODE, MODEOFFSET_ADR);
-  receiver.setTransmitterSlope(AUX, AUXSCALE_ADR);
-  receiver.setTransmitterOffset(AUX, AUXOFFSET_ADR);
+  minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
+  maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+  altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
-  receiver.setXmitFactor(XMITFACTOR_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   minAcro = readFloat(MINACRO_ADR);
+  accel.setOneG(readFloat(ACCEL1G_ADR));
 }
 
 void writeEEPROM(void){
@@ -204,6 +197,9 @@ void writeEEPROM(void){
   writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
   writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
   writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
+  writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
+  writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+  writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   
   writeFloat(levelOff, LEVELOFF_ADR); 
@@ -234,5 +230,6 @@ void writeEEPROM(void){
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(minAcro, MINACRO_ADR);
+  writeFloat(accel.getOneG(), ACCEL1G_ADR);
   sei(); // Restart interrupts
 }

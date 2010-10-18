@@ -96,8 +96,10 @@ void flightControl(void) {
     
   // ****************************** Altitude Adjust *************************
   #ifdef AltitudeHold
-    if (altitudeHold == ON)
-      throttleAdjust = constrain(updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]), minThrottleAdjust, maxThrottleAdjust);
+    if (altitudeHold == ON) {
+      throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
+      throttleAdjust = constrain(throttleAdjust + (-(accel.getZaxis() >> 4) * 2), minThrottleAdjust, maxThrottleAdjust);
+    }
     else
       throttleAdjust = 0;
   #endif
