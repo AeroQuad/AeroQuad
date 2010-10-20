@@ -113,7 +113,7 @@ public:
   }
   
   const int getZaxis() {
-    return getData(ZAXIS) - accelOneG;
+    return getFlightData(ZAXIS) - accelOneG;
   }
   
   void calculateAltitude() {

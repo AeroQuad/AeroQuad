@@ -97,6 +97,9 @@ void readSerialCommand() {
       minThrottleAdjust = readFloatSerial();
       maxThrottleAdjust = readFloatSerial();
       altitude.setSmoothFactor(readFloatSerial());
+      PID[ZDAMPENING].P = readFloatSerial();
+      PID[ZDAMPENING].I = readFloatSerial();
+      PID[ZDAMPENING].D = readFloatSerial();
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -267,7 +270,7 @@ void sendSerialTelemetry() {
     Serial.println(levelOff);
     queryType = 'X';
     break;
-  case 'J': // Spare
+  case 'J': // Altitude Hold
     Serial.print(PID[ALTITUDE].P);
     comma();
     Serial.print(PID[ALTITUDE].I);
@@ -278,7 +281,13 @@ void sendSerialTelemetry() {
     comma();
     Serial.print(maxThrottleAdjust);
     comma();
-    Serial.println(altitude.getSmoothFactor());
+    Serial.print(altitude.getSmoothFactor());
+    comma();
+    Serial.print(PID[ZDAMPENING].P);
+    comma();
+    Serial.print(PID[ZDAMPENING].I);
+    comma();
+    Serial.println(PID[ZDAMPENING].D);
     queryType = 'X';
     break;
   case 'L': // Send data filtering values

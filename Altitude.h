@@ -24,16 +24,6 @@
 // ************************** Altitude Class *****************************
 // ***********************************************************************
 
-// Altitude Adjust Globals
-#define TEMPERATURE 0
-#define PRESSURE 1
-int throttleAdjust = 0;
-int minThrottleAdjust = -50;
-int maxThrottleAdjust = 50;
-float holdAltitude;
-byte storeAltitude = OFF;
-byte altitudeHold = OFF;
-
 class Altitude {
 public:
   double altitude, rawAltitude;

@@ -58,6 +58,23 @@
 #define LEVELGYROROLL 6
 #define LEVELGYROPITCH 7
 #define ALTITUDE 8
+#define ZDAMPENING 9
+
+// PID Variables
+struct PIDdata {
+  float P, I, D;
+  float lastPosition;
+  float integratedError;
+  //float windupGuard; // Thinking about having individual wind up guards for each PID
+} PID[10];
+// This struct above declares the variable PID[] to hold each of the PID values for various functions
+// The following constants are declared in AeroQuad.h
+// ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
+// ROLLLEVEL = 3, PITCHLEVEL = 4, LEVELGYROROLL = 6, LEVELGYROPITCH = 7 (used for Stable Mode, accels + gyros)
+// HEADING = 5 (used for heading hold)
+// ALTITUDE = 8 (used for altitude hold)
+// ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
+float windupGuard; // Read in from EEPROM
 
 // Smoothing filter parameters
 #define GYRO 0
@@ -128,6 +145,17 @@ float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
 float setHeading = 0;
 float commandedYaw = 0;
+
+// Altitude Hold
+#define TEMPERATURE 0
+#define PRESSURE 1
+int throttleAdjust = 0;
+int minThrottleAdjust = -50;
+int maxThrottleAdjust = 50;
+float holdAltitude;
+float zDampening;
+byte storeAltitude = OFF;
+byte altitudeHold = OFF;
 
 // Receiver variables
 #define TIMEOUT 25000
@@ -305,6 +333,9 @@ byte testSignal = LOW;
 #define ALTITUDE_MAX_THROTTLE_ADR 272
 #define ALTITUDE_MIN_THROTTLE_ADR 276
 #define ALTITUDE_SMOOTH_ADR  280
+#define ZDAMP_PGAIN_ADR 284
+#define ZDAMP_IGAIN_ADR 288
+#define ZDAMP_DGAIN_ADR 292
 
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 float arctan2(float y, float x); // defined in Sensors.pde

@@ -18,20 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-struct PIDdata {
-  float P, I, D;
-  float lastPosition;
-  float integratedError;
-  float windupGuard;
-} PID[9];
-// This struct above declares the variable PID[] to hold each of the PID values for various functions
-// The following constants are declared in AeroQuad.h
-// ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
-// ROLLLEVEL = 3, PITCHLEVEL = 4, LEVELGYROROLL = 6, LEVELGYROPITCH = 7 (used for Stable Mode, accels + gyros)
-// HEADING = 5
-// ALTITUDE = 8
-float windupGuard; // Read in from EEPROM
-
 // Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
 float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
   float error;

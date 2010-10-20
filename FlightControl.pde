@@ -98,7 +98,8 @@ void flightControl(void) {
   #ifdef AltitudeHold
     if (altitudeHold == ON) {
       throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-      throttleAdjust = constrain(throttleAdjust + (-(accel.getZaxis() >> 4) * 2), minThrottleAdjust, maxThrottleAdjust);
+      zDampening = -updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]);
+      throttleAdjust = constrain(throttleAdjust + zDampening, minThrottleAdjust, maxThrottleAdjust);
     }
     else
       throttleAdjust = 0;

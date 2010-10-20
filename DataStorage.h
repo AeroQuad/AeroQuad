@@ -70,6 +70,9 @@ void initializeEEPROM(void) {
   PID[ALTITUDE].P = 0.0;
   PID[ALTITUDE].I = 0.0;
   PID[ALTITUDE].D = 0.0;
+  PID[ZDAMPENING].P = 0.0;
+  PID[ZDAMPENING].I = 0.0;
+  PID[ZDAMPENING].D = 0.0;
   minThrottleAdjust = -25.0;
   maxThrottleAdjust = 25.0;
   altitude.setSmoothFactor(0.05);
@@ -152,6 +155,11 @@ void readEEPROM(void) {
   PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
   PID[ALTITUDE].lastPosition = 0;
   PID[ALTITUDE].integratedError = 0;
+  PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
+  PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
+  PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
+  PID[ZDAMPENING].lastPosition = 0;
+  PID[ZDAMPENING].integratedError = 0;
   minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
@@ -197,6 +205,9 @@ void writeEEPROM(void){
   writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
   writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
   writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].P, ALTITUDE_PGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].I, ALTITUDE_IGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].D, ALTITUDE_DGAIN_ADR);
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
