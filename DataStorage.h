@@ -205,9 +205,9 @@ void writeEEPROM(void){
   writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
   writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
   writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].P, ALTITUDE_PGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].I, ALTITUDE_IGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].D, ALTITUDE_DGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].P, ZDAMP_PGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].I, ZDAMP_IGAIN_ADR);
+  writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);

@@ -28,13 +28,14 @@ public:
   int accelData[3];
   int accelADC[3];
   int sign[3];
-  int accelOneG;
+  int accelOneG, zAxis;
   byte rollChannel, pitchChannel, zAxisChannel;
   unsigned long currentTime, previousTime;
   Accel(void) {
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = 1;
+    zAxis = 0;
   }
 
   // ******************************************************************
@@ -113,7 +114,8 @@ public:
   }
   
   const int getZaxis() {
-    return getFlightData(ZAXIS) - accelOneG;
+    zAxis = smooth(getFlightData(ZAXIS) - accelOneG, zAxis, 0.25);
+    return zAxis;
   }
   
   void calculateAltitude() {

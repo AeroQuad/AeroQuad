@@ -95,10 +95,14 @@ void flightControl(void) {
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
   // ****************************** Altitude Adjust *************************
+  // Thanks to Honk for his work with altitude hold
+  // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
+  // Thanks to Sherbakov for his work in Z Axis dampening
+  // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #ifdef AltitudeHold
     if (altitudeHold == ON) {
       throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-      zDampening = -updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]);
+      zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]);
       throttleAdjust = constrain(throttleAdjust + zDampening, minThrottleAdjust, maxThrottleAdjust);
     }
     else

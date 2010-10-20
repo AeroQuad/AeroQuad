@@ -188,17 +188,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    /*Serial.print(accel.getData(ROLL));
-    comma();
-    Serial.print(accel.getData(PITCH));
-    comma();
-    Serial.print(accel.getData(ZAXIS));
+    Serial.print(accel.getZaxis());
     comma();
     Serial.print(accel.getOneG());
     comma();
-    Serial.print(accel.getData(ZAXIS) - accel.getOneG());
-    comma();*/
-    Serial.print(accel.getZaxis());
+    Serial.print(zDampening);
     comma();
     Serial.print(throttleAdjust);
     Serial.println();
