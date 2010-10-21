@@ -89,17 +89,19 @@ void readSerialCommand() {
       levelOff = readFloatSerial();
       break;
     case 'I': // Receiver altitude hold PID
-      PID[ALTITUDE].P = readFloatSerial();
-      PID[ALTITUDE].I = readFloatSerial();
-      PID[ALTITUDE].D = readFloatSerial();
-      PID[ALTITUDE].lastPosition = 0;
-      PID[ALTITUDE].integratedError = 0;
-      minThrottleAdjust = readFloatSerial();
-      maxThrottleAdjust = readFloatSerial();
-      altitude.setSmoothFactor(readFloatSerial());
-      PID[ZDAMPENING].P = readFloatSerial();
-      PID[ZDAMPENING].I = readFloatSerial();
-      PID[ZDAMPENING].D = readFloatSerial();
+      #ifdef AltitudeHold
+        PID[ALTITUDE].P = readFloatSerial();
+        PID[ALTITUDE].I = readFloatSerial();
+        PID[ALTITUDE].D = readFloatSerial();
+        PID[ALTITUDE].lastPosition = 0;
+        PID[ALTITUDE].integratedError = 0;
+        minThrottleAdjust = readFloatSerial();
+        maxThrottleAdjust = readFloatSerial();
+        altitude.setSmoothFactor(readFloatSerial());
+        PID[ZDAMPENING].P = readFloatSerial();
+        PID[ZDAMPENING].I = readFloatSerial();
+        PID[ZDAMPENING].D = readFloatSerial();
+      #endif
       break;
     case 'K': // Receive data filtering values
       gyro.setSmoothFactor(readFloatSerial());
@@ -265,23 +267,43 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'J': // Altitude Hold
-    Serial.print(PID[ALTITUDE].P);
-    comma();
-    Serial.print(PID[ALTITUDE].I);
-    comma();
-    Serial.print(PID[ALTITUDE].D);
-    comma();
-    Serial.print(minThrottleAdjust);
-    comma();
-    Serial.print(maxThrottleAdjust);
-    comma();
-    Serial.print(altitude.getSmoothFactor());
-    comma();
-    Serial.print(PID[ZDAMPENING].P);
-    comma();
-    Serial.print(PID[ZDAMPENING].I);
-    comma();
-    Serial.println(PID[ZDAMPENING].D);
+    #ifdef AltitudeHold
+      Serial.print(PID[ALTITUDE].P);
+      comma();
+      Serial.print(PID[ALTITUDE].I);
+      comma();
+      Serial.print(PID[ALTITUDE].D);
+      comma();
+      Serial.print(minThrottleAdjust);
+      comma();
+      Serial.print(maxThrottleAdjust);
+      comma();
+      Serial.print(altitude.getSmoothFactor());
+      comma();
+      Serial.print(PID[ZDAMPENING].P);
+      comma();
+      Serial.print(PID[ZDAMPENING].I);
+      comma();
+      Serial.println(PID[ZDAMPENING].D);
+    #else
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.println('0');
+    #endif
     queryType = 'X';
     break;
   case 'L': // Send data filtering values

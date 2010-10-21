@@ -67,15 +67,17 @@ void initializeEEPROM(void) {
   PID[LEVELGYROPITCH].P = 1.2;
   PID[LEVELGYROPITCH].I = 0.0;
   PID[LEVELGYROPITCH].D = -14.0;
-  PID[ALTITUDE].P = 0.0;
-  PID[ALTITUDE].I = 0.0;
-  PID[ALTITUDE].D = 0.0;
-  PID[ZDAMPENING].P = 0.0;
-  PID[ZDAMPENING].I = 0.0;
-  PID[ZDAMPENING].D = 0.0;
-  minThrottleAdjust = -25.0;
-  maxThrottleAdjust = 25.0;
-  altitude.setSmoothFactor(0.05);
+  #ifdef AltitudeHold
+    PID[ALTITUDE].P = 25.0;
+    PID[ALTITUDE].I = 0.0;
+    PID[ALTITUDE].D = 0.0;
+    PID[ZDAMPENING].P = 0.0;
+    PID[ZDAMPENING].I = 0.0;
+    PID[ZDAMPENING].D = 0.0;
+    minThrottleAdjust = -50.0;
+    maxThrottleAdjust = 500.0;
+    altitude.setSmoothFactor(0.1);
+  #endif
   windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
   levelLimit = 500.0;
@@ -150,19 +152,21 @@ void readEEPROM(void) {
   PID[LEVELGYROPITCH].lastPosition = 0;
   PID[LEVELGYROPITCH].integratedError = 0;
   
-  PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
-  PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
-  PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
-  PID[ALTITUDE].lastPosition = 0;
-  PID[ALTITUDE].integratedError = 0;
-  PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
-  PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
-  PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
-  PID[ZDAMPENING].lastPosition = 0;
-  PID[ZDAMPENING].integratedError = 0;
-  minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
-  maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
-  altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+  #ifdef AltitudeHold
+    PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
+    PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
+    PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
+    PID[ALTITUDE].lastPosition = 0;
+    PID[ALTITUDE].integratedError = 0;
+    PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
+    PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
+    PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
+    PID[ZDAMPENING].lastPosition = 0;
+    PID[ZDAMPENING].integratedError = 0;
+    minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
+    maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+    altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+  #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
@@ -202,15 +206,17 @@ void writeEEPROM(void){
   writeFloat(PID[LEVELGYROPITCH].P, LEVEL_GYRO_PITCH_PGAIN_ADR);
   writeFloat(PID[LEVELGYROPITCH].I, LEVEL_GYRO_PITCH_IGAIN_ADR);
   writeFloat(PID[LEVELGYROPITCH].D, LEVEL_GYRO_PITCH_DGAIN_ADR);
-  writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
-  writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
-  writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].P, ZDAMP_PGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].I, ZDAMP_IGAIN_ADR);
-  writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
-  writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
-  writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-  writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+  #ifdef AltitudeHold
+    writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
+    writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
+    writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
+    writeFloat(PID[ZDAMPENING].P, ZDAMP_PGAIN_ADR);
+    writeFloat(PID[ZDAMPENING].I, ZDAMP_IGAIN_ADR);
+    writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
+    writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
+    writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+  #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   
   writeFloat(levelOff, LEVELOFF_ADR); 

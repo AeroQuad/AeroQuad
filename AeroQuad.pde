@@ -218,11 +218,11 @@ void setup() {
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
     Wire.begin();
   #endif
-  //#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
     // Recommendation from Mgros to increase I2C speed
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
-    TWBR = 12; // Need to figure out a way to disable this for Wii sensors
-  //#endif
+    TWBR = 12;
+  #endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
