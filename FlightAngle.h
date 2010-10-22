@@ -418,7 +418,11 @@ public:
       Kp_ROLLPITCH = 0.060;
       Ki_ROLLPITCH = 0.0000005;
     #endif
-    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii)
+    #ifdef AeroQuadMega_v1
+       Kp_ROLLPITCH = 0.3423;
+       Ki_ROLLPITCH = 0.00234;
+    #endif
+    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1)
       Kp_ROLLPITCH = 0.010;
       Ki_ROLLPITCH = 0.0000005;
     #endif

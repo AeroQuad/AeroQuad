@@ -104,7 +104,9 @@
   //FlightAngle_DCM flightAngle;
 #endif
 
-#ifdef AeroQuadMega_v1 
+#ifdef AeroQuadMega_v1
+  // Special thanks to Wilafau for fixes for this setup
+  // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   Receiver_AeroQuadMega receiver;
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;

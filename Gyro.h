@@ -150,7 +150,7 @@ private:
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = aref / 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
   
   void initialize(void) {
