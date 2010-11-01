@@ -93,6 +93,7 @@ void readSerialCommand() {
         PID[ALTITUDE].P = readFloatSerial();
         PID[ALTITUDE].I = readFloatSerial();
         PID[ALTITUDE].D = readFloatSerial();
+        PID[ALTITUDE].windupGuard = readFloatSerial();
         PID[ALTITUDE].lastPosition = 0;
         PID[ALTITUDE].integratedError = 0;
         minThrottleAdjust = readFloatSerial();
@@ -190,11 +191,9 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(accel.getZaxis());
+    Serial.print(holdAltitude);
     comma();
-    Serial.print(accel.getOneG());
-    comma();
-    Serial.print(zDampening);
+    Serial.print(altitude.getData());
     comma();
     Serial.print(throttleAdjust);
     Serial.println();
@@ -273,6 +272,8 @@ void sendSerialTelemetry() {
       Serial.print(PID[ALTITUDE].I);
       comma();
       Serial.print(PID[ALTITUDE].D);
+      comma();
+      Serial.print(PID[ALTITUDE].windupGuard);
       comma();
       Serial.print(minThrottleAdjust);
       comma();

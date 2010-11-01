@@ -101,28 +101,39 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #ifdef AltitudeHold
     if (altitudeHold == ON) {
-      throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-      zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-      throttleAdjust = constrain(throttleAdjust + zDampening, minThrottleAdjust, maxThrottleAdjust);
+      throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
+      if (receiver.getData(THROTTLE) > MAXCHECK)
+        PID[ALTITUDE].integratedError++;
+      if (receiver.getData(THROTTLE) <= MINCHECK)
+        PID[ALTITUDE].integratedError--;
+      throttleAdjust += PID[ALTITUDE].integratedError;
     }
-    else
+    else {
+      // Altitude hold is off, get throttle from receiver
+      holdThrottle = receiver.getData(THROTTLE);
       throttleAdjust = 0;
+    }
+    // holdThrottle set in FlightCommand.pde if altitude hold is on
+    throttle = holdThrottle + throttleAdjust; 
+  #else
+    // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
+    throttle = receiver.getData(THROTTLE);
   #endif
-
+  
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig
-      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW) + throttleAdjust);
+      motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
     #endif
     #ifdef XConfig
       // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-      motors.setMotorCommand(FRONT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(RIGHT, receiver.getData(THROTTLE) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(LEFT, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW) + throttleAdjust);
-      motors.setMotorCommand(REAR, receiver.getData(THROTTLE) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW) + throttleAdjust);
+      motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+      motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
     #endif
     #ifdef MultipilotI2C
       // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set

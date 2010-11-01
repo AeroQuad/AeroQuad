@@ -67,7 +67,8 @@ void readPilotCommands() {
       armed = ON;
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
-      delay(100);
+      //   delay(100);
+      //altitude.measureGround();
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = ON; 
@@ -104,6 +105,7 @@ void readPilotCommands() {
     else if (receiver.getRaw(AUX) < 1700) {
       if (storeAltitude == ON) {
         holdAltitude = altitude.getData();
+        holdThrottle = receiver.getData(THROTTLE);
         PID[ALTITUDE].integratedError = 0;
         accel.setOneG(accel.getFlightData(ZAXIS));
         storeAltitude = OFF;

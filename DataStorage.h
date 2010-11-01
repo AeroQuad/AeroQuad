@@ -71,6 +71,7 @@ void initializeEEPROM(void) {
     PID[ALTITUDE].P = 25.0;
     PID[ALTITUDE].I = 0.0;
     PID[ALTITUDE].D = 0.0;
+    PID[ALTITUDE].windupGuard = 25.0;
     PID[ZDAMPENING].P = 0.0;
     PID[ZDAMPENING].I = 0.0;
     PID[ZDAMPENING].D = 0.0;
@@ -156,6 +157,7 @@ void readEEPROM(void) {
     PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
     PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
     PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
+    PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     PID[ALTITUDE].lastPosition = 0;
     PID[ALTITUDE].integratedError = 0;
     PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
@@ -210,6 +212,7 @@ void writeEEPROM(void){
     writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
     writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
     writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
+    writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
     writeFloat(PID[ZDAMPENING].P, ZDAMP_PGAIN_ADR);
     writeFloat(PID[ZDAMPENING].I, ZDAMP_IGAIN_ADR);
     writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
