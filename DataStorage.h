@@ -79,6 +79,14 @@ void initializeEEPROM(void) {
     maxThrottleAdjust = 500.0;
     altitude.setSmoothFactor(0.1);
   #endif
+  #ifdef HeadingMagHold
+    compass.setRange(XAXIS, 1);
+    compass.setOffset(XAXIS, 0);
+    compass.setRange(YAXIS, 1);
+    compass.setOffset(YAXIS, 0);
+    compass.setRange(ZAXIS, 1);
+    compass.setOffset(ZAXIS, 0);
+  #endif
   windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
   levelLimit = 500.0;
@@ -170,6 +178,15 @@ void readEEPROM(void) {
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
   #endif
 
+  #ifdef HeadingMagHold
+    compass.setRange(XAXIS, readFloat(MAGXRANGE_ADR));
+    compass.setOffset(XAXIS, readFloat(MAGXOFFSET_ADR));
+    compass.setRange(YAXIS, readFloat(MAGYRANGE_ADR));
+    compass.setOffset(YAXIS, readFloat(MAGYOFFSET_ADR));
+    compass.setRange(ZAXIS, readFloat(MAGZRANGE_ADR));
+    compass.setOffset(ZAXIS, readFloat(MAGZOFFSET_ADR));
+  #endif
+
   windupGuard = readFloat(WINDUPGUARD_ADR);
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
@@ -219,6 +236,14 @@ void writeEEPROM(void){
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
     writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+  #endif
+  #ifdef HeadingMagHold
+    writeFloat(compass.setRange(XAXIS), MAGXRANGE_ADR);
+    writeFloat(compass.setOffset(XAXIS), MAGXOFFSET_ADR);
+    writeFloat(compass.setRange(YAXIS), MAGYRANGE_ADR);
+    writeFloat(compass.setOffset(YAXIS), MAGYOFFSET_ADR);
+    writeFloat(compass.setRange(ZAXIS), MAGZRANGE_ADR);
+    writeFloat(compass.setOffset(ZAXIS), MAGZOFFSET_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   

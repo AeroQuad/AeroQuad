@@ -179,6 +179,16 @@ void readSerialCommand() {
     case 'd': // send aref
       aref = readFloatSerial();
       break;
+    case 'f': // calibrate magnetometer
+      #ifdef HeadingMagHold
+        compass.setRange(XAXIS, readFloat());
+        compass.setOffset(XAXIS, readFloat());
+        compass.setRange(YAXIS, readFloat());
+        compass.setOffset(YAXIS, readFloat());
+        compass.setRange(ZAXIS, readFloat());
+        compass.setOffset(ZAXIS, readFloat());
+      #endif
+      break;
     }
   digitalWrite(LEDPIN, HIGH);
   }
@@ -509,6 +519,21 @@ void sendSerialTelemetry() {
   case 'e': // Send AREF value
     Serial.println(aref);
     queryType = 'X';
+    break;
+  case 'g': // Send magnetometer cal values
+    #ifdef HeadingMagHold
+      Serial.print(compass.getRange(XAXIS);
+      comma()
+      Serial.print(compass.getOffset(XAXIS);
+      comma()
+      Serial.print(compass.getRange(YAXIS);
+      comma()
+      Serial.print(compass.getOffset(YAXIS);
+      comma()
+      Serial.print(compass.getRange(ZAXIS);
+      comma()
+      Serial.println(compass.getOffset(ZAXIS);
+    #endif
     break;
   }
 }

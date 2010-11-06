@@ -28,6 +28,13 @@ public:
   int compassAddress;
   float heading, absoluteHeading, gyroStartHeading;
   float compass;
+  int magXRange;
+  int magXOffset;
+  int magYRange;
+  int magYOffset;
+  int magZRange;
+  int magZOffset;
+
   
   Compass(void) { }
 
@@ -51,6 +58,30 @@ public:
   const float getAbsoluteHeading(void) {
     return absoluteHeading;
   }
+  
+  void setRange(byte axis, int value) {
+    if (axis == XAXIS) magXRange = value;
+    if (axis == YAXIS) magYRange = value;
+    if (axis == ZAXIS) magZRange = value;
+  }
+  
+  void setOffset(byte axis, int value) {
+    if (axis == XAXIS) magXOffset = value;
+    if (axis == YAXIS) magYOffset = value;
+    if (axis == ZAXIS) magZOffset = value;
+  }    
+  
+  const int getRange(byte axis) {
+    if (axis == XAXIS) return magXRange;
+    if (axis == YAXIS) return magYRange;
+    if (axis == ZAXIS) return magZRange;
+  }
+  
+  const int getOffset(byte axis) {
+    if (axis == XAXIS) return magXRange;
+    if (axis == YAXIS) return magYRange;
+    if (axis == ZAXIS) return magZRange;
+  }
 };
 
 // ***********************************************************************
@@ -72,6 +103,7 @@ private:
   float filter1, filter2; // coefficients for complementary filter
   float adjustedGyroHeading, previousHead;
   int gyroZero;
+  float scaleXY, scale YX, scale XZ, scale YZ;
   
 public: 
   Compass_AeroQuad_v2() : Compass(){
@@ -95,6 +127,10 @@ public:
     gyroStartHeading = getData();
     if (gyroStartHeading < 0) gyroStartHeading += 360;
     gyro.setStartHeading(gyroStartHeading);
+    magScaleXY = magXRange / magYRange;
+    magScaleYX = magYRange / magXRange;
+    magScaleXZ = magXRange / magZRange;
+    magScaleYZ = magYRange / magZRange;
   }
   
   void measure(void) {
@@ -110,8 +146,8 @@ public:
     sinRoll = sin(radians(flightAngle.getData(ROLL)));
     cosPitch = cos(radians(flightAngle.getData(PITCH)));
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
-    magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
-    magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
+    magX = (measuredMagX * magScaleYX + magOffsetX) * cosPitch + (measuredMagY * magScaleXY + magOffsetY) * sinRoll * sinPitch + (measuredMagZ * magScale XZ + magOffsetZ) * cosRoll * sinPitch;
+    magY = (measuredMagY * magScaleXY + magOffsetY) * cosRoll - (measuredMagZ * magScaleYZ + magOffsetZ) * sinRoll;
     compass = -degrees(atan2(-magY, magX));
     
     // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value
