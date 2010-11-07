@@ -181,12 +181,12 @@ void readSerialCommand() {
       break;
     case 'f': // calibrate magnetometer
       #ifdef HeadingMagHold
-        compass.setRange(XAXIS, readFloat());
-        compass.setOffset(XAXIS, readFloat());
-        compass.setRange(YAXIS, readFloat());
-        compass.setOffset(YAXIS, readFloat());
-        compass.setRange(ZAXIS, readFloat());
-        compass.setOffset(ZAXIS, readFloat());
+        compass.setRange(XAXIS, readFloatSerial());
+        compass.setOffset(XAXIS, readFloatSerial());
+        compass.setRange(YAXIS, readFloatSerial());
+        compass.setOffset(YAXIS, readFloatSerial());
+        compass.setRange(ZAXIS, readFloatSerial());
+        compass.setOffset(ZAXIS, readFloatSerial());
       #endif
       break;
     }
@@ -367,19 +367,14 @@ void sendSerialTelemetry() {
     Serial.print(flightAngle.getData(PITCH));
     Serial.println();
     break;
-  case 'R': // Send raw sensor data
-    /*Serial.print(analogRead(ROLLRATEPIN));
-    comma();
-    Serial.print(analogRead(PITCHRATEPIN));
-    comma();
-    Serial.print(analogRead(YAWRATEPIN));
-    comma();
-    Serial.print(analogRead(ROLLACCELPIN));
-    comma();
-    Serial.print(analogRead(PITCHACCELPIN));
-    comma();
-    Serial.println(analogRead(ZACCELPIN));*/
-    //queryType = 'X';
+  case 'R': // Raw magnetometer data
+    #ifdef HeadingMagHold
+      Serial.print(compass.getRawData(XAXIS));
+      comma();
+      Serial.print(compass.getRawData(YAXIS));
+      comma();
+      Serial.println(compass.getRawData(ZAXIS));
+    #endif
     break;
   case 'S': // Send all flight data
     Serial.print(deltaTime);
@@ -522,18 +517,19 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
     #ifdef HeadingMagHold
-      Serial.print(compass.getRange(XAXIS);
-      comma()
-      Serial.print(compass.getOffset(XAXIS);
-      comma()
-      Serial.print(compass.getRange(YAXIS);
-      comma()
-      Serial.print(compass.getOffset(YAXIS);
-      comma()
-      Serial.print(compass.getRange(ZAXIS);
-      comma()
-      Serial.println(compass.getOffset(ZAXIS);
+      Serial.print(compass.getRange(XAXIS));
+      comma();
+      Serial.print(compass.getOffset(XAXIS));
+      comma();
+      Serial.print(compass.getRange(YAXIS));
+      comma();
+      Serial.print(compass.getOffset(YAXIS));
+      comma();
+      Serial.print(compass.getRange(ZAXIS));
+      comma();
+      Serial.println(compass.getOffset(ZAXIS));
     #endif
+    queryType = 'X';
     break;
   }
 }

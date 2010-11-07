@@ -238,12 +238,12 @@ void writeEEPROM(void){
     writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
   #endif
   #ifdef HeadingMagHold
-    writeFloat(compass.setRange(XAXIS), MAGXRANGE_ADR);
-    writeFloat(compass.setOffset(XAXIS), MAGXOFFSET_ADR);
-    writeFloat(compass.setRange(YAXIS), MAGYRANGE_ADR);
-    writeFloat(compass.setOffset(YAXIS), MAGYOFFSET_ADR);
-    writeFloat(compass.setRange(ZAXIS), MAGZRANGE_ADR);
-    writeFloat(compass.setOffset(ZAXIS), MAGZOFFSET_ADR);
+    writeFloat(compass.getRange(XAXIS), MAGXRANGE_ADR);
+    writeFloat(compass.getOffset(XAXIS), MAGXOFFSET_ADR);
+    writeFloat(compass.getRange(YAXIS), MAGYRANGE_ADR);
+    writeFloat(compass.getOffset(YAXIS), MAGYOFFSET_ADR);
+    writeFloat(compass.getRange(ZAXIS), MAGZRANGE_ADR);
+    writeFloat(compass.getOffset(ZAXIS), MAGZOFFSET_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   
