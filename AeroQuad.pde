@@ -44,8 +44,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -64,7 +64,7 @@
 
 // Optional Sensors
 #define HeadingMagHold // Enables HMC5843 Magnetometer
-#define AltitudeHold // Enables BMP083 Barometer
+//#define AltitudeHold // Enables BMP083 Barometer
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************

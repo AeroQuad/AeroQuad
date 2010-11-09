@@ -203,7 +203,7 @@ void sendSerialTelemetry() {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     Serial.print(holdAltitude);
     comma();
-    Serial.print(altitude.getData());
+    //Serial.print(altitude.getData());
     comma();
     Serial.print(throttleAdjust);
     Serial.println();
@@ -517,17 +517,17 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
     #ifdef HeadingMagHold
-      Serial.print(compass.getRange(XAXIS));
+      Serial.print(compass.getRange(XAXIS), 2);
       comma();
-      Serial.print(compass.getOffset(XAXIS));
+      Serial.print(compass.getOffset(XAXIS), 2);
       comma();
-      Serial.print(compass.getRange(YAXIS));
+      Serial.print(compass.getRange(YAXIS), 2);
       comma();
-      Serial.print(compass.getOffset(YAXIS));
+      Serial.print(compass.getOffset(YAXIS), 2);
       comma();
-      Serial.print(compass.getRange(ZAXIS));
+      Serial.print(compass.getRange(ZAXIS), 2);
       comma();
-      Serial.println(compass.getOffset(ZAXIS));
+      Serial.println(compass.getOffset(ZAXIS), 2);
     #endif
     queryType = 'X';
     break;
