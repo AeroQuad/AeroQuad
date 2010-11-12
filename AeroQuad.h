@@ -339,12 +339,12 @@ byte testSignal = LOW;
 #define ZDAMP_IGAIN_ADR 288
 #define ZDAMP_DGAIN_ADR 292
 #define ALTITUDE_WINDUP_ADR 296
-#define MAGXRANGE_ADR 300
-#define MAGXOFFSET_ADR 304
-#define MAGYRANGE_ADR 308
-#define MAGYOFFSET_ADR 312
-#define MAGZRANGE_ADR 316
-#define MAGZOFFSET_ADR 320
+#define MAGXMAX_ADR 300
+#define MAGXMIN_ADR 304
+#define MAGYMAX_ADR 308
+#define MAGYMIN_ADR 312
+#define MAGZMAX_ADR 316
+#define MAGZMIN_ADR 320
 
 
 int findMode(int *data, int arraySize); // defined in Sensors.pde

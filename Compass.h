@@ -28,14 +28,11 @@ public:
   int compassAddress;
   float heading, absoluteHeading, gyroStartHeading;
   float compass;
-  float magRangeX;
-  float magOffsetX;
-  float magRangeY;
-  float magOffsetY;
-  float magRangeZ;
-  float magOffsetZ;
+  float magMax[3];
+  float magMin[3];
+  float magScale[3];
+  float magOffset[3];
 
-  
   Compass(void) { }
 
   // **********************************************************************
@@ -59,28 +56,24 @@ public:
     return absoluteHeading;
   }
   
-  void setRange(byte axis, float value) {
-    if (axis == XAXIS) magRangeX = value;
-    if (axis == YAXIS) magRangeY = value;
-    if (axis == ZAXIS) magRangeZ = value;
+  void setMagCal(byte axis, float maxValue, float minValue) {
+    magMax[axis] = maxValue;
+    magMin[axis] = minValue;
+    // Assume max/min is scaled to +1 and -1
+    // y2 = 1, x2 = max; y1 = -1, x1 = min
+    // m = (y2 - y1) / (x2 - x1)
+    // m = 2 / (max - min)
+    magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
+    // b = y1 - mx1; b = -1 - (m * min)
+    magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
   }
   
-  void setOffset(byte axis, float value) {
-    if (axis == XAXIS) magOffsetX = value;
-    if (axis == YAXIS) magOffsetY = value;
-    if (axis == ZAXIS) magOffsetZ = value;
-  }    
-  
-  const float getRange(byte axis) {
-    if (axis == XAXIS) return magRangeX;
-    if (axis == YAXIS) return magRangeY;
-    if (axis == ZAXIS) return magRangeZ;
+  const float getMagMax(byte axis) {
+    return magMax[axis];
   }
   
-  const float getOffset(byte axis) {
-    if (axis == XAXIS) return magOffsetX;
-    if (axis == YAXIS) return magOffsetY;
-    if (axis == ZAXIS) return magOffsetZ;
+  const float getMagMin(byte axis) {
+    return magMin[axis];
   }
 };
 
@@ -103,7 +96,6 @@ private:
   float filter1, filter2; // coefficients for complementary filter
   float adjustedGyroHeading, previousHead;
   int gyroZero;
-  float magScaleXY, magScaleYX, magScaleXZ, magScaleYZ;
   
 public: 
   Compass_AeroQuad_v2() : Compass(){
@@ -127,10 +119,6 @@ public:
     gyroStartHeading = getData();
     if (gyroStartHeading < 0) gyroStartHeading += 360;
     gyro.setStartHeading(gyroStartHeading);
-    magScaleXY = magRangeX / magRangeY;
-    magScaleYX = magRangeY / magRangeX;
-    magScaleXZ = magRangeX / magRangeZ;
-    magScaleYZ = magRangeY / magRangeZ;
   }
   
   const int getRawData(byte axis) {
@@ -152,8 +140,8 @@ public:
     sinRoll = sin(radians(flightAngle.getData(ROLL)));
     cosPitch = cos(radians(flightAngle.getData(PITCH)));
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
-    magX = ((float)measuredMagX * magScaleYX + magOffsetX) * cosPitch + ((float)measuredMagY * magScaleXY + magOffsetY) * sinRoll * sinPitch + ((float)measuredMagZ * magScaleXZ + magOffsetZ) * cosRoll * sinPitch;
-    magY = ((float)measuredMagY * magScaleXY + magOffsetY) * cosRoll - ((float)measuredMagZ * magScaleYZ + magOffsetZ) * sinRoll;
+    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
     compass = -degrees(atan2(-magY, magX));
     
     // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value

@@ -181,12 +181,9 @@ void readSerialCommand() {
       break;
     case 'f': // calibrate magnetometer
       #ifdef HeadingMagHold
-        compass.setRange(XAXIS, readFloatSerial());
-        compass.setOffset(XAXIS, readFloatSerial());
-        compass.setRange(YAXIS, readFloatSerial());
-        compass.setOffset(YAXIS, readFloatSerial());
-        compass.setRange(ZAXIS, readFloatSerial());
-        compass.setOffset(ZAXIS, readFloatSerial());
+        compass.setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
+        compass.setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
+        compass.setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
       #endif
       break;
     }
@@ -365,6 +362,20 @@ void sendSerialTelemetry() {
     Serial.print(flightAngle.getData(ROLL));
     comma();
     Serial.print(flightAngle.getData(PITCH));
+    #ifdef HeadingMagHold
+      comma();
+      Serial.print(compass.getAbsoluteHeading());
+    #else
+      comma();
+      Serial.print(0);
+    #endif
+    #ifdef AltitudeHold
+      comma();
+      Serial.print(altitude.getData());
+    #else
+      comma();
+      Serial.print(0);
+    #endif
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
@@ -517,17 +528,17 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
     #ifdef HeadingMagHold
-      Serial.print(compass.getRange(XAXIS), 2);
+      Serial.print(compass.getMagMax(XAXIS), 2);
       comma();
-      Serial.print(compass.getOffset(XAXIS), 2);
+      Serial.print(compass.getMagMin(XAXIS), 2);
       comma();
-      Serial.print(compass.getRange(YAXIS), 2);
+      Serial.print(compass.getMagMax(YAXIS), 2);
       comma();
-      Serial.print(compass.getOffset(YAXIS), 2);
+      Serial.print(compass.getMagMin(YAXIS), 2);
       comma();
-      Serial.print(compass.getRange(ZAXIS), 2);
+      Serial.print(compass.getMagMax(ZAXIS), 2);
       comma();
-      Serial.println(compass.getOffset(ZAXIS), 2);
+      Serial.println(compass.getMagMin(ZAXIS), 2);
     #endif
     queryType = 'X';
     break;

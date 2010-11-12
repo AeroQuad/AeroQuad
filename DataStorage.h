@@ -80,12 +80,9 @@ void initializeEEPROM(void) {
     altitude.setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
-    compass.setRange(XAXIS, 1);
-    compass.setOffset(XAXIS, 0);
-    compass.setRange(YAXIS, 1);
-    compass.setOffset(YAXIS, 0);
-    compass.setRange(ZAXIS, 1);
-    compass.setOffset(ZAXIS, 0);
+    compass.setMagCal(XAXIS, 1, 0);
+    compass.setMagCal(YAXIS, 1, 0);
+    compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
   receiver.setXmitFactor(0.60);  
@@ -179,12 +176,9 @@ void readEEPROM(void) {
   #endif
 
   #ifdef HeadingMagHold
-    compass.setRange(XAXIS, readFloat(MAGXRANGE_ADR));
-    compass.setOffset(XAXIS, readFloat(MAGXOFFSET_ADR));
-    compass.setRange(YAXIS, readFloat(MAGYRANGE_ADR));
-    compass.setOffset(YAXIS, readFloat(MAGYOFFSET_ADR));
-    compass.setRange(ZAXIS, readFloat(MAGZRANGE_ADR));
-    compass.setOffset(ZAXIS, readFloat(MAGZOFFSET_ADR));
+    compass.setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    compass.setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    compass.setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -238,12 +232,12 @@ void writeEEPROM(void){
     writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
   #endif
   #ifdef HeadingMagHold
-    writeFloat(compass.getRange(XAXIS), MAGXRANGE_ADR);
-    writeFloat(compass.getOffset(XAXIS), MAGXOFFSET_ADR);
-    writeFloat(compass.getRange(YAXIS), MAGYRANGE_ADR);
-    writeFloat(compass.getOffset(YAXIS), MAGYOFFSET_ADR);
-    writeFloat(compass.getRange(ZAXIS), MAGZRANGE_ADR);
-    writeFloat(compass.getOffset(ZAXIS), MAGZOFFSET_ADR);
+    writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
+    writeFloat(compass.getMagMin(XAXIS), MAGXMIN_ADR);
+    writeFloat(compass.getMagMax(YAXIS), MAGYMAX_ADR);
+    writeFloat(compass.getMagMin(YAXIS), MAGYMIN_ADR);
+    writeFloat(compass.getMagMax(ZAXIS), MAGZMAX_ADR);
+    writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);  
   writeFloat(levelLimit, LEVELLIMIT_ADR);   
