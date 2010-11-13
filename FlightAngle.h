@@ -142,7 +142,7 @@ private:
 
 public:
   FlightAngle_KalmanFilter() : FlightAngle() {
-    for (axis = ROLL; axis ++; axis < YAW) {
+    for (axis = ROLL; axis < YAW; axis ++) {
       x_angle[axis] = 0;
       x_bias[axis] = 0;
       P_00[axis] = 0;
@@ -533,10 +533,6 @@ public:
     angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
     angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
     angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
-  }
-  
-  float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
