@@ -32,13 +32,25 @@ void readPilotCommands() {
     if (receiver.getRaw(YAW) < MINCHECK && armed == ON) {
       armed = OFF;
       motors.commandAllMotors(MINCOMMAND);
+      #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+      digitalWrite(LED_Red, LOW);
+      #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
       gyro.calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
+      //accel.setOneG(accel.getFlightData(ZAXIS));
+       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      flightAngle.calibrate();
+       #endif
       zeroIntegralError();
+      #ifndef BatteryMonitor
       motors.pulseMotors(3);
+      #endif
+      #ifdef BatteryMonitor
+      ledCW(); ledCW(); ledCW();
+      #endif
       #ifdef ArduCopter
         zero_ArduCopter_ADC();
       #endif
@@ -65,6 +77,9 @@ void readPilotCommands() {
     if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       armed = ON;
+      #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+      digitalWrite(LED_Red, HIGH);
+      #endif
       for (motor=FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
       //   delay(100);
@@ -97,12 +112,20 @@ void readPilotCommands() {
     flightMode = ACRO;
   }
   
+   #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+      if (flightMode == ACRO) {
+        digitalWrite(LED_Yellow, HIGH);
+        digitalWrite(LED_Green, LOW);
+       }
+     else if (flightMode == STABLE) {
+        digitalWrite(LED_Green, HIGH);
+        digitalWrite(LED_Yellow, LOW); 
+     }
+   #endif
+  
   #ifdef AltitudeHold
-    // Check if altitude hold is enabled
-    if (receiver.getRaw(AUX) < 1400) {
-      // return to preset altitude or land?
-    }
-    else if (receiver.getRaw(AUX) < 1700) {
+    
+   if (receiver.getRaw(AUX) < 1500) {
       if (storeAltitude == ON) {
         holdAltitude = altitude.getData();
         holdThrottle = receiver.getData(THROTTLE);

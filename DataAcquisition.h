@@ -25,7 +25,7 @@
 // SPI Communication for APM ADC
 // Code written by: Jordi Munoz and Jose Julio
 // *******************************************
-#ifdef ArduCopter
+#if defined(ArduCopter)
 #include <inttypes.h>
 #include <avr/interrupt.h>
 #include "WConstants.h"
@@ -127,7 +127,7 @@ void zero_ArduCopter_ADC(void) {
 // Modifications by jihlein 
 // ********************************************
 // I2C function calls defined in I2C.h
-
+#ifndef AeroQuad_v18
 short NWMP_acc[3];
 short NWMP_gyro[3];
 
@@ -166,4 +166,23 @@ void updateControls() {
     }
   }
 }
+#endif
+
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #include "CHR6DM.h"
+    CHR6DM chr6dm;
+
+    void initCHR6DM(){
+        Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
+        chr6dm.resetToFactory();
+        chr6dm.setListenMode();
+        chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
+        chr6dm.requestPacket();
+    }
+
+    void readCHR6DM(){
+        chr6dm.waitForAndReadPacket();
+        chr6dm.requestPacket();
+    }
+#endif
 

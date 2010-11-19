@@ -19,15 +19,21 @@
 */
 
 // Low pass filter, kept as regular C function for speed
-float smooth(float currentData, float previousData, float smoothFactor) {
-  return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor));
+float smooth(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
+ if(smoothFactor != 1.0) { //only apply time compensated filter if smoothFactor is applied
+  return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
+ }
+    else {
+       return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
+     }
 }
+
 
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
 // ***********************************************************************
 // Median filter currently not used, but kept if needed for the future
-// To declar use: MedianFilter filterSomething;
+// To declare use: MedianFilter filterSomething;
 
 class MedianFilter {
 public: 

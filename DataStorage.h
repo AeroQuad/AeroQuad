@@ -43,40 +43,40 @@ void writeFloat(float value, int address) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.2;
+  PID[ROLL].P = 1.50; //Honk
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -7.0;
-  PID[PITCH].P = 1.2;
+  PID[ROLL].D = -0.05; //Honk
+  PID[PITCH].P = 1.50; //Honk
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -7.0;
+  PID[PITCH].D = -0.05; //Honk
   PID[YAW].P = 3.0;
-  PID[YAW].I = 0.0;
+  PID[YAW].I = 0.05; //Honk, we can afford this now since I term is more accurate due to time precision and gyro's better calibrated
   PID[YAW].D = 0.0;
-  PID[LEVELROLL].P = 7.0;
-  PID[LEVELROLL].I = 20.0;
+  PID[LEVELROLL].P = 1.0; //Honk following just makes safer
+  PID[LEVELROLL].I = 0.5; //Honk
   PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 7.0;
-  PID[LEVELPITCH].I = 20.0;
+  PID[LEVELPITCH].P = 1.0; //Honk
+  PID[LEVELPITCH].I = 0.5; //Honk
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
-  PID[HEADING].I = 0.0;
+  PID[HEADING].I = 0.1; //since absolute, this is ok
   PID[HEADING].D = 0.0;
   PID[LEVELGYROROLL].P = 1.2;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -14.0;
+  PID[LEVELGYROROLL].D = -0.05; //important since introduction of time
   PID[LEVELGYROPITCH].P = 1.2;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -14.0;
+  PID[LEVELGYROPITCH].D = -0.05; //important since introduction of time
   #ifdef AltitudeHold
     PID[ALTITUDE].P = 25.0;
-    PID[ALTITUDE].I = 0.0;
+    PID[ALTITUDE].I = 0.1;
     PID[ALTITUDE].D = 0.0;
-    PID[ALTITUDE].windupGuard = 25.0;
+    PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
     PID[ZDAMPENING].P = 0.0;
     PID[ZDAMPENING].I = 0.0;
     PID[ZDAMPENING].D = 0.0;
     minThrottleAdjust = -50.0;
-    maxThrottleAdjust = 500.0;
+    maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
     altitude.setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
@@ -85,7 +85,7 @@ void initializeEEPROM(void) {
     compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  receiver.setXmitFactor(0.60);  
+  receiver.setXmitFactor(0.20);  //Honk
   levelLimit = 500.0;
   levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
@@ -113,6 +113,7 @@ void readEEPROM(void) {
   PID[ROLL].P = readFloat(PGAIN_ADR);
   PID[ROLL].I = readFloat(IGAIN_ADR);
   PID[ROLL].D = readFloat(DGAIN_ADR);
+  PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
   PID[ROLL].lastPosition = 0;
   PID[ROLL].integratedError = 0;
   
@@ -162,7 +163,6 @@ void readEEPROM(void) {
     PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
     PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
     PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
-    PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     PID[ALTITUDE].lastPosition = 0;
     PID[ALTITUDE].integratedError = 0;
     PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);

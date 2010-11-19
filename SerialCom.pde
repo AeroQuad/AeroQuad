@@ -175,6 +175,10 @@ void readSerialCommand() {
       break;
     case 'c': // calibrate accels
       accel.calibrate();
+       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      flightAngle.calibrate();
+      accel.setOneG(accel.getFlightData(ZAXIS));
+       #endif
       break;
     case 'd': // send aref
       aref = readFloatSerial();
@@ -198,12 +202,36 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(holdAltitude);
-    comma();
-    //Serial.print(altitude.getData());
-    comma();
-    Serial.print(throttleAdjust);
-    Serial.println();
+//    Serial.print(accel.getZaxis());
+//    comma();
+//    Serial.print(holdAltitude);
+//    comma();
+//    #ifdef AltitudeHold
+//    Serial.print(altitude.getData());
+//    #else
+//    Serial.print(-1);
+//    #endif
+//    comma();
+//    Serial.print(throttleAdjust);
+//    Serial.println();
+//Serial.print("T: ");
+//Serial.print(G_Dt, DEC);
+//Serial.print("s");
+//comma();
+//Serial.print("f: ");
+//Serial.print(1/G_Dt, DEC);
+//Serial.print("Hz");
+//comma();
+//Serial.print("oneg: ");
+//Serial.print(accel.getOneG());
+//comma();
+//Serial.print("Zaxis");
+//Serial.println(accel.getZaxis());
+#ifdef BatteryMonitor
+Serial.print("Battery: ");
+Serial.print(readBattery());
+Serial.println("V");
+#endif
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -362,7 +390,7 @@ void sendSerialTelemetry() {
     Serial.print(flightAngle.getData(ROLL));
     comma();
     Serial.print(flightAngle.getData(PITCH));
-    #ifdef HeadingMagHold
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       comma();
       Serial.print(compass.getAbsoluteHeading());
     #else
@@ -414,7 +442,7 @@ void sendSerialTelemetry() {
       Serial.print(2000);
     if (flightMode == ACRO)
       Serial.print(1000);
-    #ifdef HeadingMagHold
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       comma();
       Serial.print(compass.getAbsoluteHeading());
     #else
@@ -507,6 +535,10 @@ void sendSerialTelemetry() {
       Serial.print('7');
     #elif defined(MultipilotI2C)
       Serial.print('8');
+    #elif defined(AeroQuadMega_CHR6DM)
+          Serial.print('5');
+    #elif defined(APM_OP_CHR6DM)
+          Serial.print('6');
     #endif
     comma();
     // Determine which motor flight configuration for Configurator GUI

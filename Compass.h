@@ -164,3 +164,56 @@ public:
     else absoluteHeading = heading;
   }
 };
+
+// ***********************************************************************
+// ************************ HMC5843 Subclass *****************************
+// ***********************************************************************
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+class Compass_CHR6DM : public Compass {
+
+private:
+public:
+  Compass_CHR6DM() : Compass(){
+
+  }
+
+  // ***********************************************************
+  // Define all the virtual functions declared in the main class
+  // ***********************************************************
+  void initialize(void) {
+  }
+
+  void measure(void) {
+    heading = chr6dm.data.yaw; //this hardly needs any filtering :)
+
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+  }
+};
+#endif
+
+
+class Compass_CHR6DM_Fake : public Compass {
+
+private:
+public:
+  Compass_CHR6DM_Fake() : Compass(){
+
+  }
+
+  // ***********************************************************
+  // Define all the virtual functions declared in the main class
+  // ***********************************************************
+  void initialize(void) {
+  }
+
+  void measure(void) {
+    heading = 0;
+
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+  }
+};
+

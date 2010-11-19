@@ -138,7 +138,7 @@ public:
 /******************************************************/
 class Motors_PWM : public Motors {
 private:
-  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
     #define FRONTMOTORPIN 2
     #define REARMOTORPIN 3
     #define RIGHTMOTORPIN 5
@@ -191,9 +191,75 @@ private:
 };
 
 /******************************************************/
+/********************* Fake PWM Motors ****************/
+/******************************************************/
+#ifdef CHR6DM_FAKE_MOTORS
+class Motors_PWM_Fake : public Motors {
+private:
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
+    #define FRONTMOTORPIN 2
+    #define REARMOTORPIN 3
+    #define RIGHTMOTORPIN 5
+    #define LEFTMOTORPIN 6
+    #define LASTMOTORPIN 7
+  #else
+    #define FRONTMOTORPIN 3
+    #define REARMOTORPIN 9
+    #define RIGHTMOTORPIN 10
+    #define LEFTMOTORPIN 11
+    #define LASTMOTORPIN 12
+  #endif
+  int minCommand;
+  byte pin;
+
+ public:
+  Motors_PWM_Fake() : Motors(){
+    // Scale motor commands to analogWrite
+    // Only supports commands from 0-255 => 0 - 100% duty cycle
+    // Usable pulsewith from approximately 1000-2000 us = 126 - 250
+    // m = (250-126)/(2000-1000) = 0.124
+    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
+    mMotorCommand = 0.124;
+    bMotorCommand = 2.0;
+  }
+
+  void initialize(void) {
+    pinMode(FRONTMOTORPIN, OUTPUT);
+    fake_analogWrite(FRONTMOTORPIN, 124);
+    pinMode(REARMOTORPIN, OUTPUT);
+    fake_analogWrite(REARMOTORPIN, 124);
+    pinMode(RIGHTMOTORPIN, OUTPUT);
+    fake_analogWrite(RIGHTMOTORPIN, 124);		
+    pinMode(LEFTMOTORPIN, OUTPUT);
+  }
+
+  void write(void) {
+    fake_analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+  }
+
+  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+    fake_analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    fake_analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+  }
+
+  void fake_analogWrite(int pin, int value){
+    Serial2.print("analogWrite:");
+    Serial2.print(pin);
+    Serial2.print(",");
+    Serial2.println(value);
+  }
+};
+#endif
+
+/******************************************************/
 /***************** ArduCopter Motors ******************/
 /******************************************************/
-#ifdef ArduCopter
+#if defined(ArduCopter) || defined(APM_OP_CHR6DM) 
 class Motors_ArduCopter : public Motors {
 public:
   Motors_ArduCopter() : Motors() {}
