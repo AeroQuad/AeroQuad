@@ -63,7 +63,12 @@
 //#define Camera
 
 // Optional Sensors
+// Uncomment the following lines to enable additional hardware installed onto your AeroQuad Shield
 #define HeadingMagHold // Enables HMC5843 Magnetometer
+// Please note that the Altitude Hold function is still experimental, use at your own risk!
+// This is not a fully completed function yet
+// Uncomment the line below to enable relative altitude telemtry to the Configurator
+// To enable the Altitude Hold function, move the AUX1 switch to the middle or high position (>1700us)
 #define AltitudeHold // Enables BMP083 Barometer
 
 /****************************************************************************
