@@ -42,6 +42,9 @@ void flightControl(void) {
       #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
         digitalWrite(LED2PIN, LOW);
       #endif
+      #ifdef APM_OP_CHR
+        digitalWrite(LED_Green, LOW);
+      #endif
     }
     else {
       PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - flightAngle.getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
@@ -49,16 +52,20 @@ void flightControl(void) {
       #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
         digitalWrite(LED2PIN, HIGH);
       #endif
+      #ifdef APM_OP_CHR
+        digitalWrite(LED_Green, HIGH);
+      #endif
     }
     motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
   }
     
   // ***************************** Update Yaw ***************************
+  #ifndef AeroQuad_v18
   if (headingHoldConfig == ON) {
     gyro.calculateHeading();
 
-    #ifdef HeadingMagHold
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       heading = compass.getHeading();
     #else
       heading = gyro.getHeading();
@@ -91,6 +98,7 @@ void flightControl(void) {
         PID[HEADING].integratedError = 0;
     }
   }
+  #endif
   commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
@@ -101,25 +109,28 @@ void flightControl(void) {
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #ifdef AltitudeHold
     if (altitudeHold == ON) {
+      throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
+      zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
+      if((abs(flightAngle.getData(ROLL)) > 5) ||  (abs(flightAngle.getData(PITCH)) > 5)) { PID[ZDAMPENING].integratedError = 0; }
       throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-      if (receiver.getData(THROTTLE) > MAXCHECK)
-        PID[ALTITUDE].integratedError++;
-      if (receiver.getData(THROTTLE) <= MINCHECK)
-        PID[ALTITUDE].integratedError--;
-      throttleAdjust += PID[ALTITUDE].integratedError;
+         if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
+           PID[ALTITUDE].integratedError++;
+         if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
+           PID[ALTITUDE].integratedError--;
+         throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {
       // Altitude hold is off, get throttle from receiver
       holdThrottle = receiver.getData(THROTTLE);
       throttleAdjust = 0;
-    }
+ 	}
     // holdThrottle set in FlightCommand.pde if altitude hold is on
-    throttle = holdThrottle + throttleAdjust; 
+    throttle = holdThrottle + throttleAdjust;
   #else
     // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-    throttle = receiver.getData(THROTTLE);
+    throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryReadArmLed while battery critical, otherwise kept 0
   #endif
-  
+
   // *********************** Calculate Motor Commands **********************
   if (armed && safetyCheck) {
     #ifdef plusConfig

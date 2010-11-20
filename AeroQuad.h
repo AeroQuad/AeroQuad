@@ -31,6 +31,17 @@
 #define ON 1
 #define OFF 0
 
+#if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+  #define LED_Red 35
+  #define LED_Yellow 36
+  #define LED_Green 37
+  #define RELE_pin 47
+  #define SW1_pin 41
+  #define SW2_pin 40
+  #define BUZZER 9
+  #define PIANO_SW1 42
+  #define PIANO_SW2 43
+#endif
 #ifdef AeroQuadMega_v2  
   #define LED2PIN 4
   #define LED3PIN 31
@@ -59,6 +70,16 @@
 #define LEVELGYROPITCH 7
 #define ALTITUDE 8
 #define ZDAMPENING 9
+
+#ifndef AeroQuad_v18
+float fakeGyroRoll;
+float fakeGyroPitch;
+float fakeGyroYaw;
+
+float fakeAccelRoll;
+float fakeAccelPitch;
+float fakeAccelYaw;
+#endif
 
 // PID Variables
 struct PIDdata {
@@ -136,21 +157,30 @@ int levelOff; // Read in from EEPROM
 float mLevelTransmitter = 0.09;
 float bLevelTransmitter = -135;
 
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float CHR_RollAngle;
+float CHR_PitchAngle;
+#endif
+
+
 // Heading hold
 byte headingHoldConfig;
 //float headingScaleFactor;
-float heading = 0; // measured heading from yaw gyro (process variable)
+float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
+float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
 float setHeading = 0;
-float commandedYaw = 0;
+
 
 // Altitude Hold
 #define TEMPERATURE 0
 #define PRESSURE 1
 int throttleAdjust = 0;
 int throttle = 1000;
+int autoDescent = 0;
+#ifndef AeroQuad_v18
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
 float holdAltitude = 0.0;
@@ -158,6 +188,7 @@ int holdThrottle = 1000;
 float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
+#endif
 
 // Receiver variables
 #define TIMEOUT 25000
@@ -214,31 +245,32 @@ byte update = 0;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-#define RECEIVERLOOPTIME 20
-#define TELEMETRYLOOPTIME 100
-#define FASTTELEMETRYTIME 10
-#define CONTROLLOOPTIME 2
-#define CAMERALOOPTIME 20
-#define AILOOPTIME 2
-#define COMPASSLOOPTIME 100
-#define ALTITUDELOOPTIME 100
+#define RECEIVERLOOPTIME 20000  //20ms, 50Hz
+#define FASTTELEMETRYTIME 10000 //10ms, 100Hz
+#define CONTROLLOOPTIME 2000   //2ms, 500Hz
+#define CAMERALOOPTIME 20000   //20ms, 50Hz
+#define AILOOPTIME 2000        // 2ms, 500Hz
+#define COMPASSLOOPTIME 100000 //100ms, 10Hz (full speed for CHR)
+#define ALTITUDELOOPTIME 26000 //26ms, 38Hz
+#define BATTERYLOOPTIME 100000 //100ms, 10Hz
 
-float AIdT = AILOOPTIME / 1000.0;
-float controldT = CONTROLLOOPTIME / 1000.0;
+float AIdT = AILOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
+float controldT = CONTROLLOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
 float G_Dt = 0.02;
 
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 unsigned long receiverTime = 0;
-unsigned long telemetryTime = 50; // make telemetry output 50ms offset from receiver check
+unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 unsigned long sensorTime = 0;
-unsigned long controlLoopTime = 1; // offset control loop from analog input loop by 1ms
-unsigned long cameraTime = 10;
+unsigned long controlLoopTime = 1000; // offset control loop from analog input loop by 1ms
+unsigned long cameraTime = 10000;
 unsigned long fastTelemetryTime = 0;
 unsigned long autoZeroGyroTime = 0;
-unsigned long compassTime = 25;
-unsigned long altitudeTime = 26;
+unsigned long compassTime = 25000;
+unsigned long altitudeTime = 26000;
+unsigned long batteryTime = 0;
 
 /**************************************************************/
 /********************** Debug Parameters **********************/
@@ -347,7 +379,7 @@ byte testSignal = LOW;
 #define MAGZMIN_ADR 320
 
 
-int findMode(int *data, int arraySize); // defined in Sensors.pde
+
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h
@@ -360,5 +392,9 @@ void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
-int findMode(int *data, int arraySize); // defined in Sensors.pde
 
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float findMode(float *data, int arraySize); // defined in Sensors.pde
+#else
+int findMode(int *data, int arraySize); // defined in Sensors.pde
+#endif

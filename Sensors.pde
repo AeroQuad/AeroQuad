@@ -25,7 +25,9 @@ void readSensors(void) {
   // Apply low pass filter to sensor values and center around zero
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
- 
+ #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  compass.measure();
+ #endif
  // ********************* Read Slower Sensors *******************
  #if defined(HeadingMagHold)
    if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
@@ -33,8 +35,14 @@ void readSensors(void) {
      compassTime = currentTime;
    }
  #endif
+ #if defined(BatteryMonitor)
+   if (currentTime > (batteryTime + BATTERYLOOPTIME)) {
+     readBattery();
+     batteryTime = currentTime;
+   }
+ #endif
  #if defined(AltitudeHold)
-   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 37Hz
+   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 38Hz
      altitude.measure(); // defined in altitude.h
      altitudeTime = currentTime;
    }
@@ -66,13 +74,46 @@ float arctan2(float y, float x) {
 }
 
 // Used for sensor calibration
-// The mode of a set of numbers returns the value that occurs most frequently
-int findMode(int *data, int arraySize) {
+// Takes the median of 50 results as zero
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float findMode(float *data, int arraySize) {
+  float temp;
+#else
+int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+  int temp;
+#endif
   boolean done = 0;
   byte i;
-  int temp, maxData, frequency, maxFrequency;
   
-  // Sorts numbers from lowest to highest
+   // Sorts numbers from lowest to highest
+  while (done != 1) {        
+    done = 1;
+    for (i=0; i<(arraySize-1); i++) {
+      if (data[i] > data[i+1]) {     // numbers are out of order - swap
+        temp = data[i+1];
+        data[i+1] = data[i];
+        data[i] = temp;
+        done = 0;
+      }
+    }
+  }
+  
+  return data[arraySize/2]; // return the median value
+}
+
+
+/*#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float findMode(float *data, int arraySize) {
+  float temp, maxData;
+#else
+int findMode(int *data, int arraySize) {                          //old findMode kept for documentation
+  int temp, maxData;
+#endif
+  boolean done = 0;
+  byte i;
+  int frequency, maxFrequency;
+  
+   // Sorts numbers from lowest to highest
   while (done != 1) {        
     done = 1;
     for (i=0; i<(arraySize-1); i++) {
@@ -102,4 +143,4 @@ int findMode(int *data, int arraySize) {
     }
   }
   return maxData;
-}
+}*/
