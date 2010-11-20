@@ -1,6 +1,6 @@
 AeroQuad Flight Software Source Code 2.0.1
 ========================================
-http://www.aeroquad.com
+[http://www.aeroquad.com](http://www.aeroquad.com)
 
 Version 2.0.1 Release Notes (9/19/2010)
 ----------------------------------------
@@ -99,19 +99,19 @@ Version 1.2 Release Notes
 
 This version incorporates the use of the Pin Change Interrupts (PCINT) to read output from an R/C receiver.  This removes the need to know the channel order of the receiver used.  This PCINT method has been tested with:
 
-   * Spektrum DX7 w/ AR6100, 6200 and AR7000
-   * Futaba T6EXHP w/ R146iP
-   * Airtronics RD8000 w/ 92778
+  * Spektrum DX7 w/ AR6100, 6200 and AR7000
+  * Futaba T6EXHP w/ R146iP
+  * Airtronics RD8000 w/ 92778
 
 The PCINT pins are unfortunately different between the Arduino Duemilanove and Arduino Mega.  Therefore Version 1.2 is not directly compatible with the Mega.  There are plans for compatibility with future releases, but for now the Mega is only compatible with Version 1.0 of the AeroQuad flight software.
 
 **New v1.2 features:**
 
-* Stable Mode (auto level) is disabled by default.  To enable remove the comment of the appropriate #define statement in AeroQuad.pde.  This was done to remove prevent confusion by new users.
-* If any critical flight parameters are zero, it is automatically filled in with a typical value.
-* PCINT receiver code updated for efficiency
-* Auto calibration of sensors at powerup disabled by default.  To enable, remove the comment of the appropriate #define statement in AeroQuad.pde.
-* Manual calibration of sensors can be performed by moving left transmitter stick to the lower left, and the right transmitter stick to the lower right corners.
+  * Stable Mode (auto level) is disabled by default.  To enable remove the comment of the appropriate #define statement in AeroQuad.pde.  This was done to remove prevent confusion by new users.
+  * If any critical flight parameters are zero, it is automatically filled in with a typical value.
+  * PCINT receiver code updated for efficiency
+  * Auto calibration of sensors at powerup disabled by default.  To enable, remove the comment of the appropriate #define statement in AeroQuad.pde.
+  * Manual calibration of sensors can be performed by moving left transmitter stick to the lower left, and the right transmitter stick to the lower right corners.
 
 Version 1.1 Release Notes
 ----------------------------------------
@@ -120,11 +120,11 @@ This version of the code now uses analogWrite() to efficiently write PWM command
 
 **New v1.1 features:**
 
-* 400Hz update rate to ESC's/Motors
-* Combined user configurable values into single tab in Configurator
+  * 400Hz update rate to ESC's/Motors
+  * Combined user configurable values into single tab in Configurator
 
 Happy flying!  
-info@AeroQuad.com
+[info@AeroQuad.com](mailto:info@AeroQuad.com)
 
 
   [1]: http://carancho.com/AeroQuad/forum/index.php?topic=290.msg2735#msg2735
