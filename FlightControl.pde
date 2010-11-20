@@ -113,10 +113,12 @@ void flightControl(void) {
       zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
       if((abs(flightAngle.getData(ROLL)) > 5) ||  (abs(flightAngle.getData(PITCH)) > 5)) { PID[ZDAMPENING].integratedError = 0; }
       throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-         if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-           PID[ALTITUDE].integratedError++;
-         if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-           PID[ALTITUDE].integratedError--;
+         if (receiver.getData(THROTTLE) > MAXCHECK) {
+                holdAltitude +=0.1;
+         }
+         if (receiver.getData(THROTTLE) <= MINCHECK) {
+                holdAltitude -=0.1;
+         }
          throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {

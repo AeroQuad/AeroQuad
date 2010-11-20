@@ -118,8 +118,8 @@ public:
   }
   
   void calculateHeading() {
-    currentTime = millis();
-    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 100000.0); //working in µs now
+    currentTime = micros();
+    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000000.0); //working in µs now
     previousTime = currentTime;
   }
  
