@@ -35,6 +35,7 @@ public:
   int sign[3];
   float rawHeading, gyroHeading;
   unsigned long currentTime, previousTime;
+  unsigned long headingCurrentTime, headingPreviousTime;
   
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
@@ -118,9 +119,9 @@ public:
   }
   
   void calculateHeading() {
-    currentTime = micros();
-    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000000.0); //working in µs now
-    previousTime = currentTime;
+    headingCurrentTime = micros();
+    rawHeading += getData(YAW) * gyroScaleFactor * ((headingCurrentTime - headingPreviousTime) / 1000000.0); //working in µs now
+    headingPreviousTime = headingCurrentTime; 
   }
  
   // returns heading as +/- 180 degrees

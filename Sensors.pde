@@ -101,6 +101,34 @@ int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: 
   return data[arraySize/2]; // return the median value
 }
 
+/******************START OF SHARP IR READING*************/
+#ifdef IRdistance
+float readFilteredSHARP () {
+#define PROXSENSPIN 0 
+#define VOLTS_PER_UNIT .00319336F  // (.0049 for 10 bit A-D) //but AREF = 3.27
+unsigned long IRcurrentTime; 
+unsigned long IRpreviousTime = 50000; //init to not cause jump
+
+  IRcurrentTime = micros();
+
+float proxSens = analogRead(PROXSENSPIN);  
+  
+  float voltage = (float)proxSens * VOLTS_PER_UNIT; // ("proxSens" is from analog read)
+  //float inches = 23.897 * pow(voltage,-1.1907); //calc inches using "power" trend line from Excel
+  float rawDist = 60.495 * pow(voltage,-1.1904);     // same in cm
+  //if (voltage < .2) return(150);        // out of range
+ 
+  rawDist = constrain(rawDist, 20, 150); //cm
+  
+  float filteredDist = smooth(rawDist, filteredDist, 0.8f, ((currentTime - previousTime) / 50000.0));  //divide by IRLOOPTIME (50ms)
+  
+  return (filteredDist);  //cm
+  
+  IRpreviousTime = IRcurrentTime;
+}
+#endif
+
+/********************END OF SHARP IR READING*************/
 
 /*#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize) {

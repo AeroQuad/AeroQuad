@@ -74,6 +74,7 @@
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer, availabe on all Mega based boards
 //#define BatteryMonitor //define your personal specs in BatteryReadArmLed.h! Full documentation with schematic there
+//#define IRdistance //Do not enable yet
 
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 
@@ -267,6 +268,9 @@ void setup() {
     pinMode(RR_LED ,OUTPUT);
     pinMode(RL_LED ,OUTPUT);
     analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
+  #endif
+  #ifdef IRdistance
+    analogReference(EXTERNAL); //use strict 3V3 AREF for SHARP IR sensors
   #endif
   
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
