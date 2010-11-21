@@ -45,8 +45,8 @@
 ************************ Define Telemetry Rate *****************************
 ****************************************************************************/
 
-#define TELEMETRYLOOPTIME 50000 //µs, 50ms, 20Hz for faster computers/cables (smoother Configurator values)
-//#define TELEMETRYLOOPTIME 100000 //µs, 100ms, 10Hz for slower computers/cables (more rough Configurator values)
+#define TELEMETRYLOOPTIME 50000 //Ã‚Âµs, 50ms, 20Hz for faster computers/cables (smoother Configurator values)
+//#define TELEMETRYLOOPTIME 100000 //Ã‚Âµs, 100ms, 10Hz for slower computers/cables (more rough Configurator values)
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -387,37 +387,39 @@ void loop () {
     digitalWrite(LEDPIN, testSignal);
   #endif
   
-  // Reads external pilot commands and performs functions based on stick configuration
-  if ((currentTime > (receiverTime + RECEIVERLOOPTIME)) && (receiverLoop == ON)) {// 50Hz
+   // Reads external pilot commands and performs functions based on stick configuration
+  if ((receiverLoop == ON) && (currentTime > receiverTime)) {// 50Hz
     readPilotCommands(); // defined in FlightCommand.pde
-    receiverTime = currentTime;
+    receiverTime = currentTime + RECEIVERLOOPTIME;
   }
   
   // Measures sensor data and calculates attitude
-  if ((currentTime > (sensorTime + AILOOPTIME)) && (sensorLoop == ON)) { // 500Hz
+  if ((sensorLoop == ON) && (currentTime > sensorTime)) { // 500Hz
     readSensors(); // defined in Sensors.pde
-    sensorTime = currentTime;
+    sensorTime = currentTime + AILOOPTIME;
   } 
 
   // Combines external pilot commands and measured sensor data to generate motor commands
-  if ((currentTime > controlLoopTime + CONTROLLOOPTIME) && (controlLoop == ON)) { // 500Hz
+  if ((controlLoop == ON) && (currentTime > controlLoopTime)) { // 500Hz
     flightControl(); // defined in FlightControl.pde
-    controlLoopTime = currentTime;
+    controlLoopTime = currentTime + CONTROLLOOPTIME;
   } 
   
   // Listen for configuration commands and reports telemetry
-  if ((currentTime > telemetryTime + TELEMETRYLOOPTIME) && (telemetryLoop == ON)) { // 20Hz    
+  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 20Hz
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
-    telemetryTime = currentTime;
+    telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
   
 #ifdef Camera // Experimental, not fully implemented yet
   // Command camera stabilization servos (requires #include <servo.h>)
-  if ((currentTime > (cameraTime + CAMERALOOPTIME)) && (cameraLoop == ON)) { // 50Hz
+  if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
     rollCamera.write((mCamera * flightAngle.get(ROLL)) + bCamera);
     pitchCamera.write((mCamera * flightAngle.get(PITCH)) + bCamera);
-    cameraTime = currentTime;
+    cameraTime = currentTime + CAMERALOOPTIME;
   }
 #endif
 }
+
+

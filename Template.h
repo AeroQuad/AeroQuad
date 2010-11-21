@@ -58,7 +58,7 @@ private:
   int exampleArray[3]; // only for use inside this subclass
   int examplePrivateData; // only for use inside this subclass
   void examplePrivateFunction(int functionVariable) {
-    // it’s possible to declare functions just for this subclass 
+    // itÃ¢â‚¬â„¢s possible to declare functions just for this subclass 
   }
   
 public: 
@@ -157,3 +157,5 @@ public:
     Wire.endTransmission();
   }
 };
+
+

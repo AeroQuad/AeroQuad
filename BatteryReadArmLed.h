@@ -108,7 +108,7 @@ void lowBatteryEvent(byte level) // <- this logic by Jose Julio
          
          #ifndef AltitudeHold
          #ifdef AutoDescent
-         if(throttle > 1400) { autoDescent -= 2; }//will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
+         if(throttle > 1400) { autoDescent -= 2; }//will remove 2Ã‚Âµs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
          #endif
          #endif
          #if defined(AltitudeHold) && defined(AutoDescent)
@@ -141,3 +141,5 @@ float readBattery(void)
   
   return batteryVoltage;
 }
+
+

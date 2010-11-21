@@ -250,13 +250,13 @@ byte update = 0;
 #define CONTROLLOOPTIME 2000   //2ms, 500Hz
 #define CAMERALOOPTIME 20000   //20ms, 50Hz
 #define AILOOPTIME 2000        // 2ms, 500Hz
-#define COMPASSLOOPTIME 100000 //100ms, 10Hz (full speed for CHR)
+#define COMPASSLOOPTIME 125000 //125ms, 8Hz      10Hz (full speed for CHR)
 #define ALTITUDELOOPTIME 26000 //26ms, 38Hz
 #define BATTERYLOOPTIME 100000 //100ms, 10Hz
 
 float AIdT = AILOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
 float controldT = CONTROLLOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
-float G_Dt = 0.02;
+float G_Dt = 0.002;
 
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
@@ -398,3 +398,5 @@ float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
+
+

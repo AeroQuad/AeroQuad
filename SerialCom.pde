@@ -202,36 +202,10 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-//    Serial.print(accel.getZaxis());
-//    comma();
-//    Serial.print(holdAltitude);
-//    comma();
-//    #ifdef AltitudeHold
-//    Serial.print(altitude.getData());
-//    #else
-//    Serial.print(-1);
-//    #endif
-//    comma();
-//    Serial.print(throttleAdjust);
-//    Serial.println();
-//Serial.print("T: ");
-//Serial.print(G_Dt, DEC);
-//Serial.print("s");
-//comma();
-//Serial.print("f: ");
-//Serial.print(1/G_Dt, DEC);
-//Serial.print("Hz");
-//comma();
-//Serial.print("oneg: ");
-//Serial.print(accel.getOneG());
-//comma();
-//Serial.print("Zaxis");
-//Serial.println(accel.getZaxis());
-#ifdef BatteryMonitor
-Serial.print("Battery: ");
-Serial.print(readBattery());
-Serial.println("V");
-#endif
+    Serial.print(gyro.getHeading());
+    comma();
+    Serial.print(compass.getData());
+    Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -611,3 +585,5 @@ void printInt(int data) {
   Serial.print(msb, BYTE);
   Serial.print(lsb, BYTE);
 }
+
+

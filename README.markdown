@@ -1,6 +1,12 @@
-AeroQuad Flight Software Source Code 2.0.1
+AeroQuad Flight Software Source Code 2.1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
+
+Version 2.1 Release Notes (9/19/2010)
+----------------------------------------
+
+  * Need to update before real release
+
 
 Version 2.0.1 Release Notes (9/19/2010)
 ----------------------------------------

@@ -30,9 +30,9 @@ void readSensors(void) {
  #endif
  // ********************* Read Slower Sensors *******************
  #if defined(HeadingMagHold)
-   if (currentTime > (compassTime + COMPASSLOOPTIME)) { // 10Hz
+   if (currentTime > compassTime) { // 10Hz
      compass.measure(); // defined in compass.h
-     compassTime = currentTime;
+     compassTime = currentTime + COMPASSLOOPTIME;
    }
  #endif
  #if defined(BatteryMonitor)
@@ -144,3 +144,5 @@ int findMode(int *data, int arraySize) {                          //old findMode
   }
   return maxData;
 }*/
+
+

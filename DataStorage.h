@@ -272,3 +272,5 @@ void writeEEPROM(void){
   writeFloat(accel.getOneG(), ACCEL1G_ADR);
   sei(); // Restart interrupts
 }
+
+
