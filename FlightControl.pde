@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - November 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -112,14 +112,12 @@ void flightControl(void) {
       throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
       zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
       if((abs(flightAngle.getData(ROLL)) > 5) ||  (abs(flightAngle.getData(PITCH)) > 5)) { PID[ZDAMPENING].integratedError = 0; }
-      throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-         if (receiver.getData(THROTTLE) > MAXCHECK) {
-                holdAltitude +=0.1;
-         }
-         if (receiver.getData(THROTTLE) <= MINCHECK) {
-                holdAltitude -=0.1;
-         }
-         throttleAdjust += PID[ALTITUDE].integratedError;
+        throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
+      if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
+        holdAltitude +=0.1;
+      if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
+        holdAltitude -=0.1;
+      throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {
       // Altitude hold is off, get throttle from receiver
@@ -276,3 +274,5 @@ void flightControl(void) {
  if (armed == ON && safetyCheck == ON)
   motors.write(); // Defined in Motors.h
 }
+
+

@@ -1,8 +1,8 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - November 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based quadrocopter.
+  An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
   it under the terms of the GNU General Public License as published by 
@@ -415,7 +415,7 @@ public:
       Ki_ROLLPITCH = 0.00000015;
     #endif
     #ifdef AeroQuadMega_Wii
-      Kp_ROLLPITCH = 0.11; //HONK men dubbling d�? 0.22 och 0.001503
+      Kp_ROLLPITCH = 0.11; //HONK men dubbling dï¿½? 0.22 och 0.001503
       Ki_ROLLPITCH = 0.0007515; //0.0000005; Kp/Kp factor = 146.2821
     #endif
     #ifdef AeroQuadMega_v1
@@ -707,4 +707,3 @@ public:
   }
 };
 #endif
-

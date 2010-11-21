@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - November 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -119,7 +119,7 @@ public:
   
   void calculateHeading() {
     currentTime = micros();
-    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000000.0); //working in µs now
+    rawHeading += getData(YAW) * gyroScaleFactor * ((currentTime - previousTime) / 1000000.0); //working in Ã‚Âµs now
     previousTime = currentTime;
   }
  
@@ -132,6 +132,10 @@ public:
     if (gyroHeading > 180) gyroHeading -= 360;
     if (gyroHeading < -180) gyroHeading += 360;
     return gyroHeading;
+  }
+  
+  const float getRawHeading(void) {
+    return rawHeading;
   }
   
   void setStartHeading(float value) {
@@ -176,7 +180,7 @@ public:
     currentTime = micros();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     }
     previousTime = currentTime;
   }
@@ -225,18 +229,21 @@ private:
   int data;
   int rawData[3];
   byte select;  // use to select which axis is being read
+  long int currentGyroTime, previousGyroTime;
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
-    gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
+    gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per Ã‚Â°/sec
     
     lastReceiverYaw=0;
     yawAge=0;
     positiveGyroYawCount=1;
     negativeGyroYawCount=1;
     zeroGyroYawCount=1;
+    currentGyroTime = micros();
+    previousGyroTime = currentGyroTime;
   }
   
   void initialize(void) {
@@ -257,7 +264,7 @@ public:
   }
   
   void measure(void) {
-    currentTime = micros();
+    currentGyroTime = micros();
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(gyroAddress, 0x1D);
     if (select == PITCH) sendByteI2C(gyroAddress, 0x1F);
@@ -265,8 +272,8 @@ public:
     rawData[select] = readWordI2C(gyroAddress);
     gyroADC[select] = rawData[select] - gyroZero[select];
     //if ((gyroADC[YAW] < 5) && (gyroADC[YAW] > -5)) gyroADC[YAW] = 0;
-    gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
-    previousTime = currentTime;
+    gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor, ((currentGyroTime - previousGyroTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    previousGyroTime = currentGyroTime;
     //if ((gyroData[YAW] < 5) && (gyroData[YAW] > -5)) gyroData[YAW] = 0;
     if (select == YAW) {
       calculateHeading();
@@ -348,7 +355,7 @@ private:
 
 public:
   Gyro_ArduCopter() : Gyro() {
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/º/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
+    // IDG500 Sensitivity (from datasheet) => 2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
     // Tested values : 
     //#define Gyro_Gain_X 0.4 //X axis Gyro gain
     //#define Gyro_Gain_Y 0.41 //Y axis Gyro gain
@@ -422,11 +429,11 @@ public:
    currentTime = micros();
     updateControls(); // defined in DataAcquisition.h
     gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
-    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
-    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroADC[YAW] = NWMP_gyro[YAW] - gyroZero[YAW];
-    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
    previousTime = currentTime;
   }
 
@@ -475,9 +482,9 @@ public:
     gyroADC[PITCH] = chr6dm.data.pitchRate - gyroZero[PITCH]; //gy pitchRate
     gyroADC[YAW] = chr6dm.data.yawRate - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     previousTime = currentTime;
   }
 
@@ -537,9 +544,9 @@ currentTime = micros();
     gyroADC[PITCH] = fakeGyroPitch - gyroZero[PITCH]; //gy pitchRate
     gyroADC[YAW] = fakeGyroYaw - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
 previousTime = currentTime;
   }
 
@@ -657,7 +664,7 @@ public:
     currentTime = micros();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     }
     previousTime = currentTime;
   }
@@ -687,3 +694,5 @@ public:
   }
 };
 #endif
+
+

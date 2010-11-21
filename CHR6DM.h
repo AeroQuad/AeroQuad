@@ -1,3 +1,24 @@
+/*
+  AeroQuad v2.1 - November 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
+
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+*/
+
+// Written by Lokling & Honk: http://aeroquad.com/showthread.php?1287-Experimental-CHR6DM-sensor-board
 
 // Usage: define a global var such as  "CHR6DM chr6 ;" in Aeroquad.pde
 // Values can then be read such as chr6.data.pitch and so on
@@ -106,16 +127,16 @@
 
 
     // Scale factors
-     const double SCALE_YAW        = 0.0109863; // �/LSB
+     const double SCALE_YAW        = 0.0109863; // ï¿½/LSB
      const double SCALE_PITCH      = 0.0109863;
      const double SCALE_ROLL       = 0.0109863;
-     const double SCALE_YAW_RATE   = 0.0137329; // �/s/LSB
+     const double SCALE_YAW_RATE   = 0.0137329; // ï¿½/s/LSB
      const double SCALE_PITCH_RATE = 0.0137329;
      const double SCALE_ROLL_RATE  = 0.0137329;
      const double SCALE_MAG_X      = 0.061035; // mGauss/LSB
      const double SCALE_MAG_Y      = 0.061035;
      const double SCALE_MAG_Z      = 0.061035;
-     const double SCALE_GYRO_X     = 0.01812; // �/s/LSB
+     const double SCALE_GYRO_X     = 0.01812; // ï¿½/s/LSB
      const double SCALE_GYRO_Y     = 0.01812;
      const double SCALE_GYRO_Z     = 0.01812;
      const double SCALE_ACCEL_X    = 0.106812; // mg/LSB
@@ -451,7 +472,5 @@ public:
         Serial.println("Timed out! 2");
         return false;
     }
-
-
-
 };
+

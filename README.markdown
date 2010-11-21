@@ -1,0 +1,138 @@
+AeroQuad Flight Software Source Code 2.1
+========================================
+[http://www.aeroquad.com](http://www.aeroquad.com)
+
+Version 2.1 Release Notes (9/19/2010)
+----------------------------------------
+
+  * Need to update before real release
+
+
+Version 2.0.1 Release Notes (9/19/2010)
+----------------------------------------
+
+This is a bug fix release which resolves reported issues:
+
+  * [#30](http://code.google.com/p/aeroquad/issues/detail?id=30&can=1) added serial com commands to report hardware platform and motor configuration to adjust scales
+  * [#31](http://code.google.com/p/aeroquad/issues/detail?id=31&can=1) by adding serial command to report motor config, can now label Configurator correctly
+  * [#32](http://code.google.com/p/aeroquad/issues/detail?id=32&can=1) fixed wrong referenced array element
+
+Additionally fixed incorrect sensor orientation for v1.7 Shield with Duemilanove, and Wii for Duemilanove and Mega, and APM with APM sensor shield.  Added #defines for Wii for Mega.  Solved DCM overflow issues for APM when performing calibration or writing to EEPROM.  Flight tested ArduCopter hardware, v2.0 Shield with Mega, v1.8 Shield with Duemilanove, v1.7 Shield with Duemilanove, v1.8 Shield using Wii sensors with Duemilanove.  Updated default PID values for v2.0 shield using 30.5cm motor to motor configuration at 1.2kg. 
+
+Version 2.0 Release Notes (9/6/2010)
+----------------------------------------
+
+This is a major architecture change from the v1.x flight software release.  Major hardware and algorithm components are now implemented as C++ classes to allow common flight software support.  Improved Stable Mode implemented.  Hardware support for new v1.8 and v2.0 AeroQuad Shields using ITG-3200 gyros and BMA-180 accelerometers.  Hardware support for Wii sensors, ArduCopter (APM and Oilpan) and Multipilot (all new platforms still need flight testing).
+
+Flight software configuration support for multiple hardware has changed.  Look for the lines listed below at the start of AeroQuad.pde and uncomment the appropriate selection:
+
+    /****************************************************************************
+     ************************* Hardware Configuration ***************************
+     ****************************************************************************/
+    // Select which hardware you wish to use with the AeroQuad Flight Software
+    
+    //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+    #define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+    //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors
+    //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+    //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+    //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors (needs debug)
+    //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+    //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro
+    //#define MultipilotI2C       // Active Multipilot I2C and Mixertable
+
+Review the rest of the #defines also to match the unique setup of you multicopter.
+
+Version 1.7.1 Release Notes (3/24/2010)
+----------------------------------------
+
+Fixed bug for Arduino Mega users.  #define Mega_AQ1x was not defined before #include "Receiver.h".  It accidentally caused the receiver pin assignments to use the Duemilanove assignments instead of the Mega.
+
+Version 1.7 Release Notes (3/21/2010)
+----------------------------------------
+
+This release allows users to specific which voltage is used for aref, specifically for compatibility with AeroQuad v1.7 shields.  Updated accelerometer calibration [here][1] to accommodate user definable aref and to best estimate Z axis zero position.  Fixed heading hold reference to aref and optimized motor to gyro rate conversion for motor control PID.  The new aref update is configured through the AeroQuad Configurator v2.3.  Tested this version against Arduino 0018.  Be sure to update your HardwareSerial.cpp found [here][2] if you are using XBee for wireless communication.
+
+Version 1.6 Release Notes (3/5/2010)
+----------------------------------------
+
+This release fixes a yaw bug that exhibits itself with the new capacitors installed which allows the user to use higher PID values.  Also the comments were fixed to reflect usage of IDG500 or IXZ500 gyros.  If the user does not select the correct gyro, the yaw axis may become inverted.  Started implementing certain functions using classes (C++).  The FlightAngle class defines the algorithm to use for angle estimation, the Motors class defines how PWM works and the Filter class allows multiple filter objects to be called to reduce the number of global variables needed and to encapsulate and retain the data needed for those filters to work.
+
+Version 1.5 Release Notes
+----------------------------------------
+
+This is a maintenance release for users of an Arduino Mega with an AeroQuad Shield v1.5 which provides receiver support.  There is a bug in the Arduino core code which doesn't allow the proper PCINT assignments to PCINT 8-23.  This release will hardcode AI pins 8-13 (PCINT 16-21) for use as receiver pins.  To enable this capability, please uncomment #define Mega_AQ1x located in AeroQuad.pde.
+
+Place jumper wires as indicated below to make your AeroQuad Shield v1.5 receiver pins work with an Arduino Mega:
+
+  * Roll (Aileron) Channel, place jumper between AQ Shield pin 2 and Mega AI13 
+  * Pitch (Elevator) Channel, place jumper between AQ Shield pin 5 and Mega AI11
+  * Yaw (Rudder) Channel, place jumper between AQ Shield pin 6 and Mega AI10
+  * Throttle Channel, place jumper between AQ Shield pin 4 and Mega AI12
+  * Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
+  * Aux Channel, place jumper between AQ Shield 8 and Mega AI8
+
+Version 1.4 Release Notes
+----------------------------------------
+
+Warning!  If you are a previous AeroQuad user and are using the Sparkfun 5DOF with the original IDG300 gyros, please review AeroQuad.pde and uncomment the line: #define OriginalIMU.  Failure to do so will result in unstable flight.  When Sparkfun updated the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were inverted.  The default AeroQuad Flight Software behavior is to assume the user is using the latest Sparkfun 5DOF IMU to make it easier for new users.
+
+Many of the improvements in v1.4 are geared towards the new features of the AeroQuad Configurator v2.0 and include the Spectrum Analyzer, Serial Monitor, manual input motor commands for initial checkout.  A basic heading hold has also been implemented (turned off by default) using the yaw gyro.
+
+The camera stabilization feature is operational but still not optimal.  There is an incompatibility with PCINT for reading receiver output and the Arduino 0017 Servo library.  There is an intermittent jitter that occurs during reading of receiver output.  Using analogWrite() works well, but there are not enough compatible pins on the Arduino Duemilanove to support this.  Therefore further development will be pushed to the Arduino Mega.
+
+The heading hold feature is also operational but not optimal.  The IDG gyros exhibit some drift during flight, which will cause the heading hold to eventually also drift.  This can be alleviated by landing the AeroQuad, disarm motor output, and then perform a manual sensor calibration (TX left stick to the lower left, TX right stick to the lower right).  The user will then be able to return to flight.  This feature will be optimized during Arduino Mega development since it is planned to implement heading hold with a magnetometer for that platform.
+
+With the updated Servo library of Arduino 0017, the older ServoTimer2 library will not be used for future versions of the AeroQuad Flight Software.
+
+Version 1.3.2 Release Notes
+----------------------------------------
+
+This version provides additional communication messages for the Configurator to make the new calibration procedures more robust.  New support added to allow Configurator to auto-reconnect to the AeroQuad (via USB or Wireless) for more convenience to the user. The Pin Change Interrupt (PCINT) code has been improved to work better for Futaba transmitters.  The variable declaration section in the main AeroQuad.pde sketch has been organized into separate header files for easier maintainability into the future.  The new default EEPROM values now include a suggested setting for yaw to allow a smoother yaw transition (in the past it would cause the quad to pop up and down a bit).  The main loop is now organized into different timed loops, to make sure the sampling of the sensors and control algorithm execution are now performed at regular timed intervals (500Hz). 
+ 
+If you'd like to maintain as much PWM resolution as possible for PWM Motor Control, please install the ServoTimer2 library found at:
+[http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75][3].  To compile the AeroQuad sketch to use the ServoTimer2 library, the ServoTimer2 folder found in this distribution must be copied to ..\Arduino-00xx\hardware\libraries.  To verify the library has been successfully installed, open the Arduino IDE and go to Sketch->Import Library. You should see ServoTimer2 as one of the items to select (you don't need to select it at this time).  The last step is to configure the #define statements for ServoTimer2 in the AeroQuad.pde sketch.
+
+The default #define statement for PWM Motor Control is AnalogWrite.  This will provide an update rate to the motors at 490Hz.  No modification to the code, or installation of the ServoTimer2 library is necessary for this default.
+
+Version 1.3.1 Release Notes
+----------------------------------------
+
+This version allows the user to calibrate a transmitter in either Airplane or Helicopter Mode.  There is also a calibration for ESC's and the ability for the user to return EEPROM values to a default value (which is also useful for first time setup).  To use these features, you must download the AeroQuad Configurator v1.3.1 or greater.  The transmitter calibration is meant to fix the situation where the trims could potentially move the transmitter beyond the 1000-2000 ms PWM pulse width range the AeroQuad is expecting.  This had resulted in a non-response from the AeroQuad when moving the transmitter stick to an extreme position.
+
+Version 1.2 Release Notes
+----------------------------------------
+
+This version incorporates the use of the Pin Change Interrupts (PCINT) to read output from an R/C receiver.  This removes the need to know the channel order of the receiver used.  This PCINT method has been tested with:
+
+  * Spektrum DX7 w/ AR6100, 6200 and AR7000
+  * Futaba T6EXHP w/ R146iP
+  * Airtronics RD8000 w/ 92778
+
+The PCINT pins are unfortunately different between the Arduino Duemilanove and Arduino Mega.  Therefore Version 1.2 is not directly compatible with the Mega.  There are plans for compatibility with future releases, but for now the Mega is only compatible with Version 1.0 of the AeroQuad flight software.
+
+**New v1.2 features:**
+
+  * Stable Mode (auto level) is disabled by default.  To enable remove the comment of the appropriate #define statement in AeroQuad.pde.  This was done to remove prevent confusion by new users.
+  * If any critical flight parameters are zero, it is automatically filled in with a typical value.
+  * PCINT receiver code updated for efficiency
+  * Auto calibration of sensors at powerup disabled by default.  To enable, remove the comment of the appropriate #define statement in AeroQuad.pde.
+  * Manual calibration of sensors can be performed by moving left transmitter stick to the lower left, and the right transmitter stick to the lower right corners.
+
+Version 1.1 Release Notes
+----------------------------------------
+
+This version of the code now uses analogWrite() to efficiently write PWM commands to the ESC's.  The tradeoff is that we can only achieve 128 steps of resolution.  The Turnigy ESC's specified in the parts list have been measured to only have 128 steps of resolution, so if you are using this ESC, there shouldn't be any issues.  Also, if you've built a previous MikroQuad or AeroQuad you will be required to update wiring in your shield per the AeroQuad website instructions.
+
+**New v1.1 features:**
+
+  * 400Hz update rate to ESC's/Motors
+  * Combined user configurable values into single tab in Configurator
+
+Happy flying!  
+[info@AeroQuad.com](mailto:info@AeroQuad.com)
+
+
+  [1]: http://carancho.com/AeroQuad/forum/index.php?topic=290.msg2735#msg2735
+  [2]: http://carancho.com/AeroQuad/forum/index.php?topic=85.0
+  [3]: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1204020386/75

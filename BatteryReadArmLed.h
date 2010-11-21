@@ -1,3 +1,25 @@
+/*
+  AeroQuad v2.1 - November 2010
+  www.AeroQuad.com
+  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
+
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+*/
+
+// Written by Honk: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13282#post13282
+
 #define LOW_VOLTAGE_1 10.8    // Pack voltage at which to trigger alarm (first alarm)
 #define LOW_VOLTAGE_2 10.2    // Pack voltage at which to trigger alarm (critical alarm)
 #define BATTERYPIN 0          // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
@@ -86,7 +108,7 @@ void lowBatteryEvent(byte level) // <- this logic by Jose Julio
          
          #ifndef AltitudeHold
          #ifdef AutoDescent
-         if(throttle > 1400) { autoDescent -= 2; }//will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
+         if(throttle > 1400) { autoDescent -= 2; }//will remove 2Ã‚Âµs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
          #endif
          #endif
          #if defined(AltitudeHold) && defined(AutoDescent)
@@ -119,3 +141,5 @@ float readBattery(void)
   
   return batteryVoltage;
 }
+
+

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - November 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -58,7 +58,7 @@ private:
   int exampleArray[3]; // only for use inside this subclass
   int examplePrivateData; // only for use inside this subclass
   void examplePrivateFunction(int functionVariable) {
-    // it’s possible to declare functions just for this subclass 
+    // itÃ¢â‚¬â„¢s possible to declare functions just for this subclass 
   }
   
 public: 
@@ -157,3 +157,5 @@ public:
     Wire.endTransmission();
   }
 };
+
+

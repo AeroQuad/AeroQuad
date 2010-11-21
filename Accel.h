@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - October 2010
+  AeroQuad v2.1 - November 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -119,7 +119,7 @@ public:
   
   const int getZaxis() {
     currentTime = micros();
-    zAxis = smooth(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000µs = (current-previous) / 5000.0 to get around 1
+    zAxis = smooth(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     previousTime = currentTime;
     return zAxis;
   }
@@ -656,3 +656,5 @@ public:
   }
 };
 #endif
+
+
