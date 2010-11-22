@@ -277,7 +277,7 @@ public:
   }
   
   void measure(void) {
-    currentTime = micros();
+    /*currentTime = micros();
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(accelAddress, 0x04);
     if (select == PITCH) sendByteI2C(accelAddress, 0x02);
@@ -289,7 +289,19 @@ public:
     if (select == ZAXIS) calculateAltitude();
      #endif
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
-     previousTime = currentTime;
+     previousTime = currentTime;*/
+    sendByteI2C(accelAddress, 0x02);
+    Wire.requestFrom(deviceAddress, 6);
+    lowerByte = Wire.receive();
+    return (Wire.receive() << 8) | lowerByte;
+
+    rawData[PITCH] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
+    rawData[ROLL] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
+    rawData[ZAXIS] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = rawData[axis] - accelZero[axis]; // center accel data around zero
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1, 5000/5000=1
+    }
   }
 
   const int getFlightData(byte axis) {
