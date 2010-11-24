@@ -265,7 +265,8 @@ public:
   }
   
   void measure(void) {
-    /*currentGyroTime = micros();
+    currentGyroTime = micros();
+    /*
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(gyroAddress, 0x1D);
     if (select == PITCH) sendByteI2C(gyroAddress, 0x1F);
@@ -274,7 +275,9 @@ public:
     gyroADC[select] = rawData[select] - gyroZero[select];
     //if ((gyroADC[YAW] < 5) && (gyroADC[YAW] > -5)) gyroADC[YAW] = 0;
     gyroData[select] = smooth(gyroADC[select], gyroData[select], smoothFactor, ((currentGyroTime - previousGyroTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    */
     previousGyroTime = currentGyroTime;
+    /*
     //if ((gyroData[YAW] < 5) && (gyroData[YAW] > -5)) gyroData[YAW] = 0;
     if (select == YAW) {
       calculateHeading();

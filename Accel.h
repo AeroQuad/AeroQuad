@@ -278,7 +278,8 @@ public:
   }
   
   void measure(void) {
-    /*currentTime = micros();
+    currentTime = micros();
+    /*
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(accelAddress, 0x04);
     if (select == PITCH) sendByteI2C(accelAddress, 0x02);
@@ -290,7 +291,8 @@ public:
     if (select == ZAXIS) calculateAltitude();
      #endif
     if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
-     previousTime = currentTime;*/
+    */
+    previousTime = currentTime;
     Wire.beginTransmission(accelAddress);
     Wire.send(0x02);
     Wire.endTransmission();
