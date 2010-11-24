@@ -265,7 +265,7 @@ public:
   }
   
   void measure(void) {
-    currentGyroTime = micros();
+    /*currentGyroTime = micros();
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(gyroAddress, 0x1D);
     if (select == PITCH) sendByteI2C(gyroAddress, 0x1F);
@@ -279,7 +279,17 @@ public:
     if (select == YAW) {
       calculateHeading();
     }
-    if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
+    if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS*/
+    sendByteI2C(gyroAddress, 0x1D);
+    Wire.requestFrom(gyroAddress, 6);
+    rawData[ROLL] = (Wire.receive() << 8) | Wire.receive();
+    rawData[PITCH] = (Wire.receive() << 8) | Wire.receive();
+    rawData[YAW] = (Wire.receive() << 8) | Wire.receive();
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = rawData[axis] - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor, ((currentGyroTime - previousGyroTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    }
+    calculateHeading();
     
     // ************ Correct for gyro drift by FabQuad **************  
     // ************ http://aeroquad.com/entry.php?4-  **************
