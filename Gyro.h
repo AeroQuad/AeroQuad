@@ -265,7 +265,8 @@ public:
   }
   
   void measure(void) {
-    /*currentGyroTime = micros();
+    currentGyroTime = micros();
+    /*
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(gyroAddress, 0x1D);
     if (select == PITCH) sendByteI2C(gyroAddress, 0x1F);

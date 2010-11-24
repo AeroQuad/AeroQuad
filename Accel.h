@@ -278,7 +278,8 @@ public:
   }
   
   void measure(void) {
-    /*currentTime = micros();
+    currentTime = micros();
+    /*
     // round robin between each axis so that I2C blocking time is low
     if (select == ROLL) sendByteI2C(accelAddress, 0x04);
     if (select == PITCH) sendByteI2C(accelAddress, 0x02);
