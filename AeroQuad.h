@@ -221,13 +221,15 @@ float angleDeg(byte axis);
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
 #ifdef Camera
-  #define ROLLCAMERAPIN 8
-  #define PITCHCAMERAPIN 13
+  #define ROLLCAMERAPIN 33 // Servo 1 signal pin
+  #define PITCHCAMERAPIN 34 // Servo 2 signal pin
+  #define YAWCAMERAPIN 35 // Servo 3 signal pin
   // map +/-90 degrees to 1000-2000
-  float mCamera = 5.556;
+  float mCamera = 11.11;
   float bCamera = 1500;
   Servo rollCamera;
   Servo pitchCamera;
+  Servo yawCamera;
 #endif
 
 // ESC Calibration
@@ -245,32 +247,27 @@ byte update = 0;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-#define RECEIVERLOOPTIME 20000  //20ms, 50Hz
-#define FASTTELEMETRYTIME 10000 //10ms, 100Hz
-#define CONTROLLOOPTIME 2000   //2ms, 500Hz
-#define CAMERALOOPTIME 20000   //20ms, 50Hz
-#define AILOOPTIME 2000        // 2ms, 500Hz
-#define COMPASSLOOPTIME 125000 //125ms, 8Hz      10Hz (full speed for CHR)
-#define ALTITUDELOOPTIME 26000 //26ms, 38Hz
-#define BATTERYLOOPTIME 100000 //100ms, 10Hz
+#define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
+#define COMPASSLOOPTIME 103000   // 103ms, ~10Hz
+#define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
+#define BATTERYLOOPTIME 100000   // 100ms, 10Hz
+#define CAMERALOOPTIME 20000     // 20ms, 50Hz
+#define FASTTELEMETRYTIME 10000  // 10ms, 100Hz
+#define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
 
-float AIdT = AILOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
-float controldT = CONTROLLOOPTIME / 1000000.0; //was 1000.0 in V6, not used however
 float G_Dt = 0.002;
-
+// Offset starting times so that events don't happen at the same time
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 unsigned long receiverTime = 0;
-unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
-unsigned long sensorTime = 0;
-unsigned long controlLoopTime = 1000; // offset control loop from analog input loop by 1ms
+unsigned long compassTime = 5000;
+unsigned long altitudeTime = 10000;
+unsigned long batteryTime = 15000;
+unsigned long autoZeroGyroTime = 0;
 unsigned long cameraTime = 10000;
 unsigned long fastTelemetryTime = 0;
-unsigned long autoZeroGyroTime = 0;
-unsigned long compassTime = 25000;
-unsigned long altitudeTime = 26000;
-unsigned long batteryTime = 0;
+unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
 /**************************************************************/
 /********************** Debug Parameters **********************/
@@ -281,34 +278,17 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
-// Measured test signal with an oscilloscope:
-// All loops on = 2.4 ms
-// Analog Input and Control loop on = 2.0 ms
-// Analog Input loop on = 1.6 ms
-// Analog Input loop on = 1 ms (no comp filter)
-// Analog Input loop on = 0.6 ms (comp filter only)
-// Control loop on = 0.4 ms
-// Receiver loop = 0.4 ms
-// Telemetry loop = .04 ms (with no telemetry transmitted)
-// Fast Telemetry Transfer (sending 12 bytes = 1.1 ms, sending 14 bytes = 1.3 ms, sending 16 bytes = 1.45 ms, sending 18 bytes = 1.625 ms) 2 bytes = 0.175 ms
-
 
 // **************************************************************
 // *************************** EEPROM ***************************
 // **************************************************************
 // EEPROM storage addresses
-#define PGAIN_ADR 0
-#define IGAIN_ADR 4
-#define DGAIN_ADR 8
-#define LEVEL_PGAIN_ADR 12
-#define LEVEL_IGAIN_ADR 16
-#define LEVEL_DGAIN_ADR 20
-#define YAW_PGAIN_ADR 24
-#define YAW_IGAIN_ADR 28
-#define YAW_DGAIN_ADR 32
+#define ROLL_PID_GAIN_ADR 0
+#define LEVELROLL_PID_GAIN_ADR 12
+#define YAW_PID_GAIN_ADR 24
 #define WINDUPGUARD_ADR 36
 #define LEVELLIMIT_ADR 40
 #define LEVELOFF_ADR 44
@@ -327,12 +307,8 @@ byte testSignal = LOW;
 #define GYRO_ROLL_ZERO_ADR 96
 #define GYRO_PITCH_ZERO_ADR 100
 #define GYRO_YAW_ZERO_ADR 104
-#define PITCH_PGAIN_ADR 124
-#define PITCH_IGAIN_ADR 128
-#define PITCH_DGAIN_ADR 132
-#define LEVEL_PITCH_PGAIN_ADR 136
-#define LEVEL_PITCH_IGAIN_ADR 140
-#define LEVEL_PITCH_DGAIN_ADR 144
+#define PITCH_PID_GAIN_ADR 124
+#define LEVELPITCH_PID_GAIN_ADR 136
 #define THROTTLESCALE_ADR 148
 #define THROTTLEOFFSET_ADR 152
 #define ROLLSCALE_ADR 156
@@ -347,17 +323,11 @@ byte testSignal = LOW;
 #define AUXOFFSET_ADR 192
 #define AUXSMOOTH_ADR 196
 #define HEADINGSMOOTH_ADR 200
-#define HEADING_PGAIN_ADR 204
-#define HEADING_IGAIN_ADR 208
-#define HEADING_DGAIN_ADR 212
+#define HEADING_PID_GAIN_ADR 204
 #define AREF_ADR 216
 #define FLIGHTMODE_ADR 220
-#define LEVEL_GYRO_ROLL_PGAIN_ADR 224
-#define LEVEL_GYRO_ROLL_IGAIN_ADR 228
-#define LEVEL_GYRO_ROLL_DGAIN_ADR 232
-#define LEVEL_GYRO_PITCH_PGAIN_ADR 236
-#define LEVEL_GYRO_PITCH_IGAIN_ADR 240
-#define LEVEL_GYRO_PITCH_DGAIN_ADR 244
+#define LEVEL_GYRO_ROLL_PID_GAIN_ADR 224
+#define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
 #define ACCEL1G_ADR 256
@@ -366,7 +336,7 @@ byte testSignal = LOW;
 #define ALTITUDE_DGAIN_ADR 268
 #define ALTITUDE_MAX_THROTTLE_ADR 272
 #define ALTITUDE_MIN_THROTTLE_ADR 276
-#define ALTITUDE_SMOOTH_ADR  280
+#define ALTITUDE_SMOOTH_ADR 280
 #define ZDAMP_PGAIN_ADR 284
 #define ZDAMP_IGAIN_ADR 288
 #define ZDAMP_DGAIN_ADR 292
@@ -377,8 +347,6 @@ byte testSignal = LOW;
 #define MAGYMIN_ADR 312
 #define MAGZMAX_ADR 316
 #define MAGZMIN_ADR 320
-
-
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h

@@ -63,7 +63,7 @@ void flightControl(void) {
   // ***************************** Update Yaw ***************************
   #ifndef AeroQuad_v18
   if (headingHoldConfig == ON) {
-    gyro.calculateHeading();
+    //gyro.calculateHeading();
 
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       heading = compass.getHeading();

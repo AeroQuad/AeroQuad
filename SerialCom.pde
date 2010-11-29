@@ -202,10 +202,10 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    Serial.print(gyro.getHeading());
-    comma();
-    Serial.print(compass.getData());
-    Serial.println();
+    //Serial.print(gyro.getHeading());
+    //comma();
+    //Serial.print(compass.getData());
+    //Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -387,6 +387,12 @@ void sendSerialTelemetry() {
       Serial.print(compass.getRawData(YAXIS));
       comma();
       Serial.println(compass.getRawData(ZAXIS));
+    #else
+      Serial.print('0');
+      comma();
+      Serial.print('0');
+      comma();
+      Serial.println('0');
     #endif
     break;
   case 'S': // Send all flight data

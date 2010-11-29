@@ -176,17 +176,25 @@ private:
   }
 
   void write(void) {
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
+    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-    analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
-    analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
-    analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    //analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
   }
 };
 

@@ -116,9 +116,9 @@ private:
     while(!Wire.available()); // wait until data available
     msb = Wire.receive();
     while(!Wire.available()); // wait until data available
-    lsb |= Wire.receive();
+    lsb = Wire.receive();
     while(!Wire.available()); // wait until data available
-    xlsb |= Wire.receive();
+    xlsb = Wire.receive();
     return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
   }
 
@@ -245,7 +245,7 @@ public:
     rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
     //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
     currentTime = micros();
-    altitude = smooth(rawAltitude, altitude, smoothFactor, ((currentTime - previousTime) / 26000.0)); //26ms expected = 26000Ã‚Âµs = current-previous, (current-prev)/26000 = 1
+    altitude = smooth(rawAltitude, altitude, smoothFactor);
     previousTime = currentTime;
   }
 };
