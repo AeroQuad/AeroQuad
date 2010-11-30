@@ -25,16 +25,17 @@ public:
   float rawAltitude;
   int accelChannel[3];
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float accelZero[3];
+    float accelZero[3];
   #else
-  int accelZero[3];
+    int accelZero[3];
   #endif
   int accelData[3];
-  float accelADC[3];
+  int accelADC[3];
   int sign[3];
   float accelOneG, zAxis;
   byte rollChannel, pitchChannel, zAxisChannel;
-  unsigned long currentTime, previousTime;
+  unsigned long currentAccelTime, previousAccelTime;
+  
   Accel(void) {
     sign[ROLL] = 1;
     sign[PITCH] = 1;
@@ -65,6 +66,8 @@ public:
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
     accelOneG = readFloat(ACCEL1G_ADR);
+    currentAccelTime = micros();
+    previousAccelTime = currentAccelTime;
   }
   
   const int getRaw(byte axis) {
@@ -118,11 +121,12 @@ public:
   }
   
   const int getZaxis() {
-    currentTime = micros();
-    zAxis = smooth(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    previousTime = currentTime;
+    currentAccelTime = micros();
+    zAxis = smoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    previousAccelTime = currentAccelTime;
     return zAxis;
   }
+  
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) 
   void calculateAltitude() {
     currentTime = micros();
@@ -182,7 +186,7 @@ public:
     currentTime = micros();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1, 5000/5000=1
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
     previousTime = currentTime;
   }
@@ -278,21 +282,6 @@ public:
   }
   
   void measure(void) {
-    currentTime = micros();
-    /*
-    // round robin between each axis so that I2C blocking time is low
-    if (select == ROLL) sendByteI2C(accelAddress, 0x04);
-    if (select == PITCH) sendByteI2C(accelAddress, 0x02);
-    if (select == ZAXIS) sendByteI2C(accelAddress, 0x06);
-    rawData[select] = readReverseWordI2C(accelAddress) >> 2; // last 2 bits are not part of measurement
-    accelADC[select] = rawData[select] - accelZero[select]; // center accel data around zero
-    accelData[select] = smooth(accelADC[select], accelData[select], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1, 5000/5000=1
-     #ifndef AeroQuad_v18
-    if (select == ZAXIS) calculateAltitude();
-     #endif
-    if (++select == LASTAXIS) select = ROLL; // go to next axis, reset to ROLL if past ZAXIS
-    */
-    previousTime = currentTime;
     Wire.beginTransmission(accelAddress);
     Wire.send(0x02);
     Wire.endTransmission();
@@ -302,7 +291,7 @@ public:
     rawData[ZAXIS] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = rawData[axis] - accelZero[axis]; // center accel data around zero
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1, 5000/5000=1
+      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
   }
 
@@ -339,6 +328,7 @@ public:
   }
 };
 #endif
+
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
 /******************************************************/
@@ -428,7 +418,7 @@ public:
     // We just update the appropriate variables here
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }
@@ -487,9 +477,9 @@ public:
       accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
       accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
 
-      accelData[XAXIS] = smooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
-      accelData[YAXIS] = smooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = smooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
+      accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
     previousTime = currentTime;
   }    
 

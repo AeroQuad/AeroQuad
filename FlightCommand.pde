@@ -125,7 +125,7 @@ void readPilotCommands() {
   
   #ifdef AltitudeHold
     
-   if (receiver.getRaw(AUX) < 1500) {
+   if (receiver.getRaw(AUX) < 1750) {
       if (storeAltitude == ON) {
         holdAltitude = altitude.getData();
         holdThrottle = receiver.getData(THROTTLE);
@@ -142,7 +142,7 @@ void readPilotCommands() {
   #endif
   
   // Use for correcting gyro drift with v2.0 Shield
-  gyro.setReceiverYaw(receiver.getData(YAW));
+  //gyro.setReceiverYaw(receiver.getData(YAW));
 }
 
 

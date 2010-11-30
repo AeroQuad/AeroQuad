@@ -113,6 +113,7 @@ public:
   // ***********************************************************
   void initialize(void) {
     // Should do a WhoAmI to know if mag is present
+    //updateRegisterI2C(compassAddress, 0x00, 0x10);
     updateRegisterI2C(compassAddress, 0x01, 0x20);
     updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
     measure();
@@ -142,8 +143,9 @@ public:
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
     magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
     magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
+    //magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
+    //magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;   
     compass = -degrees(atan2(-magY, magX));
-    //Serial.println(compass);
     
     // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value
     if (gyroZero != gyro.getZero(YAW)) {

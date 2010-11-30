@@ -41,32 +41,48 @@ void writeFloat(float value, int address) {
     EEPROM.write(address + i, floatIn.floatByte[i]);
 }
 
+void readPID(unsigned char IDPid, unsigned char IDEeprom) {
+  struct PIDdata* pid = &PID[IDPid];
+  pid->P = readFloat(IDEeprom);
+  pid->I = readFloat(IDEeprom+4);
+  pid->D = readFloat(IDEeprom+8);
+  pid->lastPosition = 0;
+  pid->integratedError = 0;
+}
+
+void writePID(unsigned char IDPid, unsigned int IDEeprom) {
+  struct PIDdata* pid = &PID[IDPid];
+  writeFloat(pid->P, IDEeprom);
+  writeFloat(pid->I, IDEeprom+4);
+  writeFloat(pid->D, IDEeprom+8);
+}
+
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.50; //Honk
+  PID[ROLL].P = 1.20;
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -0.05; //Honk
-  PID[PITCH].P = 1.50; //Honk
+  PID[ROLL].D = -0.05;
+  PID[PITCH].P = 1.20;
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -0.05; //Honk
+  PID[PITCH].D = -0.05;
   PID[YAW].P = 3.0;
-  PID[YAW].I = 0.05; //Honk, we can afford this now since I term is more accurate due to time precision and gyro's better calibrated
+  PID[YAW].I = 0.05;
   PID[YAW].D = 0.0;
-  PID[LEVELROLL].P = 1.0; //Honk following just makes safer
-  PID[LEVELROLL].I = 0.5; //Honk
+  PID[LEVELROLL].P = 1.0;
+  PID[LEVELROLL].I = 0.5;
   PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 1.0; //Honk
-  PID[LEVELPITCH].I = 0.5; //Honk
+  PID[LEVELPITCH].P = 1.0;
+  PID[LEVELPITCH].I = 0.5;
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
-  PID[HEADING].I = 0.1; //since absolute, this is ok
+  PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
   PID[LEVELGYROROLL].P = 1.2;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -0.05; //important since introduction of time
+  PID[LEVELGYROROLL].D = -0.05;
   PID[LEVELGYROPITCH].P = 1.2;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -0.05; //important since introduction of time
+  PID[LEVELGYROPITCH].D = -0.05;
   #ifdef AltitudeHold
     PID[ALTITUDE].P = 25.0;
     PID[ALTITUDE].I = 0.1;
@@ -110,52 +126,32 @@ void initializeEEPROM(void) {
 }
 
 void readEEPROM(void) {
-  PID[ROLL].P = readFloat(PGAIN_ADR);
-  PID[ROLL].I = readFloat(IGAIN_ADR);
-  PID[ROLL].D = readFloat(DGAIN_ADR);
-  PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
+  readPID(ROLL, ROLL_PID_GAIN_ADR);
   PID[ROLL].lastPosition = 0;
   PID[ROLL].integratedError = 0;
-  
-  PID[PITCH].P = readFloat(PITCH_PGAIN_ADR);
-  PID[PITCH].I = readFloat(PITCH_IGAIN_ADR);
-  PID[PITCH].D = readFloat(PITCH_DGAIN_ADR);
+  readPID(PITCH, PITCH_PID_GAIN_ADR);
   PID[PITCH].lastPosition = 0;
   PID[PITCH].integratedError = 0;
-  
-  PID[YAW].P = readFloat(YAW_PGAIN_ADR);
-  PID[YAW].I = readFloat(YAW_IGAIN_ADR);
-  PID[YAW].D = readFloat(YAW_DGAIN_ADR);
+  readPID(YAW, YAW_PID_GAIN_ADR);
   PID[YAW].lastPosition = 0;
   PID[YAW].integratedError = 0;
   
-  PID[LEVELROLL].P = readFloat(LEVEL_PGAIN_ADR);
-  PID[LEVELROLL].I = readFloat(LEVEL_IGAIN_ADR);
-  PID[LEVELROLL].D = readFloat(LEVEL_DGAIN_ADR);
+  readPID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
   PID[LEVELROLL].lastPosition = 0;
   PID[LEVELROLL].integratedError = 0;  
-  
-  PID[LEVELPITCH].P = readFloat(LEVEL_PITCH_PGAIN_ADR);
-  PID[LEVELPITCH].I = readFloat(LEVEL_PITCH_IGAIN_ADR);
-  PID[LEVELPITCH].D = readFloat(LEVEL_PITCH_DGAIN_ADR);
+  readPID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
   PID[LEVELPITCH].lastPosition = 0;
   PID[LEVELPITCH].integratedError = 0;
   
-  PID[HEADING].P = readFloat(HEADING_PGAIN_ADR);
-  PID[HEADING].I = readFloat(HEADING_IGAIN_ADR);
-  PID[HEADING].D = readFloat(HEADING_DGAIN_ADR);
+  readPID(HEADING, HEADING_PID_GAIN_ADR);
   PID[HEADING].lastPosition = 0;
   PID[HEADING].integratedError = 0;
   
-  PID[LEVELGYROROLL].P = readFloat(LEVEL_GYRO_ROLL_PGAIN_ADR);
-  PID[LEVELGYROROLL].I = readFloat(LEVEL_GYRO_ROLL_IGAIN_ADR);
-  PID[LEVELGYROROLL].D = readFloat(LEVEL_GYRO_ROLL_DGAIN_ADR);
+  readPID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   PID[LEVELGYROROLL].lastPosition = 0;
   PID[LEVELGYROROLL].integratedError = 0;
   
-  PID[LEVELGYROPITCH].P = readFloat(LEVEL_GYRO_PITCH_PGAIN_ADR);
-  PID[LEVELGYROPITCH].I = readFloat(LEVEL_GYRO_PITCH_IGAIN_ADR);
-  PID[LEVELGYROPITCH].D = readFloat(LEVEL_GYRO_PITCH_DGAIN_ADR);
+  readPID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   PID[LEVELGYROPITCH].lastPosition = 0;
   PID[LEVELGYROPITCH].integratedError = 0;
   
@@ -163,6 +159,7 @@ void readEEPROM(void) {
     PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
     PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
     PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
+    PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     PID[ALTITUDE].lastPosition = 0;
     PID[ALTITUDE].integratedError = 0;
     PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
@@ -195,30 +192,14 @@ void readEEPROM(void) {
 
 void writeEEPROM(void){
   cli(); // Needed so that APM sensor data doesn't overflow
-  writeFloat(PID[ROLL].P, PGAIN_ADR);
-  writeFloat(PID[ROLL].I, IGAIN_ADR);
-  writeFloat(PID[ROLL].D, DGAIN_ADR);
-  writeFloat(PID[PITCH].P, PITCH_PGAIN_ADR);
-  writeFloat(PID[PITCH].I, PITCH_IGAIN_ADR);
-  writeFloat(PID[PITCH].D, PITCH_DGAIN_ADR);
-  writeFloat(PID[LEVELROLL].P, LEVEL_PGAIN_ADR);
-  writeFloat(PID[LEVELROLL].I, LEVEL_IGAIN_ADR);
-  writeFloat(PID[LEVELROLL].D, LEVEL_DGAIN_ADR);
-  writeFloat(PID[LEVELPITCH].P, LEVEL_PITCH_PGAIN_ADR);
-  writeFloat(PID[LEVELPITCH].I, LEVEL_PITCH_IGAIN_ADR);
-  writeFloat(PID[LEVELPITCH].D, LEVEL_PITCH_DGAIN_ADR);
-  writeFloat(PID[YAW].P, YAW_PGAIN_ADR);
-  writeFloat(PID[YAW].I, YAW_IGAIN_ADR);
-  writeFloat(PID[YAW].D, YAW_DGAIN_ADR);
-  writeFloat(PID[HEADING].P, HEADING_PGAIN_ADR);
-  writeFloat(PID[HEADING].I, HEADING_IGAIN_ADR);
-  writeFloat(PID[HEADING].D, HEADING_DGAIN_ADR);
-  writeFloat(PID[LEVELGYROROLL].P, LEVEL_GYRO_ROLL_PGAIN_ADR);
-  writeFloat(PID[LEVELGYROROLL].I, LEVEL_GYRO_ROLL_IGAIN_ADR);
-  writeFloat(PID[LEVELGYROROLL].D, LEVEL_GYRO_ROLL_DGAIN_ADR);
-  writeFloat(PID[LEVELGYROPITCH].P, LEVEL_GYRO_PITCH_PGAIN_ADR);
-  writeFloat(PID[LEVELGYROPITCH].I, LEVEL_GYRO_PITCH_IGAIN_ADR);
-  writeFloat(PID[LEVELGYROPITCH].D, LEVEL_GYRO_PITCH_DGAIN_ADR);
+  writePID(ROLL, ROLL_PID_GAIN_ADR);
+  writePID(PITCH, PITCH_PID_GAIN_ADR);
+  writePID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
+  writePID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
+  writePID(YAW, YAW_PID_GAIN_ADR);
+  writePID(HEADING, HEADING_PID_GAIN_ADR);
+  writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
+  writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   #ifdef AltitudeHold
     writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
     writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
@@ -229,7 +210,7 @@ void writeEEPROM(void){
     writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR); 
   #endif
   #ifdef HeadingMagHold
     writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
@@ -272,5 +253,3 @@ void writeEEPROM(void){
   writeFloat(accel.getOneG(), ACCEL1G_ADR);
   sei(); // Restart interrupts
 }
-
-

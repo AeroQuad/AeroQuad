@@ -25,31 +25,32 @@ void readSensors(void) {
   // Apply low pass filter to sensor values and center around zero
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
- #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  compass.measure();
- #endif
- // ********************* Read Slower Sensors *******************
- #if defined(HeadingMagHold)
-   if (currentTime > compassTime) { // 10Hz
-     compass.measure(); // defined in compass.h
-     compassTime = currentTime + COMPASSLOOPTIME;
-   }
- #endif
- #if defined(BatteryMonitor)
-   if (currentTime > (batteryTime + BATTERYLOOPTIME)) {
-     readBattery();
-     batteryTime = currentTime;
-   }
- #endif
- #if defined(AltitudeHold)
-   if (currentTime > (altitudeTime + ALTITUDELOOPTIME)) { // 38Hz
-     altitude.measure(); // defined in altitude.h
-     altitudeTime = currentTime;
-   }
- #endif
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    compass.measure();
+  #endif
+ 
+  // ********************* Read Slower Sensors *******************
+  #if defined(HeadingMagHold)
+    if (currentTime > compassTime) {
+      compass.measure(); // defined in compass.h
+      compassTime = currentTime + COMPASSLOOPTIME;
+    }
+  #endif
+  #if defined(AltitudeHold)
+    if (currentTime > altitudeTime) {
+      altitude.measure(); // defined in altitude.h
+      altitudeTime = currentTime + ALTITUDELOOPTIME;
+    }
+  #endif
+  #if defined(BatteryMonitor)
+    if (currentTime >(batteryTime) {
+      readBattery();
+      batteryTime = currentTime + BATTERYLOOPTIME;
+    }
+  #endif
   
- // ****************** Calculate Absolute Angle *****************
- flightAngle.calculate(); // defined in FlightAngle.h
+  // ****************** Calculate Absolute Angle *****************
+  flightAngle.calculate(); // defined in FlightAngle.h
 }
 
 // Alternate method to calculate arctangent from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
