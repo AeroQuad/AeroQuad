@@ -152,7 +152,7 @@ public:
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
-    float verifyGroundAltitude;
+    //float verifyGroundAltitude;
     
     sendByteI2C(altitudeAddress, 0xAA);
     ac1 = readWordWaitI2C(altitudeAddress);

@@ -100,7 +100,7 @@ public:
   }
 
   float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
+    return gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -165,7 +165,7 @@ public:
   }
   
   float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
+    return gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -419,10 +419,10 @@ void Normalize(void)
 void Drift_correction(void) 
 {
   //Compensation the Roll, Pitch and Yaw drift. 
-  float        errorCourse;
-  static float Scaled_Omega_P[3];
+  //float        errorCourse;
+  //static float Scaled_Omega_P[3];
   static float Scaled_Omega_I[3];
-  float        Accel_magnitude;
+  //float        Accel_magnitude;
   float        Accel_weight;
   
   //*****Roll and Pitch***************
@@ -569,6 +569,8 @@ public:
       return degrees(Omega[1]);
     if (axis == PITCH)
       return degrees(-Omega[0]);
+
+    return 0;//TODO throw fatal error
   }
 };
 
@@ -755,7 +757,7 @@ public:
   }
   
   float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
+    return gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -795,6 +797,7 @@ public:
 
   float getGyroAngle(byte axis) {
     //gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
+    return 0;
   }
 };
 #endif
