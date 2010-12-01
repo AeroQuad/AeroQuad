@@ -33,7 +33,7 @@ public:
   float bTransmitter[6];
   unsigned long currentTime, previousTime;
 
-  Receiver(void) { 
+  Receiver(void) {
     transmitterCommand[ROLL] = 1500;
     transmitterCommand[PITCH] = 1500;
     transmitterCommand[YAW] = 1500;
@@ -50,8 +50,8 @@ public:
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void);
-  virtual void read(void);
+  virtual void initialize(void) = 0;
+  virtual void read(void) = 0;
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses

@@ -64,9 +64,9 @@ public:
   };
   
   // The following function calls must be defined in any new subclasses
-  virtual void initialize(void);
-  virtual void write (void);
-  virtual void commandAllMotors(int motorCommand);
+  virtual void initialize(void) = 0;
+  virtual void write (void) = 0;
+  virtual void commandAllMotors(int motorCommand) = 0;
   
   //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
   void pulseMotors(byte quantity) {
