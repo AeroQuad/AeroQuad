@@ -278,7 +278,7 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
 
