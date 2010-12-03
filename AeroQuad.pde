@@ -62,7 +62,7 @@
 
 // Camera Stabilization (experimental)
 // Not yet fully tested and implemented
-//#define Camera
+#define Camera
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 #include <EEPROM.h>
-//#include <Servo.h>
+#include <Servo.h>
 #include <Wire.h>
 #include "AeroQuad.h"
 #include "I2C.h"
