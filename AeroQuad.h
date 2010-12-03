@@ -223,7 +223,7 @@ float angleDeg(byte axis);
 #ifdef Camera
   #define ROLLCAMERAPIN 33 // Servo 1 signal pin
   #define PITCHCAMERAPIN 34 // Servo 2 signal pin
-  #define YAWCAMERAPIN 35 // Servo 3 signal pin
+//  #define YAWCAMERAPIN 35 // Servo 3 signal pin
   // map +/-90 degrees to 1000-2000
   float mCamera = 11.11;
   float bCamera = 1500;

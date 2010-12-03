@@ -354,6 +354,9 @@ void setup() {
   #ifdef Camera
     rollCamera.attach(ROLLCAMERAPIN);
     pitchCamera.attach(PITCHCAMERAPIN);
+  #ifdef YAWCAMERAPIN
+    yawCamera.attach(YAWCAMERAPIN);
+  #endif
   #endif
   
   previousTime = micros(); //was millis();
@@ -404,7 +407,9 @@ void loop () {
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
     rollCamera.write((mCamera * flightAngle.getData(ROLL)) + bCamera);
     pitchCamera.write((mCamera * flightAngle.getData(PITCH)) + bCamera);
+  #ifdef YAWCAMERAPIN
     yawCamera.write((mCamera * flightAngle.getData(YAW)) + bCamera);
+  #endif
     cameraTime = currentTime + CAMERALOOPTIME;
   }
 #endif
