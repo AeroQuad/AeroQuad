@@ -290,13 +290,15 @@ public:
     }
 
      bool setActiveChannels(int channels)  {
-        sendPacket(SET_ACTIVE_CHANNELS,(int[]){channels},1);
+        int data[]={channels};
+        sendPacket(SET_ACTIVE_CHANNELS,data,1);
         return waitForAck(DEFAULT_TIMEOUT);
     }
 
 
      void setBroadCastMode(int x) {
-        sendPacket(SET_BROADCAST_MODE,(int[]){x},1);
+        int data[]={x};
+        sendPacket(SET_BROADCAST_MODE,data,1);
     }
 
      void sendPacket(int command)  {
