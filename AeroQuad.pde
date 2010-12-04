@@ -405,10 +405,10 @@ void loop () {
 #ifdef Camera // Experimental, not fully implemented yet
   // Command camera stabilization servos (requires #include <servo.h>)
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-    rollCamera.write((mCamera * flightAngle.getData(ROLL)) + bCamera);
-    pitchCamera.write((mCamera * flightAngle.getData(PITCH)) + bCamera);
+    rollCamera.write((rollmCamera * flightAngle.getData(ROLL)) + rollbCamera);
+    pitchCamera.write((pitchmCamera * flightAngle.getData(PITCH)) + pitchbCamera);
   #ifdef YAWCAMERAPIN
-    yawCamera.write((mCamera * flightAngle.getData(YAW)) + bCamera);
+    yawCamera.write((yawmCamera * flightAngle.getData(YAW)) + yawbCamera);
   #endif
     cameraTime = currentTime + CAMERALOOPTIME;
   }

@@ -225,8 +225,12 @@ float angleDeg(byte axis);
   #define PITCHCAMERAPIN 34 // Servo 2 signal pin
 //  #define YAWCAMERAPIN 35 // Servo 3 signal pin
   // map +/-90 degrees to 1000-2000
-  float mCamera = 11.11;
-  float bCamera = 1500;
+  float rollmCamera = -11.11;             // make -ve to reverse direction
+  float pitchmCamera = 11.11;
+  float yawmCamera = 11.11;
+  float rollbCamera = 1300;              // adjust to set center/aim the cam
+  float pitchbCamera = 1300;
+  float yawbCamera = 1500;
   Servo rollCamera;
   Servo pitchCamera;
   Servo yawCamera;
