@@ -51,4 +51,7 @@ avr-ar rcs core.a WString.cpp.o
 
 avr-gcc -Os -Wl,--gc-sections -mmcu=atmega1280 -o AeroQuad.cpp.elf EEPROM.cpp.o Wire.cpp.o twi.c.o AeroQuad.cpp.o core.a  -lm   # -L/var/folders/7K/7Kj7aXBDEayJZntqcpOHPk+++TI/-Tmp-/build7155846014291482053.tmp
 
+avr-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 AeroQuad.cpp.elf AeroQuad.cpp.eep
+avr-objcopy -O ihex -R .eeprom AeroQuad.cpp.elf AeroQuad.cpp.hex
+
 rm AeroQuad.cpp *.o
