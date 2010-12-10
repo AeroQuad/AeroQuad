@@ -63,6 +63,7 @@
 // Camera Stabilization (experimental)
 // Not yet fully tested and implemented
 #define Camera
+#define CameraTimer1    
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
@@ -77,7 +78,7 @@
  ****************************************************************************/
 
 #include <EEPROM.h>
-#include <Servo.h>
+//#include <Servo.h>
 #include <Wire.h>
 #include "AeroQuad.h"
 #include "I2C.h"
@@ -88,6 +89,7 @@
 #include "Accel.h"
 #include "Gyro.h"
 #include "Motors.h"
+
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
@@ -214,6 +216,13 @@
 #endif
 #ifdef BatteryMonitor
   #include "BatteryReadArmLed.h"
+#endif
+
+// Camera stabilization variables
+// Note: stabilization camera software is still under development
+#ifdef Camera
+    #include "Camera.h"
+    camera myCamera;
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -352,11 +361,9 @@ void setup() {
     
   // Camera stabilization setup
   #ifdef Camera
-    rollCamera.attach(ROLLCAMERAPIN);
-    pitchCamera.attach(PITCHCAMERAPIN);
-  #ifdef YAWCAMERAPIN
-    yawCamera.attach(YAWCAMERAPIN);
-  #endif
+    myCamera.initialize();
+    myCamera.setmCameraRoll(-11.11);
+    myCamera.setCenterRoll(1300);
   #endif
   
   previousTime = micros(); //was millis();
@@ -405,11 +412,10 @@ void loop () {
 #ifdef Camera // Experimental, not fully implemented yet
   // Command camera stabilization servos (requires #include <servo.h>)
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-    rollCamera.write((rollmCamera * flightAngle.getData(ROLL)) + rollbCamera);
-    pitchCamera.write((pitchmCamera * flightAngle.getData(PITCH)) + pitchbCamera);
-  #ifdef YAWCAMERAPIN
-    yawCamera.write((yawmCamera * flightAngle.getData(YAW)) + yawbCamera);
-  #endif
+    myCamera.setPitch(flightAngle.getData(PITCH));
+    myCamera.setRoll(flightAngle.getData(ROLL));
+    myCamera.setYaw(flightAngle.getData(YAW));
+    myCamera.move();
     cameraTime = currentTime + CAMERALOOPTIME;
   }
 #endif

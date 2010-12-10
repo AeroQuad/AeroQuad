@@ -26,7 +26,7 @@
 // Flight Software Version
 #define VERSION 2.1
 
-#define BAUD 115200
+#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
 #define OFF 0
@@ -217,24 +217,6 @@ float timeConstant;
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
 */
-
-// Camera stabilization variables
-// Note: stabilization camera software is still under development
-#ifdef Camera
-  #define ROLLCAMERAPIN 33 // Servo 1 signal pin
-  #define PITCHCAMERAPIN 34 // Servo 2 signal pin
-  #define YAWCAMERAPIN 35 // Servo 3 signal pin
-  // map +/-90 degrees to 1000-2000
-  float rollmCamera = -11.11;             // make -ve to reverse direction
-  float pitchmCamera = 11.11;
-  float yawmCamera = 11.11;
-  float rollbCamera = 1300;              // adjust to set center/aim the cam
-  float pitchbCamera = 1500;
-  float yawbCamera = 1500;
-  Servo rollCamera;
-  Servo pitchCamera;
-  Servo yawCamera;
-#endif
 
 // ESC Calibration
 byte calibrateESC = 0;
