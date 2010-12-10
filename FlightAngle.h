@@ -176,17 +176,11 @@ private:
   float Gyro_Gain_Y;
   float Gyro_Gain_Z;
   float DCM_Matrix[9];
-  float Update_Matrix[9];
-  float Temporary_Matrix[9];
   float Accel_Vector[3];
-  float Accel_Vector_unfiltered[3];
-  float Gyro_Vector[3];
   float Omega_Vector[3];
   float Omega_P[3];
   float Omega_I[3];
   float Omega[3];
-  float errorRollPitch[3];
-  float errorYaw[3];
   float errorCourse;
   float COGX; //Course overground X axis
   float COGY; //Course overground Y axis
@@ -331,9 +325,15 @@ void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matri
 
 void Matrix_update(void) 
 {
-  Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH); //gyro x roll
-  Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
-  Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
+	{
+    float Gyro_Vector[3];
+
+    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH); //gyro x roll
+    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
+    Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
+    vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
+    vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
+	}
   
   Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
   Accel_Vector[1]=accel.getFlightData(PITCH); // acc y
@@ -344,11 +344,12 @@ void Matrix_update(void)
   //Accel_Vector[1]=Accel_Vector[1]*0.5 + (float)read_adc(4)*0.5; // acc y
   //Accel_Vector[2]=Accel_Vector[2]*0.5 + (float)read_adc(5)*0.5; // acc z
   
-  vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
-  vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
   
   //Accel_adjust();//adjusting centrifugal acceleration. // Not used for quadcopter
   
+  float Update_Matrix[9];
+  float Temporary_Matrix[9];
+
   Update_Matrix[0] =  0;
   Update_Matrix[1] = -G_Dt*Omega_Vector[2];  // -z
   Update_Matrix[2] =  G_Dt*Omega_Vector[1];  //  y
@@ -413,9 +414,10 @@ void Drift_correction(void)
   //Compensation the Roll, Pitch and Yaw drift. 
   //float        errorCourse;
   //static float Scaled_Omega_P[3];
-  static float Scaled_Omega_I[3];
+  float Scaled_Omega_I[3];
   float        Accel_magnitude;
   float        Accel_weight;
+  float        errorRollPitch[3];
   
   //*****Roll and Pitch***************
 
@@ -437,6 +439,8 @@ void Drift_correction(void)
   //*****YAW***************
   // We make the gyro YAW drift correction based on compass magnetic heading 
   /*if (MAGNETOMETER == 1) {
+	  float errorYaw[3];
+
     errorCourse= (DCM_Matrix[0][0]*APM_Compass.Heading_Y) - (DCM_Matrix[1][0]*APM_Compass.Heading_X);  //Calculating YAW error
     Vector_Scale(errorYaw,&DCM_Matrix[2][0],errorCourse); //Applys the yaw correction to the XYZ rotation of the aircraft, depeding the position.
   
@@ -484,14 +488,10 @@ public:
   {
     for (byte i=0; i<3; i++) {
       Accel_Vector[i]            = 0;  // Store the acceleration in a vector
-      Accel_Vector_unfiltered[i] = 0;  // Store the acceleration in a vector
-      Gyro_Vector[i]             = 0;  // Store the gyros rutn rate in a vector
       Omega_Vector[i]            = 0;  // Corrected Gyro_Vector data
       Omega_P[i]                 = 0;  // Omega Proportional correction
       Omega_I[i]                 = 0;  // Omega Integrator
       Omega[i]                   = 0;
-      errorRollPitch[i]          = 0;
-      errorYaw[i]                = 0;
     }
     DCM_Matrix[0]       = 1;
     DCM_Matrix[1]       = 0;
@@ -502,27 +502,7 @@ public:
     DCM_Matrix[6]       = 0;
     DCM_Matrix[7]       = 0;
     DCM_Matrix[8]       = 1;
-    
-    Update_Matrix[0]    = 0;
-    Update_Matrix[1]    = 1;
-    Update_Matrix[2]    = 2;
-    Update_Matrix[3]    = 3;
-    Update_Matrix[4]    = 4;
-    Update_Matrix[5]    = 5;
-    Update_Matrix[6]    = 6;
-    Update_Matrix[7]    = 7;
-    Update_Matrix[8]    = 8;
-    
-    Temporary_Matrix[0] = 0;
-    Temporary_Matrix[1] = 0;
-    Temporary_Matrix[2] = 0;
-    Temporary_Matrix[3] = 0;
-    Temporary_Matrix[4] = 0;
-    Temporary_Matrix[5] = 0;
-    Temporary_Matrix[6] = 0;
-    Temporary_Matrix[7] = 0;
-    Temporary_Matrix[8] = 0;
-    
+
     errorCourse = 0;
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    

@@ -156,7 +156,6 @@ public:
 #if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Gyro_AeroQuad_v1 : public Gyro {
 private:
-  int findZero[FINDZERO];
 
 public:
   Gyro_AeroQuad_v1() : Gyro() {
@@ -199,6 +198,7 @@ public:
   }
   
   void autoZero() {
+    int findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);
     delayMicroseconds(750);
     digitalWrite(AZPIN, LOW);
@@ -227,12 +227,8 @@ public:
 */
 class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
-  int findZero[FINDZERO];
   int gyroAddress;
-  int data;
-  int rawData[3];
-  byte select;  // use to select which axis is being read
-  long int currentGyroTime, previousGyroTime;
+  long int previousGyroTime;
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
@@ -245,15 +241,12 @@ public:
     positiveGyroYawCount=1;
     negativeGyroYawCount=1;
     zeroGyroYawCount=1;
-    currentGyroTime = micros();
-    previousGyroTime = currentGyroTime;
+    previousGyroTime = micros();
   }
   
   void initialize(void) {
     this->_initialize(0,1,2);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
-    data =  0x0;
-    select = ROLL;
     
     // Check if gyro is connected
     if (readWhoI2C(gyroAddress) != gyroAddress)
@@ -267,6 +260,8 @@ public:
   }
   
   void measure(void) {
+	  int rawData[3];
+
     sendByteI2C(gyroAddress, 0x1D);
     Wire.requestFrom(gyroAddress, 6);
     rawData[ROLL] = (Wire.receive() << 8) | Wire.receive();
@@ -277,7 +272,7 @@ public:
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
     //calculateHeading();
-    currentGyroTime = micros();
+    long int currentGyroTime = micros();
     rawHeading += -gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
     //Serial.println(rawHeading);
     previousGyroTime = currentGyroTime;
@@ -322,19 +317,14 @@ public:
   }
 
   void calibrate() {
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
-        findZero[i] = readWordI2C(gyroAddress);
-      }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
-    }
+		autoZero();
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
   
   void autoZero() {
+    int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
@@ -351,7 +341,6 @@ public:
 #ifdef ArduCopter
 class Gyro_ArduCopter : public Gyro {
 private:
-  int findZero[FINDZERO];
   int rawADC;
 
 public:
@@ -390,6 +379,7 @@ public:
   }
 
   void calibrate() {
+    int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
@@ -410,7 +400,6 @@ public:
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Gyro_Wii : public Gyro {
 private:
-  int findZero[FINDZERO];
 
 public:
   Gyro_Wii() : Gyro() {
@@ -443,7 +432,9 @@ public:
   }
 
   void calibrate() {
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+    int findZero[FINDZERO];
+  
+	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
         findZero[i] = NWMP_gyro[calAxis];
@@ -639,7 +630,6 @@ previousTime = currentTime;
 #if defined(Multipilot) || defined(MultipilotI2C)
 class Gyro_Multipilot : public Gyro {
 private:
-  int findZero[FINDZERO];
 
 public:
   Gyro_Multipilot() : Gyro() {
@@ -682,6 +672,7 @@ public:
   }
   
   void autoZero() {
+    int findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);
     delayMicroseconds(750);
     digitalWrite(AZPIN, LOW);
