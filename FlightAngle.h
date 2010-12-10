@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -39,7 +39,7 @@ public:
   
   virtual void initialize();
   virtual void calculate();
-  virtual float getGyroAngle(byte axis);
+  //virtual float getGyroAngle(byte axis);
   
   const float getData(byte axis) {
     return angle[axis];
@@ -97,10 +97,6 @@ public:
   void calculate(void) {
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
-  }
-
-  float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -162,10 +158,6 @@ public:
   void calculate(void) {
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
-  }
-  
-  float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
   }
 };
 
@@ -419,8 +411,8 @@ void Normalize(void)
 void Drift_correction(void) 
 {
   //Compensation the Roll, Pitch and Yaw drift. 
-  float        errorCourse;
-  static float Scaled_Omega_P[3];
+  //float        errorCourse;
+  //static float Scaled_Omega_P[3];
   static float Scaled_Omega_I[3];
   float        Accel_magnitude;
   float        Accel_weight;
@@ -562,13 +554,6 @@ public:
     Normalize();
     Drift_correction();
     Euler_angles();
-  }
-  
-  float getGyroAngle(byte axis) {
-    if (axis == ROLL)
-      return degrees(Omega[1]);
-    if (axis == PITCH)
-      return degrees(-Omega[0]);
   }
 };
 
@@ -753,10 +738,6 @@ public:
     angle[ROLL]  =  180/PI * Axz;
     angle[PITCH] =  180/PI * Ayz;
   }
-  
-  float getGyroAngle(byte axis) {
-    gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
-  }
 };
 
 
@@ -792,10 +773,6 @@ public:
     zeroRoll = chr6dm.data.roll;
     zeroPitch = chr6dm.data.pitch;
   }
-
-  float getGyroAngle(byte axis) {
-    //gyroAngle[axis] += gyro.rateDegPerSec(axis) * G_Dt;
-  }
 };
 #endif
 
@@ -829,10 +806,6 @@ public:
    void calibrate(void) {
     zeroRoll = 0;
     zeroPitch = 0;
-  }
-
-  float getGyroAngle(byte axis) {
-    return 0;
   }
 };
 #endif

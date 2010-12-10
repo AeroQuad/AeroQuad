@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -22,22 +22,22 @@ class Motors {
 public:
   // Assume maximum number of motors is 8, leave array indexes unused if lower number
   int motorAxisCommand[3];
-  int motorAxisCommandRoll[8];
-  int motorAxisCommandPitch[8];
-  int motorAxisCommandYaw[8];
-  int motorMixerSettingRoll[8];
-  int motorMixerSettingPitch[8];
-  int motorMixerSettingYaw[8];
-  int motorCommand[8];
-  int minCommand[8];
-  int maxCommand[8];
+  //int motorAxisCommandRoll[LASTMOTOR];
+  //int motorAxisCommandPitch[LASTMOTOR];
+  //int motorAxisCommandYaw[LASTMOTOR];
+  //int motorMixerSettingRoll[LASTMOTOR];
+  //int motorMixerSettingPitch[LASTMOTOR];
+  //int motorMixerSettingYaw[LASTMOTOR];
+  int motorCommand[LASTMOTOR];
+  int minCommand[LASTMOTOR];
+  int maxCommand[LASTMOTOR];
   float throttle;
   float timerDebug;
   int motor;
   int delta;
   byte axis;
   // Ground station control
-  int remoteCommand[8];
+  int remoteCommand[LASTMOTOR];
   float mMotorCommand;
   float bMotorCommand;
 
@@ -47,13 +47,13 @@ public:
     motorAxisCommand[ROLL] = 0;
     motorAxisCommand[PITCH] = 0;
     motorAxisCommand[YAW] = 0;
-    for (motor = 0; motor < 8; motor++) {
-      motorAxisCommandRoll[motor] = 0;
-      motorAxisCommandPitch[motor] = 0;
-      motorAxisCommandYaw[motor] = 0;
-      motorMixerSettingRoll[motor] = 0;
-      motorMixerSettingPitch[motor] = 0;
-      motorMixerSettingYaw[motor] = 0;
+    for (motor = 0; motor < LASTMOTOR; motor++) {
+      //motorAxisCommandRoll[motor] = 0;
+      //motorAxisCommandPitch[motor] = 0;
+      //motorAxisCommandYaw[motor] = 0;
+      //motorMixerSettingRoll[motor] = 0;
+      //motorMixerSettingPitch[motor] = 0;
+      //motorMixerSettingYaw[motor] = 0;
       motorCommand[motor] = 1000;
       minCommand[motor] = MINCOMMAND;
       maxCommand[motor] = MAXCOMMAND;
