@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -227,7 +227,6 @@ private:
   int data[2];
   int rawData[3];
   byte byteData[6];
-  byte select; // use to select which axis is being read
   
 public:
   Accel_AeroQuadMega_v2() : Accel(){
@@ -243,7 +242,6 @@ public:
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
     accelOneG = readFloat(ACCEL1G_ADR);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
-    select = PITCH;
     
     // Check if accel is connected
     if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
