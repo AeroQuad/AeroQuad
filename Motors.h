@@ -133,6 +133,72 @@ public:
   }
 };
 
+
+/******************************************************/
+/********************* PWM Motors *********************/
+/******************************************************/
+class Motors_PWM : public Motors {
+private:
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
+    #define FRONTMOTORPIN 2
+    #define REARMOTORPIN 3
+    #define RIGHTMOTORPIN 5
+    #define LEFTMOTORPIN 6
+    #define LASTMOTORPIN 7
+  #else
+    #define FRONTMOTORPIN 3
+    #define REARMOTORPIN 9
+    #define RIGHTMOTORPIN 10
+    #define LEFTMOTORPIN 11
+    #define LASTMOTORPIN 12
+  #endif  
+  int minCommand;
+  byte pin;
+  
+ public:
+  Motors_PWM() : Motors(){
+    // Scale motor commands to analogWrite
+    // Only supports commands from 0-255 => 0 - 100% duty cycle
+    // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
+    // m = (250-126)/(2000-1000) = 0.124		
+    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
+    mMotorCommand = 0.124;		
+    bMotorCommand = 2.0;
+  }
+
+  void initialize(void) {
+    pinMode(FRONTMOTORPIN, OUTPUT);
+    analogWrite(FRONTMOTORPIN, 124);		
+    pinMode(REARMOTORPIN, OUTPUT);
+    analogWrite(REARMOTORPIN, 124);		
+    pinMode(RIGHTMOTORPIN, OUTPUT);
+    analogWrite(RIGHTMOTORPIN, 124);		
+    pinMode(LEFTMOTORPIN, OUTPUT);
+  }
+
+  void write(void) {
+    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
+    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+  }
+  
+  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+    //analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+  }
+};
+
 /******************************************************/
 /********************* PWM2 Motors *********************/
 /******************************************************/
@@ -172,7 +238,7 @@ private:
   }
 
   void initialize(void) {
-#if defined (__AVR_ATmega1280__)
+//#if defined (__AVR_ATmega1280__)
     // Init PWM Timer 3
     pinMode(FRONTMOTORPIN,OUTPUT); // (PE4/OC3B)
     pinMode(REARMOTORPIN,OUTPUT);  // (PE5/OC3C)
@@ -183,7 +249,7 @@ private:
     OCR3B = -1; //PE4, OUT7
     OCR3C = -1; //PE5, OUT6
     ICR3 == 6600; //300hz freq...
-#if defined(plusConfig) || defined(XConfig) 
+//#if defined(plusConfig) || defined(XConfig) 
     // Init PWM Timer 4
     pinMode(LEFTMOTORPIN,OUTPUT); // (PL5/OC4A)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)); 
@@ -192,7 +258,7 @@ private:
     OCR4B = -1; 
     OCR4C = -1; 
     ICR4 = 6600; //300hz freq...
-#endif 
+//#endif 
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
     // Init PWM Timer 4
     pinMode(LEFTMOTORPIN,OUTPUT);   // (PL5/OC4A)
@@ -205,7 +271,7 @@ private:
     OCR4C = -1; 
     ICR4 = 6600; //300hz freq...
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
-#endif	/* __AVR_ATmega1280__) */
+//#endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     // Init PWM Timer 1    16 bit
     pinMode(REARMOTORPIN,OUTPUT);  //OUT7 (PB1/OC1A)
@@ -225,11 +291,11 @@ private:
     ICR4 = 666; // NOT 300hz freq...
 #endif	/* (__AVR_ATmega328P__)*/
 
-#if defined (__AVR_ATmega1280__)
+//#if defined (__AVR_ATmega1280__)
     OCR3B = 124;  // equivilent to analogWrite(FRONTMOTORPIN, 124)
     OCR3C = 124;
     OCR3A = 124;
-#endif	/* __AVR_ATmega1280__) */
+//#endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     OCR2B = 124;  // equivilent to analogWrite(FRONTMOTORPIN, 124)
     OCR1A = 124;
@@ -238,7 +304,7 @@ private:
   }
 
   void write(void) {
-#if defined (__AVR_ATmega1280__)
+//#if defined (__AVR_ATmega1280__)
     OCR3B = (motorCommand[FRONT] / 8) + 1;  // equivilent to analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
     OCR3C = (motorCommand[REAR] / 8) + 1;
     OCR3A = (motorCommand[RIGHT] / 8) + 1;
@@ -247,7 +313,7 @@ private:
     OCR4B = (motorCommand[RIGHT2] / 8) + 1;
     OCR4C = (motorCommand[LEFT2] / 8) + 1;
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
-#endif	/* __AVR_ATmega1280__) */
+//#endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     OCR2B = (motorCommand[FRONT] / 8) + 1;  // equivilent to analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
     OCR1A = (motorCommand[REAR] / 8) + 1;
@@ -257,7 +323,7 @@ private:
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-#if defined (__AVR_ATmega1280__)
+//#if defined (__AVR_ATmega1280__)
     OCR3B = (_motorCommand / 8) + 1;  // equivilent to analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
     OCR3C = (_motorCommand / 8) + 1;
     OCR3A = (_motorCommand / 8) + 1;
@@ -266,7 +332,7 @@ private:
     OCR4B = (_motorCommand / 8) + 1;
     OCR4C = (_motorCommand / 8) + 1;
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
-#endif	/* __AVR_ATmega1280__) */
+//#endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     OCR2B = (_motorCommand / 8) + 1;  // equivilent to analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
     OCR1A = (_motorCommand / 8) + 1;
@@ -275,7 +341,6 @@ private:
 #endif	/* __AVR_ATmega328P__) */
   }
 };
-
 
 /******************************************************/
 /********************* Fake PWM Motors ****************/
