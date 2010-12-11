@@ -67,10 +67,10 @@ public:
     ICR3 = 39999; //50hz freq (standard servos)
 #endif
 #ifdef CameraTimer4
-    // Init PWM Timer 4
-    pinMode(6,OUTPUT); // (PL5/OC4C)
+    // Init PWM Timer 5
+    pinMode(6,OUTPUT); // (PL5/OC4A)
     pinMode(7,OUTPUT);  // (PL4/OC4B)
-    pinMode(8,OUTPUT);  // (PL3/OC4A)
+    pinMode(8,OUTPUT);  // (PL3/OC4C)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
     OCR4A = 3000;  
