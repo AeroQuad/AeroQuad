@@ -136,7 +136,7 @@ public:
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
-class Motors_PWM : public Motors {
+class Motors_PWM2 : public Motors {
 private:
   #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
     #define FRONTMOTORPIN 2
@@ -155,7 +155,7 @@ private:
   byte pin;
   
  public:
-  Motors_PWM() : Motors(){
+  Motors_PWM2() : Motors(){
     // Scale motor commands to analogWrite
     // Only supports commands from 0-255 => 0 - 100% duty cycle
     // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
@@ -197,6 +197,72 @@ private:
     analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
   }
 };
+
+/******************************************************/
+/********************* PWM Motors *********************/
+/******************************************************/
+class Motors_PWM2 : public Motors {
+private:
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
+    #define FRONTMOTORPIN 2
+    #define REARMOTORPIN 3
+    #define RIGHTMOTORPIN 5
+    #define LEFTMOTORPIN 6
+    #define LASTMOTORPIN 7
+  #else
+    #define FRONTMOTORPIN 3
+    #define REARMOTORPIN 9
+    #define RIGHTMOTORPIN 10
+    #define LEFTMOTORPIN 11
+    #define LASTMOTORPIN 12
+  #endif  
+  int minCommand;
+  byte pin;
+  
+ public:
+  Motors_PWM2() : Motors(){
+    // Scale motor commands to analogWrite
+    // Only supports commands from 0-255 => 0 - 100% duty cycle
+    // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
+    // m = (250-126)/(2000-1000) = 0.124		
+    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
+    mMotorCommand = 0.124;		
+    bMotorCommand = 2.0;
+  }
+
+  void initialize(void) {
+    pinMode(FRONTMOTORPIN, OUTPUT);
+    analogWrite(FRONTMOTORPIN, 124);		
+    pinMode(REARMOTORPIN, OUTPUT);
+    analogWrite(REARMOTORPIN, 124);		
+    pinMode(RIGHTMOTORPIN, OUTPUT);
+    analogWrite(RIGHTMOTORPIN, 124);		
+    pinMode(LEFTMOTORPIN, OUTPUT);
+  }
+
+  void write(void) {
+    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
+    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
+    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+  }
+  
+  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+    //analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
+    //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+    analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+  }
+};
+
 
 /******************************************************/
 /********************* Fake PWM Motors ****************/
