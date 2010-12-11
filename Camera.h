@@ -93,18 +93,30 @@ public:
   }
   
   void setPitch (int angle) {
-    servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
+    if (mode == 1) }
+      servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
+    } else {
+      servoPitch = constrain(centerPitch , servoMinPitch , servoMaxPitch);
+    }  
   }
   void setRoll (int angle) {
-    servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
+    if (mode == 1) }
+      servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
+    } else {
+      servoRoll = constrain(centerRoll , servoMinRoll , servoMaxRoll);
+    }  
   }
   void setYaw (int angle) {
-    servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
+    if (mode == 1) }
+      servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
+    } else {
+      servoYaw = constrain(centerYaw , servoMinYaw , servoMaxYaw);
+    }  
   }
   void move (void) {
     if (mode > 0) {
 #ifdef CameraTimer1
-      OCR1A = servoPitch * 2 ;
+      OCR1A = servoPitch * 2;
       OCR1B = servoRoll * 2;
       OCR1C = servoYaw * 2;
 #endif
@@ -161,7 +173,13 @@ public:
   void setServoMaxYaw (int servoMax) {
     servoMaxYaw = servoMax;
   }
+   void setMode (int camMode) {
+    mode = camMode;
+  }
   
+  int getMode (void) {
+    return mode;
+  } 
   int getPitch (void) {
     return servoPitch;
   }
