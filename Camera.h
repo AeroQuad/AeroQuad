@@ -66,8 +66,8 @@ public:
     OCR3C = 3000; //PE5, OUT6
     ICR3 = 39999; //50hz freq (standard servos)
 #endif
-#ifdef CameraTimer5
-    // Init PWM Timer 5
+#ifdef CameraTimer4
+    // Init PWM Timer 4
     pinMode(6,OUTPUT); // (PL5/OC4C)
     pinMode(7,OUTPUT);  // (PL4/OC4B)
     pinMode(8,OUTPUT);  // (PL3/OC4A)
