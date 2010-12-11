@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -160,7 +160,6 @@ public:
 #if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
-  int findZero[FINDZERO];
   
 public:
   Accel_AeroQuad_v1() : Accel(){
@@ -197,6 +196,8 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
+    int findZero[FINDZERO];
+
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
@@ -222,12 +223,8 @@ public:
 #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
-  int findZero[FINDZERO];
   int accelAddress;
-  int data[2];
-  int rawData[3];
-  byte byteData[6];
-  byte select; // use to select which axis is being read
+  int xdata[2];
   
 public:
   Accel_AeroQuadMega_v2() : Accel(){
@@ -238,12 +235,13 @@ public:
   }
   
   void initialize(void) {
-    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
+    byte data;
+  
+	  accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
     accelOneG = readFloat(ACCEL1G_ADR);
     smoothFactor = readFloat(ACCSMOOTH_ADR);
-    select = PITCH;
     
     // Check if accel is connected
     if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
@@ -259,8 +257,8 @@ public:
     // Range settings is page 28
     updateRegisterI2C(accelAddress, 0x0D, 0x10); //enable writing to control registers
     sendByteI2C(accelAddress, 0x20); // register bw_tcs (bits 4-7)
-    data[0] = readByteI2C(accelAddress); // get current register value
-    updateRegisterI2C(accelAddress, 0x20, data[0] & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
+    data = readByteI2C(accelAddress); // get current register value
+    updateRegisterI2C(accelAddress, 0x20, data & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
 
     // From page 27 of BMA180 Datasheet
     //  1.0g = 0.13 mg/LSB
@@ -271,17 +269,19 @@ public:
     //  8.0g = 0.99 mg/LSB
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
-    data[0] = readByteI2C(accelAddress);
+    data = readByteI2C(accelAddress);
     //Serial.println(data[0], HEX);
-    data[0] &= 0xF1;
-    //data[0] |= 1<<1;
-    updateRegisterI2C(accelAddress, 0x35, data[0]); // set range to +/-1.0g (value = xxxx000x)
+    data &= 0xF1;
+    //data |= 1<<1;
+    updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-1.0g (value = xxxx000x)
     //sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
-    //data[0] = readByteI2C(accelAddress);
-    //Serial.println(data[0], HEX);    
+    //data = readByteI2C(accelAddress);
+    //Serial.println((int)data, HEX);    
   }
   
   void measure(void) {
+    int rawData[3];
+
     Wire.beginTransmission(accelAddress);
     Wire.send(0x02);
     Wire.endTransmission();
@@ -301,6 +301,7 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {  
+    int findZero[FINDZERO];
     int dataAddress;
     
     for (byte calAxis = ROLL; calAxis < ZAXIS; calAxis++) {
@@ -397,7 +398,6 @@ public:
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Accel_Wii : public Accel {
 private:
-  int findZero[FINDZERO];
 
 public:
   Accel_Wii() : Accel(){
@@ -429,6 +429,8 @@ public:
  
   // Allows user to zero accelerometers on command
   void calibrate(void) {
+    int findZero[FINDZERO];
+
     for(byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
@@ -601,7 +603,6 @@ public:
 #if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
-  int findZero[FINDZERO];
   
 public:
   Accel_Multipilot() : Accel(){
@@ -642,6 +643,7 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
+    int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);

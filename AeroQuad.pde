@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -46,8 +46,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-//#define plusConfig
-#define XConfig
+#define plusConfig
+//#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -66,8 +66,8 @@
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer, availabe on all Mega based boards
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BatteryMonitor //define your personal specs in BatteryReadArmLed.h! Full documentation with schematic there
 //#define IRdistance //Do not enable yet
 
@@ -107,8 +107,8 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CompFilter flightAngle;
-  //FlightAngle_DCM flightAngle;
+  //FlightAngle_CompFilter flightAngle;
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuadMega_v1
@@ -268,7 +268,7 @@ void setup() {
     analogReference(EXTERNAL); //use strict 3V3 AREF for SHARP IR sensors
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
     Wire.begin();
   #endif
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
