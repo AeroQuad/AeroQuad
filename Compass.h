@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - November 2010
+  AeroQuad v2.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -113,7 +113,6 @@ public:
   // ***********************************************************
   void initialize(void) {
     // Should do a WhoAmI to know if mag is present
-    //updateRegisterI2C(compassAddress, 0x00, 0x10);
     updateRegisterI2C(compassAddress, 0x01, 0x20);
     updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
     measure();

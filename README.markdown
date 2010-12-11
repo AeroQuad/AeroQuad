@@ -1,11 +1,14 @@
-AeroQuad Flight Software Source Code 2.1
+AeroQuad Flight Software Source Code 2.1 Beta
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.1 Release Notes (9/19/2010)
+Version 2.1 Beta Release Notes (12/4/2010)
 ----------------------------------------
 
-  * Need to update before real release
+  * Has only been flight tested with Arduino Mega 2560 using v2.0 Shield
+  * Bench tested configurations: Uno with v1.8 Shield, Duemilanove with v1.8 Shield, Duemilanove with v1.7 Shield
+  * This has many changes and optimization improvements implemented, please be careful flying with this version as this is still a work in progress
+  * Full documentation on all changes will be provided at full release
 
 
 Version 2.0.1 Release Notes (9/19/2010)
