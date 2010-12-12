@@ -265,8 +265,8 @@ private:
 #endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     // Init PWM Timer 1    16 bit
-    pinMode(REARMOTORPIN,OUTPUT);  //OUT7 (PB1/OC1A)
-    pinMode(RIGHTMOTORPIN,OUTPUT); //OUT6 (PB2/OC1B)
+    pinMode(REARMOTORPIN,OUTPUT);  // (PB1/OC1A)
+    pinMode(RIGHTMOTORPIN,OUTPUT); // (PB2/OC1B)
     TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1));
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
     OCR1A = -1; //PE3, NONE
@@ -304,13 +304,13 @@ private:
     OCR4B = motorCommand[RIGHT2];
     OCR4C = motorCommand[LEFT2]; 
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
-#endif	/* __AVR_ATmega1280__) */
+#endif	/* (__AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     OCR2B = motorCommand[FRONT];
     OCR1A = motorCommand[REAR];
     OCR1B = motorCommand[RIGHT];
     OCR2A = motorCommand[LEFT];
-#endif	/* __AVR_ATmega328P__) */
+#endif	/* (__AVR_ATmega328P__) */
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
@@ -323,13 +323,13 @@ private:
     OCR4B = _motorCommand;
     OCR4C = _motorCommand;
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
-#endif	/* __AVR_ATmega1280__) */
-#if defined __AVR_ATmega328P__)
+#endif	/* (__AVR_ATmega1280__) */
+#if defined (__AVR_ATmega328P__)
     OCR2B = _motorCommand;
     OCR1A = _motorCommand;
     OCR1B = _motorCommand;
     OCR2A = _motorCommand;
-#endif	/* __AVR_ATmega328P__) */
+#endif	/* (__AVR_ATmega328P__) */
   }
 };
 
