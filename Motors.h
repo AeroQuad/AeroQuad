@@ -238,16 +238,16 @@ private:
     pinMode(RIGHTMOTORPIN,OUTPUT); // (PE3/OC3A)
     TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
-    OCR3A = -1; //PE3, NONE
-    OCR3B = -1; //PE4, OUT7
-    OCR3C = -1; //PE5, OUT6
+    OCR3A = 2000; //PE3, NONE
+    OCR3B = 2000; //PE4, OUT7
+    OCR3C = 2000; //PE5, OUT6
     ICR3 == 6600; //300hz freq...
 #if defined(plusConfig) || defined(XConfig) 
     // Init PWM Timer 4
     pinMode(LEFTMOTORPIN,OUTPUT); // (PL5/OC4A)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    OCR4A = -1;  
+    OCR4A = 2000;  
     ICR4 = 6600; //300hz freq...
 #endif 
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
@@ -257,9 +257,9 @@ private:
     pinMode(LEFTMOTORPIN2,OUTPUT);  // (PL3/OC4C)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    OCR4A = -1;  
-    OCR4B = -1; 
-    OCR4C = -1; 
+    OCR4A = 2000;  
+    OCR4B = 2000; 
+    OCR4C = 2000; 
     ICR4 = 6600; //300hz freq...
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
 #endif	/* __AVR_ATmega1280__) */
@@ -269,66 +269,54 @@ private:
     pinMode(RIGHTMOTORPIN,OUTPUT); // (PB2/OC1B)
     TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1));
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
-    OCR1A = -1; //PE3, NONE
-    OCR1B = -1; //PE4, OUT7
+    OCR1A = 2000; //PE3, NONE
+    OCR1B = 2000; //PE4, OUT7
     ICR3 == 6600; //300hz freq...
     // Init PWM Timer 0   *********8bit  needs ICR
     pinMode(LEFTMOTORPIN,OUTPUT); // (PD3/OC2A)
     pinMode(FRONTMOTORPIN,OUTPUT); // (PD6/OC2B)
     TCCR2A =((1<<WGM21)|(1<<COM2A1)|(1<<COM2B1)); 
     TCCR2B = (1<<WGM23)|(1<<WGM22)|(1<<CS21);
-    OCR2A = -1;  
-    OCR2B = -1; 
+    OCR2A = 2000;  
+    OCR2B = 2000; 
     ICR4 = 666; // NOT 300hz freq...
 #endif	/* (__AVR_ATmega328P__)*/
 
-#if defined (__AVR_ATmega1280__)
-    OCR3B = 124;  // equivilent to analogWrite(FRONTMOTORPIN, 124)
-    OCR3C = 124;
-    OCR3A = 124;
-#endif	/* __AVR_ATmega1280__) */
-#if defined (__AVR_ATmega328P__)
-    OCR2B = 124;  // equivilent to analogWrite(FRONTMOTORPIN, 124)
-    OCR1A = 124;
-    OCR1B = 124;
-#endif	/* __AVR_ATmega328P__) */
-  }
-
   void write(void) {
 #if defined (__AVR_ATmega1280__)
-    OCR3B = motorCommand[FRONT];
-    OCR3C = motorCommand[REAR]; 
-    OCR3A = motorCommand[RIGHT];
-    OCR4A = motorCommand[LEFT]; 
+    OCR3B = motorCommand[FRONT] * 2 ;
+    OCR3C = motorCommand[REAR] * 2 ; 
+    OCR3A = motorCommand[RIGHT] * 2 ;
+    OCR4A = motorCommand[LEFT] * 2 ; 
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    OCR4B = motorCommand[RIGHT2];
-    OCR4C = motorCommand[LEFT2]; 
+    OCR4B = motorCommand[RIGHT2] * 2 ;
+    OCR4C = motorCommand[LEFT2] * 2 ; 
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
 #endif	/* (__AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
-    OCR2B = motorCommand[FRONT];
-    OCR1A = motorCommand[REAR];
-    OCR1B = motorCommand[RIGHT];
-    OCR2A = motorCommand[LEFT];
+    OCR2B = motorCommand[FRONT] * 2 ;
+    OCR1A = motorCommand[REAR] * 2 ;
+    OCR1B = motorCommand[RIGHT] * 2 ;
+    OCR2A = motorCommand[LEFT] * 2 ;
 #endif	/* (__AVR_ATmega328P__) */
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
 #if defined (__AVR_ATmega1280__)
-    OCR3B = _motorCommand;
-    OCR3C = _motorCommand;
-    OCR3A = _motorCommand;
-    OCR4A = _motorCommand;
+    OCR3B = _motorCommand * 2 ;
+    OCR3C = _motorCommand * 2 ;
+    OCR3A = _motorCommand * 2 ;
+    OCR4A = _motorCommand * 2 ;
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    OCR4B = _motorCommand;
-    OCR4C = _motorCommand;
+    OCR4B = _motorCommand * 2 ;
+    OCR4C = _motorCommand * 2 ;
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
 #endif	/* (__AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
-    OCR2B = _motorCommand;
-    OCR1A = _motorCommand;
-    OCR1B = _motorCommand;
-    OCR2A = _motorCommand;
+    OCR2B = _motorCommand * 2 ;
+    OCR1A = _motorCommand * 2 ;
+    OCR1B = _motorCommand * 2 ;
+    OCR2A = _motorCommand * 2 ;
 #endif	/* (__AVR_ATmega328P__) */
   }
 };
