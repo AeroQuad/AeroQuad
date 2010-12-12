@@ -264,7 +264,7 @@ private:
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
 #endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
-    // Init PWM Timer 1    16 bit
+    // Init PWM Timer 1  16 bit
     pinMode(REARMOTORPIN,OUTPUT);  // (PB1/OC1A)
     pinMode(RIGHTMOTORPIN,OUTPUT); // (PB2/OC1B)
     TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1));
@@ -272,14 +272,14 @@ private:
     OCR1A = 2000; //PE3, NONE
     OCR1B = 2000; //PE4, OUT7
     ICR3 == 6600; //300hz freq...
-    // Init PWM Timer 0   *********8bit  needs ICR
+    // Init PWM Timer 0   8bit
     pinMode(LEFTMOTORPIN,OUTPUT); // (PD3/OC2A)
     pinMode(FRONTMOTORPIN,OUTPUT); // (PD6/OC2B)
     TCCR2A =((1<<WGM21)|(1<<COM2A1)|(1<<COM2B1)); 
     TCCR2B = (1<<WGM23)|(1<<WGM22)|(1<<CS21);
     OCR2A = 2000;  
     OCR2B = 2000; 
-    ICR4 = 666; // NOT 300hz freq...
+    ICR4 = 6600; // 300hz freq...
 #endif	/* (__AVR_ATmega328P__)*/
 
   void write(void) {
