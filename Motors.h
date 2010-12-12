@@ -229,13 +229,6 @@ private:
   
  public:
   Motors_PWM2() : Motors(){
-    // Scale motor commands to analogWrite
-    // Only supports commands from 0-255 => 0 - 100% duty cycle
-    // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
-    // m = (250-126)/(2000-1000) = 0.124		
-    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
-    mMotorCommand = 0.124;		
-    bMotorCommand = 2.0;
   }
   void initialize(void) {
 #if defined (__AVR_ATmega1280__)
