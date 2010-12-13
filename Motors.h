@@ -213,7 +213,7 @@ private:
 - When the counter reaches OCRxy, the corresponding output is cleared.
 In the code below, the periode shall be 3.3ms (300hz), so the ICRx register is
  set to 6600 ticks of 0.5us/tick. It probably should be 6599, but who cares about
- this 0.5�s for the periode. This value is #define TOP
+ this 0.5us for the periode. This value is #define TOP
 The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  below this can be seen in the line "commandAllMotors(1000);"  A change of
  the timer periode does not change this setting, as the clock rate is still one
