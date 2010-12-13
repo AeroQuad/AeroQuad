@@ -222,35 +222,31 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
 */
 class Motors_PWM2 : public Motors {
 private:
-  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
-    #define FRONTMOTORPIN 2
-    #define REARMOTORPIN 3
-    #define RIGHTMOTORPIN 5
-    #define LEFTMOTORPIN 6
-    #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-      #define RIGHTMOTORPIN2 7
-      #define LEFTMOTORPIN2 8
-      #define LASTMOTORPIN 9
-    #else  
-      #define LASTMOTORPIN 7
-    #endif  
-  #else
-    #define FRONTMOTORPIN 3
-    #define REARMOTORPIN 9
-    #define RIGHTMOTORPIN 10
-    #define LEFTMOTORPIN 11
-    #define LASTMOTORPIN 12
-  #endif  
+/*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port              
+    FRONT         2  PE4              3  PD3
+    REAR          3  PE5              9  PB1
+    RIGHT         5  PE3             10  PB2                      7  PH4
+    LEFT          6  PH3             11  PB3                      8  PH5
+*/ 
   #define TOP 6600    //  ~300hz = TOP = 16,000,000 / ( 8 * 300 ) = Clock_speed / ( Prescaler * desired_PWM_Frequency)
- 
- public:
+  public:
   Motors_PWM2() : Motors(){
   }
   void initialize(void) {
-    pinMode(FRONTMOTORPIN,OUTPUT);
-    pinMode(REARMOTORPIN,OUTPUT);
-    pinMode(RIGHTMOTORPIN,OUTPUT);
     pinMode(LEFTMOTORPIN,OUTPUT);
+#if defined (__AVR_ATmega1280__)
+    DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5 
+#if defined(plusConfig) || defined(XConfig) 
+    DDRH = DDRH | B00001000;                                  // Set port to output PH3 
+#endif
+#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5  
+#endif
+#endif	/* __AVR_ATmega1280__) */
+#if defined (__AVR_ATmega328P__)
+    DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3 
+    DDRD = DDRD | B00010000;                                  // Set port to output PD4 
+#endif	/* (__AVR_ATmega328P__)*/
     commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
 #if defined (__AVR_ATmega1280__)
     // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
@@ -262,12 +258,9 @@ private:
     TCCR4A =((1<<WGM41)|(1<<COM4A1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
     ICR4 = TOP;  
-#endif 
+#endif /* (plusConfig) || defined(XConfig) */
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
     // Init PWM Timer 4
-    pinMode(LEFTMOTORPIN,OUTPUT);   // (PL5/OC4A)
-    pinMode(RIGHTMOTORPIN2,OUTPUT); // (PL4/OC4B)
-    pinMode(LEFTMOTORPIN2,OUTPUT);  // (PL3/OC4C)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
     ICR4 = TOP;
