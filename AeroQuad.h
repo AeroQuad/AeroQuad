@@ -347,6 +347,18 @@ byte testSignal = LOW;
 #define MAGYMIN_ADR 312
 #define MAGZMAX_ADR 316
 #define MAGZMIN_ADR 320
+#define MCAMERAPITCH 324
+#define MCAMERAROLL 328
+#define MCAMERAYAW 332
+#define CENTERPITCH 336
+#define CENTERROLL 340
+#define CENTERYAW 344
+#define SERVOMINPITCH 348
+#define SERVOMINROLL 352
+#define SERVOMINYAW 356
+#define SERVOMAXPITCH 360
+#define SERVOMAXROLL 364
+#define SERVOMAXYAW 368
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
