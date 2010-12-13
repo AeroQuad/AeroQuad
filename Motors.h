@@ -212,9 +212,9 @@ private:
 - When the counter reaches 0, the outputs are set
 - When the counter reaches OCRxy, the corresponding output is cleared.
 In the code below, the periode shall be 3.3ms (300hz), so the ICRx register is
- set to 6600 ticks of 0.5�s/tick. It probably should be 6599, but who cares about
+ set to 6600 ticks of 0.5us/tick. It probably should be 6599, but who cares about
  this 0.5�s for the periode. This value is #define TOP
-The high time shall be 1000�s, so the OCRxy register is set to 2000. In the code
+The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  below this can be seen in the line "commandAllMotors(1000);"  A change of
  the timer periode does not change this setting, as the clock rate is still one
  tick every 0.5�s. If the prescaler was changed, the OCRxy register value would
@@ -242,9 +242,7 @@ private:
     #define LASTMOTORPIN 12
   #endif  
   #define TOP 6600    //  ~300hz = TOP = 16,000,000 / ( 8 * 300 ) = Clock_speed / ( Prescaler * desired_PWM_Frequency)
-  int minCommand;
-  byte pin;
-  
+ 
  public:
   Motors_PWM2() : Motors(){
   }
@@ -253,9 +251,10 @@ private:
     pinMode(REARMOTORPIN,OUTPUT);
     pinMode(RIGHTMOTORPIN,OUTPUT);
     pinMode(LEFTMOTORPIN,OUTPUT);
+    commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
 #if defined (__AVR_ATmega1280__)
     // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
-    TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1)); // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
+    TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1)); // Clear OCRnA/OCRnB/OCRnC outputs on compare match, set OCRnA/OCRnB/OCRnC outputs at BOTTOM (non-inverting mode)
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us 
     ICR3 == TOP;                                              // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
 #if defined(plusConfig) || defined(XConfig) 
@@ -284,7 +283,6 @@ private:
     TCCR2B = (1<<WGM23)|(1<<WGM22)|(1<<CS21);
     ICR4 = TOP;
 #endif	/* (__AVR_ATmega328P__)*/
-  commandAllMotors(1000);
 }
   void write(void) {
 #if defined (__AVR_ATmega1280__)
