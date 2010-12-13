@@ -2,10 +2,26 @@
 // ***********************************************************************
 // *********************** Camera Control ***************************
 // ***********************************************************************
+/*Some basics about the 16 bit timer:
+- The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
+  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5탎. This
+  is also called timer resolution.
+- The timer is used as cyclic upwards counter, the counter periode is set in the
+  ICRx register. IIRC periode-1 has to be set in the ICRx register.
+- When the counter reaches 0, the outputs are set
+- When the counter reaches OCRxy, the corresponding output is cleared.
+In the code below, the periode shall be 20ms, so the ICRx register is set to 
+ 40000 ticks of 0.5탎/tick. It probably should be 39999, but who cares about
+ this 0.5탎 for the periode.
+The high time shall be 1500탎, so the OCRxy register is set to 3000. A change of
+ the timer periode does not change this setting, as the clock rate is still one
+ tick every 0.5탎. If the prescaler was changed, the OCRxy register value would
+ be different. 
+*/
 class camera {
 public:
   int mode;                      // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center
-  float mCameraPitch;       // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
+  float mCameraPitch;            // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
   float mCameraRoll;        
   float mCameraYaw;
   int centerPitch;               // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
@@ -14,7 +30,7 @@ public:
   int servoPitch;                // 1000 - 2000 where we are or will move to next  
   int servoRoll;
   int servoYaw;
-  int servoMinPitch;                // don't drive the servo past here  
+  int servoMinPitch;             // don't drive the servo past here  
   int servoMinRoll;
   int servoMinYaw;
   int servoMaxPitch;
@@ -40,54 +56,37 @@ public:
      servoMaxYaw = 2000; 
   }
   void initialize(void) {
-
+     setPitch(0);
+     setRoll(0);
+     setYaw(0);
+     move();
 #ifdef CameraTimer1
-   // Init PWM Timer 1
-    pinMode(11,OUTPUT); // Pitch (PB5/OC1A)
-    pinMode(12,OUTPUT); // Roll  (PB6/OC1B)
-    pinMode(13,OUTPUT); // Yaw   (PB7/OC1C)
-                                                              // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
-    TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode).      
+   // Init PWM Timer 1      Probable conflict with Arducopter Motor
+    DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
+                                                              //WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
+    TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); //Clear OCRnA/OCRnB/OCRnC outputs on compare match, set OCRnA/OCRnB/OCRnC outputs at BOTTOM (non-inverting mode).      
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);                 //Prescaler set to 8, that give us a resolution of 0.5us
-    OCR1B = 3000;                                             //init each servo to center
-    OCR1C = 3000;   
-    OCR1A = 3000;   
     ICR1 = 39999;    //50hz freq (standard servos) 20ms = 40000 * 0.5us
 #endif
 #ifdef CameraTimer3
-    // Init PWM Timer 3
-    pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
-    pinMode(3,OUTPUT); //OUT6 (PE5/OC3C)
-    pinMode(5,OUTPUT); //     (PE3/OC3A)
+    // Init PWM Timer 3    Probable conflict with AeroQuad Motor
+    DDRE = DDRE | B00111000;                                  //Set to Output Mega Port-Pin PE4-2, PE5-3, PE3-5
     TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
-    OCR3A = 3000; //PE3, NONE
-    OCR3B = 3000; //PE4, OUT7
-    OCR3C = 3000; //PE5, OUT6
     ICR3 = 39999; //50hz freq (standard servos)
 #endif
 #ifdef CameraTimer4
-    // Init PWM Timer 5
-    pinMode(6,OUTPUT); // (PL5/OC4A)
-    pinMode(7,OUTPUT);  // (PL4/OC4B)
-    pinMode(8,OUTPUT);  // (PL3/OC4C)
+    // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
+    DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
     TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    OCR4A = 3000;  
-    OCR4B = 3000; 
-    OCR4C = 3000; 
     ICR4 = 39999; //50hz freq (standard servos)
 #endif    
 #ifdef CameraTimer5
-    // Init PWM Timer 5
-    pinMode(44,OUTPUT);  //OUT1 (PL5/OC5C)
-    pinMode(45,OUTPUT);  //OUT0 (PL4/OC5B)
-    pinMode(46,OUTPUT);  //     (PL3/OC5A)
+    // Init PWM Timer 5   Probable conflict with Arducopter Motor
+    DDRL = DDRL | B00111000;                                  //Set to Output Mega Port-Pin PL3-46, PE4-45, PE5-44
     TCCR5A =((1<<WGM51)|(1<<COM5A1)|(1<<COM5B1)|(1<<COM5C1)); 
     TCCR5B = (1<<WGM53)|(1<<WGM52)|(1<<CS51);
-    OCR5A = 3000; //PL3, 
-    OCR5B = 3000; //PL4, OUT0
-    OCR5C = 3000; //PL5, OUT1
     ICR5 = 39999; //50hz freq (standard servos)
 #endif
   }
