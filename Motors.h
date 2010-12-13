@@ -203,6 +203,23 @@ private:
 /********************* PWM2 Motors *********************/
 /******************************************************/
 // EXPERIMENTAL uses system timers directly instead of analogWrite
+/*Some basics about the 16 bit timer:
+- The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
+  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5�s. This
+  is also called timer resolution.
+- The timer is used as cyclic upwards counter, the counter periode is set in the
+  ICRx register. IIRC periode-1 has to be set in the ICRx register.
+- When the counter reaches 0, the outputs are set
+- When the counter reaches OCRxy, the corresponding output is cleared.
+In the code below, the periode shall be 3.3ms (300hz), so the ICRx register is
+ set to 6600 ticks of 0.5�s/tick. It probably should be 6599, but who cares about
+ this 0.5�s for the periode. This value is #define TOP
+The high time shall be 1000�s, so the OCRxy register is set to 2000. In the code
+ below this can be seen in the line "commandAllMotors(1000);"  A change of
+ the timer periode does not change this setting, as the clock rate is still one
+ tick every 0.5�s. If the prescaler was changed, the OCRxy register value would
+ be different. 
+*/
 class Motors_PWM2 : public Motors {
 private:
   #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
@@ -224,6 +241,7 @@ private:
     #define LEFTMOTORPIN 11
     #define LASTMOTORPIN 12
   #endif  
+  #define TOP 6600    //  ~300hz = TOP = 16,000,000 / ( 8 * 300 ) = Clock_speed / ( Prescaler * desired_PWM_Frequency)
   int minCommand;
   byte pin;
   
@@ -231,24 +249,20 @@ private:
   Motors_PWM2() : Motors(){
   }
   void initialize(void) {
+    pinMode(FRONTMOTORPIN,OUTPUT);
+    pinMode(REARMOTORPIN,OUTPUT);
+    pinMode(RIGHTMOTORPIN,OUTPUT);
+    pinMode(LEFTMOTORPIN,OUTPUT);
 #if defined (__AVR_ATmega1280__)
-    // Init PWM Timer 3
-    pinMode(FRONTMOTORPIN,OUTPUT); // (PE4/OC3B)
-    pinMode(REARMOTORPIN,OUTPUT);  // (PE5/OC3C)
-    pinMode(RIGHTMOTORPIN,OUTPUT); // (PE3/OC3A)
-    TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1));
-    TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
-    OCR3A = 2000; //PE3, NONE
-    OCR3B = 2000; //PE4, OUT7
-    OCR3C = 2000; //PE5, OUT6
-    ICR3 == 6600; //300hz freq...
+    // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
+    TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1)); // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
+    TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us 
+    ICR3 == TOP;                                              // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
 #if defined(plusConfig) || defined(XConfig) 
     // Init PWM Timer 4
-    pinMode(LEFTMOTORPIN,OUTPUT); // (PL5/OC4A)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    OCR4A = 2000;  
-    ICR4 = 6600; //300hz freq...
+    ICR4 = TOP;  
 #endif 
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
     // Init PWM Timer 4
@@ -257,31 +271,21 @@ private:
     pinMode(LEFTMOTORPIN2,OUTPUT);  // (PL3/OC4C)
     TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    OCR4A = 2000;  
-    OCR4B = 2000; 
-    OCR4C = 2000; 
-    ICR4 = 6600; //300hz freq...
+    ICR4 = TOP;
 #endif   /* (HEXACOAXIAL) || defined(HEXARADIAL) */
 #endif	/* __AVR_ATmega1280__) */
 #if defined (__AVR_ATmega328P__)
     // Init PWM Timer 1  16 bit
-    pinMode(REARMOTORPIN,OUTPUT);  // (PB1/OC1A)
-    pinMode(RIGHTMOTORPIN,OUTPUT); // (PB2/OC1B)
     TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1));
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
-    OCR1A = 2000; //PE3, NONE
-    OCR1B = 2000; //PE4, OUT7
-    ICR3 == 6600; //300hz freq...
+    ICR3 == TOP;
     // Init PWM Timer 0   8bit
-    pinMode(LEFTMOTORPIN,OUTPUT); // (PD3/OC2A)
-    pinMode(FRONTMOTORPIN,OUTPUT); // (PD6/OC2B)
     TCCR2A =((1<<WGM21)|(1<<COM2A1)|(1<<COM2B1)); 
     TCCR2B = (1<<WGM23)|(1<<WGM22)|(1<<CS21);
-    OCR2A = 2000;  
-    OCR2B = 2000; 
-    ICR4 = 6600; // 300hz freq...
+    ICR4 = TOP;
 #endif	/* (__AVR_ATmega328P__)*/
-
+  commandAllMotors(1000);
+}
   void write(void) {
 #if defined (__AVR_ATmega1280__)
     OCR3B = motorCommand[FRONT] * 2 ;
@@ -300,8 +304,7 @@ private:
     OCR2A = motorCommand[LEFT] * 2 ;
 #endif	/* (__AVR_ATmega328P__) */
   }
-  
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+ void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
 #if defined (__AVR_ATmega1280__)
     OCR3B = _motorCommand * 2 ;
     OCR3C = _motorCommand * 2 ;
