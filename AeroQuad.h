@@ -162,7 +162,6 @@ float CHR_RollAngle;
 float CHR_PitchAngle;
 #endif
 
-
 // Heading hold
 byte headingHoldConfig;
 //float headingScaleFactor;
@@ -172,7 +171,6 @@ float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
 float setHeading = 0;
-
 
 // Altitude Hold
 #define TEMPERATURE 0
@@ -188,6 +186,22 @@ int holdThrottle = 1000;
 float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
+#endif
+
+#ifdef Camera
+  int mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center
+  float mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
+  float mCameraRoll = 11.11;        
+  float mCameraYaw = 11.11;
+  int centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
+  int centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
+  int centerYaw = 1500;  
+  int servoMinPitch = 1000;     // don't drive the servo past here  
+  int servoMinRoll = 1000;
+  int servoMinYaw = 1000;
+  int servoMaxPitch = 2000;
+  int servoMaxRoll = 2000;
+  int servoMaxYaw = 2000;
 #endif
 
 // Receiver variables

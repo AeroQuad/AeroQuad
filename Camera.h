@@ -20,40 +20,10 @@ The high time shall be 1500µs, so the OCRxy register is set to 3000. A change of
 */
 class camera {
 public:
-  int mode;                      // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center
-  float mCameraPitch;            // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
-  float mCameraRoll;        
-  float mCameraYaw;
-  int centerPitch;               // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
-  int centerRoll;                // 1000 - 2000 nornaly centered 1500
-  int centerYaw;  
   int servoPitch;                // 1000 - 2000 where we are or will move to next  
   int servoRoll;
   int servoYaw;
-  int servoMinPitch;             // don't drive the servo past here  
-  int servoMinRoll;
-  int servoMinYaw;
-  int servoMaxPitch;
-  int servoMaxRoll;
-  int servoMaxYaw;
-
   camera(void) {
-     mode = 1;
-     mCameraPitch = 11.11;
-     mCameraRoll = 11.11;        
-     mCameraYaw = 11.11;
-     centerPitch = 1500;
-     centerRoll = 1500;
-     centerYaw = 1500;  
-     servoPitch = 1500;
-     servoRoll = 1500;
-     servoYaw = 1500;
-     servoMinPitch = 1000;
-     servoMinRoll = 1000;
-     servoMinYaw = 1000;  
-     servoMaxPitch = 2000;
-     servoMaxRoll = 2000;
-     servoMaxYaw = 2000; 
   }
   void initialize(void) {
      setPitch(0);
