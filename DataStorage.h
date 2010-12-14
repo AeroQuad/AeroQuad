@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Special thanks for 1k space optimization update from Ala42
@@ -27,8 +27,8 @@ float readFloat(int address) {
     byte floatByte[4];
     float floatVal;
   } floatOut;
-  
-  for (int i = 0; i < 4; i++) 
+
+  for (int i = 0; i < 4; i++)
     floatOut.floatByte[i] = EEPROM.read(address + i);
   return floatOut.floatVal;
 }
@@ -38,13 +38,13 @@ void writeFloat(float value, int address) {
     byte floatByte[4];
     float floatVal;
   } floatIn;
-  
+
   floatIn.floatVal = value;
-  for (int i = 0; i < 4; i++) 
+  for (int i = 0; i < 4; i++)
     EEPROM.write(address + i, floatIn.floatByte[i]);
 }
 
-void readPID(unsigned char IDPid, unsigned char IDEeprom) {
+void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   struct PIDdata* pid = &PID[IDPid];
   pid->P = readFloat(IDEeprom);
   pid->I = readFloat(IDEeprom+4);
@@ -58,6 +58,12 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
   writeFloat(pid->P, IDEeprom);
   writeFloat(pid->I, IDEeprom+4);
   writeFloat(pid->D, IDEeprom+8);
+}
+
+void writeTransmitterSlopeOffset(unsigned char channel, unsigned int IDEeprom)
+{
+  writeFloat(receiver.getTransmitterSlope(channel), IDEeprom);
+  writeFloat(receiver.getTransmitterOffset(channel), IDEeprom+4);
 }
 
 // contains all default values when re-writing EEPROM
@@ -110,17 +116,14 @@ void initializeEEPROM(void) {
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   accel.setOneG(500);
-  timeConstant = 7.0;   
+  timeConstant = 7.0;
   for (channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);
     receiver.setTransmitterOffset(channel, 0.0);
+    receiver.setSmoothFactor(channel, 1.0);
   }
-  receiver.setSmoothFactor(THROTTLE, 1.0);
-  receiver.setSmoothFactor(ROLL, 1.0);
-  receiver.setSmoothFactor(PITCH, 1.0);
   receiver.setSmoothFactor(YAW, 0.5);
-  receiver.setSmoothFactor(MODE, 1.0);
-  receiver.setSmoothFactor(AUX, 1.0);
+
   smoothHeading = 1.0;
   flightMode = ACRO;
   headingHoldConfig = OFF;
@@ -137,23 +140,11 @@ void readEEPROM(void) {
   readPID(HEADING, HEADING_PID_GAIN_ADR);
   readPID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   readPID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  PID[LEVELGYROPITCH].lastPosition = 0;
-  PID[LEVELGYROPITCH].integratedError = 0;
-  
+
   #ifdef AltitudeHold
-    //readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
-    PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
-    PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
-    PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
+    readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
-    PID[ALTITUDE].lastPosition = 0;
-    PID[ALTITUDE].integratedError = 0;
-    //readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
-    PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
-    PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
-    PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
-    PID[ZDAMPENING].lastPosition = 0;
-    PID[ZDAMPENING].integratedError = 0;
+    readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
@@ -188,16 +179,12 @@ void writeEEPROM(void){
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   #ifdef AltitudeHold
-    writeFloat(PID[ALTITUDE].P, ALTITUDE_PGAIN_ADR);
-    writeFloat(PID[ALTITUDE].I, ALTITUDE_IGAIN_ADR);
-    writeFloat(PID[ALTITUDE].D, ALTITUDE_DGAIN_ADR);
+    writePID(ALTITUDE, ALTITUDE_PGAIN_ADR);
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
-    writeFloat(PID[ZDAMPENING].P, ZDAMP_PGAIN_ADR);
-    writeFloat(PID[ZDAMPENING].I, ZDAMP_IGAIN_ADR);
-    writeFloat(PID[ZDAMPENING].D, ZDAMP_DGAIN_ADR);
+    writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR); 
+    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
   #endif
   #ifdef HeadingMagHold
     writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
@@ -207,31 +194,29 @@ void writeEEPROM(void){
     writeFloat(compass.getMagMax(ZAXIS), MAGZMAX_ADR);
     writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
-  writeFloat(windupGuard, WINDUPGUARD_ADR);  
-  writeFloat(levelLimit, LEVELLIMIT_ADR);   
-  writeFloat(levelOff, LEVELOFF_ADR); 
+  writeFloat(windupGuard, WINDUPGUARD_ADR);
+  writeFloat(levelLimit, LEVELLIMIT_ADR);
+  writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(THROTTLE), THROTTLESMOOTH_ADR);
+
   writeFloat(receiver.getSmoothFactor(ROLL), ROLLSMOOTH_ADR);
   writeFloat(receiver.getSmoothFactor(PITCH), PITCHSMOOTH_ADR);
   writeFloat(receiver.getSmoothFactor(YAW), YAWSMOOTH_ADR);
+  writeFloat(receiver.getSmoothFactor(THROTTLE), THROTTLESMOOTH_ADR);
   writeFloat(receiver.getSmoothFactor(MODE), MODESMOOTH_ADR);
   writeFloat(receiver.getSmoothFactor(AUX), AUXSMOOTH_ADR);
+
   writeFloat(timeConstant, FILTERTERM_ADR);
-  writeFloat(receiver.getTransmitterSlope(THROTTLE), THROTTLESCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(THROTTLE), THROTTLEOFFSET_ADR);
-  writeFloat(receiver.getTransmitterSlope(ROLL), ROLLSCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(ROLL), ROLLOFFSET_ADR);
-  writeFloat(receiver.getTransmitterSlope(PITCH), PITCHSCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(PITCH), PITCHOFFSET_ADR);
-  writeFloat(receiver.getTransmitterSlope(YAW), YAWSCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(YAW), YAWOFFSET_ADR);
-  writeFloat(receiver.getTransmitterSlope(MODE), MODESCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(MODE), MODEOFFSET_ADR);
-  writeFloat(receiver.getTransmitterSlope(AUX), AUXSCALE_ADR);
-  writeFloat(receiver.getTransmitterOffset(AUX), AUXOFFSET_ADR);
+
+	writeTransmitterSlopeOffset(THROTTLE, THROTTLESCALE_ADR);
+	writeTransmitterSlopeOffset(ROLL, ROLLSCALE_ADR);
+	writeTransmitterSlopeOffset(PITCH, PITCHSCALE_ADR);
+	writeTransmitterSlopeOffset(YAW, YAWSCALE_ADR);
+	writeTransmitterSlopeOffset(MODE, MODESCALE_ADR);
+	writeTransmitterSlopeOffset(AUX, AUXSCALE_ADR);
+
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);

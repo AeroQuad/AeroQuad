@@ -101,9 +101,9 @@ float windupGuard; // Read in from EEPROM
 #define GYRO 0
 #define ACCEL 1
 #if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 10
+  #define FINDZERO 9
 #else
-  #define FINDZERO 50
+  #define FINDZERO 49
 #endif
 float smoothHeading;
 
@@ -184,7 +184,7 @@ float setHeading = 0;
 int throttleAdjust = 0;
 int throttle = 1000;
 int autoDescent = 0;
-#ifndef AeroQuad_v18
+//#ifndef AeroQuad_v18
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
 float holdAltitude = 0.0;
@@ -192,7 +192,7 @@ int holdThrottle = 1000;
 float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
-#endif
+//#endif
 
 // Receiver variables
 #define TIMEOUT 25000
@@ -243,7 +243,7 @@ int testCommand = 1000;
 // Communication
 char queryType = 'X';
 byte tlmType = 0;
-char string[32];
+//char string[32];
 byte armed = OFF;
 byte safetyCheck = OFF;
 byte update = 0;
@@ -382,5 +382,3 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
-
-
