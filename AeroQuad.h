@@ -188,8 +188,8 @@ byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 #endif
 
-#ifdef Camera
-  int mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center
+#ifdef Camera    // mode controlled by serialCom rest set from eprom (eventually) 
+  int mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
   float mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
   float mCameraRoll = 11.11;        
   float mCameraYaw = 11.11;
@@ -347,18 +347,18 @@ byte testSignal = LOW;
 #define MAGYMIN_ADR 312
 #define MAGZMAX_ADR 316
 #define MAGZMIN_ADR 320
-#define MCAMERAPITCH 324
-#define MCAMERAROLL 328
-#define MCAMERAYAW 332
-#define CENTERPITCH 336
-#define CENTERROLL 340
-#define CENTERYAW 344
-#define SERVOMINPITCH 348
-#define SERVOMINROLL 352
-#define SERVOMINYAW 356
-#define SERVOMAXPITCH 360
-#define SERVOMAXROLL 364
-#define SERVOMAXYAW 368
+#define MCAMERAPITCH_ADR 324
+#define MCAMERAROLL_ADR 328
+#define MCAMERAYAW_ADR 332
+#define CENTERPITCH_ADR 336
+#define CENTERROLL_ADR 340
+#define CENTERYAW_ADR 344
+#define SERVOMINPITCH_ADR 348
+#define SERVOMINROLL_ADR 352
+#define SERVOMINYAW_ADR 356
+#define SERVOMAXPITCH_ADR 360
+#define SERVOMAXROLL_ADR 364
+#define SERVOMAXYAW_ADR 368
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
