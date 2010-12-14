@@ -190,6 +190,23 @@ void readSerialCommand() {
         compass.setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
       #endif
       break;
+    case '~': //  read Camera values 
+      #ifdef Camera
+      setMode(readFloatSerial());
+      setCenterPitch(readFloatSerial());
+      setCenterRoll(readFloatSerial());
+      setCenterYaw(readFloatSerial());
+      setmCameraPitch(readFloatSerial());
+      setmCameraRoll(readFloatSerial());
+      setmCameraYaw(readFloatSerial());
+      setServoMinPitch(readFloatSerial());
+      setServoMinRoll(readFloatSerial());
+      setServoMinYaw(readFloatSerial());
+      setServoMaxPitch(readFloatSerial());
+      setServoMaxRoll(readFloatSerial());
+      setServoMaxYaw(readFloatSerial());
+      #endif
+      break;
     }
   digitalWrite(LEDPIN, HIGH);
   }
@@ -553,6 +570,35 @@ void sendSerialTelemetry() {
       Serial.println(compass.getMagMin(ZAXIS), 2);
     #endif
     queryType = 'X';
+    break;
+  case '`': // Send Camera values 
+    #ifdef Camera
+    Serial.print(getMode());
+    comma();
+    Serial.print(getCenterPitch());
+    comma();
+    Serial.print(getCenterRoll());
+    comma();
+    Serial.print(getCenterYaw());
+    comma();
+    Serial.print(getmCameraPitch() , 2);
+    comma();
+    Serial.print(getmCameraRoll() , 2);
+    comma();
+    Serial.print(getmCameraYaw() , 2);
+    comma();
+    Serial.print(getServoMinPitch());
+    comma();
+    Serial.print(getServoMinRoll());
+    comma();
+    Serial.print(getServoMinYaw());
+    comma();
+    Serial.print(getServoMaxPitch());
+    comma();
+    Serial.print(getServoMaxRoll());
+    comma();
+    Serial.println(getServoMaxYaw());
+    #endif
     break;
   }
 }
