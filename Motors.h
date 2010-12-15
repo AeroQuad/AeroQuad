@@ -289,7 +289,7 @@ public:
     // Init PWM Timer 3
     pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
     pinMode(3,OUTPUT); //OUT6 (PE5/OC3C)
-    //pinMode(4,OUTPUT); //     (PE3/OC3A)
+    //pinMode(5,OUTPUT); //     (PE3/OC3A)
     TCCR3A =((1<<WGM31)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
     //OCR3A = 3000; //PE3, NONE

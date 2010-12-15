@@ -26,7 +26,7 @@
 // Flight Software Version
 #define VERSION 2.1
 
-#define BAUD 115200
+#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
 #define OFF 0
@@ -166,7 +166,6 @@ float CHR_RollAngle;
 float CHR_PitchAngle;
 #endif
 
-
 // Heading hold
 byte headingHoldConfig;
 //float headingScaleFactor;
@@ -176,7 +175,6 @@ float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
 float setHeading = 0;
-
 
 // Altitude Hold
 #define TEMPERATURE 0
@@ -192,6 +190,22 @@ int holdThrottle = 1000;
 float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
+#endif
+
+#ifdef Camera    // mode controlled by serialCom rest set from eprom (eventually) 
+  int mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
+  float mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
+  float mCameraRoll = 11.11;        
+  float mCameraYaw = 11.11;
+  int centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
+  int centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
+  int centerYaw = 1500;  
+  int servoMinPitch = 1000;     // don't drive the servo past here  
+  int servoMinRoll = 1000;
+  int servoMinYaw = 1000;
+  int servoMaxPitch = 2000;
+  int servoMaxRoll = 2000;
+  int servoMaxYaw = 2000;
 #endif
 
 // Receiver variables
@@ -221,20 +235,6 @@ float timeConstant;
 float rateDegPerSec(byte axis);
 float angleDeg(byte axis);
 */
-
-// Camera stabilization variables
-// Note: stabilization camera software is still under development
-#ifdef Camera
-  #define ROLLCAMERAPIN 33 // Servo 1 signal pin
-  #define PITCHCAMERAPIN 34 // Servo 2 signal pin
-  #define YAWCAMERAPIN 35 // Servo 3 signal pin
-  // map +/-90 degrees to 1000-2000
-  float mCamera = 11.11;
-  float bCamera = 1500;
-  Servo rollCamera;
-  Servo pitchCamera;
-  Servo yawCamera;
-#endif
 
 // ESC Calibration
 byte calibrateESC = 0;
@@ -282,7 +282,7 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
-byte cameraLoop = OFF; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
 
@@ -351,6 +351,18 @@ byte testSignal = LOW;
 #define MAGYMIN_ADR 312
 #define MAGZMAX_ADR 316
 #define MAGZMIN_ADR 320
+#define MCAMERAPITCH_ADR 324
+#define MCAMERAROLL_ADR 328
+#define MCAMERAYAW_ADR 332
+#define CENTERPITCH_ADR 336
+#define CENTERROLL_ADR 340
+#define CENTERYAW_ADR 344
+#define SERVOMINPITCH_ADR 348
+#define SERVOMINROLL_ADR 352
+#define SERVOMINYAW_ADR 356
+#define SERVOMAXPITCH_ADR 360
+#define SERVOMAXROLL_ADR 364
+#define SERVOMAXYAW_ADR 368
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
