@@ -233,8 +233,7 @@ private:
   Motors_PWM2() : Motors(){
   }
   void initialize(void) {
-    pinMode(LEFTMOTORPIN,OUTPUT);
-#if defined (__AVR_ATmega1280__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
     DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5 
 #if defined(plusConfig) || defined(XConfig) 
     DDRH = DDRH | B00001000;                                  // Set port to output PH3 
@@ -248,11 +247,11 @@ private:
     DDRD = DDRD | B00010000;                                  // Set port to output PD4 
 #endif	/* (__AVR_ATmega328P__)*/
     commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
-#if defined (__AVR_ATmega1280__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
     // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
     TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1)); // Clear OCRnA/OCRnB/OCRnC outputs on compare match, set OCRnA/OCRnB/OCRnC outputs at BOTTOM (non-inverting mode)
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us 
-    ICR3 == TOP;                                              // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
+    ICR3 = TOP;                                              // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
 #if defined(plusConfig) || defined(XConfig) 
     // Init PWM Timer 4
     TCCR4A =((1<<WGM41)|(1<<COM4A1)); 
@@ -270,15 +269,15 @@ private:
     // Init PWM Timer 1  16 bit
     TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1));
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
-    ICR3 == TOP;
-    // Init PWM Timer 0   8bit
+    ICR1 == TOP;
+    // Init PWM Timer 2   8bit
     TCCR2A =((1<<WGM21)|(1<<COM2A1)|(1<<COM2B1)); 
     TCCR2B = (1<<WGM23)|(1<<WGM22)|(1<<CS21);
-    ICR4 = TOP;
-#endif	/* (__AVR_ATmega328P__)*/
+    ICR2 = TOP;
+#endif	/* (__AVR_ATmega328P__)*/w
 }
   void write(void) {
-#if defined (__AVR_ATmega1280__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
     OCR3B = motorCommand[FRONT] * 2 ;
     OCR3C = motorCommand[REAR] * 2 ; 
     OCR3A = motorCommand[RIGHT] * 2 ;
@@ -296,7 +295,7 @@ private:
 #endif	/* (__AVR_ATmega328P__) */
   }
  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-#if defined (__AVR_ATmega1280__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
     OCR3B = _motorCommand * 2 ;
     OCR3C = _motorCommand * 2 ;
     OCR3A = _motorCommand * 2 ;
