@@ -157,9 +157,17 @@ void readEEPROM(void) {
   readPID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
   #ifdef AltitudeHold
+    // Leaving separate PID reads as commented for now
+    // Previously had issue where EEPROM was not reading right data
     readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
+    //PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
+    //PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
+    //PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
+    //PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
+    //PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
+    //PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));

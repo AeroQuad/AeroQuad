@@ -46,8 +46,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -126,6 +126,7 @@
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
+  //Motors_PWM2 motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"

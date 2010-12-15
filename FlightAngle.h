@@ -446,9 +446,9 @@ void Drift_correction(void)
   //float        errorCourse;
   //static float Scaled_Omega_P[3];
   float Scaled_Omega_I[3];
-  float        Accel_magnitude;
-  float        Accel_weight;
-  float        errorRollPitch[3];
+  float Accel_magnitude;
+  float Accel_weight;
+  float errorRollPitch[3];
   
   //*****Roll and Pitch***************
 
