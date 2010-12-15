@@ -166,13 +166,15 @@ private:
   }
 
   void initialize(void) {
-    pinMode(FRONTMOTORPIN, OUTPUT);
+/*    pinMode(FRONTMOTORPIN, OUTPUT);
     analogWrite(FRONTMOTORPIN, 124);		
     pinMode(REARMOTORPIN, OUTPUT);
     analogWrite(REARMOTORPIN, 124);		
     pinMode(RIGHTMOTORPIN, OUTPUT);
     analogWrite(RIGHTMOTORPIN, 124);		
     pinMode(LEFTMOTORPIN, OUTPUT);
+    */
+    commandAllMotors(1000);
   }
 
   void write(void) {
@@ -180,10 +182,16 @@ private:
     //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
     //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
     //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+    
+    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
+    //analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
+    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
+    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8));
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8));
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8));
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8));
+
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
@@ -191,10 +199,15 @@ private:
     //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
     //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
     //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+
+    //analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(FRONTMOTORPIN, (_motorCommand / 8));
+    analogWrite(REARMOTORPIN, (_motorCommand / 8));
+    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8));
+    analogWrite(LEFTMOTORPIN, (_motorCommand / 8));
   }
 };
 
