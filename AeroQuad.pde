@@ -30,10 +30,10 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
@@ -62,13 +62,13 @@
 
 // Camera Stabilization (experimental)
 // Not yet fully tested and implemented
-#define Camera
-#define CameraTimer1    
+//#define Camera
+//#define CameraTimer1    
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BatteryMonitor //define your personal specs in BatteryReadArmLed.h! Full documentation with schematic there
 
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
@@ -107,8 +107,8 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
+  //Motors_PWM2 motors;
   #include "FlightAngle.h"
-  //FlightAngle_CompFilter flightAngle;
   FlightAngle_DCM flightAngle;
 #endif
 
@@ -126,7 +126,6 @@
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
   Motors_PWM2 motors;
-  //Motors_PWM motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
