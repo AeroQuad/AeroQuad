@@ -125,13 +125,8 @@
 
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
-<<<<<<< HEAD
-  Motors_PWM motors;
-  //Motors_PWM2 motors;
-=======
   Motors_PWM2 motors;
-//  Motors_PWM motors;
->>>>>>> b87f032f333e34e4d4d83f59de86a8924e698265
+  //Motors_PWM motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
