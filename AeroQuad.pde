@@ -30,10 +30,10 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
@@ -125,8 +125,13 @@
 
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
+<<<<<<< HEAD
   Motors_PWM motors;
   //Motors_PWM2 motors;
+=======
+  Motors_PWM2 motors;
+//  Motors_PWM motors;
+>>>>>>> b87f032f333e34e4d4d83f59de86a8924e698265
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
