@@ -254,8 +254,9 @@ private:
   #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
     DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5  
   #endif
-#endif
-#if defined (__AVR_ATmega328P__)
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
     DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3 
     DDRD = DDRD | B00010000;                                  // Set port to output PD4 
 #endif
@@ -277,16 +278,17 @@ private:
     TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
     ICR4 = TOP;
   #endif
-#endif
-#if defined (__AVR_ATmega328P__)
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
     // Init PWM Timer 1  16 bit
     TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
     ICR1 == TOP;
-    // Init PWM Timer 2   8bit
-    TCCR2A = (1<<WGM21)|(1<<COM2A1)|(1<<COM2B1); 
-    TCCR2B = (1<<WGM22)|(1<<CS21)|(1<<WGM21);
-    // TOP is fixed at 255
+    // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
+    TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
+    TCCR2B = (1<<CS21);                                      // Prescaler set to 256, that gives us a resolution of 16us 
+    // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
 #endif
 }
   void write(void) {
@@ -299,12 +301,13 @@ private:
     OCR4B = motorCommand[RIGHT2] * 2 ;
     OCR4C = motorCommand[LEFT2] * 2 ; 
   #endif
-#endif
-#if defined (__AVR_ATmega328P__)
-    OCR2B = motorCommand[FRONT] * 2 ;
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    OCR2B = motorCommand[FRONT] / 8 ;                       // 1000-2000 to 128-256 
     OCR1A = motorCommand[REAR] * 2 ;
-    OCR1B = motorCommand[RIGHT] * 2 ;  // div???
-    OCR2A = motorCommand[LEFT] * 2 ;
+    OCR1B = motorCommand[RIGHT] * 2 ;
+    OCR2A = motorCommand[LEFT] / 8 ;
 #endif
   }
  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
@@ -317,12 +320,13 @@ private:
     OCR4B = _motorCommand * 2 ;
     OCR4C = _motorCommand * 2 ;
   #endif
-#endif
-#if defined (__AVR_ATmega328P__)
-    OCR2B = _motorCommand * 2 ;
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    OCR2B = _motorCommand / 8 ;
     OCR1A = _motorCommand * 2 ;
     OCR1B = _motorCommand * 2 ;
-    OCR2A = _motorCommand * 2 ;
+    OCR2A = _motorCommand / 8 ;
 #endif
   }
 };
