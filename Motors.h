@@ -133,6 +133,7 @@ public:
   }
 };
 
+
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
@@ -166,13 +167,15 @@ private:
   }
 
   void initialize(void) {
-    pinMode(FRONTMOTORPIN, OUTPUT);
+/*    pinMode(FRONTMOTORPIN, OUTPUT);
     analogWrite(FRONTMOTORPIN, 124);		
     pinMode(REARMOTORPIN, OUTPUT);
     analogWrite(REARMOTORPIN, 124);		
     pinMode(RIGHTMOTORPIN, OUTPUT);
     analogWrite(RIGHTMOTORPIN, 124);		
     pinMode(LEFTMOTORPIN, OUTPUT);
+    */
+    commandAllMotors(1000);
   }
 
   void write(void) {
@@ -180,10 +183,16 @@ private:
     //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
     //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
     //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
-    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
-    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
-    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
-    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+    
+    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
+    //analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
+    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
+    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
+    analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8));
+    analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8));
+    analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8));
+    analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8));
+
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
@@ -191,10 +200,134 @@ private:
     //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
     //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
     //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
-    analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+
+    //analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
+    //analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
+    analogWrite(FRONTMOTORPIN, (_motorCommand / 8));
+    analogWrite(REARMOTORPIN, (_motorCommand / 8));
+    analogWrite(RIGHTMOTORPIN, (_motorCommand / 8));
+    analogWrite(LEFTMOTORPIN, (_motorCommand / 8));
+  }
+};
+
+/******************************************************/
+/********************* PWM2 Motors *********************/
+/******************************************************/
+// EXPERIMENTAL uses system timers directly instead of analogWrite
+/*Some basics about the 16 bit timer:
+- The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
+  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5us. This
+  is also called timer resolution.
+- The timer is used as cyclic upwards counter, the counter periode is set in the
+  ICRx register. IIRC periode-1 has to be set in the ICRx register.
+- When the counter reaches 0, the outputs are set
+- When the counter reaches OCRxy, the corresponding output is cleared.
+In the code below, the periode shall be 3.3ms (300hz), so the ICRx register is
+ set to 6600 ticks of 0.5us/tick. It probably should be 6599, but who cares about
+ this 0.5us for the periode. This value is #define TOP
+The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
+ below this can be seen in the line "commandAllMotors(1000);"  A change of
+ the timer periode does not change this setting, as the clock rate is still one
+ tick every 0.5us. If the prescaler was changed, the OCRxy register value would
+ be different. 
+*/
+class Motors_PWM2 : public Motors {
+private:
+/*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port              
+    FRONT         2  PE4              3  PD3
+    REAR          3  PE5              9  PB1
+    RIGHT         5  PE3             10  PB2                      7  PH4
+    LEFT          6  PH3             11  PB3                      8  PH5
+*/ 
+  #define TOP 6600    //  ~300hz = TOP = 16,000,000 / ( 8 * 300 ) = Clock_speed / ( Prescaler * desired_PWM_Frequency)
+  public:
+  Motors_PWM2() : Motors(){
+  }
+  void initialize(void) {
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
+    DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5 
+  #if defined(plusConfig) || defined(XConfig) 
+    DDRH = DDRH | B00001000;                                  // Set port to output PH3 
+  #endif
+  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5  
+  #endif
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3 
+    DDRD = DDRD | B00010000;                                  // Set port to output PD4 
+#endif
+    commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
+    // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
+    TCCR3A = (1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1);  // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
+    TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us 
+    ICR3 = TOP;                                               // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
+  #if defined(plusConfig) || defined(XConfig) 
+    // Init PWM Timer 4
+    TCCR4A = (1<<WGM41)|(1<<COM4A1); 
+    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+    ICR4 = TOP;  
+  #endif
+  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    // Init PWM Timer 4
+    TCCR4A = (1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1); 
+    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+    ICR4 = TOP;
+  #endif
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    // Init PWM Timer 1  16 bit
+    TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
+    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
+    ICR1 == TOP;
+    // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
+    TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
+    TCCR2B = (1<<CS21);                                      // Prescaler set to 256, that gives us a resolution of 16us 
+    // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
+#endif
+}
+  void write(void) {
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
+    OCR3B = motorCommand[FRONT] * 2 ;
+    OCR3C = motorCommand[REAR] * 2 ; 
+    OCR3A = motorCommand[RIGHT] * 2 ;
+    OCR4A = motorCommand[LEFT] * 2 ; 
+  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    OCR4B = motorCommand[RIGHT2] * 2 ;
+    OCR4C = motorCommand[LEFT2] * 2 ; 
+  #endif
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    OCR2B = motorCommand[FRONT] / 8 ;                       // 1000-2000 to 128-256 
+    OCR1A = motorCommand[REAR] * 2 ;
+    OCR1B = motorCommand[RIGHT] * 2 ;
+    OCR2A = motorCommand[LEFT] / 8 ;
+#endif
+  }
+ void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
+    OCR3B = _motorCommand * 2 ;
+    OCR3C = _motorCommand * 2 ;
+    OCR3A = _motorCommand * 2 ;
+    OCR4A = _motorCommand * 2 ;
+  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    OCR4B = _motorCommand * 2 ;
+    OCR4C = _motorCommand * 2 ;
+  #endif
+//#endif
+//#if defined (__AVR_ATmega328P__)
+#else
+    OCR2B = _motorCommand / 8 ;
+    OCR1A = _motorCommand * 2 ;
+    OCR1B = _motorCommand * 2 ;
+    OCR2A = _motorCommand / 8 ;
+#endif
   }
 };
 
@@ -289,7 +422,7 @@ public:
     // Init PWM Timer 3
     pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
     pinMode(3,OUTPUT); //OUT6 (PE5/OC3C)
-    //pinMode(4,OUTPUT); //     (PE3/OC3A)
+    //pinMode(5,OUTPUT); //     (PE3/OC3A)
     TCCR3A =((1<<WGM31)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
     //OCR3A = 3000; //PE3, NONE

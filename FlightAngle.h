@@ -377,7 +377,7 @@ void Matrix_update(void)
 //
 //**********************************************************************************************
 
-void Normalize(void) 
+/*void Normalize(void) 
 {
   float error=0;
   float temporary[9];
@@ -401,6 +401,37 @@ void Normalize(void)
   
   renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[6],&temporary[6]));   // eq.21
   vectorScale(3, &DCM_Matrix[6], &temporary[6], renorm);
+}*/
+
+void Normalize(void) 
+{
+  float error=0;
+  float temporary[9];
+  float renorm=0;
+  
+  error= -vectorDotProduct(3, &DCM_Matrix[0], &DCM_Matrix[3])*.5;         // eq.18
+
+  vectorScale(3, &temporary[0], &DCM_Matrix[3], error);                   // eq.19
+  vectorScale(3, &temporary[3], &DCM_Matrix[0], error);                   // eq.19
+  
+  //vectorAdd(3, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
+  //vectorAdd(3, &temporary[3], &temporary[3], &DCM_Matrix[3]);             // eq.19
+  vectorAdd(6, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
+  
+  vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);          // c= a x b //eq.20
+  
+  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[0],&temporary[0]));   // eq.21
+  //vectorScale(3, &DCM_Matrix[0], &temporary[0], renorm);
+  
+  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[3],&temporary[3]));   // eq.21
+  //vectorScale(3, &DCM_Matrix[3], &temporary[3], renorm);
+  
+  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[6],&temporary[6]));   // eq.21
+  //vectorScale(3, &DCM_Matrix[6], &temporary[6], renorm);
+  for(byte v=0; v<9; v+=3) {
+    renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[v],&temporary[v]));   // eq.21
+    vectorScale(3, &DCM_Matrix[v], &temporary[v], renorm);
+  }
 }
 
 //**********************************************************************************************
@@ -415,9 +446,9 @@ void Drift_correction(void)
   //float        errorCourse;
   //static float Scaled_Omega_P[3];
   float Scaled_Omega_I[3];
-  float        Accel_magnitude;
-  float        Accel_weight;
-  float        errorRollPitch[3];
+  float Accel_magnitude;
+  float Accel_weight;
+  float errorRollPitch[3];
   
   //*****Roll and Pitch***************
 

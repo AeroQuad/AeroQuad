@@ -46,8 +46,8 @@
  ****************************************************************************/
 // Use only one of the following definitions
 
-#define plusConfig
-//#define XConfig
+//#define plusConfig
+#define XConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -63,6 +63,7 @@
 // Camera Stabilization (experimental)
 // Not yet fully tested and implemented
 //#define Camera
+//#define CameraTimer1    
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
@@ -90,6 +91,7 @@
 #include "Gyro.h"
 #include "Motors.h"
 
+
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
@@ -106,8 +108,8 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
+  //Motors_PWM2 motors;
   #include "FlightAngle.h"
-  //FlightAngle_CompFilter flightAngle;
   FlightAngle_DCM flightAngle;
 #endif
 
@@ -124,7 +126,7 @@
 
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
-  Motors_PWM motors;
+  Motors_PWM2 motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
@@ -215,6 +217,13 @@
 #endif
 #ifdef BatteryMonitor
   #include "BatteryReadArmLed.h"
+#endif
+
+// Camera stabilization variables
+// Note: stabilization camera software is still under development
+#ifdef Camera
+    #include "Camera.h"
+    camera myCamera;
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -356,8 +365,9 @@ void setup() {
     
   // Camera stabilization setup
   #ifdef Camera
-    rollCamera.attach(ROLLCAMERAPIN);
-    pitchCamera.attach(PITCHCAMERAPIN);
+    myCamera.initialize();
+    myCamera.setmCameraRoll(-11.11);
+    myCamera.setCenterRoll(1300);
   #endif
   
   previousTime = micros(); //was millis();
@@ -406,9 +416,10 @@ void loop () {
 #ifdef Camera // Experimental, not fully implemented yet
   // Command camera stabilization servos (requires #include <servo.h>)
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-    rollCamera.write((mCamera * flightAngle.getData(ROLL)) + bCamera);
-    pitchCamera.write((mCamera * flightAngle.getData(PITCH)) + bCamera);
-    yawCamera.write((mCamera * flightAngle.getData(YAW)) + bCamera);
+    myCamera.setPitch(flightAngle.getData(PITCH));
+    myCamera.setRoll(flightAngle.getData(ROLL));
+    myCamera.setYaw(flightAngle.getData(YAW));
+    myCamera.move();
     cameraTime = currentTime + CAMERALOOPTIME;
   }
 #endif

@@ -258,7 +258,7 @@ public:
     updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
     updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
   }
-  
+  /*
   void measure(void) {
 	  int rawData[3];
 
@@ -299,6 +299,53 @@ public:
           zeroGyroYawCount=0;
           negativeGyroYawCount=0;
           positiveGyroYawCount=0; 
+        }
+      }
+    }
+    else { // gyro different, restart
+      lastReceiverYaw = receiverYaw;
+      yawAge = 0;
+    }
+  }
+  */
+  
+    void measure(void) {
+    sendByteI2C(gyroAddress, 0x1D);
+    Wire.requestFrom(gyroAddress, 6);
+
+    for (axis = ROLL; axis < LASTAXIS; axis++) {
+      gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
+      gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
+    }
+
+    //calculateHeading();
+    long int currentGyroTime = micros();
+    rawHeading += -gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
+    //Serial.println(rawHeading);
+    previousGyroTime = currentGyroTime;
+
+    // ************ Correct for gyro drift by FabQuad **************
+    // ************ http://aeroquad.com/entry.php?4-  **************
+    // Modified FabQuad's approach to use yaw transmitter command instead of checking accelerometer
+    if (abs(lastReceiverYaw - receiverYaw) < 15) {
+      yawAge++;
+      if (yawAge >= 4) {  // if gyro was the same long enough, we can assume that there is no (fast) rotation
+        if (gyroData[YAW] < 0) {
+          negativeGyroYawCount++; // if gyro still indicates negative rotation, that's additional signal that gyroZero is too low
+        }
+        else if (gyroData[YAW] > 0) {
+          positiveGyroYawCount++;  // additional signal that gyroZero is too high
+        }
+        else {
+          zeroGyroYawCount++; // additional signal that gyroZero is correct
+        }
+        yawAge = 0;
+        if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
+          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyroZero is too low
+          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyroZero is too high
+          zeroGyroYawCount=0;
+          negativeGyroYawCount=0;
+          positiveGyroYawCount=0;
         }
       }
     }
