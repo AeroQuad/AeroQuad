@@ -278,10 +278,10 @@ private:
 //#endif
 //#if defined (__AVR_ATmega328P__)
 #else
-    OCR2B = motorCommand[FRONT] / 8 ;                       // 1000-2000 to 128-256 
+    OCR2B = motorCommand[FRONT] / 16 ;                       // 1000-2000 to 128-256 
     OCR1A = motorCommand[REAR] * 2 ;
     OCR1B = motorCommand[RIGHT] * 2 ;
-    OCR2A = motorCommand[LEFT] / 8 ;
+    OCR2A = motorCommand[LEFT] / 16 ;
 #endif
   }
  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
@@ -297,10 +297,10 @@ private:
 //#endif
 //#if defined (__AVR_ATmega328P__)
 #else
-    OCR2B = _motorCommand / 8 ;
+    OCR2B = _motorCommand / 16 ;
     OCR1A = _motorCommand * 2 ;
     OCR1B = _motorCommand * 2 ;
-    OCR2A = _motorCommand / 8 ;
+    OCR2A = _motorCommand / 16 ;
 #endif
   }
 };
