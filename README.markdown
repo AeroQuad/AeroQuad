@@ -1,6 +1,12 @@
-AeroQuad Flight Software Source Code 2.1 Beta
+AeroQuad Flight Software Source Code 2.1.1 Beta
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
+
+Version 2.1.1 Beta Release Notes (12/20/2010)
+  * Fixed issues 55-63 in Google Code Issue Tracker (http://code.google.com/p/aeroquad/issues/list)
+  * Added support for DCM with Uno and v1.8 Shield for improved Stable Mode performance
+    * Special thanks to Ala42 and Aadamson for all their optimization work
+  * Added experimental camera stabilization code (thanks CupOfTea)
 
 Version 2.1 Beta Release Notes (12/4/2010)
 ----------------------------------------
@@ -9,6 +15,7 @@ Version 2.1 Beta Release Notes (12/4/2010)
   * Bench tested configurations: Uno with v1.8 Shield, Duemilanove with v1.8 Shield, Duemilanove with v1.7 Shield
   * This has many changes and optimization improvements implemented, please be careful flying with this version as this is still a work in progress
   * Full documentation on all changes will be provided at full release
+  * Many improvements by Lokling and Honk
 
 
 Version 2.0.1 Release Notes (9/19/2010)
