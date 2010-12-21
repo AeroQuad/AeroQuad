@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 Beta - December 2010
+  AeroQuad v2.1.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -167,27 +167,10 @@ private:
   }
 
   void initialize(void) {
-/*    pinMode(FRONTMOTORPIN, OUTPUT);
-    analogWrite(FRONTMOTORPIN, 124);		
-    pinMode(REARMOTORPIN, OUTPUT);
-    analogWrite(REARMOTORPIN, 124);		
-    pinMode(RIGHTMOTORPIN, OUTPUT);
-    analogWrite(RIGHTMOTORPIN, 124);		
-    pinMode(LEFTMOTORPIN, OUTPUT);
-    */
     commandAllMotors(1000);
   }
 
   void write(void) {
-    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    //analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
-    
-    //analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8) + 1);
-    //analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8) + 1);
-    //analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8) + 1);
-    //analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] / 8) + 1);
     analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] / 8));
     analogWrite(REARMOTORPIN, (motorCommand[REAR] / 8));
     analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] / 8));
@@ -196,15 +179,6 @@ private:
   }
   
   void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-    //analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    //analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
-    //analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);		
-    //analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-
-    //analogWrite(FRONTMOTORPIN, (_motorCommand / 8) + 1);
-    //analogWrite(REARMOTORPIN, (_motorCommand / 8) + 1);
-    //analogWrite(RIGHTMOTORPIN, (_motorCommand / 8) + 1);
-    //analogWrite(LEFTMOTORPIN, (_motorCommand / 8) + 1);
     analogWrite(FRONTMOTORPIN, (_motorCommand / 8));
     analogWrite(REARMOTORPIN, (_motorCommand / 8));
     analogWrite(RIGHTMOTORPIN, (_motorCommand / 8));
@@ -284,7 +258,7 @@ private:
     // Init PWM Timer 1  16 bit
     TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); 
-    ICR1 == TOP;
+    ICR1 = TOP;
     // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
     TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
     TCCR2B = (1<<CS21);                                      // Prescaler set to 256, that gives us a resolution of 16us 

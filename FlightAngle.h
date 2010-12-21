@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 Beta - December 2010
+  AeroQuad v2.1.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -554,7 +554,11 @@ public:
        Kp_ROLLPITCH = 0.3423;
        Ki_ROLLPITCH = 0.00234;
     #endif
-    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1)
+    #ifdef AeroQuad_v1
+       Kp_ROLLPITCH = 0.11;
+       Ki_ROLLPITCH = 0.00000015;
+    #endif
+    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1) &!defined(AeroQuad_v1)
       Kp_ROLLPITCH = 0.010;
       Ki_ROLLPITCH = 0.0000005;
     #endif

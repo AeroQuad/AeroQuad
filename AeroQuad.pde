@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 Beta - December 2010
+  AeroQuad v2.1.1 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -98,8 +98,9 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CompFilter flightAngle;
+  //FlightAngle_CompFilter flightAngle;
   //FlightAngle_MultiWii flightAngle;
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuad_v18
