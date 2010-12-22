@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1.1 Beta - December 2010
+  AeroQuad v2.1.2 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -20,7 +20,6 @@
 
 /****************************************************************************
    Before flight, select the different user options for your AeroQuad below
-   Also, consult the ReadMe.mht file for additional details
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
 
@@ -107,8 +106,7 @@
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
-  //Motors_PWM motors;
-  Motors_PWM2 motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -126,7 +124,7 @@
 
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
-  Motors_PWM2 motors;
+  Motors_PWMtimer motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"

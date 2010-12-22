@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1.1 Beta - December 2010
+  AeroQuad v2.1.2 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -186,10 +186,12 @@ private:
   }
 };
 
-/******************************************************/
-/********************* PWM2 Motors *********************/
-/******************************************************/
-// EXPERIMENTAL uses system timers directly instead of analogWrite
+/***********************************************************/
+/********************* PWMtimer Motors *********************/
+/***********************************************************/
+// Special thanks to CupOfTea for authorting this class
+// http://aeroquad.com/showthread.php?1553-Timed-Motors_PWM
+// Uses system timers directly instead of analogWrite
 /*Some basics about the 16 bit timer:
 - The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
   and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5us. This
@@ -207,7 +209,7 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  tick every 0.5us. If the prescaler was changed, the OCRxy register value would
  be different. 
 */
-class Motors_PWM2 : public Motors {
+class Motors_PWMtimer : public Motors {
 private:
 /*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port              
     FRONT         2  PE4              3  PD3
@@ -216,8 +218,8 @@ private:
     LEFT          6  PH3             11  PB3                      8  PH5
 */ 
   #define TOP 6600    //  ~300hz = TOP = 16,000,000 / ( 8 * 300 ) = Clock_speed / ( Prescaler * desired_PWM_Frequency)
-  public:
-  Motors_PWM2() : Motors(){
+public:
+  Motors_PWMtimer() : Motors(){
   }
   void initialize(void) {
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
@@ -232,7 +234,7 @@ private:
 //#if defined (__AVR_ATmega328P__)
 #else
     DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3 
-    DDRD = DDRD | B00010000;                                  // Set port to output PD4 
+    DDRD = DDRD | B00001000;                                  // Set port to output PD4 
 #endif
     commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
@@ -261,7 +263,7 @@ private:
     ICR1 = TOP;
     // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
     TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
-    TCCR2B = (1<<CS21);                                      // Prescaler set to 256, that gives us a resolution of 16us 
+    TCCR2B = (1<<CS22)|(1<<CS21);                                      // Prescaler set to 256, that gives us a resolution of 16us 
     // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
 #endif
 }
