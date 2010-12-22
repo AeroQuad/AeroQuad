@@ -6,6 +6,7 @@ Version 2.1.2 Beta Release Notes (12/22/2010)
 ----------------------------------------
 
   * Fixed PWM timer class to work with Uno, special thanks to CupOfTea (implementation) and Ala42 (debugging)!
+  * Implemented PWM timer class for Mega (thanks CupOfTea!)
 
 Version 2.1.1 Beta Release Notes (12/20/2010)
 ----------------------------------------
