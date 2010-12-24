@@ -43,16 +43,44 @@ The high time shall be 1500�s, so the OCRxy register is set to 3000. A change 
 */
 class camera {
 public:
+  int mode;
+  float mCameraPitch;
+  float mCameraRoll;    
+  float mCameraYaw;
+  int centerPitch;
+  int centerRoll;
+  int centerYaw;
+  int servoMinPitch;
+  int servoMinRoll;
+  int servoMinYaw;
+  int servoMaxPitch;
+  int servoMaxRoll;
+  int servoMaxYaw;
+
   int servoPitch;                // 1000 - 2000 where we are or will move to next  
   int servoRoll;
   int servoYaw;
-  camera(void) {
-  }
+  
+  camera(void) {}
   void initialize(void) {
-     setPitch(0);
-     setRoll(0);
-     setYaw(0);
-     move();
+    mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
+    mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
+    mCameraRoll = 11.11;        
+    mCameraYaw = 11.11;
+    centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
+    centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
+    centerYaw = 1500;  
+    servoMinPitch = 1000;     // don't drive the servo past here  
+    servoMinRoll = 1000;
+    servoMinYaw = 1000;
+    servoMaxPitch = 2000;
+    servoMaxRoll = 2000;
+    servoMaxYaw = 2000;
+    
+    setPitch(0);
+    setRoll(0);
+    setYaw(0);
+    move();
 #ifdef CameraTimer1
    // Init PWM Timer 1      Probable conflict with Arducopter Motor
     DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
@@ -84,21 +112,21 @@ public:
 #endif
   }
   
-  void setPitch (int angle) {
+  void setPitch (float angle) {
     if (mode == 1) {
       servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
     } else {
       servoPitch = constrain(centerPitch , servoMinPitch , servoMaxPitch);
     }  
   }
-  void setRoll (int angle) {
+  void setRoll (float angle) {
     if (mode == 1) {
       servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
     } else {
       servoRoll = constrain(centerRoll , servoMinRoll , servoMaxRoll);
     }  
   }
-  void setYaw (int angle) {
+  void setYaw (float angle) {
     if (mode == 1) {
       servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
     } else {

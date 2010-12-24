@@ -130,7 +130,7 @@ void initializeEEPROM(void) {
   minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
-  #ifdef Camera
+  /*#ifdef Camera
     mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
     mCameraRoll = 11.11;        
     mCameraYaw = 11.11;
@@ -143,7 +143,7 @@ void initializeEEPROM(void) {
     servoMaxPitch = 2000;
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
-  #endif
+  #endif*/
 }
 
 void readEEPROM(void) {
@@ -190,7 +190,7 @@ void readEEPROM(void) {
   minAcro = readFloat(MINACRO_ADR);
   accel.setOneG(readFloat(ACCEL1G_ADR));
   
-  #ifdef Camera
+  /*#ifdef Camera
   mCameraPitch = readFloat(MCAMERAPITCH_ADR);
   mCameraRoll = readFloat(MCAMERAROLL_ADR);
   mCameraYaw = readFloat(MCAMERAYAW_ADR);
@@ -203,7 +203,7 @@ void readEEPROM(void) {
   servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
   servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
   servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
-  #endif
+  #endif*/
 }
 
 void writeEEPROM(void){
@@ -248,12 +248,12 @@ void writeEEPROM(void){
 
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-	writeTransmitterSlopeOffset(THROTTLE, THROTTLESCALE_ADR);
-	writeTransmitterSlopeOffset(ROLL, ROLLSCALE_ADR);
-	writeTransmitterSlopeOffset(PITCH, PITCHSCALE_ADR);
-	writeTransmitterSlopeOffset(YAW, YAWSCALE_ADR);
-	writeTransmitterSlopeOffset(MODE, MODESCALE_ADR);
-	writeTransmitterSlopeOffset(AUX, AUXSCALE_ADR);
+  writeTransmitterSlopeOffset(THROTTLE, THROTTLESCALE_ADR);
+  writeTransmitterSlopeOffset(ROLL, ROLLSCALE_ADR);
+  writeTransmitterSlopeOffset(PITCH, PITCHSCALE_ADR);
+  writeTransmitterSlopeOffset(YAW, YAWSCALE_ADR);
+  writeTransmitterSlopeOffset(MODE, MODESCALE_ADR);
+  writeTransmitterSlopeOffset(AUX, AUXSCALE_ADR);
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
@@ -262,7 +262,7 @@ void writeEEPROM(void){
   writeFloat(minAcro, MINACRO_ADR);
   writeFloat(accel.getOneG(), ACCEL1G_ADR);
     
-  #ifdef Camera
+  /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);
   writeFloat(mCameraRoll, MCAMERAROLL_ADR);
   writeFloat(mCameraYaw, MCAMERAYAW_ADR);
@@ -275,7 +275,7 @@ void writeEEPROM(void){
   writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
   writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
   writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
-  #endif
+  #endif*/
   
   sei(); // Restart interrupts
 }

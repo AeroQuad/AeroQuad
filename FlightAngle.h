@@ -560,7 +560,7 @@ public:
     #endif
     #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1) &!defined(AeroQuad_v1)
       Kp_ROLLPITCH = 0.010;
-      Ki_ROLLPITCH = 0.0000005;
+      Ki_ROLLPITCH = 0.00005; //0.0000005;
     #endif
   }
   

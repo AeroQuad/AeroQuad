@@ -59,10 +59,15 @@
 #define IXZ // IXZ-500 Flat Yaw Gyro or ITG-3200 Triple Axis Gyro
 //#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
-// Camera Stabilization (experimental)
-// Not yet fully tested and implemented
-//#define Camera
-//#define CameraTimer1    
+// Camera Stabilization
+// Servo output goes to D11-D13
+// If using v2.0 Shield place jumper between:
+// D12 to D33 for roll, connect servo to SERVO1
+// D11 to D34 for pitch, connect servo to SERVO2
+// D13 to D35 for yaw, connectr servo to SERVO3
+// Please note that you will need to have battery connected to power on servos
+#define Camera
+#define CameraTimer1    
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
@@ -77,7 +82,6 @@
  ****************************************************************************/
 
 #include <EEPROM.h>
-//#include <Servo.h>
 #include <Wire.h>
 #include "AeroQuad.h"
 #include "I2C.h"
@@ -262,6 +266,9 @@ void setup() {
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
   
+  pinMode(33, INPUT);
+  pinMode(34, INPUT);
+  
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
@@ -364,8 +371,10 @@ void setup() {
   // Camera stabilization setup
   #ifdef Camera
     myCamera.initialize();
-    myCamera.setmCameraRoll(-11.11);
-    myCamera.setCenterRoll(1300);
+    myCamera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    myCamera.setCenterRoll(1500); // Need to figure out nice way to set center position
+    myCamera.setmCameraPitch(11.11);
+    myCamera.setCenterPitch(1300);
   #endif
   
   previousTime = micros(); //was millis();
@@ -412,7 +421,6 @@ void loop () {
   }
 
 #ifdef Camera // Experimental, not fully implemented yet
-  // Command camera stabilization servos (requires #include <servo.h>)
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
     myCamera.setPitch(flightAngle.getData(PITCH));
     myCamera.setRoll(flightAngle.getData(ROLL));
