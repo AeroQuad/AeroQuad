@@ -395,3 +395,6 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
+
+// debug test for battery monitor
+float batteryMonitor;
