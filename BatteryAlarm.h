@@ -25,97 +25,39 @@
 // *************************************************************************
 class BatteryMonitor {
 public: 
-  float LOW_VOLTAGE_1 10.8    // Pack voltage at which to trigger alarm (first alarm)
-  float LOW_VOLTAGE_2 10.2    // Pack voltage at which to trigger alarm (critical alarm)
-  byte BATTERYPIN 0          // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
+  #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
+  #define OK 0
+  #define WARNING 1
+  #define ALARM 2
+  float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
+  float lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
+  float R1; //the SMD 10k resistor measured with DMM
+  float R2; //3k3 user mounted resistor measured with DMM
+  float Aref; //AREF 3V3 used (solder jumper) and measured with DMM
+  float batteryVoltage;
+  float batteryScaleFactor;
   
-  float R1 10050 //the SMD 10k resistor measured with DMM
-  float R2 3260 //3k3 user mounted resistor measured with DMM
-  float AREF 3.27F //AREF 3V3 used (solder jumper) and measured with DMM
-  float DIODE_FWD_VOLTAGE_DROP 0.306F //Schottky diode on APM board, drop measured with DMM. If no diode present, define as 0
-  
-  byte FL_LED 57 // Ain 2 on Mega
-  byte FR_LED 58 // Ain 3 on Mega
-  byte RR_LED 59 // Ain 4 on Mega
-  byte RL_LED 60 // Ain 5 on Mega
-  byte LEDDELAY 200
   BatteryMonitor(void) { 
-    // this is the constructor of the object and must have the same name 
-    // can be used to initialize any of the variables declared above 
+    lowVoltageWarning = 10.8;
+    lowVoltageAlarm = 10.2;
   }
 
   virtual void initialize(void); 
-  virtual const float measure(int); 
+  virtual const float readBatteryVoltage(byte);
+  virtual void lowBatteryEvent(byte);
   
-  float readBattery(void) {   
-    byte batteryStatus = 0;
-    float batteryVoltage = measure();
-    float batteryMonitor = analogRead(0) * 0.0147; //* 0.0049 * 3.0;
-  
-    //Serial.println(battery_voltage); //this is accessed by typing '=' in Serial Monitor
+  void measure(void) {   
+    byte batteryStatus = OK;
     
-    // If we reach battery status 2, we mantain this status of alert
-    if (batteryStatus==2) batteryStatus=2;  
-    else if (batteryVoltage < LOW_VOLTAGE_2) batteryStatus=2;
-    else if (batteryVoltage < LOW_VOLTAGE_1) batteryStatus=1;
-    else batteryStatus=0;
+    batteryVoltage = readBatteryVoltage(BATTERYPIN);
+    if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
+    else if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
+    else batteryStatus = OK;
     lowBatteryEvent(batteryStatus);
-    
+  }
+  
+  const float getData(void) {
     return batteryVoltage;
-  }
-  void ledCW(void) { 
-    digitalWrite(RL_LED, HIGH);
-    delay(LEDDELAY);
-    digitalWrite(RL_LED, LOW);
-    digitalWrite(RR_LED, HIGH);
-    delay(LEDDELAY);
-    digitalWrite(RR_LED, LOW);
-    digitalWrite(FR_LED, HIGH);
-    delay(LEDDELAY);
-    digitalWrite(FR_LED, LOW);
-    digitalWrite(FL_LED, HIGH);
-    delay(LEDDELAY);
-    digitalWrite(FL_LED, LOW); 
-  }
-  
-  void ledsON(void) {
-    digitalWrite(RL_LED, HIGH);
-    digitalWrite(RR_LED, HIGH);
-    digitalWrite(FR_LED, HIGH);
-    digitalWrite(FL_LED, HIGH); 
-  }
-  
-  void ledsOFF(void) {
-    digitalWrite(RL_LED, LOW);
-    digitalWrite(RR_LED, LOW);
-    digitalWrite(FR_LED, LOW);
-    digitalWrite(FL_LED, LOW); 
-  }
-
-  void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
-    byte batteryCounter=0;
-    byte freq;
-  
-    if (level==0) {
-      ledsON();
-      autoDescent = 0; //reset autoAscent if battery is good
-    }
-    else {
-      batteryCounter++;
-      if (level == 1) freq = 40;  //4 seconds wait
-      else freq = 5; //0.5 second wait
-      if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
-      #ifndef AltitudeHold
-        #ifdef AutoDescent
-          if(throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
-        #endif
-      #endif
-      #if defined(AltitudeHold) && defined(AutoDescent)
-        if (throttle > 1400) holdAltitude -= 0.2; //-0.2m in 2 fixed rates, one where battery < 10.8V and one where battery < 10.2V, only done if in altitude hold mode
-      #endif
-      else if (batteryCounter < freq) ledsON();
-      else batteryCounter=0;
-     }
   }
 };
 
@@ -144,23 +86,49 @@ public:
 */
 
 class BatteryMonitor_APM : public BatteryMonitor { 
+private:
+  #define DIODE_FWD_VOLTAGE_DROP 0.306F //Schottky diode on APM board, drop measured with DMM. If no diode present, define as 0
+  #define FL_LED 57 // Ain 2 on Mega
+  #define FR_LED 58 // Ain 3 on Mega
+  #define RR_LED 59 // Ain 4 on Mega
+  #define RL_LED 60 // Ain 5 on Mega
+  #define LEDDELAY 200
+  
+  void ledCW(void){ 
+    digitalWrite(RL_LED, HIGH);
+    delay(LEDDELAY);
+    digitalWrite(RL_LED, LOW);
+    digitalWrite(RR_LED, HIGH);
+    delay(LEDDELAY);
+    digitalWrite(RR_LED, LOW);
+    digitalWrite(FR_LED, HIGH);
+    delay(LEDDELAY);
+    digitalWrite(FR_LED, LOW);
+    digitalWrite(FL_LED, HIGH);
+    delay(LEDDELAY);
+    digitalWrite(FL_LED, LOW); 
+  };
+  
+  void ledsON(void){
+    digitalWrite(RL_LED, HIGH);
+    digitalWrite(RR_LED, HIGH);
+    digitalWrite(FR_LED, HIGH);
+    digitalWrite(FL_LED, HIGH); 
+  };
+  
+  void ledsOFF(void){
+    digitalWrite(RL_LED, LOW);
+    digitalWrite(RR_LED, LOW);
+    digitalWrite(FR_LED, LOW);
+    digitalWrite(FL_LED, LOW); 
+  };
+
 public: 
-  batteryMonitor_APM() : batteryMonitor(){}
-  initialize(void) {
-    LOW_VOLTAGE_1 = 10.8;    // Pack voltage at which to trigger alarm (first alarm)
-    LOW_VOLTAGE_2 10.2    // Pack voltage at which to trigger alarm (critical alarm)
-    BATTERYPIN 0          // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-    
-    R1 10050 //the SMD 10k resistor measured with DMM
-    R2 3260 //3k3 user mounted resistor measured with DMM
-    AREF 3.27F //AREF 3V3 used (solder jumper) and measured with DMM
-    DIODE_FWD_VOLTAGE_DROP 0.306F //Schottky diode on APM board, drop measured with DMM. If no diode present, define as 0
-    
-    FL_LED 57 // Ain 2 on Mega
-    FR_LED 58 // Ain 3 on Mega
-    RR_LED 59 // Ain 4 on Mega
-    RL_LED 60 // Ain 5 on Mega
-    LEDDELAY 200;
+  BatteryMonitor_APM() : BatteryMonitor(){}
+  void initialize(void) {
+    R1 = 10050; //the SMD 10k resistor measured with DMM
+    R2 = 3260; //3k3 user mounted resistor measured with DMM
+    Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
     
     pinMode(FL_LED ,OUTPUT);
     pinMode(FR_LED ,OUTPUT);
@@ -169,8 +137,35 @@ public:
     analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
   }
   
-  const float measure(void) {
-    return (((analogRead(BATTERYPIN)*(AREF/1024.0)) * (R1+R2)) / R2) + DIODE_FWD_VOLTAGE_DROP; //max 13.5V! Honk gets 0.01V difference from this function compared to DMM
+  void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
+    byte batteryCounter = 0;
+    byte freq;
+  
+    if (level == OK) {
+      ledsON();
+      autoDescent = 0; //reset autoAscent if battery is good
+    }
+    else {
+      batteryCounter++;
+      if (level == WARNING) freq = 40;  //4 seconds wait
+      else freq = 5; //0.5 second wait
+      
+      if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
+      #ifndef AltitudeHold
+        #ifdef AutoDescent
+          if (throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
+        #endif
+      #endif
+      #if defined(AltitudeHold) && defined(AutoDescent)
+        if (throttle > 1400) holdAltitude -= 0.2; //-0.2m in 2 fixed rates, one where battery < 10.8V and one where battery < 10.2V, only done if in altitude hold mode
+      #endif
+      else if (batteryCounter < freq) ledsON();
+      else batteryCounter = 0;
+    }
+  }
+  
+  const float readBatteryVoltage(byte channel) {
+    return (analogRead(channel) * batteryScaleFactor) + DIODE_FWD_VOLTAGE_DROP; //max 13.5V! Honk gets 0.01V difference from this function compared to DMM
   }
 };
 
@@ -181,16 +176,19 @@ class BatteryMonitor_AeroQuad : public BatteryMonitor {
 public: 
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
   void initialize(void) {
+    R1 = 15000.0;
+    R2 = 7500.0;
+    Aref = 5.0;
+    batteryScaleFactor = (Aref / 1024.0) * ((R1 + R2) / R2);
     analogReference(DEFAULT);
   }
 
-  const float measure(void) { 
-    // insert code here 
-    return exampleArray[axis]; 
+  void lowBatteryEvent(byte level) {
+  }
+  
+  const float readBatteryVoltage(byte channel) { 
+    return analogRead(channel) * batteryScaleFactor; 
   } 
 };
 

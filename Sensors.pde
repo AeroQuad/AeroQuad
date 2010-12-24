@@ -44,7 +44,7 @@ void readSensors(void) {
   #endif
   #if defined(BatteryMonitor)
     if (currentTime > batteryTime) {
-      readBattery();
+      batteryMonitor.measure();
       batteryTime = currentTime + BATTERYLOOPTIME;
     }
   #endif

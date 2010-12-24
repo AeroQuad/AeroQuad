@@ -68,7 +68,7 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BatteryMonitor //define your personal specs in BatteryReadArmLed.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 
@@ -89,7 +89,6 @@
 #include "Gyro.h"
 #include "Motors.h"
 
-
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1 
   Accel_AeroQuad_v1 accel;
@@ -97,8 +96,6 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  //FlightAngle_CompFilter flightAngle;
-  //FlightAngle_MultiWii flightAngle;
   FlightAngle_DCM flightAngle;
 #endif
 
@@ -129,6 +126,10 @@
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef BattMonitor
+    #include "BatteryAlarm.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
 #endif
 
 #ifdef ArduCopter
@@ -138,6 +139,10 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef BattMonitor
+    #include "BatteryAlarm.h"
+    BatteryMonitor_APM batteryMonitor;
+  #endif
 #endif
 
 #ifdef AeroQuad_Wii
@@ -168,6 +173,10 @@
   FlightAngle_CHR6DM flightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
+  #ifdef BattMonitor
+    #include "BatteryAlarm.h"
+    BatteryMonitor_APM batteryMonitor;
+  #endif
 #endif
 
 #ifdef APM_OP_CHR6DM
@@ -179,6 +188,10 @@
   FlightAngle_CHR6DM flightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
+  #ifdef BattMonitor
+    #include "BatteryAlarm.h"
+    BatteryMonitor_APM batteryMonitor;
+  #endif
 #endif
 
 #ifdef Multipilot
@@ -213,10 +226,6 @@
   #include "Altitude.h"
   Altitude_AeroQuad_v2 altitude;  //BMP085
 #endif
-#ifdef BatteryMonitor
-  #include "BatteryReadArmLed.h"
-#endif
-
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
 #ifdef Camera
@@ -290,9 +299,7 @@ void setup() {
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
   //accel.setOneG(accel.getFlightData(ZAXIS));
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  flightAngle.calibrate(); //defined in FlightAngle.pde
-  #endif
+  
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
@@ -341,6 +348,9 @@ void setup() {
   
   // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    flightAngle.calibrate(); //defined in FlightAngle.pde
+  #endif
 
   // Optional Sensors
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -350,7 +360,7 @@ void setup() {
   #ifdef AltitudeHold
     altitude.initialize();
   #endif
-    
+  
   // Camera stabilization setup
   #ifdef Camera
     myCamera.initialize();

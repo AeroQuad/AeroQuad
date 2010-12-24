@@ -225,7 +225,7 @@ void sendSerialTelemetry() {
     //printFreeMemory();
     //Serial.print(gyro.getHeading());
     //comma();
-    Serial.print(batteryMonitor, 2);
+    //Serial.print(batteryMonitor, 2);
     Serial.println();
     //queryType = 'X';
     break;
@@ -362,11 +362,17 @@ void sendSerialTelemetry() {
 #ifdef AltitudeHold
     PrintValueComma(altitude.getData());
     Serial.print(altitudeHold, DEC);
+    comma();
 #else
     PrintValueComma(0);
-    Serial.print('0');
+    PrintValueComma(0);
 #endif
-    Serial.println();
+#ifdef BatteryMonitor
+    Serial.print(batteryMonitor.getData());
+#else
+    Serial.print(0);
+#endif
+    Serial.println();    
     break;
   case 'T': // Send processed transmitter values
     PrintValueComma(receiver.getXmitFactor());
