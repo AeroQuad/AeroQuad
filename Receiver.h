@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 Beta - December 2010
+  AeroQuad v2.1.2 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -220,7 +220,7 @@ static void measurePulseWidthISR(uint8_t port) {
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
           pinData[pin].edge = RISING_EDGE;
         else
-          pinData[pin].edge == FALLING_EDGE; // invalid rising edge detected
+          pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
       }
       else {
         time = currentTime - pinData[pin].riseTime;

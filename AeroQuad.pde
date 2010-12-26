@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 Beta - December 2010
+  AeroQuad v2.1.2 Beta - December 2010
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -20,7 +20,6 @@
 
 /****************************************************************************
    Before flight, select the different user options for your AeroQuad below
-   Also, consult the ReadMe.mht file for additional details
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
 
@@ -30,10 +29,10 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
@@ -99,16 +98,16 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CompFilter flightAngle;
+  //FlightAngle_CompFilter flightAngle;
   //FlightAngle_MultiWii flightAngle;
+  FlightAngle_DCM flightAngle;
 #endif
 
 #ifdef AeroQuad_v18
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
-  Motors_PWM motors;
-  //Motors_PWM2 motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
 #endif
@@ -126,7 +125,7 @@
 
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
-  Motors_PWM2 motors;
+  Motors_PWMtimer motors;
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
