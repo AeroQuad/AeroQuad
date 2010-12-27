@@ -101,6 +101,10 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef Camera
+      #include "Camera.h"
+      camera myCamera;
+  #endif
 #endif
 
 #ifdef AeroQuad_v18
@@ -110,6 +114,10 @@
   Motors_PWMtimer motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef Camera
+      #include "Camera.h"
+      camera myCamera;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_v1
@@ -130,9 +138,21 @@
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Compass_AeroQuad_v2 compass; // HMC5843
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;  //BMP085
+  #endif
   #ifdef BattMonitor
     #include "BatteryAlarm.h"
     BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
+  #ifdef Camera
+      #include "Camera.h"
+      camera myCamera;
   #endif
 #endif
 
@@ -192,9 +212,9 @@
   FlightAngle_CHR6DM flightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
-  #ifdef BattMonitor
+  #ifdef BattteryMonitor
     #include "BatteryAlarm.h"
-    BatteryMonitor_APM batteryMonitor;
+    BatteryAlarm_APM batteryAlarm;
   #endif
 #endif
 
@@ -222,20 +242,8 @@
 
 // Optional Sensors, currently defined for the AeroQuad v2.0 Shield
 // Defined here in case other configurations want to incorporate these sensors
-#ifdef HeadingMagHold
-  #include "Compass.h"
-  Compass_AeroQuad_v2 compass; // HMC5843
-#endif
-#ifdef AltitudeHold
-  #include "Altitude.h"
-  Altitude_AeroQuad_v2 altitude;  //BMP085
-#endif
 // Camera stabilization variables
 // Note: stabilization camera software is still under development
-#ifdef Camera
-    #include "Camera.h"
-    camera myCamera;
-#endif
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
