@@ -197,7 +197,7 @@ public:
   }
   
   void autoZero() {
-    int findZero[FINDZERO];
+    float findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);
     delayMicroseconds(750);
     digitalWrite(AZPIN, LOW);

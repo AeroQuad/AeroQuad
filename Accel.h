@@ -62,7 +62,6 @@ public:
     accelChannel[ROLL] = rollChannel;
     accelChannel[PITCH] = pitchChannel;
     accelChannel[ZAXIS] = zAxisChannel;
-    
     accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
     accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
@@ -458,6 +457,8 @@ public:
 /******************************************************/
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 class Accel_CHR6DM : public Accel {
+float accelZero[3];
+
 public:
   Accel_CHR6DM() : Accel() {
     accelScaleFactor = 0;
