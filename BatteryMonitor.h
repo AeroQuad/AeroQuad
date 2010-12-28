@@ -172,19 +172,40 @@ public:
 // *******************************************************************************
 // ************************ AeroQuad Battery Monitor *****************************
 // *******************************************************************************
-class BatteryMonitor_AeroQuad : public BatteryMonitor { 
+class BatteryMonitor_AeroQuad : public BatteryMonitor {
+private:
+  long previousTime;
+  
 public: 
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
+    analogReference(DEFAULT);
+    pinMode(49, OUTPUT); // connect a 12V buzzer to pin 49
+    digitalWrite(49, LOW);
     R1 = 15000.0;
     R2 = 7500.0;
     Aref = 5.0;
     batteryScaleFactor = (Aref / 1024.0) * ((R1 + R2) / R2);
-    analogReference(DEFAULT);
+    previousTime = millis();
   }
 
   void lowBatteryEvent(byte level) {
+    long currentTime = millis()- previousTime;
+    if (level == WARNNING) {
+      if (currentTime > 1000) autoDescent = -50;
+      if (currentTime > 1500) {
+        autoDescent = 0;
+        previousTime = currentTime;
+      }
+    }
+    else if (case == ALARM) {
+      digitalWrite(49, HIGH); // enable buzzer
+      if ((currentTime > 500) && (throttle > 1400)) {
+        autoDescent -= 2; // auto descend quad
+        previousTime = currentTime;
+      }
+    }
   }
   
   const float readBatteryVoltage(byte channel) { 
