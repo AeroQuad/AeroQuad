@@ -163,19 +163,19 @@ void readSerialCommand() {
       break;
     case '~': //  read Camera values 
       #ifdef Camera
-      myCamera.setMode(readFloatSerial());
-      myCamera.setCenterPitch(readFloatSerial());
-      myCamera.setCenterRoll(readFloatSerial());
-      myCamera.setCenterYaw(readFloatSerial());
-      myCamera.setmCameraPitch(readFloatSerial());
-      myCamera.setmCameraRoll(readFloatSerial());
-      myCamera.setmCameraYaw(readFloatSerial());
-      myCamera.setServoMinPitch(readFloatSerial());
-      myCamera.setServoMinRoll(readFloatSerial());
-      myCamera.setServoMinYaw(readFloatSerial());
-      myCamera.setServoMaxPitch(readFloatSerial());
-      myCamera.setServoMaxRoll(readFloatSerial());
-      myCamera.setServoMaxYaw(readFloatSerial());
+      camera.setMode(readFloatSerial());
+      camera.setCenterPitch(readFloatSerial());
+      camera.setCenterRoll(readFloatSerial());
+      camera.setCenterYaw(readFloatSerial());
+      camera.setmCameraPitch(readFloatSerial());
+      camera.setmCameraRoll(readFloatSerial());
+      camera.setmCameraYaw(readFloatSerial());
+      camera.setServoMinPitch(readFloatSerial());
+      camera.setServoMinRoll(readFloatSerial());
+      camera.setServoMinYaw(readFloatSerial());
+      camera.setServoMaxPitch(readFloatSerial());
+      camera.setServoMaxRoll(readFloatSerial());
+      camera.setServoMaxYaw(readFloatSerial());
       #endif
       break;
     }
@@ -476,31 +476,31 @@ void sendSerialTelemetry() {
     break;
   case '`': // Send Camera values 
     #ifdef Camera
-    Serial.print(myCamera.getMode());
+    Serial.print(camera.getMode());
     comma();
-    Serial.print(myCamera.getCenterPitch());
+    Serial.print(camera.getCenterPitch());
     comma();
-    Serial.print(myCamera.getCenterRoll());
+    Serial.print(camera.getCenterRoll());
     comma();
-    Serial.print(myCamera.getCenterYaw());
+    Serial.print(camera.getCenterYaw());
     comma();
-    Serial.print(myCamera.getmCameraPitch() , 2);
+    Serial.print(camera.getmCameraPitch() , 2);
     comma();
-    Serial.print(myCamera.getmCameraRoll() , 2);
+    Serial.print(camera.getmCameraRoll() , 2);
     comma();
-    Serial.print(myCamera.getmCameraYaw() , 2);
+    Serial.print(camera.getmCameraYaw() , 2);
     comma();
-    Serial.print(myCamera.getServoMinPitch());
+    Serial.print(camera.getServoMinPitch());
     comma();
-    Serial.print(myCamera.getServoMinRoll());
+    Serial.print(camera.getServoMinRoll());
     comma();
-    Serial.print(myCamera.getServoMinYaw());
+    Serial.print(camera.getServoMinYaw());
     comma();
-    Serial.print(myCamera.getServoMaxPitch());
+    Serial.print(camera.getServoMaxPitch());
     comma();
-    Serial.print(myCamera.getServoMaxRoll());
+    Serial.print(camera.getServoMaxRoll());
     comma();
-    Serial.println(myCamera.getServoMaxYaw());
+    Serial.println(camera.getServoMaxYaw());
     #endif
     break;
   }

@@ -60,14 +60,13 @@
 //#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
 
 // Camera Stabilization
-// Servo output goes to D11-D13
+// Servo output goes to D11(pitch), D12(roll), D13(yaw) on AeroQuad v1.8 shield
 // If using v2.0 Shield place jumper between:
 // D12 to D33 for roll, connect servo to SERVO1
 // D11 to D34 for pitch, connect servo to SERVO2
 // D13 to D35 for yaw, connectr servo to SERVO3
-// Please note that you will need to have battery connected to power on servos
-#define Camera
-#define CameraTimer1    
+// Please note that you will need to have battery connected to power on servos with v2.0 shield
+#define CameraControl
 
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
@@ -101,9 +100,9 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
-  #ifdef Camera
-      #include "Camera.h"
-      camera myCamera;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
   #endif
 #endif
 
@@ -114,9 +113,9 @@
   Motors_PWMtimer motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
-  #ifdef Camera
-      #include "Camera.h"
-      camera myCamera;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
   #endif
 #endif
 
@@ -129,6 +128,10 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_v2
@@ -140,19 +143,19 @@
   FlightAngle_DCM flightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass; // HMC5843
+    Compass_AeroQuad_v2 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;  //BMP085
+    Altitude_AeroQuad_v2 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryAlarm.h"
+    #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
   #endif
-  #ifdef Camera
-      #include "Camera.h"
-      camera myCamera;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
   #endif
 #endif
 
@@ -164,7 +167,7 @@
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
   #ifdef BattMonitor
-    #include "BatteryAlarm.h"
+    #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
   #endif
 #endif
@@ -177,6 +180,10 @@
   #include "FlightAngle.h"
   FlightAngle_CompFilter flightAngle;
   //FlightAngle_DCM flightAngle;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_Wii
@@ -186,6 +193,10 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
@@ -198,8 +209,12 @@
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef BattMonitor
-    #include "BatteryAlarm.h"
+    #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
   #endif
 #endif
 
@@ -213,8 +228,12 @@
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef BattteryMonitor
-    #include "BatteryAlarm.h"
+    #include "BatteryMonitor.h"
     BatteryAlarm_APM batteryAlarm;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
   #endif
 #endif
 
@@ -377,12 +396,12 @@ void setup() {
   #endif
   
   // Camera stabilization setup
-  #ifdef Camera
-    myCamera.initialize();
-    myCamera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    myCamera.setCenterRoll(1500); // Need to figure out nice way to set center position
-    myCamera.setmCameraPitch(11.11);
-    myCamera.setCenterPitch(1300);
+  #ifdef CameraControl
+    camera.initialize();
+    camera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    camera.setCenterRoll(1500); // Need to figure out nice way to set center position
+    camera.setmCameraPitch(11.11);
+    camera.setCenterPitch(1300);
   #endif
   
   previousTime = micros(); //was millis();
@@ -428,12 +447,12 @@ void loop () {
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
 
-#ifdef Camera // Experimental, not fully implemented yet
+#ifdef CameraControl // Experimental, not fully implemented yet
   if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-    myCamera.setPitch(flightAngle.getData(PITCH));
-    myCamera.setRoll(flightAngle.getData(ROLL));
-    myCamera.setYaw(flightAngle.getData(YAW));
-    myCamera.move();
+    camera.setPitch(flightAngle.getData(PITCH));
+    camera.setRoll(flightAngle.getData(ROLL));
+    camera.setYaw(flightAngle.getData(YAW));
+    camera.move();
     cameraTime = currentTime + CAMERALOOPTIME;
   }
 #endif
