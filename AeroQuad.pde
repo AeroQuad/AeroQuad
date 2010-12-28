@@ -28,9 +28,8 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below using updated Sparkfun 5DOF IMU
-//#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v1_IMU     // Arduino 2009 with AeroQuad Shield v1.7 and below using original Sparkfun 5DOF IMU
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
@@ -46,29 +45,10 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-
-//#define plusConfig
 #define XConfig
+//#define plusConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
-
-// 5DOF IMU Version
-// Uncomment this if you have the version of the 5DOF IMU which uses the older IDG300 or IDG500 gyros
-//#define OriginalIMU 
-
-// Yaw Gyro Type
-// Use only one of the following definitions
-#define IXZ // IXZ-500 Flat Yaw Gyro or ITG-3200 Triple Axis Gyro
-//#define IDG // IDG-300 or IDG-500 Dual Axis Gyro
-
-// Camera Stabilization
-// Servo output goes to D11(pitch), D12(roll), D13(yaw) on AeroQuad v1.8 shield
-// If using v2.0 Shield place jumper between:
-// D12 to D33 for roll, connect servo to SERVO1
-// D11 to D34 for pitch, connect servo to SERVO2
-// D13 to D35 for yaw, connectr servo to SERVO3
-// Please note that you will need to have battery connected to power on servos with v2.0 shield
-#define CameraControl
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -77,8 +57,18 @@
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
+
+// *******************************************************************************************************************************
+// Camera Stabilization
+// Servo output goes to D11(pitch), D12(roll), D13(yaw) on AeroQuad v1.8 shield
+// If using v2.0 Shield place jumper between:
+// D12 to D33 for roll, connect servo to SERVO1
+// D11 to D34 for pitch, connect servo to SERVO2
+// D13 to D35 for yaw, connectr servo to SERVO3
+// Please note that you will need to have battery connected to power on servos with v2.0 shield
+// *******************************************************************************************************************************
+//#define CameraControl
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
@@ -97,7 +87,20 @@
 #include "Motors.h"
 
 // Create objects defined from Configuration Section above
-#ifdef AeroQuad_v1 
+#ifdef AeroQuad_v1
+  Accel_AeroQuad_v1 accel;
+  Gyro_AeroQuad_v1 gyro;
+  Receiver_AeroQuad receiver;
+  Motors_PWM motors;
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
+#endif
+
+#ifdef AeroQuad_v1_IDG
   Accel_AeroQuad_v1 accel;
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad receiver;
@@ -283,21 +286,24 @@
 // ************************************************************
 void setup() {
   Serial.begin(BAUD);
+  pinMode(LEDPIN, OUTPUT);
+  digitalWrite(LEDPIN, LOW);
+
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     Serial1.begin(BAUD);
     PORTD = B00000100;
   #endif
-  pinMode(LEDPIN, OUTPUT);
-  digitalWrite(LEDPIN, LOW);
-  
-  pinMode(33, INPUT);
-  pinMode(34, INPUT);
-  
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
     digitalWrite(LED3PIN, LOW);
+  #endif
+  #ifdef AeroQuadMega_v2
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT);
+    pinMode(34, INPUT);
+    pinMode(35, INPUT);
   #endif
   #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
     pinMode(LED_Red, OUTPUT);
@@ -321,15 +327,13 @@ void setup() {
   motors.initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON)
-    receiver.initialize(); // defined in Received.h
+  if (receiverLoop == ON) receiver.initialize(); // defined in Received.h
        
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
-  //accel.setOneG(accel.getFlightData(ZAXIS));
   
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
@@ -338,28 +342,11 @@ void setup() {
   levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
-  #ifdef OriginalIMU
-    gyro.invert(PITCH);
-    gyro.invert(ROLL);
-  #endif
-  #ifdef IXZ
+  #ifdef AeroQuad_v1_IDG
     gyro.invert(YAW);
-  #endif
-  #ifdef ArduCopter
-    gyro.invert(YAW);
-    gyro.invert(PITCH);
-    gyro.invert(ROLL);
   #endif
   #ifdef AeroQuad_Wii
     accel.invert(ROLL);
-  #endif
-  #ifdef AeroQuadMega_Wii
-    accel.invert(ROLL);
-    accel.invert(PITCH);
-    accel.invert(ZAXIS);
-  #endif
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) 
-      gyro.invert(PITCH);
   #endif
   #ifdef Multipilot
     accel.invert(PITCH);
@@ -368,12 +355,9 @@ void setup() {
   
   // Flight angle estimiation
   flightAngle.initialize(); // defined in FlightAngle.h
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    flightAngle.calibrate(); //defined in FlightAngle.pde
-  #endif
 
   // Optional Sensors
-  #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #ifdef HeadingMagHold
     compass.initialize();
     setHeading = compass.getHeading();
   #endif
@@ -390,7 +374,7 @@ void setup() {
     camera.setCenterPitch(1300);
   #endif
   
-  previousTime = micros(); //was millis();
+  previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;
 }
@@ -433,15 +417,13 @@ void loop () {
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
 
-#ifdef CameraControl // Experimental, not fully implemented yet
-  if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-    camera.setPitch(flightAngle.getData(PITCH));
-    camera.setRoll(flightAngle.getData(ROLL));
-    camera.setYaw(flightAngle.getData(YAW));
-    camera.move();
-    cameraTime = currentTime + CAMERALOOPTIME;
-  }
-#endif
+  #ifdef CameraControl // Experimental, not fully implemented yet
+    if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
+      camera.setPitch(flightAngle.getData(PITCH));
+      camera.setRoll(flightAngle.getData(ROLL));
+      camera.setYaw(flightAngle.getData(YAW));
+      camera.move();
+      cameraTime = currentTime + CAMERALOOPTIME;
+    }
+  #endif
 }
-
-

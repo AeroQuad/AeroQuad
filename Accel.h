@@ -53,6 +53,7 @@ public:
   virtual void measure(void);
   virtual void calibrate(void);
   virtual const int getFlightData(byte);
+  virtual void calculateAltitude(void);
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -127,28 +128,6 @@ public:
     return zAxis;
   }
   
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) 
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
-  #endif
-  
-  #ifndef AeroQuad_v18
-  #ifndef AeroQuadMega_CHR6DM
-  #ifndef APM_OP_CHR6DM
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
-  #endif
-  #endif
-  #endif
-  
   const float getAltitude(void) {
     return rawAltitude;
   }
@@ -214,6 +193,13 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
 
@@ -224,7 +210,6 @@ public:
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
-  //int xdata[2];
   
 public:
   Accel_AeroQuadMega_v2() : Accel(){
@@ -270,13 +255,8 @@ public:
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
     data = readByteI2C(accelAddress);
-    //Serial.println(data[0], HEX);
     data &= 0xF1;
-    //data |= 1<<1;
     updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-1.0g (value = xxxx000x)
-    //sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
-    //data = readByteI2C(accelAddress);
-    //Serial.println((int)data, HEX);    
   }
   
   void measure(void) {
@@ -327,6 +307,13 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
 
@@ -389,6 +376,13 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
 
@@ -417,7 +411,7 @@ public:
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = NWMP_acc[axis] - accelZero[axis];
+      accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
       accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
@@ -449,18 +443,23 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
+
 /******************************************************/
 /****************** CHR6DM Accelerometer **************/
 /******************************************************/
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 class Accel_CHR6DM : public Accel {
-private:
-
-
 public:
-  Accel_CHR6DM() : Accel(){
+  Accel_CHR6DM() : Accel() {
     accelScaleFactor = 0;
   }
 
@@ -519,18 +518,23 @@ public:
     writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
-/******************************************************/
-/****************** CHR6DM Fake Accelerometer *********/
-/******************************************************/
+
+/********************************************/
+/******** CHR6DM Fake Accelerometer *********/
+/********************************************/
 #ifdef CHR6DM_FAKE_ACCEL
 class Accel_CHR6DM_Fake : public Accel {
-private:
-
-
 public:
-  Accel_CHR6DM_Fake() : Accel(){
+  Accel_CHR6DM_Fake() : Accel() {
     accelScaleFactor = 0;
   }
 
@@ -594,6 +598,13 @@ public:
     writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
 
@@ -660,6 +671,13 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
+
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
 };
 #endif
 

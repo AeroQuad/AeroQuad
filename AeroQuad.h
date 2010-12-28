@@ -72,14 +72,13 @@
 #define ALTITUDE 8
 #define ZDAMPENING 9
 
-#ifndef AeroQuad_v18
-float fakeGyroRoll;
-float fakeGyroPitch;
-float fakeGyroYaw;
-
-float fakeAccelRoll;
-float fakeAccelPitch;
-float fakeAccelYaw;
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  float fakeGyroRoll;
+  float fakeGyroPitch;
+  float fakeGyroYaw;
+  float fakeAccelRoll;
+  float fakeAccelPitch;
+  float fakeAccelYaw;
 #endif
 
 // PID Variables
@@ -163,8 +162,8 @@ float mLevelTransmitter = 0.09;
 float bLevelTransmitter = -135;
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float CHR_RollAngle;
-float CHR_PitchAngle;
+  float CHR_RollAngle;
+  float CHR_PitchAngle;
 #endif
 
 // Heading hold
@@ -216,10 +215,6 @@ int delta;
 
 // Flight angle variables
 float timeConstant;
-/*float rateRadPerSec(byte axis);
-float rateDegPerSec(byte axis);
-float angleDeg(byte axis);
-*/
 
 // ESC Calibration
 byte calibrateESC = 0;
@@ -228,7 +223,6 @@ int testCommand = 1000;
 // Communication
 char queryType = 'X';
 byte tlmType = 0;
-//char string[32];
 byte armed = OFF;
 byte safetyCheck = OFF;
 byte update = 0;

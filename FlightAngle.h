@@ -768,16 +768,13 @@ float zeroRoll;
 float zeroPitch;
 
 public:
-  FlightAngle_CHR6DM() : FlightAngle() {
+  FlightAngle_CHR6DM() : FlightAngle() {}
+
+  void initialize(void) {
+    calibrate();
   }
 
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(void) {}
-
-  void calculate(void) {
-   
+  void calculate(void) {   
     angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
     angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
     CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
@@ -802,13 +799,14 @@ float zeroRoll;
 float zeroPitch;
 
 public:
-  FlightAngle_CHR6DM_Fake() : FlightAngle() {
-  }
+  FlightAngle_CHR6DM_Fake() : FlightAngle() {}
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {}
+  void initialize(void) {
+    calibrate();
+  }
 
   void calculate(void) {
 
