@@ -28,11 +28,13 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below using updated Sparkfun 5DOF IMU
+//#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
+//#define AeroQuad_v1_IMU     // Arduino 2009 with AeroQuad Shield v1.7 and below using original Sparkfun 5DOF IMU
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
@@ -68,11 +70,13 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 #define CameraControl
 
+// *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
+// *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 
@@ -206,8 +210,14 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM flightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Compass_CHR6DM compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
@@ -225,8 +235,14 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM flightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Compass_CHR6DM compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
   #ifdef BattteryMonitor
     #include "BatteryMonitor.h"
     BatteryAlarm_APM batteryAlarm;
@@ -259,27 +275,8 @@
   FlightAngle_DCM flightAngle;
 #endif
 
-// Optional Sensors, currently defined for the AeroQuad v2.0 Shield
-// Defined here in case other configurations want to incorporate these sensors
-// Camera stabilization variables
-// Note: stabilization camera software is still under development
-
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
-
-// Angle Estimation Objects
-// Class definition for angle estimation found in FlightAngle.h
-// Use only one of the following variable declarations
-// Insert into the appropriate #ifdef's above
-//#include "FlightAngle.h"
-//FlightAngle_CompFilter flightAngle; // Use this for Complementary Filter
-//FlightAngle_KalmanFilter flightAngle; // Use this for Kalman Filter
-//FlightAngle_IMU flightAngle; // Use this for IMU filter (do not use, for experimentation only)
-//FlightAngle_MultiWii flightAngle;
-
-// DCM gyro null values are defined in flightAngle.initalize()
-// Review those values is you add a new #define which uses FlightAngle_DCM
-//FlightAngle_DCM flightAngle; // Use this for DCM (only for Arduino Mega)
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -287,8 +284,8 @@
 void setup() {
   Serial.begin(BAUD);
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  Serial1.begin(BAUD);
-  PORTD = B00000100;
+    Serial1.begin(BAUD);
+    PORTD = B00000100;
   #endif
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
@@ -312,7 +309,7 @@ void setup() {
     Wire.begin();
   #endif
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-    // Recommendation from Mgros to increase I2C speed
+    // Recommendation from Mgros to increase I2C speed to 400kHz
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
     TWBR = 12;
   #endif
@@ -341,14 +338,6 @@ void setup() {
   levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
-  #ifdef AeroQuad_v1
-    gyro.invert(PITCH);
-    gyro.invert(ROLL);
-  #endif 
-  #ifdef AeroQuadMega_v1
-    gyro.invert(PITCH);
-    gyro.invert(ROLL);
-  #endif 
   #ifdef OriginalIMU
     gyro.invert(PITCH);
     gyro.invert(ROLL);
@@ -363,14 +352,11 @@ void setup() {
   #endif
   #ifdef AeroQuad_Wii
     accel.invert(ROLL);
-    gyro.invert(PITCH);
-    gyro.invert(YAW);
   #endif
   #ifdef AeroQuadMega_Wii
     accel.invert(ROLL);
     accel.invert(PITCH);
     accel.invert(ZAXIS);
-    gyro.invert(PITCH);
   #endif
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) 
       gyro.invert(PITCH);

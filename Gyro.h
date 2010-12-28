@@ -153,7 +153,6 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Gyro_AeroQuad_v1 : public Gyro {
 private:
 
@@ -180,7 +179,7 @@ public:
   void measure(void) {
     currentTime = micros();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
     previousTime = currentTime;
@@ -211,7 +210,6 @@ public:
     }
   }
 };
-#endif
 
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
@@ -467,9 +465,9 @@ public:
     updateControls(); // defined in DataAcquisition.h
     gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
     gyroData[ROLL] = smoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
+    gyroADC[PITCH] = gyroZero[PITCH] - NWMP_gyro[PITCH];
     gyroData[PITCH] = smoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[YAW] = NWMP_gyro[YAW] - gyroZero[YAW];
+    gyroADC[YAW] =  gyroZero[YAW] - NWMP_gyro[YAW];
     gyroData[YAW] = smoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
    previousTime = currentTime;
   }

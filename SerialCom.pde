@@ -323,7 +323,7 @@ void sendSerialTelemetry() {
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
-#ifdef HeadingMagHold
+#if defined(HeadingMagHold) && defined(AeroQuad_v2)
     PrintValueComma(compass.getRawData(XAXIS));
     PrintValueComma(compass.getRawData(YAXIS));
     Serial.println(compass.getRawData(ZAXIS));
