@@ -117,14 +117,6 @@ public:
     return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
   }
   
-  /*void calculateHeading() {
-    unsigned long currentHeadingTime, previousHeadingTime;
-    
-    currentHeadingTime = micros();
-    rawHeading += getData(YAW) * gyroScaleFactor * ((currentHeadingTime - previousHeadingTime) / 1000000.0); //working in µs now
-    previousHeadingTime = currentHeadingTime;
-  }*/
- 
   // returns heading as +/- 180 degrees
   const float getHeading(void) {
     div_t integerDivide;
@@ -154,8 +146,6 @@ public:
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
 class Gyro_AeroQuad_v1 : public Gyro {
-private:
-
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
@@ -197,7 +187,7 @@ public:
   }
   
   void autoZero() {
-    float findZero[FINDZERO];
+    int findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);
     delayMicroseconds(750);
     digitalWrite(AZPIN, LOW);

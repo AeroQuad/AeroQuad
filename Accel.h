@@ -135,7 +135,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+//#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   
@@ -200,12 +200,12 @@ public:
     previousTime = currentTime;
   } 
 };
-#endif
+//#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
@@ -314,7 +314,7 @@ public:
     previousTime = currentTime;
   } 
 };
-#endif
+//#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -390,8 +390,6 @@ public:
 /******************************************************/
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Accel_Wii : public Accel {
-private:
-
 public:
   Accel_Wii() : Accel(){
     accelScaleFactor = 0;    
@@ -457,8 +455,6 @@ public:
 /******************************************************/
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 class Accel_CHR6DM : public Accel {
-float accelZero[3];
-
 public:
   Accel_CHR6DM() : Accel() {
     accelScaleFactor = 0;
@@ -612,7 +608,7 @@ public:
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-#if defined(Multipilot) || defined(MultipilotI2C)
+//#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   
@@ -644,7 +640,7 @@ public:
     currentTime = micros();
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }
@@ -680,6 +676,4 @@ public:
     previousTime = currentTime;
   } 
 };
-#endif
-
-
+//#endif
