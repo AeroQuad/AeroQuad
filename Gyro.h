@@ -47,7 +47,7 @@ public:
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
-    sign[YAW] = 1;
+    sign[YAW] = -1;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -69,7 +69,7 @@ public:
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
     
-    previousTime = micros(); //was millis();
+    previousTime = micros();
   }
     
   const int getRaw(byte axis) {

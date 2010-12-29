@@ -310,16 +310,21 @@ void sendSerialTelemetry() {
     }
     PrintValueComma(flightAngle.getData(ROLL));
     PrintValueComma(flightAngle.getData(PITCH));
-#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    PrintValueComma(compass.getAbsoluteHeading());
-#else
-    PrintValueComma(0);
-#endif
-#ifdef AltitudeHold
-    Serial.print(altitude.getData());
-#else
-    Serial.print(0);
-#endif
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      PrintValueComma(compass.getAbsoluteHeading());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef AltitudeHold
+      PrintValueComma(altitude.getData());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef BatteryMonitor
+      Serial.print(batteryMonitor.getData());
+    #else
+      Serial.print(0);
+    #endif
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
@@ -338,7 +343,11 @@ void sendSerialTelemetry() {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getFlightData(axis));
     }
-    PrintValueComma(receiver.getData(THROTTLE));
+    #ifdef BatteryMonitor
+      PrintValueComma(batteryMonitor.getData());
+    #else
+      PrintValueComma(0);
+    #endif
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(motors.getMotorAxisCommand(axis));
     }
@@ -354,24 +363,18 @@ void sendSerialTelemetry() {
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
-#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    PrintValueComma(compass.getAbsoluteHeading());
-#else
-    PrintValueComma(0);
-#endif
-#ifdef AltitudeHold
-    PrintValueComma(altitude.getData());
-    Serial.print(altitudeHold, DEC);
-    comma();
-#else
-    PrintValueComma(0);
-    PrintValueComma(0);
-#endif
-#ifdef BatteryMonitor
-    Serial.print(batteryMonitor.getData());
-#else
-    Serial.print(0);
-#endif
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      PrintValueComma(compass.getAbsoluteHeading());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef AltitudeHold
+      PrintValueComma(altitude.getData());
+      Serial.print(altitudeHold, DEC);
+    #else
+      PrintValueComma(0);
+      Serial.print(0);
+    #endif
     Serial.println();    
     break;
   case 'T': // Send processed transmitter values
