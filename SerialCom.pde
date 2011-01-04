@@ -320,7 +320,7 @@ void sendSerialTelemetry() {
     #else
       PrintValueComma(0);
     #endif
-    #ifdef BatteryMonitor
+    #ifdef BattMonitor
       Serial.print(batteryMonitor.getData());
     #else
       Serial.print(0);

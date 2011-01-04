@@ -192,14 +192,14 @@ public:
 
   void lowBatteryEvent(byte level) {
     long currentTime = millis()- previousTime;
-    if (level == WARNNING) {
+    if (level == WARNING) {
       if (currentTime > 1000) autoDescent = -50;
       if (currentTime > 1500) {
         autoDescent = 0;
         previousTime = currentTime;
       }
     }
-    else if (case == ALARM) {
+    else if (level == ALARM) {
       digitalWrite(49, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
         autoDescent -= 2; // auto descend quad
@@ -208,7 +208,7 @@ public:
     }
   }
   
-  const float readBatteryVoltage(byte channel) { 
+  const float readBatteryVoltage(byte channel) {
     return analogRead(channel) * batteryScaleFactor; 
   } 
 };
