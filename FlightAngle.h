@@ -328,9 +328,9 @@ void Matrix_update(void)
 	{
     float Gyro_Vector[3];
 
-    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH); //gyro x roll
-    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
-    Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
+    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH);
+    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL);
+    Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW);
     vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
     vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
 	}
@@ -542,6 +542,7 @@ public:
     Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
     Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
     type = DCM;
+    // Future version, these should be defined from Configurator
     #ifdef ArduCopter
       Kp_ROLLPITCH = 0.025;
       Ki_ROLLPITCH = 0.00000015;
@@ -550,11 +551,7 @@ public:
       Kp_ROLLPITCH = 0.11; //HONK men dubbling dï¿½? 0.22 och 0.001503
       Ki_ROLLPITCH = 0.0007515; //0.0000005; Kp/Kp factor = 146.2821
     #endif
-    #ifdef AeroQuadMega_v1
-       Kp_ROLLPITCH = 0.3423;
-       Ki_ROLLPITCH = 0.00234;
-    #endif
-    #ifdef AeroQuad_v1
+    #if defined(AeroQuadMega_v1) || defined(AeroQuad_v1)
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #endif
