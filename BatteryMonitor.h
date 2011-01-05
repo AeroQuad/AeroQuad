@@ -29,30 +29,26 @@ public:
   #define OK 0
   #define WARNING 1
   #define ALARM 2
+  byte batteryStatus;
   float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
   float lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
-  float R1; //the SMD 10k resistor measured with DMM
-  float R2; //3k3 user mounted resistor measured with DMM
-  float Aref; //AREF 3V3 used (solder jumper) and measured with DMM
   float batteryVoltage;
   float batteryScaleFactor;
   
   BatteryMonitor(void) { 
-    lowVoltageWarning = 10.8;
-    lowVoltageAlarm = 10.2;
+    lowVoltageWarning = 10.0; //10.8;
+    lowVoltageAlarm = 9.5;//10.2;
+    batteryStatus = OK;
   }
 
   virtual void initialize(void); 
-  virtual const float readBatteryVoltage(byte);
-  virtual void lowBatteryEvent(byte);
+  virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
+  virtual void lowBatteryEvent(byte); 
   
-  void measure(void) {   
-    byte batteryStatus = OK;
-    
-    batteryVoltage = readBatteryVoltage(BATTERYPIN);
+  void measure(void) {     
+    batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.5);
     if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
-    else if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
-    else batteryStatus = OK;
+    if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
     lowBatteryEvent(batteryStatus);
   }
   
@@ -87,12 +83,15 @@ public:
 
 class BatteryMonitor_APM : public BatteryMonitor { 
 private:
-  #define DIODE_FWD_VOLTAGE_DROP 0.306F //Schottky diode on APM board, drop measured with DMM. If no diode present, define as 0
   #define FL_LED 57 // Ain 2 on Mega
   #define FR_LED 58 // Ain 3 on Mega
   #define RR_LED 59 // Ain 4 on Mega
   #define RL_LED 60 // Ain 5 on Mega
   #define LEDDELAY 200
+  float R1; //the SMD 10k resistor measured with DMM
+  float R2; //3k3 user mounted resistor measured with DMM
+  float Aref; //AREF 3V3 used (solder jumper) and measured with DMM
+  float diode; //Schottky diode on APM board
   
   void ledCW(void){ 
     digitalWrite(RL_LED, HIGH);
@@ -129,6 +128,8 @@ public:
     R1 = 10050; //the SMD 10k resistor measured with DMM
     R2 = 3260; //3k3 user mounted resistor measured with DMM
     Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
+    diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;
     
     pinMode(FL_LED ,OUTPUT);
     pinMode(FR_LED ,OUTPUT);
@@ -165,7 +166,7 @@ public:
   }
   
   const float readBatteryVoltage(byte channel) {
-    return (analogRead(channel) * batteryScaleFactor) + DIODE_FWD_VOLTAGE_DROP; //max 13.5V! Honk gets 0.01V difference from this function compared to DMM
+    return (analogRead(channel) * batteryScaleFactor) + diode;
   }
 };
 
@@ -175,6 +176,11 @@ public:
 class BatteryMonitor_AeroQuad : public BatteryMonitor {
 private:
   long previousTime;
+  float R1;
+  float R2;
+  float Aref;
+  float diode; // raw voltage goes through diode on Arduino
+  byte state;
   
 public: 
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
@@ -186,30 +192,40 @@ public:
     R1 = 15000.0;
     R2 = 7500.0;
     Aref = 5.0;
-    batteryScaleFactor = (Aref / 1024.0) * ((R1 + R2) / R2);
+    diode = 0.9; // measured with DMM
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
     previousTime = millis();
+    state = LOW;
   }
 
   void lowBatteryEvent(byte level) {
     long currentTime = millis()- previousTime;
     if (level == WARNING) {
-      if (currentTime > 1000) autoDescent = -50;
-      if (currentTime > 1500) {
+      if ((autoDescent == 0) && (currentTime > 1000)) {
+        autoDescent = -75;
+        digitalWrite(LED2PIN, LOW);
+      }
+      if (currentTime > 1100) {
         autoDescent = 0;
-        previousTime = currentTime;
+        previousTime = millis();
+        digitalWrite(LED2PIN, HIGH);
       }
     }
-    else if (level == ALARM) {
+    if (level == ALARM) {
       digitalWrite(49, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
         autoDescent -= 2; // auto descend quad
-        previousTime = currentTime;
+        previousTime = millis();
+        if (state == LOW) state = HIGH;
+        else state = LOW;
+        digitalWrite(LEDPIN, state);
+        digitalWrite(LED2PIN, state);
       }
     }
   }
   
   const float readBatteryVoltage(byte channel) {
-    return analogRead(channel) * batteryScaleFactor; 
+    return (analogRead(channel) * batteryScaleFactor) + diode; 
   } 
 };
 

@@ -343,7 +343,7 @@ void sendSerialTelemetry() {
     for (axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getFlightData(axis));
     }
-    #ifdef BatteryMonitor
+    #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
     #else
       PrintValueComma(0);
