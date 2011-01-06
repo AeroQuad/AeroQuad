@@ -60,12 +60,6 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
   writeFloat(pid->D, IDEeprom+8);
 }
 
-void writeTransmitterSlopeOffset(unsigned char channel, unsigned int IDEeprom)
-{
-  writeFloat(receiver.getTransmitterSlope(channel), IDEeprom);
-  writeFloat(receiver.getTransmitterOffset(channel), IDEeprom+4);
-}
-
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
   PID[ROLL].P = 1.20;
@@ -160,14 +154,8 @@ void readEEPROM(void) {
     // Leaving separate PID reads as commented for now
     // Previously had issue where EEPROM was not reading right data
     readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
-    //PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
-    //PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
-    //PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
-    //PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
-    //PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
-    //PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
@@ -238,22 +226,15 @@ void writeEEPROM(void){
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
-
-  writeFloat(receiver.getSmoothFactor(ROLL), ROLLSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(PITCH), PITCHSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(YAW), YAWSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(THROTTLE), THROTTLESMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(MODE), MODESMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(AUX), AUXSMOOTH_ADR);
-
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-  writeTransmitterSlopeOffset(THROTTLE, THROTTLESCALE_ADR);
-  writeTransmitterSlopeOffset(ROLL, ROLLSCALE_ADR);
-  writeTransmitterSlopeOffset(PITCH, PITCHSCALE_ADR);
-  writeTransmitterSlopeOffset(YAW, YAWSCALE_ADR);
-  writeTransmitterSlopeOffset(MODE, MODESCALE_ADR);
-  writeTransmitterSlopeOffset(AUX, AUXSCALE_ADR);
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
+    writeFloat(receiver.getTransmitterSlope(channel),  offset+0);
+    writeFloat(receiver.getTransmitterOffset(channel), offset+4);
+    writeFloat(receiver.getSmoothFactor(channel),      offset+8);
+  }
+
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);

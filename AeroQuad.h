@@ -59,6 +59,8 @@
 #define THROTTLE 3
 #define MODE 4
 #define AUX 5
+#define AUX2 6
+#define AUX3 7
 #define XAXIS 0
 #define YAXIS 1
 #define ZAXIS 2
@@ -309,29 +311,9 @@ byte testSignal = LOW;
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-#define MODESMOOTH_ADR 76
-#define ROLLSMOOTH_ADR 80
-#define PITCHSMOOTH_ADR 84
-#define YAWSMOOTH_ADR 88
-#define THROTTLESMOOTH_ADR 92
-#define GYRO_ROLL_ZERO_ADR 96
-#define GYRO_PITCH_ZERO_ADR 100
-#define GYRO_YAW_ZERO_ADR 104
-#define PITCH_PID_GAIN_ADR 124
-#define LEVELPITCH_PID_GAIN_ADR 136
-#define THROTTLESCALE_ADR 148
-#define THROTTLEOFFSET_ADR 152
-#define ROLLSCALE_ADR 156
-#define ROLLOFFSET_ADR 160
-#define PITCHSCALE_ADR 164
-#define PITCHOFFSET_ADR 168
-#define YAWSCALE_ADR 172
-#define YAWOFFSET_ADR 176
-#define MODESCALE_ADR 180
-#define MODEOFFSET_ADR 184
-#define AUXSCALE_ADR 188
-#define AUXOFFSET_ADR 192
-#define AUXSMOOTH_ADR 196
+#define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
+#define PITCH_PID_GAIN_ADR 172
+#define LEVELPITCH_PID_GAIN_ADR 184
 #define HEADINGSMOOTH_ADR 200
 #define HEADING_PID_GAIN_ADR 204
 #define AREF_ADR 216
@@ -369,12 +351,9 @@ byte testSignal = LOW;
 #define SERVOMAXPITCH_ADR 360
 #define SERVOMAXROLL_ADR 364
 #define SERVOMAXYAW_ADR 368
-/*#define AUX1SCALE_ADR 372  // jihlein: AUX1 scale address
-#define AUX1OFFSET_ADR 376  // jihlein: AUX1 offset address
-#define AUX1SMOOTH_ADR 380  // jihlein: AUX1 smooth address
-#define AUX2SCALE_ADR 384  // jihlein: AUX2 scale address
-#define AUX2OFFSET_ADR 388  // jihlein: AUX2 offset address
-#define AUX2SMOOTH_ADR 392  // jihlein: AUX2 smooth address*/
+#define GYRO_ROLL_ZERO_ADR 372
+#define GYRO_PITCH_ZERO_ADR 376
+#define GYRO_YAW_ZERO_ADR 380
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
