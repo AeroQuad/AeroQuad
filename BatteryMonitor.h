@@ -37,7 +37,7 @@ public:
   
   BatteryMonitor(void) { 
     lowVoltageWarning = 10.0; //10.8;
-    lowVoltageAlarm = 9.5;//10.2;
+    lowVoltageAlarm = 9.5; //10.2;
     batteryStatus = OK;
   }
 
@@ -46,7 +46,7 @@ public:
   virtual void lowBatteryEvent(byte); 
   
   void measure(void) {     
-    batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.5);
+    batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
     if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
     if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
     lowBatteryEvent(batteryStatus);
@@ -139,7 +139,7 @@ public:
   }
   
   void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
-    byte batteryCounter = 0;
+    static byte batteryCounter=0;
     byte freq;
   
     if (level == OK) {

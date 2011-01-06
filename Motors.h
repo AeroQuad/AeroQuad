@@ -157,13 +157,8 @@ private:
   
  public:
   Motors_PWM() : Motors(){
-    // Scale motor commands to analogWrite
-    // Only supports commands from 0-255 => 0 - 100% duty cycle
-    // Usable pulsewith from approximately 1000-2000 us = 126 - 250	
-    // m = (250-126)/(2000-1000) = 0.124		
-    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2		
-    mMotorCommand = 0.124;		
-    bMotorCommand = 2.0;
+   // Analog write supports commands from 0-255 => 0 - 100% duty cycle
+   // Using 125-250 for motor setting 1000-2000
   }
 
   void initialize(void) {
@@ -234,7 +229,7 @@ public:
 //#if defined (__AVR_ATmega328P__)
 #else
     DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3 
-    DDRD = DDRD | B00001000;                                  // Set port to output PD4 
+    DDRD = DDRD | B00001000;                                  // Set port to output PD3 
 #endif
     commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
@@ -851,4 +846,52 @@ for(nmotor=0;nmotor<6;nmotor++)
 };
 #endif
 
+/******************************************************/
+/********************* I2C Motors *********************/
+/******************************************************/
+// Tested AeroQuad I2C class authored by jihlein
+// http://code.google.com/p/aeroquad/issues/detail?id=67
+class Motors_AeroQuadI2C : public Motors {
+private:
+  #define MOTORBASE 0x28            // I2C controller base address
+  
+  #define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
+  #define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers
+  #define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
+  #define LEFTMOTORID  MOTORBASE + 4  // inspired frame
+  
+  public:
+  Motors_AeroQuadI2C() : Motors(){
+    // Scale motor commands to 0 to 255
+    // for I2C commands
+    // m = (255 - 0)/(2000-1000) = 0.255		
+    // b = y1 - (m * x1) = 0 - (0.255 * 1000) = -255		
+    mMotorCommand = 0.255;		
+    bMotorCommand = -255.0;
+  }
+
+  void initialize(void)
+  {
+    sendByteI2C(FRONTMOTORID, 0);
+    sendByteI2C(REARMOTORID,  0);
+    sendByteI2C(RIGHTMOTORID, 0);
+    sendByteI2C(LEFTMOTORID,  0);
+  }
+
+  void write(void)
+  {
+    sendByteI2C(FRONTMOTORID, constrain((motorCommand[FRONT] * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(REARMOTORID,  constrain((motorCommand[REAR]  * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(RIGHTMOTORID, constrain((motorCommand[RIGHT] * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(LEFTMOTORID,  constrain((motorCommand[LEFT]  * mMotorCommand) + bMotorCommand, 0, 255));
+  }
+  
+  void commandAllMotors(int motorCommand)
+  {   
+    sendByteI2C(FRONTMOTORID, constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(REARMOTORID,  constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));		
+    sendByteI2C(RIGHTMOTORID, constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));		
+    sendByteI2C(LEFTMOTORID,  constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
+  }
+};
 

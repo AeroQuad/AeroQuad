@@ -252,6 +252,33 @@ unsigned long cameraTime = 10000;
 unsigned long fastTelemetryTime = 0;
 unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
+// jihlein: wireless telemetry defines
+/**************************************************************/
+/********************** Wireless Telem Port *******************/
+/**************************************************************/
+#if defined WirelessTelemetry && (defined(AeroQuadMega_v1)     || \
+                                  defined(AeroQuadMega_v2)     || \
+                                  defined(AeroQuadMega_Wii)    || \
+                                  defined(ArduCopter)          || \
+                                  defined(AeroQuadMega_CHR6DM) || \
+                                  defined(APM_OP_CHR6DM))
+  #define SERIAL_BAUD       115200
+  #define SERIAL_PRINT      Serial3.print
+  #define SERIAL_PRINTLN    Serial3.println
+  #define SERIAL_AVAILABLE  Serial3.available
+  #define SERIAL_READ       Serial3.read
+  #define SERIAL_FLUSH      Serial3.flush
+  #define SERIAL_BEGIN      Serial3.begin
+#else
+  #define SERIAL_BAUD       115200
+  #define SERIAL_PRINT      Serial.print
+  #define SERIAL_PRINTLN    Serial.println
+  #define SERIAL_AVAILABLE  Serial.available
+  #define SERIAL_READ       Serial.read
+  #define SERIAL_FLUSH      Serial.flush
+  #define SERIAL_BEGIN      Serial.begin
+#endif
+
 /**************************************************************/
 /********************** Debug Parameters **********************/
 /**************************************************************/
@@ -342,6 +369,12 @@ byte testSignal = LOW;
 #define SERVOMAXPITCH_ADR 360
 #define SERVOMAXROLL_ADR 364
 #define SERVOMAXYAW_ADR 368
+/*#define AUX1SCALE_ADR 372  // jihlein: AUX1 scale address
+#define AUX1OFFSET_ADR 376  // jihlein: AUX1 offset address
+#define AUX1SMOOTH_ADR 380  // jihlein: AUX1 smooth address
+#define AUX2SCALE_ADR 384  // jihlein: AUX2 scale address
+#define AUX2OFFSET_ADR 388  // jihlein: AUX2 offset address
+#define AUX2SMOOTH_ADR 392  // jihlein: AUX2 smooth address*/
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h

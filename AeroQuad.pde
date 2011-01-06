@@ -58,6 +58,7 @@
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 #define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
+//#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -118,6 +119,7 @@
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWMtimer motors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
   #ifdef CameraControl
@@ -144,6 +146,7 @@
 #ifdef AeroQuadMega_v2
   Receiver_AeroQuadMega receiver;
   Motors_PWMtimer motors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
