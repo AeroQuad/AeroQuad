@@ -59,6 +59,7 @@ public:
 
   void _initialize(void) {
     xmitFactor = readFloat(XMITFACTOR_ADR);
+
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
       byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
       mTransmitter[channel] = readFloat(offset+0);
@@ -151,10 +152,9 @@ typedef struct {
   byte edge;
   unsigned long riseTime;
   unsigned long fallTime;
-  unsigned long lastGoodWidth;
-}
-pinTimingData;
-volatile static pinTimingData pinData[9];
+  unsigned int  lastGoodWidth;
+} tPinTimingData;
+volatile static tPinTimingData pinData[9];
 
 // Attaches PCINT to Arduino Pin
 void attachPinChangeInterrupt(uint8_t pin) {
@@ -224,13 +224,12 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
 SIGNAL(PCINT0_vect) {
   measurePulseWidthISR(0, 8); // PORT B
 }
-//SIGNAL(PCINT1_vect) {
-//  measurePulseWidthISR(1, 16); // PORT C, unused
-//}
+
 SIGNAL(PCINT2_vect) {
   measurePulseWidthISR(2, 0); // PORT D
 }
 
+// defines arduino pins used for receiver in arduino pin numbering schema
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
 class Receiver_AeroQuad :
@@ -255,29 +254,18 @@ public:
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
   void read(void) {
-    uint16_t data[LASTCHANNEL];
-    uint8_t oldSREG;
-
-    oldSREG = SREG;
+    uint8_t oldSREG = SREG;
     cli();
-    // Buffer receiver values read from pin change interrupt handler
-    //for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    //  data[channel] = pinData[receiverPin[channel]].lastGoodWidth;
-    //}
-    data[ROLL] = pinData[receiverPin[ROLL]].lastGoodWidth;
-    data[PITCH] = pinData[receiverPin[PITCH]].lastGoodWidth;
-    data[THROTTLE] = pinData[receiverPin[THROTTLE]].lastGoodWidth;
-    data[YAW] = pinData[receiverPin[YAW]].lastGoodWidth;
-    data[MODE] = pinData[receiverPin[MODE]].lastGoodWidth;
-    data[AUX] = pinData[receiverPin[AUX]].lastGoodWidth;
-    SREG = oldSREG;
-
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+      byte pin = receiverPin[channel];
+      // Get receiver value read by pin change interrupt handler
+      uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
+      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
     }
+    SREG = oldSREG;
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
@@ -304,10 +292,9 @@ typedef struct {
   byte edge;
   unsigned long riseTime;
   unsigned long fallTime;
-  unsigned long lastGoodWidth;
-}
-pinTimingData;
-volatile static pinTimingData pinData[9];
+  unsigned int lastGoodWidth;
+} tPinTimingData;
+volatile static tPinTimingData pinData[LASTCHANNEL];
 
 static void MegaPcIntISR() {
   uint8_t bit;
@@ -317,12 +304,9 @@ static void MegaPcIntISR() {
   uint32_t currentTime;
   uint32_t time;
 
-  //curr = PORTK;
   curr = *portInputRegister(11);
   mask = curr ^ PCintLast[0];
   PCintLast[0] = curr;
-
-  //Serial.println(curr,DEC);
 
   // mask is pins that have changed. screen out non pcint pins.
   if ((mask &= PCMSK2) == 0) {
@@ -350,7 +334,6 @@ static void MegaPcIntISR() {
         pinData[pin].fallTime = currentTime;
         if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
           pinData[pin].lastGoodWidth = time;
-          //Serial.println(pinData[4].lastGoodWidth);
           pinData[pin].edge = FALLING_EDGE;
         }
       }
@@ -362,14 +345,20 @@ SIGNAL(PCINT2_vect) {
   MegaPcIntISR();
 }
 
+// For some reason, these declarations don't work when made outside of class
+// When initialized here, all receiver channels read throttle output
+/*#ifdef AeroQuadMega_v1
+ arduino pins 67, 65, 64, 66, 63, 62
+static byte receiverPin[6] = {5, 3, 2, 4, 1, 0}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+#else
+ arduino pins 63, 64, 65, 62, 66, 67
+static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+#endif*/
+
 class Receiver_AeroQuadMega :
 public Receiver {
 private:
   byte receiverPin[LASTCHANNEL];
-  //Receiver pin assignments for the Arduino Mega using an AeroQuad v1.x Shield
-  //The defines below are for documentation only of the Mega receiver input
-  //The real pin assignments happen in initializeMegaPcInt2()
-  //If you are using an AQ 1.x Shield, put a jumper wire between the Shield and Mega as indicated in the comments below
 
 public:
   Receiver_AeroQuadMega() :
@@ -384,13 +373,6 @@ public:
     PCICR |= 0x1 << 2;
 
 #ifdef AeroQuadMega_v1
-    //receiverChannel[ROLL] = 67;
-    //receiverChannel[PITCH] = 65;
-    //receiverChannel[YAW] = 64;
-    //receiverChannel[THROTTLE] = 66;
-    //receiverChannel[MODE] = 63;
-    //receiverChannel[AUX] = 62;
-    // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
     receiverPin[ROLL] = 5;
     receiverPin[PITCH] = 3;
     receiverPin[YAW] = 2;
@@ -398,13 +380,6 @@ public:
     receiverPin[MODE] = 1;
     receiverPin[AUX] = 0;
 #else
-    //receiverChannel[ROLL] = 63;
-    //receiverChannel[PITCH] = 64;
-    //receiverChannel[YAW] = 65;
-    //receiverChannel[THROTTLE] = 62;
-    //receiverChannel[MODE] = 66;
-    //receiverChannel[AUX] = 67;
-    // defines ATmega328P pins (Arduino pins converted to ATmega328P pinouts)
     receiverPin[ROLL] = 1;
     receiverPin[PITCH] = 2;
     receiverPin[YAW] = 3;
@@ -413,30 +388,26 @@ public:
     receiverPin[AUX] = 5;
 #endif
 
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
       pinData[receiverPin[channel]].edge = FALLING_EDGE;
   }
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
   void read(void) {
-    uint16_t data[LASTCHANNEL];
-    uint8_t oldSREG;
-
-    oldSREG = SREG;
+    uint8_t oldSREG = SREG;
     cli();
-    // Buffer receiver values read from pin change interrupt handler
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
-      data[channel] = pinData[receiverPin[channel]].lastGoodWidth;
-    SREG = oldSREG;
-
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+      byte pin = receiverPin[channel];
+      // Get receiver value read by pin change interrupt handler
+      uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
+      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-      //transmitterCommandSmooth[channel] = transmitterFilter[channel].filter(receiverData[channel]);
     }
+    SREG = oldSREG;
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
@@ -446,7 +417,7 @@ public:
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
 };
-//#endif //Honk
+
 class Receiver_AeroQuadMega_Fake :
 public Receiver {
 private:
