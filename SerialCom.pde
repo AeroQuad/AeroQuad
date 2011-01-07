@@ -226,7 +226,7 @@ void sendSerialTelemetry() {
     //Serial.print(gyro.getHeading());
     //comma();
     //Serial.print(batteryMonitor, 2);
-    Serial.println();
+    //Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -417,7 +417,7 @@ void sendSerialTelemetry() {
     Serial.println(motors.getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
-    SERIAL_PRINTLN(VERSION, 2);  // jihlein: Print 2 decimal places
+    Serial.println(VERSION, 2);  // jihlein: Print 2 decimal places
     queryType = 'X';
     break;
   case '#': // Send software configuration
@@ -482,16 +482,16 @@ void sendSerialTelemetry() {
     #ifdef Camera
     //Serial.print(camera.getMode());
     //comma();
-		PrintValueComma(camera.getMode());
+    PrintValueComma(camera.getMode());
     //Serial.print(camera.getCenterPitch());
     //comma();
-		PrintValueComma(camera.getCenterPitch());
+    PrintValueComma(camera.getCenterPitch());
     //Serial.print(camera.getCenterRoll());
     //comma();
-		PrintValueComma(camera.getCenterRoll());
+    PrintValueComma(camera.getCenterRoll());
     //Serial.print(camera.getCenterYaw());
     //comma();
-		PrintValueComma(camera.getCenterYaw());
+    PrintValueComma(camera.getCenterYaw());
     Serial.print(camera.getmCameraPitch() , 2);
     comma();
     Serial.print(camera.getmCameraRoll() , 2);
@@ -500,19 +500,19 @@ void sendSerialTelemetry() {
     comma();
     //Serial.print(camera.getServoMinPitch());
     //comma();
-		PrintValueComma(camera.getServoMinPitch());
+    PrintValueComma(camera.getServoMinPitch());
     //Serial.print(camera.getServoMinRoll());
     //comma();
-		PrintValueComma(camera.getServoMinRoll());
+    PrintValueComma(camera.getServoMinRoll());
     //Serial.print(camera.getServoMinYaw());
     //comma();
-		PrintValueComma(camera.getServoMinYaw());
+    PrintValueComma(camera.getServoMinYaw());
     //Serial.print(camera.getServoMaxPitch());
     //comma();
-		PrintValueComma(camera.getServoMaxPitch());
+    PrintValueComma(camera.getServoMaxPitch());
     //Serial.print(camera.getServoMaxRoll());
     //comma();
-		PrintValueComma(camera.getServoMaxRoll());
+    PrintValueComma(camera.getServoMaxRoll());
     Serial.println(camera.getServoMaxYaw());
     #endif
     break;

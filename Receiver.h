@@ -254,18 +254,19 @@ public:
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
   void read(void) {
-    uint8_t oldSREG = SREG;
-    cli();
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
       byte pin = receiverPin[channel];
+      uint8_t oldSREG = SREG;
+      cli();
       // Get receiver value read by pin change interrupt handler
       uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+      SREG = oldSREG;
+
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
     }
-    SREG = oldSREG;
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
@@ -395,19 +396,19 @@ public:
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
   void read(void) {
-    uint8_t oldSREG = SREG;
-    cli();
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
       byte pin = receiverPin[channel];
+      uint8_t oldSREG = SREG;
+      cli();
       // Get receiver value read by pin change interrupt handler
       uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+      SREG = oldSREG;
 
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = smooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
     }
-    SREG = oldSREG;
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
