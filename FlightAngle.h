@@ -39,8 +39,7 @@ public:
   
   virtual void initialize();
   virtual void calculate();
-  //virtual float getGyroAngle(byte axis);
-  
+ 
   const float getData(byte axis) {
     return angle[axis];
   }
@@ -172,10 +171,8 @@ public:
 class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;
-  float Gyro_Gain_X;
-  float Gyro_Gain_Y;
-  float Gyro_Gain_Z;
-  float DCM_Matrix[9];
+  float Gyro_Gain;  // jihlein; Replaced X, Y, and Z gyro gains with single gain
+ float DCM_Matrix[9];
   float Accel_Vector[3];
   float Omega_Vector[3];
   float Omega_P[3];
@@ -328,11 +325,11 @@ void Matrix_update(void)
 	{
     float Gyro_Vector[3];
 
-    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH);
-    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL);
-    Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW);
-    vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
-    vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
+  Gyro_Vector[0] = Gyro_Gain * -gyro.getData(PITCH);  // jihlein: Use single scale factor
+  Gyro_Vector[1] = Gyro_Gain *  gyro.getData(ROLL);   // jihlein: Use single scale factor
+  Gyro_Vector[2] = Gyro_Gain *  gyro.getData(YAW);    // jihlein: Use single scale factor
+  vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
+  vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
 	}
   
   Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
@@ -376,32 +373,6 @@ void Matrix_update(void)
 //  Normalize
 //
 //**********************************************************************************************
-
-/*void Normalize(void) 
-{
-  float error=0;
-  float temporary[9];
-  float renorm=0;
-  
-  error= -vectorDotProduct(3, &DCM_Matrix[0] ,&DCM_Matrix[3])*.5;         // eq.19
-
-  vectorScale(3, &temporary[0], &DCM_Matrix[3], error);                   // eq.19
-  vectorScale(3, &temporary[3], &DCM_Matrix[0], error);                   // eq.19
-  
-  vectorAdd(3, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
-  vectorAdd(3, &temporary[3], &temporary[3], &DCM_Matrix[3]);             // eq.19
-  
-  vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);          // c= a x b //eq.20
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[0],&temporary[0]));   // eq.21
-  vectorScale(3, &DCM_Matrix[0], &temporary[0], renorm);
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[3],&temporary[3]));   // eq.21
-  vectorScale(3, &DCM_Matrix[3], &temporary[3], renorm);
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[6],&temporary[6]));   // eq.21
-  vectorScale(3, &DCM_Matrix[6], &temporary[6], renorm);
-}*/
 
 void Normalize(void) 
 {
@@ -538,12 +509,11 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain_X = gyro.getScaleFactor() * 0.0174532925; // convert to rad/sec
-    Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
-    Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
-    type = DCM;
+   Gyro_Gain = gyro.getScaleFactor() * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
+
+   type = DCM;
     // Future version, these should be defined from Configurator
-    #ifdef ArduCopter
+    #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
       Kp_ROLLPITCH = 0.025;
       Ki_ROLLPITCH = 0.00000015;
     #endif
@@ -555,7 +525,7 @@ public:
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #endif
-    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1) &!defined(AeroQuad_v1)
+    #if !defined(ArduCopter) & !defined(ArduCopter_I2C) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1)  // jihlein: Added ArduCopter_I2C
       Kp_ROLLPITCH = 0.010;
       Ki_ROLLPITCH = 0.00005; //0.0000005;
     #endif
