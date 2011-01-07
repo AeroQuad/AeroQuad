@@ -111,7 +111,7 @@ void initializeEEPROM(void) {
   accel.setSmoothFactor(1.0);
   accel.setOneG(500);
   timeConstant = 7.0;
-  for (channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);
     receiver.setTransmitterOffset(channel, 0.0);
     receiver.setSmoothFactor(channel, 1.0);

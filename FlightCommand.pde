@@ -80,7 +80,7 @@ void readPilotCommands() {
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       digitalWrite(LED_Red, HIGH);
       #endif
-      for (motor=FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMinCommand(motor, MINTHROTTLE);
       //   delay(100);
       //altitude.measureGround();

@@ -161,7 +161,7 @@ public:
   
   void measure(void) {
     currentTime = micros();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
@@ -268,7 +268,7 @@ public:
     rawData[PITCH] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
     rawData[ROLL] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
     rawData[ZAXIS] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = rawData[axis] - accelZero[axis]; // center accel data around zero
       accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
     }
@@ -638,7 +638,7 @@ public:
   
   void measure(void) {
     currentTime = micros();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
       accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }

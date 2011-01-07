@@ -168,7 +168,7 @@ public:
   
   void measure(void) {
     currentTime = micros();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }
@@ -251,7 +251,7 @@ public:
     sendByteI2C(gyroAddress, 0x1D);
     Wire.requestFrom(gyroAddress, 6);
 
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor);
     }

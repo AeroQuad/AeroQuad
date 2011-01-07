@@ -90,7 +90,7 @@ public:
   }
   
   void initialize(void) {
-    for (axis = ROLL; axis < YAW; axis++)
+    for (byte axis = ROLL; axis < YAW; axis++)
       _initialize(axis);
   }
   
@@ -138,7 +138,7 @@ private:
 
 public:
   FlightAngle_KalmanFilter() : FlightAngle() {
-    for (axis = ROLL; axis < YAW; axis ++) {
+    for (byte axis = ROLL; axis < YAW; axis ++) {
       x_angle[axis] = 0;
       x_bias[axis] = 0;
       P_00[axis] = 0;

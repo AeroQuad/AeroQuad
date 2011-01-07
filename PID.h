@@ -33,8 +33,9 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
 
+void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (axis = ROLL; axis < LASTLEVELAXIS; axis++)
+  for (byte axis = ROLL; axis < LASTLEVELAXIS; axis++)
     PID[axis].integratedError = 0;
 }
 

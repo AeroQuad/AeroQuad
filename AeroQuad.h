@@ -137,7 +137,6 @@ float smoothHeading;
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
   #define LASTMOTOR 6
 #endif
-byte motor;
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -147,7 +146,6 @@ byte motor;
 // AeroQuad Shield v1.7, aref = 3.0
 // AeroQuad Shield v1.6 or below, aref = 2.8
 float aref; // Read in from EEPROM
-int axis;
 
 // Flight Mode
 #define ACRO 0
@@ -205,7 +203,6 @@ byte altitudeHold = OFF;
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
 #define LASTCHANNEL 6
-byte channel;
 int delta;
 
 #define RISING_EDGE 1

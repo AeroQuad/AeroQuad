@@ -135,7 +135,7 @@ void readSerialCommand() {
     case '5': // Send individual motor commands (motor, command)
       armed = 0;
       calibrateESC = 5;
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setRemoteCommand(motor, readFloatSerial());
       break;
     case 'a':
@@ -283,14 +283,14 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(receiver.getXmitFactor());
-    for (axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) {
       PrintValueComma(receiver.getSmoothFactor(axis));
     }
     Serial.println(receiver.getSmoothFactor(AUX));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
@@ -299,13 +299,13 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getData(axis));
     }
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
-    for (axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
     PrintValueComma(flightAngle.getData(ROLL));
@@ -340,7 +340,7 @@ void sendSerialTelemetry() {
     break;
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getFlightData(axis));
     }
     #ifdef BattMonitor
@@ -348,13 +348,13 @@ void sendSerialTelemetry() {
     #else
       PrintValueComma(0);
     #endif
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(motors.getMotorAxisCommand(axis));
     }
-    for (motor = FRONT; motor < LASTMOTOR; motor++) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       PrintValueComma(motors.getMotorCommand(motor));
     }
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getFlightData(axis));
     }
     Serial.print(armed, BIN);
@@ -379,10 +379,10 @@ void sendSerialTelemetry() {
     break;
   case 'T': // Send processed transmitter values
     PrintValueComma(receiver.getXmitFactor());
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(receiver.getData(axis));
     }
-    for (axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
     PrintValueComma(motors.getMotorAxisCommand(ROLL));
@@ -390,13 +390,13 @@ void sendSerialTelemetry() {
     Serial.println(motors.getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
-    for (channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) {
       PrintValueComma(receiver.getData(channel));
     }
     Serial.println(receiver.getData(AUX));
     break;
   case 'V': // Send receiver status
-    for (channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) {
       PrintValueComma(receiver.getRaw(channel));
     }
     Serial.println(receiver.getRaw(AUX));
@@ -410,7 +410,7 @@ void sendSerialTelemetry() {
     Serial.println(relativeHeading);
     break;
   case '6': // Report remote commands
-    for (motor = FRONT; motor < LEFT; motor++) {
+    for (byte motor = FRONT; motor < LEFT; motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
     Serial.println(motors.getRemoteCommand(LEFT));

@@ -237,12 +237,12 @@ void flightControl(void) {
   }
 
   // Apply limits to motor commands
-  for (motor = FRONT; motor < LASTMOTOR; motor++)
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++)
     motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
-    for (motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       motors.setMotorCommand(motor, MINTHROTTLE);
   }
   
@@ -250,20 +250,20 @@ void flightControl(void) {
   if (armed == OFF) {
     switch (calibrateESC) { // used for calibrating ESC's
     case 1:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MAXCOMMAND);
       break;
     case 3:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, constrain(testCommand, 1000, 1200));
       break;
     case 5:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
       safetyCheck = ON;
       break;
     default:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MINCOMMAND);
     }
     // Send calibration commands to motors

@@ -33,7 +33,6 @@ public:
   int maxCommand[LASTMOTOR];
   float throttle;
   float timerDebug;
-  int motor;
   int delta;
   byte axis;
   // Ground station control
@@ -47,7 +46,7 @@ public:
     motorAxisCommand[ROLL] = 0;
     motorAxisCommand[PITCH] = 0;
     motorAxisCommand[YAW] = 0;
-    for (motor = 0; motor < LASTMOTOR; motor++) {
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
       //motorAxisCommandRoll[motor] = 0;
       //motorAxisCommandPitch[motor] = 0;
       //motorAxisCommandYaw[motor] = 0;
@@ -59,7 +58,6 @@ public:
       maxCommand[motor] = MAXCOMMAND;
       remoteCommand[motor] = 1000;
     }
-    motor = 0;
     delta = 0;  
   };
   
