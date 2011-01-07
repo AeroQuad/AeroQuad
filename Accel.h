@@ -343,7 +343,7 @@ public:
   }
   
   void measure(void) {
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         accelADC[axis] = rawADC - accelZero[axis];
@@ -407,7 +407,7 @@ public:
     currentTime = micros();
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
       accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }

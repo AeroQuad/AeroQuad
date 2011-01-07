@@ -352,7 +352,7 @@ public:
   }
   
   void measure(void) {
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
         gyroADC[axis] =  rawADC - gyroZero[axis];
@@ -633,7 +633,7 @@ public:
   
   void measure(void) {
     currentTime = micros();
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
       gyroData[axis] = smooth(gyroADC[axis], gyroData[axis], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     }

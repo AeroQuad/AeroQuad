@@ -160,7 +160,7 @@ volatile static tPinTimingData pinData[9];
 void attachPinChangeInterrupt(uint8_t pin) {
   uint8_t bit = digitalPinToBitMask(pin);
   uint8_t port = digitalPinToPort(pin);
-  uint8_t slot;
+  //uint8_t slot;
   volatile uint8_t *pcmask;
 
   // map pin to PCIR register
