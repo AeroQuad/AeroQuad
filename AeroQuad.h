@@ -255,28 +255,13 @@ unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from r
 /**************************************************************/
 /********************** Wireless Telem Port *******************/
 /**************************************************************/
-#if defined WirelessTelemetry && (defined(AeroQuadMega_v1)     || \
-                                  defined(AeroQuadMega_v2)     || \
-                                  defined(AeroQuadMega_Wii)    || \
-                                  defined(ArduCopter)          || \
-                                  defined(AeroQuadMega_CHR6DM) || \
-                                  defined(APM_OP_CHR6DM))
-  #define SERIAL_BAUD       115200
-  #define SERIAL_PRINT      Serial3.print
-  #define SERIAL_PRINTLN    Serial3.println
-  #define SERIAL_AVAILABLE  Serial3.available
-  #define SERIAL_READ       Serial3.read
-  #define SERIAL_FLUSH      Serial3.flush
-  #define SERIAL_BEGIN      Serial3.begin
-#else
-  #define SERIAL_BAUD       115200
-  #define SERIAL_PRINT      Serial.print
-  #define SERIAL_PRINTLN    Serial.println
-  #define SERIAL_AVAILABLE  Serial.available
-  #define SERIAL_READ       Serial.read
-  #define SERIAL_FLUSH      Serial.flush
-  #define SERIAL_BEGIN      Serial.begin
-#endif
+
+//JDH Selection of serial port 0 or 3 using jumper connected to pin 40 of mega
+//***********************************
+HardwareSerial SERIAL_PORT = Serial;
+
+//***********************************
+//JDH Selection of serial port 0 or 3
 
 /**************************************************************/
 /********************** Debug Parameters **********************/

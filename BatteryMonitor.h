@@ -45,7 +45,7 @@ public:
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual void lowBatteryEvent(byte); 
   
-  void measure(void) {     
+  void measure(void) {    
     batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
     if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
     if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
@@ -112,14 +112,14 @@ private:
     digitalWrite(RL_LED, HIGH);
     digitalWrite(RR_LED, HIGH);
     digitalWrite(FR_LED, HIGH);
-    digitalWrite(FL_LED, HIGH); 
+    digitalWrite(FL_LED, HIGH);
   };
   
   void ledsOFF(void){
     digitalWrite(RL_LED, LOW);
     digitalWrite(RR_LED, LOW);
     digitalWrite(FR_LED, LOW);
-    digitalWrite(FL_LED, LOW); 
+    digitalWrite(FL_LED, LOW);
   };
 
 public: 
@@ -130,7 +130,7 @@ public:
     Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
     diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;
-    
+  
     pinMode(FL_LED ,OUTPUT);
     pinMode(FR_LED ,OUTPUT);
     pinMode(RR_LED ,OUTPUT);

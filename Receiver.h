@@ -373,7 +373,7 @@ public:
     PCMSK2 |= 0x3F;
     PCICR |= 0x1 << 2;
 
-#ifdef AeroQuadMega_v1
+#if defined(AeroQuadMega_v1) ||  defined(AeroQuadMega_Wii)
     receiverPin[ROLL] = 5;
     receiverPin[PITCH] = 3;
     receiverPin[YAW] = 2;

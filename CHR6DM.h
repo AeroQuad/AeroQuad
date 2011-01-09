@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Written by Lokling & Honk: http://aeroquad.com/showthread.php?1287-Experimental-CHR6DM-sensor-board
@@ -218,7 +218,7 @@ public:
     int readPacket()  {
 
         if (!syncToHeader()){
-            //Serial.println("Not synced to header");
+            //SERIAL_PORT.println("Not synced to header");
             packet[0]= NO_DATA;
             packet_length=1;
             return NO_DATA;
@@ -244,7 +244,7 @@ public:
         int packetChecksum = bytesToSignedShort(high,low);
 
         if (calculatedChecksum!=packetChecksum) {
-            //Serial.print("Bad checksum ");Serial.print(" calculated="); Serial.print(calculatedChecksum);Serial.print(" actual="); Serial.println(packetChecksum);
+            //SERIAL_PORT.print("Bad checksum ");SERIAL_PORT.print(" calculated="); SERIAL_PORT.print(calculatedChecksum);SERIAL_PORT.print(" actual="); SERIAL_PORT.println(packetChecksum);
             packet[0] = FAILED_CHECKSUM;
             packet_length=1;
             return FAILED_CHECKSUM;
@@ -350,14 +350,14 @@ public:
                 if (packetType==command){
                     return result;
                 } /*else {
-                    Serial.println("Didnt get the expected.. looping");
+                    SERIAL_PORT.println("Didnt get the expected.. looping");
                 }
                 */
             }
 
         }
 
-        //Serial.println("Timed out !");
+        //SERIAL_PORT.println("Timed out !");
         return false;
     }
 
@@ -402,7 +402,7 @@ public:
                 if (data.azEnabled           ){ data.az           = SCALE_ACCEL_Z       * bytesToSignedShort(packet[index++],packet[index++]); }
 
                 if (index!=packet_length){
-                    //Serial.println("Recevied bad length packet!");
+                    //SERIAL_PORT.println("Recevied bad length packet!");
                     return false;
                 }
 
@@ -410,26 +410,26 @@ public:
                 return true;
                 }
             case STATUS_REPORT:
-                 Serial.println("Received status report");
+                 SERIAL_PORT.println("Received status report");
                  return true;
             case BAD_CHECKSUM:
-                 Serial.println("CHR6DM reported bad checksum!");
+                 SERIAL_PORT.println("CHR6DM reported bad checksum!");
                  return true;
             case NO_DATA:
-                 //Serial.println("CHR6DM No data!");
+                 //SERIAL_PORT.println("CHR6DM No data!");
                  return false;
             case FAILED_CHECKSUM:
-                 //Serial.println("CHR6DM reported failed checksum!");
+                 //SERIAL_PORT.println("CHR6DM reported failed checksum!");
                  return false;
             case COMMAND_COMPLETE:
-                Serial.println("COMMAND_COMPLETE");
+                SERIAL_PORT.println("COMMAND_COMPLETE");
                 return true;
             case COMMAND_FAILED:
-                Serial.println("COMMAND_FAILED");
+                SERIAL_PORT.println("COMMAND_FAILED");
                 return false;
             default:
-                Serial.print("Received unknown packet ");
-                Serial.println(packet[0]);
+                SERIAL_PORT.print("Received unknown packet ");
+                SERIAL_PORT.println(packet[0]);
                 return false;
 
         }
@@ -464,12 +464,12 @@ public:
                 case NO_DATA:
                     break;
                 default:
-                  //Serial.print("Unexcepted packet, waiting for ack:"); Serial.println(command);
+                  //SERIAL_PORT.print("Unexcepted packet, waiting for ack:"); SERIAL_PORT.println(command);
                   break;
             }
         }
 
-        Serial.println("Timed out! 2");
+        SERIAL_PORT.println("Timed out! 2");
         return false;
     }
 };

@@ -30,11 +30,11 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
-//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
+#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
@@ -45,8 +45,8 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define XConfig
-//#define plusConfig
+//#define XConfig
+#define plusConfig
 //#define HEXACOAXIAL
 //#define HEXARADIAL
 
@@ -59,6 +59,7 @@
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
+#define WIRELESS_TELEMETRY_J_PIN 40
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -77,6 +78,7 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
+#include <HardwareSerial.h>
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"
@@ -292,11 +294,26 @@
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
 
+void SetupSerial(void)
+{
+  pinMode(WIRELESS_TELEMETRY_J_PIN, INPUT);
+  digitalWrite(WIRELESS_TELEMETRY_J_PIN, HIGH); //turn on pullup resistor
+
+  if(digitalRead(WIRELESS_TELEMETRY_J_PIN) == LOW)  // jumper on
+  {
+    SERIAL_PORT = Serial3; 
+  }else
+  {
+    SERIAL_PORT = Serial;
+  }
+  SERIAL_PORT.begin(BAUD);
+}
 // ************************************************************
 // ********************** Setup AeroQuad **********************
 // ************************************************************
 void setup() {
-  Serial.begin(BAUD);
+  SetupSerial();
+  
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
 
@@ -362,6 +379,12 @@ void setup() {
   #ifdef Multipilot
     accel.invert(PITCH);
     gyro.invert(ROLL);
+  #endif
+  #ifdef AeroQuadMega_Wii
+    gyro.invert(ROLL);
+    gyro.invert(PITCH);
+    accel.invert(PITCH);
+    accel.invert(ZAXIS);
   #endif
   
   // Flight angle estimiation

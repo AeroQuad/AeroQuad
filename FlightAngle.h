@@ -9,13 +9,18 @@
   the Free Software Foundation, either version 3 of the License, or 
   (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // This class is responsible for calculating vehicle attitude
@@ -357,7 +362,7 @@ void Matrix_update(void)
   Update_Matrix[7] =  G_Dt*Omega_Vector[0];  //  x
   Update_Matrix[8] =  0;
 
-  //Serial.println(DCM_Matrix[2][0], 6);
+  //SERIAL_PORT.println(DCM_Matrix[2][0], 6);
 
   matrixMultiply(3, 3, 3, Temporary_Matrix, DCM_Matrix, Update_Matrix); //a*b=c
   matrixAdd(3, 3, DCM_Matrix, DCM_Matrix, Temporary_Matrix);
@@ -439,7 +444,7 @@ void Drift_correction(void)
   vectorAdd(3, Omega_I, Omega_I, Scaled_Omega_I);
   
   //*****YAW***************
-  // We make the gyro YAW drift correction based on compass magnetic heading 
+  // We make the gyro YAW drift correction based on compass magnetic heading
   /*if (MAGNETOMETER == 1) {
 	  float errorYaw[3];
 
@@ -670,21 +675,21 @@ public:
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {}
-  
+
   void calculate(void) {
     //get accelerometer readings in g, gives us RAcc vector
     RxAcc = accel.getRaw(ROLL);
     RyAcc = accel.getRaw(PITCH);
     RzAcc = accel.getRaw(YAW);
-  
+
     //normalize vector (convert to a vector with same direction and with length 1)
     R = sqrt(square(RxAcc) + square(RyAcc) + square(RzAcc));
     RxAcc /= R;
-    RyAcc /= R;  
-    RzAcc /= R;  
-  
+    RyAcc /= R;
+    RzAcc /= R;
+
     gyroFactor = G_Dt/83e6; //empirical, depends on WMP on IDG datasheet, tied of deg/ms sensibility
-    
+
     //evaluate R Gyro vector
     if(abs(RzEst) < 0.1f) {
       //Rz is too small and because it is used as reference for computing Axz, Ayz it's error fluctuations will amplify leading to bad results
@@ -699,24 +704,24 @@ public:
       //For gyro it will return  deg/ms (rate of rotation)
       atanx = atan2(RxEst,RzEst);
       atany = atan2(RyEst,RzEst);
-    
+
       Axz = atanx + gyro.getRaw(ROLL)  * gyroFactor;  // convert ADC value for to physical units
       Ayz = atany + gyro.getRaw(PITCH) * gyroFactor; // and get updated angle according to gyro movement
-    
-      //estimate sign of RzGyro by looking in what qudrant the angle Axz is, 
+
+      //estimate sign of RzGyro by looking in what qudrant the angle Axz is,
       signRzGyro = ( cos(Axz) >=0 ) ? 1 : -1;
-  
+
       //reverse calculation of RwGyro from Awz angles, for formulas deductions see  http://starlino.com/imu_guide.html
       RxGyro = sin(Axz) / sqrt( 1 + square(cos(Axz)) * square(tan(Ayz)) );
-      RyGyro = sin(Ayz) / sqrt( 1 + square(cos(Ayz)) * square(tan(Axz)) );        
+      RyGyro = sin(Ayz) / sqrt( 1 + square(cos(Ayz)) * square(tan(Axz)) );
       RzGyro = signRzGyro * sqrt(1 - square(RxGyro) - square(RyGyro));
     }
-    
+
     //combine Accelerometer and gyro readings
     RxEst = (RxAcc + wGyro* RxGyro) / (1.0 + wGyro);
     RyEst = (RyAcc + wGyro* RyGyro) / (1.0 + wGyro);
     RzEst = (RzAcc + wGyro* RzGyro) / (1.0 + wGyro);
-  
+
     angle[ROLL]  =  180/PI * Axz;
     angle[PITCH] =  180/PI * Ayz;
   }
@@ -741,13 +746,13 @@ public:
     calibrate();
   }
 
-  void calculate(void) {   
+  void calculate(void) {
     angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
     angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
     CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
     CHR_PitchAngle = angle[PITCH];
   }
-  
+
    void calibrate(void) {
     zeroRoll = chr6dm.data.roll;
     zeroPitch = chr6dm.data.pitch;

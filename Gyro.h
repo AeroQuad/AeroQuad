@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 class Gyro {
@@ -35,21 +35,21 @@ public:
   int sign[3];
   float rawHeading, gyroHeading;
   unsigned long currentTime, previousTime;
-  
-  // ************ Correct for gyro drift by FabQuad **************  
-  // ************ http://aeroquad.com/entry.php?4-  **************     
+
+  // ************ Correct for gyro drift by FabQuad **************
+  // ************ http://aeroquad.com/entry.php?4-  **************
   int lastReceiverYaw, receiverYaw;
   long yawAge;
   int positiveGyroYawCount;
   int negativeGyroYawCount;
   int zeroGyroYawCount;
-    
+
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
     sign[YAW] = -1;
   }
-  
+
   // The following function calls must be defined in any new subclasses
   virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
@@ -64,39 +64,39 @@ public:
     gyroChannel[ROLL] = rollChannel;
     gyroChannel[PITCH] = pitchChannel;
     gyroChannel[ZAXIS] = yawChannel;
-    
+
     gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-    
+
     previousTime = micros();
   }
-    
+
   const int getRaw(byte axis) {
     return gyroADC[axis] * sign[axis];
   }
-  
+
   const int getData(byte axis) {
     return gyroData[axis] * sign[axis];
   }
-  
+
   void setData(byte axis, int value) {
     gyroData[axis] = value;
   }
-  
+
   const int invert(byte axis) {
     sign[axis] = -sign[axis];
     return sign[axis];
   }
-  
+
   const int getZero(byte axis) {
     return gyroZero[axis];
   }
-  
+
   void setZero(byte axis, int value) {
     gyroZero[axis] = value;
-  }    
-  
+  }
+
   const float getScaleFactor() {
     return gyroScaleFactor;
   }
@@ -104,7 +104,7 @@ public:
   const float getSmoothFactor(void) {
     return smoothFactor;
   }
-  
+
   void setSmoothFactor(float value) {
     smoothFactor = value;
   }
@@ -116,27 +116,27 @@ public:
   const float rateRadPerSec(byte axis) {
     return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
   }
-  
+
   // returns heading as +/- 180 degrees
   const float getHeading(void) {
     div_t integerDivide;
-    
+
     integerDivide = div(rawHeading, 360);
     gyroHeading = rawHeading + (integerDivide.quot * -360);
     if (gyroHeading > 180) gyroHeading -= 360;
     if (gyroHeading < -180) gyroHeading += 360;
     return gyroHeading;
   }
-  
+
   const float getRawHeading(void) {
     return rawHeading;
   }
-  
+
   void setStartHeading(float value) {
     // since a relative heading, get starting absolute heading from compass class
     rawHeading = value;
   }
-  
+
   void setReceiverYaw(int value) {
     receiverYaw = value;
   }
@@ -151,7 +151,7 @@ public:
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
     gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
-  
+
   void initialize(void) {
     analogReference(EXTERNAL);
     // Configure gyro auto zero pins
@@ -165,7 +165,7 @@ public:
     this->_initialize(4,3,5);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
-  
+
   void measure(void) {
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
@@ -178,14 +178,14 @@ public:
   const int getFlightData(byte axis) {
     return getRaw(axis);
   }
-  
+
  void calibrate() {
     autoZero();
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
-  
+
   void autoZero() {
     int findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);
@@ -217,13 +217,13 @@ class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int gyroAddress;
   long int previousGyroTime;
-  
+
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
-    
+
     lastReceiverYaw=0;
     yawAge=0;
     positiveGyroYawCount=1;
@@ -231,22 +231,22 @@ public:
     zeroGyroYawCount=1;
     previousGyroTime = micros();
   }
-  
+
   void initialize(void) {
     this->_initialize(0,1,2);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
-    
+
     // Check if gyro is connected
     if (readWhoI2C(gyroAddress) != gyroAddress)
-      Serial.println("Gyro not found!");
-        
+      SERIAL_PORT.println("Gyro not found!");
+
     // Thanks to SwiftingSpeed for updates on these settings
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
     updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
     updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
-    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
+    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator
   }
-  
+
   void measure(void) {
     sendByteI2C(gyroAddress, 0x1D);
     Wire.requestFrom(gyroAddress, 6);
@@ -259,7 +259,7 @@ public:
     //calculateHeading();
     long int currentGyroTime = micros();
     rawHeading += -gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
-    //Serial.println(rawHeading);
+    //SERIAL_PORT.println(rawHeading);
     previousGyroTime = currentGyroTime;
 
     // ************ Correct for gyro drift by FabQuad **************
@@ -292,10 +292,10 @@ public:
       yawAge = 0;
     }
   }
-  
+
   const int getFlightData(byte axis) {
     int reducedData;
-    
+
     reducedData = getRaw(axis) >> 3;
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
     return reducedData;
@@ -307,7 +307,7 @@ public:
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
-  
+
   void autoZero() {
     int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
@@ -332,7 +332,7 @@ private:
 public:
   Gyro_ArduCopter() : Gyro() {
     // IDG500 Sensitivity (from datasheet) => 2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-    // Tested values : 
+    // Tested values :
     //#define Gyro_Gain_X 0.4 //X axis Gyro gain
     //#define Gyro_Gain_Y 0.41 //Y axis Gyro gain
     //#define Gyro_Gain_Z 0.41 //Z axis Gyro gain
@@ -342,7 +342,7 @@ public:
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
     gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
-  
+
   void initialize(void) {
     // rollChannel = 1
     // pitchChannel = 2
@@ -350,7 +350,7 @@ public:
     this->_initialize(1, 2, 0);
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
   }
-  
+
   void measure(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
@@ -392,7 +392,7 @@ public:
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;
   }
-  
+
   void initialize(void) {
     Init_Gyro_Acc(); // defined in DataAquisition.h
     smoothFactor = readFloat(GYROSMOOTH_ADR);
@@ -400,7 +400,7 @@ public:
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
   }
-  
+
   void measure(void) {
    currentTime = micros();
     updateControls(); // defined in DataAcquisition.h
@@ -419,7 +419,7 @@ public:
 
   void calibrate() {
     int findZero[FINDZERO];
-  
+
 	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
@@ -616,7 +616,7 @@ public:
     gyroFullScaleOutput = 300.0;        // ADXR610 full scale output = +/- 300 deg/sec
     gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)
   }
-  
+
   void initialize(void) {
     analogReference(EXTERNAL);
     // Configure gyro auto zero pins
@@ -630,7 +630,7 @@ public:
     this->_initialize(1,2,0);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
-  
+
   void measure(void) {
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
@@ -650,7 +650,7 @@ public:
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
-  
+
   void autoZero() {
     int findZero[FINDZERO];
     digitalWrite(AZPIN, HIGH);

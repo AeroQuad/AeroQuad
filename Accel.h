@@ -229,7 +229,7 @@ public:
     
     // Check if accel is connected
     if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
-      Serial.println("Accelerometer not found!");
+      SERIAL_PORT.println("Accelerometer not found!");
 
     // Thanks to SwiftingSpeed for updates on these settings
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
