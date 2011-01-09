@@ -130,6 +130,8 @@ void zero_ArduCopter_ADC(void) {
 #ifndef AeroQuad_v18
 short NWMP_acc[3];
 short NWMP_gyro[3];
+byte NWMP_sx; //NC analog x value 8bit res
+byte NWMP_sy; //NC analog y value 8 bit res
 
 void Init_Gyro_acc();
 void updateControls();
@@ -157,6 +159,8 @@ void updateControls() {
       NWMP_gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
     }
     else {//If Nunchuk
+      NWMP_sx=buffer[0];
+      NWMP_sy=buffer[1];
       NWMP_acc[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01);  //hji
       NWMP_acc[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01);  //hji
       NWMP_acc[2]=buffer[4];                             //hji

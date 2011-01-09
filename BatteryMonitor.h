@@ -26,36 +26,45 @@
 class BatteryMonitor {
 public: 
   #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-  #define OK 0
+  enum BatteryStatus {OK, Warning, Critical};
+  /*#define OK 0
   #define WARNING 1
-  #define ALARM 2
-  byte batteryStatus;
+  #define ALARM 2*/
+  BatteryStatus batteryStatus;
+  //byte batteryStatus;
+  
   float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
-  float lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
+  float lowVoltageCritical;    // Pack voltage at which to trigger alarm (critical alarm)
+  
   float batteryVoltage;
   float batteryScaleFactor;
   
+  void (*batteryStatusCallback)(BatteryStatus);
+  
   BatteryMonitor(void) { 
     lowVoltageWarning = 10.0; //10.8;
-    lowVoltageAlarm = 9.5; //10.2;
+    lowVoltageCritical = 9.5; //10.2;
     batteryStatus = OK;
   }
 
   virtual void initialize(void); 
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-  virtual void lowBatteryEvent(byte); 
   
   void measure(void) {    
     batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-    if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
-    if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
-    lowBatteryEvent(batteryStatus);
+    if (batteryVoltage < lowVoltageWarning) batteryStatus = Warning;
+    if (batteryVoltage < lowVoltageCritical) batteryStatus = Critical;
+    //Fire the external event
+    if(batteryStatusCallback != NULL)
+      batteryStatusCallback(batteryStatus);
   }
   
   const float getData(void) {
     return batteryVoltage;
   }
 };
+
+#if defined(ArduCopter) || defined(APM_OP_CHR6DM)
 
 // ***********************************************************************************
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
@@ -93,7 +102,7 @@ private:
   float Aref; //AREF 3V3 used (solder jumper) and measured with DMM
   float diode; //Schottky diode on APM board
   
-  void ledCW(void){ 
+  static void ledCW(void){ 
     digitalWrite(RL_LED, HIGH);
     delay(LEDDELAY);
     digitalWrite(RL_LED, LOW);
@@ -108,14 +117,14 @@ private:
     digitalWrite(FL_LED, LOW); 
   };
   
-  void ledsON(void){
+  static void ledsON(void){
     digitalWrite(RL_LED, HIGH);
     digitalWrite(RR_LED, HIGH);
     digitalWrite(FR_LED, HIGH);
     digitalWrite(FL_LED, HIGH);
   };
   
-  void ledsOFF(void){
+  static void ledsOFF(void){
     digitalWrite(RL_LED, LOW);
     digitalWrite(RR_LED, LOW);
     digitalWrite(FR_LED, LOW);
@@ -136,9 +145,11 @@ public:
     pinMode(RR_LED ,OUTPUT);
     pinMode(RL_LED ,OUTPUT);
     analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
+    //This should be declared outside of the function so BatteryMonitor only deals with reading battery logic
+    batteryStatusCallback = &lowBatteryEvent;
   }
   
-  void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
+  static void lowBatteryEvent(BatteryStatus level) {  // <- this logic by Jose Julio
     static byte batteryCounter=0;
     byte freq;
   
@@ -148,7 +159,7 @@ public:
     }
     else {
       batteryCounter++;
-      if (level == WARNING) freq = 40;  //4 seconds wait
+      if (level == Warning) freq = 40;  //4 seconds wait
       else freq = 5; //0.5 second wait
       
       if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
@@ -170,17 +181,21 @@ public:
   }
 };
 
+#endif
+
+#if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2)
+
 // *******************************************************************************
 // ************************ AeroQuad Battery Monitor *****************************
 // *******************************************************************************
 class BatteryMonitor_AeroQuad : public BatteryMonitor {
 private:
-  long previousTime;
   float R1;
   float R2;
   float Aref;
   float diode; // raw voltage goes through diode on Arduino
-  byte state;
+  static byte state;
+  static long previousTime;
   
 public: 
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
@@ -196,22 +211,24 @@ public:
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
     previousTime = millis();
     state = LOW;
+    //This should be declared outside of the function so BatteryMonitor only deals with reading battery logic
+    batteryStatusCallback = &lowBatteryEvent;
   }
 
-  void lowBatteryEvent(byte level) {
+  static void lowBatteryEvent(BatteryStatus level) {
     long currentTime = millis()- previousTime;
-    if (level == WARNING) {
+    if (level == Warning) {
       if ((autoDescent == 0) && (currentTime > 1000)) {
         autoDescent = -75;
-        digitalWrite(LED2PIN, LOW);
+        //digitalWrite(LED2PIN, LOW);
       }
       if (currentTime > 1100) {
         autoDescent = 0;
         previousTime = millis();
-        digitalWrite(LED2PIN, HIGH);
+       // digitalWrite(LED2PIN, HIGH);
       }
     }
-    if (level == ALARM) {
+    if (level == Critical) {
       digitalWrite(49, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
         autoDescent -= 2; // auto descend quad
@@ -219,7 +236,7 @@ public:
         if (state == LOW) state = HIGH;
         else state = LOW;
         digitalWrite(LEDPIN, state);
-        digitalWrite(LED2PIN, state);
+        //digitalWrite(LED2PIN, state);
       }
     }
   }
@@ -228,4 +245,29 @@ public:
     return (analogRead(channel) * batteryScaleFactor) + diode; 
   } 
 };
+
+#endif
+
+#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+
+// *******************************************************************************
+// ************************ AeroQuad_Wii Battery Monitor *****************************
+// *******************************************************************************
+class BatteryMonitor_Wii : public BatteryMonitor {
+private:
+  
+public: 
+  BatteryMonitor_Wii() : BatteryMonitor(){}
+
+  void initialize(void) {
+    batteryScaleFactor = 0.0486275;//(12.4 - 0) / (255 - 0);
+    //batteryStatusCallback = &batteryStatusEvent;
+  }
+  
+  const float readBatteryVoltage(byte channel) {
+    return NWMP_sx * batteryScaleFactor; 
+  }
+};
+
+#endif
 

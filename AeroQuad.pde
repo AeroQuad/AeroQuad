@@ -56,7 +56,7 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 #define WIRELESS_TELEMETRY_J_PIN 40
@@ -221,6 +221,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_Wii batteryMonitor;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
@@ -293,6 +297,22 @@
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
+
+//Event fired when battery voltage is measured
+void batteryStatusEvent(BatteryMonitor::BatteryStatus batteryStatus) {
+    switch(batteryStatus)
+    {
+     case BatteryMonitor::OK:
+       
+      break; 
+     case BatteryMonitor::Warning:
+       
+      break; 
+     case BatteryMonitor::Critical:
+       
+      break; 
+    }
+}
 
 void SetupSerial(void)
 {
@@ -402,6 +422,8 @@ void setup() {
   // Battery Monitor
   #ifdef BattMonitor
     batteryMonitor.initialize();
+    //Set callback function
+    batteryMonitor.batteryStatusCallback = &batteryStatusEvent;
   #endif
   
   // Camera stabilization setup
