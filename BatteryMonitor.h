@@ -27,11 +27,7 @@ class BatteryMonitor {
 public: 
   #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
   enum BatteryStatus {OK, Warning, Critical};
-  /*#define OK 0
-  #define WARNING 1
-  #define ALARM 2*/
   BatteryStatus batteryStatus;
-  //byte batteryStatus;
   
   float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
   float lowVoltageCritical;    // Pack voltage at which to trigger alarm (critical alarm)
