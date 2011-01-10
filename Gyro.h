@@ -238,7 +238,7 @@ public:
 
     // Check if gyro is connected
     if (readWhoI2C(gyroAddress) != gyroAddress)
-      SERIAL_PORT.println("Gyro not found!");
+      SERIAL_PORT->println("Gyro not found!");
 
     // Thanks to SwiftingSpeed for updates on these settings
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
@@ -259,7 +259,7 @@ public:
     //calculateHeading();
     long int currentGyroTime = micros();
     rawHeading += -gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
-    //SERIAL_PORT.println(rawHeading);
+    //SERIAL_PORT->println(rawHeading);
     previousGyroTime = currentGyroTime;
 
     // ************ Correct for gyro drift by FabQuad **************

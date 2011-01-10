@@ -362,7 +362,7 @@ void Matrix_update(void)
   Update_Matrix[7] =  G_Dt*Omega_Vector[0];  //  x
   Update_Matrix[8] =  0;
 
-  //SERIAL_PORT.println(DCM_Matrix[2][0], 6);
+  //SERIAL_PORT->println(DCM_Matrix[2][0], 6);
 
   matrixMultiply(3, 3, 3, Temporary_Matrix, DCM_Matrix, Update_Matrix); //a*b=c
   matrixAdd(3, 3, DCM_Matrix, DCM_Matrix, Temporary_Matrix);

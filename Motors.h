@@ -612,120 +612,120 @@ for (i=0;i<LASTMOTOR;i++)
 void matrix_debug()
 {
 #ifdef PRINT_MIXERTABLE
-     SERIAL_PORT.println();
-     SERIAL_PORT.println("--------------------------");
-     SERIAL_PORT.println("        Motori Mixertable " );
-     SERIAL_PORT.println("--------------------------");
-     SERIAL_PORT.println();
+     SERIAL_PORT->println();
+     SERIAL_PORT->println("--------------------------");
+     SERIAL_PORT->println("        Motori Mixertable " );
+     SERIAL_PORT->println("--------------------------");
+     SERIAL_PORT->println();
 
 /*
-     SERIAL_PORT.print("AIL:");
-     SERIAL_PORT.print(ch1);
-     SERIAL_PORT.print(" ELE:");
-     SERIAL_PORT.print(ch2);
+     SERIAL_PORT->print("AIL:");
+     SERIAL_PORT->print(ch1);
+     SERIAL_PORT->print(" ELE:");
+     SERIAL_PORT->print(ch2);
 */
-     SERIAL_PORT.print(" THR:");
-     SERIAL_PORT.print(Throttle);
+     SERIAL_PORT->print(" THR:");
+     SERIAL_PORT->print(Throttle);
 /*
-     SERIAL_PORT.print(" YAW:");
-     SERIAL_PORT.print(ch4);
-     SERIAL_PORT.print(" AUX:");
-     SERIAL_PORT.print(ch_aux);
-     SERIAL_PORT.print(" AUX2:");
-     SERIAL_PORT.print(ch_aux2);
+     SERIAL_PORT->print(" YAW:");
+     SERIAL_PORT->print(ch4);
+     SERIAL_PORT->print(" AUX:");
+     SERIAL_PORT->print(ch_aux);
+     SERIAL_PORT->print(" AUX2:");
+     SERIAL_PORT->print(ch_aux2);
   */
-     SERIAL_PORT.println();
-     SERIAL_PORT.print("CONTROL_ROLL:");
-     SERIAL_PORT.print(motorAxisCommand[ROLL]);
-     SERIAL_PORT.print(" CONTROL_PITCH:");
-     SERIAL_PORT.print(motorAxisCommand[PITCH]);
-     SERIAL_PORT.print(" CONTROL_YAW:");
-     SERIAL_PORT.print(motorAxisCommand[YAW]);
-//     SERIAL_PORT.print(" SONAR_VALUE:");
-//     SERIAL_PORT.print(sonar_value);
-//     SERIAL_PORT.print(" TARGET_SONAR_VALUE:");
-//     SERIAL_PORT.print(target_sonar_altitude);
-//     SERIAL_PORT.print(" ERR_SONAR_VALUE:");
-//     SERIAL_PORT.print(err_altitude);
-//     SERIAL_PORT.println();
-//     SERIAL_PORT.print("latitude:");
-//     SERIAL_PORT.print(GPS_np.Lattitude);
-//     SERIAL_PORT.print(" longitude:");
-//     SERIAL_PORT.print(GPS_np.Longitude);
-//     SERIAL_PORT.print(" command gps roll:");
-//     SERIAL_PORT.print(command_gps_roll);
-//     SERIAL_PORT.print(" command gps pitch:");
-//     SERIAL_PORT.print(command_gps_pitch);
-//     SERIAL_PORT.print(" Lon_diff:");
-//     SERIAL_PORT.print(Lon_diff);
-//     SERIAL_PORT.print(" Lon_diff");
-//     SERIAL_PORT.print(command_gps_pitch);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print("CONTROL_ROLL:");
+     SERIAL_PORT->print(motorAxisCommand[ROLL]);
+     SERIAL_PORT->print(" CONTROL_PITCH:");
+     SERIAL_PORT->print(motorAxisCommand[PITCH]);
+     SERIAL_PORT->print(" CONTROL_YAW:");
+     SERIAL_PORT->print(motorAxisCommand[YAW]);
+//     SERIAL_PORT->print(" SONAR_VALUE:");
+//     SERIAL_PORT->print(sonar_value);
+//     SERIAL_PORT->print(" TARGET_SONAR_VALUE:");
+//     SERIAL_PORT->print(target_sonar_altitude);
+//     SERIAL_PORT->print(" ERR_SONAR_VALUE:");
+//     SERIAL_PORT->print(err_altitude);
+//     SERIAL_PORT->println();
+//     SERIAL_PORT->print("latitude:");
+//     SERIAL_PORT->print(GPS_np.Lattitude);
+//     SERIAL_PORT->print(" longitude:");
+//     SERIAL_PORT->print(GPS_np.Longitude);
+//     SERIAL_PORT->print(" command gps roll:");
+//     SERIAL_PORT->print(command_gps_roll);
+//     SERIAL_PORT->print(" command gps pitch:");
+//     SERIAL_PORT->print(command_gps_pitch);
+//     SERIAL_PORT->print(" Lon_diff:");
+//     SERIAL_PORT->print(Lon_diff);
+//     SERIAL_PORT->print(" Lon_diff");
+//     SERIAL_PORT->print(command_gps_pitch);
 
-//     SERIAL_PORT.println();
+//     SERIAL_PORT->println();
 
-//     SERIAL_PORT.print("AP MODE:");SERIAL_PORT.print((int)AP_mode);
+//     SERIAL_PORT->print("AP MODE:");SERIAL_PORT->print((int)AP_mode);
 
 #ifdef ARDUCOPTER
-     SERIAL_PORT.print("AIL:");
-     SERIAL_PORT.print(ch1);
-     SERIAL_PORT.print(" ELE:");
-     SERIAL_PORT.print(ch2);
-     SERIAL_PORT.print(" THR:");
-     SERIAL_PORT.print(ch3);
-     SERIAL_PORT.print(" YAW:");
-     SERIAL_PORT.print(ch4);
-     SERIAL_PORT.print(" AUX:");
-     SERIAL_PORT.print(ch_aux);
-     SERIAL_PORT.print(" AUX2:");
-     SERIAL_PORT.print(ch_aux2);
-     SERIAL_PORT.println();
-     SERIAL_PORT.print("CONTROL_ROLL:");
-     SERIAL_PORT.print(control_roll);
-     SERIAL_PORT.print(" CONTROL_PITCH:");
-     SERIAL_PORT.print(control_pitch);
-     SERIAL_PORT.print(" CONTROL_YAW:");
-     SERIAL_PORT.print(control_yaw);
-     SERIAL_PORT.print(" SONAR_VALUE:");
-     SERIAL_PORT.print(sonar_value);
-     SERIAL_PORT.print(" TARGET_SONAR_VALUE:");
-     SERIAL_PORT.print(target_sonar_altitude);
-     SERIAL_PORT.print(" ERR_SONAR_VALUE:");
-     SERIAL_PORT.print(err_altitude);
-     SERIAL_PORT.println();
-     SERIAL_PORT.print("latitude:");
-     SERIAL_PORT.print(GPS_np.Lattitude);
-     SERIAL_PORT.print(" longitude:");
-     SERIAL_PORT.print(GPS_np.Longitude);
-     SERIAL_PORT.print(" command gps roll:");
-     SERIAL_PORT.print(command_gps_roll);
-     SERIAL_PORT.print(" command gps pitch:");
-     SERIAL_PORT.print(command_gps_pitch);
-     SERIAL_PORT.print(" Lon_diff:");
-     SERIAL_PORT.print(Lon_diff);
-     SERIAL_PORT.print(" Lon_diff");
-     SERIAL_PORT.print(command_gps_pitch);
+     SERIAL_PORT->print("AIL:");
+     SERIAL_PORT->print(ch1);
+     SERIAL_PORT->print(" ELE:");
+     SERIAL_PORT->print(ch2);
+     SERIAL_PORT->print(" THR:");
+     SERIAL_PORT->print(ch3);
+     SERIAL_PORT->print(" YAW:");
+     SERIAL_PORT->print(ch4);
+     SERIAL_PORT->print(" AUX:");
+     SERIAL_PORT->print(ch_aux);
+     SERIAL_PORT->print(" AUX2:");
+     SERIAL_PORT->print(ch_aux2);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print("CONTROL_ROLL:");
+     SERIAL_PORT->print(control_roll);
+     SERIAL_PORT->print(" CONTROL_PITCH:");
+     SERIAL_PORT->print(control_pitch);
+     SERIAL_PORT->print(" CONTROL_YAW:");
+     SERIAL_PORT->print(control_yaw);
+     SERIAL_PORT->print(" SONAR_VALUE:");
+     SERIAL_PORT->print(sonar_value);
+     SERIAL_PORT->print(" TARGET_SONAR_VALUE:");
+     SERIAL_PORT->print(target_sonar_altitude);
+     SERIAL_PORT->print(" ERR_SONAR_VALUE:");
+     SERIAL_PORT->print(err_altitude);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print("latitude:");
+     SERIAL_PORT->print(GPS_np.Lattitude);
+     SERIAL_PORT->print(" longitude:");
+     SERIAL_PORT->print(GPS_np.Longitude);
+     SERIAL_PORT->print(" command gps roll:");
+     SERIAL_PORT->print(command_gps_roll);
+     SERIAL_PORT->print(" command gps pitch:");
+     SERIAL_PORT->print(command_gps_pitch);
+     SERIAL_PORT->print(" Lon_diff:");
+     SERIAL_PORT->print(Lon_diff);
+     SERIAL_PORT->print(" Lon_diff");
+     SERIAL_PORT->print(command_gps_pitch);
 
-     SERIAL_PORT.println();
+     SERIAL_PORT->println();
 
-     SERIAL_PORT.print("AP MODE:");SERIAL_PORT.print((int)AP_mode);
+     SERIAL_PORT->print("AP MODE:");SERIAL_PORT->print((int)AP_mode);
 #endif
 
 #ifdef HEXARADIAL
-     SERIAL_PORT.println();
-     SERIAL_PORT.print((unsigned int)MotorI2C[5]);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print((unsigned int)MotorI2C[5]);
      comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[0]);
+     SERIAL_PORT->print((unsigned int)MotorI2C[0]);
      comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[1]);
+     SERIAL_PORT->print((unsigned int)MotorI2C[1]);
      comma();
-     SERIAL_PORT.println();
-     SERIAL_PORT.print((unsigned int)MotorI2C[4]);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print((unsigned int)MotorI2C[4]);
      comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[3]);
+     SERIAL_PORT->print((unsigned int)MotorI2C[3]);
      comma();
-     SERIAL_PORT.println((unsigned int)MotorI2C[2]);
-     SERIAL_PORT.println("---------------");
-     SERIAL_PORT.println();
+     SERIAL_PORT->println((unsigned int)MotorI2C[2]);
+     SERIAL_PORT->println("---------------");
+     SERIAL_PORT->println();
 #endif
 
 // Example of Hexa Coaxial.
@@ -746,25 +746,25 @@ void matrix_debug()
 
 
 #ifdef HEXACOAXIAL
-     SERIAL_PORT.println();
-     SERIAL_PORT.print((unsigned int)MotorI2C[2]);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print((unsigned int)MotorI2C[2]);
      comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[4]);
-     SERIAL_PORT.println();
+     SERIAL_PORT->print((unsigned int)MotorI2C[4]);
+     SERIAL_PORT->println();
      //comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[3]);
+     SERIAL_PORT->print((unsigned int)MotorI2C[3]);
      comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[5]);
-     SERIAL_PORT.println();
-     SERIAL_PORT.print ("   ");
+     SERIAL_PORT->print((unsigned int)MotorI2C[5]);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print ("   ");
      //comma();
-     SERIAL_PORT.print((unsigned int)MotorI2C[0]);
-     SERIAL_PORT.println();
-     SERIAL_PORT.print ("   ");
+     SERIAL_PORT->print((unsigned int)MotorI2C[0]);
+     SERIAL_PORT->println();
+     SERIAL_PORT->print ("   ");
      //comma();
-     SERIAL_PORT.println((unsigned int)MotorI2C[1]);
-     SERIAL_PORT.println("---------------");
-     SERIAL_PORT.println();
+     SERIAL_PORT->println((unsigned int)MotorI2C[1]);
+     SERIAL_PORT->println("---------------");
+     SERIAL_PORT->println();
 #endif
 
 #endif
@@ -793,7 +793,7 @@ for(nmotor=0;nmotor<6;nmotor++)
     buff_i2c[i] = Wire.receive();  // receive one byte
     i++;
     if (i>6)break;
-    //SERIAL_PORT.print(i);
+    //SERIAL_PORT->print(i);
     if (Wire.available()==0)break;
   }
 

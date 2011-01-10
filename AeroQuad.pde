@@ -308,12 +308,12 @@ void SetupSerial(void)
 
   if(digitalRead(WIRELESS_TELEMETRY_J_PIN) == LOW)  // jumper on
   {
-    SERIAL_PORT = Serial3; 
+    SERIAL_PORT = &Serial3; 
   }else
   {
-    SERIAL_PORT = Serial;
+    SERIAL_PORT = &Serial;
   }
-  SERIAL_PORT.begin(BAUD);
+  SERIAL_PORT->begin(BAUD);
 }
 // ************************************************************
 // ********************** Setup AeroQuad **********************

@@ -343,7 +343,7 @@ public:
 
 //Event fired when battery voltage is measured
 void batteryStatusEvent(BatteryMonitor::BatteryStatus batteryStatus) {
-    //SERIAL_PORT.println(batteryStatus);
+    //SERIAL_PORT->println(batteryStatus);
     switch(batteryStatus)
     {
      case BatteryMonitor::OK:

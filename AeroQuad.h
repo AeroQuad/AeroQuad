@@ -258,7 +258,7 @@ unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from r
 
 //JDH Selection of serial port 0 or 3 using jumper connected to pin 40 of mega
 //***********************************
-HardwareSerial SERIAL_PORT = Serial;
+HardwareSerial* SERIAL_PORT = &Serial;
 
 //***********************************
 //JDH Selection of serial port 0 or 3

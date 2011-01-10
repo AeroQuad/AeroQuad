@@ -218,7 +218,7 @@ public:
     int readPacket()  {
 
         if (!syncToHeader()){
-            //SERIAL_PORT.println("Not synced to header");
+            //SERIAL_PORT->println("Not synced to header");
             packet[0]= NO_DATA;
             packet_length=1;
             return NO_DATA;
@@ -244,7 +244,7 @@ public:
         int packetChecksum = bytesToSignedShort(high,low);
 
         if (calculatedChecksum!=packetChecksum) {
-            //SERIAL_PORT.print("Bad checksum ");SERIAL_PORT.print(" calculated="); SERIAL_PORT.print(calculatedChecksum);SERIAL_PORT.print(" actual="); SERIAL_PORT.println(packetChecksum);
+            //SERIAL_PORT->print("Bad checksum ");SERIAL_PORT->print(" calculated="); SERIAL_PORT->print(calculatedChecksum);SERIAL_PORT->print(" actual="); SERIAL_PORT->println(packetChecksum);
             packet[0] = FAILED_CHECKSUM;
             packet_length=1;
             return FAILED_CHECKSUM;
@@ -350,14 +350,14 @@ public:
                 if (packetType==command){
                     return result;
                 } /*else {
-                    SERIAL_PORT.println("Didnt get the expected.. looping");
+                    SERIAL_PORT->println("Didnt get the expected.. looping");
                 }
                 */
             }
 
         }
 
-        //SERIAL_PORT.println("Timed out !");
+        //SERIAL_PORT->println("Timed out !");
         return false;
     }
 
@@ -402,7 +402,7 @@ public:
                 if (data.azEnabled           ){ data.az           = SCALE_ACCEL_Z       * bytesToSignedShort(packet[index++],packet[index++]); }
 
                 if (index!=packet_length){
-                    //SERIAL_PORT.println("Recevied bad length packet!");
+                    //SERIAL_PORT->println("Recevied bad length packet!");
                     return false;
                 }
 
@@ -410,26 +410,26 @@ public:
                 return true;
                 }
             case STATUS_REPORT:
-                 SERIAL_PORT.println("Received status report");
+                 SERIAL_PORT->println("Received status report");
                  return true;
             case BAD_CHECKSUM:
-                 SERIAL_PORT.println("CHR6DM reported bad checksum!");
+                 SERIAL_PORT->println("CHR6DM reported bad checksum!");
                  return true;
             case NO_DATA:
-                 //SERIAL_PORT.println("CHR6DM No data!");
+                 //SERIAL_PORT->println("CHR6DM No data!");
                  return false;
             case FAILED_CHECKSUM:
-                 //SERIAL_PORT.println("CHR6DM reported failed checksum!");
+                 //SERIAL_PORT->println("CHR6DM reported failed checksum!");
                  return false;
             case COMMAND_COMPLETE:
-                SERIAL_PORT.println("COMMAND_COMPLETE");
+                SERIAL_PORT->println("COMMAND_COMPLETE");
                 return true;
             case COMMAND_FAILED:
-                SERIAL_PORT.println("COMMAND_FAILED");
+                SERIAL_PORT->println("COMMAND_FAILED");
                 return false;
             default:
-                SERIAL_PORT.print("Received unknown packet ");
-                SERIAL_PORT.println(packet[0]);
+                SERIAL_PORT->print("Received unknown packet ");
+                SERIAL_PORT->println(packet[0]);
                 return false;
 
         }
@@ -464,12 +464,12 @@ public:
                 case NO_DATA:
                     break;
                 default:
-                  //SERIAL_PORT.print("Unexcepted packet, waiting for ack:"); SERIAL_PORT.println(command);
+                  //SERIAL_PORT->print("Unexcepted packet, waiting for ack:"); SERIAL_PORT->println(command);
                   break;
             }
         }
 
-        SERIAL_PORT.println("Timed out! 2");
+        SERIAL_PORT->println("Timed out! 2");
         return false;
     }
 };
