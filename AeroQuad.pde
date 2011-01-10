@@ -56,7 +56,8 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor
+//#define BattMonitor_SmoothVoltage //Enable smoothing of the battery voltage
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 #define WIRELESS_TELEMETRY_J_PIN 40
@@ -70,7 +71,7 @@
 // D13 to D35 for yaw, connectr servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
@@ -132,10 +133,6 @@
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
-  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -173,10 +170,6 @@
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
-  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -190,10 +183,6 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
-  #endif
 #endif
 
 #ifdef AeroQuad_Wii
@@ -221,11 +210,7 @@
   FlightAngle_DCM flightAngle;
   #ifdef CameraControl
     #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_Wii batteryMonitor;
+    Camera_Pins_44_45_46 camera;
   #endif
 #endif
 
@@ -241,10 +226,6 @@
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
-  #endif
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -264,10 +245,6 @@
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
-  #endif
-  #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryAlarm_APM batteryAlarm;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -295,6 +272,16 @@
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
   FlightAngle_DCM flightAngle;
+#endif
+
+#ifdef BattMonitor
+  #include "BatteryMonitor.h"
+  #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+    //Doesn't use analogRead.
+    BatteryMonitor_Wii batteryMonitor;
+  #else
+    BatteryMonitor batteryMonitor;
+  #endif
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -412,7 +399,24 @@ void setup() {
   
   // Battery Monitor
   #ifdef BattMonitor
-    batteryMonitor.initialize();
+    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+      /* R1 = 10050; //the SMD 10k resistor measured with DMM
+      R2 = 3260; //3k3 user mounted resistor measured with DMM
+      Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
+      diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
+      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;*/
+      batteryMonitor.initialize(0, ((3.27F / 1024.0) * ((10050 + 3260) / 3260)) + 0.306);
+      batteryMonitor.setDiode(0.306);
+      analogReference(EXTERNAL);
+    #endif
+    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+      
+    #endif
+    #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+      //Custom battery monitor class
+      batteryMonitor.initialize(0, 0.050042553);
+    #endif
+    
     //Set callback function
     batteryMonitor.setStatusCallback(&batteryStatusEvent);
   #endif
