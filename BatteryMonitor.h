@@ -25,31 +25,48 @@
 // *************************************************************************
 class BatteryMonitor {
 public: 
-  #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
   enum BatteryStatus {OK, Warning, Critical};
-  BatteryStatus batteryStatus;
+  
+protected: 
+  byte batteryPin;
   
   float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
   float lowVoltageCritical;    // Pack voltage at which to trigger alarm (critical alarm)
+  BatteryStatus batteryStatus;
   
   float batteryVoltage;
   float batteryScaleFactor;
   
+  //callback function
   void (*batteryStatusCallback)(BatteryStatus);
-  
+
+public:
   BatteryMonitor(void) { 
     lowVoltageWarning = 10.0; //10.8;
     lowVoltageCritical = 9.5; //10.2;
     batteryStatus = OK;
   }
 
-  virtual void initialize(void); 
+  virtual void initialize(void) {
+    batteryPin = 0;
+  }
+  
+  virtual void initialize(byte pin, float scaleFactor) {
+     batteryPin = pin;
+     batteryScaleFactor = scaleFactor;
+  }
+  
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   
+  void setStatusCallback(void (*callback)(BatteryStatus)) {
+    batteryStatusCallback = callback;
+  }
+  
   void measure(void) {    
-    batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-    if (batteryVoltage < lowVoltageWarning) batteryStatus = Warning;
+    batteryVoltage = readBatteryVoltage(batteryPin);//smooth(readBatteryVoltage(batteryPin), batteryVoltage, 0.1);
     if (batteryVoltage < lowVoltageCritical) batteryStatus = Critical;
+    else if (batteryVoltage < lowVoltageWarning) batteryStatus = Warning;
+    else batteryStatus = OK;
     //Fire the external event
     if(batteryStatusCallback != NULL)
       batteryStatusCallback(batteryStatus);
@@ -57,6 +74,10 @@ public:
   
   const float getData(void) {
     return batteryVoltage;
+  }
+  
+  const BatteryStatus getStatus(void) {
+    return batteryStatus;
   }
 };
 
@@ -130,6 +151,9 @@ private:
 public: 
   BatteryMonitor_APM() : BatteryMonitor(){}
   void initialize(void) {
+    //call base initalize
+    BatteryMonitor::initialize();
+    
     R1 = 10050; //the SMD 10k resistor measured with DMM
     R2 = 3260; //3k3 user mounted resistor measured with DMM
     Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
@@ -141,7 +165,28 @@ public:
     pinMode(RR_LED ,OUTPUT);
     pinMode(RL_LED ,OUTPUT);
     analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
-    //This should be declared outside of the function so BatteryMonitor only deals with reading battery logic
+    
+    //Set default callback
+    batteryStatusCallback = &lowBatteryEvent;
+  }
+  
+  void initialize(byte pin, float scaleFactor) {
+    //call base initalize
+    BatteryMonitor::initialize(pin, scaleFactor);
+    
+    R1 = 10050; //the SMD 10k resistor measured with DMM
+    R2 = 3260; //3k3 user mounted resistor measured with DMM
+    Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
+    diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;
+  
+    pinMode(FL_LED ,OUTPUT);
+    pinMode(FR_LED ,OUTPUT);
+    pinMode(RR_LED ,OUTPUT);
+    pinMode(RL_LED ,OUTPUT);
+    analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
+    
+    //Set default callback
     batteryStatusCallback = &lowBatteryEvent;
   }
   
@@ -197,6 +242,9 @@ public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
+    //call base initalize
+    BatteryMonitor::initialize();
+    
     analogReference(DEFAULT);
     pinMode(49, OUTPUT); // connect a 12V buzzer to pin 49
     digitalWrite(49, LOW);
@@ -207,7 +255,25 @@ public:
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
     previousTime = millis();
     state = LOW;
-    //This should be declared outside of the function so BatteryMonitor only deals with reading battery logic
+    //Set default battery status callback
+    batteryStatusCallback = &lowBatteryEvent;
+  }
+  
+  void initialize(byte pin, float scaleFactor) {
+    //call base initalize
+    BatteryMonitor::initialize(pin, scaleFactor);
+    
+    analogReference(DEFAULT);
+    pinMode(49, OUTPUT); // connect a 12V buzzer to pin 49
+    digitalWrite(49, LOW);
+    R1 = 15000.0;
+    R2 = 7500.0;
+    Aref = 5.0;
+    diode = 0.9; // measured with DMM
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+    previousTime = millis();
+    state = LOW;
+    //Set default battery status callback
     batteryStatusCallback = &lowBatteryEvent;
   }
 
@@ -256,8 +322,16 @@ public:
   BatteryMonitor_Wii() : BatteryMonitor(){}
 
   void initialize(void) {
-    batteryScaleFactor = 0.0486275;//(12.4 - 0) / (255 - 0);
-    //batteryStatusCallback = &batteryStatusEvent;
+    //call base initalize
+    BatteryMonitor::initialize();
+    //Set scale factor
+    batteryScaleFactor = 0.050042553;  //0.0486275;//(11.76 - 0) / (235 - 0);
+    //set default battery status callback
+  }
+  
+  void initialize(byte pin, float scaleFactor) {
+    BatteryMonitor::initialize(pin, scaleFactor);
+    //set default battery status callback
   }
   
   const float readBatteryVoltage(byte channel) {
@@ -266,4 +340,22 @@ public:
 };
 
 #endif
+
+//Event fired when battery voltage is measured
+void batteryStatusEvent(BatteryMonitor::BatteryStatus batteryStatus) {
+    //SERIAL_PORT.println(batteryStatus);
+    switch(batteryStatus)
+    {
+     case BatteryMonitor::OK:
+       leds.alwaysOn();
+      break; 
+     case BatteryMonitor::Warning:
+       leds.flashSlow();
+      break; 
+     case BatteryMonitor::Critical:
+       leds.flashFast();
+      break; 
+    }
+}
+
 

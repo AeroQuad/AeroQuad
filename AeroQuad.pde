@@ -211,6 +211,8 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
+  #include "LEDs.h"
+  LEDs_FlashAll leds;
   Accel_Wii accel;
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
@@ -263,7 +265,7 @@
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
-  #ifdef BattteryMonitor
+  #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryAlarm_APM batteryAlarm;
   #endif
@@ -298,21 +300,6 @@
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
 
-//Event fired when battery voltage is measured
-void batteryStatusEvent(BatteryMonitor::BatteryStatus batteryStatus) {
-    switch(batteryStatus)
-    {
-     case BatteryMonitor::OK:
-       
-      break; 
-     case BatteryMonitor::Warning:
-       
-      break; 
-     case BatteryMonitor::Critical:
-       
-      break; 
-    }
-}
 
 void SetupSerial(void)
 {
@@ -336,6 +323,10 @@ void setup() {
   
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
+  
+  #ifdef AeroQuadMega_Wii
+    leds.initialize();
+  #endif
 
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     Serial1.begin(BAUD);
@@ -423,7 +414,7 @@ void setup() {
   #ifdef BattMonitor
     batteryMonitor.initialize();
     //Set callback function
-    batteryMonitor.batteryStatusCallback = &batteryStatusEvent;
+    batteryMonitor.setStatusCallback(&batteryStatusEvent);
   #endif
   
   // Camera stabilization setup
@@ -486,5 +477,9 @@ void loop () {
       camera.move();
       cameraTime = currentTime + CAMERALOOPTIME;
     }
+  #endif
+  
+  #ifdef AeroQuadMega_Wii
+    leds.run(currentTime);
   #endif
 }

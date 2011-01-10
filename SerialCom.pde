@@ -44,6 +44,9 @@ void readSerialCommand() {
     digitalWrite(LEDPIN, LOW);
     queryType = SERIAL_PORT.read();
     switch (queryType) {
+    case '£':
+      SERIAL_PORT.println ((short)NWMP_sx);
+      break;
     case 'A': // Receive roll and pitch gyro PID
       readSerialPID(ROLL);
       readSerialPID(PITCH);
