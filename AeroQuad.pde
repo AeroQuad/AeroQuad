@@ -409,8 +409,17 @@ void setup() {
       batteryMonitor.setDiode(0.306);
       analogReference(EXTERNAL);
     #endif
-    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
-      
+    #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2)
+      /*
+      R1 = 15000.0; 	
+      R2 = 7500.0;	
+      Aref = 5.0; 	
+      diode = 0.9; // measured with DMM
+      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+      */
+      batteryMonitor.initialize(0, ((5.0 / 1024.0) * ((15000 + 7500) / 7500)) + 0.9);
+      batteryMonitor.setDiode(0.9);
+      analogReference(DEFAULT);
     #endif
     #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
       //Custom battery monitor class
