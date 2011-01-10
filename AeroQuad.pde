@@ -404,8 +404,8 @@ void setup() {
       R2 = 3260; //3k3 user mounted resistor measured with DMM
       Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
       diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
-      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;*/
-      batteryMonitor.initialize(0, ((3.27F / 1024.0) * ((10050 + 3260) / 3260)) + 0.306);
+      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));*/
+      batteryMonitor.initialize(0, ((3.27F / 1024.0) * ((10050 + 3260) / 3260)));
       batteryMonitor.setDiode(0.306);
       analogReference(EXTERNAL);
     #endif
