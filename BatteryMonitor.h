@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2010 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Written by Honk: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13282#post13282
@@ -24,7 +24,7 @@
 // ************************** Battery Monitor ******************************
 // *************************************************************************
 class BatteryMonitor {
-public: 
+public:
   #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
   #define OK 0
   #define WARNING 1
@@ -33,25 +33,25 @@ public:
   float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
   float lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
   float batteryVoltage;
-  float batteryScaleFactor;
-  
-  BatteryMonitor(void) { 
+
+  BatteryMonitor(void) {
     lowVoltageWarning = 10.0; //10.8;
     lowVoltageAlarm = 9.5; //10.2;
+    batteryVoltage = lowVoltageWarning+2;
     batteryStatus = OK;
   }
 
-  virtual void initialize(void); 
+  virtual void initialize(void);
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-  virtual void lowBatteryEvent(byte); 
-  
-  void measure(void) {     
+  virtual void lowBatteryEvent(byte);
+
+  void measure(void) {
     batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
     if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
     if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
     lowBatteryEvent(batteryStatus);
   }
-  
+
   const float getData(void) {
     return batteryVoltage;
   }
@@ -61,7 +61,7 @@ public:
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
 // ***********************************************************************************
 /* Circuit:
-  
+
   Vin--D1--R1--|--R2--GND
                |
                |
@@ -81,19 +81,17 @@ public:
   PIN60--RL_LED--150ohm--GND
 */
 
-class BatteryMonitor_APM : public BatteryMonitor { 
+class BatteryMonitor_APM : public BatteryMonitor {
 private:
   #define FL_LED 57 // Ain 2 on Mega
   #define FR_LED 58 // Ain 3 on Mega
   #define RR_LED 59 // Ain 4 on Mega
   #define RL_LED 60 // Ain 5 on Mega
   #define LEDDELAY 200
-  float R1; //the SMD 10k resistor measured with DMM
-  float R2; //3k3 user mounted resistor measured with DMM
-  float Aref; //AREF 3V3 used (solder jumper) and measured with DMM
   float diode; //Schottky diode on APM board
-  
-  void ledCW(void){ 
+  float batteryScaleFactor;
+
+  void ledCW(void){
     digitalWrite(RL_LED, HIGH);
     delay(LEDDELAY);
     digitalWrite(RL_LED, LOW);
@@ -105,43 +103,47 @@ private:
     digitalWrite(FR_LED, LOW);
     digitalWrite(FL_LED, HIGH);
     delay(LEDDELAY);
-    digitalWrite(FL_LED, LOW); 
+    digitalWrite(FL_LED, LOW);
   };
-  
+
   void ledsON(void){
     digitalWrite(RL_LED, HIGH);
     digitalWrite(RR_LED, HIGH);
     digitalWrite(FR_LED, HIGH);
-    digitalWrite(FL_LED, HIGH); 
+    digitalWrite(FL_LED, HIGH);
   };
-  
+
   void ledsOFF(void){
     digitalWrite(RL_LED, LOW);
     digitalWrite(RR_LED, LOW);
     digitalWrite(FR_LED, LOW);
-    digitalWrite(FL_LED, LOW); 
+    digitalWrite(FL_LED, LOW);
   };
 
-public: 
+public:
   BatteryMonitor_APM() : BatteryMonitor(){}
   void initialize(void) {
-    R1 = 10050; //the SMD 10k resistor measured with DMM
-    R2 = 3260; //3k3 user mounted resistor measured with DMM
-    Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
+    float R1   = 10050; //the SMD 10k resistor measured with DMM
+    float R2   =  3260; //3k3 user mounted resistor measured with DMM
+    float Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+
     diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
-    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2)) + diode;
-    
+
+    analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
+
     pinMode(FL_LED ,OUTPUT);
     pinMode(FR_LED ,OUTPUT);
     pinMode(RR_LED ,OUTPUT);
     pinMode(RL_LED ,OUTPUT);
-    analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
+
+    //batteryVoltage = readBatteryVoltage(BATTERYPIN);
   }
-  
+
   void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
     static byte batteryCounter=0;
     byte freq;
-  
+
     if (level == OK) {
       ledsON();
       autoDescent = 0; //reset autoAscent if battery is good
@@ -150,21 +152,17 @@ public:
       batteryCounter++;
       if (level == WARNING) freq = 40;  //4 seconds wait
       else freq = 5; //0.5 second wait
-      
       if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
-      #ifndef AltitudeHold
-        #ifdef AutoDescent
-          if (throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
-        #endif
-      #endif
-      #if defined(AltitudeHold) && defined(AutoDescent)
+      #if defined(AltitudeHold)
         if (throttle > 1400) holdAltitude -= 0.2; //-0.2m in 2 fixed rates, one where battery < 10.8V and one where battery < 10.2V, only done if in altitude hold mode
+      #else
+        if (throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
       #endif
       else if (batteryCounter < freq) ledsON();
       else batteryCounter = 0;
     }
   }
-  
+
   const float readBatteryVoltage(byte channel) {
     return (analogRead(channel) * batteryScaleFactor) + diode;
   }
@@ -175,27 +173,31 @@ public:
 // *******************************************************************************
 class BatteryMonitor_AeroQuad : public BatteryMonitor {
 private:
+  #define BUZZERPIN 49
   long previousTime;
-  float R1;
-  float R2;
-  float Aref;
-  float diode; // raw voltage goes through diode on Arduino
   byte state;
-  
-public: 
+  float diode; // raw voltage goes through diode on Arduino
+  float batteryScaleFactor;
+
+public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
-    analogReference(DEFAULT);
-    pinMode(49, OUTPUT); // connect a 12V buzzer to pin 49
-    digitalWrite(49, LOW);
-    R1 = 15000.0;
-    R2 = 7500.0;
-    Aref = 5.0;
-    diode = 0.9; // measured with DMM
+    float R1   = 15000;
+    float R2   =  7500;
+    float Aref =     5.0;
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+
+    diode = 0.9; // measured with DMM
+
+    analogReference(DEFAULT);
+
+    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
+    digitalWrite(BUZZERPIN, LOW);
     previousTime = millis();
     state = LOW;
+
+    //batteryVoltage = readBatteryVoltage(BATTERYPIN);
   }
 
   void lowBatteryEvent(byte level) {
@@ -212,9 +214,11 @@ public:
       }
     }
     if (level == ALARM) {
-      digitalWrite(49, HIGH); // enable buzzer
+      if (digitalRead(BUZZERPIN) == LOW) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
+      digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
         autoDescent -= 2; // auto descend quad
+        holdAltitude -= 0.2; // descend if in attitude hold mode
         previousTime = millis();
         if (state == LOW) state = HIGH;
         else state = LOW;
@@ -223,9 +227,9 @@ public:
       }
     }
   }
-  
+
   const float readBatteryVoltage(byte channel) {
-    return (analogRead(channel) * batteryScaleFactor) + diode; 
-  } 
+    return (analogRead(channel) * batteryScaleFactor) + diode;
+  }
 };
 
