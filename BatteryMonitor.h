@@ -105,7 +105,7 @@ public:
   BatteryMonitor_Wii() : BatteryMonitor(){}
 
   //Read the voltage from the Nunchuck's Stick X value
-  const float readBatteryVoltage(byte channel) {
+  const float readBatteryVoltage(void) {
     return NWMP_sx * batteryScaleFactor; 
   }
 };
