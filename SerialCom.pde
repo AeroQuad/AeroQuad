@@ -165,7 +165,7 @@ void readSerialCommand() {
 #endif
       break;
     case '~': //  read Camera values 
-      #ifdef Camera
+      #ifdef CameraControl
       camera.setMode(readFloatSerial());
       camera.setCenterPitch(readFloatSerial());
       camera.setCenterRoll(readFloatSerial());
@@ -231,6 +231,7 @@ void sendSerialTelemetry() {
     //SERIAL_PORT->print(batteryMonitor, 2);
     //SERIAL_PORT->println();
     //queryType = 'X';
+    SERIAL_PORT->println((short)NWMP_sx);
     break;
   case 'B': // Send roll and pitch gyro PID values
     PrintPID(ROLL);
@@ -482,7 +483,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case '`': // Send Camera values 
-    #ifdef Camera
+    #ifdef CameraControl
     //SERIAL_PORT->print(camera.getMode());
     //comma();
     PrintValueComma(camera.getMode());
