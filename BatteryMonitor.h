@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.3 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,8 @@ public:
   float batteryVoltage;
 
   BatteryMonitor(void) {
-    lowVoltageWarning = 10.0; //10.8;
+
+    lowVoltageWarning = 10.2; //10.8;
     lowVoltageAlarm = 9.5; //10.2;
     batteryVoltage = lowVoltageWarning+2;
     batteryStatus = OK;
@@ -152,15 +153,11 @@ public:
       batteryCounter++;
       if (level == WARNING) freq = 40;  //4 seconds wait
       else freq = 5; //0.5 second wait
-
       if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
-      #ifndef AltitudeHold
-        #ifdef AutoDescent
-          if (throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
-        #endif
-      #endif
-      #if defined(AltitudeHold) && defined(AutoDescent)
+      #if defined(AltitudeHold)
         if (throttle > 1400) holdAltitude -= 0.2; //-0.2m in 2 fixed rates, one where battery < 10.8V and one where battery < 10.2V, only done if in altitude hold mode
+      #else
+        if (throttle > 1400) autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
       #endif
       else if (batteryCounter < freq) ledsON();
       else batteryCounter = 0;
@@ -177,6 +174,7 @@ public:
 // *******************************************************************************
 class BatteryMonitor_AeroQuad : public BatteryMonitor {
 private:
+  #define BUZZERPIN 49
   long previousTime;
   byte state;
   float diode; // raw voltage goes through diode on Arduino
@@ -186,8 +184,9 @@ public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
-	  float R1   = 15000;
-	  float R2   =  7500;
+
+    float R1   = 15000;
+    float R2   =  7500;
     float Aref =     5.0;
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
 
@@ -195,8 +194,8 @@ public:
 
     analogReference(DEFAULT);
 
-    pinMode(49, OUTPUT); // connect a 12V buzzer to pin 49
-    digitalWrite(49, LOW);
+    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
+    digitalWrite(BUZZERPIN, LOW);
     previousTime = millis();
     state = LOW;
 
@@ -211,15 +210,22 @@ public:
         digitalWrite(LED2PIN, LOW);
       }
       if (currentTime > 1100) {
-        autoDescent = 0;
+        autoDescent = 75;
+        digitalWrite(BUZZERPIN, HIGH); // enable buzzer
+      }
+      if (currentTime > 1200) {
         previousTime = millis();
+        autoDescent = 0;
         digitalWrite(LED2PIN, HIGH);
+        digitalWrite(BUZZERPIN, LOW);
       }
     }
     if (level == ALARM) {
-      digitalWrite(49, HIGH); // enable buzzer
+      if (digitalRead(BUZZERPIN) == LOW) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
+      digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
-        autoDescent -= 2; // auto descend quad
+        autoDescent -= 1; // auto descend quad
+        holdAltitude -= 0.2; // descend if in attitude hold mode
         previousTime = millis();
         if (state == LOW) state = HIGH;
         else state = LOW;
