@@ -103,7 +103,7 @@ private:
   int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
-  float pressureFactor;
+//  float pressureFactor;
   
   void requestRawPressure(void) {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
@@ -145,14 +145,14 @@ public:
     temperature = 0;
     groundTemperature = 0;
     groundAltitude = 0;
-    pressureFactor = 1/5.255;
+//    pressureFactor = 1/5.255;
   }
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
-    float verifyGroundAltitude;
+//    float verifyGroundAltitude;
     
     sendByteI2C(altitudeAddress, 0xAA);
     ac1 = readWordWaitI2C(altitudeAddress);
