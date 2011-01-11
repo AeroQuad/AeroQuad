@@ -35,7 +35,7 @@ public:
   float batteryVoltage;
 
   BatteryMonitor(void) {
-    lowVoltageWarning = 10.0; //10.8;
+    lowVoltageWarning = 10.2; //10.8;
     lowVoltageAlarm = 9.5; //10.2;
     batteryVoltage = lowVoltageWarning+2;
     batteryStatus = OK;
@@ -208,16 +208,21 @@ public:
         digitalWrite(LED2PIN, LOW);
       }
       if (currentTime > 1100) {
-        autoDescent = 0;
+        autoDescent = 75;
+        digitalWrite(BUZZERPIN, HIGH); // enable buzzer
+      }
+      if (currentTime > 1200) {
         previousTime = millis();
+        autoDescent = 0;
         digitalWrite(LED2PIN, HIGH);
+        digitalWrite(BUZZERPIN, LOW);
       }
     }
     if (level == ALARM) {
       if (digitalRead(BUZZERPIN) == LOW) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       if ((currentTime > 500) && (throttle > 1400)) {
-        autoDescent -= 2; // auto descend quad
+        autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
         previousTime = millis();
         if (state == LOW) state = HIGH;
