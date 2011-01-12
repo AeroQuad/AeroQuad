@@ -35,6 +35,7 @@ public:
   float batteryVoltage;
 
   BatteryMonitor(void) {
+
     lowVoltageWarning = 10.2; //10.8;
     lowVoltageAlarm = 9.5; //10.2;
     batteryVoltage = lowVoltageWarning+2;
@@ -183,6 +184,7 @@ public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
+
     float R1   = 15000;
     float R2   =  7500;
     float Aref =     5.0;
