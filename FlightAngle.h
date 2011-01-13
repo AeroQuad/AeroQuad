@@ -526,8 +526,8 @@ public:
        Ki_ROLLPITCH = 0.00000015;
     #endif
     #if !defined(ArduCopter) & !defined(ArduCopter_I2C) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1)  // jihlein: Added ArduCopter_I2C
-      Kp_ROLLPITCH = 0.010;
-      Ki_ROLLPITCH = 0.00005; //0.0000005;
+      Kp_ROLLPITCH = 0.01; //0.010;
+      Ki_ROLLPITCH =  0.00005; //0.0000005;
     #endif
   }
   

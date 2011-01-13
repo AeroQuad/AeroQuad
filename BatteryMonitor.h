@@ -184,39 +184,33 @@ public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
-
     float R1   = 15000;
     float R2   =  7500;
     float Aref =     5.0;
-    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
-
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
     diode = 0.9; // measured with DMM
-
     analogReference(DEFAULT);
-
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
     digitalWrite(BUZZERPIN, LOW);
     previousTime = millis();
     state = LOW;
-
-    //batteryVoltage = readBatteryVoltage(BATTERYPIN);
   }
 
   void lowBatteryEvent(byte level) {
     long currentTime = millis()- previousTime;
     if (level == WARNING) {
       if ((autoDescent == 0) && (currentTime > 1000)) {
-        autoDescent = -75;
-        digitalWrite(LED2PIN, LOW);
+        autoDescent = -50;
       }
       if (currentTime > 1100) {
-        autoDescent = 75;
-        digitalWrite(BUZZERPIN, HIGH); // enable buzzer
+        autoDescent = 50;
+        digitalWrite(LED2PIN, HIGH);
+        digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentTime > 1200) {
         previousTime = millis();
         autoDescent = 0;
-        digitalWrite(LED2PIN, HIGH);
+        digitalWrite(LED2PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
       }
     }
@@ -231,6 +225,7 @@ public:
         else state = LOW;
         digitalWrite(LEDPIN, state);
         digitalWrite(LED2PIN, state);
+        digitalWrite(LED3PIN, state);
       }
     }
   }
