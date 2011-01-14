@@ -19,6 +19,7 @@
 */
 
 // Written by Honk: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13282#post13282
+// Rewritten by johnnyquad
 
 // *************************************************************************
 // ************************** Battery Monitor ******************************
@@ -71,7 +72,7 @@ public:
   }
   
   void measure(void) {
-    #ifdef BattMonitor_SmoothVoltage
+    #ifdef BATTERY_MONITOR_SMOOTH_VOLTAGE
       batteryVoltage = smooth(readBatteryVoltage(), batteryVoltage, 0.1);
     #else
       batteryVoltage = readBatteryVoltage();

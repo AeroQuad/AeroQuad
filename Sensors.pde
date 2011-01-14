@@ -42,7 +42,7 @@ void readSensors(void) {
       altitudeTime = currentTime + ALTITUDELOOPTIME;
     }
   #endif
-  #if defined(BattMonitor)
+  #if defined(BATTERY_MONITOR)
     if (currentTime > batteryTime) {
       batteryMonitor.measure();
       batteryTime = currentTime + BATTERYLOOPTIME;

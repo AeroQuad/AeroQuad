@@ -56,8 +56,8 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor
-//#define BattMonitor_SmoothVoltage //Enable smoothing of the battery voltage
+#define BATTERY_MONITOR
+//#define BATTERY_MONITOR_SMOOTH_VOLTAGE //Enable smoothing of the battery voltage
 //#define AutoDescent // Requires BatteryMonitor to be enabled, then descend in 2 fixed PWM rates, if AltitudeHold enabled, then descend in 2 fixed m/s rates
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 #define WIRELESS_TELEMETRY_J_PIN 40
@@ -79,7 +79,6 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include <HardwareSerial.h>
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"
@@ -274,13 +273,53 @@
   FlightAngle_DCM flightAngle;
 #endif
 
-#ifdef BattMonitor
+#ifdef BATTERY_MONITOR
   #include "BatteryMonitor.h"
   #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
     //Doesn't use analogRead.
     BatteryMonitor_Wii batteryMonitor;
+    
+    #define BATTERY_MONITOR_SCALE_FACTOR 0.049920318725
+    //Pin doesn't matter in the Wii battery monitor
+    #define BATTERY_MONITOR_PIN 0
   #else
+    //Use generic battery monitor
     BatteryMonitor batteryMonitor;
+
+    /* Circuit:
+      
+      Vin--D1--R1--|--R2--GND
+                   |
+                   |
+                  Vout
+    */
+    //calculation: AREF/1024.0 is Vout of divider network
+    //Vin = lipo voltage minus the diode drop
+    //Vout = (Vin*R2) * (R1+R2)
+    //Vin = (Vout * (R1+R2))/R2
+    //Vin = ((((AREF/1024.0)*adDECIMAL) * (R1+R2)) / R2) + Diode drop //(aref/1024)*adDecimal is Vout
+    //Vout connected to Ain0 (or other analog pin) on any Arduino
+    
+    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+      #define BATTERY_MONITOR_R1 10050//the SMD 10k resistor measured with DMM
+      #define BATTERY_MONITOR_R2 3260//3k3 user mounted resistor measured with DMM
+      #define BATTERY_MONITOR_AREF 3.27F//AREF 3V3 used (solder jumper) and measured with DMM
+      #define BATTERY_MONITOR_DIODE 0.306F//Schottky diode on APM board, drop measured with DMM
+      #define BATTERY_MONITOR_SCALE_FACTOR ((BATTERY_MONITOR_AREF / 1024.0) * ((BATTERY_MONITOR_R1 + BATTERY_MONITOR_R2) / BATTERY_MONITOR_R2))
+      #define BATTERY_MONITOR_PIN 0
+      
+      #define BATTERY_MONITOR_ANALOG_REF_TYPE EXTERNAL
+    #endif
+    #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2)
+      #define BATTERY_MONITOR_R1 15000.0	
+      #define BATTERY_MONITOR_R2 7500.0	
+      #define BATTERY_MONITOR_AREF 5.0F
+      #define BATTERY_MONITOR_DIODE 0.9F // measured with DMM
+      #define BATTERY_MONITOR_SCALE_FACTOR ((BATTERY_MONITOR_AREF / 1024.0) * ((BATTERY_MONITOR_R1 + BATTERY_MONITOR_R2) / BATTERY_MONITOR_R2))
+      #define BATTERY_MONITOR_PIN 0
+      
+      #define BATTERY_MONITOR_ANALOG_REF_TYPE DEFAULT
+    #endif
   #endif
 #endif
 
@@ -396,37 +435,17 @@ void setup() {
   #ifdef AltitudeHold
     altitude.initialize();
   #endif
-  
-  // Battery Monitor
-  #ifdef BattMonitor
-    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
-      /* R1 = 10050; //the SMD 10k resistor measured with DMM
-      R2 = 3260; //3k3 user mounted resistor measured with DMM
-      Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
-      diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
-      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));*/
-      batteryMonitor.initialize(0, ((3.27F / 1024.0) * ((10050 + 3260) / 3260)));
-      batteryMonitor.setDiode(0.306);
-      analogReference(EXTERNAL);
+
+  #ifdef BATTERY_MONITOR
+    #ifdef BATTERY_MONITOR_ANALOG_REF_TYPE
+      analogReference(BATTERY_MONITOR_ANALOG_REF_TYPE);
     #endif
-    #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2)
-      /*
-      R1 = 15000.0; 	
-      R2 = 7500.0;	
-      Aref = 5.0; 	
-      diode = 0.9; // measured with DMM
-      batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
-      */
-      batteryMonitor.initialize(0, ((5.0 / 1024.0) * ((15000 + 7500) / 7500)) + 0.9);
-      batteryMonitor.setDiode(0.9);
-      analogReference(DEFAULT);
-    #endif
-    #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-      //Custom battery monitor class
-      batteryMonitor.initialize(0, 0.050042553);
+
+    batteryMonitor.initialize(BATTERY_MONITOR_PIN, BATTERY_MONITOR_SCALE_FACTOR);
+    #ifdef BATTERY_MONITOR_DIODE
+      batteryMonitor.setDiode(BATTERY_MONITOR_DIODE);
     #endif
     
-    //Set callback function
     batteryMonitor.setStatusCallback(&batteryStatusEvent);
   #endif
   

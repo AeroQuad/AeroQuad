@@ -128,7 +128,7 @@ void flightControl(void) {
     throttle = holdThrottle + throttleAdjust;
   #else
     // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-    throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryReadArmLed while battery critical, otherwise kept 0
+    throttle = ((receiver.getData(THROTTLE))*0.70)+300 + autoDescent; //SLOPE RATE CHANGED here and autoDescent is lowered from BatteryReadArmLed while battery critical, otherwise kept 0
   #endif
 
   // *********************** Calculate Motor Commands **********************
