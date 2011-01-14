@@ -32,6 +32,53 @@
 #define ON 1
 #define OFF 0
 
+#ifdef BATTERY_MONITOR
+  #define BATTERY_MONITOR_WARNING_VOLTAGE 10.5
+  #define BATTERY_MONITOR_CRITICAL_VOLTAGE 10
+
+  #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+    //Doesn't use analogRead.
+    #define BATTERY_MONITOR_SCALE_FACTOR 0.049920318725
+    //Pin doesn't matter in the Wii battery monitor
+    #define BATTERY_MONITOR_PIN 0
+  #else
+    /* Circuit:
+      
+      Vin--D1--R1--|--R2--GND
+                   |
+                   |
+                  Vout
+    */
+    //calculation: AREF/1024.0 is Vout of divider network
+    //Vin = lipo voltage minus the diode drop
+    //Vout = (Vin*R2) * (R1+R2)
+    //Vin = (Vout * (R1+R2))/R2
+    //Vin = ((((AREF/1024.0)*adDECIMAL) * (R1+R2)) / R2) + Diode drop //(aref/1024)*adDecimal is Vout
+    //Vout connected to Ain0 (or other analog pin) on any Arduino
+    
+    #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+      #define BATTERY_MONITOR_R1 10050//the SMD 10k resistor measured with DMM
+      #define BATTERY_MONITOR_R2 3260//3k3 user mounted resistor measured with DMM
+      #define BATTERY_MONITOR_AREF 3.27F//AREF 3V3 used (solder jumper) and measured with DMM
+      #define BATTERY_MONITOR_DIODE 0.306F//Schottky diode on APM board, drop measured with DMM
+      #define BATTERY_MONITOR_SCALE_FACTOR ((BATTERY_MONITOR_AREF / 1024.0) * ((BATTERY_MONITOR_R1 + BATTERY_MONITOR_R2) / BATTERY_MONITOR_R2))
+      #define BATTERY_MONITOR_PIN 0
+      
+      #define BATTERY_MONITOR_ANALOG_REF_TYPE EXTERNAL
+    #endif
+    #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuad_v18) || defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2)
+      #define BATTERY_MONITOR_R1 15000.0	
+      #define BATTERY_MONITOR_R2 7500.0	
+      #define BATTERY_MONITOR_AREF 5.0F
+      #define BATTERY_MONITOR_DIODE 0.9F // measured with DMM
+      #define BATTERY_MONITOR_SCALE_FACTOR ((BATTERY_MONITOR_AREF / 1024.0) * ((BATTERY_MONITOR_R1 + BATTERY_MONITOR_R2) / BATTERY_MONITOR_R2))
+      #define BATTERY_MONITOR_PIN 0
+      
+      #define BATTERY_MONITOR_ANALOG_REF_TYPE DEFAULT
+    #endif
+  #endif
+#endif
+
 #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
   #define LED_Red 35
   #define LED_Yellow 36
