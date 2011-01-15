@@ -45,8 +45,9 @@ protected:
 
 public:
   BatteryMonitor(void) { 
-    lowVoltageWarning = BATTERY_MONITOR_WARNING_VOLTAGE; //10.8;
-    lowVoltageCritical = BATTERY_MONITOR_CRITICAL_VOLTAGE; //10.2;
+    lowVoltageWarning = BATTERY_MONITOR_WARNING_VOLTAGE;
+    lowVoltageCritical = BATTERY_MONITOR_CRITICAL_VOLTAGE;
+    batteryVoltage = lowVoltageWarning + 2;
     diode = 0;
     batteryStatus = OK;
   }

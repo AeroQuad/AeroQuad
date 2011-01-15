@@ -206,6 +206,7 @@
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
+//  FlightAngle_CompFilter flightAngle;
   FlightAngle_DCM flightAngle;
   #ifdef CameraControl
     #include "Camera.h"
