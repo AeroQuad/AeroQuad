@@ -501,6 +501,9 @@ public:
 #ifdef CHR6DM_FAKE_GYRO
 class Gyro_CHR6DM_Fake : public Gyro {
 public:
+  float fakeGyroRoll;
+  float fakeGyroPitch;
+  float fakeGyroYaw;
   Gyro_CHR6DM_Fake() : Gyro() {
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;

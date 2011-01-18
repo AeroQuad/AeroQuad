@@ -74,15 +74,6 @@
 #define ALTITUDE 8
 #define ZDAMPENING 9
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float fakeGyroRoll;
-  float fakeGyroPitch;
-  float fakeGyroYaw;
-  float fakeAccelRoll;
-  float fakeAccelPitch;
-  float fakeAccelYaw;
-#endif
-
 // PID Variables
 struct PIDdata {
   float P, I, D;

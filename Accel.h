@@ -531,6 +531,9 @@ public:
 #ifdef CHR6DM_FAKE_ACCEL
 class Accel_CHR6DM_Fake : public Accel {
 public:
+  float fakeAccelRoll;
+  float fakeAccelPitch;
+  float fakeAccelYaw;
   Accel_CHR6DM_Fake() : Accel() {
     accelScaleFactor = 0;
   }
