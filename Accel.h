@@ -135,7 +135,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-//#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   
@@ -200,12 +200,12 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
@@ -314,7 +314,7 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -611,7 +611,7 @@ public:
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-//#if defined(Multipilot) || defined(MultipilotI2C)
+#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   
@@ -679,4 +679,4 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
