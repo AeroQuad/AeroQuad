@@ -42,7 +42,7 @@ public:
     transmitterCommand[AUX] = 1000;
 
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
-      transmitterCommandSmooth[channel] = 0;
+      transmitterCommandSmooth[channel] = 1.0;
     for (byte channel = ROLL; channel < THROTTLE; channel++)
       transmitterZero[channel] = 1500;
   }
