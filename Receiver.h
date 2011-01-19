@@ -344,7 +344,7 @@ SIGNAL(PCINT2_vect) {
 #else
  //arduino pins 63, 64, 65, 62, 66, 67
   static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
-#endif*/
+#endif
 
 class Receiver_AeroQuadMega : public Receiver {
 public:
@@ -354,22 +354,6 @@ public:
     PORTK = 0;
     PCMSK2 |= 0x3F;
     PCICR |= 0x1 << 2;
-
-#ifdef AeroQuadMega_v1
-    receiverPin[ROLL] = 5;
-    receiverPin[PITCH] = 3;
-    receiverPin[YAW] = 2;
-    receiverPin[THROTTLE] = 4;
-    receiverPin[MODE] = 1;
-    receiverPin[AUX] = 0;
-#else
-    receiverPin[ROLL] = 1;
-    receiverPin[PITCH] = 2;
-    receiverPin[YAW] = 3;
-    receiverPin[THROTTLE] = 0;
-    receiverPin[MODE] = 4;
-    receiverPin[AUX] = 5;
-#endif
 
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
       pinData[receiverPin[channel]].edge = FALLING_EDGE;

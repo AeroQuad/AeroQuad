@@ -46,10 +46,14 @@ public:
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual void lowBatteryEvent(byte);
 
-  void measure(void) {
+  void measure(byte armed) {
     batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-    if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
-    if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
+    if (armed == ON) {
+      if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
+      if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
+    }
+    else
+      batteryStatus = OK;
     lowBatteryEvent(batteryStatus);
   }
 
@@ -198,6 +202,11 @@ public:
 
   void lowBatteryEvent(byte level) {
     long currentTime = millis()- previousTime;
+    if (level == OK) {
+      digitalWrite(BUZZERPIN, LOW);
+      autoDescent = 0;
+      holdAltitude = 0;
+    }
     if (level == WARNING) {
       if ((autoDescent == 0) && (currentTime > 1000)) {
         autoDescent = -50;
