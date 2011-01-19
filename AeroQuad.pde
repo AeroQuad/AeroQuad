@@ -356,11 +356,12 @@ void setup() {
   levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
-  #ifdef AeroQuad_v1_IDG
+  #ifdef AeroQuad_v1
     gyro.invert(YAW);
   #endif
-  #ifdef AeroQuad_Wii
-    accel.invert(ROLL);
+  #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+    accel.invert(PITCH);
+    accel.invert(ZAXIS);
   #endif
   #ifdef Multipilot
     accel.invert(PITCH);
