@@ -75,14 +75,11 @@ float arctan2(float y, float x) {
 }
 
 // Used for sensor calibration
+//Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+
 // Takes the median of 50 results as zero
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize) {
   float temp;
-#else
-int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
-  int temp;
-#endif
   boolean done = 0;
   byte i;
   
@@ -102,14 +99,12 @@ int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: 
   return data[arraySize/2]; // return the median value
 }
 
-
-/*#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize) {
-  float temp, maxData;
-#else
-int findMode(int *data, int arraySize) {                          //old findMode kept for documentation
+// Find the numerical "mode" of a set of numbers
+// This calculates the largest number of occurences of a single integer
+// This gives better accuracy than calculating average for an integer so that you will get whole numbers, not fractions for measuring zero of a sensor
+int findMode(int *data, int arraySize) { 
   int temp, maxData;
-#endif
+//#endif
   boolean done = 0;
   byte i;
   int frequency, maxFrequency;
@@ -144,6 +139,6 @@ int findMode(int *data, int arraySize) {                          //old findMode
     }
   }
   return maxData;
-}*/
+}
 
 
