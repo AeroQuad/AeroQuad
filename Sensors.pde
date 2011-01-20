@@ -103,16 +103,16 @@ float findMode(float *data, int arraySize) {
 // This calculates the largest number of occurences of a single integer
 // This gives better accuracy than calculating average for an integer so that you will get whole numbers, not fractions for measuring zero of a sensor
 int findMode(int *data, int arraySize) { 
-  int temp, maxData;
-//#endif
+  int temp = 0;
+  int maxData = 0;
+  int frequency = 0;
+  int maxFrequency = 0;
   boolean done = 0;
-  byte i;
-  int frequency, maxFrequency;
   
    // Sorts numbers from lowest to highest
   while (done != 1) {        
     done = 1;
-    for (i=0; i<(arraySize-1); i++) {
+    for (int i=0; i<(arraySize-1); i++) {
       if (data[i] > data[i+1]) {     // numbers are out of order - swap
         temp = data[i+1];
         data[i+1] = data[i];
@@ -122,12 +122,8 @@ int findMode(int *data, int arraySize) {
     }
   }
   
-  temp = -32768;
-  frequency = 0;
-  maxFrequency = 0;
-  
   // Count number of times a value occurs in sorted array
-  for (i=0; i<arraySize; i++) {
+  for (int i=0; i<arraySize; i++) {
     if (data[i] > temp) {
       frequency = 0;
       temp = data[i];

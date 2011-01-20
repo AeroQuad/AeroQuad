@@ -2,12 +2,12 @@ AeroQuad Flight Software Source Code 2.1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.1 Release Notes (1/11/2010)
+Version 2.1 Release Notes (1/20/2010)
 ----------------------------------------
 
   * Added support for battery monitor for AeroQuad v2.0 Shield
   * Initialization bug fix for receiver code
-  * Fixed issues 64-76 in Google Code Issue Tracker (http://code.google.com/p/aeroquad/issues/list)
+  * Fixed issues 64-81 in Google Code Issue Tracker (http://code.google.com/p/aeroquad/issues/list)
 
 Version 2.1.2 Beta Release Notes (12/22/2010)
 ----------------------------------------
