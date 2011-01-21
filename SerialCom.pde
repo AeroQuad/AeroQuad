@@ -417,7 +417,7 @@ void sendSerialTelemetry() {
     Serial.println(motors.getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
-    Serial.println(VERSION, 2);  // jihlein: Print 2 decimal places
+    Serial.println(VERSION, 1);
     queryType = 'X';
     break;
   case '#': // Send software configuration

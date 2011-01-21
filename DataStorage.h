@@ -104,7 +104,7 @@ void initializeEEPROM(void) {
     compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  receiver.setXmitFactor(0.20);  //Honk
+  receiver.setXmitFactor(0.50);
   levelLimit = 500.0;
   levelOff = 150.0;
   gyro.setSmoothFactor(1.0);

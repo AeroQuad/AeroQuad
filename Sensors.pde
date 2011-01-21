@@ -75,11 +75,14 @@ float arctan2(float y, float x) {
 }
 
 // Used for sensor calibration
-//Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
-
 // Takes the median of 50 results as zero
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize) {
   float temp;
+#else
+int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+  int temp;
+#endif
   boolean done = 0;
   byte i;
   
@@ -98,43 +101,3 @@ float findMode(float *data, int arraySize) {
   
   return data[arraySize/2]; // return the median value
 }
-
-// Find the numerical "mode" of a set of numbers
-// This calculates the largest number of occurences of a single integer
-// This gives better accuracy than calculating average for an integer so that you will get whole numbers, not fractions for measuring zero of a sensor
-int findMode(int *data, int arraySize) { 
-  int temp = 0;
-  int maxData = 0;
-  int frequency = 0;
-  int maxFrequency = 0;
-  boolean done = 0;
-  
-   // Sorts numbers from lowest to highest
-  while (done != 1) {        
-    done = 1;
-    for (int i=0; i<(arraySize-1); i++) {
-      if (data[i] > data[i+1]) {     // numbers are out of order - swap
-        temp = data[i+1];
-        data[i+1] = data[i];
-        data[i] = temp;
-        done = 0;
-      }
-    }
-  }
-  
-  // Count number of times a value occurs in sorted array
-  for (int i=0; i<arraySize; i++) {
-    if (data[i] > temp) {
-      frequency = 0;
-      temp = data[i];
-      frequency++;
-    } else if (data[i] == temp) frequency++;
-    if (frequency > maxFrequency) {
-      maxFrequency = frequency;
-      maxData = data[i];
-    }
-  }
-  return maxData;
-}
-
-
