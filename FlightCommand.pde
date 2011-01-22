@@ -41,7 +41,7 @@ void readPilotCommands() {
       gyro.calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
-       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) //|| defined(AeroQuadMega_XplaneSimulated)
       flightAngle.calibrate();
        #endif
       zeroIntegralError();

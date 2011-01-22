@@ -50,8 +50,8 @@ public:
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void) = 0;
-  virtual void read(void) = 0;
+  virtual void initialize(void) { };
+  virtual void read(void) { };
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -273,7 +273,7 @@ public:
 /******************************************************/
 /*************** AeroQuad Mega PCINT ******************/
 /******************************************************/
-#if defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM)
+#if defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,

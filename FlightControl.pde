@@ -65,7 +65,7 @@ void flightControl(void) {
   if (headingHoldConfig == ON) {
     //gyro.calculateHeading();
 
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(AeroQuadMega_XplaneSimulated) || defined(APM_OP_CHR6DM)
       heading = compass.getHeading();
     #else
       heading = gyro.getHeading();

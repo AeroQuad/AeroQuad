@@ -25,7 +25,7 @@ void readSensors(void) {
   // Apply low pass filter to sensor values and center around zero
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     compass.measure();
   #endif
  
@@ -76,7 +76,7 @@ float arctan2(float y, float x) {
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 float findMode(float *data, int arraySize) {
   float temp;
 #else

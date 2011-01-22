@@ -727,7 +727,7 @@ public:
 // ***********************************************************************
 // ********************* CHR6DM "null" Filter ***************************
 // ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 class FlightAngle_CHR6DM : public FlightAngle {
 private:
 

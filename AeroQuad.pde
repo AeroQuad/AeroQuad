@@ -33,13 +33,17 @@
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
+#define AeroQuadMega_XplaneSimulated
+#define  CHR6DM_FAKE_GYRO;
+#define  CHR6DM_FAKE_ACCEL;
+#define  CHR6DM_FAKE_MOTORS;
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -54,9 +58,9 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 
 // *******************************************************************************************************************************
@@ -292,6 +296,29 @@
   FlightAngle_DCM flightAngle;
 #endif
 
+#ifdef AeroQuadMega_XplaneSimulated
+  Accel_CHR6DM_Fake accel;
+  Gyro_CHR6DM_Fake gyro;
+  Receiver_AeroQuadMega receiver;
+  Motors_PWM_Fake motors;
+  #include "FlightAngle.h"
+  FlightAngle_DCM flightAngle;
+  #include "Compass.h"
+  Compass_CHR6DM compass;
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_APM batteryMonitor;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
+#endif
+
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
 
@@ -303,7 +330,10 @@ void setup() {
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
 
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  Serial2.begin(BAUD);
+  Serial2.println("Starting!");
+
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     Serial1.begin(BAUD);
     PORTD = B00000100;
   #endif
@@ -328,7 +358,7 @@ void setup() {
     analogReference(EXTERNAL); //use strict 3V3 AREF for SHARP IR sensors
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated) || defined(ArduCopter)
     Wire.begin();
   #endif
   #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
@@ -351,7 +381,7 @@ void setup() {
   // insert it into the gyro class because it executes first
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
-  
+
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();

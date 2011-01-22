@@ -170,7 +170,7 @@ public:
 // ***********************************************************************
 // ************************* CHR6DM Subclass *****************************
 // ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 class Compass_CHR6DM : public Compass {
 public:
   Compass_CHR6DM() : Compass() {}

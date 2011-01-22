@@ -151,7 +151,7 @@ int levelOff; // Read in from EEPROM
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
   float CHR_RollAngle;
   float CHR_PitchAngle;
 #endif
@@ -250,6 +250,7 @@ unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from r
                                   defined(AeroQuadMega_Wii)    || \
                                   defined(ArduCopter)          || \
                                   defined(AeroQuadMega_CHR6DM) || \
+                                  defined(AeroQuadMega_XplaneSimulated) || \
                                   defined(APM_OP_CHR6DM))
   #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial3.print
@@ -355,7 +356,7 @@ void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
 int findMode(int *data, int arraySize); // defined in Sensors.pde
@@ -372,3 +373,16 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
+
+
+
+#ifdef AeroQuadMega_XplaneSimulated
+  float fakeGyroRoll;
+  float fakeGyroPitch;
+  float fakeGyroYaw;
+
+  float fakeAccelRoll;
+  float fakeAccelPitch;
+  float fakeAccelYaw;
+#endif
+

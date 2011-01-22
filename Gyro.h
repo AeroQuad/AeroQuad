@@ -25,7 +25,7 @@ public:
   float smoothFactor;
   int gyroChannel[3];
   int gyroData[3];
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     float gyroZero[3];
   #else
     int gyroZero[3];
@@ -145,6 +145,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
@@ -200,6 +201,7 @@ public:
     }
   }
 };
+#endif
 
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
@@ -438,7 +440,7 @@ public:
 /******************************************************/
 /********************** CHR6DM Gyro **********************/
 /******************************************************/
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
 class Gyro_CHR6DM : public Gyro {
 
 public:
@@ -527,9 +529,9 @@ public:
     gyroADC[PITCH] = fakeGyroPitch - gyroZero[PITCH]; //gy pitchRate
     gyroADC[YAW] = fakeGyroYaw - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor);
+    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor);
+    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor);
     previousTime = currentTime;
   }
 
@@ -558,32 +560,90 @@ public:
   }
 
   void readFakeValues(){
-    if (!syncToHeader()){
-        return;
-    }
+    readLine();
 
-    fakeGyroRoll = readInt();
-    fakeGyroPitch = readInt();
-    fakeGyroYaw = readInt();
 
-    fakeAccelRoll = readInt();
-    fakeAccelPitch = readInt();
-    fakeAccelYaw = readInt();
+    /*Serial.print("fakeGyroRoll=");
+    Serial.println(fakeGyroRoll);
+    Serial.print("fakeGyroPitch=");
+    Serial.println(fakeGyroPitch);
+    Serial.print("fakeGyroYaw=");
+    Serial.println(fakeGyroYaw);
 
-    Serial2.print("fakeGyroRoll=");
-    Serial2.println(fakeGyroRoll);
-    Serial2.print("fakeGyroPitch=");
-    Serial2.println(fakeGyroPitch);
-    Serial2.print("fakeGyroYaw=");
-    Serial2.println(fakeGyroYaw);
+    Serial.print("fakeAccelRoll=");
+    Serial.println(fakeAccelRoll);
+    Serial.print("fakeAccelPitch=");
+    Serial.println(fakeAccelPitch);
+    */
 
-    Serial2.print("fakeAccelRoll=");
-    Serial2.println(fakeAccelRoll);
-    Serial2.print("fakeAccelPitch=");
-    Serial2.println(fakeAccelPitch);
-    Serial2.print("fakeAccelYaw=");
-    Serial2.println(fakeAccelYaw);
+
   }
+
+
+ String line;
+ void readLine(){
+     while( Serial2.available()>0){
+
+         //Serial2.println("Starting readline");
+         byte c;
+
+         while( Serial2.available()>0 && (c = Serial2.read())!= 13  ) {  // buffer up a line
+           //Serial2.print(c);//Debug echo
+           line+= c;
+         }
+
+         if (c==13){
+
+            //Serial2.println("Parsing command:");
+            //Serial.println(line);
+            //Serial2.println("------");
+
+                       // TODO check that
+            if (line.startsWith("gx=")){
+              fakeGyroRoll=toFloat(line.substring(3));
+              //Serial.print("fakeGyroRoll=");
+              //Serial.println(fakeGyroRoll);
+
+            } else if (line.startsWith("gy=")){
+              fakeGyroPitch=toFloat(line.substring(3));
+              //Serial.print("fakeGyroPitch=");
+              //Serial.println(fakeGyroPitch);
+            } else if (line.startsWith("gz=")){
+              fakeGyroYaw=toFloat(line.substring(3));
+              //Serial.print("fakeGyroYaw=");
+              //Serial.println(fakeGyroYaw);
+            }
+
+            else if (line.startsWith("ax=")){
+              fakeAccelRoll=toFloat(line.substring(3));
+              //Serial.print("fakeAccelRoll=");
+              //Serial.println(fakeAccelRoll);
+            } else if (line.startsWith("ay=")){
+              fakeAccelPitch=toFloat(line.substring(3));
+              //Serial.print("fakeAccelPitch=");
+              //Serial.println(fakeAccelPitch);
+            } else if (line.startsWith("az=")){
+              fakeAccelYaw=toFloat(line.substring(3));
+              //Serial.print("fakeAccelYaw=");
+              //Serial.println(fakeAccelYaw);
+            }
+
+
+
+            line ="";
+            c=0;
+         }
+     }
+ }
+
+
+ float toFloat(String floatString){
+
+    char buffer[floatString.length() + 1];
+    floatString.toCharArray(buffer, sizeof(buffer));
+    return atof(buffer) * 1 ; // TODO the scale-up should probably go elsewhere
+
+ }
 
   int readInt() {
     return word(blockingRead(),blockingRead());

@@ -146,7 +146,7 @@ void readSerialCommand() {
       break;
     case 'c': // calibrate accels
       accel.calibrate();
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) // || defined(AeroQuadMega_XplaneSimulated)
       flightAngle.calibrate();
       accel.setOneG(accel.getFlightData(ZAXIS));
 #endif
@@ -311,7 +311,7 @@ void sendSerialTelemetry() {
     }
     PrintValueComma(flightAngle.getData(ROLL));
     PrintValueComma(flightAngle.getData(PITCH));
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
       PrintValueComma(compass.getAbsoluteHeading());
     #else
       PrintValueComma(0);
@@ -364,7 +364,7 @@ void sendSerialTelemetry() {
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
       PrintValueComma(compass.getAbsoluteHeading());
     #else
       PrintValueComma(0);
@@ -440,7 +440,7 @@ void sendSerialTelemetry() {
     PrintValueComma(7);
 #elif defined(MultipilotI2C)
     PrintValueComma(8);
-#elif defined(AeroQuadMega_CHR6DM)
+#elif defined(AeroQuadMega_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     PrintValueComma(5);
 #elif defined(APM_OP_CHR6DM)
     PrintValueComma(6);

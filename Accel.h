@@ -24,7 +24,7 @@ public:
   float smoothFactor;
   float rawAltitude;
   int accelChannel[3];
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     float accelZero[3];
   #else
     int accelZero[3];
@@ -135,7 +135,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-//#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   
@@ -200,12 +200,12 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
@@ -314,7 +314,7 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -392,7 +392,7 @@ public:
 class Accel_Wii : public Accel {
 public:
   Accel_Wii() : Accel(){
-    accelScaleFactor = 0;    
+    accelScaleFactor = 0;
   }
   
   void initialize(void) {
@@ -611,7 +611,7 @@ public:
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-//#if defined(Multipilot) || defined(MultipilotI2C)
+#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   
@@ -679,4 +679,4 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
