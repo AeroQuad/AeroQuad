@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -39,8 +39,7 @@ public:
   
   virtual void initialize();
   virtual void calculate();
-  //virtual float getGyroAngle(byte axis);
-  
+ 
   const float getData(byte axis) {
     return angle[axis];
   }
@@ -90,7 +89,7 @@ public:
   }
   
   void initialize(void) {
-    for (axis = ROLL; axis < YAW; axis++)
+    for (byte axis = ROLL; axis < YAW; axis++)
       _initialize(axis);
   }
   
@@ -138,7 +137,7 @@ private:
 
 public:
   FlightAngle_KalmanFilter() : FlightAngle() {
-    for (axis = ROLL; axis < YAW; axis ++) {
+    for (byte axis = ROLL; axis < YAW; axis ++) {
       x_angle[axis] = 0;
       x_bias[axis] = 0;
       P_00[axis] = 0;
@@ -172,10 +171,8 @@ public:
 class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;
-  float Gyro_Gain_X;
-  float Gyro_Gain_Y;
-  float Gyro_Gain_Z;
-  float DCM_Matrix[9];
+  float Gyro_Gain;  // jihlein; Replaced X, Y, and Z gyro gains with single gain
+ float DCM_Matrix[9];
   float Accel_Vector[3];
   float Omega_Vector[3];
   float Omega_P[3];
@@ -328,11 +325,11 @@ void Matrix_update(void)
 	{
     float Gyro_Vector[3];
 
-    Gyro_Vector[0]=Gyro_Gain_X * -gyro.getData(PITCH); //gyro x roll
-    Gyro_Vector[1]=Gyro_Gain_Y * gyro.getData(ROLL); //gyro y pitch
-    Gyro_Vector[2]=Gyro_Gain_Z * gyro.getData(YAW); //gyro Z yaw
-    vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
-    vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
+  Gyro_Vector[0] = Gyro_Gain * -gyro.getData(PITCH);  // jihlein: Use single scale factor
+  Gyro_Vector[1] = Gyro_Gain *  gyro.getData(ROLL);   // jihlein: Use single scale factor
+  Gyro_Vector[2] = Gyro_Gain *  gyro.getData(YAW);    // jihlein: Use single scale factor
+  vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
+  vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
 	}
   
   Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
@@ -377,32 +374,6 @@ void Matrix_update(void)
 //
 //**********************************************************************************************
 
-/*void Normalize(void) 
-{
-  float error=0;
-  float temporary[9];
-  float renorm=0;
-  
-  error= -vectorDotProduct(3, &DCM_Matrix[0] ,&DCM_Matrix[3])*.5;         // eq.19
-
-  vectorScale(3, &temporary[0], &DCM_Matrix[3], error);                   // eq.19
-  vectorScale(3, &temporary[3], &DCM_Matrix[0], error);                   // eq.19
-  
-  vectorAdd(3, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
-  vectorAdd(3, &temporary[3], &temporary[3], &DCM_Matrix[3]);             // eq.19
-  
-  vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);          // c= a x b //eq.20
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[0],&temporary[0]));   // eq.21
-  vectorScale(3, &DCM_Matrix[0], &temporary[0], renorm);
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[3],&temporary[3]));   // eq.21
-  vectorScale(3, &DCM_Matrix[3], &temporary[3], renorm);
-  
-  renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[6],&temporary[6]));   // eq.21
-  vectorScale(3, &DCM_Matrix[6], &temporary[6], renorm);
-}*/
-
 void Normalize(void) 
 {
   float error=0;
@@ -446,7 +417,7 @@ void Drift_correction(void)
   //float        errorCourse;
   //static float Scaled_Omega_P[3];
   float Scaled_Omega_I[3];
-  float Accel_magnitude;
+//  float Accel_magnitude;
   float Accel_weight;
   float errorRollPitch[3];
   
@@ -538,29 +509,25 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain_X = gyro.getScaleFactor() * 0.0174532925; // convert to rad/sec
-    Gyro_Gain_Y = gyro.getScaleFactor() * 0.0174532925;
-    Gyro_Gain_Z = gyro.getScaleFactor() * 0.0174532925;
-    type = DCM;
-    #ifdef ArduCopter
+   Gyro_Gain = gyro.getScaleFactor() * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
+
+   type = DCM;
+    // Future version, these should be defined from Configurator
+    #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
       Kp_ROLLPITCH = 0.025;
       Ki_ROLLPITCH = 0.00000015;
-    #endif
-    #ifdef AeroQuadMega_Wii
-      Kp_ROLLPITCH = 0.11; //HONK men dubbling dï¿½? 0.22 och 0.001503
-      Ki_ROLLPITCH = 0.0007515; //0.0000005; Kp/Kp factor = 146.2821
-    #endif
-    #ifdef AeroQuadMega_v1
-       Kp_ROLLPITCH = 0.3423;
-       Ki_ROLLPITCH = 0.00234;
-    #endif
-    #ifdef AeroQuad_v1
+    #elif defined(AeroQuad_Wii)
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
-    #endif
-    #if !defined(ArduCopter) & !defined(AeroQuadMega_Wii) & !defined(AeroQuadMega_v1) &!defined(AeroQuad_v1)
-      Kp_ROLLPITCH = 0.010;
-      Ki_ROLLPITCH = 0.0000005;
+    #elif defined(AeroQuadMega_Wii)
+      Kp_ROLLPITCH = 0.11; //HONK men dubbling dï¿½? 0.22 och 0.001503
+      Ki_ROLLPITCH = 0.0007515; //0.0000005; Kp/Kp factor = 146.2821
+    #elif defined(AeroQuadMega_v1) || defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG)
+       Kp_ROLLPITCH = 0.11;
+       Ki_ROLLPITCH = 0.00000015;
+    #else
+      Kp_ROLLPITCH = 0.01; //0.010;
+      Ki_ROLLPITCH =  0.00005; //0.0000005;
     #endif
   }
   
@@ -768,16 +735,13 @@ float zeroRoll;
 float zeroPitch;
 
 public:
-  FlightAngle_CHR6DM() : FlightAngle() {
+  FlightAngle_CHR6DM() : FlightAngle() {}
+
+  void initialize(void) {
+    calibrate();
   }
 
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(void) {}
-
-  void calculate(void) {
-   
+  void calculate(void) {   
     angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
     angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
     CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
@@ -802,13 +766,14 @@ float zeroRoll;
 float zeroPitch;
 
 public:
-  FlightAngle_CHR6DM_Fake() : FlightAngle() {
-  }
+  FlightAngle_CHR6DM_Fake() : FlightAngle() {}
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {}
+  void initialize(void) {
+    calibrate();
+  }
 
   void calculate(void) {
 

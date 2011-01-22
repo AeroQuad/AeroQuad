@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -33,8 +33,9 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
 
+void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (axis = ROLL; axis < LASTLEVELAXIS; axis++)
+  for (byte axis = ROLL; axis < LASTLEVELAXIS; axis++)
     PID[axis].integratedError = 0;
 }
 

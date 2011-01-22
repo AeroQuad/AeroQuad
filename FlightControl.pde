@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -114,21 +114,21 @@ void flightControl(void) {
       if((abs(flightAngle.getData(ROLL)) > 5) ||  (abs(flightAngle.getData(PITCH)) > 5)) { PID[ZDAMPENING].integratedError = 0; }
         throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
       if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-        holdAltitude +=0.1;
+        holdAltitude += 0.1;
       if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-        holdAltitude -=0.1;
+        holdAltitude -= 0.1;
       throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {
       // Altitude hold is off, get throttle from receiver
       holdThrottle = receiver.getData(THROTTLE);
-      throttleAdjust = 0;
- 	}
+      throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
+    }
     // holdThrottle set in FlightCommand.pde if altitude hold is on
-    throttle = holdThrottle + throttleAdjust;
+    throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
   #else
     // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-    throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryReadArmLed while battery critical, otherwise kept 0
+    throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
   #endif
 
   // *********************** Calculate Motor Commands **********************
@@ -237,12 +237,12 @@ void flightControl(void) {
   }
 
   // Apply limits to motor commands
-  for (motor = FRONT; motor < LASTMOTOR; motor++)
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++)
     motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
-    for (motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       motors.setMotorCommand(motor, MINTHROTTLE);
   }
   
@@ -250,20 +250,20 @@ void flightControl(void) {
   if (armed == OFF) {
     switch (calibrateESC) { // used for calibrating ESC's
     case 1:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MAXCOMMAND);
       break;
     case 3:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, constrain(testCommand, 1000, 1200));
       break;
     case 5:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
       safetyCheck = ON;
       break;
     default:
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setMotorCommand(motor, MINCOMMAND);
     }
     // Send calibration commands to motors

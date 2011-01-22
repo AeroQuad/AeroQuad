@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -42,9 +42,9 @@ void readSensors(void) {
       altitudeTime = currentTime + ALTITUDELOOPTIME;
     }
   #endif
-  #if defined(BatteryMonitor)
+  #if defined(BattMonitor)
     if (currentTime > batteryTime) {
-      readBattery();
+      batteryMonitor.measure(armed);
       batteryTime = currentTime + BATTERYLOOPTIME;
     }
   #endif
@@ -101,77 +101,3 @@ int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: 
   
   return data[arraySize/2]; // return the median value
 }
-
-/******************START OF SHARP IR READING*************/
-#ifdef IRdistance
-float readFilteredSHARP () {
-#define PROXSENSPIN 0 
-#define VOLTS_PER_UNIT .00319336F  // (.0049 for 10 bit A-D) //but AREF = 3.27
-unsigned long IRcurrentTime; 
-unsigned long IRpreviousTime = 50000; //init to not cause jump
-
-  IRcurrentTime = micros();
-
-float proxSens = analogRead(PROXSENSPIN);  
-  
-  float voltage = (float)proxSens * VOLTS_PER_UNIT; // ("proxSens" is from analog read)
-  //float inches = 23.897 * pow(voltage,-1.1907); //calc inches using "power" trend line from Excel
-  float rawDist = 60.495 * pow(voltage,-1.1904);     // same in cm
-  //if (voltage < .2) return(150);        // out of range
- 
-  rawDist = constrain(rawDist, 20, 150); //cm
-  
-  float filteredDist = smooth(rawDist, filteredDist, 0.8f, ((currentTime - previousTime) / 50000.0));  //divide by IRLOOPTIME (50ms)
-  
-  return (filteredDist);  //cm
-  
-  IRpreviousTime = IRcurrentTime;
-}
-#endif
-
-/********************END OF SHARP IR READING*************/
-
-/*#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize) {
-  float temp, maxData;
-#else
-int findMode(int *data, int arraySize) {                          //old findMode kept for documentation
-  int temp, maxData;
-#endif
-  boolean done = 0;
-  byte i;
-  int frequency, maxFrequency;
-  
-   // Sorts numbers from lowest to highest
-  while (done != 1) {        
-    done = 1;
-    for (i=0; i<(arraySize-1); i++) {
-      if (data[i] > data[i+1]) {     // numbers are out of order - swap
-        temp = data[i+1];
-        data[i+1] = data[i];
-        data[i] = temp;
-        done = 0;
-      }
-    }
-  }
-  
-  temp = -32768;
-  frequency = 0;
-  maxFrequency = 0;
-  
-  // Count number of times a value occurs in sorted array
-  for (i=0; i<arraySize; i++) {
-    if (data[i] > temp) {
-      frequency = 0;
-      temp = data[i];
-      frequency++;
-    } else if (data[i] == temp) frequency++;
-    if (frequency > maxFrequency) {
-      maxFrequency = frequency;
-      maxData = data[i];
-    }
-  }
-  return maxData;
-}*/
-
-

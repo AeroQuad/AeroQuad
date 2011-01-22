@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -33,7 +33,7 @@ public:
   float magScale[3];
   float magOffset[3];
 
-  Compass(void) { }
+  Compass(void) {}
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
@@ -98,7 +98,7 @@ private:
   int gyroZero;
   
 public: 
-  Compass_AeroQuad_v2() : Compass(){
+  Compass_AeroQuad_v2() : Compass() {
     compassAddress = 0x1E;
     // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
     // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
@@ -172,52 +172,26 @@ public:
 // ***********************************************************************
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 class Compass_CHR6DM : public Compass {
-
-private:
 public:
-  Compass_CHR6DM() : Compass(){
-
-  }
-
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(void) {
-  }
-
+  Compass_CHR6DM() : Compass() {}
+  void initialize(void) {}
   void measure(void) {
     heading = chr6dm.data.yaw; //this hardly needs any filtering :)
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+  }
+};
 
+class Compass_CHR6DM_Fake : public Compass {
+public:
+  Compass_CHR6DM_Fake() : Compass() {}
+  void initialize(void) {}
+  void measure(void) {
+    heading = 0;
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
     else absoluteHeading = heading;
   }
 };
 #endif
-
-
-class Compass_CHR6DM_Fake : public Compass {
-
-private:
-public:
-  Compass_CHR6DM_Fake() : Compass(){
-
-  }
-
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(void) {
-  }
-
-  void measure(void) {
-    heading = 0;
-
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
-
-
-

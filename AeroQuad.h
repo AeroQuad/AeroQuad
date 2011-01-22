@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -46,8 +46,7 @@
 #ifdef AeroQuadMega_v2  
   #define LED2PIN 4
   #define LED3PIN 31
-#endif
-#ifdef AeroQuad_v18
+#else
   #define LED2PIN 12
   #define LED3PIN 12
 #endif
@@ -59,6 +58,8 @@
 #define THROTTLE 3
 #define MODE 4
 #define AUX 5
+#define AUX2 6
+#define AUX3 7
 #define XAXIS 0
 #define YAXIS 1
 #define ZAXIS 2
@@ -71,16 +72,6 @@
 #define LEVELGYROPITCH 7
 #define ALTITUDE 8
 #define ZDAMPENING 9
-
-#ifndef AeroQuad_v18
-float fakeGyroRoll;
-float fakeGyroPitch;
-float fakeGyroYaw;
-
-float fakeAccelRoll;
-float fakeAccelPitch;
-float fakeAccelYaw;
-#endif
 
 // PID Variables
 struct PIDdata {
@@ -136,7 +127,6 @@ float smoothHeading;
 #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
   #define LASTMOTOR 6
 #endif
-byte motor;
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -146,7 +136,6 @@ byte motor;
 // AeroQuad Shield v1.7, aref = 3.0
 // AeroQuad Shield v1.6 or below, aref = 2.8
 float aref; // Read in from EEPROM
-int axis;
 
 // Flight Mode
 #define ACRO 0
@@ -159,12 +148,12 @@ int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
-float mLevelTransmitter = 0.09;
-float bLevelTransmitter = -135;
+//float mLevelTransmitter = 0.09;
+//float bLevelTransmitter = -135;
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float CHR_RollAngle;
-float CHR_PitchAngle;
+  float CHR_RollAngle;
+  float CHR_PitchAngle;
 #endif
 
 // Heading hold
@@ -193,22 +182,6 @@ byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 //#endif
 
-#ifdef Camera    // mode controlled by serialCom rest set from eprom (eventually) 
-  int mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
-  float mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
-  float mCameraRoll = 11.11;        
-  float mCameraYaw = 11.11;
-  int centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
-  int centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
-  int centerYaw = 1500;  
-  int servoMinPitch = 1000;     // don't drive the servo past here  
-  int servoMinRoll = 1000;
-  int servoMinYaw = 1000;
-  int servoMaxPitch = 2000;
-  int servoMaxRoll = 2000;
-  int servoMaxYaw = 2000;
-#endif
-
 // Receiver variables
 #define TIMEOUT 25000
 #define MINCOMMAND 1000
@@ -220,7 +193,6 @@ byte altitudeHold = OFF;
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
 #define LASTCHANNEL 6
-byte channel;
 int delta;
 
 #define RISING_EDGE 1
@@ -232,10 +204,6 @@ int delta;
 
 // Flight angle variables
 float timeConstant;
-/*float rateRadPerSec(byte axis);
-float rateDegPerSec(byte axis);
-float angleDeg(byte axis);
-*/
 
 // ESC Calibration
 byte calibrateESC = 0;
@@ -244,7 +212,6 @@ int testCommand = 1000;
 // Communication
 char queryType = 'X';
 byte tlmType = 0;
-//char string[32];
 byte armed = OFF;
 byte safetyCheck = OFF;
 byte update = 0;
@@ -273,6 +240,33 @@ unsigned long autoZeroGyroTime = 0;
 unsigned long cameraTime = 10000;
 unsigned long fastTelemetryTime = 0;
 unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
+
+// jihlein: wireless telemetry defines
+/**************************************************************/
+/********************** Wireless Telem Port *******************/
+/**************************************************************/
+#if defined WirelessTelemetry && (defined(AeroQuadMega_v1)     || \
+                                  defined(AeroQuadMega_v2)     || \
+                                  defined(AeroQuadMega_Wii)    || \
+                                  defined(ArduCopter)          || \
+                                  defined(AeroQuadMega_CHR6DM) || \
+                                  defined(APM_OP_CHR6DM))
+  #define SERIAL_BAUD       115200
+  #define SERIAL_PRINT      Serial3.print
+  #define SERIAL_PRINTLN    Serial3.println
+  #define SERIAL_AVAILABLE  Serial3.available
+  #define SERIAL_READ       Serial3.read
+  #define SERIAL_FLUSH      Serial3.flush
+  #define SERIAL_BEGIN      Serial3.begin
+#else
+  #define SERIAL_BAUD       115200
+  #define SERIAL_PRINT      Serial.print
+  #define SERIAL_PRINTLN    Serial.println
+  #define SERIAL_AVAILABLE  Serial.available
+  #define SERIAL_READ       Serial.read
+  #define SERIAL_FLUSH      Serial.flush
+  #define SERIAL_BEGIN      Serial.begin
+#endif
 
 /**************************************************************/
 /********************** Debug Parameters **********************/
@@ -304,29 +298,9 @@ byte testSignal = LOW;
 #define LEVELROLLCAL_ADR 64
 #define LEVELZCAL_ADR 68
 #define FILTERTERM_ADR 72
-#define MODESMOOTH_ADR 76
-#define ROLLSMOOTH_ADR 80
-#define PITCHSMOOTH_ADR 84
-#define YAWSMOOTH_ADR 88
-#define THROTTLESMOOTH_ADR 92
-#define GYRO_ROLL_ZERO_ADR 96
-#define GYRO_PITCH_ZERO_ADR 100
-#define GYRO_YAW_ZERO_ADR 104
-#define PITCH_PID_GAIN_ADR 124
-#define LEVELPITCH_PID_GAIN_ADR 136
-#define THROTTLESCALE_ADR 148
-#define THROTTLEOFFSET_ADR 152
-#define ROLLSCALE_ADR 156
-#define ROLLOFFSET_ADR 160
-#define PITCHSCALE_ADR 164
-#define PITCHOFFSET_ADR 168
-#define YAWSCALE_ADR 172
-#define YAWOFFSET_ADR 176
-#define MODESCALE_ADR 180
-#define MODEOFFSET_ADR 184
-#define AUXSCALE_ADR 188
-#define AUXOFFSET_ADR 192
-#define AUXSMOOTH_ADR 196
+#define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
+#define PITCH_PID_GAIN_ADR 172
+#define LEVELPITCH_PID_GAIN_ADR 184
 #define HEADINGSMOOTH_ADR 200
 #define HEADING_PID_GAIN_ADR 204
 #define AREF_ADR 216
@@ -364,6 +338,9 @@ byte testSignal = LOW;
 #define SERVOMAXPITCH_ADR 360
 #define SERVOMAXROLL_ADR 364
 #define SERVOMAXYAW_ADR 368
+#define GYRO_ROLL_ZERO_ADR 372
+#define GYRO_PITCH_ZERO_ADR 376
+#define GYRO_YAW_ZERO_ADR 380
 
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h

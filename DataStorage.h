@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -60,12 +60,6 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
   writeFloat(pid->D, IDEeprom+8);
 }
 
-void writeTransmitterSlopeOffset(unsigned char channel, unsigned int IDEeprom)
-{
-  writeFloat(receiver.getTransmitterSlope(channel), IDEeprom);
-  writeFloat(receiver.getTransmitterOffset(channel), IDEeprom+4);
-}
-
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
   PID[ROLL].P = 1.20;
@@ -110,14 +104,14 @@ void initializeEEPROM(void) {
     compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  receiver.setXmitFactor(0.20);  //Honk
+  receiver.setXmitFactor(0.50);
   levelLimit = 500.0;
   levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   accel.setOneG(500);
   timeConstant = 7.0;
-  for (channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);
     receiver.setTransmitterOffset(channel, 0.0);
     receiver.setSmoothFactor(channel, 1.0);
@@ -130,7 +124,7 @@ void initializeEEPROM(void) {
   minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
-  #ifdef Camera
+  /*#ifdef Camera
     mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
     mCameraRoll = 11.11;        
     mCameraYaw = 11.11;
@@ -143,7 +137,7 @@ void initializeEEPROM(void) {
     servoMaxPitch = 2000;
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
-  #endif
+  #endif*/
 }
 
 void readEEPROM(void) {
@@ -160,14 +154,8 @@ void readEEPROM(void) {
     // Leaving separate PID reads as commented for now
     // Previously had issue where EEPROM was not reading right data
     readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
-    //PID[ALTITUDE].P = readFloat(ALTITUDE_PGAIN_ADR);
-    //PID[ALTITUDE].I = readFloat(ALTITUDE_IGAIN_ADR);
-    //PID[ALTITUDE].D = readFloat(ALTITUDE_DGAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
-    //PID[ZDAMPENING].P = readFloat(ZDAMP_PGAIN_ADR);
-    //PID[ZDAMPENING].I = readFloat(ZDAMP_IGAIN_ADR);
-    //PID[ZDAMPENING].D = readFloat(ZDAMP_DGAIN_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
@@ -190,7 +178,7 @@ void readEEPROM(void) {
   minAcro = readFloat(MINACRO_ADR);
   accel.setOneG(readFloat(ACCEL1G_ADR));
   
-  #ifdef Camera
+  /*#ifdef Camera
   mCameraPitch = readFloat(MCAMERAPITCH_ADR);
   mCameraRoll = readFloat(MCAMERAROLL_ADR);
   mCameraYaw = readFloat(MCAMERAYAW_ADR);
@@ -203,7 +191,7 @@ void readEEPROM(void) {
   servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
   servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
   servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
-  #endif
+  #endif*/
 }
 
 void writeEEPROM(void){
@@ -238,22 +226,15 @@ void writeEEPROM(void){
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
-
-  writeFloat(receiver.getSmoothFactor(ROLL), ROLLSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(PITCH), PITCHSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(YAW), YAWSMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(THROTTLE), THROTTLESMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(MODE), MODESMOOTH_ADR);
-  writeFloat(receiver.getSmoothFactor(AUX), AUXSMOOTH_ADR);
-
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-	writeTransmitterSlopeOffset(THROTTLE, THROTTLESCALE_ADR);
-	writeTransmitterSlopeOffset(ROLL, ROLLSCALE_ADR);
-	writeTransmitterSlopeOffset(PITCH, PITCHSCALE_ADR);
-	writeTransmitterSlopeOffset(YAW, YAWSCALE_ADR);
-	writeTransmitterSlopeOffset(MODE, MODESCALE_ADR);
-	writeTransmitterSlopeOffset(AUX, AUXSCALE_ADR);
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
+    writeFloat(receiver.getTransmitterSlope(channel),  offset+0);
+    writeFloat(receiver.getTransmitterOffset(channel), offset+4);
+    writeFloat(receiver.getSmoothFactor(channel),      offset+8);
+  }
+
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
@@ -262,7 +243,7 @@ void writeEEPROM(void){
   writeFloat(minAcro, MINACRO_ADR);
   writeFloat(accel.getOneG(), ACCEL1G_ADR);
     
-  #ifdef Camera
+  /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);
   writeFloat(mCameraRoll, MCAMERAROLL_ADR);
   writeFloat(mCameraYaw, MCAMERAYAW_ADR);
@@ -275,7 +256,7 @@ void writeEEPROM(void){
   writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
   writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
   writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
-  #endif
+  #endif*/
   
   sei(); // Restart interrupts
 }

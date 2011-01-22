@@ -1,7 +1,7 @@
 /*
-  AeroQuad v2.1.2 Beta - December 2010
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
-  Copyright (c) 2010 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -135,7 +135,7 @@ void readSerialCommand() {
     case '5': // Send individual motor commands (motor, command)
       armed = 0;
       calibrateESC = 5;
-      for (motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setRemoteCommand(motor, readFloatSerial());
       break;
     case 'a':
@@ -163,19 +163,19 @@ void readSerialCommand() {
       break;
     case '~': //  read Camera values 
       #ifdef Camera
-      myCamera.setMode(readFloatSerial());
-      myCamera.setCenterPitch(readFloatSerial());
-      myCamera.setCenterRoll(readFloatSerial());
-      myCamera.setCenterYaw(readFloatSerial());
-      myCamera.setmCameraPitch(readFloatSerial());
-      myCamera.setmCameraRoll(readFloatSerial());
-      myCamera.setmCameraYaw(readFloatSerial());
-      myCamera.setServoMinPitch(readFloatSerial());
-      myCamera.setServoMinRoll(readFloatSerial());
-      myCamera.setServoMinYaw(readFloatSerial());
-      myCamera.setServoMaxPitch(readFloatSerial());
-      myCamera.setServoMaxRoll(readFloatSerial());
-      myCamera.setServoMaxYaw(readFloatSerial());
+      camera.setMode(readFloatSerial());
+      camera.setCenterPitch(readFloatSerial());
+      camera.setCenterRoll(readFloatSerial());
+      camera.setCenterYaw(readFloatSerial());
+      camera.setmCameraPitch(readFloatSerial());
+      camera.setmCameraRoll(readFloatSerial());
+      camera.setmCameraYaw(readFloatSerial());
+      camera.setServoMinPitch(readFloatSerial());
+      camera.setServoMinRoll(readFloatSerial());
+      camera.setServoMinYaw(readFloatSerial());
+      camera.setServoMaxPitch(readFloatSerial());
+      camera.setServoMaxRoll(readFloatSerial());
+      camera.setServoMaxYaw(readFloatSerial());
       #endif
       break;
     }
@@ -225,7 +225,7 @@ void sendSerialTelemetry() {
     //printFreeMemory();
     //Serial.print(gyro.getHeading());
     //comma();
-    //Serial.print(compass.getData());
+    //Serial.print(batteryMonitor, 2);
     //Serial.println();
     //queryType = 'X';
     break;
@@ -250,8 +250,9 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
-    Serial.print(levelLimit);
-    comma();
+    //Serial.print(levelLimit);
+    //comma();
+		PrintValueComma(levelLimit);
     Serial.println(levelOff);
     queryType = 'X';
     break;
@@ -283,14 +284,14 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(receiver.getXmitFactor());
-    for (axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) {
       PrintValueComma(receiver.getSmoothFactor(axis));
     }
     Serial.println(receiver.getSmoothFactor(AUX));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
@@ -299,31 +300,36 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getData(axis));
     }
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
-    for (axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
     PrintValueComma(flightAngle.getData(ROLL));
     PrintValueComma(flightAngle.getData(PITCH));
-#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    PrintValueComma(compass.getAbsoluteHeading());
-#else
-    PrintValueComma(0);
-#endif
-#ifdef AltitudeHold
-    Serial.print(altitude.getData());
-#else
-    Serial.print(0);
-#endif
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      PrintValueComma(compass.getAbsoluteHeading());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef AltitudeHold
+      PrintValueComma(altitude.getData());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef BattMonitor
+      Serial.print(batteryMonitor.getData());
+    #else
+      Serial.print(0);
+    #endif
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
-#ifdef HeadingMagHold
+#if defined(HeadingMagHold) && defined(AeroQuad_v2)
     PrintValueComma(compass.getRawData(XAXIS));
     PrintValueComma(compass.getRawData(YAXIS));
     Serial.println(compass.getRawData(ZAXIS));
@@ -335,17 +341,21 @@ void sendSerialTelemetry() {
     break;
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(gyro.getFlightData(axis));
     }
-    PrintValueComma(receiver.getData(THROTTLE));
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    #ifdef BattMonitor
+      PrintValueComma(batteryMonitor.getData());
+    #else
+      PrintValueComma(0);
+    #endif
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(motors.getMotorAxisCommand(axis));
     }
-    for (motor = FRONT; motor < LASTMOTOR; motor++) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       PrintValueComma(motors.getMotorCommand(motor));
     }
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getFlightData(axis));
     }
     Serial.print(armed, BIN);
@@ -354,26 +364,26 @@ void sendSerialTelemetry() {
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
-#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    PrintValueComma(compass.getAbsoluteHeading());
-#else
-    PrintValueComma(0);
-#endif
-#ifdef AltitudeHold
-    PrintValueComma(altitude.getData());
-    Serial.print(altitudeHold, DEC);
-#else
-    PrintValueComma(0);
-    Serial.print('0');
-#endif
-    Serial.println();
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      PrintValueComma(compass.getAbsoluteHeading());
+    #else
+      PrintValueComma(0);
+    #endif
+    #ifdef AltitudeHold
+      PrintValueComma(altitude.getData());
+      Serial.print(altitudeHold, DEC);
+    #else
+      PrintValueComma(0);
+      Serial.print('0');
+    #endif
+    Serial.println();    
     break;
   case 'T': // Send processed transmitter values
     PrintValueComma(receiver.getXmitFactor());
-    for (axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(receiver.getData(axis));
     }
-    for (axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
     PrintValueComma(motors.getMotorAxisCommand(ROLL));
@@ -381,13 +391,13 @@ void sendSerialTelemetry() {
     Serial.println(motors.getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
-    for (channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) {
       PrintValueComma(receiver.getData(channel));
     }
     Serial.println(receiver.getData(AUX));
     break;
   case 'V': // Send receiver status
-    for (channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) {
       PrintValueComma(receiver.getRaw(channel));
     }
     Serial.println(receiver.getRaw(AUX));
@@ -401,7 +411,7 @@ void sendSerialTelemetry() {
     Serial.println(relativeHeading);
     break;
   case '6': // Report remote commands
-    for (motor = FRONT; motor < LEFT; motor++) {
+    for (byte motor = FRONT; motor < LEFT; motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
     Serial.println(motors.getRemoteCommand(LEFT));
@@ -470,31 +480,40 @@ void sendSerialTelemetry() {
     break;
   case '`': // Send Camera values 
     #ifdef Camera
-    Serial.print(myCamera.getMode());
+    //Serial.print(camera.getMode());
+    //comma();
+    PrintValueComma(camera.getMode());
+    //Serial.print(camera.getCenterPitch());
+    //comma();
+    PrintValueComma(camera.getCenterPitch());
+    //Serial.print(camera.getCenterRoll());
+    //comma();
+    PrintValueComma(camera.getCenterRoll());
+    //Serial.print(camera.getCenterYaw());
+    //comma();
+    PrintValueComma(camera.getCenterYaw());
+    Serial.print(camera.getmCameraPitch() , 2);
     comma();
-    Serial.print(myCamera.getCenterPitch());
+    Serial.print(camera.getmCameraRoll() , 2);
     comma();
-    Serial.print(myCamera.getCenterRoll());
+    Serial.print(camera.getmCameraYaw() , 2);
     comma();
-    Serial.print(myCamera.getCenterYaw());
-    comma();
-    Serial.print(myCamera.getmCameraPitch() , 2);
-    comma();
-    Serial.print(myCamera.getmCameraRoll() , 2);
-    comma();
-    Serial.print(myCamera.getmCameraYaw() , 2);
-    comma();
-    Serial.print(myCamera.getServoMinPitch());
-    comma();
-    Serial.print(myCamera.getServoMinRoll());
-    comma();
-    Serial.print(myCamera.getServoMinYaw());
-    comma();
-    Serial.print(myCamera.getServoMaxPitch());
-    comma();
-    Serial.print(myCamera.getServoMaxRoll());
-    comma();
-    Serial.println(myCamera.getServoMaxYaw());
+    //Serial.print(camera.getServoMinPitch());
+    //comma();
+    PrintValueComma(camera.getServoMinPitch());
+    //Serial.print(camera.getServoMinRoll());
+    //comma();
+    PrintValueComma(camera.getServoMinRoll());
+    //Serial.print(camera.getServoMinYaw());
+    //comma();
+    PrintValueComma(camera.getServoMinYaw());
+    //Serial.print(camera.getServoMaxPitch());
+    //comma();
+    PrintValueComma(camera.getServoMaxPitch());
+    //Serial.print(camera.getServoMaxRoll());
+    //comma();
+    PrintValueComma(camera.getServoMaxRoll());
+    Serial.println(camera.getServoMaxYaw());
     #endif
     break;
   }
