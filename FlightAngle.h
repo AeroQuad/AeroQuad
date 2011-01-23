@@ -339,9 +339,9 @@ void Matrix_update(void)
 //  Accel_Vector[2]=accel.getFlightData(ZAXIS); // acc z
 
   // Low pass filter on accelerometer data (to filter vibrations)
-  Accel_Vector[0]=Accel_Vector[0]*0.5 + (float)-accel.getFlightData(ROLL)*0.5; // acc x
-  Accel_Vector[1]=Accel_Vector[1]*0.5 + (float)accel.getFlightData(PITCH)*0.5; // acc y
-  Accel_Vector[2]=Accel_Vector[2]*0.5 + (float)accel.getFlightData(ZAXIS)*0.5; // acc z
+  Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getFlightData(ROLL)*0.4; // acc x
+  Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getFlightData(PITCH)*0.4; // acc y
+  Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getFlightData(ZAXIS)*0.4; // acc z
 
   float Update_Matrix[9];
   float Temporary_Matrix[9];
