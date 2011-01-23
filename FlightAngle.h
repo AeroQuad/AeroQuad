@@ -322,28 +322,27 @@ void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matri
 
 void Matrix_update(void) 
 {
-	{
     float Gyro_Vector[3];
 
-  Gyro_Vector[0] = Gyro_Gain * -gyro.getData(PITCH);  // jihlein: Use single scale factor
-  Gyro_Vector[1] = Gyro_Gain *  gyro.getData(ROLL);   // jihlein: Use single scale factor
-  Gyro_Vector[2] = Gyro_Gain *  gyro.getData(YAW);    // jihlein: Use single scale factor
+//  Gyro_Vector[0] = Gyro_Gain * -gyro.getData(PITCH);  // jihlein: Use single scale factor
+//  Gyro_Vector[1] = Gyro_Gain *  gyro.getData(ROLL);   // jihlein: Use single scale factor
+//  Gyro_Vector[2] = Gyro_Gain *  gyro.getData(YAW);    // jihlein: Use single scale factor
+
+  Gyro_Vector[0]=-(gyro.getFlightData(PITCH) * Gyro_Gain); //gyro y roll
+  Gyro_Vector[1]=gyro.getFlightData(ROLL) * Gyro_Gain; //gyro x pitch
+  Gyro_Vector[2]=gyro.getFlightData(YAW) * Gyro_Gain; //gyro Z yaw
   vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
   vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
-	}
   
-  Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
-  Accel_Vector[1]=accel.getFlightData(PITCH); // acc y
-  Accel_Vector[2]=accel.getFlightData(ZAXIS); // acc z
+//  Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
+//  Accel_Vector[1]=accel.getFlightData(PITCH); // acc y
+//  Accel_Vector[2]=accel.getFlightData(ZAXIS); // acc z
 
   // Low pass filter on accelerometer data (to filter vibrations)
-  //Accel_Vector[0]=Accel_Vector[0]*0.5 + (float)read_adc(3)*0.5; // acc x
-  //Accel_Vector[1]=Accel_Vector[1]*0.5 + (float)read_adc(4)*0.5; // acc y
-  //Accel_Vector[2]=Accel_Vector[2]*0.5 + (float)read_adc(5)*0.5; // acc z
-  
-  
-  //Accel_adjust();//adjusting centrifugal acceleration. // Not used for quadcopter
-  
+  Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getFlightData(ROLL)*0.4; // acc x
+  Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getFlightData(PITCH)*0.4; // acc y
+  Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getFlightData(ZAXIS)*0.4; // acc z
+
   float Update_Matrix[9];
   float Temporary_Matrix[9];
 
@@ -509,8 +508,8 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-   Gyro_Gain = gyro.getScaleFactor() * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
-
+    Gyro_Gain = gyro.getScaleFactor();// * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
+//    Gyro_Gain = 0.00698131701;
    type = DCM;
     // Future version, these should be defined from Configurator
     #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
@@ -526,8 +525,10 @@ public:
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #else
-      Kp_ROLLPITCH = 0.01; //0.010;
-      Ki_ROLLPITCH =  0.00005; //0.0000005;
+//      Kp_ROLLPITCH = 0.01; //0.010;
+//      Ki_ROLLPITCH =  0.00005; //0.0000005;
+       Kp_ROLLPITCH = 0.0014;      
+       Ki_ROLLPITCH = 0.00000015;
     #endif
   }
   
@@ -536,6 +537,15 @@ public:
     Normalize();
     Drift_correction();
     Euler_angles();
+  }
+  
+  float getGyroUnbias(byte axis) { 
+    if (axis == ROLL)
+      return degrees(Omega[1]);
+    if (axis == PITCH)
+      return degrees(-Omega[0]);
+    if (axis == YAW)
+      return degrees(Omega[2]);
   }
 };
 
@@ -789,3 +799,4 @@ public:
   }
 };
 #endif
+

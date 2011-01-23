@@ -27,6 +27,7 @@
 #define VERSION 2.1
 
 #define BAUD 115200
+//#define BAUD 111111
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -372,3 +373,4 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
+
