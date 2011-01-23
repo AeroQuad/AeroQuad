@@ -26,11 +26,14 @@ public:
   int accelChannel[3];
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(AeroQuadMega_XplaneSimulated)
     float accelZero[3];
+    float accelData[3];
+    float accelADC[3];
+
   #else
     int accelZero[3];
+    int accelData[3];
+    int accelADC[3];
   #endif
-  int accelData[3];
-  int accelADC[3];
   int sign[3];
   float accelOneG, zAxis;
   byte rollChannel, pitchChannel, zAxisChannel;
@@ -531,9 +534,6 @@ public:
 #ifdef CHR6DM_FAKE_ACCEL
 class Accel_CHR6DM_Fake : public Accel {
 public:
-  float fakeAccelRoll;
-  float fakeAccelPitch;
-  float fakeAccelYaw;
   Accel_CHR6DM_Fake() : Accel() {
     accelScaleFactor = 0;
   }
@@ -558,9 +558,13 @@ public:
       accelADC[YAXIS] = fakeAccelPitch - accelZero[YAXIS];
       accelADC[ZAXIS] = fakeAccelYaw - accelOneG;
 
-      accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = accelADC[XAXIS];
+      accelData[YAXIS] = accelADC[YAXIS];
+      accelData[ZAXIS] = accelADC[ZAXIS];
+
+      //accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
     previousTime = currentTime;
   }
   

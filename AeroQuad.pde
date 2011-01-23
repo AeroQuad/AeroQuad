@@ -302,7 +302,8 @@
   Receiver_AeroQuadMega receiver;
   Motors_PWM_Fake motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_CompFilter flightAngle;
+  //FlightAngle_DCM flightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -399,6 +400,10 @@ void setup() {
   #ifdef Multipilot
     accel.invert(PITCH);
     gyro.invert(ROLL);
+  #endif
+  #ifdef AeroQuadMega_XplaneSimulated
+    accel.invert(PITCH);
+    gyro.invert(PITCH);
   #endif
   
   // Flight angle estimiation

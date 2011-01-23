@@ -504,12 +504,9 @@ public:
 #ifdef CHR6DM_FAKE_GYRO
 class Gyro_CHR6DM_Fake : public Gyro {
 public:
-  float fakeGyroRoll;
-  float fakeGyroPitch;
-  float fakeGyroYaw;
   Gyro_CHR6DM_Fake() : Gyro() {
-    gyroFullScaleOutput = 0;
-    gyroScaleFactor = 0;
+    gyroFullScaleOutput = 360;
+    gyroScaleFactor = 1024;
   }
 
   void initialize(void) {
@@ -529,9 +526,13 @@ public:
     gyroADC[PITCH] = fakeGyroPitch - gyroZero[PITCH]; //gy pitchRate
     gyroADC[YAW] = fakeGyroYaw - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor);
-    gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor);
-    gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor);
+    gyroData[ROLL] = gyroADC[ROLL];
+    gyroData[PITCH] = gyroADC[PITCH];
+    gyroData[YAW] = gyroADC[YAW];
+
+    //gyroData[ROLL] = smooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor);
+    //gyroData[PITCH] = smooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor);
+    //gyroData[YAW] = smooth(gyroADC[YAW], gyroData[YAW], smoothFactor);
     previousTime = currentTime;
   }
 
