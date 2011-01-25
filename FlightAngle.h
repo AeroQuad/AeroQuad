@@ -417,7 +417,7 @@ void Drift_correction(void)
   //static float Scaled_Omega_P[3];
   float Scaled_Omega_I[3];
 //  float Accel_magnitude;
-  float Accel_weight;
+//  float Accel_weight;
   float errorRollPitch[3];
   
   //*****Roll and Pitch***************
@@ -429,15 +429,17 @@ void Drift_correction(void)
   // Accel_weight = constrain(1 - 4*abs(1 - Accel_magnitude),0,1);
   // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
   // Accel_weight = constrain(1 - 2*abs(1 - Accel_magnitude),0,1);
-  Accel_weight = 1.0;
+//  Accel_weight = 1.0;
 
   vectorCrossProduct(&errorRollPitch[0], &Accel_Vector[0], &DCM_Matrix[6]); //adjust the ground of reference
-  errorRollPitch[0] = constrain(errorRollPitch[0],-50,50);
-  errorRollPitch[1] = constrain(errorRollPitch[1],-50,50);
-  errorRollPitch[2] = constrain(errorRollPitch[2],-50,50);
-  vectorScale(3, &Omega_P[0], &errorRollPitch[0], Kp_ROLLPITCH * Accel_weight);
+  // Limit max errorRollPitch to limit max Omega_P and Omega_I
+  #define MAX_ERROR 5
+  errorRollPitch[0] = constrain(errorRollPitch[0],-MAX_ERROR,MAX_ERROR);
+  errorRollPitch[1] = constrain(errorRollPitch[1],-MAX_ERROR,MAX_ERROR);
+  errorRollPitch[2] = constrain(errorRollPitch[2],-MAX_ERROR,MAX_ERROR);
+  vectorScale(3, &Omega_P[0], &errorRollPitch[0], Kp_ROLLPITCH);// * Accel_weight);
   
-  vectorScale(3, &Scaled_Omega_I[0], &errorRollPitch[0], Ki_ROLLPITCH * Accel_weight);
+  vectorScale(3, &Scaled_Omega_I[0], &errorRollPitch[0], Ki_ROLLPITCH);// * Accel_weight);
   vectorAdd(3, Omega_I, Omega_I, Scaled_Omega_I);
   
   //*****YAW***************
