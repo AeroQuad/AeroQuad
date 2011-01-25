@@ -432,6 +432,9 @@ void Drift_correction(void)
   Accel_weight = 1.0;
 
   vectorCrossProduct(&errorRollPitch[0], &Accel_Vector[0], &DCM_Matrix[6]); //adjust the ground of reference
+  errorRollPitch[0] = constrain(errorRollPitch[0],-50,50);
+  errorRollPitch[1] = constrain(errorRollPitch[1],-50,50);
+  errorRollPitch[2] = constrain(errorRollPitch[2],-50,50);
   vectorScale(3, &Omega_P[0], &errorRollPitch[0], Kp_ROLLPITCH * Accel_weight);
   
   vectorScale(3, &Scaled_Omega_I[0], &errorRollPitch[0], Ki_ROLLPITCH * Accel_weight);
