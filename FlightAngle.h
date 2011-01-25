@@ -513,7 +513,7 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain = gyro.getScaleFactor();// * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
+    Gyro_Gain = radians(gyro.getScaleFactor());// * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
 //    Gyro_Gain = 0.00698131701;
    type = DCM;
     // Future version, these should be defined from Configurator
@@ -530,10 +530,8 @@ public:
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #else
-//      Kp_ROLLPITCH = 0.01; //0.010;
-//      Ki_ROLLPITCH =  0.00005; //0.0000005;
-       Kp_ROLLPITCH = 0.0014;      
-       Ki_ROLLPITCH = 0.00000015;
+      Kp_ROLLPITCH = 0.01; //0.010;
+      Ki_ROLLPITCH =  0.00005; //0.0000005;
     #endif
   }
   
