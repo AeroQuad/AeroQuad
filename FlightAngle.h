@@ -172,7 +172,7 @@ class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;
   float Gyro_Gain;  // jihlein; Replaced X, Y, and Z gyro gains with single gain
- float DCM_Matrix[9];
+  float DCM_Matrix[9];
   float Accel_Vector[3];
   float Omega_Vector[3];
   float Omega_P[3];
@@ -433,7 +433,7 @@ void Drift_correction(void)
 
   vectorCrossProduct(&errorRollPitch[0], &Accel_Vector[0], &DCM_Matrix[6]); //adjust the ground of reference
   // Limit max errorRollPitch to limit max Omega_P and Omega_I
-  #define MAX_ERROR 5
+  #define MAX_ERROR 50
   errorRollPitch[0] = constrain(errorRollPitch[0],-MAX_ERROR,MAX_ERROR);
   errorRollPitch[1] = constrain(errorRollPitch[1],-MAX_ERROR,MAX_ERROR);
   errorRollPitch[2] = constrain(errorRollPitch[2],-MAX_ERROR,MAX_ERROR);
@@ -513,12 +513,11 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain = radians(gyro.getScaleFactor());// * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
-//    Gyro_Gain = 0.00698131701;
-   type = DCM;
+    Gyro_Gain = gyro.getGyroGain();// * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
+    type = DCM;
     // Future version, these should be defined from Configurator
     #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
-      Kp_ROLLPITCH = 0.025;
+      Kp_ROLLPITCH = 0.0014;
       Ki_ROLLPITCH = 0.00000015;
     #elif defined(AeroQuad_Wii)
        Kp_ROLLPITCH = 0.11;
