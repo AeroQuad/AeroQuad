@@ -35,10 +35,9 @@ public:
   float batteryVoltage;
 
   BatteryMonitor(void) {
-
     lowVoltageWarning = 10.2; //10.8;
     lowVoltageAlarm = 9.5; //10.2;
-    batteryVoltage = lowVoltageWarning+2;
+    batteryVoltage = lowVoltageWarning + 2;
     batteryStatus = OK;
   }
 
@@ -178,7 +177,11 @@ public:
 // *******************************************************************************
 class BatteryMonitor_AeroQuad : public BatteryMonitor {
 private:
-  #define BUZZERPIN 49
+  #if defined (__AVR_ATmega328P__)
+    #define BUZZERPIN 12
+  #else
+    #define BUZZERPIN 49
+  #endif
   long previousTime;
   byte state;
   float diode; // raw voltage goes through diode on Arduino
