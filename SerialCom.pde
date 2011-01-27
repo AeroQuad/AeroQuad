@@ -225,8 +225,8 @@ void sendSerialTelemetry() {
     //printFreeMemory();
     //Serial.print(gyro.getHeading());
     //comma();
-    Serial.print(batteryMonitor.getData(), 2);
-    Serial.println();
+    //Serial.print(batteryMonitor.getData(), 2);
+    //Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
