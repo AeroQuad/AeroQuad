@@ -227,7 +227,7 @@ private:
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
-    gyroAddress = 0x68;
+    gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
     gyroGain = radians(0.35);
