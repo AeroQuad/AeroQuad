@@ -246,7 +246,7 @@ public:
     rawAltitude = (101325.0-pressure)/4096*346;
     //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
     currentTime = micros();
-    altitude = smooth(rawAltitude, altitude, smoothFactor);
+    altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
     previousTime = currentTime;
   }
 };

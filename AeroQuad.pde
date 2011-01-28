@@ -94,6 +94,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -107,6 +108,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -121,6 +123,7 @@
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -148,6 +151,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -162,6 +166,7 @@
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -187,6 +192,7 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
@@ -205,6 +211,7 @@
   #include "FlightAngle.h"
   FlightAngle_CompFilter tempFlightAngle;
   //FlightAngle_DCM flightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -218,6 +225,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -231,6 +239,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -254,6 +263,7 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -279,6 +289,7 @@
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
 #endif
 
 #ifdef MultipilotI2C  
@@ -290,10 +301,11 @@
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
+  FlightAngle *_flightAngle = &tempFlightAngle;
 #endif
 
 
-FlightAngle *_flightAngle = &tempFlightAngle;
+
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
 #else

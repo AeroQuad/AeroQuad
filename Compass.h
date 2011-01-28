@@ -136,10 +136,10 @@ public:
     Wire.endTransmission();
     // Heading calculation based on code written by FabQuad
     // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
-    cosRoll = cos(radians(flightAngle.getData(ROLL)));
-    sinRoll = sin(radians(flightAngle.getData(ROLL)));
-    cosPitch = cos(radians(flightAngle.getData(PITCH)));
-    sinPitch = sin(radians(flightAngle.getData(PITCH)));
+    cosRoll = cos(radians(_flightAngle->getData(ROLL)));
+    sinRoll = sin(radians(_flightAngle->getData(ROLL)));
+    cosPitch = cos(radians(_flightAngle->getData(PITCH)));
+    sinPitch = sin(radians(_flightAngle->getData(PITCH)));
     magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
     magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
     //magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
