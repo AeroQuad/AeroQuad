@@ -122,7 +122,7 @@ public:
   
   const int getZaxis() {
     currentAccelTime = micros();
-    zAxis = smoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     previousAccelTime = currentAccelTime;
     return zAxis;
   }
@@ -163,7 +163,7 @@ public:
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+      accelData[axis] = filterSmooth(accelADC[axis], accelData[axis], smoothFactor);
     }
     previousTime = currentTime;
   }
@@ -270,7 +270,7 @@ public:
     rawData[ZAXIS] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = rawData[axis] - accelZero[axis]; // center accel data around zero
-      accelData[axis] = smooth(accelADC[axis], accelData[axis], smoothFactor);
+      accelData[axis] = filterSmooth(accelADC[axis], accelData[axis], smoothFactor);
     }
   }
 
@@ -409,7 +409,7 @@ public:
     // We just update the appropriate variables here
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
-      accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[axis] = filterSmoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }
@@ -643,7 +643,7 @@ public:
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = smoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[axis] = filterSmoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }

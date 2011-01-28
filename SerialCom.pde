@@ -83,7 +83,7 @@ void readSerialCommand() {
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
 #if defined(AeroQuad_v1) || defined(AeroQuad_v18)
-      flightAngle.initialize();
+      _flightAngle->initialize();
 #endif
       break;
     case 'M': // Receive transmitter smoothing values
@@ -309,8 +309,8 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
-    PrintValueComma(flightAngle.getData(ROLL));
-    PrintValueComma(flightAngle.getData(PITCH));
+    PrintValueComma(_flightAngle->getData(ROLL));
+    PrintValueComma(_flightAngle->getData(PITCH));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       PrintValueComma(compass.getAbsoluteHeading());
     #else

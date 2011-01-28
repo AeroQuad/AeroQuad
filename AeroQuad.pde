@@ -30,12 +30,12 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -79,7 +79,7 @@
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"
-#include "Filter.h"
+#include "AQMath.h"
 #include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Accel.h"
@@ -93,7 +93,7 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -106,7 +106,7 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -120,7 +120,7 @@
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -147,7 +147,7 @@
   Gyro_AeroQuad_v1 gyro;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -161,7 +161,7 @@
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -186,7 +186,7 @@
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
@@ -203,7 +203,7 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CompFilter flightAngle;
+  FlightAngle_CompFilter tempFlightAngle;
   //FlightAngle_DCM flightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -217,7 +217,7 @@
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -230,7 +230,7 @@
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CHR6DM flightAngle;
+  FlightAngle_CHR6DM tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -253,7 +253,7 @@
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
-  FlightAngle_CHR6DM flightAngle;
+  FlightAngle_CHR6DM tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -278,7 +278,7 @@
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
 #endif
 
 #ifdef MultipilotI2C  
@@ -289,7 +289,15 @@
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
-  FlightAngle_DCM flightAngle;
+  FlightAngle_DCM tempFlightAngle;
+#endif
+
+
+FlightAngle *_flightAngle = &tempFlightAngle;
+#ifdef XConfig
+  void (*processFlightControl)() = &processFlightControlXMode;
+#else
+  void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -369,7 +377,7 @@ void setup() {
   #endif
   
   // Flight angle estimiation
-  flightAngle.initialize(); // defined in FlightAngle.h
+  _flightAngle->initialize(); // defined in FlightAngle.h
 
   // Optional Sensors
   #ifdef HeadingMagHold
@@ -421,7 +429,7 @@ void loop () {
 
   // Combines external pilot commands and measured sensor data to generate motor commands
   if (controlLoop == ON) {
-    flightControl(); // defined in FlightControl.pde
+    processFlightControl();
   } 
   
   // Reads external pilot commands and performs functions based on stick configuration

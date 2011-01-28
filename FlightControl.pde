@@ -23,7 +23,9 @@
 
 #define MAX_CONTROL_OUTPUT 250
 
-void flightControl(void) {
+
+void calculateFlightError(void)
+{
   if (flightMode == ACRO) {
     // Acrobatic Mode
     // updatePID(target, measured, PIDsettings);
@@ -36,25 +38,53 @@ void flightControl(void) {
   else {
     // ArduPirate adaptation
     // ROLL
-    float errorRoll = (receiver.getAngle(ROLL) - flightAngle.getData(ROLL));     
+    float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
     errorRoll = constrain(errorRoll,-25,25);                    
     PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
     PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
     const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;          // default PID[LEVELROLL].P = 4 PID[LEVELROLL].I = 0.15
-    errorRoll = stableRoll - flightAngle.getGyroUnbias(ROLL);
+    errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
     motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));    // default PID[LEVELGYROROLL].P = 1.2
 
     // PITCH
-    float errorPitch = (receiver.getAngle(PITCH) + flightAngle.getData(PITCH));     
+    float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
     errorPitch = constrain(errorPitch,-25,25);                    
     PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
     PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
     const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;       // default PID[LEVELROLL].P = 4 PID[LEVELROLL].I = 0.15
-    errorPitch = stablePitch - flightAngle.getGyroUnbias(PITCH);
+    errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
     motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));  // default PID[LEVELGYROROLL].P = 1.2
   }
+}
 
-  // ***************************** Update Yaw ***************************
+
+void processCalibrateESC(void)
+{
+  switch (calibrateESC) { // used for calibrating ESC's
+  case 1:
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+      motors.setMotorCommand(motor, MAXCOMMAND);
+    break;
+  case 3:
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+      motors.setMotorCommand(motor, constrain(testCommand, 1000, 1200));
+    break;
+  case 5:
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+      motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
+    safetyCheck = ON;
+    break;
+  default:
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+      motors.setMotorCommand(motor, MINCOMMAND);
+  }
+  // Send calibration commands to motors
+  motors.write(); // Defined in Motors.h
+}
+
+
+void processHeading(void)
+{
 #ifndef AeroQuad_v18
   if (headingHoldConfig == ON) {
     //gyro.calculateHeading();
@@ -95,7 +125,11 @@ void flightControl(void) {
 #endif
   commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
+}
 
+
+void processAltitudeHold(void)
+{
   // ****************************** Altitude Adjust *************************
   // Thanks to Honk for his work with altitude hold
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
@@ -126,28 +160,10 @@ void flightControl(void) {
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
+}
 
-  // *********************** Calculate Motor Commands **********************
-  if (armed && safetyCheck) {
-#ifdef plusConfig
-    motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
-#endif
-#ifdef XConfig
-    // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-    motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
-    motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
-#endif
-#ifdef MultipilotI2C
-    // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
-    motors.setThrottle(receiver.getData(THROTTLE));
-#endif
-  } 
-
+void processMinMaxMotorCommand(void)
+{
   // Prevents too little power applied to motors during hard manuevers
   // Also provides even motor power on both sides if limit encountered
   if ((motors.getMotorCommand(FRONT) <= MINTHROTTLE) || (motors.getMotorCommand(REAR) <= MINTHROTTLE)){
@@ -183,94 +199,151 @@ void flightControl(void) {
     motors.setMinCommand(FRONT, MINTHROTTLE);
     motors.setMinCommand(REAR, MINTHROTTLE);
   }
+}
+
+
+void processHardManuevers()
+{
+  if (receiver.getRaw(ROLL) < MINCHECK) {
+    motors.setMaxCommand(FRONT, minAcro);
+    motors.setMaxCommand(REAR, MAXCOMMAND);
+    motors.setMaxCommand(LEFT, minAcro);
+    motors.setMaxCommand(RIGHT, MAXCOMMAND);
+  }
+  else if (receiver.getRaw(ROLL) > MAXCHECK) {
+    motors.setMaxCommand(FRONT, MAXCOMMAND);
+    motors.setMaxCommand(REAR, minAcro);
+    motors.setMaxCommand(LEFT, MAXCOMMAND);
+    motors.setMaxCommand(RIGHT, minAcro);
+  }
+  else if (receiver.getRaw(PITCH) < MINCHECK) {
+    motors.setMaxCommand(FRONT, MAXCOMMAND);
+    motors.setMaxCommand(REAR, minAcro);
+    motors.setMaxCommand(LEFT, minAcro);
+    motors.setMaxCommand(RIGHT, MAXCOMMAND);
+  }
+  else if (receiver.getRaw(PITCH) > MAXCHECK) {
+    motors.setMaxCommand(FRONT, minAcro);
+    motors.setMaxCommand(REAR, MAXCOMMAND);
+    motors.setMaxCommand(LEFT, MAXCOMMAND);
+    motors.setMaxCommand(RIGHT, minAcro);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// X MODE //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processFlightControlXMode(void) {
+  // ***************************** Calculate Flight Error ***************************
+  calculateFlightError();
+  
+  // ***************************** Update Yaw ***************************
+  processHeading();
+
+  // ****************************** Altitude Adjust *************************
+  processAltitudeHold();
+
+  // *********************** Calculate Motor Commands **********************
+  if (armed && safetyCheck) {
+    // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
+    motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
+#ifdef MultipilotI2C
+    // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
+    motors.setThrottle(receiver.getData(THROTTLE));
+#endif
+  } 
+
+  // ***************************** process min max motor command ***************************
+  processMinMaxMotorCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == ACRO) {
-#ifdef plusConfig
-    if (receiver.getRaw(ROLL) < MINCHECK) {
-      motors.setMinCommand(LEFT, minAcro);
-      motors.setMaxCommand(RIGHT, MAXCOMMAND);
-    }
-    else if (receiver.getRaw(ROLL) > MAXCHECK) {
-      motors.setMaxCommand(LEFT, MAXCOMMAND);
-      motors.setMinCommand(RIGHT, minAcro);
-    }
-    else if (receiver.getRaw(PITCH) < MINCHECK) {
-      motors.setMaxCommand(FRONT, MAXCOMMAND);
-      motors.setMinCommand(REAR, minAcro);
-    }
-    else if (receiver.getRaw(PITCH) > MAXCHECK) {
-      motors.setMinCommand(FRONT, minAcro);
-      motors.setMaxCommand(REAR, MAXCOMMAND);
-    }
-#endif
-#ifdef XConfig
-    if (receiver.getRaw(ROLL) < MINCHECK) {
-      motors.setMaxCommand(FRONT, minAcro);
-      motors.setMaxCommand(REAR, MAXCOMMAND);
-      motors.setMaxCommand(LEFT, minAcro);
-      motors.setMaxCommand(RIGHT, MAXCOMMAND);
-    }
-    else if (receiver.getRaw(ROLL) > MAXCHECK) {
-      motors.setMaxCommand(FRONT, MAXCOMMAND);
-      motors.setMaxCommand(REAR, minAcro);
-      motors.setMaxCommand(LEFT, MAXCOMMAND);
-      motors.setMaxCommand(RIGHT, minAcro);
-    }
-    else if (receiver.getRaw(PITCH) < MINCHECK) {
-      motors.setMaxCommand(FRONT, MAXCOMMAND);
-      motors.setMaxCommand(REAR, minAcro);
-      motors.setMaxCommand(LEFT, minAcro);
-      motors.setMaxCommand(RIGHT, MAXCOMMAND);
-    }
-    else if (receiver.getRaw(PITCH) > MAXCHECK) {
-      motors.setMaxCommand(FRONT, minAcro);
-      motors.setMaxCommand(REAR, MAXCOMMAND);
-      motors.setMaxCommand(LEFT, MAXCOMMAND);
-      motors.setMaxCommand(RIGHT, minAcro);
-    }
-#endif
+    processHardManuevers();
   }
 
   // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
     motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
+  }
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       motors.setMotorCommand(motor, MINTHROTTLE);
+    }
   }
 
   // ESC Calibration
   if (armed == OFF) {
-    switch (calibrateESC) { // used for calibrating ESC's
-    case 1:
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setMotorCommand(motor, MAXCOMMAND);
-      break;
-    case 3:
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setMotorCommand(motor, constrain(testCommand, 1000, 1200));
-      break;
-    case 5:
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setMotorCommand(motor, constrain(motors.getRemoteCommand(motor), 1000, 1200));
-      safetyCheck = ON;
-      break;
-    default:
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setMotorCommand(motor, MINCOMMAND);
-    }
-    // Send calibration commands to motors
-    motors.write(); // Defined in Motors.h
+    processCalibrateESC();
   }
 
   // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON)
+  if (armed == ON && safetyCheck == ON) {
     motors.write(); // Defined in Motors.h
+  }
 }
 
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// PLUS MODE //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processFlightControlPlusMode(void) {
+  // ***************************** Calculate Flight Error ***************************
+  calculateFlightError();
+
+  // ***************************** Update Yaw ***************************
+  processHeading();
+
+  // ****************************** Altitude Adjust *************************
+  processAltitudeHold();
+
+  // *********************** Calculate Motor Commands **********************
+  if (armed && safetyCheck) {
+    motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
+#ifdef MultipilotI2C
+    // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
+    motors.setThrottle(receiver.getData(THROTTLE));
+#endif
+  } 
+
+  // ****************************** process min max motor command *************************
+  processMinMaxMotorCommand();
+
+  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
+  if (flightMode == ACRO) {
+    processHardManuevers();
+  }
+
+  // Apply limits to motor commands
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
+  }
+
+  // If throttle in minimum position, don't apply yaw
+  if (receiver.getData(THROTTLE) < MINCHECK) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+      motors.setMotorCommand(motor, MINTHROTTLE);
+    }
+  }
+
+  // ESC Calibration
+  if (armed == OFF) {
+    processCalibrateESC();
+  }
+
+  // *********************** Command Motors **********************
+  if (armed == ON && safetyCheck == ON) {
+    motors.write(); // Defined in Motors.h
+  }
+}
 
 
