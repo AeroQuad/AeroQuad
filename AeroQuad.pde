@@ -54,6 +54,7 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
+//#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
@@ -209,8 +210,8 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_CompFilter tempFlightAngle;
-  //FlightAngle_DCM flightAngle;
+//  FlightAngle_CompFilter tempFlightAngle;
+  FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -310,6 +311,12 @@
   void (*processFlightControl)() = &processFlightControlXMode;
 #else
   void (*processFlightControl)() = &processFlightControlPlusMode;
+#endif
+
+#ifdef UseArduPirateSuperStable
+  void (*processStableMode)() = &processArdupirateSuperStableMode;
+#else
+  void (*processStableMode)() = &processAeroQuadStableMode;
 #endif
 
 // Include this last as it contains objects from above declarations

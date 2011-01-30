@@ -149,7 +149,7 @@ class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
+    gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
   }
   
   void initialize(void) {
@@ -390,8 +390,10 @@ private:
 
 public:
   Gyro_Wii() : Gyro() {
-    gyroFullScaleOutput = 0;
-    gyroScaleFactor = 0;
+    // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
+    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
+    gyroFullScaleOutput = 2000;
+    gyroScaleFactor = 0.069565217391304;
   }
   
   void initialize(void) {
