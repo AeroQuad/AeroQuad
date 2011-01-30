@@ -391,6 +391,7 @@ private:
 public:
   Gyro_Wii() : Gyro() {
     // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
+    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
     // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
     gyroFullScaleOutput = 2000;
     gyroScaleFactor = 0.069565217391304;
