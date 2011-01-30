@@ -203,16 +203,16 @@ private:
   void matrixUpdate(void) 
   {
     float gyroVector[3];
-    gyroVector[0]=-(gyro.getFlightData(PITCH) * Gyro_Gain); //gyro y roll
-    gyroVector[1]=gyro.getFlightData(ROLL) * Gyro_Gain; //gyro x pitch
-    gyroVector[2]=gyro.getFlightData(YAW) * Gyro_Gain; //gyro Z yaw
+    gyroVector[0]=-(gyro.getData(PITCH) * Gyro_Gain); //gyro y roll
+    gyroVector[1]=gyro.getData(ROLL) * Gyro_Gain; //gyro x pitch
+    gyroVector[2]=gyro.getData(YAW) * Gyro_Gain; //gyro Z yaw
     vectorAdd(3, &Omega[0], &gyroVector[0], &Omega_I[0]);   // adding integrator
     vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
     
     // Low pass filter on accelerometer data (to filter vibrations)
-    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getFlightData(ROLL)*0.4; // acc x
-    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getFlightData(PITCH)*0.4; // acc y
-    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getFlightData(ZAXIS)*0.4; // acc z
+    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getData(ROLL)*0.4; // acc x
+    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getData(PITCH)*0.4; // acc y
+    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getData(ZAXIS)*0.4; // acc z
   
     float updateMatrix[9];
     updateMatrix[0] =  0;
@@ -343,7 +343,7 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain = gyro.getGyroGain();
+    Gyro_Gain = radians(gyro.getScaleFactor());
     type = DCM;
     // Future version, these should be defined from Configurator
     Kp_ROLLPITCH = 0.0014;

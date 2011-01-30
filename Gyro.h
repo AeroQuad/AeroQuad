@@ -23,7 +23,6 @@ public:
   float gyroFullScaleOutput;
   float gyroScaleFactor;
   float smoothFactor;
-  float gyroGain;
   int gyroChannel[3];
   int gyroData[3];
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -111,11 +110,11 @@ public:
   }
 
   const float rateDegPerSec(byte axis) {
-    return ((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor;
+    return ((gyroADC[axis] * sign[axis])) * gyroScaleFactor;
   }
 
   const float rateRadPerSec(byte axis) {
-    return radians(((gyroADC[axis] * sign[axis]) / 1024.0) * gyroScaleFactor);
+    return radians(rateDegPerSec(axis));
   }
   
   // returns heading as +/- 180 degrees
@@ -141,11 +140,6 @@ public:
   void setReceiverYaw(int value) {
     receiverYaw = value;
   }
-  
-  float getGyroGain() {
-    return gyroGain;
-  }
-    
 };
 
 /******************************************************/
@@ -155,8 +149,7 @@ class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-    gyroGain = radians(0.4); 
+    gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
   }
   
   void initialize(void) {
@@ -230,7 +223,6 @@ public:
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
-    gyroGain = radians(0.35);
     
     lastReceiverYaw=0;
     yawAge=0;
@@ -349,8 +341,7 @@ public:
     //#define Gyro_Scaled_Y(x) x*ToRad(Gyro_Gain_Y) //Return the scaled ADC raw data of the gyro in radians for second
     //#define Gyro_Scaled_Z(x) x*ToRad(Gyro_Gain_Z) //Return the scaled ADC raw data of the gyro in radians for second
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.002;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-    gyroGain = radians(0.4);
+    gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec) 0.002
   }
   
   void initialize(void) {
@@ -401,7 +392,6 @@ public:
   Gyro_Wii() : Gyro() {
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;
-    gyroGain = radians(0.4);
   }
   
   void initialize(void) {
@@ -455,7 +445,6 @@ public:
   Gyro_CHR6DM() : Gyro() {
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;
-    gyroGain = radians(0.4);
   }
 
   void initialize(void) {
@@ -519,7 +508,6 @@ public:
   Gyro_CHR6DM_Fake() : Gyro() {
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;
-    gyroGain = radians(0.4);
   }
 
   void initialize(void) {
@@ -631,7 +619,6 @@ public:
   Gyro_Multipilot() : Gyro() {
     gyroFullScaleOutput = 300.0;        // ADXR610 full scale output = +/- 300 deg/sec
     gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)
-    gyroGain = radians(2.33333333);
   }
   
   void initialize(void) {
