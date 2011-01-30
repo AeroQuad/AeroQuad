@@ -103,7 +103,7 @@ private:
   int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
-//  float pressureFactor;
+  float pressureFactor;
   
   void requestRawPressure(void) {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
@@ -145,7 +145,7 @@ public:
     temperature = 0;
     groundTemperature = 0;
     groundAltitude = 0;
-//    pressureFactor = 1/5.255;
+    pressureFactor = 1/5.255;
   }
 
   // ***********************************************************
@@ -227,23 +227,29 @@ public:
     x1 = (b2 * (b6 * b6 >> 12)) >> 11; 
     x2 = ac2 * b6 >> 11;
     x3 = x1 + x2;
+ 
+    // Real Bosch formula - b3 = ((((int32_t)ac1 * 4 + x3) << overSamplingSetting) + 2) >> 2;
+    // The version below is the same, but takes less program space
     tmp = ac1;
-    tmp = (tmp*4 + x3)<<overSamplingSetting;
-    b3 = (tmp+2)/4;
+    tmp = (tmp * 4 + x3) << overSamplingSetting;
+    b3 = (tmp + 2) >> 2;
+ 
+
+
     x1 = ac3 * b6 >> 13;
     x2 = (b1 * (b6 * b6 >> 12)) >> 16;
     x3 = ((x1 + x2) + 2) >> 2;
     b4 = (ac4 * (uint32_t) (x3 + 32768)) >> 15;
     b7 = ((uint32_t) rawPressure - b3) * (50000 >> overSamplingSetting);
-    p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
+    p = b7 < 0x80000000 ? (b7 << 1) / b4 : (b7 / b4) >> 1;
     
     x1 = (p >> 8) * (p >> 8);
     x1 = (x1 * 3038) >> 16;
     x2 = (-7357 * p) >> 16;
     pressure = (p + ((x1 + x2 + 3791) >> 4));
     
-    //rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
-    rawAltitude = (101325.0-pressure)/4096*346;
+    rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
+    //rawAltitude = (101325.0-pressure)/4096*346;
     //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
     currentTime = micros();
     altitude = smooth(rawAltitude, altitude, smoothFactor);

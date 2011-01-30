@@ -61,7 +61,7 @@ void flightControl(void) {
   }
     
   // ***************************** Update Yaw ***************************
-  #ifndef AeroQuad_v18
+  //#ifndef AeroQuad_v18
   if (headingHoldConfig == ON) {
     //gyro.calculateHeading();
 
@@ -98,7 +98,7 @@ void flightControl(void) {
         PID[HEADING].integratedError = 0;
     }
   }
-  #endif
+  //#endif
   commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     
@@ -111,13 +111,16 @@ void flightControl(void) {
     if (altitudeHold == ON) {
       throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
       zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-      if((abs(flightAngle.getData(ROLL)) > 5) ||  (abs(flightAngle.getData(PITCH)) > 5)) { PID[ZDAMPENING].integratedError = 0; }
-        throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-      if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-        holdAltitude += 0.1;
-      if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-        holdAltitude -= 0.1;
-      throttleAdjust += PID[ALTITUDE].integratedError;
+      if((abs(flightAngle.getData(ROLL)) > 5) || (abs(flightAngle.getData(PITCH)) > 5)) { 
+        PID[ZDAMPENING].integratedError = 0;
+      }
+      //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
+      throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
+      //if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
+        //holdAltitude += 0.1;
+      //if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
+        //holdAltitude -= 0.1;
+      //throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {
       // Altitude hold is off, get throttle from receiver

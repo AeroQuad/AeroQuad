@@ -222,7 +222,21 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //printFreeMemory();
+    Serial.print("HoldA: ");
+    Serial.print(holdAltitude);
+    Serial.print(" Altitude: ");
+    Serial.print(altitude.getData());
+    Serial.print(" HoldT: ");
+    Serial.print(holdThrottle);
+    Serial.print(" rxThrottle: ");
+    Serial.print(receiver.getData(THROTTLE));
+    Serial.print(" rxAUX: ");
+    Serial.print(receiver.getRaw(AUX));
+    Serial.print(" ThottleA: ");
+    Serial.print(throttleAdjust);
+    Serial.print(" Throttle: ");
+    Serial.println(throttle);
+  //printFreeMemory();
     //Serial.print(gyro.getHeading());
     //comma();
     //Serial.print(batteryMonitor.getData(), 2);

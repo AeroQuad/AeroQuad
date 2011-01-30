@@ -31,7 +31,7 @@ public:
   int motorCommand[LASTMOTOR];
   int minCommand[LASTMOTOR];
   int maxCommand[LASTMOTOR];
-  float throttle;
+  //float throttle;
   float timerDebug;
   int delta;
   byte axis;
