@@ -28,7 +28,7 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   
-  dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / G_Dt;
+  dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (G_Dt*100); // dT fix from Honk
   PIDparameters->lastPosition = currentPosition;
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }

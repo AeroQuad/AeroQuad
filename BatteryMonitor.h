@@ -208,7 +208,7 @@ public:
     if (level == OK) {
       digitalWrite(BUZZERPIN, LOW);
       autoDescent = 0;
-      holdAltitude = 0;
+      //holdAltitude = 0;
     }
     if (level == WARNING) {
       if ((autoDescent == 0) && (currentTime > 1000)) {

@@ -391,8 +391,8 @@ public:
     TCCR1A =((1<<WGM11)|(1<<COM1B1)|(1<<COM1C1)); //Please read page 131 of DataSheet, we are changing the registers settings of WGM11,COM1B1,COM1A1 to 1 thats all...
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); //Prescaler set to 8, that give us a resolution of 0.5us, read page 134 of data sheet
     //OCR1A = 3000; //PB5, none
-    OCR1B = 3000; //PB6, OUT2
-    OCR1C = 3000; //PB7  OUT3
+    OCR1B = 2000; //PB6, OUT2
+    OCR1C = 2000; //PB7  OUT3
     ICR1 = 6600; //300hz freq...
 
     // Init PWM Timer 3
@@ -414,8 +414,8 @@ public:
     TCCR5A =((1<<WGM51)|(1<<COM5B1)|(1<<COM5C1));
     TCCR5B = (1<<WGM53)|(1<<WGM52)|(1<<CS51);
     //OCR5A = 3000; //PL3,
-    OCR5B = 3000; //PL4, OUT0
-    OCR5C = 3000; //PL5, OUT1
+    OCR5B = 2000; //PL4, OUT0
+    OCR5C = 2000; //PL5, OUT1
     ICR5 = 6600; //300hz freq
 
     // Init PPM input and PWM Timer 4
