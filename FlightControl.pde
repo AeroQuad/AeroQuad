@@ -61,11 +61,8 @@ void flightControl(void) {
   }
     
   // ***************************** Update Yaw ***************************
-  #ifndef AeroQuad_v18
   if (headingHoldConfig == ON) {
-    //gyro.calculateHeading();
-
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #ifdef HeadingMagHold
       heading = compass.getHeading();
     #else
       heading = gyro.getHeading();
@@ -98,7 +95,6 @@ void flightControl(void) {
         PID[HEADING].integratedError = 0;
     }
   }
-  #endif
   commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
     

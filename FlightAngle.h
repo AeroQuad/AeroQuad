@@ -526,7 +526,7 @@ public:
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #else
-      Kp_ROLLPITCH = 0.01; //0.010;
+      Kp_ROLLPITCH = 0.0024; //0.01; //0.010;
       Ki_ROLLPITCH =  0.00005; //0.0000005;
     #endif
   }

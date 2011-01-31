@@ -82,9 +82,7 @@ void readSerialCommand() {
       gyro.setSmoothFactor(readFloatSerial());
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
-#if defined(AeroQuad_v1) || defined(AeroQuad_v18)
       flightAngle.initialize();
-#endif
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
@@ -311,7 +309,7 @@ void sendSerialTelemetry() {
     }
     PrintValueComma(flightAngle.getData(ROLL));
     PrintValueComma(flightAngle.getData(PITCH));
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #ifdef HeadingMagHold
       PrintValueComma(compass.getAbsoluteHeading());
     #else
       PrintValueComma(0);
@@ -329,7 +327,7 @@ void sendSerialTelemetry() {
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
-#if defined(HeadingMagHold) && defined(AeroQuad_v2)
+#if defined(HeadingMagHold)
     PrintValueComma(compass.getRawData(XAXIS));
     PrintValueComma(compass.getRawData(YAXIS));
     Serial.println(compass.getRawData(ZAXIS));
@@ -364,7 +362,7 @@ void sendSerialTelemetry() {
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #ifdef HeadingMagHold
       PrintValueComma(compass.getAbsoluteHeading());
     #else
       PrintValueComma(0);
