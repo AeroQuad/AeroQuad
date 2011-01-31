@@ -116,10 +116,10 @@ void flightControl(void) {
       }
       //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
       throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
-      //if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-        //holdAltitude += 0.1;
-      //if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-        //holdAltitude -= 0.1;
+      if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
+        holdAltitude += 0.1;
+      if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
+        holdAltitude -= 0.1;
       //throttleAdjust += PID[ALTITUDE].integratedError;
     }
     else {

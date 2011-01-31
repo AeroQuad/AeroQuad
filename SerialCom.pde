@@ -222,6 +222,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
+    /*
     Serial.print("HoldA: ");
     Serial.print(holdAltitude);
     Serial.print(" Altitude: ");
@@ -236,6 +237,7 @@ void sendSerialTelemetry() {
     Serial.print(throttleAdjust);
     Serial.print(" Throttle: ");
     Serial.println(throttle);
+    */
   //printFreeMemory();
     //Serial.print(gyro.getHeading());
     //comma();
@@ -343,7 +345,7 @@ void sendSerialTelemetry() {
     Serial.println();
     break;
   case 'R': // Raw magnetometer data
-#if defined(HeadingMagHold) && defined(AeroQuad_v2)
+#if defined(HeadingMagHold)
     PrintValueComma(compass.getRawData(XAXIS));
     PrintValueComma(compass.getRawData(YAXIS));
     Serial.println(compass.getRawData(ZAXIS));
