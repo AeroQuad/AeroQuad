@@ -32,7 +32,7 @@ void processArdupirateSuperStableMode(void)
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
   float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
-  errorRoll = constrain(errorRoll,-25,25);                    
+  errorRoll = constrain(errorRoll,-50,50);                    
   PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
   PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
@@ -41,7 +41,7 @@ void processArdupirateSuperStableMode(void)
 
   // PITCH
   float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
-  errorPitch = constrain(errorPitch,-25,25);                    
+  errorPitch = constrain(errorPitch,-50,50);                    
   PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
   PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
@@ -195,7 +195,6 @@ void processAltitudeHold(void)
       holdAltitude += 0.1;
     if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
       holdAltitude -= 0.1;
-    throttleAdjust += PID[ALTITUDE].integratedError;
   }
   else {
     // Altitude hold is off, get throttle from receiver

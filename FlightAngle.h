@@ -359,11 +359,11 @@ public:
        Kp_ROLLPITCH = 0.11;
        Ki_ROLLPITCH = 0.00000015;
     #else
-      Kp_ROLLPITCH = 0.0024; //0.01; //0.010;
-      Ki_ROLLPITCH =  0.00005; //0.0000005;
+      //Kp_ROLLPITCH = 0.0024; //0.01; //0.010;
+      //Ki_ROLLPITCH =  0.00005; //0.0000005;
+      Kp_ROLLPITCH = 0.0014;
+      Ki_ROLLPITCH = 0.00000012; // was 0.00000015
     #endif
-    //Kp_ROLLPITCH = 0.0014;
-    //Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
   
   void calculate(void) {

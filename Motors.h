@@ -402,8 +402,8 @@ public:
     TCCR3A =((1<<WGM31)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);
     //OCR3A = 3000; //PE3, NONE
-    OCR3B = 3000; //PE4, OUT7
-    OCR3C = 3000; //PE5, OUT6
+    OCR3B = 2000; //PE4, OUT7
+    OCR3C = 2000; //PE5, OUT6
     ICR3 = 40000; //50hz freq (standard servos)
 
     // Init PWM Timer 5
@@ -429,12 +429,14 @@ public:
     TCCR4B = ((1<<WGM43)|(1<<WGM42)|(1<<CS41)|(1<<ICES4));
 
     OCR4A = 40000; ///50hz freq. (standard servos)
-    OCR4B = 3000; //PH4, OUT5
-    OCR4C = 3000; //PH5, OUT4
+    OCR4B = 2000; //PH4, OUT5
+    OCR4C = 2000; //PH5, OUT4
 
     //TCCR4B |=(1<<ICES4); //Changing edge detector (rising edge).
     //TCCR4B &=(~(1<<ICES4)); //Changing edge detector. (falling edge)
     TIMSK4 |= (1<<ICIE4); // Enable Input Capture interrupt. Timer interrupt mask
+    
+    commandAllMotors(1000);
   }
 
   void write (void) {
