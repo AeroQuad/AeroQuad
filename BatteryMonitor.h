@@ -46,7 +46,7 @@ public:
   virtual void lowBatteryEvent(byte);
 
   void measure(byte armed) {
-    batteryVoltage = smooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
+    batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
     if (armed == ON) {
       if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
       if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;

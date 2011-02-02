@@ -27,6 +27,7 @@
 #define VERSION 2.1
 
 #define BAUD 115200
+//#define BAUD 111111
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -348,7 +349,11 @@ void writeFloat(float value, int address); // defined in DataStorage.h
 void readEEPROM(void); // defined in DataStorage.h
 void readPilotCommands(void); // defined in FlightCommand.pde
 void readSensors(void); // defined in Sensors.pde
-void flightControl(void); // defined in FlightControl.pde
+//void calibrateESC(void); // defined in FlightControl.pde
+void processFlightControlXMode(void); // defined in FlightControl.pde
+void processFlightControlPlusMode(void); // defined in FlightControl.pde
+void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
+void processAeroQuadStableMode(void);  // defined in FlightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
@@ -372,3 +377,4 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
+
