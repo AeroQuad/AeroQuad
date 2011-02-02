@@ -347,7 +347,7 @@ public:
     type = DCM;
     // Future version, these should be defined from Configurator
     Kp_ROLLPITCH = 0.0014;
-    Ki_ROLLPITCH = 0.00000015;
+    Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
   
   void calculate(void) {
