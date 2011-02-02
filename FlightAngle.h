@@ -39,6 +39,7 @@ public:
   
   virtual void initialize();
   virtual void calculate();
+  virtual float getGyroUnbias(byte axis);
  
   const float getData(byte axis) {
     return angle[axis];
@@ -97,6 +98,11 @@ public:
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+  
 };
 
 /******************************************************/
@@ -158,6 +164,10 @@ public:
     angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
     angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
 };
 
 /******************************************************/
@@ -172,7 +182,7 @@ class FlightAngle_DCM : public FlightAngle {
 private:
   float dt;
   float Gyro_Gain;  // jihlein; Replaced X, Y, and Z gyro gains with single gain
- float DCM_Matrix[9];
+  float DCM_Matrix[9];
   float Accel_Vector[3];
   float Omega_Vector[3];
   float Omega_P[3];
@@ -184,304 +194,128 @@ private:
   float Kp_ROLLPITCH;
   float Ki_ROLLPITCH;
 
-//**********************************************************************************************
-//
-//  Vector Dot Product
-//  Return the Dot product of vectors a and b with length m
-//
-//  Call as: vectorDotProduct(m, a, b)
-//
-//**********************************************************************************************
 
-float vectorDotProduct(int length, float vector1[], float vector2[])
-{
-  float dotProduct = 0;
-  int   i;
-
-  for (i = 0; i < length; i++)
+  //**********************************************************************************************
+  //
+  //  Matrix Update
+  //
+  //**********************************************************************************************
+  void matrixUpdate(void) 
   {
-  dotProduct += vector1[i] * vector2[i];
+    float gyroVector[3];
+    gyroVector[0]=-(gyro.getData(PITCH) * Gyro_Gain); //gyro y roll
+    gyroVector[1]=gyro.getData(ROLL) * Gyro_Gain; //gyro x pitch
+    gyroVector[2]=gyro.getData(YAW) * Gyro_Gain; //gyro Z yaw
+    vectorAdd(3, &Omega[0], &gyroVector[0], &Omega_I[0]);   // adding integrator
+    vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
+    
+    // Low pass filter on accelerometer data (to filter vibrations)
+    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getData(ROLL)*0.4; // acc x
+    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getData(PITCH)*0.4; // acc y
+    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getData(ZAXIS)*0.4; // acc z
+  
+    float updateMatrix[9];
+    updateMatrix[0] =  0;
+    updateMatrix[1] = -G_Dt*Omega_Vector[2];  // -z
+    updateMatrix[2] =  G_Dt*Omega_Vector[1];  //  y
+    updateMatrix[3] =  G_Dt*Omega_Vector[2];  //  z
+    updateMatrix[4] =  0;
+    updateMatrix[5] = -G_Dt*Omega_Vector[0];  // -x
+    updateMatrix[6] = -G_Dt*Omega_Vector[1];  // -y
+    updateMatrix[7] =  G_Dt*Omega_Vector[0];  //  x
+    updateMatrix[8] =  0;
+
+    float temporaryMatrix[9];
+    matrixMultiply(3, 3, 3, temporaryMatrix, DCM_Matrix, updateMatrix); //a*b=c
+    matrixAdd(3, 3, DCM_Matrix, DCM_Matrix, temporaryMatrix);
   }
 
-  return dotProduct;
-}
-
-//**********************************************************************************************
-//
-//  Multiply a vector by a scalar
-//  Mulitply vector a with length m by a scalar
-//  Place result in vector b
-//
-//  Call as: vectorScale(m, b, a, scalar)
-//
-//**********************************************************************************************
-
-void vectorScale(int length, float scaledVector[], float inputVector[], float scalar)
-{
-  int i;
-
-  for (i = 0; i < length; i++)
+  //**********************************************************************************************
+  //
+  //  Normalize
+  //
+  //**********************************************************************************************
+  void normalize(void) 
   {
-   scaledVector[i] = inputVector[i] * scalar;
-  }
-}
-
-//**********************************************************************************************
-//
-//  Compute sum of 2 vectors
-//  Add vector a to vector b, both of length m
-//  Place result in vector c
-//
-//  Call as: vectorAdd(m, c, b, a)
-//
-//**********************************************************************************************
-
-void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[])
-{
-  int i;
-
-  for(i = 0; i < length; i++)
-  {
-     vectorC[i] = vectorA[i] + vectorB[i];
-  }
-}
-
-//**********************************************************************************************
-//
-//  Vector Cross Product
-//  Compute the cross product of vectors a and b with length 3
-//  Place result in vector C
-//
-//  Call as: vectorDotProduct(c, a, b)
-//
-//**********************************************************************************************
-
-void vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3])
-{
-  vectorC[0] = (vectorA[1] * vectorB[2]) - (vectorA[2] * vectorB[1]);
-  vectorC[1] = (vectorA[2] * vectorB[0]) - (vectorA[0] * vectorB[2]);
-  vectorC[2] = (vectorA[0] * vectorB[1]) - (vectorA[1] * vectorB[0]);
-}
-
-//**********************************************************************************************
-//
-//  Matrix Multiply
-//  Multiply matrix A times matrix B, matrix A dimension m x n, matrix B dimension n x p
-//  Result placed in matrix C, dimension m x p
-//
-//  Call as: matrixMultiply(m, n, p, C, A, B)
-//
-//**********************************************************************************************
-
-void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], float matrixA[], float matrixB[])
-{
-  int i, j, k;
-
-  for (i = 0; i < aRows * bCols; i++)
-  {
-    matrixC[i] = 0.0;
-  }
-
-  for (i = 0; i < aRows; i++)
-  {
-    for(j = 0; j < aCols_bRows; j++)
-    {
-      for(k = 0;  k < bCols; k++)
-      {
-       matrixC[i * bCols + k] += matrixA[i * aCols_bRows + j] * matrixB[j * bCols + k];
-      }
+    float temporary[9];
+    float renorm=0;
+    
+    float error= -vectorDotProduct(3, &DCM_Matrix[0], &DCM_Matrix[3])*.5;         // eq.18
+  
+    vectorScale(3, &temporary[0], &DCM_Matrix[3], error);                   // eq.19
+    vectorScale(3, &temporary[3], &DCM_Matrix[0], error);                   // eq.19
+    
+    vectorAdd(6, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
+    
+    vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);          // c= a x b //eq.20
+    
+    for(byte v=0; v<9; v+=3) {
+      renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[v],&temporary[v]));   // eq.21
+      vectorScale(3, &DCM_Matrix[v], &temporary[v], renorm);
     }
   }
-}
-  
-//**********************************************************************************************
-//
-//  Matrix Addition
-//  Add matrix A to matrix B, dimensions m x n
-//  Result placed in matrix C, dimension m x n
-//
-//  Call as: matrixAdd(m, n, C, A, B)
-//
-//**********************************************************************************************
 
-void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matrixB[])
-{
-  int i;
-
-  for (i = 0; i < rows * cols; i++)
+  //**********************************************************************************************
+  //
+  //  Drift Correction
+  //
+  //**********************************************************************************************
+  void driftCorrection(void) 
   {
-    matrixC[i] = matrixA[i] + matrixB[i];
+    //Compensation the Roll, Pitch and Yaw drift. 
+    //float        errorCourse;
+    //static float Scaled_Omega_P[3];
+    float scaledOmegaI[3];
+    float errorRollPitch[3];
+    
+    //*****Roll and Pitch***************
+  
+    // Calculate the magnitude of the accelerometer vector
+    // Accel_magnitude = sqrt(Accel_Vector[0]*Accel_Vector[0] + Accel_Vector[1]*Accel_Vector[1] + Accel_Vector[2]*Accel_Vector[2]);
+    // Accel_magnitude = Accel_magnitude / GRAVITY; // Scale to gravity.
+    // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
+    // Accel_weight = constrain(1 - 4*abs(1 - Accel_magnitude),0,1);
+    // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
+    // Accel_weight = constrain(1 - 2*abs(1 - Accel_magnitude),0,1);
+  
+    vectorCrossProduct(&errorRollPitch[0], &Accel_Vector[0], &DCM_Matrix[6]); //adjust the ground of reference
+    // Limit max errorRollPitch to limit max Omega_P and Omega_I
+    #define MAX_ERROR 50
+    errorRollPitch[0] = constrain(errorRollPitch[0],-MAX_ERROR,MAX_ERROR);
+    errorRollPitch[1] = constrain(errorRollPitch[1],-MAX_ERROR,MAX_ERROR);
+    errorRollPitch[2] = constrain(errorRollPitch[2],-MAX_ERROR,MAX_ERROR);
+    vectorScale(3, &Omega_P[0], &errorRollPitch[0], Kp_ROLLPITCH);
+    
+    vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], Ki_ROLLPITCH);
+    vectorAdd(3, Omega_I, Omega_I, scaledOmegaI);
+    
+    //*****YAW***************
+    // We make the gyro YAW drift correction based on compass magnetic heading 
+    /*if (MAGNETOMETER == 1) {
+  	  float errorYaw[3];
+  
+      errorCourse= (DCM_Matrix[0][0]*APM_Compass.Heading_Y) - (DCM_Matrix[1][0]*APM_Compass.Heading_X);  //Calculating YAW error
+      Vector_Scale(errorYaw,&DCM_Matrix[2][0],errorCourse); //Applys the yaw correction to the XYZ rotation of the aircraft, depeding the position.
+    
+      Vector_Scale(&Scaled_Omega_P[0],&errorYaw[0],Kp_YAW);
+      Vector_Add(Omega_P,Omega_P,Scaled_Omega_P);//Adding  Proportional.
+    
+      Vector_Scale(&Scaled_Omega_I[0],&errorYaw[0],Ki_YAW);
+      Vector_Add(Omega_I,Omega_I,Scaled_Omega_I);//adding integrator to the Omega_I
+    }*/
   }
-}
 
-//**********************************************************************************************
-//
-//  Matrix Update
-//
-//**********************************************************************************************
-
-void Matrix_update(void) 
-{
-	{
-    float Gyro_Vector[3];
-
-  Gyro_Vector[0] = Gyro_Gain * -gyro.getData(PITCH);  // jihlein: Use single scale factor
-  Gyro_Vector[1] = Gyro_Gain *  gyro.getData(ROLL);   // jihlein: Use single scale factor
-  Gyro_Vector[2] = Gyro_Gain *  gyro.getData(YAW);    // jihlein: Use single scale factor
-  vectorAdd(3, &Omega[0], &Gyro_Vector[0], &Omega_I[0]);   // adding integrator
-  vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
-	}
-  
-  Accel_Vector[0]=-accel.getFlightData(ROLL); // acc x
-  Accel_Vector[1]=accel.getFlightData(PITCH); // acc y
-  Accel_Vector[2]=accel.getFlightData(ZAXIS); // acc z
-
-  // Low pass filter on accelerometer data (to filter vibrations)
-  //Accel_Vector[0]=Accel_Vector[0]*0.5 + (float)read_adc(3)*0.5; // acc x
-  //Accel_Vector[1]=Accel_Vector[1]*0.5 + (float)read_adc(4)*0.5; // acc y
-  //Accel_Vector[2]=Accel_Vector[2]*0.5 + (float)read_adc(5)*0.5; // acc z
-  
-  
-  //Accel_adjust();//adjusting centrifugal acceleration. // Not used for quadcopter
-  
-  float Update_Matrix[9];
-  float Temporary_Matrix[9];
-
-  Update_Matrix[0] =  0;
-  Update_Matrix[1] = -G_Dt*Omega_Vector[2];  // -z
-  Update_Matrix[2] =  G_Dt*Omega_Vector[1];  //  y
-  Update_Matrix[3] =  G_Dt*Omega_Vector[2];  //  z
-  Update_Matrix[4] =  0;
-  Update_Matrix[5] = -G_Dt*Omega_Vector[0];  // -x
-  Update_Matrix[6] = -G_Dt*Omega_Vector[1];  // -y
-  Update_Matrix[7] =  G_Dt*Omega_Vector[0];  //  x
-  Update_Matrix[8] =  0;
-
-  //Serial.println(DCM_Matrix[2][0], 6);
-
-  matrixMultiply(3, 3, 3, Temporary_Matrix, DCM_Matrix, Update_Matrix); //a*b=c
-  matrixAdd(3, 3, DCM_Matrix, DCM_Matrix, Temporary_Matrix);
-
-//  for(int x=0; x<3; x++) {  //Matrix Addition (update)
-//    for(int y=0; y<3; y++)
-//      DCM_Matrix[x][y]+=Temporary_Matrix[x][y];
-//  }
-}
-
-//**********************************************************************************************
-//
-//  Normalize
-//
-//**********************************************************************************************
-
-void Normalize(void) 
-{
-  float error=0;
-  float temporary[9];
-  float renorm=0;
-  
-  error= -vectorDotProduct(3, &DCM_Matrix[0], &DCM_Matrix[3])*.5;         // eq.18
-
-  vectorScale(3, &temporary[0], &DCM_Matrix[3], error);                   // eq.19
-  vectorScale(3, &temporary[3], &DCM_Matrix[0], error);                   // eq.19
-  
-  //vectorAdd(3, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
-  //vectorAdd(3, &temporary[3], &temporary[3], &DCM_Matrix[3]);             // eq.19
-  vectorAdd(6, &temporary[0], &temporary[0], &DCM_Matrix[0]);             // eq.19
-  
-  vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);          // c= a x b //eq.20
-  
-  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[0],&temporary[0]));   // eq.21
-  //vectorScale(3, &DCM_Matrix[0], &temporary[0], renorm);
-  
-  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[3],&temporary[3]));   // eq.21
-  //vectorScale(3, &DCM_Matrix[3], &temporary[3], renorm);
-  
-  //renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[6],&temporary[6]));   // eq.21
-  //vectorScale(3, &DCM_Matrix[6], &temporary[6], renorm);
-  for(byte v=0; v<9; v+=3) {
-    renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[v],&temporary[v]));   // eq.21
-    vectorScale(3, &DCM_Matrix[v], &temporary[v], renorm);
-  }
-}
-
-//**********************************************************************************************
-//
-//  Drift Correction
-//
-//**********************************************************************************************
-
-void Drift_correction(void) 
-{
-  //Compensation the Roll, Pitch and Yaw drift. 
-  //float        errorCourse;
-  //static float Scaled_Omega_P[3];
-  float Scaled_Omega_I[3];
-//  float Accel_magnitude;
-  float Accel_weight;
-  float errorRollPitch[3];
-  
-  //*****Roll and Pitch***************
-
-  // Calculate the magnitude of the accelerometer vector
-  // Accel_magnitude = sqrt(Accel_Vector[0]*Accel_Vector[0] + Accel_Vector[1]*Accel_Vector[1] + Accel_Vector[2]*Accel_Vector[2]);
-  // Accel_magnitude = Accel_magnitude / GRAVITY; // Scale to gravity.
-  // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // Accel_weight = constrain(1 - 4*abs(1 - Accel_magnitude),0,1);
-  // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  // Accel_weight = constrain(1 - 2*abs(1 - Accel_magnitude),0,1);
-  Accel_weight = 1.0;
-
-  vectorCrossProduct(&errorRollPitch[0], &Accel_Vector[0], &DCM_Matrix[6]); //adjust the ground of reference
-  vectorScale(3, &Omega_P[0], &errorRollPitch[0], Kp_ROLLPITCH * Accel_weight);
-  
-  vectorScale(3, &Scaled_Omega_I[0], &errorRollPitch[0], Ki_ROLLPITCH * Accel_weight);
-  vectorAdd(3, Omega_I, Omega_I, Scaled_Omega_I);
-  
-  //*****YAW***************
-  // We make the gyro YAW drift correction based on compass magnetic heading 
-  /*if (MAGNETOMETER == 1) {
-	  float errorYaw[3];
-
-    errorCourse= (DCM_Matrix[0][0]*APM_Compass.Heading_Y) - (DCM_Matrix[1][0]*APM_Compass.Heading_X);  //Calculating YAW error
-    Vector_Scale(errorYaw,&DCM_Matrix[2][0],errorCourse); //Applys the yaw correction to the XYZ rotation of the aircraft, depeding the position.
-  
-    Vector_Scale(&Scaled_Omega_P[0],&errorYaw[0],Kp_YAW);
-    Vector_Add(Omega_P,Omega_P,Scaled_Omega_P);//Adding  Proportional.
-  
-    Vector_Scale(&Scaled_Omega_I[0],&errorYaw[0],Ki_YAW);
-    Vector_Add(Omega_I,Omega_I,Scaled_Omega_I);//adding integrator to the Omega_I
-  }*/
-}
-
-//**********************************************************************************************
-//
-//  Accel Adjust
-//
-//**********************************************************************************************
-
-/*void Accel_adjust(void) {
-  // ADC : Voltage reference 3.0V / 10bits(1024 steps) => 2.93mV/ADC step
-  // ADXL335 Sensitivity(from datasheet) => 330mV/g, 2.93mV/ADC step => 330/0.8 = 102
-  #define GRAVITY 102 //this equivalent to 1G in the raw data coming from the accelerometer 
-  #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-
-  Accel_Vector[1] += Accel_Scale(speed_3d*Omega[2]);  // Centrifugal force on Acc_y = GPS_speed*GyroZ
-  Accel_Vector[2] -= Accel_Scale(speed_3d*Omega[1]);  // Centrifugal force on Acc_z = GPS_speed*GyroY
-}*/
-
-//**********************************************************************************************
-//
-//  Euler Angles
-//
-//**********************************************************************************************
-
-void Euler_angles(void)
-{
-  angle[ROLL] =  degrees(asin(-DCM_Matrix[6]));
-  angle[PITCH] = degrees(atan2(DCM_Matrix[7],DCM_Matrix[8]));
-  angle[YAW] =   degrees(atan2(DCM_Matrix[3],DCM_Matrix[0]));
-} 
+  //**********************************************************************************************
+  //
+  //  Euler Angles
+  //
+  //**********************************************************************************************
+  void eulerAngles(void)
+  {
+    angle[ROLL] =  degrees(asin(-DCM_Matrix[6]));
+    angle[PITCH] = degrees(atan2(DCM_Matrix[7],DCM_Matrix[8]));
+    angle[YAW] =   degrees(atan2(DCM_Matrix[3],DCM_Matrix[0]));
+  } 
   
 public:
   FlightAngle_DCM():FlightAngle() {}
@@ -509,9 +343,8 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-   Gyro_Gain = gyro.getScaleFactor() * 0.0174532925;  // jihlein: Removed X, Y, and Z scale factors and replaced with single scale factor
-
-   type = DCM;
+    Gyro_Gain = radians(gyro.getScaleFactor());
+    type = DCM;
     // Future version, these should be defined from Configurator
     #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
       Kp_ROLLPITCH = 0.025;
@@ -529,13 +362,24 @@ public:
       Kp_ROLLPITCH = 0.0024; //0.01; //0.010;
       Ki_ROLLPITCH =  0.00005; //0.0000005;
     #endif
+    //Kp_ROLLPITCH = 0.0014;
+    //Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
   
   void calculate(void) {
-    Matrix_update(); 
-    Normalize();
-    Drift_correction();
-    Euler_angles();
+    matrixUpdate(); 
+    normalize();
+    driftCorrection();
+    eulerAngles();
+  }
+  
+  float getGyroUnbias(byte axis) { 
+    if (axis == ROLL)
+      return degrees(Omega[1]);
+    if (axis == PITCH)
+      return degrees(-Omega[0]);
+    if (axis == YAW)
+      return degrees(Omega[2]);
   }
 };
 
@@ -630,6 +474,11 @@ public:
     angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
     angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+
 };
 
 // ***********************************************************************
@@ -720,6 +569,11 @@ public:
     angle[ROLL]  =  180/PI * Axz;
     angle[PITCH] =  180/PI * Ayz;
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+
 };
 
 
@@ -752,6 +606,11 @@ public:
     zeroRoll = chr6dm.data.roll;
     zeroPitch = chr6dm.data.pitch;
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+
 };
 #endif
 
@@ -787,5 +646,12 @@ public:
     zeroRoll = 0;
     zeroPitch = 0;
   }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+
+  
 };
 #endif
+
