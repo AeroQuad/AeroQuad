@@ -121,10 +121,11 @@ public:
   }
   
   const int getZaxis() {
-    currentAccelTime = micros();
-    zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    previousAccelTime = currentAccelTime;
-    return zAxis;
+    //currentAccelTime = micros();
+    //zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    //previousAccelTime = currentAccelTime;
+    //return zAxis;
+    return accelOneG - getData(ZAXIS);
   }
   
   const float getAltitude(void) {
@@ -254,8 +255,8 @@ public:
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
     data = readByteI2C(accelAddress);
-    data &= 0xF1;
-    updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-1.0g (value = xxxx000x)
+    data &= 0xF5; //0xF1; // +/-1.0g (value = xxxx000x)
+    updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-2g (value = xxxx010x)
   }
   
   void measure(void) {

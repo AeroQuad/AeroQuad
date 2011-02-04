@@ -202,7 +202,7 @@ void processAltitudeHold(void)
     throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
   }
   // holdThrottle set in FlightCommand.pde if altitude hold is on
-  throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
+  throttle = holdThrottle + throttleAdjust + zDampening; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
