@@ -131,6 +131,10 @@ public:
   const float getAltitude(void) {
     return rawAltitude;
   }
+  
+  const float rateG(const byte axis) {
+    return getData(axis) / accelOneG;
+  }
 };
 
 /******************************************************/
@@ -366,11 +370,14 @@ public:
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
 
+
     // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
+//    accelOneG = accelZero[ZAXIS];
+    mesure();
+    accelOneG = getRaw(ZAXIS);
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-    
+   
     writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
@@ -432,7 +439,7 @@ public:
     }
     
     // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
+    accelOneG = getRaw[ZAXIS];
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     
