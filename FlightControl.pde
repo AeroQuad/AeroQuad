@@ -286,16 +286,16 @@ void processHardManuevers()
 //////////////////////////////////// X MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void processFlightControlXMode(void) {
-  // ***************************** Calculate Flight Error ***************************
+  // ********************** Calculate Flight Error ***************************
   calculateFlightError();
   
-  // ***************************** Update Yaw ***************************
+  // ********************** Update Yaw ***************************************
   processHeading();
 
-  // ****************************** Altitude Adjust *************************
+  // ********************** Altitude Adjust **********************************
   processAltitudeHold();
 
-  // *********************** Calculate Motor Commands **********************
+  // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
     motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
@@ -308,7 +308,7 @@ void processFlightControlXMode(void) {
 #endif
   } 
 
-  // ***************************** process min max motor command ***************************
+  // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
@@ -343,16 +343,16 @@ void processFlightControlXMode(void) {
 ///////////////////////////////// PLUS MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void processFlightControlPlusMode(void) {
-  // ***************************** Calculate Flight Error ***************************
+  // ********************** Calculate Flight Error ***************************
   calculateFlightError();
-
-  // ***************************** Update Yaw ***************************
+  
+  // ********************** Update Yaw ***************************************
   processHeading();
 
-  // ****************************** Altitude Adjust *************************
+  // ********************** Altitude Adjust **********************************
   processAltitudeHold();
 
-  // *********************** Calculate Motor Commands **********************
+  // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
@@ -364,7 +364,7 @@ void processFlightControlPlusMode(void) {
 #endif
   } 
 
-  // ****************************** process min max motor command *************************
+  // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
