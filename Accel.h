@@ -369,8 +369,10 @@ public:
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
 
+
     // store accel value that represents 1g
 //    accelOneG = accelZero[ZAXIS];
+    mesure();
     accelOneG = getRaw(ZAXIS);
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
