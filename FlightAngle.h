@@ -210,10 +210,9 @@ private:
     vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
     
     // Low pass filter on accelerometer data (to filter vibrations)
-    float oneG = accel.getOneG();
-    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getData(ROLL)/oneG*100.0; // acc x
-    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getData(PITCH)/oneG*100.0; // acc y
-    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getData(ZAXIS)/oneG*100.0; // acc z
+    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.rateG(ROLL)*100.0; // acc x
+    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.rateG(PITCH)*100.0; // acc y
+    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.rateG(ZAXIS)*100.0; // acc z
     
     float updateMatrix[9];
     updateMatrix[0] =  0;

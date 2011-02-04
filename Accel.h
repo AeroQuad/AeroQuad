@@ -130,6 +130,10 @@ public:
   const float getAltitude(void) {
     return rawAltitude;
   }
+  
+  const float rateG(const byte axis) {
+    return getData(axis) / accelOneG;
+  }
 };
 
 /******************************************************/
