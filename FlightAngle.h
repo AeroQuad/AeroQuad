@@ -361,7 +361,7 @@ public:
       return degrees(Omega[1]);
     if (axis == PITCH)
       return degrees(-Omega[0]);
-    if (axis == YAW)
+    else
       return degrees(Omega[2]);
   }
 };
