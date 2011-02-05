@@ -103,7 +103,7 @@ private:
   int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
-//  float pressureFactor;
+  float pressureFactor;
   
   void requestRawPressure(void) {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
@@ -145,7 +145,7 @@ public:
     temperature = 0;
     groundTemperature = 0;
     groundAltitude = 0;
-//    pressureFactor = 1/5.255;
+    pressureFactor = 1/5.255;
   }
 
   // ***********************************************************
@@ -242,8 +242,8 @@ public:
     x2 = (-7357 * p) >> 16;
     pressure = (p + ((x1 + x2 + 3791) >> 4));
     
-    //rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
-    rawAltitude = (101325.0-pressure)/4096*346;
+    rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
+    //rawAltitude = (101325.0-pressure)/4096*346;
     //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
     currentTime = micros();
     altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
