@@ -67,7 +67,7 @@ public:
         updateControls();
         findZero[i] = NWMP_gyro[calAxis];
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);

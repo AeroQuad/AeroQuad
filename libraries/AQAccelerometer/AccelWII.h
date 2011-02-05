@@ -61,7 +61,7 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g

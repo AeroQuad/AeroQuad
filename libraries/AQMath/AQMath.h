@@ -23,10 +23,6 @@
 
 #include "WProgram.h"
 
-
-
-
-
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor);
 float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne);
@@ -120,10 +116,7 @@ float arctan2(float y, float x);
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float findMode(float *data, int arraySize);
-#else
-  int findMode(int *data, int arraySize);
-#endif
+float findModeFloat(float *data, int arraySize);
+int findModeInt(int *data, int arraySize);
   
 #endif // AQMath.h

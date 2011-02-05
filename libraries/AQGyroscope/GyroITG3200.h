@@ -134,7 +134,7 @@ public:
         findZero[i] = readWordI2C(gyroAddress);
         delay(10);
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
   }
 };

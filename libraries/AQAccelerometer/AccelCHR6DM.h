@@ -70,9 +70,9 @@ public:
     }
 
 
-    accelZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    accelZero[XAXIS] = findModeFloat(zeroXreads, FINDZERO);
+    accelZero[YAXIS] = findModeFloat(zeroYreads, FINDZERO);
+    accelZero[ZAXIS] = findModeFloat(zeroZreads, FINDZERO);
    
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
