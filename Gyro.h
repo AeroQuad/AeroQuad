@@ -145,6 +145,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
+#if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG)
 class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
@@ -200,6 +201,7 @@ public:
     }
   }
 };
+#endif
 
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
@@ -326,6 +328,7 @@ public:
 /**************** ArduCopter Gyro *********************/
 /******************************************************/
 #ifdef ArduCopter
+#include <AQADC.h>
 class Gyro_ArduCopter : public Gyro {
 private:
   int rawADC;
@@ -349,12 +352,12 @@ public:
     // pitchChannel = 2
     // yawChannel = 0
     this->_initialize(1, 2, 0);
-    initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
+    initializeOilpanADC(); // this is needed for both gyros and accels, done once in this class
   }
   
   void measure(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
+      rawADC = analogReadOilpanADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
         gyroADC[axis] =  rawADC - gyroZero[axis];
       gyroData[axis] = gyroADC[axis]; // no smoothing needed
@@ -369,7 +372,7 @@ public:
     int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
+        findZero[i] = analogReadOilpanADC(gyroChannel[calAxis]);
         delay(2);
       }
       gyroZero[calAxis] = findMode(findZero, FINDZERO);
@@ -465,9 +468,9 @@ public:
     gyroADC[PITCH] = gyroZero[PITCH] - chr6dm.data.pitchRate; //gy pitchRate
     gyroADC[YAW] = chr6dm.data.yawRate - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = smoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = smoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     previousTime = currentTime;
   }
 

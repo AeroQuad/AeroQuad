@@ -40,6 +40,7 @@ public:
   virtual void initialize();
   virtual void calculate();
   virtual float getGyroUnbias(byte axis);
+  virtual void calibrate(void) {}
  
   const float getData(byte axis) {
     return angle[axis];

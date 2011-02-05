@@ -41,9 +41,9 @@ void readPilotCommands() {
       gyro.calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
-       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      flightAngle.calibrate();
-       #endif
+      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+        _flightAngle->calibrate();
+      #endif
       zeroIntegralError();
       #ifndef BatteryMonitor
       motors.pulseMotors(3);
@@ -52,7 +52,7 @@ void readPilotCommands() {
       ledCW(); ledCW(); ledCW();
       #endif
       #ifdef ArduCopter
-        zero_ArduCopter_ADC();
+        zeroOilpanADC();
       #endif
     }   
     // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
@@ -61,7 +61,7 @@ void readPilotCommands() {
       zeroIntegralError();
       motors.pulseMotors(3);
       #ifdef ArduCopter
-        zero_ArduCopter_ADC();
+        zeroOilpanADC();
       #endif
     }   
     // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
@@ -70,7 +70,7 @@ void readPilotCommands() {
       zeroIntegralError();
       motors.pulseMotors(4);
       #ifdef ArduCopter
-        zero_ArduCopter_ADC();
+        zeroOilpanADC();
       #endif
     }
     // Arm motors (left stick lower right corner)

@@ -147,7 +147,7 @@ void readSerialCommand() {
     case 'c': // calibrate accels
       accel.calibrate();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      flightAngle.calibrate();
+      _flightAngle->calibrate();
       accel.setOneG(accel.getFlightData(ZAXIS));
 #endif
       break;
