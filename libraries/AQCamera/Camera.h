@@ -18,6 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#ifndef _CAMERA_STABILIZATION_H_
+#define _CAMERA_STABILIZATION_H_
+
 // Written by CupOfTea:
 // http://aeroquad.com/showthread.php?1484-Camera-Stablisation
 // http://aeroquad.com/showthread.php?1491-Camera-Stablisation-continued
@@ -27,18 +30,18 @@
 // ***********************************************************************
 /*Some basics about the 16 bit timer:
 - The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
-  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5�s. This
+  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5?s. This
   is also called timer resolution.
 - The timer is used as cyclic upwards counter, the counter periode is set in the
   ICRx register. IIRC periode-1 has to be set in the ICRx register.
 - When the counter reaches 0, the outputs are set
 - When the counter reaches OCRxy, the corresponding output is cleared.
 In the code below, the periode shall be 20ms, so the ICRx register is set to 
- 40000 ticks of 0.5�s/tick. It probably should be 39999, but who cares about
- this 0.5�s for the periode.
-The high time shall be 1500�s, so the OCRxy register is set to 3000. A change of
+ 40000 ticks of 0.5?s/tick. It probably should be 39999, but who cares about
+ this 0.5?s for the periode.
+The high time shall be 1500?s, so the OCRxy register is set to 3000. A change of
  the timer periode does not change this setting, as the clock rate is still one
- tick every 0.5�s. If the prescaler was changed, the OCRxy register value would
+ tick every 0.5?s. If the prescaler was changed, the OCRxy register value would
  be different. 
 */
 class Camera {
@@ -218,84 +221,4 @@ public:
   }
 };
 
-class Camera_AeroQuad : public Camera {
-public:
-  Camera_AeroQuad() : Camera() {}
-  void _initialize(void) {
-     // Init PWM Timer 1      Probable conflict with Arducopter Motor
-    DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
-                                                              //WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
-    TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); //Clear OCRnA/OCRnB/OCRnC outputs on compare match, set OCRnA/OCRnB/OCRnC outputs at BOTTOM (non-inverting mode).      
-    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);                 //Prescaler set to 8, that give us a resolution of 0.5us
-    ICR1 = 39999;    //50hz freq (standard servos) 20ms = 40000 * 0.5us
-  }
-
-  void move(void) {
-    if (mode > 0) {
-      OCR1A = servoPitch * 2;
-      OCR1B = servoRoll * 2;
-      OCR1C = servoYaw * 2;
-    }
-  }
-};
-
-class Camera_Pins_2_3_5 : public Camera {
-public:
-  Camera_Pins_2_3_5() : Camera() {}
-  void _initialize(void) {
-    // Init PWM Timer 3    Probable conflict with AeroQuad Motor
-    DDRE = DDRE | B00111000;                                  //Set to Output Mega Port-Pin PE4-2, PE5-3, PE3-5
-    TCCR3A =((1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1));
-    TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31); 
-    ICR3 = 39999; //50hz freq (standard servos)
-  }
-  
-  void move(void) {
-    if (mode > 0) {
-      OCR3A = servoPitch * 2;
-      OCR3B = servoRoll * 2;
-      OCR3C = servoYaw * 2;
-    }
-  }
-};
-
-class Camera_Pins_6_7_8 : public Camera {
-public:
-  Camera_Pins_6_7_8() : Camera() {}
-  void _initialize(void) {
-    // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
-    DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
-    TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
-    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    ICR4 = 39999; //50hz freq (standard servos)
-  }
-  
-  void move(void) {
-    if (mode > 0) {
-      OCR4A = servoPitch * 2;
-      OCR4B = servoRoll * 2;
-      OCR4C = servoYaw * 2;
-    }
-  }
-};
-
-class Camera_Pins_44_45_46 : public Camera {
-public:
-  Camera_Pins_44_45_46() : Camera() {}
-  void _initialize(void) {
-    // Init PWM Timer 5   Probable conflict with Arducopter Motor
-    DDRL = DDRL | B00111000;                                  //Set to Output Mega Port-Pin PL3-46, PE4-45, PE5-44
-    TCCR5A =((1<<WGM51)|(1<<COM5A1)|(1<<COM5B1)|(1<<COM5C1)); 
-    TCCR5B = (1<<WGM53)|(1<<WGM52)|(1<<CS51);
-    ICR5 = 39999; //50hz freq (standard servos)
-  }
-  
-  void move(void) {
-    if (mode > 0) {
-      OCR5A = servoPitch * 2;
-      OCR5B = servoRoll * 2;
-      OCR5C = servoYaw * 2;      
-    }
-  }
-};
-
+#endif
