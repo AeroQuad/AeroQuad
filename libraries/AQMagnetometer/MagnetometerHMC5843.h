@@ -20,67 +20,15 @@
 
 // Class to define sensors that can determine absolute heading
 
-// ***********************************************************************
-// ************************** Compass Class ******************************
-// ***********************************************************************
-class Compass {
-public: 
-  int compassAddress;
-  float heading, absoluteHeading, gyroStartHeading;
-  float compass;
-  float magMax[3];
-  float magMin[3];
-  float magScale[3];
-  float magOffset[3];
+#ifndef _MAGNETOMETER_HMC5843_H_
+#define _MAGNETOMETER_HMC5843_H_
 
-  Compass(void) {}
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void); 
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData(void) {
-    return compass;
-  }
-  
-  const float getHeading(void) {
-    return heading;
-  }
-  
-  const float getAbsoluteHeading(void) {
-    return absoluteHeading;
-  }
-  
-  void setMagCal(byte axis, float maxValue, float minValue) {
-    magMax[axis] = maxValue;
-    magMin[axis] = minValue;
-    // Assume max/min is scaled to +1 and -1
-    // y2 = 1, x2 = max; y1 = -1, x1 = min
-    // m = (y2 - y1) / (x2 - x1)
-    // m = 2 / (max - min)
-    magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
-    // b = y1 - mx1; b = -1 - (m * min)
-    magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
-  }
-  
-  const float getMagMax(byte axis) {
-    return magMax[axis];
-  }
-  
-  const float getMagMin(byte axis) {
-    return magMin[axis];
-  }
-};
+#include <Magnetometer.h>
 
 // ***********************************************************************
 // ************************ HMC5843 Subclass *****************************
 // ***********************************************************************
-class Compass_AeroQuad_v2 : public Compass {
+class MagnetometerHMC5843 : public Magnetometer {
 // This sets up the HMC5843 from Sparkfun
 private:
   float cosRoll;
@@ -98,7 +46,7 @@ private:
   int gyroZero;
   
 public: 
-  Compass_AeroQuad_v2() : Compass() {
+  MagnetometerHMC5843() : Magnetometer() {
     compassAddress = 0x1E;
     // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
     // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
@@ -167,31 +115,4 @@ public:
   }
 };
 
-// ***********************************************************************
-// ************************* CHR6DM Subclass *****************************
-// ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class Compass_CHR6DM : public Compass {
-public:
-  Compass_CHR6DM() : Compass() {}
-  void initialize(void) {}
-  void measure(void) {
-    heading = chr6dm.data.yaw; //this hardly needs any filtering :)
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
-
-class Compass_CHR6DM_Fake : public Compass {
-public:
-  Compass_CHR6DM_Fake() : Compass() {}
-  void initialize(void) {}
-  void measure(void) {
-    heading = 0;
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
 #endif
