@@ -30,8 +30,8 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -80,16 +80,18 @@
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"
-#include "AQMath.h"
+#include <AQMath.h>
 #include "Receiver.h"
 #include "DataAcquisition.h"
-#include "Accel.h"
+//#include "Accel.h"
 #include "Gyro.h"
 #include "Motors.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
-  Accel_AeroQuad_v1 accel;
+  #include <AccelAeroQuadV1.h>
+  AccelAeroQuadV1 accel;
+  
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
@@ -103,7 +105,9 @@
 #endif
 
 #ifdef AeroQuad_v1_IDG
-  Accel_AeroQuad_v1 accel;
+  #include <AccelAeroQuadV1.h>
+  AccelAeroQuadV1 accel;
+
   Gyro_AeroQuad_v1 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
@@ -117,7 +121,9 @@
 #endif
 
 #ifdef AeroQuad_v18
-  Accel_AeroQuadMega_v2 accel;
+  #include <AccelBMA180.h>
+  AccelBMA180 accel;
+  
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
 //  Motors_PWM motors;
@@ -147,10 +153,12 @@
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
-  Receiver_AeroQuadMega receiver;
-  Accel_AeroQuad_v1 accel;
+  #include <AccelAeroQuadV1.h>
+  AccelAeroQuadV1 accel;
+
   Gyro_AeroQuad_v1 gyro;
   Motors_PWM motors;
+  Receiver_AeroQuadMega receiver;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -161,11 +169,15 @@
 #endif
 
 #ifdef AeroQuadMega_v2
+  #include <AccelBMA180.h>
+  AccelBMA180 accel;
+
+  Gyro_AeroQuadMega_v2 gyro;
+  
   Receiver_AeroQuadMega receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
+
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -188,8 +200,10 @@
 #endif
 
 #ifdef ArduCopter
+  #include <AccelADXL335.h>
+  AccelADXL335 accel;
+  
   Gyro_ArduCopter gyro;
-  Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
@@ -206,7 +220,9 @@
 #endif
 
 #ifdef AeroQuad_Wii
-  Accel_Wii accel;
+  #include <AccelWii.h>
+  AccelWii accel;
+  
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
@@ -221,7 +237,9 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
-  Accel_Wii accel;
+  #include <AccelWii.h>
+  AccelWii accel;
+  
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
@@ -235,7 +253,9 @@
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
-  Accel_CHR6DM accel;
+  #include <AccelCHR6DM.h>
+  AccelCHR6DM accel;
+  
   Gyro_CHR6DM gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
@@ -259,7 +279,9 @@
 #endif
 
 #ifdef APM_OP_CHR6DM
-  Accel_CHR6DM accel;
+  #include <AccelCHR6DM.h>
+  AccelCHR6DM accel;
+  
   Gyro_CHR6DM gyro;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
@@ -283,7 +305,9 @@
 #endif
 
 #ifdef Multipilot
-  Accel_AeroQuad_v1 accel;
+  #include <AccelAeroQuadV1.h>
+  AccelAeroQuadV1 accel;
+
   Gyro_AeroQuad_v1 gyro;
   Receiver_Multipilot receiver;
   Motors_PWM motors;
@@ -295,7 +319,9 @@
 #endif
 
 #ifdef MultipilotI2C  
-  Accel_AeroQuad_v1 accel;
+  #include <AccelAeroQuadV1.h>
+  AccelAeroQuadV1 accel;
+
   Gyro_AeroQuad_v1 gyro;
   Receiver_Multipilot receiver;
   Motors_I2C motors;
