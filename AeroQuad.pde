@@ -82,7 +82,6 @@
 #include "PID.h"
 #include <AQMath.h>
 #include "DataAcquisition.h"
-#include "Motors.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
@@ -92,7 +91,8 @@
   GyroIXZ500 gyro;
   #include <Receiver328.h>
   Receiver328 receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -109,7 +109,8 @@
   GyroIXZ500 gyro;
   #include <Receiver328.h>
   Receiver328 receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -126,8 +127,8 @@
   GyroITG3200 gyro;
   #include <Receiver328.h>
   Receiver328 receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  #include <MotorsPWMTimer.h>
+  MotorsPWMTimer motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -156,7 +157,8 @@
   AccelADXL335 accel;
   #include <GyroIXZ500.h>
   GyroIXZ500 gyro;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include <Receiver1280.h>
   Receiver1280 receiver;
   #include "FlightAngle.h"
@@ -175,8 +177,10 @@
   GyroITG3200 gyro;
   #include <Receiver1280.h>
   Receiver1280 receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  #include <MotorsPWMTimer.h>
+  MotorsPWMTimer motors;
+//  #include <MotorsI2C.h>
+//  MotorsI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -206,7 +210,8 @@
   GyroIXZ500ADC gyro;
   #include <ReceiverAPM.h>
   ReceiverAPM receiver;
-  Motors_ArduCopter motors;
+  #include <MotorsAPM.h>
+  MotorsAPM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -227,7 +232,8 @@
   GyroWii gyro;
   #include <Receiver328.h>
   Receiver328 receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
   FlightAngle_DCM tempFlightAngle;
@@ -245,7 +251,8 @@
   GyroWii gyro;
   #include <Receiver1280.h>
   Receiver1280 receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -263,7 +270,8 @@
   GyroCHR6DM gyro;
   #include <Receiver1280.h>
   Receiver1280 receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -290,7 +298,8 @@
   GyroCHR6DM gyro;
   #include <ReceiverAPM.h>
   ReceiverAPM receiver;
-  Motors_ArduCopter motors;
+  #include <MotorsAPM.h>
+  MotorsAPM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -317,7 +326,8 @@
   GyroMultipilot gyro;
   #include <ReceiverMultipilot.h>
   ReceiverMultipilot receiver;
-  Motors_PWM motors;
+  #include <MotorsPWM.h>
+  MotorsPWM motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
@@ -332,7 +342,8 @@
   GyroMultipilot gyro;
   #include <ReceiverMultipilot.h>
   ReceiverMultipilot receiver;
-  Motors_I2C motors;
+  #include <MotorsMultipilotI2C.h>
+  MotorsMultipilotI2C motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
