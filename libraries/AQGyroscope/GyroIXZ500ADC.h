@@ -70,7 +70,7 @@ public:
         findZero[i] = analogReadOilpanADC(gyroChannel[calAxis]);
         delay(2);
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);

@@ -360,12 +360,6 @@ void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 
-//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-//float findMode(float *data, int arraySize); // defined in Sensors.pde
-//#else
-//int findMode(int *data, int arraySize); // defined in Sensors.pde
-//#endif
-
 // FUNCTION: return the number of bytes currently free in RAM      
 extern int  __bss_end; // used by freemem 
 extern int  *__brkval; // used by freemem

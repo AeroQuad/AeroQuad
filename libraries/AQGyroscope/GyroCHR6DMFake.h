@@ -72,9 +72,9 @@ public:
         zeroZreads[i] = fakeGyroYaw;
     }
 
-    gyroZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    gyroZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    gyroZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    gyroZero[XAXIS] = findModeFloat(zeroXreads, FINDZERO);
+    gyroZero[YAXIS] = findModeFloat(zeroYreads, FINDZERO);
+    gyroZero[ZAXIS] = findModeFloat(zeroZreads, FINDZERO);
 
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);

@@ -66,7 +66,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g

@@ -109,7 +109,7 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
         delay(1);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value

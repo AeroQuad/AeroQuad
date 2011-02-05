@@ -74,7 +74,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
   }
 };

@@ -20,8 +20,6 @@
 
 #include <AQMath.h>
 
-
-
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor) {
   if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
@@ -233,15 +231,9 @@ float arctan2(float y, float x)
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize) 
+float findModeFloat(float *data, int arraySize) //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
 {
   float temp;
-#else
-int findMode(int *data, int arraySize) 		//Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
-{                  
-  int temp;
-#endif
   boolean done = 0;
   byte i;
   
@@ -264,4 +256,29 @@ int findMode(int *data, int arraySize) 		//Thanks ala42! Post: http://aeroquad.c
   return data[arraySize/2]; // return the median value
 }
 
+
+int findModeInt(int *data, int arraySize) 		
+{                  
+  int temp;
+  boolean done = 0;
+  byte i;
+  
+   // Sorts numbers from lowest to highest
+  while (done != 1) 
+  {        
+    done = 1;
+    for (i=0; i<(arraySize-1); i++) 
+	{
+      if (data[i] > data[i+1]) 	// numbers are out of order - swap
+	  {     
+        temp = data[i+1];
+        data[i+1] = data[i];
+        data[i] = temp;
+        done = 0;
+      }
+    }
+  }
+  
+  return data[arraySize/2]; // return the median value
+}
 

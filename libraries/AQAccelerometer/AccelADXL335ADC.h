@@ -66,7 +66,7 @@ public:
         findZero[i] = analogReadOilpanADC(accelChannel[calAxis]);
         delay(2);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
