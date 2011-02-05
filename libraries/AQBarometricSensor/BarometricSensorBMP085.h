@@ -21,75 +21,18 @@
 // Class to define sensors that can determine altitude
 
 // ***********************************************************************
-// ************************** Altitude Class *****************************
+// ************************** BarometricSensor Class *********************
 // ***********************************************************************
 
-class Altitude {
-public:
-  double altitude, rawAltitude;
-  float groundTemperature; // remove later
-  float groundPressure; // remove later
-  float groundAltitude;
-  float smoothFactor;
-  
-  Altitude (void) { 
-    altitude = 0;
-    smoothFactor = 0.02;
-  }
+#ifndef _BAROMETRIC_SENSOR_BMP085_H
+#define _BAROMETRIC_SENSOR_BMP085_H
 
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData(void) {
-    return altitude - groundAltitude;
-  }
-  
-  const float getRawData(void) {
-    return rawAltitude;
-  }
-  
-  void setStartAltitude(float value) {
-    altitude = value;
-  }
-  
-  void measureGround(void) {
-    // measure initial ground pressure (multiple samples)
-    groundAltitude = 0;
-    for (int i=0; i < 25; i++) {
-      measure();
-      delay(26);
-      groundAltitude += rawAltitude;
-    }
-    groundAltitude = groundAltitude / 25.0;
-  }
-  
-  void setGroundAltitude(float value) {
-    groundAltitude = value;
-  }
-  
-  const float getGroundAltitude(void) {
-    return groundAltitude;
-  }
-  
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
-  
-  const float getSmoothFactor(void) {
-    return smoothFactor;
-  }
-};
+#include <BarometricSensor.h>
 
 // ***********************************************************************
 // ************************* BMP085 Subclass *****************************
 // ***********************************************************************
-class Altitude_AeroQuad_v2 : public Altitude {
+class BarometricSensorBMP085 : public BarometricSensor {
 // This sets up the BMP085 from Sparkfun
 // Code from http://wiring.org.co/learning/libraries/bmp085.html
 // Also made bug fixes based on BMP085 library from Jordi Munoz and Jose Julio
@@ -132,7 +75,7 @@ private:
   }
 
 public: 
-  Altitude_AeroQuad_v2() : Altitude(){
+  BarometricSensorBMP085() : BarometricSensor() {
     altitudeAddress = 0x77;
     // oversampling setting
     // 0 = ultra low power
@@ -251,4 +194,4 @@ public:
   }
 };
 
-
+#endif
