@@ -56,7 +56,7 @@
 // *******************************************************************************************************************************
 #define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // jihlein: Wireless telemetry enable
 
@@ -81,7 +81,6 @@
 #include "I2C.h"
 #include "PID.h"
 #include <AQMath.h>
-#include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Motors.h"
 
@@ -91,7 +90,8 @@
   AccelADXL335 accel;
   #include <GyroIXZ500.h>
   GyroIXZ500 gyro;
-  Receiver_AeroQuad receiver;
+  #include <Receiver328.h>
+  Receiver328 receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -107,7 +107,8 @@
   AccelADXL335 accel;
   #include <GyroIXZ500.h>
   GyroIXZ500 gyro;
-  Receiver_AeroQuad receiver;
+  #include <Receiver328.h>
+  Receiver328 receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -123,23 +124,24 @@
   AccelBMA180 accel;
   #include <GyroITG3200.h>
   GyroITG3200 gyro;
-  Receiver_AeroQuad receiver;
+  #include <Receiver328.h>
+  Receiver328 receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    #include "MagnetometerHMC5843.h"
+    MagnetometerHMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include <BarometricSensorBMP085.h>
     BarometricSensorBMP085 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #include "BatteryMonitorAeroQuad.h"
+    BatteryMonitorAeroQuad batteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -155,7 +157,8 @@
   #include <GyroIXZ500.h>
   GyroIXZ500 gyro;
   Motors_PWM motors;
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver1280.h>
+  Receiver1280 receiver;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -170,23 +173,24 @@
   AccelBMA180 accel;
   #include <GyroITG3200.h>
   GyroITG3200 gyro;
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver1280.h>
+  Receiver1280 receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    #include "MagnetometerHMC5843.h"
+    MagnetometerHMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include <BarometricSensorBMP085.h>
     BarometricSensorBMP085 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #include "BatteryMonitorAeroQuad.h"
+    BatteryMonitorAeroQuad batteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -200,7 +204,8 @@
   AccelADXL335ADC accel;
   #include <GyroIXZ500ADC.h>
   GyroIXZ500ADC gyro;
-  Receiver_ArduCopter receiver;
+  #include <ReceiverAPM.h>
+  ReceiverAPM receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -210,8 +215,8 @@
     BarometricSensorBMP085 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #include "BatteryMonitorAPM.h"
+    BatteryMonitorAPM batteryMonitor;
   #endif
 #endif
 
@@ -220,7 +225,8 @@
   AccelWii accel;
   #include <GyroWii.h>
   GyroWii gyro;
-  Receiver_AeroQuad receiver;
+  #include <Receiver328.h>
+  Receiver328 receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
@@ -237,7 +243,8 @@
   AccelWii accel;
   #include <GyroWii.h>
   GyroWii gyro;
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver1280.h>
+  Receiver1280 receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -254,20 +261,21 @@
   AccelCHR6DM accel;
   #include <GyroCHR6DM.h>
   GyroCHR6DM gyro;
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver1280.h>
+  Receiver1280 receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #include "MagnetometerCHR6DM.h"
+  MagnetometerCHR6DM compass;
   #ifdef AltitudeHold
     #include <BarometricSensorBMP085.h>
     BarometricSensorBMP085 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #include "BatteryMonitorAPM.h"
+    BatteryMonitorAPM batteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -280,20 +288,21 @@
   AccelCHR6DM accel;
   #include <GyroCHR6DM.h>
   GyroCHR6DM gyro;
-  Receiver_ArduCopter receiver;
+  #include <ReceiverAPM.h>
+  ReceiverAPM receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #include "MagnetometerCHR6DM.h"
+  MagnetometerCHR6DM compass;
   #ifdef AltitudeHold
     #include <BarometricSensorBMP085.h>
     BarometricSensorBMP085 altitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #include "BatteryMonitorAPM.h"
+    BatteryMonitorAPM batteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -306,7 +315,8 @@
   AccelAeroQuadV1 accel;
   #include <GyroMultipilot.h>
   GyroMultipilot gyro;
-  Receiver_Multipilot receiver;
+  #include <ReceiverMultipilot.h>
+  ReceiverMultipilot receiver;
   Motors_PWM motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
@@ -320,7 +330,8 @@
   AccelAeroQuadV1 accel;
   #include <GyroMultipilot.h>
   GyroMultipilot gyro;
-  Receiver_Multipilot receiver;
+  #include <ReceiverMultipilot.h>
+  ReceiverMultipilot receiver;
   Motors_I2C motors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
