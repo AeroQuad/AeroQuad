@@ -97,8 +97,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -115,8 +115,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -145,8 +145,8 @@
     BatteryMonitorAeroQuad batteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -165,8 +165,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -197,8 +197,8 @@
     BatteryMonitorAeroQuad batteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -239,8 +239,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -257,8 +257,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -286,8 +286,8 @@
     BatteryMonitorAPM batteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -314,8 +314,8 @@
     BatteryMonitorAPM batteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+    #include "CameraAeroQuad.h"
+    CameraAeroQuad camera;
   #endif
 #endif
 
@@ -512,9 +512,9 @@ void loop () {
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-      camera.setPitch(flightAngle.getData(PITCH));
-      camera.setRoll(flightAngle.getData(ROLL));
-      camera.setYaw(flightAngle.getData(YAW));
+      camera.setPitch(_flightAngle->getData(PITCH));
+      camera.setRoll(_flightAngle->getData(ROLL));
+      camera.setYaw(_flightAngle->getData(YAW));
       camera.move();
       cameraTime = currentTime + CAMERALOOPTIME;
     }
