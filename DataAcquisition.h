@@ -169,7 +169,7 @@ void updateControls() {
 #endif
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    #include "CHR6DM.h"
+    #include <CHR6DM.h>
     CHR6DM chr6dm;
 
     void initCHR6DM(){
