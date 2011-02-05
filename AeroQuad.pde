@@ -83,16 +83,16 @@
 #include <AQMath.h>
 #include "Receiver.h"
 #include "DataAcquisition.h"
-//#include "Accel.h"
-#include "Gyro.h"
 #include "Motors.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
-  #include <AccelAeroQuadV1.h>
-  AccelAeroQuadV1 accel;
+  #include <AccelADXL335.h>
+  AccelADXL335 accel;
   
-  Gyro_AeroQuad_v1 gyro;
+  #include <GyroIXZ500.h>
+  GyroIXZ500 gyro;
+  
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -105,10 +105,12 @@
 #endif
 
 #ifdef AeroQuad_v1_IDG
-  #include <AccelAeroQuadV1.h>
-  AccelAeroQuadV1 accel;
+  #include <AccelADXL335.h>
+  AccelADXL335 accel;
 
-  Gyro_AeroQuad_v1 gyro;
+  #include <GyroIXZ500.h>
+  GyroIXZ500 gyro;
+  
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -124,7 +126,9 @@
   #include <AccelBMA180.h>
   AccelBMA180 accel;
   
-  Gyro_AeroQuadMega_v2 gyro;
+  #include <GyroITG3200.h>
+  GyroITG3200 gyro;
+  
   Receiver_AeroQuad receiver;
 //  Motors_PWM motors;
   Motors_PWMtimer motors;
@@ -153,10 +157,12 @@
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
-  #include <AccelAeroQuadV1.h>
-  AccelAeroQuadV1 accel;
+  #include <AccelADXL335.h>
+  AccelADXL335 accel;
 
-  Gyro_AeroQuad_v1 gyro;
+  #include <GyroIXZ500.h>
+  GyroIXZ500 gyro;
+
   Motors_PWM motors;
   Receiver_AeroQuadMega receiver;
   #include "FlightAngle.h"
@@ -172,7 +178,9 @@
   #include <AccelBMA180.h>
   AccelBMA180 accel;
 
-  Gyro_AeroQuadMega_v2 gyro;
+  #include <GyroITG3200.h>
+  GyroITG3200 gyro;
+
   
   Receiver_AeroQuadMega receiver;
   Motors_PWMtimer motors;
@@ -201,10 +209,12 @@
 
 #ifdef ArduCopter
   #include <AQADC.h>
-  #include <AccelADXL335.h>
-  AccelADXL335 accel;
+  #include <AccelADXL335ADC.h>
+  AccelADXL335ADC accel;
   
-  Gyro_ArduCopter gyro;
+  #include <GyroIXZ500ADC.h>
+  GyroIXZ500ADC gyro;
+  
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
@@ -224,7 +234,9 @@
   #include <AccelWii.h>
   AccelWii accel;
   
-  Gyro_Wii gyro;
+  #include <GyroWii.h>
+  GyroWii gyro;
+  
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -241,7 +253,9 @@
   #include <AccelWii.h>
   AccelWii accel;
   
-  Gyro_Wii gyro;
+  #include <GyroWii.h>
+  GyroWii gyro;
+  
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -257,7 +271,9 @@
   #include <AccelCHR6DM.h>
   AccelCHR6DM accel;
   
-  Gyro_CHR6DM gyro;
+  #include <GyroCHR6DM.h>
+  GyroCHR6DM gyro;
+  
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -283,7 +299,9 @@
   #include <AccelCHR6DM.h>
   AccelCHR6DM accel;
   
-  Gyro_CHR6DM gyro;
+  #include <GyroCHR6DM.h>
+  GyroCHR6DM gyro;
+  
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
@@ -309,7 +327,8 @@
   #include <AccelAeroQuadV1.h>
   AccelAeroQuadV1 accel;
 
-  Gyro_AeroQuad_v1 gyro;
+  #include <GyroMultipilot.h>
+  GyroMultipilot gyro;
   Receiver_Multipilot receiver;
   Motors_PWM motors;
   //#define PRINT_MIXERTABLE
@@ -323,7 +342,9 @@
   #include <AccelAeroQuadV1.h>
   AccelAeroQuadV1 accel;
 
-  Gyro_AeroQuad_v1 gyro;
+  #include <GyroMultipilot.h>
+  GyroMultipilot gyro;
+
   Receiver_Multipilot receiver;
   Motors_I2C motors;
   //#define PRINT_MIXERTABLE

@@ -18,41 +18,41 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _ACCEL_AEROQUAD_V1_H_
-#define _ACCEL_AEROQUAD_V1_H_
+#ifndef _ACCEL_ADXL335_ADC_H_
+#define _ACCEL_ADXL335_ADC_H_
 
 #include <Accelerometer.h>
+#include <AQADC.h>
 
-class AccelAeroQuadV1 : public Accelerometer {
+class AccelADXL335ADC : public Accelerometer {
 private:
-  
+  int findZero[FINDZERO];
+  int rawADC;
+
 public:
-  AccelAeroQuadV1() : Accelerometer(){
-    // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;
+  AccelADXL335ADC() : Accelerometer(){
+    // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
+    // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
+    // Tested value : 414
+    // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
+    // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
+    accelScaleFactor = 414.0 / 9.81;    
   }
   
   void initialize(void) {
-    // rollChannel = 1
-    // pitchChannel = 0
-    // zAxisChannel = 2
-    this->_initialize(1, 0, 2);
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
+    // rollChannel = 5
+    // pitchChannel = 4
+    // zAxisChannel = 6
+    this->_initialize(5, 4, 6);
   }
   
   void measure(void) {
-    currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = filterSmooth(accelADC[axis], accelData[axis], smoothFactor);
+      rawADC = analogReadOilpanADC(accelChannel[axis]);
+      if (rawADC > 500) // Check if measurement good
+        accelADC[axis] = rawADC - accelZero[axis];
+      accelData[axis] = accelADC[axis]; // no smoothing needed
     }
-    previousTime = currentTime;
   }
 
   const int getFlightData(byte axis) {
@@ -61,19 +61,20 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    int findZero[FINDZERO];
-
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(accelChannel[calAxis]);
+    for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        findZero[i] = analogReadOilpanADC(accelChannel[calAxis]);
+        delay(2);
+      }
       accelZero[calAxis] = findMode(findZero, FINDZERO);
     }
-    
+
     // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
+//    accelOneG = accelZero[ZAXIS];
+    accelOneG = getRaw(ZAXIS);
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-    
+   
     writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
