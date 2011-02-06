@@ -23,6 +23,8 @@
 #ifndef _MAGNETOMETER_H_
 #define _MAGNETOMETER_H_
 
+#include "WProgram.h"
+
 // ***********************************************************************
 // ************************** Magnetometer Class *************************
 // ***********************************************************************
@@ -36,48 +38,29 @@ public:
   float magScale[3];
   float magOffset[3];
 
-  Magnetometer(void) {}
-
+  Magnetometer(void);
+  
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
   virtual void initialize(void); 
-  virtual void measure(void); 
+  virtual void measure(float angleRoll, float anglePitch); 
+  virtual const int getRawData(byte axis);
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData(void) {
-    return compass;
-  }
+  const float getData(void);
   
-  const float getHeading(void) {
-    return heading;
-  }
+  const float getHeading(void);
   
-  const float getAbsoluteHeading(void) {
-    return absoluteHeading;
-  }
+  const float getAbsoluteHeading(void);
   
-  void setMagCal(byte axis, float maxValue, float minValue) {
-    magMax[axis] = maxValue;
-    magMin[axis] = minValue;
-    // Assume max/min is scaled to +1 and -1
-    // y2 = 1, x2 = max; y1 = -1, x1 = min
-    // m = (y2 - y1) / (x2 - x1)
-    // m = 2 / (max - min)
-    magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
-    // b = y1 - mx1; b = -1 - (m * min)
-    magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
-  }
+  void setMagCal(byte axis, float maxValue, float minValue);
   
-  const float getMagMax(byte axis) {
-    return magMax[axis];
-  }
+  const float getMagMax(byte axis);
   
-  const float getMagMin(byte axis) {
-    return magMin[axis];
-  }
+  const float getMagMin(byte axis);
 };
 
 #endif

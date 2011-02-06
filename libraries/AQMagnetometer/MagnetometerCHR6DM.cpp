@@ -20,27 +20,31 @@
 
 // Class to define sensors that can determine absolute heading
 
-#ifndef _MAGNETOMETER_CHR6DM_H_
-#define _MAGNETOMETER_CHR6DM_H_
 
-#include <Magnetometer.h>
-#include <CHR6DM.h>
+#include "MagnetometerCHR6DM.h"
 
-// ***********************************************************************
-// ************************ MagnetometerCHR6DM Subclass ******************
-// ***********************************************************************
-class MagnetometerCHR6DM : public Magnetometer {
-private:
-  CHR6DM *_chr6dm;
-  
-public:
-  MagnetometerCHR6DM(CHR6DM chr6dm);
-  
-  void initialize(void);
-  
-  void measure(float angleRoll, float anglePitch);
-  
-  const int getRawData(byte axis);
-};
+MagnetometerCHR6DM::MagnetometerCHR6DM(CHR6DM chr6dm)
+{
+  _chr6dm = &chr6dm;
+}
 
-#endif
+void MagnetometerCHR6DM::initialize(void) {}
+  
+void MagnetometerCHR6DM::measure(float angleRoll, float anglePitch)
+{
+  heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
+  // Change from +/-180 to 0-360
+  if (heading < 0) 
+  {
+    absoluteHeading = 360 + heading;
+  }
+  else 
+  {
+	absoluteHeading = heading;
+  }
+}
+  
+const int MagnetometerCHR6DM::getRawData(byte axis)
+{
+  return absoluteHeading;
+}

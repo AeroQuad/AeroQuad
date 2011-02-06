@@ -26,13 +26,13 @@ void readSensors(void) {
   gyro.measure(); // defined in Gyro.h
   accel.measure(); // defined in Accel.h
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    compass.measure();
+    compass.measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH));
   #endif
  
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
     if (currentTime > compassTime) {
-      compass.measure(); // defined in compass.h
+      compass.measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH)); // defined in compass.h
       compassTime = currentTime + COMPASSLOOPTIME;
     }
   #endif
