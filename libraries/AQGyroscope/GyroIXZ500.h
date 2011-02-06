@@ -22,61 +22,25 @@
 #define _GYRO_IXZ500_H_
 
 #include <Gyroscope.h>
+#include <AxisDefine.h>
+#include <EEPROMAddress.h>
+#include <AQDataStorage.h>
+
+#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 class GyroIXZ500 : public Gyroscope {
 public:
-  GyroIXZ500() : Gyroscope() {
-    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-  }
+  GyroIXZ500();
   
-  void initialize(void) {
-    analogReference(EXTERNAL);
-    // Configure gyro auto zero pins
-    pinMode (AZPIN, OUTPUT);
-    digitalWrite(AZPIN, LOW);
-    delay(1);
+  void initialize(void);
+  
+  void measure(void);
 
-    // rollChannel = 4
-    // pitchChannel = 3
-    // yawChannel = 5
-    this->_initialize(4,3,5);
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-  }
+  const int getFlightData(byte axis);
   
-  void measure(void) {
-    currentTime = micros();
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
-      gyroData[axis] = filterSmooth(gyroADC[axis], gyroData[axis], smoothFactor);
-    }
-    previousTime = currentTime;
-  }
-
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
+  void calibrate();
   
- void calibrate() {
-    autoZero();
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
-  
-  void autoZero() {
-    int findZero[FINDZERO];
-    digitalWrite(AZPIN, HIGH);
-    delayMicroseconds(750);
-    digitalWrite(AZPIN, LOW);
-    delay(8);
-
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
-    }
-  }
+  void autoZero();
 };
 
 #endif
