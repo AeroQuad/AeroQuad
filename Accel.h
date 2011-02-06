@@ -303,9 +303,9 @@ public:
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     // store accel value that represents 1g
-//    measure();
-//    accelOneG = getRaw(ZAXIS);
-    accelOneG = 8274; // mesured value at flat level with configurator
+    measure();
+    accelOneG = getRaw(ZAXIS);
+    //accelOneG = 8274; // mesured value at flat level with configurator
     
     writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
@@ -372,9 +372,8 @@ public:
     }
 
     // store accel value that represents 1g
-//    accelOneG = accelZero[ZAXIS];
-//    accelOneG = getRaw(ZAXIS);
-    accelOneG = 486;    // tested value with the configurator at flat level
+    accelOneG = accelZero[ZAXIS];
+    //accelOneG = 486;    // tested value with the configurator at flat level
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
    
