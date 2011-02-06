@@ -38,9 +38,11 @@ class AQADC
 {
 private:
 public:
- void initializeOilpanADC(void);
- int analogReadOilpanADC(unsigned char ch_num);
- void zeroOilpanADC(void);
+  AQADC();
+  
+  void initializeOilpanADC(void);
+  int analogReadOilpanADC(unsigned char ch_num);
+  void zeroOilpanADC(void);
 };
 
 #endif  // _AQ_ADC_H_

@@ -74,7 +74,8 @@ void AccelADXL335::calibrate(void)
   }
     
   // store accel value that represents 1g
-  accelOneG = accelZero[ZAXIS];
+//  accelOneG = accelZero[ZAXIS];
+  accelOneG = 500;
   // replace with estimated Z axis 0g value
   accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     

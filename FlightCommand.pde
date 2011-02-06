@@ -33,7 +33,7 @@ void readPilotCommands() {
       armed = OFF;
       motors.commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-      digitalWrite(LED_Red, LOW);
+        digitalWrite(LED_Red, LOW);
       #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
@@ -46,33 +46,33 @@ void readPilotCommands() {
       #endif
       zeroIntegralError();
       #ifndef BatteryMonitor
-      motors.pulseMotors(3);
+        motors.pulseMotors(3);
       #endif
       #ifdef BatteryMonitor
-      ledCW(); ledCW(); ledCW();
+        ledCW(); ledCW(); ledCW();
       #endif
       #ifdef ArduCopter
         _aqAdc.zeroOilpanADC();
       #endif
     }   
     // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
-    if ((receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
-      accel.calibrate(); // defined in Accel.h
-      zeroIntegralError();
-      motors.pulseMotors(3);
-      #ifdef ArduCopter
-        _aqAdc.zeroOilpanADC();
-      #endif
-    }   
-    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
-    if ((receiver.getRaw(ROLL) < MINCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
-      gyro.calibrate();
-      zeroIntegralError();
-      motors.pulseMotors(4);
-      #ifdef ArduCopter
-        _aqAdc.zeroOilpanADC();
-      #endif
-    }
+//    if ((receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
+//      accel.calibrate(); // defined in Accel.h
+//      zeroIntegralError();
+//      motors.pulseMotors(3);
+//      #ifdef ArduCopter
+//        _aqAdc.zeroOilpanADC();
+//      #endif
+//    }   
+//    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
+//    if ((receiver.getRaw(ROLL) < MINCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
+//      gyro.calibrate();
+//      zeroIntegralError();
+//      motors.pulseMotors(4);
+//      #ifdef ArduCopter
+//        _aqAdc.zeroOilpanADC();
+//      #endif
+//    }
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();

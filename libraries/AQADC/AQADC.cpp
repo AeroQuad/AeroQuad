@@ -66,6 +66,10 @@ ISR (TIMER2_OVF_vect)
   TCNT2 = 104;        // 400 Hz
 }
 
+AQADC::AQADC()
+{
+}
+
 void AQADC::initializeOilpanADC(void) 
 {
   pinMode(ADC_CHIP_SELECT,OUTPUT);
@@ -81,7 +85,6 @@ void AQADC::initializeOilpanADC(void)
   UCSR2B = (1<<RXEN2)|(1<<TXEN2);
   // Set Baud rate
   UBRR2 = 2; // SPI clock running at 2.6MHz
-
 
   // Enable Timer2 Overflow interrupt to capture ADC data
   TIMSK2 = 0;  // Disable interrupts 
@@ -109,7 +112,7 @@ int AQADC::analogReadOilpanADC(unsigned char ch_num)
   sei();
   return(result);
 }
-  
+
 void AQADC::zeroOilpanADC(void) 
 {
   for (byte n; n<8; n++) 

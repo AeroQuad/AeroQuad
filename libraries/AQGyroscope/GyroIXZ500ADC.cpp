@@ -42,7 +42,7 @@ void GyroIXZ500ADC::initialize(void)
   // pitchChannel = 2
   // yawChannel = 0
   this->_initialize(1, 2, 0);
-  _aqAdc->initializeOilpanADC(); // this is needed for both gyros and accels, done once in this class
+  _aqAdc->initializeOilpanADC();
 }
   
 void GyroIXZ500ADC::measure(void) 
@@ -70,7 +70,7 @@ void GyroIXZ500ADC::calibrate()
     for (int i=0; i<FINDZERO; i++) 
 	{
       findZero[i] = _aqAdc->analogReadOilpanADC(gyroChannel[calAxis]);
-      delay(2);
+      delay(5);
     }
     gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
   }

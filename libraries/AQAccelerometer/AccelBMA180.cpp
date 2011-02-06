@@ -117,9 +117,11 @@ void AccelBMA180::calibrate(void)
   // replace with estimated Z axis 0g value
   accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
   // store accel value that represents 1g
-  measure();
-  accelOneG = getRaw(ZAXIS);
+//  measure();
+//  accelOneG = getRaw(ZAXIS);
+  accelOneG = 8261;   // mesured value with the configurator
 
+  
   writeFloat(accelOneG, ACCEL1G_ADR);
   writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
   writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);

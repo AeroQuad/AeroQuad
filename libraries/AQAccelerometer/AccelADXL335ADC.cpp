@@ -20,7 +20,6 @@
 
 #include <AccelADXL335ADC.h>
 
-
 AccelADXL335ADC::AccelADXL335ADC(AQADC aqAdc)
 {
   _aqAdc = &aqAdc;
@@ -38,6 +37,7 @@ void AccelADXL335ADC::initialize(void)
   // pitchChannel = 4
   // zAxisChannel = 6
   this->_initialize(5, 4, 6);
+  _aqAdc->initializeOilpanADC();
 }
   
 void AccelADXL335ADC::measure(void) 
@@ -66,14 +66,15 @@ void AccelADXL335ADC::calibrate(void)
     for (int i=0; i<FINDZERO; i++) 
 	{
       findZero[i] = _aqAdc->analogReadOilpanADC(accelChannel[calAxis]);
-      delay(2);
+      delay(5);
     }
     accelZero[calAxis] = findModeInt(findZero, FINDZERO);
   }
 
   // store accel value that represents 1g
 //    accelOneG = accelZero[ZAXIS];
-  accelOneG = getRaw(ZAXIS);
+//  accelOneG = getRaw(ZAXIS);
+  accelOneG = 500;
   // replace with estimated Z axis 0g value
   accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
    

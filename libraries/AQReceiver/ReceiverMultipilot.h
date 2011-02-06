@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _RECEIVER_1280_H_
-#define _RECEIVER_1280_H_
+#ifndef _RECEIVER_MULTIPILOT_H_
+#define _RECEIVER_MULTIPILOT_H_
 
 #include <Receiver.h>
 
