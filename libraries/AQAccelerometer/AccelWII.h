@@ -22,65 +22,31 @@
 #define _ACCEL_WII_H_
 
 #include <Accelerometer.h>
+#include <AxisDefine.h>
+#include <EEPROMAddress.h>
+#include <AQDataStorage.h>
+#include <WiiSensors.h>
 
-class AccelWii : public Accelerometer {
+class AccelWii : public Accelerometer 
+{
+private:
+  unsigned long currentTime;
+  unsigned long previousTime;
+  WiiSensors *_wiiSensors;
+  
 public:
-  AccelWii() : Accelerometer(){
-    accelScaleFactor = 0;    
-  }
+  AccelWii(WiiSensors WiiSensors);
   
-  void initialize(void) {
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
-    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
-    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
-    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-    accelOneG = readFloat(ACCEL1G_ADR);
-  }
+  void initialize(void);
   
-  void measure(void) {
-    currentTime = micros();
-    // Actual measurement performed in gyro class
-    // We just update the appropriate variables here
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
-      accelData[axis] = filterSmoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
-    }
-    previousTime = currentTime;
-  }
+  void measure(void);
   
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
+  const int getFlightData(byte axis);
  
   // Allows user to zero accelerometers on command
-  void calibrate(void) {
-    int findZero[FINDZERO];
+  void calibrate(void);
 
-    for(byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        updateControls();
-        findZero[i] = NWMP_acc[calAxis];
-      }
-      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
-    }
-    
-    // store accel value that represents 1g
-    accelOneG = getRaw(ZAXIS);
-    // replace with estimated Z axis 0g value
-    accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-    
-    writeFloat(accelOneG, ACCEL1G_ADR);
-    writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
-    writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
-    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
-  }
-
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
+  void calculateAltitude(unsigned long currentTime, unsigned long previousTime);
 };
 
 #endif

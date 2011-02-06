@@ -23,55 +23,31 @@
 
 #include <Gyroscope.h>
 
-class GyroWii : public Gyroscope {
+#include <AxisDefine.h>
+#include <EEPROMAddress.h>
+#include <AQDataStorage.h>
+#include <WiiSensors.h>
+
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+
+class GyroWii : public Gyroscope 
+{
 private:
-
+  WiiSensors *_wiiSensors;
+  
 public:
-  GyroWii() : Gyroscope() {
-    // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
-    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
-    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
-    gyroFullScaleOutput = 2000;
-    gyroScaleFactor = 0.069565217391304;
-  }
+  GyroWii(WiiSensors WiiSensors);
   
-  void initialize(void) {
-    Init_Gyro_Acc(); // defined in DataAquisition.h
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-  }
+  void initialize(void);
   
-  void measure(void) {
-   currentTime = micros();
-    updateControls(); // defined in DataAcquisition.h
-    gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
-    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[PITCH] = gyroZero[PITCH] - NWMP_gyro[PITCH];
-    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[YAW] =  gyroZero[YAW] - NWMP_gyro[YAW];
-    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-   previousTime = currentTime;
-  }
+  void measure(void);
 
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
+  const int getFlightData(byte axis);
 
-  void calibrate() {
-    int findZero[FINDZERO];
-  
-	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        updateControls();
-        findZero[i] = NWMP_gyro[calAxis];
-      }
-      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
-    }
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
+  void calibrate();
 };
 #endif
