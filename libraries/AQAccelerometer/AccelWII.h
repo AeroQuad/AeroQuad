@@ -46,7 +46,7 @@ public:
   // Allows user to zero accelerometers on command
   void calibrate(void);
 
-  void calculateAltitude(unsigned long currentTime, unsigned long previousTime);
+  void calculateAltitude(void);
 };
 
 #endif
