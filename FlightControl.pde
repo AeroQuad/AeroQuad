@@ -1,27 +1,27 @@
 /*
-  AeroQuad v2.1 - January 2011
- www.AeroQuad.com
- Copyright (c) 2011 Ted Carancho.  All rights reserved.
- An Open Source Arduino based multicopter.
+  AeroQuad v2.2 - Feburary 2011
+  www.AeroQuad.com
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
  
- This program is free software: you can redistribute it and/or modify 
- it under the terms of the GNU General Public License as published by 
- the Free Software Foundation, either version 3 of the License, or 
- (at your option) any later version. 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
  
- This program is distributed in the hope that it will be useful, 
- but WITHOUT ANY WARRANTY; without even the implied warranty of 
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- GNU General Public License for more details. 
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
  
- You should have received a copy of the GNU General Public License 
- along with this program. If not, see <http://www.gnu.org/licenses/>. 
- */
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+*/
 
 // FlightControl.pde is responsible for combining sensor measurements and
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
-#define MAX_CONTROL_OUTPUT 250
+#define MAX_CONTROL_OUTPUT 500
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// ArduPirateSuperStableProcessor ///////////////////
@@ -32,9 +32,13 @@ void processArdupirateSuperStableMode(void)
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
   float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
-  errorRoll = constrain(errorRoll,-50,50);                    
-  PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
-  PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
+  errorRoll = constrain(errorRoll,-50,50);
+  if (receiver.getAngle(ROLL) < 30) {
+    PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
+    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
+  }
+  else
+    PID[LEVELROLL].integratedError = 0;
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
   errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
   motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -42,8 +46,12 @@ void processArdupirateSuperStableMode(void)
   // PITCH
   float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
   errorPitch = constrain(errorPitch,-50,50);                    
-  PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
-  PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
+  if (receiver.getAngle(PITCH) < 30) {
+    PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
+  }
+  else
+    PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
   errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
   motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -205,6 +213,8 @@ void processAltitudeHold(void)
   // holdThrottle set in FlightCommand.pde if altitude hold is on
   throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
+  //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
+  //throttle = receiver.getData(THROTTLE) - zDampening + autoDescent; 
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
@@ -287,16 +297,16 @@ void processHardManuevers()
 //////////////////////////////////// X MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void processFlightControlXMode(void) {
-  // ***************************** Calculate Flight Error ***************************
+  // ********************** Calculate Flight Error ***************************
   calculateFlightError();
   
-  // ***************************** Update Yaw ***************************
+  // ********************** Update Yaw ***************************************
   processHeading();
 
-  // ****************************** Altitude Adjust *************************
+  // ********************** Altitude Adjust **********************************
   processAltitudeHold();
 
-  // *********************** Calculate Motor Commands **********************
+  // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
     motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
@@ -309,7 +319,7 @@ void processFlightControlXMode(void) {
 #endif
   } 
 
-  // ***************************** process min max motor command ***************************
+  // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
@@ -344,16 +354,16 @@ void processFlightControlXMode(void) {
 ///////////////////////////////// PLUS MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void processFlightControlPlusMode(void) {
-  // ***************************** Calculate Flight Error ***************************
+  // ********************** Calculate Flight Error ***************************
   calculateFlightError();
-
-  // ***************************** Update Yaw ***************************
+  
+  // ********************** Update Yaw ***************************************
   processHeading();
 
-  // ****************************** Altitude Adjust *************************
+  // ********************** Altitude Adjust **********************************
   processAltitudeHold();
 
-  // *********************** Calculate Motor Commands **********************
+  // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     motors.setMotorCommand(FRONT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
@@ -365,7 +375,7 @@ void processFlightControlPlusMode(void) {
 #endif
   } 
 
-  // ****************************** process min max motor command *************************
+  // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers

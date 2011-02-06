@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -30,7 +30,7 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -120,8 +120,7 @@
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
-  Motors_PWM motors;
-  //Motors_PWMtimer motors;
+  Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -195,6 +194,10 @@
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Compass_AeroQuad_v2 compass;
+  #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
@@ -467,9 +470,9 @@ void loop () {
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-      camera.setPitch(flightAngle.getData(PITCH));
-      camera.setRoll(flightAngle.getData(ROLL));
-      camera.setYaw(flightAngle.getData(YAW));
+      camera.setPitch(_flightAngle->getData(PITCH));
+      camera.setRoll(_flightAngle->getData(ROLL));
+      camera.setYaw(_flightAngle->getData(YAW));
       camera.move();
       cameraTime = currentTime + CAMERALOOPTIME;
     }

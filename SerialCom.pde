@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -147,7 +147,7 @@ void readSerialCommand() {
     case 'c': // calibrate accels
       accel.calibrate();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      flightAngle.calibrate();
+      _flightAngle->calibrate();
       accel.setOneG(accel.getFlightData(ZAXIS));
 #endif
       break;
@@ -238,11 +238,7 @@ void sendSerialTelemetry() {
     Serial.print(" Throttle: ");
     Serial.println(throttle);
     */
-  //printFreeMemory();
-    //Serial.print(gyro.getHeading());
-    //comma();
-    //Serial.print(batteryMonitor.getData(), 2);
-    //Serial.println();
+    //printFreeMemory();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -284,7 +280,7 @@ void sendSerialTelemetry() {
     Serial.println(PID[ZDAMPENING].D);
 #else
     for(byte i=0; i<9; i++) {
-      PrintValueComma(0);
+     PrintValueComma(0);
     }
     Serial.println('0');
 #endif

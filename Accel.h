@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -121,21 +121,26 @@ public:
   }
   
   const int getZaxis() {
-    currentAccelTime = micros();
-    zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    previousAccelTime = currentAccelTime;
-    return zAxis;
+    //currentAccelTime = micros();
+    //zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    //previousAccelTime = currentAccelTime;
+    //return zAxis;
+    return accelOneG - getData(ZAXIS);
   }
   
   const float getAltitude(void) {
     return rawAltitude;
+  }
+  
+  const float rateG(const byte axis) {
+    return getData(axis) / accelOneG;
   }
 };
 
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-//#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   
@@ -179,7 +184,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
@@ -200,12 +205,12 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
@@ -254,8 +259,8 @@ public:
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
     data = readByteI2C(accelAddress);
-    data &= 0xF1;
-    updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-1.0g (value = xxxx000x)
+    data &= 0xF1; // +/-1.0g (value = xxxx000x) // 0xF7;(3g)  //0xF5; (2g)
+    updateRegisterI2C(accelAddress, 0x35, data);
   }
   
   void measure(void) {
@@ -292,7 +297,7 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
         delay(1);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value
@@ -300,6 +305,7 @@ public:
     // store accel value that represents 1g
     measure();
     accelOneG = getRaw(ZAXIS);
+    //accelOneG = 8274; // mesured value at flat level with configurator
     
     writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
@@ -314,7 +320,7 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -362,14 +368,15 @@ public:
         findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
         delay(2);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
+    //accelOneG = 486;    // tested value with the configurator at flat level
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-    
+   
     writeFloat(accelOneG, ACCEL1G_ADR);
     writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
@@ -427,11 +434,11 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
+    accelOneG = getRaw(ZAXIS);
     // replace with estimated Z axis 0g value
     accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
     
@@ -475,9 +482,9 @@ public:
       accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
       accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
 
-      accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
-      accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = filterSmoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
+      accelData[YAXIS] = filterSmoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[ZAXIS] = filterSmoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
     previousTime = currentTime;
   }    
 
@@ -501,9 +508,9 @@ public:
     }
 
 
-    accelZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
    
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
@@ -584,9 +591,9 @@ public:
     }
 
 
-    accelZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
 
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
@@ -611,7 +618,7 @@ public:
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-//#if defined(Multipilot) || defined(MultipilotI2C)
+#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   
@@ -658,7 +665,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
@@ -679,4 +686,4 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif

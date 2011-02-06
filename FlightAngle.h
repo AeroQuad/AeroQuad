@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -40,6 +40,7 @@ public:
   virtual void initialize();
   virtual void calculate();
   virtual float getGyroUnbias(byte axis);
+  virtual void calibrate();
  
   const float getData(byte axis) {
     return angle[axis];
@@ -103,6 +104,7 @@ public:
     return gyro.getFlightData(axis);
   }
   
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -168,6 +170,8 @@ public:
   float getGyroUnbias(byte axis) {
     return gyro.getFlightData(axis);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -210,10 +214,10 @@ private:
     vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
     
     // Low pass filter on accelerometer data (to filter vibrations)
-    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.getData(ROLL)*0.4; // acc x
-    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.getData(PITCH)*0.4; // acc y
-    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.getData(ZAXIS)*0.4; // acc z
-  
+    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.rateG(ROLL)*100.0; // acc x
+    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.rateG(PITCH)*100.0; // acc y
+    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.rateG(ZAXIS)*100.0; // acc z
+    
     float updateMatrix[9];
     updateMatrix[0] =  0;
     updateMatrix[1] = -G_Dt*Omega_Vector[2];  // -z
@@ -345,25 +349,8 @@ public:
     dt = 0;
     Gyro_Gain = radians(gyro.getScaleFactor());
     type = DCM;
-    // Future version, these should be defined from Configurator
-    #if defined(ArduCopter) || defined(ArduCopter_I2C)  // jihlein: Added ArduCopter_I2C
-      Kp_ROLLPITCH = 0.025;
-      Ki_ROLLPITCH = 0.00000015;
-    #elif defined(AeroQuad_Wii)
-       Kp_ROLLPITCH = 0.11;
-       Ki_ROLLPITCH = 0.00000015;
-    #elif defined(AeroQuadMega_Wii)
-      Kp_ROLLPITCH = 0.11; //HONK men dubbling dï¿½? 0.22 och 0.001503
-      Ki_ROLLPITCH = 0.0007515; //0.0000005; Kp/Kp factor = 146.2821
-    #elif defined(AeroQuadMega_v1) || defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG)
-       Kp_ROLLPITCH = 0.11;
-       Ki_ROLLPITCH = 0.00000015;
-    #else
-      //Kp_ROLLPITCH = 0.0024; //0.01; //0.010;
-      //Ki_ROLLPITCH =  0.00005; //0.0000005;
-      Kp_ROLLPITCH = 0.0014;
-      Ki_ROLLPITCH = 0.00000012; // was 0.00000015
-    #endif
+    Kp_ROLLPITCH = 0.0014;
+    Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
   
   void calculate(void) {
@@ -378,9 +365,11 @@ public:
       return degrees(Omega[1]);
     if (axis == PITCH)
       return degrees(-Omega[0]);
-    if (axis == YAW)
+    else
       return degrees(Omega[2]);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -479,6 +468,7 @@ public:
     return gyro.getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 // ***********************************************************************
@@ -574,6 +564,7 @@ public:
     return gyro.getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 

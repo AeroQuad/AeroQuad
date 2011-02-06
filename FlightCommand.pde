@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -41,16 +41,15 @@ void readPilotCommands() {
       gyro.calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
-       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      flightAngle.calibrate();
-       #endif
+      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+        _flightAngle->calibrate();
+      #endif
       zeroIntegralError();
-      #ifndef BatteryMonitor
       motors.pulseMotors(3);
-      #endif
-      #ifdef BatteryMonitor
-      ledCW(); ledCW(); ledCW();
-      #endif
+      // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
+      //#if defined(BattMonitor) && defined(ArduCopter)
+      //  ledCW(); ledCW(); ledCW();
+      //#endif
       #ifdef ArduCopter
         zero_ArduCopter_ADC();
       #endif
