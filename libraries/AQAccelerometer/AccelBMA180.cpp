@@ -126,13 +126,13 @@ void AccelBMA180::calibrate(void)
   writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
 }
 
-void AccelBMA180::calculateAltitude(unsigned long currentTime, unsigned long previousTime) 
+void AccelBMA180::calculateAltitude(void) 
 {
-  currentTime = micros();
+  currentAccelTime = micros();
   if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
   {
-    rawAltitude += (getZaxis(currentTime,previousTime)) * ((currentTime - previousTime) / 1000000.0);
+    rawAltitude += (getZaxis(currentAccelTime,previousAccelTime)) * ((currentAccelTime - previousAccelTime) / 1000000.0);
   }
-  previousTime = currentTime;
+  previousAccelTime = currentAccelTime;
 } 
 
