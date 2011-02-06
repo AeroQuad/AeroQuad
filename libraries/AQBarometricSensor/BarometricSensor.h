@@ -27,7 +27,8 @@
 #ifndef _BAROMETRIC_SENSOR_H
 #define _BAROMETRIC_SENSOR_H
 
-class BarometricSensor {
+class BarometricSensor 
+{
 public:
   double altitude, rawAltitude;
   float groundTemperature; // remove later
@@ -35,10 +36,7 @@ public:
   float groundAltitude;
   float smoothFactor;
   
-  BarometricSensor (void) { 
-    altitude = 0;
-    smoothFactor = 0.02;
-  }
+  BarometricSensor (void);
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
@@ -49,44 +47,21 @@ public:
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData(void) {
-    return altitude - groundAltitude;
-  }
+  const float getData(void);
   
-  const float getRawData(void) {
-    return rawAltitude;
-  }
+  const float getRawData(void);
   
-  void setStartAltitude(float value) {
-    altitude = value;
-  }
+  void setStartAltitude(float value);
   
-  void measureGround(void) {
-    // measure initial ground pressure (multiple samples)
-    groundAltitude = 0;
-    for (int i=0; i < 25; i++) {
-      measure();
-      delay(26);
-      groundAltitude += rawAltitude;
-    }
-    groundAltitude = groundAltitude / 25.0;
-  }
+  void measureGround(void);
   
-  void setGroundAltitude(float value) {
-    groundAltitude = value;
-  }
+  void setGroundAltitude(float value);
   
-  const float getGroundAltitude(void) {
-    return groundAltitude;
-  }
+  const float getGroundAltitude(void);
   
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
+  void setSmoothFactor(float value);
   
-  const float getSmoothFactor(void) {
-    return smoothFactor;
-  }
+  const float getSmoothFactor(void);
 };
 
 #endif
