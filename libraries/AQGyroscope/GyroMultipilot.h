@@ -18,14 +18,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _GYRO_IXZ500_H_
-#define _GYRO_IXZ500_H_
+#ifndef _GYRO_GYRO_MULTIPILOT_H_
+#define _GYRO_GYRO_MULTIPILOT_H_
 
 #include <Gyroscope.h>
+
+#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 class GyroMultipilot : public Gyroscope 
 {
 private:
+  float aref; // Read in from EEPROM
 
 public:
   GyroMultipilot();
