@@ -23,62 +23,22 @@
 
 #include <Gyroscope.h>
 
-class GyroMultipilot : public Gyroscope {
+class GyroMultipilot : public Gyroscope 
+{
 private:
 
 public:
-  GyroMultipilot() : Gyroscope) {
-    gyroFullScaleOutput = 300.0;        // ADXR610 full scale output = +/- 300 deg/sec
-    gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)
-  }
+  GyroMultipilot();
   
-  void initialize(void) {
-    analogReference(EXTERNAL);
-    // Configure gyro auto zero pins
-    pinMode (AZPIN, OUTPUT);
-    digitalWrite(AZPIN, LOW);
-    delay(1);
-
-    // rollChannel = 1
-    // pitchChannel = 2
-    // yawChannel = 0
-    this->_initialize(1,2,0);
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-  }
+  void initialize(void);
   
-  void measure(void) {
-    currentTime = micros();
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-      gyroData[axis] = filterSmooth(gyroADC[axis], gyroData[axis], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    }
-    previousTime = currentTime;
-  }
+  void measure(void);
 
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
+  const int getFlightData(byte axis);
 
-  void calibrate() {
-    autoZero();
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
+  void calibrate();
   
-  void autoZero() {
-    int findZero[FINDZERO];
-    digitalWrite(AZPIN, HIGH);
-    delayMicroseconds(750);
-    digitalWrite(AZPIN, LOW);
-    delay(8);
-
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++)
-        findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findModeInt(findZero, FINDZERO);
-    }
-  }
+  void autoZero();
 };
 
 #endif
