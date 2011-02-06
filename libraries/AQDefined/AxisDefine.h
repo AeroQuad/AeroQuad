@@ -18,34 +18,29 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _ACCEL_BMA180_H_
-#define _ACCEL_BMA180_H_
+#ifndef _AXIS_DEFINE_H_
+#define _AXIS_DEFINE_H_
 
-#include <I2C.h>
-#include <Accelerometer.h>
-#include <AxisDefine.h>
-#include <EEPROMAddress.h>
-#include <AQDataStorage.h>
-
-
-class AccelBMA180 : public Accelerometer 
-{
-private:
-  int accelAddress;
-  
-public:
-  AccelBMA180();
-  
-  void initialize(void);
-  
-  void measure(void);
-
-  const int getFlightData(byte axis);
-  
-  // Allows user to zero accelerometers on command
-  void calibrate(void);
-
-  void calculateAltitude(unsigned long currentTime, unsigned long previousTime);
-};
+// Basic axis definitions
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define THROTTLE 3
+#define MODE 4
+#define AUX 5
+#define AUX2 6
+#define AUX3 7
+#define XAXIS 0
+#define YAXIS 1
+#define ZAXIS 2
+#define LASTAXIS 3
+#define LEVELROLL 3
+#define LEVELPITCH 4
+#define LASTLEVELAXIS 5
+#define HEADING 5
+#define LEVELGYROROLL 6
+#define LEVELGYROPITCH 7
+#define ALTITUDE 8
+#define ZDAMPENING 9
 
 #endif

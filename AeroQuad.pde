@@ -77,6 +77,10 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
+
+#include <AxisDefine.h>
+#include <EEPROMAddress.h>
+#include <AQDataStorage.h>
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"

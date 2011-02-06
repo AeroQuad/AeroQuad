@@ -18,34 +18,25 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _ACCEL_BMA180_H_
-#define _ACCEL_BMA180_H_
+#ifndef _AQ_I2C_H_
+#define _AQ_I2C_H_
 
-#include <I2C.h>
-#include <Accelerometer.h>
-#include <AxisDefine.h>
-#include <EEPROMAddress.h>
-#include <AQDataStorage.h>
+// I2C functions
+#include <wire.h>
+#include "WProgram.h"
 
+void sendByteI2C(int deviceAddress, byte dataValue);
 
-class AccelBMA180 : public Accelerometer 
-{
-private:
-  int accelAddress;
+byte readByteI2C(int deviceAddress);
+
+int readWordI2C(int deviceAddress);
+
+int readWordWaitI2C(int deviceAddress);
+
+int readReverseWordI2C(int deviceAddress);
+
+byte readWhoI2C(int deviceAddress);
+
+void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue);
   
-public:
-  AccelBMA180();
-  
-  void initialize(void);
-  
-  void measure(void);
-
-  const int getFlightData(byte axis);
-  
-  // Allows user to zero accelerometers on command
-  void calibrate(void);
-
-  void calculateAltitude(unsigned long currentTime, unsigned long previousTime);
-};
-
 #endif

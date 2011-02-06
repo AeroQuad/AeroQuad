@@ -22,27 +22,27 @@
 // http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13359&viewfull=1#post13359
 
 // Utilities for writing and reading from the EEPROM
-float readFloat(int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatOut;
-
-  for (int i = 0; i < 4; i++)
-    floatOut.floatByte[i] = EEPROM.read(address + i);
-  return floatOut.floatVal;
-}
-
-void writeFloat(float value, int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatIn;
-
-  floatIn.floatVal = value;
-  for (int i = 0; i < 4; i++)
-    EEPROM.write(address + i, floatIn.floatByte[i]);
-}
+//float readFloat(int address) {
+//  union floatStore {
+//    byte floatByte[4];
+//    float floatVal;
+//  } floatOut;
+//
+//  for (int i = 0; i < 4; i++)
+//    floatOut.floatByte[i] = EEPROM.read(address + i);
+//  return floatOut.floatVal;
+//}
+//
+//void writeFloat(float value, int address) {
+//  union floatStore {
+//    byte floatByte[4];
+//    float floatVal;
+//  } floatIn;
+//
+//  floatIn.floatVal = value;
+//  for (int i = 0; i < 4; i++)
+//    EEPROM.write(address + i, floatIn.floatByte[i]);
+//}
 
 void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   struct PIDdata* pid = &PID[IDPid];
