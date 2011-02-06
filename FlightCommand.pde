@@ -52,7 +52,7 @@ void readPilotCommands() {
       ledCW(); ledCW(); ledCW();
       #endif
       #ifdef ArduCopter
-        zeroOilpanADC();
+        _aqAdc.zeroOilpanADC();
       #endif
     }   
     // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
@@ -61,7 +61,7 @@ void readPilotCommands() {
       zeroIntegralError();
       motors.pulseMotors(3);
       #ifdef ArduCopter
-        zeroOilpanADC();
+        _aqAdc.zeroOilpanADC();
       #endif
     }   
     // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
@@ -70,7 +70,7 @@ void readPilotCommands() {
       zeroIntegralError();
       motors.pulseMotors(4);
       #ifdef ArduCopter
-        zeroOilpanADC();
+        _aqAdc.zeroOilpanADC();
       #endif
     }
     // Arm motors (left stick lower right corner)
