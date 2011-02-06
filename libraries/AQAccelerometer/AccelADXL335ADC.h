@@ -28,65 +28,21 @@ class AccelADXL335ADC : public Accelerometer {
 private:
   int findZero[FINDZERO];
   int rawADC;
+  AQADC* _aqAdc;
 
 public:
-  AccelADXL335ADC() : Accelerometer(){
-    // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
-    // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
-    // Tested value : 414
-    // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
-    // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-    accelScaleFactor = 414.0 / 9.81;    
-  }
+  AccelADXL335ADC(AQADC aqAdc);
   
-  void initialize(void) {
-    // rollChannel = 5
-    // pitchChannel = 4
-    // zAxisChannel = 6
-    this->_initialize(5, 4, 6);
-  }
+  void initialize(void);
   
-  void measure(void) {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogReadOilpanADC(accelChannel[axis]);
-      if (rawADC > 500) // Check if measurement good
-        accelADC[axis] = rawADC - accelZero[axis];
-      accelData[axis] = accelADC[axis]; // no smoothing needed
-    }
-  }
+  void measure(void);
 
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
+  const int getFlightData(byte axis);
   
   // Allows user to zero accelerometers on command
-  void calibrate(void) {
-    for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogReadOilpanADC(accelChannel[calAxis]);
-        delay(2);
-      }
-      accelZero[calAxis] = findModeInt(findZero, FINDZERO);
-    }
+  void calibrate(void);
 
-    // store accel value that represents 1g
-//    accelOneG = accelZero[ZAXIS];
-    accelOneG = getRaw(ZAXIS);
-    // replace with estimated Z axis 0g value
-    accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-   
-    writeFloat(accelOneG, ACCEL1G_ADR);
-    writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
-    writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
-    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
-  }
-
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
+  void calculateAltitude(void);
 };
 
 #endif
