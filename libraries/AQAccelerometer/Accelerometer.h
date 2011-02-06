@@ -23,6 +23,18 @@
 
 #include <AQMath.h>
 
+#include <AxisDefine.h>
+#include <EEPROMAddress.h>
+#include <AQDataStorage.h>
+
+
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+
+
 class Accelerometer {
 public:
   float accelScaleFactor;
@@ -37,21 +49,12 @@ public:
   byte rollChannel, pitchChannel, zAxisChannel;
   unsigned long currentAccelTime, previousAccelTime;
   
-  Accelerometer(void) {
-    sign[ROLL] = 1;
-    sign[PITCH] = 1;
-    sign[YAW] = 1;
-    zAxis = 0;
-  }
+  Accelerometer(void);
 
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void) {
-    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
-  }
-  
+  virtual void initialize(void);
   virtual void measure(void);
   virtual void calibrate(void);
   virtual const int getFlightData(byte);
@@ -60,82 +63,37 @@ public:
   // **************************************************************
   // The following functions are common between all Gyro subclasses
   // **************************************************************
-  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
-    accelChannel[ROLL] = rollChannel;
-    accelChannel[PITCH] = pitchChannel;
-    accelChannel[ZAXIS] = zAxisChannel;
-    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
-    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
-    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-    accelOneG = readFloat(ACCEL1G_ADR);
-    currentAccelTime = micros();
-    previousAccelTime = currentAccelTime;
-  }
+  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel);
   
-  const int getRaw(byte axis) {
-    return accelADC[axis] * sign[axis];
-  }
+  const int getRaw(byte axis);
   
-  const int getData(byte axis) {
-    return accelData[axis] * sign[axis];
-  }
+  const int getData(byte axis);
   
-  const int invert(byte axis) {
-    sign[axis] = -sign[axis];
-    return sign[axis];
-  }
+  const int invert(byte axis);
   
-  const int getZero(byte axis) {
-    return accelZero[axis];
-  }
+  const int getZero(byte axis);
   
-  void setZero(byte axis, int value) {
-    accelZero[axis] = value;
-  }
+  void setZero(byte axis, int value);
   
-  const float getScaleFactor(void) {
-    return accelScaleFactor;
-  }
+  const float getScaleFactor(void);
   
-  const float getSmoothFactor() {
-    return smoothFactor;
-  }
+  const float getSmoothFactor();
   
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
+  void setSmoothFactor(float value);
   
-  const float angleRad(byte axis) {
-    if (axis == PITCH) return arctan2(accelData[PITCH] * sign[PITCH], sqrt((long(accelData[ROLL]) * accelData[ROLL]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
-    if (axis == ROLL) return arctan2(accelData[ROLL] * sign[ROLL], sqrt((long(accelData[PITCH]) * accelData[PITCH]) + (long(accelData[ZAXIS]) * accelData[ZAXIS])));
-  }
+  const float angleRad(byte axis);
 
-  const float angleDeg(byte axis) {
-    return degrees(angleRad(axis));
-  }
+  const float angleDeg(byte axis);
   
-  void setOneG(int value) {
-    accelOneG = value;
-  }
+  void setOneG(int value);
   
-  const int getOneG(void) {
-    return accelOneG;
-  }
+  const int getOneG(void);
   
-  const int getZaxis() {
-    currentAccelTime = micros();
-    zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    previousAccelTime = currentAccelTime;
-    return zAxis;
-  }
+  const int getZaxis(unsigned long currentTime, unsigned long previousTime);
   
-  const float getAltitude(void) {
-    return rawAltitude;
-  }
+  const float getAltitude(void);
   
-  const float rateG(const byte axis) {
-    return getData(axis) / accelOneG;
-  }
+  const float rateG(const byte axis);
 };
 
 #endif
