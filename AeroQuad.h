@@ -89,7 +89,7 @@ float smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-#define AZPIN 12 // Auto zero pin for IDG500 gyros
+
 
 // Motor control variables
 #define FRONT 0

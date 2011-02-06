@@ -28,11 +28,6 @@
 #include <AQDataStorage.h>
 #include <WiiSensors.h>
 
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
 
 class GyroWii : public Gyroscope 
 {
