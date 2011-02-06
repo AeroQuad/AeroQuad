@@ -199,9 +199,17 @@ private:
 	int packet_length;
 
 public:
+
+    float CHR_RollAngle;
+    float CHR_PitchAngle;
+
 	Data data;
 
 	CHR6DM(void);    
+	
+	void initCHR6DM();
+	
+	void readCHR6DM();
 
 	void EKFReset();
 

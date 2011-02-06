@@ -134,10 +134,10 @@ int levelOff; // Read in from EEPROM
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float CHR_RollAngle;
-  float CHR_PitchAngle;
-#endif
+//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+//  float CHR_RollAngle;
+//  float CHR_PitchAngle;
+//#endif
 
 // Heading hold
 byte headingHoldConfig;

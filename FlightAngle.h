@@ -580,15 +580,15 @@ public:
   }
 
   void calculate(void) {   
-    angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
-    angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
-    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    CHR_PitchAngle = angle[PITCH];
+    angle[ROLL]  =  _chr6dm.data.roll - zeroRoll;
+    angle[PITCH] =  _chr6dm.data.pitch - zeroPitch;
+    _chr6dm.CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
+    _chr6dm.CHR_PitchAngle = angle[PITCH];
   }
   
    void calibrate(void) {
-    zeroRoll = chr6dm.data.roll;
-    zeroPitch = chr6dm.data.pitch;
+    zeroRoll = _chr6dm.data.roll;
+    zeroPitch = _chr6dm.data.pitch;
   }
   
   float getGyroUnbias(byte axis) {

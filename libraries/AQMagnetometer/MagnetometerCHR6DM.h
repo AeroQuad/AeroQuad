@@ -24,19 +24,32 @@
 #define _MAGNETOMETER_CHR6DM_H_
 
 #include <Magnetometer.h>
+#include <CHR6DM.h>
 
 // ***********************************************************************
 // ************************ MagnetometerCHR6DM Subclass ******************
 // ***********************************************************************
 class MagnetometerCHR6DM : public Magnetometer {
+private:
+  CHR6DM *_chr6dm;
+  
 public:
-  MagnetometerCHR6DM() : Magnetometer() {}
+  MagnetometerCHR6DM(CHR6DM chr6dm) : Magnetometer() 
+  {
+    _chr6dm = &chr6dm;
+  }
   void initialize(void) {}
   void measure(void) {
-    heading = chr6dm.data.yaw; //this hardly needs any filtering :)
+    heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
+    if (heading < 0) 
+	{
+	  absoluteHeading = 360 + heading;
+	}
+    else 
+	{
+	  absoluteHeading = heading;
+	}
   }
 };
 

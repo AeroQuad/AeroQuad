@@ -27,9 +27,28 @@
 
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
+
+void CHR6DM::initCHR6DM()
+{
+	Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
+	resetToFactory();
+	setListenMode();
+	setActiveChannels(CHANNEL_ALL_MASK);
+	requestPacket();
+}
+
+void CHR6DM::readCHR6DM()
+{
+	waitForAndReadPacket();
+	requestPacket();
+}
+
+
 CHR6DM::CHR6DM(void)
 {
 	packet_length = 0;
+	CHR_RollAngle = 0.0;
+    CHR_PitchAngle = 0.0;
 }
 
 void CHR6DM::EKFReset() 

@@ -22,62 +22,22 @@
 #define _GYRO_CHR6DM_H_
 
 #include <Gyroscope.h>
-
+#include <CHR6DM.h>
 
 class GyroCHR6DM : public Gyroscope {
+private:
+  CHR6DM *_chr6dm;
 
 public:
-  GyroCHR6DM() : Gyroscope() {
-    gyroFullScaleOutput = 0;
-    gyroScaleFactor = 0;
-  }
+  GyroCHR6DM(CHR6DM chr6dm);
 
-  void initialize(void) {
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-    initCHR6DM();
-  }
+  void initialize(void);
 
-  void measure(void) {
-    currentTime = micros();
-    readCHR6DM();
-    gyroADC[ROLL] = chr6dm.data.rollRate - gyroZero[ROLL]; //gx yawRate
-    gyroADC[PITCH] = gyroZero[PITCH] - chr6dm.data.pitchRate; //gy pitchRate
-    gyroADC[YAW] = chr6dm.data.yawRate - gyroZero[ZAXIS]; //gz rollRate
+  void measure(void);
 
-    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    previousTime = currentTime;
-  }
+  const int getFlightData(byte axis);
 
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
-
-  void calibrate() {
-
-    float zeroXreads[FINDZERO];
-    float zeroYreads[FINDZERO];
-    float zeroZreads[FINDZERO];
-
-    for (int i=0; i<FINDZERO; i++) {
-        readCHR6DM();
-        zeroXreads[i] = chr6dm.data.rollRate;
-        zeroYreads[i] = chr6dm.data.pitchRate;
-        zeroZreads[i] = chr6dm.data.yawRate;
-    }
-
-    gyroZero[XAXIS] = findModeFloat(zeroXreads, FINDZERO);
-    gyroZero[YAXIS] = findModeFloat(zeroYreads, FINDZERO);
-    gyroZero[ZAXIS] = findModeFloat(zeroZreads, FINDZERO);
-
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
+  void calibrate();
 };
 
 #endif
