@@ -21,7 +21,7 @@
 // FlightControl.pde is responsible for combining sensor measurements and
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
-#define MAX_CONTROL_OUTPUT 250
+#define MAX_CONTROL_OUTPUT 500
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// ArduPirateSuperStableProcessor ///////////////////
@@ -32,9 +32,13 @@ void processArdupirateSuperStableMode(void)
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
   float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
-  errorRoll = constrain(errorRoll,-50,50);                    
-  PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
-  PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
+  errorRoll = constrain(errorRoll,-50,50);
+  if (receiver.getAngle(ROLL) < 30) {
+    PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
+    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
+  }
+  else
+    PID[LEVELROLL].integratedError = 0;
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
   errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
   motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -42,8 +46,12 @@ void processArdupirateSuperStableMode(void)
   // PITCH
   float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
   errorPitch = constrain(errorPitch,-50,50);                    
-  PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
-  PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
+  if (receiver.getAngle(PITCH) < 30) {
+    PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
+  }
+  else
+    PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
   errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
   motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -202,8 +210,10 @@ void processAltitudeHold(void)
     throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
   }
   // holdThrottle set in FlightCommand.pde if altitude hold is on
-  throttle = holdThrottle + throttleAdjust + zDampening; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
+  throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
+  //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
+  //throttle = receiver.getData(THROTTLE) - zDampening + autoDescent; 
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif

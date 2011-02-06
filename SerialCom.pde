@@ -223,10 +223,10 @@ void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     //printFreeMemory();
-    //Serial.print(gyro.getHeading());
-    //comma();
-    //Serial.print(batteryMonitor.getData(), 2);
-    //Serial.println();
+    Serial.print(receiver.getAngle(ROLL));
+    comma();
+    Serial.print(receiver.getAngle(PITCH));
+    Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
@@ -268,7 +268,7 @@ void sendSerialTelemetry() {
     Serial.println(PID[ZDAMPENING].D);
 #else
     for(byte i=0; i<9; i++) {
-      PrintValueComma(0);
+     PrintValueComma(0);
     }
     Serial.println('0');
 #endif

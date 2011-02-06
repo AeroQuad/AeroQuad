@@ -259,8 +259,8 @@ public:
     // 16.0g = 1.98 mg/LSB
     sendByteI2C(accelAddress, 0x35); // register offset_lsb1 (bits 1-3)
     data = readByteI2C(accelAddress);
-    data &= 0xF5; //0xF1; // +/-1.0g (value = xxxx000x)
-    updateRegisterI2C(accelAddress, 0x35, data); // set range to +/-2g (value = xxxx010x)
+    data &= 0xF1; // +/-1.0g (value = xxxx000x) // 0xF7;(3g)  //0xF5; (2g)
+    updateRegisterI2C(accelAddress, 0x35, data);
   }
   
   void measure(void) {
