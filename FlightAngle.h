@@ -40,6 +40,7 @@ public:
   virtual void initialize();
   virtual void calculate();
   virtual float getGyroUnbias(byte axis);
+  virtual void calibrate();
  
   const float getData(byte axis) {
     return angle[axis];
@@ -103,6 +104,7 @@ public:
     return gyro.getFlightData(axis);
   }
   
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -168,6 +170,8 @@ public:
   float getGyroUnbias(byte axis) {
     return gyro.getFlightData(axis);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -364,6 +368,8 @@ public:
     else
       return degrees(Omega[2]);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -462,6 +468,7 @@ public:
     return gyro.getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 // ***********************************************************************
@@ -557,6 +564,7 @@ public:
     return gyro.getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 

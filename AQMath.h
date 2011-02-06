@@ -222,10 +222,10 @@ float arctan2(float y, float x) {
 // Used for sensor calibration
 // Takes the median of 50 results as zero
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize) {
+float findMedian(float *data, int arraySize) {
   float temp;
 #else
-int findMode(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+int findMedian(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
   int temp;
 #endif
   boolean done = 0;

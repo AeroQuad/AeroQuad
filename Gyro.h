@@ -145,6 +145,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
+#if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuadMega_v1)
 class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
@@ -196,10 +197,11 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
   }
 };
+#endif
 
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
@@ -316,7 +318,7 @@ public:
         findZero[i] = readWordI2C(gyroAddress);
         delay(10);
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
   }
 };
@@ -372,7 +374,7 @@ public:
         findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
         delay(2);
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -429,7 +431,7 @@ public:
         updateControls();
         findZero[i] = NWMP_gyro[calAxis];
       }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -465,9 +467,9 @@ public:
     gyroADC[PITCH] = gyroZero[PITCH] - chr6dm.data.pitchRate; //gy pitchRate
     gyroADC[YAW] = chr6dm.data.yawRate - gyroZero[ZAXIS]; //gz rollRate
 
-    gyroData[ROLL] = smoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = smoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = smoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     previousTime = currentTime;
   }
 
@@ -488,9 +490,9 @@ public:
         zeroZreads[i] = chr6dm.data.yawRate;
     }
 
-    gyroZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    gyroZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    gyroZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    gyroZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    gyroZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    gyroZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
 
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -551,9 +553,9 @@ public:
         zeroZreads[i] = fakeGyroYaw;
     }
 
-    gyroZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    gyroZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    gyroZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    gyroZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    gyroZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    gyroZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
 
     writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -668,7 +670,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(gyroChannel[calAxis]);
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
+      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
   }
 };

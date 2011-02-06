@@ -42,13 +42,14 @@ void readPilotCommands() {
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        _flightAngle->.calibrate();
+        _flightAngle->calibrate();
       #endif
       zeroIntegralError();
       motors.pulseMotors(3);
-      #if defined(BattMonitor) && defined(ArduCopter)
-        ledCW(); ledCW(); ledCW();
-      #endif
+      // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
+      //#if defined(BattMonitor) && defined(ArduCopter)
+      //  ledCW(); ledCW(); ledCW();
+      //#endif
       #ifdef ArduCopter
         zero_ArduCopter_ADC();
       #endif

@@ -140,7 +140,7 @@ public:
 /******************************************************/
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
-//#if defined(AeroQuad_v1) || defined(AeroQuadMega_v1)
+#if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuadMega_v1)
 class Accel_AeroQuad_v1 : public Accel {
 private:
   
@@ -184,7 +184,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
@@ -205,12 +205,12 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
-//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
 class Accel_AeroQuadMega_v2 : public Accel {
 private:
   int accelAddress;
@@ -297,7 +297,7 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
         delay(1);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value
@@ -320,7 +320,7 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
 
 /******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
@@ -368,7 +368,7 @@ public:
         findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
         delay(2);
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
@@ -434,7 +434,7 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
@@ -482,9 +482,9 @@ public:
       accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
       accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
 
-      accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
-      accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = filterSmoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
+      accelData[YAXIS] = filterSmoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[ZAXIS] = filterSmoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
     previousTime = currentTime;
   }    
 
@@ -508,9 +508,9 @@ public:
     }
 
 
-    accelZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
    
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
@@ -591,9 +591,9 @@ public:
     }
 
 
-    accelZero[XAXIS] = findMode(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMode(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMode(zeroZreads, FINDZERO);
+    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
+    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
+    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
 
     // store accel value that represents 1g
     accelOneG = accelZero[ZAXIS];
@@ -618,7 +618,7 @@ public:
 /******************************************************/
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
-//#if defined(Multipilot) || defined(MultipilotI2C)
+#if defined(Multipilot) || defined(MultipilotI2C)
 class Accel_Multipilot : public Accel {
 private:
   
@@ -665,7 +665,7 @@ public:
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++)
         findZero[i] = analogRead(accelChannel[calAxis]);
-      accelZero[calAxis] = findMode(findZero, FINDZERO);
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
@@ -686,4 +686,4 @@ public:
     previousTime = currentTime;
   } 
 };
-//#endif
+#endif
