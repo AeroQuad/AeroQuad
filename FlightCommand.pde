@@ -41,15 +41,13 @@ void readPilotCommands() {
       gyro.calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
-       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      _flightAngle->.calibrate();
-       #endif
-      zeroIntegralError();
-      #ifndef BatteryMonitor
-      motors.pulseMotors(3);
+      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+        _flightAngle->.calibrate();
       #endif
-      #ifdef BatteryMonitor
-      ledCW(); ledCW(); ledCW();
+      zeroIntegralError();
+      motors.pulseMotors(3);
+      #if defined(BattMonitor) && defined(ArduCopter)
+        ledCW(); ledCW(); ledCW();
       #endif
       #ifdef ArduCopter
         zero_ArduCopter_ADC();
