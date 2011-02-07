@@ -1,6 +1,14 @@
-AeroQuad Flight Software Source Code 2.1
+AeroQuad Flight Software Source Code 2.2
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
+
+Version 2.2 Release Notes (2/6/2010)
+----------------------------------------
+
+  * Fixed correct scaling for Kd for all flight modes.  Makes it easier to find the right PID gains ro remove oscillations during flight.  PID Tuning Guide is updated with best values to use.
+  * Added experimental ArduPirate Stable Mode
+  * Started common SI units for major sensors to work with DCM
+  * Addressed issues 82-100 in Google Code Issue Tracker (http://code.google.com/p/aeroquad/issues/list)
 
 Version 2.1 Release Notes (1/20/2010)
 ----------------------------------------
