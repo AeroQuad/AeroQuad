@@ -594,8 +594,8 @@ MotorYaw[5] =  100;
 
 void motor_axis_correction()
 {
-int i;
-for (i=0;i<LASTMOTOR;i++)
+//int i;
+for (byte i=0;i<LASTMOTOR;i++)
   {
   motorAxisCommandPitch[i] = (motorAxisCommand[PITCH] / 100.0) * MotorPitch[i];
   motorAxisCommandRoll[i] = (motorAxisCommand[ROLL] / 100.0) * MotorRoll[i];
@@ -606,9 +606,9 @@ for (i=0;i<LASTMOTOR;i++)
 //After that we can mix them together:
 void motor_matrix_command()
 {
-int i;
+//int i;
 float valuemotor;
-for (i=0;i<LASTMOTOR;i++)
+for (byte i=0;i<LASTMOTOR;i++)
   {
    valuemotor = ((Throttle* MotorGas[i])/100) + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i];
    //valuemotor = Throttle + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i]; // OLD VERSION WITHOUT GAS CONTROL ON Mixertable
@@ -782,13 +782,13 @@ void matrix_debug()
 void WireMotorWrite()
 {
 int i = 0;
-int nmotor=0;
+//int nmotor=0;
 int index=0;
 int tout=0;
 char buff_i2c[10];
 
 Wire.endTransmission(); //end transmission
-for(nmotor=0;nmotor<6;nmotor++)
+for(byte nmotor=0;nmotor<6;nmotor++)
   {
   index=0x29+nmotor;
   Wire.beginTransmission(index);

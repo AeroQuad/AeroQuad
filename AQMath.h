@@ -229,12 +229,12 @@ int findMedian(int *data, int arraySize) {                  //Thanks ala42! Post
   int temp;
 #endif
   boolean done = 0;
-  byte i;
+  //byte i;
   
    // Sorts numbers from lowest to highest
   while (done != 1) {        
     done = 1;
-    for (i=0; i<(arraySize-1); i++) {
+    for (byte i=0; i<(arraySize-1); i++) {
       if (data[i] > data[i+1]) {     // numbers are out of order - swap
         temp = data[i+1];
         data[i+1] = data[i];

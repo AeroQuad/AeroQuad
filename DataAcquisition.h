@@ -56,13 +56,13 @@ unsigned char ADC_SPI_transfer(unsigned char data) {
 }
 
 ISR (TIMER2_OVF_vect) {
-  uint8_t ch;
+  //uint8_t ch;
   unsigned int adc_tmp;
   
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
   ADC_SPI_transfer(adc_cmd[0]);       // Command to read the first channel
-  for (ch=0;ch<7;ch++) {
+  for (unit8_t ch=0;ch<7;ch++) {
     adc_tmp = ADC_SPI_transfer(0)<<8;    // Read first byte
     adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
     adc_value[ch] += adc_tmp>>3;     // Shift to 12 bits
@@ -143,13 +143,13 @@ void Init_Gyro_Acc(void) {
 };
 
 void updateControls() {
-  int i,j;
+  //int i,j;
   unsigned char buffer[6];
 
-  for(j=0;j<2;j++) {
+  for(byte j=0;j<2;j++) {
     sendByteI2C(0x52, 0x00);
     Wire.requestFrom(0x52,6);
-    for(i = 0; i < 6; i++) 
+    for(byte i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
     if (buffer[5] & 0x02) { //If WiiMP
       NWMP_gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji

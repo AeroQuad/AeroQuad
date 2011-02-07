@@ -24,7 +24,7 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.1
+#define VERSION 2.2
 
 #define BAUD 115200
 //#define BAUD 111111
