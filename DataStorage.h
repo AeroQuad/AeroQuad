@@ -62,12 +62,12 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.20;
+  PID[ROLL].P = 1.0;
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -0.05;
-  PID[PITCH].P = 1.20;
+  PID[ROLL].D = -3.0;
+  PID[PITCH].P = 1.0;
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -0.05;
+  PID[PITCH].D = -3.0;
   PID[YAW].P = 3.0;
   PID[YAW].I = 0.05;
   PID[YAW].D = 0.0;
@@ -80,18 +80,18 @@ void initializeEEPROM(void) {
   PID[HEADING].P = 3.0;
   PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
-  PID[LEVELGYROROLL].P = 1.2;
+  PID[LEVELGYROROLL].P = 1.0;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -0.05;
-  PID[LEVELGYROPITCH].P = 1.2;
+  PID[LEVELGYROROLL].D = -3.0;
+  PID[LEVELGYROPITCH].P = 1.0;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -0.05;
+  PID[LEVELGYROPITCH].D = -3.0;
   #ifdef AltitudeHold
     PID[ALTITUDE].P = 25.0;
     PID[ALTITUDE].I = 0.1;
     PID[ALTITUDE].D = 0.0;
     PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-    PID[ZDAMPENING].P = 0.5;
+    PID[ZDAMPENING].P = 0.0;
     PID[ZDAMPENING].I = 0.0;
     PID[ZDAMPENING].D = 0.0;
     minThrottleAdjust = -50.0;
