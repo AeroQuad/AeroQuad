@@ -20,6 +20,8 @@
 
 // FlightControl.pde is responsible for combining sensor measurements and
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
+// Special thanks to Keny9999 for suggesting a more readable format for FlightControl.pde and for
+// porting over the ArduPirates Stable Mode (please note this is still experimental, use at your own risk)
 
 #define MAX_CONTROL_OUTPUT 500
 
