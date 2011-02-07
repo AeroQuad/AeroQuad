@@ -197,7 +197,7 @@ void processAltitudeHold(void)
   if (altitudeHold == ON) {
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
     zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-    if((abs(flightAngle.getData(ROLL)) > 5) || (abs(flightAngle.getData(PITCH)) > 5)) { 
+    if((abs(_flightAngle->getData(ROLL)) > 5) || (abs(_flightAngle->getData(PITCH)) > 5)) { 
       PID[ZDAMPENING].integratedError = 0;
     }
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
