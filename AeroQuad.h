@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -52,9 +52,27 @@
   #define LED3PIN 12
 #endif
 
-
-
-
+// Basic axis definitions
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define THROTTLE 3
+#define MODE 4
+#define AUX 5
+#define AUX2 6
+#define AUX3 7
+#define XAXIS 0
+#define YAXIS 1
+#define ZAXIS 2
+#define LASTAXIS 3
+#define LEVELROLL 3
+#define LEVELPITCH 4
+#define LASTLEVELAXIS 5
+#define HEADING 5
+#define LEVELGYROROLL 6
+#define LEVELGYROPITCH 7
+#define ALTITUDE 8
+#define ZDAMPENING 9
 
 // PID Variables
 struct PIDdata {
@@ -75,12 +93,12 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-//#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-//  #define FINDZERO 9
-//#else
-//  #define FINDZERO 49
-//#endif
-float smoothHeading;
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+float _smoothHeading;
 
 // Sensor pin assignments
 #define PITCHACCELPIN 0
@@ -89,7 +107,7 @@ float smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-
+#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 // Motor control variables
 #define FRONT 0
@@ -123,44 +141,46 @@ float aref; // Read in from EEPROM
 // Flight Mode
 #define ACRO 0
 #define STABLE 1
-byte flightMode;
-int minAcro; // Read in from EEPROM, defines min throttle during flips
+byte _flightMode;
+int _minAcro; // Read in from EEPROM, defines min throttle during flips
 
 // Auto level setup
-int levelAdjust[2] = {0,0};
-int levelLimit; // Read in from EEPROM
-int levelOff; // Read in from EEPROM
+int _levelAdjust[2] = {0,0};
+int _levelLimit; // Read in from EEPROM
+int _levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
-//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-//  float CHR_RollAngle;
-//  float CHR_PitchAngle;
-//#endif
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  float CHR_RollAngle;
+  float CHR_PitchAngle;
+#endif
 
 // Heading hold
-byte headingHoldConfig;
+byte _headingHoldConfig;
 //float headingScaleFactor;
-float commandedYaw = 0;
-float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading = 0; // measured heading from yaw gyro (process variable)
-float relativeHeading = 0; // current heading the quad is set to (set point)
-float absoluteHeading = 0;;
-float setHeading = 0;
+float _commandedYaw = 0;
+float _headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
+float _heading = 0; // measured heading from yaw gyro (process variable)
+float _relativeHeading = 0; // current heading the quad is set to (set point)
+float _absoluteHeading = 0;;
+float _setHeading = 0;
 
 // Altitude Hold
-int throttleAdjust = 0;
-int throttle = 1000;
-int autoDescent = 0;
+#define TEMPERATURE 0
+#define PRESSURE 1
+int _throttleAdjust = 0;
+int _throttle = 1000;
+int _autoDescent = 0;
 //#ifndef AeroQuad_v18
-int minThrottleAdjust = -50;
-int maxThrottleAdjust = 50;
-float holdAltitude = 0.0;
-int holdThrottle = 1000;
-float zDampening = 0.0;
-byte storeAltitude = OFF;
-byte altitudeHold = OFF;
+int _minThrottleAdjust = -50;
+int _maxThrottleAdjust = 50;
+float _holdAltitude = 0.0;
+int _holdThrottle = 1000;
+float _zDampening = 0.0;
+byte _storeAltitude = OFF;
+byte _altitudeHold = OFF;
 //#endif
 
 // Receiver variables
@@ -174,7 +194,7 @@ byte altitudeHold = OFF;
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
 #define LASTCHANNEL 6
-int delta;
+int _delta;
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
@@ -184,18 +204,18 @@ int delta;
 #define MAXOFFWIDTH 24000
 
 // Flight angle variables
-float timeConstant;
+float _timeConstant;
 
 // ESC Calibration
-byte calibrateESC = 0;
-int testCommand = 1000;
+byte _calibrateESC = 0;
+int _testCommand = 1000;
 
 // Communication
-char queryType = 'X';
-byte tlmType = 0;
-byte armed = OFF;
-byte safetyCheck = OFF;
-byte update = 0;
+char _queryType = 'X';
+byte _tlmType = 0;
+byte _armed = OFF;
+byte _safetyCheck = OFF;
+byte _update = 0;
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -210,17 +230,17 @@ byte update = 0;
 
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
-unsigned long previousTime = 0;
-unsigned long currentTime = 0;
-unsigned long deltaTime = 0;
-unsigned long receiverTime = 0;
-unsigned long compassTime = 5000;
-unsigned long altitudeTime = 10000;
-unsigned long batteryTime = 15000;
-unsigned long autoZeroGyroTime = 0;
-unsigned long cameraTime = 10000;
-unsigned long fastTelemetryTime = 0;
-unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
+unsigned long _previousTime = 0;
+unsigned long _currentTime = 0;
+unsigned long _deltaTime = 0;
+unsigned long _receiverTime = 0;
+unsigned long _compassTime = 5000;
+unsigned long _altitudeTime = 10000;
+unsigned long _batteryTime = 15000;
+unsigned long _autoZeroGyroTime = 0;
+unsigned long _cameraTime = 10000;
+unsigned long _fastTelemetryTime = 0;
+unsigned long _telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
 // jihlein: wireless telemetry defines
 /**************************************************************/
@@ -254,19 +274,78 @@ unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from r
 /**************************************************************/
 // Enable/disable control loops for debug
 //#define DEBUG
-byte receiverLoop = ON;
-byte telemetryLoop = ON;
-byte sensorLoop = ON;
-byte controlLoop = ON;
-byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
-byte fastTransfer = OFF; // Used for troubleshooting
-byte testSignal = LOW;
+byte _receiverLoop = ON;
+byte _telemetryLoop = ON;
+byte _sensorLoop = ON;
+byte _controlLoop = ON;
+byte _cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte _fastTransfer = OFF; // Used for troubleshooting
+byte _testSignal = LOW;
 
+// **************************************************************
+// *************************** EEPROM ***************************
+// **************************************************************
+// EEPROM storage addresses
+#define ROLL_PID_GAIN_ADR 0
+#define LEVELROLL_PID_GAIN_ADR 12
+#define YAW_PID_GAIN_ADR 24
+#define WINDUPGUARD_ADR 36
+#define LEVELLIMIT_ADR 40
+#define LEVELOFF_ADR 44
+#define XMITFACTOR_ADR 48
+#define GYROSMOOTH_ADR 52
+#define ACCSMOOTH_ADR 56
+#define LEVELPITCHCAL_ADR 60
+#define LEVELROLLCAL_ADR 64
+#define LEVELZCAL_ADR 68
+#define FILTERTERM_ADR 72
+#define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
+#define PITCH_PID_GAIN_ADR 172
+#define LEVELPITCH_PID_GAIN_ADR 184
+#define HEADINGSMOOTH_ADR 200
+#define HEADING_PID_GAIN_ADR 204
+#define AREF_ADR 216
+#define FLIGHTMODE_ADR 220
+#define LEVEL_GYRO_ROLL_PID_GAIN_ADR 224
+#define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
+#define HEADINGHOLD_ADR 248
+#define MINACRO_ADR 252
+#define ACCEL1G_ADR 256
+#define ALTITUDE_PGAIN_ADR 260
+#define ALTITUDE_IGAIN_ADR 264
+#define ALTITUDE_DGAIN_ADR 268
+#define ALTITUDE_MAX_THROTTLE_ADR 272
+#define ALTITUDE_MIN_THROTTLE_ADR 276
+#define ALTITUDE_SMOOTH_ADR 280
+#define ZDAMP_PGAIN_ADR 284
+#define ZDAMP_IGAIN_ADR 288
+#define ZDAMP_DGAIN_ADR 292
+#define ALTITUDE_WINDUP_ADR 296
+#define MAGXMAX_ADR 300
+#define MAGXMIN_ADR 304
+#define MAGYMAX_ADR 308
+#define MAGYMIN_ADR 312
+#define MAGZMAX_ADR 316
+#define MAGZMIN_ADR 320
+#define MCAMERAPITCH_ADR 324
+#define MCAMERAROLL_ADR 328
+#define MCAMERAYAW_ADR 332
+#define CENTERPITCH_ADR 336
+#define CENTERROLL_ADR 340
+#define CENTERYAW_ADR 344
+#define SERVOMINPITCH_ADR 348
+#define SERVOMINROLL_ADR 352
+#define SERVOMINYAW_ADR 356
+#define SERVOMAXPITCH_ADR 360
+#define SERVOMAXROLL_ADR 364
+#define SERVOMAXYAW_ADR 368
+#define GYRO_ROLL_ZERO_ADR 372
+#define GYRO_PITCH_ZERO_ADR 376
+#define GYRO_YAW_ZERO_ADR 380
 
-
-//float arctan2(float y, float x); // defined in Sensors.pde
-//float readFloat(int address); // defined in DataStorage.h
-//void writeFloat(float value, int address); // defined in DataStorage.h
+float arctan2(float y, float x); // defined in Sensors.pde
+float readFloat(int address); // defined in DataStorage.h
+void writeFloat(float value, int address); // defined in DataStorage.h
 void readEEPROM(void); // defined in DataStorage.h
 void readPilotCommands(void); // defined in FlightCommand.pde
 void readSensors(void); // defined in Sensors.pde
@@ -280,6 +359,15 @@ void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
+
+void initSensorsFromEEPROM(); // defined in Sensors.pde
+void storeSensorsToEEPROM();  // defined in Sensors.pde
+
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float findMode(float *data, int arraySize); // defined in Sensors.pde
+#else
+int findMode(int *data, int arraySize); // defined in Sensors.pde
+#endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
 extern int  __bss_end; // used by freemem 

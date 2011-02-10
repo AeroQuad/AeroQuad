@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -40,7 +40,7 @@ public:
   virtual void initialize();
   virtual void calculate();
   virtual float getGyroUnbias(byte axis);
-  virtual void calibrate(void) {}
+  virtual void calibrate();
  
   const float getData(byte axis) {
     return angle[axis];
@@ -66,9 +66,9 @@ private:
   float timeConstantCF;
 
   void _initialize(byte axis) {
-    previousAngle[axis] = accel.angleDeg(axis);
-    filterTerm2[axis] = gyro.rateDegPerSec(axis);
-    timeConstantCF = timeConstant; // timeConstant is a global variable read in from EEPROM
+    previousAngle[axis] = _accel->angleDeg(axis);
+    filterTerm2[axis] = _gyro->rateDegPerSec(axis);
+    timeConstantCF = _timeConstant; // timeConstant is a global variable read in from EEPROM
     // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
     // Will take care of better OO implementation in future revision
   }
@@ -96,14 +96,15 @@ public:
   }
   
   void calculate(void) {
-    angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
-    angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
+    angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
+    angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
   
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -162,13 +163,15 @@ public:
   }
   
   void calculate(void) {
-    angle[ROLL] = _calculate(ROLL, accel.angleDeg(ROLL), gyro.rateDegPerSec(ROLL));
-    angle[PITCH] = _calculate(PITCH, accel.angleDeg(PITCH), gyro.rateDegPerSec(PITCH));
+    angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
+    angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -204,16 +207,16 @@ private:
   void matrixUpdate(void) 
   {
     float gyroVector[3];
-    gyroVector[0]=-(gyro.getData(PITCH) * Gyro_Gain); //gyro y roll
-    gyroVector[1]=gyro.getData(ROLL) * Gyro_Gain; //gyro x pitch
-    gyroVector[2]=gyro.getData(YAW) * Gyro_Gain; //gyro Z yaw
+    gyroVector[0]=-(_gyro->getData(PITCH) * Gyro_Gain); //gyro y roll
+    gyroVector[1]=_gyro->getData(ROLL) * Gyro_Gain; //gyro x pitch
+    gyroVector[2]=_gyro->getData(YAW) * Gyro_Gain; //gyro Z yaw
     vectorAdd(3, &Omega[0], &gyroVector[0], &Omega_I[0]);   // adding integrator
     vectorAdd(3, &Omega_Vector[0], &Omega[0], &Omega_P[0]);  // adding proportional
     
     // Low pass filter on accelerometer data (to filter vibrations)
-    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-accel.rateG(ROLL)*100.0; // acc x
-    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)accel.rateG(PITCH)*100.0; // acc y
-    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)accel.rateG(ZAXIS)*100.0; // acc z
+    Accel_Vector[0]=Accel_Vector[0]*0.6 + (float)-_accel->rateG(ROLL)*100.0; // acc x
+    Accel_Vector[1]=Accel_Vector[1]*0.6 + (float)_accel->rateG(PITCH)*100.0; // acc y
+    Accel_Vector[2]=Accel_Vector[2]*0.6 + (float)_accel->rateG(ZAXIS)*100.0; // acc z
     
     float updateMatrix[9];
     updateMatrix[0] =  0;
@@ -344,7 +347,7 @@ public:
     COGX = 0; //Course overground X axis
     COGY = 1; //Course overground Y axis    
     dt = 0;
-    Gyro_Gain = radians(gyro.getScaleFactor());
+    Gyro_Gain = radians(_gyro->getScaleFactor());
     type = DCM;
     Kp_ROLLPITCH = 0.0014;
     Ki_ROLLPITCH = 0.00000012; // was 0.00000015
@@ -365,6 +368,8 @@ public:
     else
       return degrees(Omega[2]);
   }
+
+  void calibrate(void) {}
 };
 
 /******************************************************/
@@ -453,16 +458,17 @@ public:
   }
   
   void calculate(void) {
-    filterUpdate(gyro.rateRadPerSec(ROLL), gyro.rateRadPerSec(PITCH), gyro.rateRadPerSec(YAW), accel.getRaw(XAXIS), accel.getRaw(YAXIS), accel.getRaw(ZAXIS));
+    filterUpdate(_gyro->rateRadPerSec(ROLL), _gyro->rateRadPerSec(PITCH), _gyro->rateRadPerSec(YAW), _accel->getRaw(XAXIS), _accel->getRaw(YAXIS), _accel->getRaw(ZAXIS));
     angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
     angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
     angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 // ***********************************************************************
@@ -506,9 +512,9 @@ public:
   
   void calculate(void) {
     //get accelerometer readings in g, gives us RAcc vector
-    RxAcc = accel.getRaw(ROLL);
-    RyAcc = accel.getRaw(PITCH);
-    RzAcc = accel.getRaw(YAW);
+    RxAcc = _accel->getRaw(ROLL);
+    RyAcc = _accel->getRaw(PITCH);
+    RzAcc = _accel->getRaw(YAW);
   
     //normalize vector (convert to a vector with same direction and with length 1)
     R = sqrt(square(RxAcc) + square(RyAcc) + square(RzAcc));
@@ -533,8 +539,8 @@ public:
       atanx = atan2(RxEst,RzEst);
       atany = atan2(RyEst,RzEst);
     
-      Axz = atanx + gyro.getRaw(ROLL)  * gyroFactor;  // convert ADC value for to physical units
-      Ayz = atany + gyro.getRaw(PITCH) * gyroFactor; // and get updated angle according to gyro movement
+      Axz = atanx + _gyro->getRaw(ROLL)  * gyroFactor;  // convert ADC value for to physical units
+      Ayz = atany + _gyro->getRaw(PITCH) * gyroFactor; // and get updated angle according to gyro movement
     
       //estimate sign of RzGyro by looking in what qudrant the angle Axz is, 
       signRzGyro = ( cos(Axz) >=0 ) ? 1 : -1;
@@ -555,9 +561,10 @@ public:
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
 
+  void calibrate(void) {}
 };
 
 
@@ -580,19 +587,19 @@ public:
   }
 
   void calculate(void) {   
-    angle[ROLL]  =  _chr6dm.data.roll - zeroRoll;
-    angle[PITCH] =  _chr6dm.data.pitch - zeroPitch;
-    _chr6dm.CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    _chr6dm.CHR_PitchAngle = angle[PITCH];
+    angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
+    angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
+    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
+    CHR_PitchAngle = angle[PITCH];
   }
   
    void calibrate(void) {
-    zeroRoll = _chr6dm.data.roll;
-    zeroPitch = _chr6dm.data.pitch;
+    zeroRoll = chr6dm.data.roll;
+    zeroPitch = chr6dm.data.pitch;
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
 
 };
@@ -632,7 +639,7 @@ public:
   }
   
   float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
+    return _gyro->getFlightData(axis);
   }
 
   

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -23,29 +23,30 @@
 void readSensors(void) {
   // *********************** Read Critical Sensors **********************
   // Apply low pass filter to sensor values and center around zero
-  gyro.measure(); // defined in Gyro.h
-  accel.measure(); // defined in Accel.h
+  _gyro->measure(); // defined in Gyro.h
+  _accel->measure(); // defined in Accel.h
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    compass.measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH));
+    _compass->measure();
   #endif
  
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
-    if (currentTime > compassTime) {
-      compass.measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH)); // defined in compass.h
-      compassTime = currentTime + COMPASSLOOPTIME;
+    if (_currentTime > _compassTime) {
+      _compass->measure(); // defined in compass.h
+      _compassTime = _currentTime + COMPASSLOOPTIME;
     }
   #endif
   #if defined(AltitudeHold)
-    if (currentTime > altitudeTime) {
-      altitude.measure(); // defined in altitude.h
-      altitudeTime = currentTime + ALTITUDELOOPTIME;
+    if (_currentTime > _altitudeTime) {
+      _altitude->measure(); // defined in altitude.h
+      _altitudeTime = _currentTime + ALTITUDELOOPTIME;
     }
   #endif
   #if defined(BattMonitor)
-    if (currentTime > batteryTime) {
-      batteryMonitor.measure(armed);
-      batteryTime = currentTime + BATTERYLOOPTIME;
+    if (_currentTime > _batteryTime) 
+    {
+      _batteryMonitor->measure(_armed);
+      _batteryTime = _currentTime + BATTERYLOOPTIME;
     }
   #endif
   
@@ -53,4 +54,28 @@ void readSensors(void) {
   _flightAngle->calculate(); // defined in FlightAngle.h
 }
 
+void initSensorsFromEEPROM()
+{
+  _accel->setSmoothFactor(readFloat(ACCSMOOTH_ADR));
+  _accel->setOneG(readFloat(ACCEL1G_ADR));
+  _accel->setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
+  _accel->setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
+  _accel->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
+  
+  _gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
+  _gyro->setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
+  _gyro->setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
+  _gyro->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
+}
 
+void storeSensorsToEEPROM()
+{
+  writeFloat(_accel->getOneG(), ACCEL1G_ADR);
+  writeFloat(_accel->getZero(ROLL),  LEVELROLLCAL_ADR);
+  writeFloat(_accel->getZero(PITCH), LEVELPITCHCAL_ADR);
+  writeFloat(_accel->getZero(ZAXIS), LEVELZCAL_ADR);
+  
+  writeFloat(_gyro->getZero(ROLL),  LEVELROLLCAL_ADR);
+  writeFloat(_gyro->getZero(PITCH), LEVELPITCHCAL_ADR);
+  writeFloat(_gyro->getZero(ZAXIS), LEVELZCAL_ADR);
+}

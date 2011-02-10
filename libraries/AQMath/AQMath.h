@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,8 +18,10 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQMATH_H_
-#define _AQMATH_H_
+#ifndef _AQ_MATH_H_
+#define _AQ_MATH_H_
+
+#define DATASIZE 25
 
 #include "WProgram.h"
 
@@ -27,22 +29,21 @@
 float filterSmooth(float currentData, float previousData, float smoothFactor);
 float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne);
 
-
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
 // ***********************************************************************
 // Median filter currently not used, but kept if needed for the future
 // To declare use: MedianFilter filterSomething;
-#define DATASIZE 25
 
-class MedianFilter {
-private: 
+class MedianFilter 
+{
+public: 
   float data[DATASIZE], sortData[DATASIZE];
   int dataIndex;
+  MedianFilter();
+
+  void initialize();
   
-public:  
-  MedianFilter(void);
-  void initialize(void);
   const float filter(float newData);
 };
 
@@ -54,7 +55,7 @@ public:
 //  Call as: vectorDotProduct(m, a, b)
 //
 //**********************************************************************************************
-float vectorDotProduct(int length, float vector1[], float vector2[]);
+float vectorDotProduct(byte length, float vector1[], float vector2[]);
 
 //**********************************************************************************************
 //
@@ -65,7 +66,7 @@ float vectorDotProduct(int length, float vector1[], float vector2[]);
 //  Call as: vectorScale(m, b, a, scalar)
 //
 //**********************************************************************************************
-void vectorScale(int length, float scaledVector[], float inputVector[], float scalar);
+void vectorScale(byte length, float scaledVector[], float inputVector[], float scalar);
 
 //**********************************************************************************************
 //
@@ -76,7 +77,7 @@ void vectorScale(int length, float scaledVector[], float inputVector[], float sc
 //  Call as: vectorAdd(m, c, b, a)
 //
 //**********************************************************************************************
-void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[]);
+void vectorAdd(byte length, float vectorC[], float vectorA[], float vectorB[]);
 
 //**********************************************************************************************
 //
@@ -98,7 +99,7 @@ void vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3]);
 //  Call as: matrixMultiply(m, n, p, C, A, B)
 //
 //**********************************************************************************************
-void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], float matrixA[], float matrixB[]);
+void matrixMultiply(byte aRows, byte aCols_bRows, byte bCols, float matrixC[], float matrixA[], float matrixB[]);
   
 //**********************************************************************************************
 //
@@ -109,14 +110,16 @@ void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], floa
 //  Call as: matrixAdd(m, n, C, A, B)
 //
 //**********************************************************************************************
-void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matrixB[]);
+void matrixAdd(byte rows, byte cols, float matrixC[], float matrixA[], float matrixB[]);
+
 
 // Alternate method to calculate arctangent from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 float arctan2(float y, float x);
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-float findModeFloat(float *data, int arraySize);
-int findModeInt(int *data, int arraySize);
-  
-#endif // AQMath.h
+float findMedianFloat(float *data, int arraySize);
+
+int findMedianInt(int *data, int arraySize); 
+
+#endif

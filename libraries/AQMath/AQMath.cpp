@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,24 +18,27 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <AQMath.h>
+#include "AQMath.h"
+
 
 // Low pass filter, kept as regular C function for speed
-float filterSmooth(float currentData, float previousData, float smoothFactor) {
+float filterSmooth(float currentData, float previousData, float smoothFactor) 
+{
   if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
+  {
     return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor)); 
-  else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
+  }
+  return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
 }
 
-float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
+float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) 
+{  //time scale factor
   if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
+  {
     return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
-  else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
+  }
+  return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
 }
-
-
 
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
@@ -43,9 +46,9 @@ float filterSmoothWithTime(float currentData, float previousData, float smoothFa
 // Median filter currently not used, but kept if needed for the future
 // To declare use: MedianFilter filterSomething;
 
-MedianFilter::MedianFilter(void) {}
+MedianFilter::MedianFilter() {}
 
-void MedianFilter::initialize(void) 
+void MedianFilter::initialize() 
 {
   for (int index = 0; index < DATASIZE; index++) 
   {
@@ -57,6 +60,8 @@ void MedianFilter::initialize(void)
   
 const float MedianFilter::filter(float newData) 
 {
+  int temp, j; // used to sort array
+
   // Insert new data into raw data array round robin style
   data[dataIndex] = newData;
   if (dataIndex < (DATASIZE-1)) 
@@ -67,19 +72,19 @@ const float MedianFilter::filter(float newData)
   {
     dataIndex = 0;    
   }
-    
+
   // Copy raw data to sort data array
   memcpy(sortData, data, sizeof(data));
-    
+
   // Insertion Sort
   for(int i=1; i<=(DATASIZE-1); i++) 
   {
-    int temp = sortData[i];
-    int j = i-1;
+    temp = sortData[i];
+    j = i-1;
     while(temp<sortData[j] && j>=0) 
 	{
-      sortData[j+1] = sortData[j];
-      j = j-1;
+	  sortData[j+1] = sortData[j];
+	  j = j-1;
     }
     sortData[j+1] = temp;
   }
@@ -94,10 +99,11 @@ const float MedianFilter::filter(float newData)
 //  Call as: vectorDotProduct(m, a, b)
 //
 //**********************************************************************************************
-float vectorDotProduct(int length, float vector1[], float vector2[])
+float vectorDotProduct(byte length, float vector1[], float vector2[])
 {
   float dotProduct = 0;
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++) 
+  {
     dotProduct += vector1[i] * vector2[i];
   }
   return dotProduct;
@@ -112,7 +118,7 @@ float vectorDotProduct(int length, float vector1[], float vector2[])
 //  Call as: vectorScale(m, b, a, scalar)
 //
 //**********************************************************************************************
-void vectorScale(int length, float scaledVector[], float inputVector[], float scalar)
+void vectorScale(byte length, float scaledVector[], float inputVector[], float scalar)
 {
   for (int i = 0; i < length; i++)
   {
@@ -129,9 +135,9 @@ void vectorScale(int length, float scaledVector[], float inputVector[], float sc
 //  Call as: vectorAdd(m, c, b, a)
 //
 //**********************************************************************************************
-void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[])
+void vectorAdd(byte length, float vectorC[], float vectorA[], float vectorB[])
 {
-  for(int i = 0; i < length; i++)
+  for(byte i = 0; i < length; i++)
   {
      vectorC[i] = vectorA[i] + vectorB[i];
   }
@@ -162,18 +168,18 @@ void vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3])
 //  Call as: matrixMultiply(m, n, p, C, A, B)
 //
 //**********************************************************************************************
-void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], float matrixA[], float matrixB[])
+void matrixMultiply(byte aRows, byte aCols_bRows, byte bCols, float matrixC[], float matrixA[], float matrixB[])
 {
-  for (int i = 0; i < aRows * bCols; i++)
+  for (byte i = 0; i < aRows * bCols; i++)
   {
     matrixC[i] = 0.0;
   }
 
-  for (int i = 0; i < aRows; i++)
+  for (byte i = 0; i < aRows; i++)
   {
-    for(int j = 0; j < aCols_bRows; j++)
+    for(byte j = 0; j < aCols_bRows; j++)
     {
-      for(int k = 0;  k < bCols; k++)
+      for(byte k = 0;  k < bCols; k++)
       {
        matrixC[i * bCols + k] += matrixA[i * aCols_bRows + j] * matrixB[j * bCols + k];
       }
@@ -190,9 +196,9 @@ void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], floa
 //  Call as: matrixAdd(m, n, C, A, B)
 //
 //**********************************************************************************************
-void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matrixB[])
+void matrixAdd(byte rows, byte cols, float matrixC[], float matrixA[], float matrixB[])
 {
-  for (int i = 0; i < rows * cols; i++)
+  for (byte i = 0; i < rows * cols; i++)
   {
     matrixC[i] = matrixA[i] + matrixB[i];
   }
@@ -205,8 +211,7 @@ float arctan2(float y, float x)
   float coeff_1 = PI/4;
   float coeff_2 = 3*coeff_1;
   float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
-  float r;
-  float angle;
+  float r, angle;
    
   if (x >= 0) 
   {
@@ -218,7 +223,6 @@ float arctan2(float y, float x)
     r = (x + abs_y) / (abs_y - x);
     angle = coeff_2 - coeff_1 * r;
   }
-  
   if (y < 0)
   {
     return(-angle);     // negate if in quad III or IV
@@ -231,7 +235,7 @@ float arctan2(float y, float x)
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-float findModeFloat(float *data, int arraySize) //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+float findMedianFloat(float *data, int arraySize) 
 {
   float temp;
   boolean done = 0;
@@ -243,8 +247,8 @@ float findModeFloat(float *data, int arraySize) //Thanks ala42! Post: http://aer
     done = 1;
     for (i=0; i<(arraySize-1); i++) 
 	{
-      if (data[i] > data[i+1]) 	// numbers are out of order - swap
-	  {     
+      if (data[i] > data[i+1]) 
+	  {     // numbers are out of order - swap
         temp = data[i+1];
         data[i+1] = data[i];
         data[i] = temp;
@@ -257,8 +261,8 @@ float findModeFloat(float *data, int arraySize) //Thanks ala42! Post: http://aer
 }
 
 
-int findModeInt(int *data, int arraySize) 		
-{                  
+int findMedianInt(int *data, int arraySize) 
+{                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
   int temp;
   boolean done = 0;
   byte i;
@@ -269,8 +273,8 @@ int findModeInt(int *data, int arraySize)
     done = 1;
     for (i=0; i<(arraySize-1); i++) 
 	{
-      if (data[i] > data[i+1]) 	// numbers are out of order - swap
-	  {     
+      if (data[i] > data[i+1]) 
+	  {     // numbers are out of order - swap
         temp = data[i+1];
         data[i+1] = data[i];
         data[i] = temp;
@@ -281,4 +285,3 @@ int findModeInt(int *data, int arraySize)
   
   return data[arraySize/2]; // return the median value
 }
-

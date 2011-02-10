@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -42,20 +42,20 @@ void readSerialCommand() {
   // Check for serial message
   if (Serial.available()) {
     digitalWrite(LEDPIN, LOW);
-    queryType = Serial.read();
-    switch (queryType) {
+    _queryType = Serial.read();
+    switch (_queryType) {
     case 'A': // Receive roll and pitch gyro PID
       readSerialPID(ROLL);
       readSerialPID(PITCH);
-      minAcro = readFloatSerial();
+      _minAcro = readFloatSerial();
       break;
     case 'C': // Receive yaw PID
       readSerialPID(YAW);
       readSerialPID(HEADING);
-      headingHoldConfig = readFloatSerial();
-      heading = 0;
-      relativeHeading = 0;
-      headingHold = 0;
+      _headingHoldConfig = readFloatSerial();
+      _heading = 0;
+      _relativeHeading = 0;
+      _headingHold = 0;
       break;
     case 'E': // Receive roll and pitch auto level PID
       readSerialPID(LEVELROLL);
@@ -65,37 +65,37 @@ void readSerialCommand() {
       windupGuard = readFloatSerial();
       break;
     case 'G': // Receive auto level configuration
-      levelLimit = readFloatSerial();
-      levelOff = readFloatSerial();
+      _levelLimit = readFloatSerial();
+      _levelOff = readFloatSerial();
       break;
     case 'I': // Receiver altitude hold PID
 #ifdef AltitudeHold
       readSerialPID(ALTITUDE);
       PID[ALTITUDE].windupGuard = readFloatSerial();
-      minThrottleAdjust = readFloatSerial();
-      maxThrottleAdjust = readFloatSerial();
-      altitude.setSmoothFactor(readFloatSerial());
+      _minThrottleAdjust = readFloatSerial();
+      _maxThrottleAdjust = readFloatSerial();
+      _altitude->setSmoothFactor(readFloatSerial());
       readSerialPID(ZDAMPENING);
 #endif
       break;
     case 'K': // Receive data filtering values
-      gyro.setSmoothFactor(readFloatSerial());
-      accel.setSmoothFactor(readFloatSerial());
-      timeConstant = readFloatSerial();
+      _gyro->setSmoothFactor(readFloatSerial());
+      _accel->setSmoothFactor(readFloatSerial());
+      _timeConstant = readFloatSerial();
 #if defined(AeroQuad_v1) || defined(AeroQuad_v18)
       _flightAngle->initialize();
 #endif
       break;
     case 'M': // Receive transmitter smoothing values
-      receiver.setXmitFactor(readFloatSerial());
+      _receiver->setXmitFactor(readFloatSerial());
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver.setSmoothFactor(channel, readFloatSerial());
+        _receiver->setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver.setTransmitterSlope(channel, readFloatSerial());
-        receiver.setTransmitterOffset(channel, readFloatSerial());
+        _receiver->setTransmitterSlope(channel, readFloatSerial());
+        _receiver->setTransmitterOffset(channel, readFloatSerial());
       }
       break;
     case 'W': // Write all user configurable values to EEPROM
@@ -104,51 +104,56 @@ void readSerialCommand() {
       break;
     case 'Y': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
-      gyro.calibrate();
-      accel.calibrate();
+      _gyro->calibrate();
+      _accel->calibrate();
+      storeSensorsToEEPROM();
       zeroIntegralError();
 #ifdef HeadingMagHold
-      compass.initialize();
+      _compass->initialize();
 #endif
 #ifdef AltitudeHold
-      altitude.initialize();
+      _altitude->initialize();
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
-      armed = 0;
-      calibrateESC = 1;
+      _armed = 0;
+      _calibrateESC = 1;
       break;
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-      armed = 0;
-      calibrateESC = 2;
+      _armed = 0;
+      _calibrateESC = 2;
       break;
     case '3': // Test ESC calibration
-      armed = 0;
-      testCommand = readFloatSerial();
-      calibrateESC = 3;
+      _armed = 0;
+      _testCommand = readFloatSerial();
+      _calibrateESC = 3;
       break;
     case '4': // Turn off ESC calibration
-      armed = 0;
-      calibrateESC = 0;
-      testCommand = 1000;
+      _armed = 0;
+      _calibrateESC = 0;
+      _testCommand = 1000;
       break;
     case '5': // Send individual motor commands (motor, command)
-      armed = 0;
-      calibrateESC = 5;
+      _armed = 0;
+      _calibrateESC = 5;
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setRemoteCommand(motor, readFloatSerial());
+      {
+        _motors->setRemoteCommand(motor, readFloatSerial());
+      }
       break;
     case 'a':
       // spare
       break;
     case 'b': // calibrate gyros
-      gyro.calibrate();
+      _gyro->calibrate();
+      storeSensorsToEEPROM();
       break;
     case 'c': // calibrate accels
-      accel.calibrate();
+      _accel->calibrate();
+      storeSensorsToEEPROM();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       _flightAngle->calibrate();
-      accel.setOneG(accel.getFlightData(ZAXIS));
+      _accel->setOneG(_accel->getFlightData(ZAXIS));
 #endif
       break;
     case 'd': // send aref
@@ -156,9 +161,9 @@ void readSerialCommand() {
       break;
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
-      compass.setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
+      _compass->setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
+      _compass->setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
+      _compass->setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
 #endif
       break;
     case '~': //  read Camera values 
@@ -219,27 +224,27 @@ void PrintPID(unsigned char IDPid)
 }
 
 void sendSerialTelemetry() {
-  update = 0;
-  switch (queryType) {
+  _update = 0;
+  switch (_queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     //printFreeMemory();
-    //Serial.print(gyro.getHeading());
-    //comma();
-    //Serial.print(batteryMonitor.getData(), 2);
-    //Serial.println();
+    Serial.print(_receiver->getAngle(ROLL));
+    comma();
+    Serial.print(_receiver->getAngle(PITCH));
+    Serial.println();
     //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
     PrintPID(ROLL);
     PrintPID(PITCH);
-    Serial.println(minAcro);
-    queryType = 'X';
+    Serial.println(_minAcro);
+    _queryType = 'X';
     break;
   case 'D': // Send yaw PID values
     PrintPID(YAW);
     PrintPID(HEADING);
-    Serial.println(headingHoldConfig, BIN);
-    queryType = 'X';
+    Serial.println(_headingHoldConfig, BIN);
+    _queryType = 'X';
     break;
   case 'F': // Send roll and pitch auto level PID values
     PrintPID(LEVELROLL);
@@ -247,82 +252,82 @@ void sendSerialTelemetry() {
     PrintPID(LEVELGYROROLL);
     PrintPID(LEVELGYROPITCH);
     Serial.println(windupGuard);
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
     //Serial.print(levelLimit);
     //comma();
-		PrintValueComma(levelLimit);
-    Serial.println(levelOff);
-    queryType = 'X';
+    PrintValueComma(_levelLimit);
+    Serial.println(_levelOff);
+    _queryType = 'X';
     break;
   case 'J': // Altitude Hold
 #ifdef AltitudeHold
     PrintPID(ALTITUDE);
     PrintValueComma(PID[ALTITUDE].windupGuard);
-    PrintValueComma(minThrottleAdjust);
-    PrintValueComma(maxThrottleAdjust);
-    PrintValueComma(altitude.getSmoothFactor());
+    PrintValueComma(_minThrottleAdjust);
+    PrintValueComma(_maxThrottleAdjust);
+    PrintValueComma(_altitude->getSmoothFactor());
     PrintValueComma(PID[ZDAMPENING].P);
     PrintValueComma(PID[ZDAMPENING].I);
     Serial.println(PID[ZDAMPENING].D);
 #else
     for(byte i=0; i<9; i++) {
-      PrintValueComma(0);
+     PrintValueComma(0);
     }
     Serial.println('0');
 #endif
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case 'L': // Send data filtering values
-    PrintValueComma(gyro.getSmoothFactor());
-    PrintValueComma(accel.getSmoothFactor());
-    Serial.println(timeConstant);
+    PrintValueComma(_gyro->getSmoothFactor());
+    PrintValueComma(_accel->getSmoothFactor());
+    Serial.println(_timeConstant);
     // comma();
     // Serial.println(flightMode, DEC);
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
-    PrintValueComma(receiver.getXmitFactor());
+    PrintValueComma(_receiver->getXmitFactor());
     for (byte axis = ROLL; axis < AUX; axis++) {
-      PrintValueComma(receiver.getSmoothFactor(axis));
+      PrintValueComma(_receiver->getSmoothFactor(axis));
     }
-    Serial.println(receiver.getSmoothFactor(AUX));
-    queryType = 'X';
+    Serial.println(_receiver->getSmoothFactor(AUX));
+    _queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
     for (byte axis = ROLL; axis < AUX; axis++) {
-      PrintValueComma(receiver.getTransmitterSlope(axis));
-      PrintValueComma(receiver.getTransmitterOffset(axis));
+      PrintValueComma(_receiver->getTransmitterSlope(axis));
+      PrintValueComma(_receiver->getTransmitterOffset(axis));
     }
-    PrintValueComma(receiver.getTransmitterSlope(AUX));
-    Serial.println(receiver.getTransmitterOffset(AUX));
-    queryType = 'X';
+    PrintValueComma(_receiver->getTransmitterSlope(AUX));
+    Serial.println(_receiver->getTransmitterOffset(AUX));
+    _queryType = 'X';
     break;
   case 'Q': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getData(axis));
+      PrintValueComma(_gyro->getData(axis));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getData(axis));
+      PrintValueComma(_accel->getData(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
-      PrintValueComma(levelAdjust[axis]);
+      PrintValueComma(_levelAdjust[axis]);
     }
     PrintValueComma(_flightAngle->getData(ROLL));
     PrintValueComma(_flightAngle->getData(PITCH));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma(_compass->getAbsoluteHeading());
     #else
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
+      PrintValueComma(_altitude->getData());
     #else
       PrintValueComma(0);
     #endif
     #ifdef BattMonitor
-      Serial.print(batteryMonitor.getData());
+      Serial.print(_batteryMonitor->getData());
     #else
       Serial.print(0);
     #endif
@@ -330,9 +335,9 @@ void sendSerialTelemetry() {
     break;
   case 'R': // Raw magnetometer data
 #if defined(HeadingMagHold)
-    PrintValueComma(compass.getRawData(XAXIS));
-    PrintValueComma(compass.getRawData(YAXIS));
-    Serial.println(compass.getRawData(ZAXIS));
+    PrintValueComma(_compass->getRawData(XAXIS));
+    PrintValueComma(_compass->getRawData(YAXIS));
+    Serial.println(_compass->getRawData(ZAXIS));
 #else
     PrintValueComma(0);
     PrintValueComma(0);
@@ -340,38 +345,46 @@ void sendSerialTelemetry() {
 #endif
     break;
   case 'S': // Send all flight data
-    PrintValueComma(deltaTime);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getFlightData(axis));
+    PrintValueComma(_deltaTime);
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
+      PrintValueComma(_gyro->getFlightData(axis));
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryMonitor.getData());
+      PrintValueComma(_batteryMonitor->getData());
     #else
       PrintValueComma(0);
     #endif
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motors.getMotorAxisCommand(axis));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
+      PrintValueComma(_motors->getMotorAxisCommand(axis));
     }
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-      PrintValueComma(motors.getMotorCommand(motor));
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) 
+    {
+      PrintValueComma(_motors->getMotorCommand(motor));
     }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getFlightData(axis));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
+      PrintValueComma(_accel->getFlightData(axis));
     }
-    Serial.print(armed, BIN);
+    Serial.print(_armed, BIN);
     comma();
-    if (flightMode == STABLE)
+    if (_flightMode == STABLE)
+    {
       PrintValueComma(2000);
-    if (flightMode == ACRO)
+    }
+    if (_flightMode == ACRO)
+    {
       PrintValueComma(1000);
+    }
     #ifdef HeadingMagHold
-      PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma(_compass->getAbsoluteHeading());
     #else
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
-      Serial.print(altitudeHold, DEC);
+      PrintValueComma(_altitude->getData());
+      Serial.print(_altitudeHold, DEC);
     #else
       PrintValueComma(0);
       Serial.print('0');
@@ -379,46 +392,46 @@ void sendSerialTelemetry() {
     Serial.println();    
     break;
   case 'T': // Send processed transmitter values
-    PrintValueComma(receiver.getXmitFactor());
+    PrintValueComma(_receiver->getXmitFactor());
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(receiver.getData(axis));
+      PrintValueComma(_receiver->getData(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
-      PrintValueComma(levelAdjust[axis]);
+      PrintValueComma(_levelAdjust[axis]);
     }
-    PrintValueComma(motors.getMotorAxisCommand(ROLL));
-    PrintValueComma(motors.getMotorAxisCommand(PITCH));
-    Serial.println(motors.getMotorAxisCommand(YAW));
+    PrintValueComma(_motors->getMotorAxisCommand(ROLL));
+    PrintValueComma(_motors->getMotorAxisCommand(PITCH));
+    Serial.println(_motors->getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < AUX; channel++) {
-      PrintValueComma(receiver.getData(channel));
+      PrintValueComma(_receiver->getData(channel));
     }
-    Serial.println(receiver.getData(AUX));
+    Serial.println(_receiver->getData(AUX));
     break;
   case 'V': // Send receiver status
     for (byte channel = ROLL; channel < AUX; channel++) {
-      PrintValueComma(receiver.getRaw(channel));
+      PrintValueComma(_receiver->getRaw(channel));
     }
-    Serial.println(receiver.getRaw(AUX));
+    Serial.println(_receiver->getRaw(AUX));
     break;
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
-    PrintValueComma(receiver.getData(YAW));
-    PrintValueComma(headingHold);
-    PrintValueComma(setHeading);
-    Serial.println(relativeHeading);
+    PrintValueComma(_receiver->getData(YAW));
+    PrintValueComma(_headingHold);
+    PrintValueComma(_setHeading);
+    Serial.println(_relativeHeading);
     break;
   case '6': // Report remote commands
     for (byte motor = FRONT; motor < LEFT; motor++) {
-      PrintValueComma(motors.getRemoteCommand(motor));
+      PrintValueComma(_motors->getRemoteCommand(motor));
     }
-    Serial.println(motors.getRemoteCommand(LEFT));
+    Serial.println(_motors->getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
     Serial.println(VERSION, 1);
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case '#': // Send software configuration
     // Determine which hardware is used to define max/min sensor values for Configurator plots
@@ -456,27 +469,27 @@ void sendSerialTelemetry() {
     Serial.print('3');
 #endif
     Serial.println();
-    queryType = 'X';
+    _queryType = 'X';
     break;  
   case 'e': // Send AREF value
     Serial.println(aref);
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
-    Serial.print(compass.getMagMax(XAXIS), 2);
+    Serial.print(_compass->getMagMax(XAXIS), 2);
     comma();
-    Serial.print(compass.getMagMin(XAXIS), 2);
+    Serial.print(_compass->getMagMin(XAXIS), 2);
     comma();
-    Serial.print(compass.getMagMax(YAXIS), 2);
+    Serial.print(_compass->getMagMax(YAXIS), 2);
     comma();
-    Serial.print(compass.getMagMin(YAXIS), 2);
+    Serial.print(_compass->getMagMin(YAXIS), 2);
     comma();
-    Serial.print(compass.getMagMax(ZAXIS), 2);
+    Serial.print(_compass->getMagMax(ZAXIS), 2);
     comma();
-    Serial.println(compass.getMagMin(ZAXIS), 2);
+    Serial.println(_compass->getMagMin(ZAXIS), 2);
 #endif
-    queryType = 'X';
+    _queryType = 'X';
     break;
   case '`': // Send Camera values 
     #ifdef Camera
