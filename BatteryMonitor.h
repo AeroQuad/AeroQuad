@@ -20,44 +20,61 @@
 
 // Written by Honk: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13282#post13282
 
+#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
+#define OK 0
+#define WARNING 1
+#define ALARM 2
+
+
 // *************************************************************************
 // ************************** Battery Monitor ******************************
 // *************************************************************************
-class BatteryMonitor {
-public:
-  #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-  #define OK 0
-  #define WARNING 1
-  #define ALARM 2
-  byte batteryStatus;
-  float lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
-  float lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
-  float batteryVoltage;
+class BatteryMonitor 
+{
+private:
+  byte _batteryStatus;
+  float _lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
+  float _lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
+  float _batteryVoltage;
 
-  BatteryMonitor(void) {
-    lowVoltageWarning = 10.2; //10.8;
-    lowVoltageAlarm = 9.5; //10.2;
-    batteryVoltage = lowVoltageWarning + 2;
-    batteryStatus = OK;
+public:  
+
+  BatteryMonitor() 
+  {
+    _lowVoltageWarning = 10.2; //10.8;
+    _lowVoltageAlarm = 9.5; //10.2;
+    _batteryVoltage = _lowVoltageWarning + 2;
+    _batteryStatus = OK;
   }
 
   virtual void initialize(void);
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual void lowBatteryEvent(byte);
 
-  void measure(byte armed) {
-    batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-    if (armed == ON) {
-      if (batteryVoltage < lowVoltageWarning) batteryStatus = WARNING;
-      if (batteryVoltage < lowVoltageAlarm) batteryStatus = ALARM;
+  void measure(byte armed) 
+  {
+    _batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), _batteryVoltage, 0.1);
+    if (armed == ON) 
+    {
+      if (_batteryVoltage < _lowVoltageWarning) 
+      {
+        _batteryStatus = WARNING;
+      }
+      if (_batteryVoltage < _lowVoltageAlarm)
+      {
+        _batteryStatus = ALARM;
+      }
     }
     else
-      batteryStatus = OK;
-    lowBatteryEvent(batteryStatus);
+    {
+      _batteryStatus = OK;
+    }
+    lowBatteryEvent(_batteryStatus);
   }
 
-  const float getData(void) {
-    return batteryVoltage;
+  const float getData() 
+  {
+    return _batteryVoltage;
   }
 };
 
@@ -85,17 +102,22 @@ public:
   PIN60--RL_LED--150ohm--GND
 */
 
-class BatteryMonitor_APM : public BatteryMonitor {
-private:
-  #define FL_LED 57 // Ain 2 on Mega
-  #define FR_LED 58 // Ain 3 on Mega
-  #define RR_LED 59 // Ain 4 on Mega
-  #define RL_LED 60 // Ain 5 on Mega
-  #define LEDDELAY 200
-  float diode; //Schottky diode on APM board
-  float batteryScaleFactor;
 
-  void ledCW(void){
+
+#define FL_LED 57 // Ain 2 on Mega
+#define FR_LED 58 // Ain 3 on Mega
+#define RR_LED 59 // Ain 4 on Mega
+#define RL_LED 60 // Ain 5 on Mega
+#define LEDDELAY 200
+
+class BatteryMonitor_APM : public BatteryMonitor 
+{
+private:
+  float _diode; //Schottky diode on APM board
+  float _batteryScaleFactor;
+
+  void ledCW(void)
+  {
     digitalWrite(RL_LED, HIGH);
     delay(LEDDELAY);
     digitalWrite(RL_LED, LOW);
@@ -130,9 +152,9 @@ public:
     float R1   = 10050; //the SMD 10k resistor measured with DMM
     float R2   =  3260; //3k3 user mounted resistor measured with DMM
     float Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
-    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+    _batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
 
-    diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
+    _diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
 
     analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
 
@@ -144,19 +166,31 @@ public:
     //batteryVoltage = readBatteryVoltage(BATTERYPIN);
   }
 
-  void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
+  void lowBatteryEvent(byte level) // <- this logic by Jose Julio
+  {  
     static byte batteryCounter=0;
     byte freq;
 
-    if (level == OK) {
+    if (level == OK) 
+    {
       ledsON();
       _autoDescent = 0; //reset autoAscent if battery is good
     }
-    else {
+    else
+    {
       batteryCounter++;
-      if (level == WARNING) freq = 40;  //4 seconds wait
-      else freq = 5; //0.5 second wait
-      if (batteryCounter < 2) ledsOFF();  //indicate with led's everytime autoDescent kicks in
+      if (level == WARNING) 
+      {
+        freq = 40;  //4 seconds wait
+      }
+      else 
+      {
+        freq = 5; //0.5 second wait
+      }
+      if (batteryCounter < 2) 
+      {
+        ledsOFF();  //indicate with led's everytime autoDescent kicks in
+      }
       #if defined(AltitudeHold)
         if (_throttle > 1400) 
         {
@@ -179,45 +213,51 @@ public:
     }
   }
 
-  const float readBatteryVoltage(byte channel) {
-    return (analogRead(channel) * batteryScaleFactor) + diode;
+  const float readBatteryVoltage(byte channel) 
+  {
+    return (analogRead(channel) * _batteryScaleFactor) + _diode;
   }
 };
 
 // *******************************************************************************
 // ************************ AeroQuad Battery Monitor *****************************
 // *******************************************************************************
-class BatteryMonitor_AeroQuad : public BatteryMonitor {
+class BatteryMonitor_AeroQuad : public BatteryMonitor 
+{
 private:
   #if defined (__AVR_ATmega328P__)
     #define BUZZERPIN 12
   #else
     #define BUZZERPIN 49
   #endif
-  long previousTime;
-  byte state, firstAlarm;
-  float diode; // raw voltage goes through diode on Arduino
-  float batteryScaleFactor;
+  
+  long _previousTime;
+  byte _state;
+  byte _firstAlarm;
+  float _diode; // raw voltage goes through diode on Arduino
+  float _batteryScaleFactor;
 
 public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
-  void initialize(void) {
+  void initialize(void) 
+  {
     float R1   = 15000;
     float R2   =  7500;
     float Aref =     5.0;
-    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
-    diode = 0.9; // measured with DMM
+    _batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
+    _diode = 0.9; // measured with DMM
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
     digitalWrite(BUZZERPIN, LOW);
-    previousTime = millis();
-    state = LOW;
-    firstAlarm = OFF;
+    _previousTime = millis();
+    _state = LOW;
+    _firstAlarm = OFF;
   }
 
-  void lowBatteryEvent(byte level) {
-    long currentTime = millis()- previousTime;
+  void lowBatteryEvent(byte level) 
+  {
+    long currentTime = millis()- _previousTime;
     if (level == OK) 
     {
       digitalWrite(BUZZERPIN, LOW);
@@ -245,28 +285,35 @@ public:
     }
     if (level == ALARM) 
     {
-      if (firstAlarm == OFF) 
+      if (_firstAlarm == OFF) 
       {
         _autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
       }
-      firstAlarm = ON;
+      _firstAlarm = ON;
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       if ((_currentTime > 500) && (_throttle > 1400)) 
       {
         _autoDescent -= 1; // auto descend quad
         _holdAltitude -= 0.2; // descend if in attitude hold mode
         _previousTime = millis();
-        if (state == LOW) state = HIGH;
-        else state = LOW;
-        digitalWrite(LEDPIN, state);
-        digitalWrite(LED2PIN, state);
-        digitalWrite(LED3PIN, state);
+        if (_state == LOW) 
+        {
+          _state = HIGH;
+        }
+        else
+        { 
+          _state = LOW;
+        }
+        digitalWrite(LEDPIN, _state);
+        digitalWrite(LED2PIN, _state);
+        digitalWrite(LED3PIN, _state);
       }
     }
   }
 
-  const float readBatteryVoltage(byte channel) {
-    return (analogRead(channel) * batteryScaleFactor) + diode;
+  const float readBatteryVoltage(byte channel) 
+  {
+    return (analogRead(channel) * _batteryScaleFactor) + _diode;
   }
 };
 
