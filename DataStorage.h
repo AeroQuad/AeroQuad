@@ -101,7 +101,7 @@ void initializeEEPROM()
     PID[ZDAMPENING].D = 0.0;
     _minThrottleAdjust = -50.0;
     _maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
-    _altitude->setSmoothFactor(0.1);
+    _altitudeProvider->setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
     _compass->setMagCal(XAXIS, 1, 0);
@@ -163,7 +163,7 @@ void readEEPROM()
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     _minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     _maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
-    _altitude->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+    _altitudeProvider->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
 
@@ -216,7 +216,7 @@ void writeEEPROM()
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
     writeFloat(_minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(_maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(_altitude->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(_altitudeProvider->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
     writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
   #ifdef HeadingMagHold

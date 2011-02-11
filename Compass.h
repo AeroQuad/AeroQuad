@@ -94,7 +94,7 @@ public:
 // ***********************************************************************
 // ************************ HMC5843 Subclass *****************************
 // ***********************************************************************
-class Compass_AeroQuad_v2 : public Compass 
+class HMC5843Magnetometer : public Compass 
 {
 // This sets up the HMC5843 from Sparkfun
 private:
@@ -115,7 +115,7 @@ private:
   int _gyroZero;
   
 public: 
-  Compass_AeroQuad_v2() : Compass() 
+  HMC5843Magnetometer() : Compass() 
   {
     _compassAddress = 0x1E;
     // smoothFactor means time in seconds less than smoothFactor, depend on gyro more

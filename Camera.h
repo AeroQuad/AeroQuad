@@ -41,7 +41,7 @@ The high time shall be 1500�s, so the OCRxy register is set to 3000. A change 
  tick every 0.5�s. If the prescaler was changed, the OCRxy register value would
  be different. 
 */
-class Camera 
+class CameraStabilizer 
 {
 private:
   float _mCameraPitch;
@@ -64,7 +64,7 @@ protected:
   int _servoYaw;
 
 public:  
-  Camera() {}
+  CameraStabilizer() {}
   virtual void _initialize();
   virtual void move();
 
@@ -273,10 +273,10 @@ public:
   }
 };
 
-class Camera_AeroQuad : public Camera 
+class Camera_AeroQuad : public CameraStabilizer 
 {
 public:
-  Camera_AeroQuad() : Camera() {}
+  Camera_AeroQuad() : CameraStabilizer() {}
   
   void _initialize() 
   {
@@ -299,10 +299,10 @@ public:
   }
 };
 
-class Camera_Pins_2_3_5 : public Camera 
+class Camera_Pins_2_3_5 : public CameraStabilizer 
 {
 public:
-  Camera_Pins_2_3_5() : Camera() {}
+  Camera_Pins_2_3_5() : CameraStabilizer() {}
   
   void _initialize() 
   {
@@ -324,10 +324,10 @@ public:
   }
 };
 
-class Camera_Pins_6_7_8 : public Camera 
+class Camera_Pins_6_7_8 : public CameraStabilizer 
 {
 public:
-  Camera_Pins_6_7_8() : Camera() {}
+  Camera_Pins_6_7_8() : CameraStabilizer() {}
   
   void _initialize() 
   {
@@ -348,10 +348,10 @@ public:
   }
 };
 
-class Camera_Pins_44_45_46 : public Camera 
+class Camera_Pins_44_45_46 : public CameraStabilizer 
 {
 public:
-  Camera_Pins_44_45_46() : Camera() {}
+  Camera_Pins_44_45_46() : CameraStabilizer() {}
   
   void _initialize() 
   {

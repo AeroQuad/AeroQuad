@@ -280,7 +280,7 @@ SIGNAL(PCINT2_vect)
 // defines arduino pins used for receiver in arduino pin numbering schema
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
-class Receiver_AeroQuad : public Receiver 
+class ReceiverFor328p : public Receiver 
 {
 public:
   // Configure each receiver pin for PCINT
@@ -421,7 +421,7 @@ SIGNAL(PCINT2_vect)
   static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #endif
 
-class Receiver_AeroQuadMega : public Receiver 
+class ReceiverForMega : public Receiver 
 {
 public:
   void initialize() 
@@ -470,13 +470,13 @@ public:
   }
 };
 
-class Receiver_AeroQuadMega_Fake :
+class FakeReceiverForMega :
 public Receiver 
 {
 private:
 
 public:
-  Receiver_AeroQuadMega_Fake() :
+  FakeReceiverForMega() :
   Receiver()
   {
   }
@@ -574,13 +574,13 @@ ISR(TIMER4_CAPT_vect)//interrupt.
   //Counter++;
 }
 //#endif
-class Receiver_ArduCopter : public Receiver 
+class ReceiverForAPM : public Receiver 
 {
 private:
   int receiverPin[6];
 
 public:
-  Receiver_ArduCopter() : Receiver()
+  ReceiverForAPM() : Receiver()
   {
     receiverPin[ROLL] = 0;
     receiverPin[PITCH] = 1;
@@ -650,13 +650,13 @@ public:
 #define CAMERAROLLCH 5
 #define CAMERAPITCHCH 6
 
-class Receiver_Multipilot : public Receiver 
+class ReceiverForMultipilot : public Receiver 
 {
 private:
   int receiverChannel[LASTCHANNEL];
 
 public:
-  Receiver_Multipilot() : Receiver()
+  ReceiverForMultipilot() : Receiver()
   {
     receiverChannel[ROLL] = ROLLCH;
     receiverChannel[PITCH] = PITCHCH;

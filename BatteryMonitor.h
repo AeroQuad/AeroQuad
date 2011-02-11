@@ -110,7 +110,7 @@ public:
 #define RL_LED 60 // Ain 5 on Mega
 #define LEDDELAY 200
 
-class BatteryMonitor_APM : public BatteryMonitor 
+class APMBatteryMonitor : public BatteryMonitor 
 {
 private:
   float _diode; //Schottky diode on APM board
@@ -147,7 +147,7 @@ private:
   };
 
 public:
-  BatteryMonitor_APM() : BatteryMonitor(){}
+  APMBatteryMonitor() : BatteryMonitor(){}
   void initialize() {
     float R1   = 10050; //the SMD 10k resistor measured with DMM
     float R2   =  3260; //3k3 user mounted resistor measured with DMM
@@ -222,7 +222,7 @@ public:
 // *******************************************************************************
 // ************************ AeroQuad Battery Monitor *****************************
 // *******************************************************************************
-class BatteryMonitor_AeroQuad : public BatteryMonitor 
+class AeroQuadBatteryMonitor : public BatteryMonitor 
 {
 private:
   #if defined (__AVR_ATmega328P__)
@@ -238,7 +238,7 @@ private:
   float _batteryScaleFactor;
 
 public:
-  BatteryMonitor_AeroQuad() : BatteryMonitor(){}
+  AeroQuadBatteryMonitor() : BatteryMonitor(){}
 
   void initialize() 
   {

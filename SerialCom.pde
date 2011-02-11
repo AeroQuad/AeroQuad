@@ -78,7 +78,7 @@ void readSerialCommand()
       PID[ALTITUDE].windupGuard = readFloatSerial();
       _minThrottleAdjust = readFloatSerial();
       _maxThrottleAdjust = readFloatSerial();
-      _altitude->setSmoothFactor(readFloatSerial());
+      _altitudeProvider->setSmoothFactor(readFloatSerial());
       readSerialPID(ZDAMPENING);
 #endif
       break;
@@ -118,7 +118,7 @@ void readSerialCommand()
       _compass->initialize();
 #endif
 #ifdef AltitudeHold
-      _altitude->initialize();
+      _altitudeProvider->initialize();
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
@@ -275,7 +275,7 @@ void sendSerialTelemetry()
     PrintValueComma(PID[ALTITUDE].windupGuard);
     PrintValueComma(_minThrottleAdjust);
     PrintValueComma(_maxThrottleAdjust);
-    PrintValueComma(_altitude->getSmoothFactor());
+    PrintValueComma(_altitudeProvider->getSmoothFactor());
     PrintValueComma(PID[ZDAMPENING].P);
     PrintValueComma(PID[ZDAMPENING].I);
     Serial.println(PID[ZDAMPENING].D);
@@ -336,7 +336,7 @@ void sendSerialTelemetry()
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(_altitude->getData());
+      PrintValueComma(_altitudeProvider->getData());
     #else
       PrintValueComma(0);
     #endif
@@ -397,7 +397,7 @@ void sendSerialTelemetry()
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(_altitude->getData());
+      PrintValueComma(_altitudeProvider->getData());
       Serial.print(_altitudeHold, DEC);
     #else
       PrintValueComma(0);

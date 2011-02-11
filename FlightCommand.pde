@@ -151,7 +151,7 @@ void readPilotCommands()
    {
       if (_storeAltitude == ON) 
       {
-        _holdAltitude = _altitude->getData();
+        _holdAltitude = _altitudeProvider->getData();
         _holdThrottle = _receiver->getData(THROTTLE);
         PID[ALTITUDE].integratedError = 0;
         _accel->setOneG(_accel->getFlightData(ZAXIS));

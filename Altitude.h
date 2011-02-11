@@ -24,7 +24,7 @@
 // ************************** Altitude Class *****************************
 // ***********************************************************************
 
-class Altitude 
+class AltitudeProvider 
 {
 protected:
   float _groundPressure; // remove later
@@ -34,10 +34,9 @@ protected:
   double _rawAltitude;
   double _altitude; 
   
-  
 public:
   
-  Altitude () 
+  AltitudeProvider () 
   { 
     _altitude = 0;
     _smoothFactor = 0.02;
@@ -104,7 +103,7 @@ public:
 // ***********************************************************************
 // ************************* BMP085 Subclass *****************************
 // ***********************************************************************
-class Altitude_AeroQuad_v2 : public Altitude 
+class BMP085BarometricSensor : public AltitudeProvider 
 {
 // This sets up the BMP085 from Sparkfun
 // Code from http://wiring.org.co/learning/libraries/bmp085.html
@@ -161,7 +160,7 @@ private:
   }
 
 public: 
-  Altitude_AeroQuad_v2() : Altitude()
+  BMP085BarometricSensor() : AltitudeProvider()
   {
     _altitudeAddress = 0x77;
     // oversampling setting

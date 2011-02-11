@@ -219,13 +219,13 @@ void processAltitudeHold()
 #ifdef AltitudeHold
   if (_altitudeHold == ON) 
   {
-    _throttleAdjust = updatePID(_holdAltitude, _altitude->getData(), &PID[ALTITUDE]);
+    _throttleAdjust = updatePID(_holdAltitude, _altitudeProvider->getData(), &PID[ALTITUDE]);
     _zDampening = updatePID(0, _accel->getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
     if((abs(_flightAngle->getData(ROLL)) > 5) ||  (abs(_flightAngle->getData(PITCH)) > 5)) 
     { 
       PID[ZDAMPENING].integratedError = 0; 
     }
-    _throttleAdjust = constrain((_holdAltitude - _altitude->getData()) * PID[ALTITUDE].P, _minThrottleAdjust, _maxThrottleAdjust);
+    _throttleAdjust = constrain((_holdAltitude - _altitudeProvider->getData()) * PID[ALTITUDE].P, _minThrottleAdjust, _maxThrottleAdjust);
     if (_receiver->getData(THROTTLE) > MAXCHECK) //above 1900
     {
       _holdAltitude += 0.1;

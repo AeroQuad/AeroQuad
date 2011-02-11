@@ -35,6 +35,7 @@ protected:
   float _bMotorCommand;
   
 public:
+
   Motors()
   {
     _throttle = 0;
@@ -157,10 +158,10 @@ public:
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
-class Motors_PWM : public Motors 
+class PWMMotors : public Motors 
 {
 public:
-  Motors_PWM() : Motors()
+  PWMMotors() : Motors()
   {
    // Analog write supports commands from 0-255 => 0 - 100% duty cycle
    // Using 125-250 for motor setting 1000-2000
@@ -218,7 +219,7 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
 
-class Motors_PWMtimer : public Motors 
+class PWMTimedMotors : public Motors 
 {
 private:
 /*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port
@@ -228,7 +229,7 @@ private:
     LEFT          6  PH3             11  PB3                      8  PH5
 */
 public:
-  Motors_PWMtimer() : Motors(){}
+  PWMTimedMotors() : Motors(){}
 
   void initialize() 
   {
@@ -340,7 +341,7 @@ public:
   #define LASTMOTORPIN 12
 #endif
 
-class Motors_PWM_Fake : public Motors 
+class CHR6DMFakeMotors : public Motors 
 {
 private:
 
@@ -348,7 +349,7 @@ private:
   byte pin;
 
  public:
-  Motors_PWM_Fake() : Motors()
+  CHR6DMFakeMotors() : Motors()
   {
     // Scale motor commands to analogWrite
     // Only supports commands from 0-255 => 0 - 100% duty cycle
@@ -400,10 +401,10 @@ private:
 /***************** ArduCopter Motors ******************/
 /******************************************************/
 #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
-class Motors_ArduCopter : public Motors 
+class APMMotors : public Motors 
 {
 public:
-  Motors_ArduCopter() : Motors() {}
+  APMMotors() : Motors() {}
 
   void initialize() 
   {
@@ -486,7 +487,7 @@ public:
 /********************* Multipilot Motors *********************/
 /*************************************************************/
 #ifdef MultipilotI2C
-class Motors_I2C : public Motors 
+class MultipilotI2CMotors : public Motors 
 {
 public:
 
@@ -500,7 +501,7 @@ public:
   float motorAxisCommandYaw[LASTMOTOR];
 
   unsigned char MotorI2C[LASTMOTOR];
-  Motors_I2C() : Motors() {}
+  MultipilotI2CMotors() : Motors() {}
 
   void initialize() 
   {
@@ -895,10 +896,10 @@ void matrix_debug()
 #define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
 #define LEFTMOTORID  MOTORBASE + 4  // inspired frame
 
-class Motors_AeroQuadI2C : public Motors 
+class I2CMotors : public Motors 
 {
 public:
-  Motors_AeroQuadI2C() : Motors()
+  I2CMotors() : Motors()
   {
     // Scale motor commands to 0 to 255
     // for I2C commands

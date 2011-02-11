@@ -95,9 +95,9 @@
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuad tempReceiver;
+  ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -105,7 +105,7 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -114,9 +114,9 @@
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuad tempReceiver;
+  ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -124,7 +124,7 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -133,9 +133,9 @@
   Accelerometer *_accel = &tempAccel;
   ITG3200Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuad tempReceiver;
+  ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWMtimer tempMotors;
+  PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
@@ -143,36 +143,36 @@
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 tempCompass;
+    HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 tempAltitude;
-    Altitude *_altitude = &tempAltitude;
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad tempBatteryMonitor;
+    AeroQuadBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
-  Receiver_AeroQuadMega tempReceiver;
+  ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -180,14 +180,14 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
 #ifdef AeroQuadMega_v2
-  Receiver_AeroQuadMega tempReceiver;
+  ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWMtimer tempMotors;
+  PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   BMA180Accelerometer tempAccel;
@@ -199,23 +199,23 @@
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 tempCompass;
+    HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 tempAltitude;
-    Altitude *_altitude = &tempAltitude;
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitude = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad tempBatteryMonitor;
+    AeroQuadBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -224,26 +224,26 @@
   Gyroscope *_gyro = &tempGyro;
   ADXL335_ADCAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
-  Receiver_ArduCopter tempReceiver;
+  ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_ArduCopter tempMotors;
+  APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 tempCompass;
+    HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 tempAltitude;
-    Altitude *_altitude = &tempAltitude;
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitude = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
-    BatteryMonitor_APM tempBatteryMonitor;
+    APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
 #endif
@@ -253,9 +253,9 @@
   Accelerometer *_accel = &tempAccel;
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuad tempReceiver;
+  ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
@@ -264,7 +264,7 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -273,9 +273,9 @@
   Accelerometer *_accel = &tempAccel;
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuadMega tempReceiver;
+  ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
@@ -283,7 +283,7 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -292,9 +292,9 @@
   Accelerometer *_accel = &tempAccel;
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_AeroQuadMega tempReceiver;
+  ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
@@ -304,18 +304,18 @@
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 tempAltitude;
-    Altitude *_altitude = &tempAltitude;
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitude = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
-    BatteryMonitor_APM tempBatteryMonitor;
+    APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -324,9 +324,9 @@
   Accelerometer *_accel = &tempAccel;
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_ArduCopter tempReceiver;
+  ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_ArduCopter tempMotors;
+  APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
@@ -336,18 +336,18 @@
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
     #include "Altitude.h"
-    Altitude_AeroQuad_v2 tempAltitude;
-    Altitude *_altitude = &tempAltitude;
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitude = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
-    BatteryMonitor_APM tempBatteryMonitor;
+    APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad tempCamera;
-    Camera *_camera = &tempCamera;
+    CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
 
@@ -356,9 +356,9 @@
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_Multipilot tempReceiver;
+  ReceiverForMultipilot tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Motors_PWM tempMotors;
+  PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   //#define PRINT_MIXERTABLE
   //#define TELEMETRY_DEBUG
@@ -372,7 +372,7 @@
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
-  Receiver_Multipilot tempReceiver;
+  ReceiverForMultipilot tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_I2C tempMotors;
   Motors *_motors = &tempMotors;
@@ -483,7 +483,7 @@ void setup() {
     _setHeading = _compass->getHeading();
   #endif
   #ifdef AltitudeHold
-    _altitude->initialize();
+    _altitudeProvider->initialize();
   #endif
   
   // Battery Monitor
@@ -493,11 +493,11 @@ void setup() {
   
   // Camera stabilization setup
   #ifdef CameraControl
-    _camera->initialize();
-    _camera->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    _camera->setCenterRoll(1500); // Need to figure out nice way to set center position
-    _camera->setmCameraPitch(11.11);
-    _camera->setCenterPitch(1300);
+    _cameraStabilizer->initialize();
+    _cameraStabilizer->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    _cameraStabilizer->setCenterRoll(1500); // Need to figure out nice way to set center position
+    _cameraStabilizer->setmCameraPitch(11.11);
+    _cameraStabilizer->setCenterPitch(1300);
   #endif
   
   _previousTime = micros();
@@ -546,10 +546,10 @@ void loop () {
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((_cameraLoop == ON) && (_currentTime > _cameraTime)) // 50Hz
     { 
-      _camera->setPitch(_flightAngle->getData(PITCH));
-      _camera->setRoll(_flightAngle->getData(ROLL));
-      _camera->setYaw(_flightAngle->getData(YAW));
-      _camera->move();
+      _cameraStabilizer->setPitch(_flightAngle->getData(PITCH));
+      _cameraStabilizer->setRoll(_flightAngle->getData(ROLL));
+      _cameraStabilizer->setYaw(_flightAngle->getData(YAW));
+      _cameraStabilizer->move();
       _cameraTime = _currentTime + CAMERALOOPTIME;
     }
   #endif
