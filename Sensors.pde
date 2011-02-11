@@ -20,7 +20,7 @@
 
 // Sensors.pde is responsible for taking on board sensor measuremens of the AeroQuad
 
-void readSensors(void) 
+void readSensors() 
 {
   // *********************** Read Critical Sensors **********************
   // Apply low pass filter to sensor values and center around zero

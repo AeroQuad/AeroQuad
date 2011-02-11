@@ -47,7 +47,7 @@ protected:
 
   
 public:  
-  Accel(void) 
+  Accel() 
   {
     _sign[ROLL] = 1;
     _sign[PITCH] = 1;
@@ -58,14 +58,14 @@ public:
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void) 
+  virtual void initialize() 
   {
     this->_initialize(_rollChannel, _pitchChannel, _zAxisChannel);
   }
-  virtual void measure(void);
-  virtual void calibrate(void);
+  virtual void measure();
+  virtual void calibrate();
   virtual const int getFlightData(byte);
-  virtual void calculateAltitude(void);
+  virtual void calculateAltitude();
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -105,7 +105,7 @@ public:
     _accelZero[axis] = value;
   }
   
-  const float getScaleFactor(void) 
+  const float getScaleFactor() 
   {
     return _accelScaleFactor;
   }
@@ -140,7 +140,7 @@ public:
     _accelOneG = value;
   }
   
-  const int getOneG(void) 
+  const int getOneG() 
   {
     return _accelOneG;
   }
@@ -154,7 +154,7 @@ public:
     return _accelOneG - getData(ZAXIS);
   }
   
-  const float getAltitude(void) 
+  const float getAltitude() 
   {
     return _rawAltitude;
   }
@@ -184,7 +184,7 @@ public:
     _accelScaleFactor = 0.000329062;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     // rollChannel = 1
     // pitchChannel = 0
@@ -192,7 +192,7 @@ public:
     this->_initialize(1, 0, 2);
   }
   
-  void measure(void) 
+  void measure() 
   {
     _currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 
@@ -209,7 +209,7 @@ public:
   }
   
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
     int findZero[FINDZERO];
 
@@ -257,7 +257,7 @@ public:
     _accelScaleFactor = 0.00013;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     // Check if accel is connected
     if (readWhoI2C(accelAddress) != 0x03) // page 52 of datasheet
@@ -292,7 +292,7 @@ public:
     updateRegisterI2C(accelAddress, 0x35, data);
   }
   
-  void measure(void) 
+  void measure() 
   {
     int rawData[3];
 
@@ -316,7 +316,7 @@ public:
   }
   
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {  
     int findZero[FINDZERO];
     int dataAddress;
@@ -376,7 +376,7 @@ public:
     _accelScaleFactor = 414.0 / 9.81;    
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     // rollChannel = 5
     // pitchChannel = 4
@@ -384,7 +384,7 @@ public:
     this->_initialize(5, 4, 6);
   }
   
-  void measure(void) 
+  void measure() 
   {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 
     {
@@ -403,7 +403,7 @@ public:
   }
   
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
     for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) 
     {
@@ -446,7 +446,7 @@ public:
     _accelScaleFactor = 0;    
   }
   
-  void measure(void) 
+  void measure() 
   {
     _currentTime = micros();
     // Actual measurement performed in gyro class
@@ -465,7 +465,7 @@ public:
   }
  
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
     int findZero[FINDZERO];
 
@@ -509,12 +509,12 @@ public:
     _accelScaleFactor = 0;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     calibrate();
   }
 
-  void measure(void) 
+  void measure() 
   {
     _currentTime = micros();
     _accelADC[XAXIS] = chr6dm.data.ax - _accelZero[XAXIS];
@@ -533,7 +533,7 @@ public:
   }
 
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
    float zeroXreads[FINDZERO];
    float zeroYreads[FINDZERO];
@@ -584,7 +584,7 @@ public:
     accelScaleFactor = 0;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     accelZero[ROLL] = 0;
     accelZero[PITCH] = 0;
@@ -592,7 +592,7 @@ public:
     calibrate();
   }
 
-  void measure(void) 
+  void measure() 
   {
     currentTime = micros();
       //read done in gyro   //TODO
@@ -612,7 +612,7 @@ public:
   }
 
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
    float zeroXreads[FINDZERO];
    float zeroYreads[FINDZERO];
@@ -673,7 +673,7 @@ public:
     accelScaleFactor = 0.000660;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     // rollChannel = 6
     // pitchChannel = 7
@@ -681,7 +681,7 @@ public:
     this->_initialize(6, 7, 5);
   }
   
-  void measure(void) 
+  void measure() 
   {
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 
@@ -698,7 +698,7 @@ public:
   }
   
   // Allows user to zero accelerometers on command
-  void calibrate(void) 
+  void calibrate() 
   {
     int findZero[FINDZERO];
     for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 

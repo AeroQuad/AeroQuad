@@ -35,7 +35,7 @@ protected:
   float _bMotorCommand;
   
 public:
-  Motors(void)
+  Motors()
   {
     _throttle = 0;
     _motorAxisCommand[ROLL] = 0;
@@ -52,8 +52,8 @@ public:
   };
 
   // The following function calls must be defined in any new subclasses
-  virtual void initialize(void);
-  virtual void write (void);
+  virtual void initialize();
+  virtual void write ();
   virtual void commandAllMotors(int motorCommand);
 
   //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
@@ -78,12 +78,12 @@ public:
     return _remoteCommand[motor];
   }
 
-  const float getMotorSlope(void) 
+  const float getMotorSlope() 
   {
     return _mMotorCommand;
   }
 
-  const float getMotorOffset(void) 
+  const float getMotorOffset() 
   {
     return _bMotorCommand;
   }
@@ -166,12 +166,12 @@ public:
    // Using 125-250 for motor setting 1000-2000
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     commandAllMotors(1000);
   }
 
-  void write(void) 
+  void write() 
   {
     analogWrite(FRONTMOTORPIN, _motorCommand[FRONT] / 8);
     analogWrite(REARMOTORPIN,  _motorCommand[REAR]  / 8);
@@ -230,7 +230,7 @@ private:
 public:
   Motors_PWMtimer() : Motors(){}
 
-  void initialize(void) 
+  void initialize() 
   {
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
@@ -278,7 +278,7 @@ public:
 #endif
 }
 
-  void write(void) 
+  void write() 
   {
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     OCR3B = _motorCommand[FRONT] * 2 ;
@@ -359,7 +359,7 @@ private:
     _bMotorCommand = 2.0;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     pinMode(FRONTMOTORPIN, OUTPUT);
     fake_analogWrite(FRONTMOTORPIN, 124);
@@ -370,7 +370,7 @@ private:
     pinMode(LEFTMOTORPIN, OUTPUT);
   }
 
-  void write(void) 
+  void write() 
   {
     fake_analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * _mMotorCommand) + _bMotorCommand);
     fake_analogWrite(REARMOTORPIN, (motorCommand[REAR] * _mMotorCommand) + _bMotorCommand);
@@ -405,7 +405,7 @@ class Motors_ArduCopter : public Motors
 public:
   Motors_ArduCopter() : Motors() {}
 
-  void initialize(void) 
+  void initialize() 
   {
     // Init PWM Timer 1
     //pinMode(11,OUTPUT); //     (PB5/OC1A)
@@ -464,7 +464,7 @@ public:
     commandAllMotors(1000);
   }
 
-  void write (void) 
+  void write () 
   {
     OCR1B = _motorCommand[FRONT] * 2;
     OCR1C = _motorCommand[REAR] * 2;
@@ -502,7 +502,7 @@ public:
   unsigned char MotorI2C[LASTMOTOR];
   Motors_I2C() : Motors() {}
 
-  void initialize(void) 
+  void initialize() 
   {
     char Motor[LASTMOTOR];
     // Scale motor commands to analogWrite
@@ -841,7 +841,7 @@ void matrix_debug()
       }
     }
   }
-  void write (void) 
+  void write () 
   {
     // Matrix transformation.
     motor_axis_correction();
@@ -908,7 +908,7 @@ public:
     _bMotorCommand = -255.0;
   }
 
-  void initialize(void)
+  void initialize()
   {
     sendByteI2C(FRONTMOTORID, 0);
     sendByteI2C(REARMOTORID,  0);
@@ -916,7 +916,7 @@ public:
     sendByteI2C(LEFTMOTORID,  0);
   }
 
-  void write(void)
+  void write()
   {
     sendByteI2C(FRONTMOTORID, constrain((_motorCommand[FRONT] * _mMotorCommand) + _bMotorCommand, 0, 255));
     sendByteI2C(REARMOTORID,  constrain((_motorCommand[REAR]  * _mMotorCommand) + _bMotorCommand, 0, 255));

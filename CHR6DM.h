@@ -196,7 +196,7 @@ class CHR6DM {
 public:
 
 
-    CHR6DM(void){
+    CHR6DM(){
         //Nothing here
     }
 

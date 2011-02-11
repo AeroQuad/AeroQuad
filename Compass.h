@@ -40,29 +40,29 @@ protected:
   
 public: 
 
-  Compass(void) {}
+  Compass() {}
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
+  virtual void initialize(); 
+  virtual void measure();
   virtual const int getRawData(byte);
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData(void) 
+  const float getData() 
   {
     return _compass;
   }
   
-  const float getHeading(void) 
+  const float getHeading() 
   {
     return _heading;
   }
   
-  const float getAbsoluteHeading(void) 
+  const float getAbsoluteHeading() 
   {
     return _absoluteHeading;
   }
@@ -129,7 +129,7 @@ public:
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) 
+  void initialize() 
   {
     // Should do a WhoAmI to know if mag is present
     updateRegisterI2C(_compassAddress, 0x01, 0x20);
@@ -159,7 +159,7 @@ public:
     }
   }
   
-  void measure(void) 
+  void measure() 
   {
     sendByteI2C(_compassAddress, 0x03);
     Wire.requestFrom(_compassAddress, 6);
@@ -225,11 +225,11 @@ class Compass_CHR6DM : public Compass
 public:
   Compass_CHR6DM() : Compass() {}
   
-  void initialize(void) {}
+  void initialize() {}
   
   const int getRawData(byte) {}
   
-  void measure(void) 
+  void measure() 
   {
     _heading = chr6dm.data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
@@ -249,11 +249,11 @@ class Compass_CHR6DM_Fake : public Compass
 public:
   Compass_CHR6DM_Fake() : Compass() {}
   
-  void initialize(void) {}
+  void initialize() {}
   
   const int getRawData(byte) {}
   
-  void measure(void) 
+  void measure() 
   {
     _heading = 0;
     // Change from +/-180 to 0-360

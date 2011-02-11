@@ -35,7 +35,7 @@ protected:
   float _angle[3];
   
 public:  
-  FlightAngle(void) 
+  FlightAngle() 
   {
     _angle[ROLL] = 0;
     _angle[PITCH] = 0;
@@ -54,7 +54,7 @@ public:
     return _angle[axis];
   }
   
-  const byte getType(void) 
+  const byte getType() 
   {
     // This is set in each subclass to identify which algorithm used
     return _type;
@@ -103,7 +103,7 @@ public:
     _type = CF;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     for (byte axis = ROLL; axis < YAW; axis++)
     {
@@ -111,7 +111,7 @@ public:
     }
   }
   
-  void calculate(void) 
+  void calculate() 
   {
     _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
     _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
@@ -122,7 +122,7 @@ public:
     return _gyro->getFlightData(axis);
   }
   
-  void calibrate(void) {}
+  void calibrate() {}
 };
 
 /******************************************************/
@@ -185,14 +185,14 @@ public:
     _type = KF;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     Q_angle = 0.001;
     Q_gyro = 0.003;
     R_angle = 0.03;
   }
   
-  void calculate(void) 
+  void calculate() 
   {
     _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
     _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
@@ -203,7 +203,7 @@ public:
     return _gyro->getFlightData(axis);
   }
 
-  void calibrate(void) {}
+  void calibrate() {}
 };
 
 /******************************************************/
@@ -236,7 +236,7 @@ private:
   //  Matrix Update
   //
   //**********************************************************************************************
-  void matrixUpdate(void) 
+  void matrixUpdate() 
   {
     float gyroVector[3];
     gyroVector[0]=-(_gyro->getData(PITCH) * _gyroGain); //gyro y roll
@@ -271,7 +271,7 @@ private:
   //  Normalize
   //
   //**********************************************************************************************
-  void normalize(void) 
+  void normalize() 
   {
     float temporary[9];
     float renorm=0;
@@ -297,7 +297,7 @@ private:
   //  Drift Correction
   //
   //**********************************************************************************************
-  void driftCorrection(void) 
+  void driftCorrection() 
   {
     //Compensation the Roll, Pitch and Yaw drift. 
     //float        _errorCourse;
@@ -347,7 +347,7 @@ private:
   //  Euler Angles
   //
   //**********************************************************************************************
-  void eulerAngles(void)
+  void eulerAngles()
   {
     _angle[ROLL] =  degrees(asin(-_dcmMatrix[6]));
     _angle[PITCH] = degrees(atan2(_dcmMatrix[7],_dcmMatrix[8]));
@@ -357,7 +357,7 @@ private:
 public:
   FlightAngle_DCM():FlightAngle() {}
   
-  void initialize(void) 
+  void initialize() 
   {
     for (byte i=0; i<3; i++) 
     {
@@ -386,7 +386,7 @@ public:
     Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
   
-  void calculate(void) 
+  void calculate() 
   {
     matrixUpdate(); 
     normalize();
@@ -410,7 +410,7 @@ public:
     }
   }
 
-  void calibrate(void) {}
+  void calibrate() {}
 };
 
 /******************************************************/
@@ -495,7 +495,7 @@ private:
 public:
   FlightAngle_IMU() : FlightAngle() {}
   
-  void initialize(void) 
+  void initialize() 
   {
     // estimated orientation quaternion elements with initial conditions
     SEq_1 = 1.0f; // w
@@ -504,7 +504,7 @@ public:
     SEq_4 = 0.0f; // z
   }
   
-  void calculate(void) 
+  void calculate() 
   {
     filterUpdate(_gyro->rateRadPerSec(ROLL), _gyro->rateRadPerSec(PITCH), _gyro->rateRadPerSec(YAW), _accel->getRaw(XAXIS), _accel->getRaw(YAXIS), _accel->getRaw(ZAXIS));
     _angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
@@ -517,7 +517,7 @@ public:
     return _gyro->getFlightData(axis);
   }
 
-  void calibrate(void) {}
+  void calibrate() {}
 };
 
 // ***********************************************************************
@@ -559,9 +559,9 @@ public:
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {}
+  void initialize() {}
   
-  void calculate(void) 
+  void calculate() 
   {
     //get accelerometer readings in g, gives us RAcc vector
     RxAcc = _accel->getRaw(ROLL);
@@ -619,7 +619,7 @@ public:
     return _gyro->getFlightData(axis);
   }
 
-  void calibrate(void) {}
+  void calibrate() {}
 };
 
 // ***********************************************************************
@@ -635,12 +635,12 @@ private:
 public:
   FlightAngle_CHR6DM() : FlightAngle() {}
 
-  void initialize(void) 
+  void initialize() 
   {
     calibrate();
   }
 
-  void calculate(void) 
+  void calculate() 
   {   
     _angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
     _angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
@@ -648,7 +648,7 @@ public:
     CHR_PitchAngle = _angle[PITCH];
   }
   
-   void calibrate(void) 
+   void calibrate() 
    {
     zeroRoll = chr6dm.data.roll;
     zeroPitch = chr6dm.data.pitch;
@@ -679,12 +679,12 @@ public:
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) 
+  void initialize() 
   {
     calibrate();
   }
 
-  void calculate(void) 
+  void calculate() 
   {
     angle[ROLL]  =  0 - zeroRoll;
     angle[PITCH] =  0 - zeroPitch;
@@ -692,7 +692,7 @@ public:
     CHR_PitchAngle = angle[PITCH];
   }
 
-  void calibrate(void) 
+  void calibrate() 
   {
     zeroRoll = 0;
     zeroPitch = 0;

@@ -32,7 +32,7 @@ public:
   float groundAltitude;
   float smoothFactor;
   
-  Altitude (void) { 
+  Altitude () { 
     altitude = 0;
     smoothFactor = 0.02;
   }
@@ -40,17 +40,17 @@ public:
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
+  virtual void initialize(); 
+  virtual void measure();
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData(void) {
+  const float getData() {
     return altitude - groundAltitude;
   }
   
-  const float getRawData(void) {
+  const float getRawData() {
     return rawAltitude;
   }
   
@@ -58,7 +58,7 @@ public:
     altitude = value;
   }
   
-  void measureGround(void) {
+  void measureGround() {
     // measure initial ground pressure (multiple samples)
     groundAltitude = 0;
     for (int i=0; i < 25; i++) {
@@ -73,7 +73,7 @@ public:
     groundAltitude = value;
   }
   
-  const float getGroundAltitude(void) {
+  const float getGroundAltitude() {
     return groundAltitude;
   }
   
@@ -81,7 +81,7 @@ public:
     smoothFactor = value;
   }
   
-  const float getSmoothFactor(void) {
+  const float getSmoothFactor() {
     return smoothFactor;
   }
 };
@@ -105,11 +105,11 @@ private:
   byte select, pressureCount;
   float pressureFactor;
   
-  void requestRawPressure(void) {
+  void requestRawPressure() {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
   }
   
-  long readRawPressure(void) {
+  long readRawPressure() {
     unsigned char msb, lsb, xlsb;
     sendByteI2C(altitudeAddress, 0xF6);
     Wire.requestFrom(altitudeAddress, 3); // request three bytes
@@ -122,11 +122,11 @@ private:
     return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
   }
 
-  void requestRawTemperature(void) {
+  void requestRawTemperature() {
     updateRegisterI2C(altitudeAddress, 0xF4, 0x2E);
   }
   
-  unsigned int readRawTemperature(void) {
+  unsigned int readRawTemperature() {
     sendByteI2C(altitudeAddress, 0xF6);
     return readWordWaitI2C(altitudeAddress);
   }
@@ -151,7 +151,7 @@ public:
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {
+  void initialize() {
 //    float verifyGroundAltitude;
     
     sendByteI2C(altitudeAddress, 0xAA);
@@ -192,7 +192,7 @@ public:
     setStartAltitude(getGroundAltitude());
   }
   
-  void measure(void) {
+  void measure() {
     long x1, x2, x3, b3, b5, b6, p;
     unsigned long b4, b7;
     int32_t tmp;

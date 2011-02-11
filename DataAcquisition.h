@@ -73,7 +73,7 @@ ISR (TIMER2_OVF_vect) {
   TCNT2 = 104;        // 400 Hz
 }
 
-void initialize_ArduCopter_ADC(void) {
+void initialize_ArduCopter_ADC() {
   unsigned char tmp;
   
   pinMode(ADC_CHIP_SELECT,OUTPUT);
@@ -113,7 +113,7 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   return(result);
 }
   
-void zero_ArduCopter_ADC(void) {
+void zero_ArduCopter_ADC() {
   for (byte n; n<8; n++) {
     adc_value[n] = 0;
     adc_counter[n] = 0;
@@ -134,7 +134,7 @@ short NWMP_gyro[3];
 void Init_Gyro_acc();
 void updateControls();
 
-void Init_Gyro_Acc(void) {
+void Init_Gyro_Acc() {
   //Init WM+ and Nunchuk
   updateRegisterI2C(0x53, 0xFE, 0x05);
   delay(100);

@@ -47,7 +47,7 @@ public:
     _batteryStatus = OK;
   }
 
-  virtual void initialize(void);
+  virtual void initialize();
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual void lowBatteryEvent(byte);
 
@@ -116,7 +116,7 @@ private:
   float _diode; //Schottky diode on APM board
   float _batteryScaleFactor;
 
-  void ledCW(void)
+  void ledCW()
   {
     digitalWrite(RL_LED, HIGH);
     delay(LEDDELAY);
@@ -132,14 +132,14 @@ private:
     digitalWrite(FL_LED, LOW);
   };
 
-  void ledsON(void){
+  void ledsON(){
     digitalWrite(RL_LED, HIGH);
     digitalWrite(RR_LED, HIGH);
     digitalWrite(FR_LED, HIGH);
     digitalWrite(FL_LED, HIGH);
   };
 
-  void ledsOFF(void){
+  void ledsOFF(){
     digitalWrite(RL_LED, LOW);
     digitalWrite(RR_LED, LOW);
     digitalWrite(FR_LED, LOW);
@@ -148,7 +148,7 @@ private:
 
 public:
   BatteryMonitor_APM() : BatteryMonitor(){}
-  void initialize(void) {
+  void initialize() {
     float R1   = 10050; //the SMD 10k resistor measured with DMM
     float R2   =  3260; //3k3 user mounted resistor measured with DMM
     float Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
@@ -240,7 +240,7 @@ private:
 public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
-  void initialize(void) 
+  void initialize() 
   {
     float R1   = 15000;
     float R2   =  7500;

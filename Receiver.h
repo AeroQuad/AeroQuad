@@ -38,7 +38,7 @@ protected:
   unsigned long _previousTime;
   
 public:
-  Receiver(void) 
+  Receiver() 
   {
     _transmitterCommand[ROLL] = 1500;
     _transmitterCommand[PITCH] = 1500;
@@ -60,14 +60,14 @@ public:
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void);
-  virtual void read(void);
+  virtual void initialize();
+  virtual void read();
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
   // **************************************************************
 
-  void _initialize(void) 
+  void _initialize() 
   {
     _xmitFactor = readFloat(XMITFACTOR_ADR);
 
@@ -126,7 +126,7 @@ public:
     _transmitterSmooth[channel] = value;
   }
 
-  const float getXmitFactor(void) 
+  const float getXmitFactor() 
   {
     return _xmitFactor;
   }
@@ -297,7 +297,7 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) 
+  void read() 
   {
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
     {
@@ -440,7 +440,7 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) 
+  void read() 
   {
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
     {
@@ -492,7 +492,7 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) 
+  void read() 
   {
     uint16_t data[6];
     uint8_t oldSREG;
@@ -590,7 +590,7 @@ public:
     receiverPin[AUX] = 5;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     this->_initialize(); // load in calibration and xmitFactor from EEPROM
     /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos
@@ -610,7 +610,7 @@ public:
     sei();
   }
 
-  void read(void) 
+  void read() 
   {
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
     {
@@ -677,7 +677,7 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) 
+  void read() 
   {
     uint16_t data[6];
 

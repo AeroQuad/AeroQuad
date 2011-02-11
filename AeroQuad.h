@@ -346,19 +346,19 @@ byte _testSignal = LOW;
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-//void calibrateESC(void); // defined in FlightControl.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
-void processAeroQuadStableMode(void);  // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
+void readEEPROM(); // defined in DataStorage.h
+void readPilotCommands(); // defined in FlightCommand.pde
+void readSensors(); // defined in Sensors.pde
+//void calibrateESC(); // defined in FlightControl.pde
+void processFlightControlXMode(); // defined in FlightControl.pde
+void processFlightControlPlusMode(); // defined in FlightControl.pde
+void processArdupirateSuperStableMode();  // defined in FlightControl.pde
+void processAeroQuadStableMode();  // defined in FlightControl.pde
+void readSerialCommand();  //defined in SerialCom.pde
+void sendSerialTelemetry(); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
+float readFloatSerial(); // defined in SerialCom.pde
+void comma(); // defined in SerialCom.pde
 
 void initSensorsFromEEPROM(); // defined in Sensors.pde
 void storeSensorsToEEPROM();  // defined in Sensors.pde

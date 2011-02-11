@@ -64,11 +64,11 @@ protected:
   int _servoYaw;
 
 public:  
-  Camera(void) {}
-  virtual void _initialize(void);
-  virtual void move (void);
+  Camera() {}
+  virtual void _initialize();
+  virtual void move ();
 
-  void initialize(void) 
+  void initialize() 
   {
     _mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
     _mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
@@ -192,82 +192,82 @@ public:
     _mode = camMode;
   }
   
-  int getMode (void) 
+  int getMode () 
   {
     return _mode;
   } 
   
-  int getPitch (void) 
+  int getPitch () 
   {
     return _servoPitch;
   }
   
-  int getRoll (void) 
+  int getRoll () 
   {
     return _servoRoll;
   }
   
-  int getYaw (void) 
+  int getYaw () 
   {
     return _servoYaw;
   }
   
-  float getmCameraPitch(void) 
+  float getmCameraPitch() 
   {
     return _mCameraPitch;
   }  
   
-  float getmCameraRoll(void) 
+  float getmCameraRoll() 
   {
     return _mCameraRoll;        
   }
   
-  float getmCameraYaw(void) 
+  float getmCameraYaw() 
   {
     return _mCameraYaw;
   }
   
-  int getCenterPitch(void) 
+  int getCenterPitch() 
   {
     return _centerPitch;
   }
   
-  int getCenterRoll(void) 
+  int getCenterRoll() 
   {
     return _centerRoll;
   }
   
-  int getCenterYaw(void) 
+  int getCenterYaw() 
   {
     return _centerYaw;
   }
   
-  int getServoMinPitch(void) 
+  int getServoMinPitch() 
   {
     return _servoMinPitch;
   }
   
-  int getServoMinRoll(void) 
+  int getServoMinRoll() 
   {
     return _servoMinRoll;
   }
   
-  int getServoMinYaw(void) 
+  int getServoMinYaw() 
   {
     return _servoMinYaw;
   }
   
-  int getServoMaxPitch(void) 
+  int getServoMaxPitch() 
   {
     return _servoMaxPitch;
   }
   
-  int getServoMaxRoll(void) 
+  int getServoMaxRoll() 
   {
     return _servoMaxRoll;
   }
   
-  int getServoMaxYaw(void) 
+  int getServoMaxYaw() 
   {
     return _servoMaxYaw;
   }
@@ -278,7 +278,7 @@ class Camera_AeroQuad : public Camera
 public:
   Camera_AeroQuad() : Camera() {}
   
-  void _initialize(void) 
+  void _initialize() 
   {
      // Init PWM Timer 1      Probable conflict with Arducopter Motor
     DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
@@ -288,7 +288,7 @@ public:
     ICR1 = 39999;    //50hz freq (standard servos) 20ms = 40000 * 0.5us
   }
 
-  void move(void) 
+  void move() 
   {
     if (_mode > 0) 
     {
@@ -304,7 +304,7 @@ class Camera_Pins_2_3_5 : public Camera
 public:
   Camera_Pins_2_3_5() : Camera() {}
   
-  void _initialize(void) 
+  void _initialize() 
   {
     // Init PWM Timer 3    Probable conflict with AeroQuad Motor
     DDRE = DDRE | B00111000;                                  //Set to Output Mega Port-Pin PE4-2, PE5-3, PE3-5
@@ -313,7 +313,7 @@ public:
     ICR3 = 39999; //50hz freq (standard servos)
   }
   
-  void move(void) 
+  void move() 
   {
     if (_mode > 0) 
     {
@@ -329,7 +329,7 @@ class Camera_Pins_6_7_8 : public Camera
 public:
   Camera_Pins_6_7_8() : Camera() {}
   
-  void _initialize(void) 
+  void _initialize() 
   {
     // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
     DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
@@ -338,7 +338,7 @@ public:
     ICR4 = 39999; //50hz freq (standard servos)
   }
   
-  void move(void) 
+  void move() 
   {
     if (_mode > 0) {
       OCR4A = _servoPitch * 2;
@@ -353,7 +353,7 @@ class Camera_Pins_44_45_46 : public Camera
 public:
   Camera_Pins_44_45_46() : Camera() {}
   
-  void _initialize(void) 
+  void _initialize() 
   {
     // Init PWM Timer 5   Probable conflict with Arducopter Motor
     DDRL = DDRL | B00111000;                                  //Set to Output Mega Port-Pin PL3-46, PE4-45, PE5-44
@@ -362,7 +362,7 @@ public:
     ICR5 = 39999; //50hz freq (standard servos)
   }
   
-  void move(void) 
+  void move() 
   {
     if (_mode > 0) 
     {

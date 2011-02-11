@@ -451,12 +451,12 @@ void setup() {
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
-  initSensorsFromEEPROM();
+  
   _gyro->initialize(); // defined in Gyro.h
   _accel->initialize(); // defined in Accel.h
+  initSensorsFromEEPROM();
   
   // Calibrate sensors
-  _gyro->autoZero(); // defined in Gyro.h
   zeroIntegralError();
   _levelAdjust[ROLL] = 0;
   _levelAdjust[PITCH] = 0;

@@ -27,23 +27,15 @@ private:
   int _sign[3];
   float _gyroHeading;
 
-
-
-
-
-
-
 protected:
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     float _gyroZero[3];
   #else
     int _gyroZero[3];
   #endif
-
   int _gyroADC[3];
   int _gyroChannel[3];  
   int _gyroData[3];  
-
   int _lastReceiverYaw;  
   int _positiveGyroYawCount; 
   int _negativeGyroYawCount;  
@@ -61,7 +53,7 @@ protected:
   unsigned long _previousTime;
   
 public:    
-  Gyro(void)
+  Gyro()
   {
     _sign[ROLL] = 1;
     _sign[PITCH] = 1;
@@ -73,9 +65,9 @@ public:
   {
     this->_initialize(rollChannel, pitchChannel, yawChannel);
   }
-  virtual void measure(void);
-  virtual void calibrate(void);
-  virtual void autoZero(void){};
+  virtual void measure();
+  virtual void calibrate();
+  virtual void autoZero(){};
   virtual const int getFlightData(byte);
   virtual void initialize();
 
@@ -125,7 +117,7 @@ public:
     return _gyroScaleFactor;
   }
 
-  const float getSmoothFactor(void) 
+  const float getSmoothFactor() 
   {
     return _smoothFactor;
   }
@@ -146,7 +138,7 @@ public:
   }
   
   // returns heading as +/- 180 degrees
-  const float getHeading(void) 
+  const float getHeading() 
   {
     div_t integerDivide;
     
@@ -163,7 +155,7 @@ public:
     return _gyroHeading;
   }
   
-  const float getRawHeading(void) 
+  const float getRawHeading() 
   {
     return _rawHeading;
   }
@@ -193,7 +185,7 @@ public:
     _gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     analogReference(EXTERNAL);
     // Configure gyro auto zero pins
@@ -207,7 +199,7 @@ public:
     this->_initialize(4,3,5);
   }
   
-  void measure(void) 
+  void measure() 
   {
     _currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 
@@ -281,7 +273,7 @@ public:
     _previousGyroTime = micros();
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     this->_initialize(0,1,2);
     
@@ -298,7 +290,7 @@ public:
     updateRegisterI2C(_gyroAddress, 0x3E, 0x01); // use internal oscillator 
   }
   
-  void measure(void) 
+  void measure() 
   {
     sendByteI2C(_gyroAddress, 0x1D);
     Wire.requestFrom(_gyroAddress, 6);
@@ -412,7 +404,7 @@ public:
     _gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec) 0.002
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     // rollChannel = 1
     // pitchChannel = 2
@@ -421,7 +413,7 @@ public:
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
   }
   
-  void measure(void) 
+  void measure() 
   {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 
     {
@@ -471,12 +463,12 @@ public:
     _gyroScaleFactor = 0.069565217391304;
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     Init_Gyro_Acc(); // defined in DataAquisition.h
   }
   
-  void measure(void) 
+  void measure() 
   {
     _currentTime = micros();
     updateControls(); // defined in DataAcquisition.h
@@ -524,12 +516,12 @@ public:
     _gyroScaleFactor = 0;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     initCHR6DM();
   }
 
-  void measure(void)
+  void measure()
   {
     _currentTime = micros();
     readCHR6DM();
@@ -584,14 +576,14 @@ public:
     gyroScaleFactor = 0;
   }
 
-  void initialize(void) 
+  void initialize() 
   {
     gyroZero[ROLL] = 0;
     gyroZero[PITCH] = 0;
     gyroZero[ZAXIS] = 0;
   }
 
-  void measure(void) 
+  void measure() 
   {
     currentTime = micros();
     readFakeValues();
@@ -701,7 +693,7 @@ public:
     gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)
   }
   
-  void initialize(void) 
+  void initialize() 
   {
     analogReference(EXTERNAL);
     // Configure gyro auto zero pins
@@ -715,7 +707,7 @@ public:
     this->_initialize(1,2,0);
   }
   
-  void measure(void) 
+  void measure() 
   {
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) 

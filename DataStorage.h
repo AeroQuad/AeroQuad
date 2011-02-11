@@ -65,7 +65,7 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom)
 }
 
 // contains all default values when re-writing EEPROM
-void initializeEEPROM(void) 
+void initializeEEPROM() 
 {
   PID[ROLL].P = 1.0;
   PID[ROLL].I = 0.0;
@@ -145,7 +145,7 @@ void initializeEEPROM(void)
   #endif*/
 }
 
-void readEEPROM(void) 
+void readEEPROM() 
 {
   readPID(ROLL, ROLL_PID_GAIN_ADR);
   readPID(PITCH, PITCH_PID_GAIN_ADR);
@@ -200,7 +200,7 @@ void readEEPROM(void)
   #endif*/
 }
 
-void writeEEPROM(void)
+void writeEEPROM()
 {
   cli(); // Needed so that APM sensor data doesn't overflow
   writePID(ROLL, ROLL_PID_GAIN_ADR);
