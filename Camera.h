@@ -66,7 +66,7 @@ protected:
 public:  
   Camera() {}
   virtual void _initialize();
-  virtual void move ();
+  virtual void move();
 
   void initialize() 
   {
