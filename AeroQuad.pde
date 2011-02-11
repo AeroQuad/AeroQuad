@@ -544,12 +544,13 @@ void loop () {
   }
 
   #ifdef CameraControl // Experimental, not fully implemented yet
-    if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
+    if ((_cameraLoop == ON) && (_currentTime > _cameraTime)) // 50Hz
+    { 
       _camera->setPitch(_flightAngle->getData(PITCH));
       _camera->setRoll(_flightAngle->getData(ROLL));
       _camera->setYaw(_flightAngle->getData(YAW));
       _camera->move();
-      cameraTime = currentTime + CAMERALOOPTIME;
+      _cameraTime = _currentTime + CAMERALOOPTIME;
     }
   #endif
 }

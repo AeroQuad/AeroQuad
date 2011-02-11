@@ -21,33 +21,34 @@
 class Accel 
 {
 private:
-  int sign[3];
-  float zAxis;
-  byte rollChannel, pitchChannel, zAxisChannel;
-  unsigned long currentAccelTime, previousAccelTime;
+  int _sign[3];
+  byte _rollChannel; 
+  byte _pitchChannel; 
+  byte _zAxisChannel;
+  unsigned long _currentAccelTime;
+  unsigned long _previousAccelTime;
   
 protected:  
-  int accelChannel[3];
-  float accelScaleFactor;
-  float smoothFactor;
-  int accelADC[3];
-  int accelData[3];
-  float accelOneG;
-  float rawAltitude;
+  int _accelChannel[3];
+  float _accelScaleFactor;
+  float _smoothFactor;
+  int _accelADC[3];
+  int _accelData[3];
+  float _accelOneG;
+  float _rawAltitude;
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float accelZero[3];
+  float _accelZero[3];
 #else
-  int accelZero[3];
+  int _accelZero[3];
 #endif
 
 public:  
 
   Accel(void) 
   {
-    sign[0] = 1;
-    sign[1] = 1;
-    sign[2] = 1;
-    zAxis = 0;
+    _sign[0] = 1;
+    _sign[1] = 1;
+    _sign[2] = 1;
   }
 
   // ******************************************************************
@@ -55,7 +56,7 @@ public:
   // ******************************************************************
   virtual void initialize(void) 
   {
-    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
+    this->_initialize(_rollChannel, _pitchChannel, _zAxisChannel);
   }
   virtual void measure(void);
   virtual void calibrate(void);
@@ -67,58 +68,62 @@ public:
   // **************************************************************
   void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) 
   {
-    accelChannel[0] = rollChannel;
-    accelChannel[1] = pitchChannel;
-    accelChannel[2] = zAxisChannel;
-    currentAccelTime = micros();
-    previousAccelTime = currentAccelTime;
+    _accelChannel[0] = rollChannel;
+    _accelChannel[1] = pitchChannel;
+    _accelChannel[2] = zAxisChannel;
+    _currentAccelTime = micros();
+    _previousAccelTime = _currentAccelTime;
   }
   
   const int getRaw(byte axis) 
   {
-    return accelADC[axis] * sign[axis];
+    return _accelADC[axis] * _sign[axis];
   }
   
   const int getData(byte axis) 
   {
-    return accelData[axis] * sign[axis];
+    return _accelData[axis] * _sign[axis];
   }
   
   const int invert(byte axis) 
   {
-    sign[axis] = -sign[axis];
-    return sign[axis];
+    _sign[axis] = -_sign[axis];
+    return _sign[axis];
   }
   
   const int getZero(byte axis) 
   {
-    return accelZero[axis];
+    return _accelZero[axis];
   }
   
   void setZero(byte axis, int value) 
   {
-    accelZero[axis] = value;
+    _accelZero[axis] = value;
   }
   
   const float getScaleFactor(void) 
   {
-    return accelScaleFactor;
+    return _accelScaleFactor;
   }
   
   const float getSmoothFactor() 
   {
-    return smoothFactor;
+    return _smoothFactor;
   }
   
   void setSmoothFactor(float value) 
   {
-    smoothFactor = value;
+    _smoothFactor = value;
   }
   
   const float angleRad(byte axis) 
   {
-    if (axis == 1) return arctan2(accelData[1] * sign[1], sqrt((long(accelData[0]) * accelData[0]) + (long(accelData[2]) * accelData[2])));
-    if (axis == 0) return arctan2(accelData[0] * sign[0], sqrt((long(accelData[1]) * accelData[1]) + (long(accelData[2]) * accelData[2])));
+    if (axis == 1) 
+    {
+      return arctan2(_accelData[1] * _sign[1], sqrt((long(_accelData[0]) * _accelData[0]) + (long(_accelData[2]) * _accelData[2])));
+    }
+    // then, it should be 0
+    return arctan2(_accelData[0] * _sign[0], sqrt((long(_accelData[1]) * _accelData[1]) + (long(_accelData[2]) * _accelData[2])));
   }
 
   const float angleDeg(byte axis) 
@@ -126,14 +131,14 @@ public:
     return degrees(angleRad(axis));
   }
   
-    void setOneG(int value) 
-    {
-    accelOneG = value;
+  void setOneG(int value) 
+  {
+    _accelOneG = value;
   }
   
   const int getOneG(void) 
   {
-    return accelOneG;
+    return _accelOneG;
   }
   
   const int getZaxis() 
@@ -142,17 +147,17 @@ public:
     //zAxis = filterSmoothWithTime(getFlightData(2), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     //previousAccelTime = currentAccelTime;
     //return zAxis;
-    return accelOneG - getData(2);
+    return _accelOneG - getData(2);
   }
   
   const float getAltitude(void) 
   {
-    return rawAltitude;
+    return _rawAltitude;
   }
   
   const float rateG(const byte axis) 
   {
-    return getData(axis) / accelOneG;
+    return getData(axis) / _accelOneG;
   }
 };
 
@@ -172,7 +177,7 @@ public:
     // If Vs = 3.6V, then output sensitivity is 360mV/g
     // If Vs = 2V, then it's 195 mV/g
     // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;
+    _accelScaleFactor = 0.000329062;
   }
   
   void initialize(void) 
@@ -188,8 +193,8 @@ public:
     _currentTime = micros();
     for (byte axis = 0; axis < 3; axis++) 
     {
-      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = filterSmooth(accelADC[axis], accelData[axis], smoothFactor);
+      _accelADC[axis] = analogRead(_accelChannel[axis]) - _accelZero[axis];
+      _accelData[axis] = filterSmooth(_accelADC[axis], _accelData[axis], _smoothFactor);
     }
     _previousTime = _currentTime;
   }
@@ -208,15 +213,15 @@ public:
     {
       for (int i=0; i<FINDZERO; i++)
       {
-        findZero[i] = analogRead(accelChannel[calAxis]);
+        findZero[i] = analogRead(_accelChannel[calAxis]);
       }
-      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+      _accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
-    accelOneG = accelZero[2];
+    _accelOneG = _accelZero[2];
     // replace with estimated Z axis 0g value
-    accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    _accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -224,7 +229,7 @@ public:
     _currentTime = micros();
     if ((abs(getRaw(0)) < 1500) && (abs(getRaw(1)) < 1500)) 
     {
-      rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
     }
     _previousTime = _currentTime;
   } 
@@ -245,7 +250,7 @@ public:
     accelAddress = 0x40; // page 54 and 61 of datasheet
     // Accelerometer value if BMA180 setup for 1.0G
     // Page 27 of datasheet = 0.00013g/LSB
-    accelScaleFactor = 0.00013;
+    _accelScaleFactor = 0.00013;
   }
   
   void initialize(void) 
@@ -296,8 +301,8 @@ public:
     rawData[2] = (Wire.receive()| (Wire.receive() << 8)) >> 2; // last 2 bits are not part of measurement
     for (byte axis = 0; axis < 3; axis++) 
     {
-      accelADC[axis] = rawData[axis] - accelZero[axis]; // center accel data around zero
-      accelData[axis] = filterSmooth(accelADC[axis], accelData[axis], smoothFactor);
+      _accelADC[axis] = rawData[axis] - _accelZero[axis]; // center accel data around zero
+      _accelData[axis] = filterSmooth(_accelADC[axis], _accelData[axis], _smoothFactor);
     }
   }
 
@@ -323,15 +328,15 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
         delay(1);
       }
-      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+      _accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value
-    accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    _accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
     // store accel value that represents 1g
     measure();
-    accelOneG = getRaw(2);
-    //accelOneG = 8274; // mesured value at flat level with configurator
+    _accelOneG = getRaw(2);
+    //_accelOneG = 8274; // mesured value at flat level with configurator
   }
 
   void calculateAltitude() 
@@ -339,7 +344,7 @@ public:
     _currentTime = micros();
     if ((abs(getRaw(0)) < 1500) && (abs(getRaw(1)) < 1500)) 
     {
-      rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
     }
     _previousTime = _currentTime;
   } 
@@ -352,8 +357,8 @@ public:
 #ifdef ArduCopter
 class Accel_ArduCopter : public Accel {
 private:
-  int findZero[FINDZERO];
-  int rawADC;
+  int _findZero[FINDZERO];
+  int _rawADC;
 
 public:
   Accel_ArduCopter() : Accel()
@@ -363,7 +368,7 @@ public:
     // Tested value : 414
     // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
     // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-    accelScaleFactor = 414.0 / 9.81;    
+    _accelScaleFactor = 414.0 / 9.81;    
   }
   
   void initialize(void) 
@@ -374,15 +379,16 @@ public:
     this->_initialize(5, 4, 6);
   }
   
-  void measure(void) {
+  void measure(void) 
+  {
     for (byte axis = 0; axis < 3; axis++)
     {
-      rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
-      if (rawADC > 500) // Check if measurement good
+      _rawADC = analogRead_ArduCopter_ADC(_accelChannel[axis]);
+      if (_rawADC > 500) // Check if measurement good
       {
-        accelADC[axis] = rawADC - accelZero[axis];
+        _accelADC[axis] = _rawADC - _accelZero[axis];
       }
-      accelData[axis] = accelADC[axis]; // no smoothing needed
+      _accelData[axis] = _accelADC[axis]; // no smoothing needed
     }
   }
 
@@ -398,17 +404,17 @@ public:
     {
       for (int i=0; i<FINDZERO; i++) 
       {
-        findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
+        _findZero[i] = analogRead_ArduCopter_ADC(_accelChannel[calAxis]);
         delay(2);
       }
-      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+      _accelZero[calAxis] = findMedianInt(_findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
-    accelOneG = accelZero[2];
-    //accelOneG = 486;    // tested value with the configurator at flat level
+    _accelOneG = _accelZero[2];
+    //_accelOneG = 486;    // tested value with the configurator at flat level
     // replace with estimated Z axis 0g value
-    accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    _accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -416,7 +422,7 @@ public:
     _currentTime = micros();
     if ((abs(getRaw(0)) < 1500) && (abs(getRaw(1)) < 1500)) 
     {
-      rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
     }
     _previousTime = _currentTime;
   } 
@@ -432,7 +438,7 @@ class Accel_Wii : public Accel
 public:
   Accel_Wii() : Accel()
   {
-    accelScaleFactor = 0;    
+    _accelScaleFactor = 0;    
   }
   
   void measure(void) 
@@ -442,8 +448,8 @@ public:
     // We just update the appropriate variables here
     for (byte axis = 0; axis < 3; axis++) 
     {
-      accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
-      accelData[axis] = filterSmoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((_currentTime - _previousTime) / 5000.0));
+      _accelADC[axis] = _accelZero[axis] - NWMP_acc[axis];
+      _accelData[axis] = filterSmoothWithTime(_accelADC[axis], _accelData[axis], _smoothFactor, ((_currentTime - _previousTime) / 5000.0));
     }
     _previousTime = _currentTime;
   }
@@ -465,13 +471,13 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+      _accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
-    accelOneG = getRaw(2);
+    _accelOneG = getRaw(2);
     // replace with estimated Z axis 0g value
-    accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    _accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -479,7 +485,7 @@ public:
     _currentTime = micros();
     if ((abs(getRaw(0)) < 1500) && (abs(getRaw(1)) < 1500))
     { 
-      rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
     }
     _previousTime = _currentTime;
   } 
@@ -495,7 +501,7 @@ class Accel_CHR6DM : public Accel
 public:
   Accel_CHR6DM() : Accel() 
   {
-    accelScaleFactor = 0;
+    _accelScaleFactor = 0;
   }
 
   void initialize(void) 
@@ -506,13 +512,13 @@ public:
   void measure(void) 
   {
     _currentTime = micros();
-    accelADC[0] = chr6dm.data.ax - accelZero[0];
-    accelADC[1] = chr6dm.data.ay - accelZero[1];
-    accelADC[2] = chr6dm.data.az - accelOneG;
+    _accelADC[0] = chr6dm.data.ax - _accelZero[0];
+    _accelADC[1] = chr6dm.data.ay - _accelZero[1];
+    _accelADC[2] = chr6dm.data.az - _accelOneG;
 
-    accelData[0] = filterSmoothWithTime(accelADC[0], accelData[0], smoothFactor, ((_currentTime - _previousTime) / 5000.0)); //to get around 1
-    accelData[1] = filterSmoothWithTime(accelADC[1], accelData[1], smoothFactor, ((_currentTime - _previousTime) / 5000.0));
-    accelData[2] = filterSmoothWithTime(accelADC[2], accelData[2], smoothFactor, ((_currentTime - _previousTime) / 5000.0));
+    _accelData[0] = filterSmoothWithTime(_accelADC[0], _accelData[0], _smoothFactor, ((_currentTime - _previousTime) / 5000.0)); //to get around 1
+    _accelData[1] = filterSmoothWithTime(_accelADC[1], _accelData[1], _smoothFactor, ((_currentTime - _previousTime) / 5000.0));
+    _accelData[2] = filterSmoothWithTime(_accelADC[2], _accelData[2], _smoothFactor, ((_currentTime - _previousTime) / 5000.0));
     _previousTime = _currentTime;
   }    
 
@@ -536,14 +542,14 @@ public:
     }
 
 
-    accelZero[0] = findMedianFloat(zeroXreads, FINDZERO);
-    accelZero[1] = findMedianFloat(zeroYreads, FINDZERO);
-    accelZero[2] = findMedianFloat(zeroZreads, FINDZERO);
+    _accelZero[0] = findMedianFloat(zeroXreads, FINDZERO);
+    _accelZero[1] = findMedianFloat(zeroYreads, FINDZERO);
+    _accelZero[2] = findMedianFloat(zeroZreads, FINDZERO);
    
     // store accel value that represents 1g
-    accelOneG = accelZero[2];
+    _accelOneG = _accelZero[2];
     // replace with estimated Z axis 0g value
-    //accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    //_accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -551,7 +557,7 @@ public:
     _currentTime = micros();
     if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
     {
-      rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
     }
     _previousTime = _currentTime;
   } 
@@ -570,14 +576,14 @@ public:
   float fakeAccelYaw;
   Accel_CHR6DM_Fake() : Accel() 
   {
-    accelScaleFactor = 0;
+    _accelScaleFactor = 0;
   }
 
   void initialize(void) 
   {
-    accelZero[0] = 0;
-    accelZero[1] = 0;
-    accelZero[2] = 0;
+    _accelZero[0] = 0;
+    _accelZero[1] = 0;
+    _accelZero[2] = 0;
 
     calibrate();
   }
@@ -586,13 +592,13 @@ public:
   {
     currentTime = micros();
     //read done in gyro   //TODO
-    accelADC[0] = fakeAccelRoll - accelZero[0];
-    accelADC[1] = fakeAccelPitch - accelZero[1];
-    accelADC[2] = fakeAccelYaw - accelOneG;
+    _accelADC[0] = fakeAccelRoll - _accelZero[0];
+    _accelADC[1] = fakeAccelPitch - _accelZero[1];
+    _accelADC[2] = fakeAccelYaw - _accelOneG;
 
-    accelData[0] = smoothWithTime(accelADC[0], accelData[0], smoothFactor, ((currentTime - previousTime) / 5000.0));
-    accelData[1] = smoothWithTime(accelADC[1], accelData[1], smoothFactor, ((currentTime - previousTime) / 5000.0));
-    accelData[2] = smoothWithTime(accelADC[2], accelData[2], smoothFactor, ((currentTime - previousTime) / 5000.0));
+    _accelData[0] = smoothWithTime(_accelADC[0], _accelData[0], _smoothFactor, ((currentTime - previousTime) / 5000.0));
+    _accelData[1] = smoothWithTime(_accelADC[1], _accelData[1], _smoothFactor, ((currentTime - previousTime) / 5000.0));
+    _accelData[2] = smoothWithTime(_accelADC[2], _accelData[2], _smoothFactor, ((currentTime - previousTime) / 5000.0));
     previousTime = currentTime;
   }
   
@@ -616,14 +622,14 @@ public:
         zeroZreads[i] = 0;
     }
 
-    accelZero[0] = findMedian(zeroXreads, FINDZERO);
-    accelZero[1] = findMedian(zeroYreads, FINDZERO);
-    accelZero[2] = findMedian(zeroZreads, FINDZERO);
+    _accelZero[0] = findMedian(zeroXreads, FINDZERO);
+    _accelZero[1] = findMedian(zeroYreads, FINDZERO);
+    _accelZero[2] = findMedian(zeroZreads, FINDZERO);
 
     // store accel value that represents 1g
-    accelOneG = accelZero[2];
+    _accelOneG = _accelZero[2];
     // replace with estimated Z axis 0g value
-    //accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    //_accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -631,7 +637,7 @@ public:
     currentTime = micros();
     if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
     {
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     }
     previousTime = currentTime;
   } 
@@ -658,7 +664,7 @@ public:
     // Vdd = 3.3 Volt
     // Zero = Vdd / 2
     // 3300 mV / 5  (+-2G ) = 660
-    accelScaleFactor = 0.000660;
+    _accelScaleFactor = 0.000660;
   }
   
   void initialize(void)
@@ -674,8 +680,8 @@ public:
     currentTime = micros();
     for (byte axis = 0; axis < 3; axis++)
     {
-      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = filterSmoothWithTime(accelADC[axis], accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      _accelADC[axis] = analogRead(accelChannel[axis]) - _accelZero[axis];
+      _accelData[axis] = filterSmoothWithTime(_accelADC[axis], _accelData[axis], _smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }
@@ -695,13 +701,13 @@ public:
       {
         findZero[i] = analogRead(accelChannel[calAxis]);
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      _accelZero[calAxis] = findMedian(findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
-    accelOneG = accelZero[2];
+    _accelOneG = _accelZero[2];
     // replace with estimated Z axis 0g value
-    accelZero[2] = (accelZero[0] + accelZero[1]) / 2;
+    _accelZero[2] = (_accelZero[0] + _accelZero[1]) / 2;
   }
 
   void calculateAltitude() 
@@ -709,7 +715,7 @@ public:
     currentTime = micros();
     if ((abs(getRaw(0)) < 1500) && (abs(getRaw(1)) < 1500))
     { 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+      _rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     }
     previousTime = currentTime;
   } 
