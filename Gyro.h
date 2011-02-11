@@ -18,7 +18,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-class Gyro 
+class Gyroscope 
 {
 private:
   byte _rollChannel; 
@@ -53,7 +53,7 @@ protected:
   unsigned long _previousTime;
   
 public:    
-  Gyro()
+  Gyroscope()
   {
     _sign[ROLL] = 1;
     _sign[PITCH] = 1;
@@ -176,10 +176,10 @@ public:
 /****************** AeroQuad_v1 Gyro ******************/
 /******************************************************/
 #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuadMega_v1)
-class Gyro_AeroQuad_v1 : public Gyro 
+class IDGIXZ500Gyroscope : public Gyroscope 
 {
 public:
-  Gyro_AeroQuad_v1() : Gyro() 
+  IDGIXZ500Gyroscope() : Gyroscope() 
   {
     _gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
     _gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
@@ -252,14 +252,14 @@ public:
   INT -> D2 (PB2) (or no connection, not used here)
   CLK -> GND
 */
-class Gyro_AeroQuadMega_v2 : public Gyro 
+class ITG3200Gyroscope : public Gyroscope 
 {
 private:
   int _gyroAddress;
   long int _previousGyroTime;
   
 public:
-  Gyro_AeroQuadMega_v2() : Gyro() 
+  ITG3200Gyroscope() : Gyroscope() 
   {
     _gyroAddress = 0x69;
     _gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
@@ -384,13 +384,13 @@ public:
 /**************** ArduCopter Gyro *********************/
 /******************************************************/
 #ifdef ArduCopter
-class Gyro_ArduCopter : public Gyro 
+class IDG500_ADCGyroscope : public Gyroscope 
 {
 private:
   int _rawADC;
 
 public:
-  Gyro_ArduCopter() : Gyro() 
+  IDG500_ADCGyroscope() : Gyroscope() 
   {
     // IDG500 Sensitivity (from datasheet) => 2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
     // Tested values : 
@@ -451,10 +451,10 @@ public:
 /********************** Wii Gyro **********************/
 /******************************************************/
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-class Gyro_Wii : public Gyro 
+class WiiGyroscope : public Gyroscope 
 {
 public:
-  Gyro_Wii() : Gyro() 
+  WiiGyroscope() : Gyroscope() 
   {
     // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
     // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
@@ -507,10 +507,10 @@ public:
 /********************** CHR6DM Gyro **********************/
 /******************************************************/
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class Gyro_CHR6DM : public Gyro 
+class CHR6DMGyroscope : public Gyroscope 
 {
 public:
-  Gyro_CHR6DM() : Gyro() 
+  CHR6DMGyroscope() : Gyroscope() 
   {
     _gyroFullScaleOutput = 0;
     _gyroScaleFactor = 0;
@@ -565,13 +565,15 @@ public:
 /***************** CHR6DM FAKE Gyro **************/
 /*************************************************/
 #ifdef CHR6DM_FAKE_GYRO
-class Gyro_CHR6DM_Fake : public Gyro 
+class CHR6DMGyroscopeFake : public Gyroscope 
 {
 public:
   float fakeGyroRoll;
   float fakeGyroPitch;
   float fakeGyroYaw;
-  Gyro_CHR6DM_Fake() : Gyro() {
+  
+  CHR6DMGyroscopeFake() : Gyroscope() 
+  {
     gyroFullScaleOutput = 0;
     gyroScaleFactor = 0;
   }
@@ -682,12 +684,12 @@ public:
 /******************* Multipilot Gyro ******************/
 /******************************************************/
 #if defined(Multipilot) || defined(MultipilotI2C)
-class Gyro_Multipilot : public Gyro 
+class MultipilotGyroscope : public Gyroscope 
 {
 private:
 
 public:
-  Gyro_Multipilot() : Gyro() 
+  MultipilotGyroscope() : Gyroscope() 
   {
     gyroFullScaleOutput = 300.0;        // ADXR610 full scale output = +/- 300 deg/sec
     gyroScaleFactor = aref / 0.006;     // ADXR610 sensitivity = 6mV/(deg/sec)

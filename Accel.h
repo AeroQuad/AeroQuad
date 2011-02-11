@@ -18,12 +18,10 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-class Accel 
+class Accelerometer 
 {
 private:
-
   int _sign[3];
-//  float _zAxis;
   byte _rollChannel;
   byte _pitchChannel;
   byte _zAxisChannel;
@@ -47,12 +45,11 @@ protected:
 
   
 public:  
-  Accel() 
+  Accelerometer() 
   {
     _sign[ROLL] = 1;
     _sign[PITCH] = 1;
     _sign[YAW] = 1;
-//    _zAxis = 0;
   }
 
   // ******************************************************************
@@ -169,10 +166,10 @@ public:
 /************ AeroQuad v1 Accelerometer ***************/
 /******************************************************/
 #if defined(AeroQuad_v1) || defined(AeroQuad_v1_IDG) || defined(AeroQuadMega_v1)
-class Accel_AeroQuad_v1 : public Accel 
+class ADXL335Accelerometer : public Accelerometer 
 {
 public:
-  Accel_AeroQuad_v1() : Accel()
+  ADXL335Accelerometer() : Accelerometer()
   {
     // Accelerometer Values
     // Update these variables if using a different accel
@@ -244,13 +241,14 @@ public:
 /********* AeroQuad Mega v2 Accelerometer *************/
 /******************************************************/
 #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-class Accel_AeroQuadMega_v2 : public Accel 
+class BMA180Accelerometer : public Accelerometer 
 {
 private:
   int accelAddress;
   
 public:
-  Accel_AeroQuadMega_v2() : Accel(){
+  BMA180Accelerometer() : Accelerometer()
+  {
     accelAddress = 0x40; // page 54 and 61 of datasheet
     // Accelerometer value if BMA180 setup for 1.0G
     // Page 27 of datasheet = 0.00013g/LSB
@@ -359,14 +357,14 @@ public:
 /*********** ArduCopter ADC Accelerometer *************/
 /******************************************************/
 #ifdef ArduCopter
-class Accel_ArduCopter : public Accel 
+class ADXL335_ADCAccelerometer : public Accelerometer 
 {
 private:
   int _findZero[FINDZERO];
   int _rawADC;
 
 public:
-  Accel_ArduCopter() : Accel()
+  ADXL335_ADCAccelerometer() : Accelerometer()
   {
     // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
     // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
@@ -438,10 +436,10 @@ public:
 /****************** Wii Accelerometer *****************/
 /******************************************************/
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-class Accel_Wii : public Accel 
+class WiiAccelerometer : public Accelerometer 
 {
 public:
-  Accel_Wii() : Accel()
+  WiiAccelerometer() : Accelerometer()
   {
     _accelScaleFactor = 0;    
   }
@@ -501,10 +499,10 @@ public:
 /****************** CHR6DM Accelerometer **************/
 /******************************************************/
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class Accel_CHR6DM : public Accel 
+class CHR6DMAccelerometer : public Accelerometer 
 {
 public:
-  Accel_CHR6DM() : Accel() 
+  CHR6DMAccelerometer() : Accelerometer() 
   {
     _accelScaleFactor = 0;
   }
@@ -573,13 +571,14 @@ public:
 /******** CHR6DM Fake Accelerometer *********/
 /********************************************/
 #ifdef CHR6DM_FAKE_ACCEL
-class Accel_CHR6DM_Fake : public Accel 
+class CHR6DMFakeAccelerometer : public Accelerometer 
 {
 public:
   float fakeAccelRoll;
   float fakeAccelPitch;
   float fakeAccelYaw;
-  Accel_CHR6DM_Fake() : Accel() 
+  
+  CHR6DMFakeAccelerometer() : Accelerometer() 
   {
     accelScaleFactor = 0;
   }
@@ -652,12 +651,11 @@ public:
 /************* MultiPilot Accelerometer ***************/
 /******************************************************/
 #if defined(Multipilot) || defined(MultipilotI2C)
-class Accel_Multipilot : public Accel 
+class MultipilotAccelerometer : public Accelerometer 
 {
-private:
-  
 public:
-  Accel_Multipilot() : Accel()
+
+  MultipilotAccelerometer() : Accelerometer()
   {
     // Accelerometer Values
     // Update these variables if using a different accel

@@ -30,7 +30,7 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -38,7 +38,7 @@
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
-#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
+//#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
                               // (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -91,10 +91,10 @@
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
-  Accel_AeroQuad_v1 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuad_v1 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  ADXL335Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  IDGIXZ500Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuad tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -110,10 +110,10 @@
 #endif
 
 #ifdef AeroQuad_v1_IDG
-  Accel_AeroQuad_v1 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuad_v1 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  ADXL335Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  IDGIXZ500Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuad tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -129,10 +129,10 @@
 #endif
 
 #ifdef AeroQuad_v18
-  Accel_AeroQuadMega_v2 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuadMega_v2 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  BMA180Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  ITG3200Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuad tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWMtimer tempMotors;
@@ -168,10 +168,10 @@
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   Receiver_AeroQuadMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
-  Accel_AeroQuad_v1 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuad_v1 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  ADXL335Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  IDGIXZ500Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Motors_PWM tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -190,10 +190,10 @@
   Motors_PWMtimer tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  Accel_AeroQuadMega_v2 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuadMega_v2 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  BMA180Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  ITG3200Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
@@ -220,10 +220,10 @@
 #endif
 
 #ifdef ArduCopter
-  Gyro_ArduCopter tempGyro;
-  Gyro *_gyro = &tempGyro;
-  Accel_ArduCopter tempAccel;
-  Accel *_accel = &tempAccel;
+  IDG500_ADCGyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
+  ADXL335_ADCAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
   Receiver_ArduCopter tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_ArduCopter tempMotors;
@@ -249,10 +249,10 @@
 #endif
 
 #ifdef AeroQuad_Wii
-  Accel_Wii tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_Wii tempGyro;
-  Gyro *_gyro = &tempGyro;
+  WiiAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  WiiGyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuad tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -269,10 +269,10 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
-  Accel_Wii tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_Wii tempGyro;
-  Gyro *_gyro = &tempGyro;
+  WiiAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  WiiGyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuadMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -288,10 +288,10 @@
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
-  Accel_CHR6DM tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_CHR6DM tempGyro;
-  Gyro *_gyro = &tempGyro;
+  CHR6DMAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  CHR6DMGyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_AeroQuadMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -320,10 +320,10 @@
 #endif
 
 #ifdef APM_OP_CHR6DM
-  Accel_CHR6DM tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_CHR6DM tempGyro;
-  Gyro *_gyro = &tempGyro;
+  CHR6DMAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  CHR6DMGyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_ArduCopter tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_ArduCopter tempMotors;
@@ -352,10 +352,10 @@
 #endif
 
 #ifdef Multipilot
-  Accel_AeroQuad_v1 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuad_v1 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  MultipilotAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  IDGIXZ500Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_Multipilot tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_PWM tempMotors;
@@ -368,10 +368,10 @@
 #endif
 
 #ifdef MultipilotI2C  
-  Accel_AeroQuad_v1 tempAccel;
-  Accel *_accel = &tempAccel;
-  Gyro_AeroQuad_v1 tempGyro;
-  Gyro *_gyro = &tempGyro;
+  MultipilotAccelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  IDGIXZ500Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
   Receiver_Multipilot tempReceiver;
   Receiver *_receiver = &tempReceiver;
   Motors_I2C tempMotors;
