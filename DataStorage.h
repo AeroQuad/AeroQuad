@@ -21,30 +21,33 @@
 // Special thanks for 1k space optimization update from Ala42
 // http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13359&viewfull=1#post13359
 
-// Utilities for writing and reading from the EEPROM
-float readFloat(int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatOut;
+union floatStore 
+{
+  byte floatByte[4];
+  float floatVal;
+} floatOut,floatIn;
 
+// Utilities for writing and reading from the EEPROM
+float readFloat(int address) 
+{
   for (int i = 0; i < 4; i++)
+  {
     floatOut.floatByte[i] = EEPROM.read(address + i);
+  }
   return floatOut.floatVal;
 }
 
-void writeFloat(float value, int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatIn;
-
+void writeFloat(float value, int address) 
+{
   floatIn.floatVal = value;
   for (int i = 0; i < 4; i++)
+  {
     EEPROM.write(address + i, floatIn.floatByte[i]);
+  }
 }
 
-void readPID(unsigned char IDPid, unsigned int IDEeprom) {
+void readPID(unsigned char IDPid, unsigned int IDEeprom) 
+{
   struct PIDdata* pid = &PID[IDPid];
   pid->P = readFloat(IDEeprom);
   pid->I = readFloat(IDEeprom+4);
@@ -53,7 +56,8 @@ void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->integratedError = 0;
 }
 
-void writePID(unsigned char IDPid, unsigned int IDEeprom) {
+void writePID(unsigned char IDPid, unsigned int IDEeprom) 
+{
   struct PIDdata* pid = &PID[IDPid];
   writeFloat(pid->P, IDEeprom);
   writeFloat(pid->I, IDEeprom+4);
@@ -61,7 +65,8 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 }
 
 // contains all default values when re-writing EEPROM
-void initializeEEPROM(void) {
+void initializeEEPROM(void) 
+{
   PID[ROLL].P = 1.0;
   PID[ROLL].I = 0.0;
   PID[ROLL].D = -3.0;
@@ -140,7 +145,8 @@ void initializeEEPROM(void) {
   #endif*/
 }
 
-void readEEPROM(void) {
+void readEEPROM(void) 
+{
   readPID(ROLL, ROLL_PID_GAIN_ADR);
   readPID(PITCH, PITCH_PID_GAIN_ADR);
   readPID(YAW, YAW_PID_GAIN_ADR);
@@ -194,7 +200,8 @@ void readEEPROM(void) {
   #endif*/
 }
 
-void writeEEPROM(void){
+void writeEEPROM(void)
+{
   cli(); // Needed so that APM sensor data doesn't overflow
   writePID(ROLL, ROLL_PID_GAIN_ADR);
   writePID(PITCH, PITCH_PID_GAIN_ADR);

@@ -18,47 +18,54 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-class Motors {
-public:
+class Motors 
+{
+private:
   // Assume maximum number of motors is 8, leave array indexes unused if lower number
-  int motorAxisCommand[3];
+  int _motorAxisCommand[3];
   //int motorAxisCommandRoll[LASTMOTOR];
   //int motorAxisCommandPitch[LASTMOTOR];
   //int motorAxisCommandYaw[LASTMOTOR];
   //int motorMixerSettingRoll[LASTMOTOR];
   //int motorMixerSettingPitch[LASTMOTOR];
   //int motorMixerSettingYaw[LASTMOTOR];
-  int motorCommand[LASTMOTOR];
-  int minCommand[LASTMOTOR];
-  int maxCommand[LASTMOTOR];
-  float throttle;
-  float timerDebug;
-  int delta;
-  byte axis;
+  int _minCommand[LASTMOTOR];
+  int _maxCommand[LASTMOTOR];
+  float _throttle;
+//  float _timerDebug;
+//  int _delta;
+//  byte _axis;
   // Ground station control
-  int remoteCommand[LASTMOTOR];
-  float mMotorCommand;
-  float bMotorCommand;
+  int _remoteCommand[LASTMOTOR];
 
 
-  Motors(void){
-    throttle = 0;
-    motorAxisCommand[ROLL] = 0;
-    motorAxisCommand[PITCH] = 0;
-    motorAxisCommand[YAW] = 0;
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+
+protected:
+  int _motorCommand[LASTMOTOR];
+  float _mMotorCommand;
+  float _bMotorCommand;
+  
+public:
+  Motors(void)
+  {
+    _throttle = 0;
+    _motorAxisCommand[ROLL] = 0;
+    _motorAxisCommand[PITCH] = 0;
+    _motorAxisCommand[YAW] = 0;
+    for (byte motor = 0; motor < LASTMOTOR; motor++) 
+    {
       //motorAxisCommandRoll[motor] = 0;
       //motorAxisCommandPitch[motor] = 0;
       //motorAxisCommandYaw[motor] = 0;
       //motorMixerSettingRoll[motor] = 0;
       //motorMixerSettingPitch[motor] = 0;
       //motorMixerSettingYaw[motor] = 0;
-      motorCommand[motor] = 1000;
-      minCommand[motor] = MINCOMMAND;
-      maxCommand[motor] = MAXCOMMAND;
-      remoteCommand[motor] = 1000;
+      _motorCommand[motor] = 1000;
+      _minCommand[motor] = MINCOMMAND;
+      _maxCommand[motor] = MAXCOMMAND;
+      _remoteCommand[motor] = 1000;
     }
-    delta = 0;
+    _delta = 0;
   };
 
   // The following function calls must be defined in any new subclasses
@@ -67,8 +74,10 @@ public:
   virtual void commandAllMotors(int motorCommand);
 
   //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
-  void pulseMotors(byte quantity) {
-    for (byte i = 0; i < quantity; i++) {
+  void pulseMotors(byte quantity) 
+  {
+    for (byte i = 0; i < quantity; i++) 
+    {
       commandAllMotors(MINCOMMAND + 100);
       delay(250);
       commandAllMotors(MINCOMMAND);
@@ -76,58 +85,74 @@ public:
     }
   }
 
-  void setRemoteCommand(byte motor, int value) {
-    remoteCommand[motor] = value;
+  void setRemoteCommand(byte motor, int value) 
+  {
+    _remoteCommand[motor] = value;
   }
 
-  const int getRemoteCommand(byte motor) {
-    return remoteCommand[motor];
+  const int getRemoteCommand(byte motor) 
+  {
+    return _remoteCommand[motor];
   }
 
-  const float getMotorSlope(void) {
-    return mMotorCommand;
+  const float getMotorSlope(void) 
+  {
+    return _mMotorCommand;
   }
 
-  const float getMotorOffset(void) {
-    return bMotorCommand;
+  const float getMotorOffset(void) 
+  {
+    return _bMotorCommand;
   }
 
-  void setMinCommand(byte motor, int value) {
-    minCommand[motor] = value;
+  void setMinCommand(byte motor, int value) 
+  {
+    _minCommand[motor] = value;
   }
 
-  const int getMinCommand(byte motor) {
-    return minCommand[motor];
+  const int getMinCommand(byte motor) 
+  {
+    return _minCommand[motor];
   }
 
-  void setMaxCommand(byte motor, int value) {
-    maxCommand[motor] = value;
+  void setMaxCommand(byte motor, int value) 
+  {
+    _maxCommand[motor] = value;
   }
 
-  const int getMaxCommand(byte motor) {
-    return maxCommand[motor];
+  const int getMaxCommand(byte motor) 
+  {
+    return _maxCommand[motor];
   }
 
-  void setMotorAxisCommand(byte motor, int value) {
-    motorAxisCommand[motor] = value;
+  void setMotorAxisCommand(byte motor, int value) 
+  {
+    _motorAxisCommand[motor] = value;
   }
 
-  const int getMotorAxisCommand(byte motor) {
-    return motorAxisCommand[motor];
+  const int getMotorAxisCommand(byte motor) 
+  {
+    return _motorAxisCommand[motor];
   }
 
-  void setMotorCommand(byte motor, int value) {
-    motorCommand[motor] = value;
+  void setMotorCommand(byte motor, int value) 
+  {
+    _motorCommand[motor] = value;
   }
 
-  const int getMotorCommand(byte motor) {
-    return motorCommand[motor];
+  const int getMotorCommand(byte motor) 
+  {
+    return _motorCommand[motor];
   }
-  void setThrottle(float value) {
-    throttle = value;
+  
+  void setThrottle(float value) 
+  {
+    _throttle = value;
   }
-  const float getThrottle() {
-    return throttle;
+  
+  const float getThrottle() 
+  {
+    return _throttle;
   }
 };
 
@@ -135,7 +160,8 @@ public:
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
-class Motors_PWM : public Motors {
+class Motors_PWM : public Motors 
+{
 private:
   #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
     #define FRONTMOTORPIN  2
@@ -154,28 +180,32 @@ private:
   byte pin;
 
  public:
-  Motors_PWM() : Motors(){
+  Motors_PWM() : Motors()
+  {
    // Analog write supports commands from 0-255 => 0 - 100% duty cycle
    // Using 125-250 for motor setting 1000-2000
   }
 
-  void initialize(void) {
+  void initialize(void) 
+  {
     commandAllMotors(1000);
   }
 
-  void write(void) {
-    analogWrite(FRONTMOTORPIN, motorCommand[FRONT] / 8);
-    analogWrite(REARMOTORPIN,  motorCommand[REAR]  / 8);
-    analogWrite(RIGHTMOTORPIN, motorCommand[RIGHT] / 8);
-    analogWrite(LEFTMOTORPIN,  motorCommand[LEFT]  / 8);
+  void write(void) 
+  {
+    analogWrite(FRONTMOTORPIN, _motorCommand[FRONT] / 8);
+    analogWrite(REARMOTORPIN,  _motorCommand[REAR]  / 8);
+    analogWrite(RIGHTMOTORPIN, _motorCommand[RIGHT] / 8);
+    analogWrite(LEFTMOTORPIN,  _motorCommand[LEFT]  / 8);
 
   }
 
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-    analogWrite(FRONTMOTORPIN, _motorCommand / 8);
-    analogWrite(REARMOTORPIN,  _motorCommand / 8);
-    analogWrite(RIGHTMOTORPIN, _motorCommand / 8);
-    analogWrite(LEFTMOTORPIN,  _motorCommand / 8);
+  void commandAllMotors(int motorCommand) 
+  {   // Sends commands to all motors
+    analogWrite(FRONTMOTORPIN, motorCommand / 8);
+    analogWrite(REARMOTORPIN,  motorCommand / 8);
+    analogWrite(RIGHTMOTORPIN, motorCommand / 8);
+    analogWrite(LEFTMOTORPIN,  motorCommand / 8);
   }
 };
 
@@ -202,7 +232,8 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  tick every 0.5us. If the prescaler was changed, the OCRxy register value would
  be different.
 */
-class Motors_PWMtimer : public Motors {
+class Motors_PWMtimer : public Motors 
+{
 private:
 /*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port
     FRONT         2  PE4              3  PD3
@@ -216,10 +247,10 @@ private:
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
 public:
-  Motors_PWMtimer() : Motors(){
-  }
+  Motors_PWMtimer() : Motors(){}
 
-  void initialize(void) {
+  void initialize(void) 
+  {
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
   #if defined(plusConfig) || defined(XConfig)
@@ -266,43 +297,45 @@ public:
 #endif
 }
 
-  void write(void) {
+  void write(void) 
+  {
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    OCR3B = motorCommand[FRONT] * 2 ;
-    OCR3C = motorCommand[REAR]  * 2 ;
-    OCR3A = motorCommand[RIGHT] * 2 ;
-    OCR4A = motorCommand[LEFT]  * 2 ;
+    OCR3B = _motorCommand[FRONT] * 2 ;
+    OCR3C = _motorCommand[REAR]  * 2 ;
+    OCR3A = _motorCommand[RIGHT] * 2 ;
+    OCR4A = _motorCommand[LEFT]  * 2 ;
   #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    OCR4B = motorCommand[RIGHT2] * 2 ;
-    OCR4C = motorCommand[LEFT2]  * 2 ;
+    OCR4B = _motorCommand[RIGHT2] * 2 ;
+    OCR4C = _motorCommand[LEFT2]  * 2 ;
   #endif
 //#endif
 //#if defined (__AVR_ATmega328P__)
 #else
-    OCR2B = motorCommand[FRONT] / 16 ;                       // 1000-2000 to 128-256
-    OCR1A = motorCommand[REAR]  * 2 ;
-    OCR1B = motorCommand[RIGHT] * 2 ;
-    OCR2A = motorCommand[LEFT]  / 16 ;
+    OCR2B = _motorCommand[FRONT] / 16 ;                       // 1000-2000 to 128-256
+    OCR1A = _motorCommand[REAR]  * 2 ;
+    OCR1B = _motorCommand[RIGHT] * 2 ;
+    OCR2A = _motorCommand[LEFT]  / 16 ;
 #endif
   }
 
- void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+ void commandAllMotors(int motorCommand) 
+ {   // Sends commands to all motors
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    OCR3B = _motorCommand * 2 ;
-    OCR3C = _motorCommand * 2 ;
-    OCR3A = _motorCommand * 2 ;
-    OCR4A = _motorCommand * 2 ;
+    OCR3B = motorCommand * 2 ;
+    OCR3C = motorCommand * 2 ;
+    OCR3A = motorCommand * 2 ;
+    OCR4A = motorCommand * 2 ;
   #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    OCR4B = _motorCommand * 2 ;
-    OCR4C = _motorCommand * 2 ;
+    OCR4B = motorCommand * 2 ;
+    OCR4C = motorCommand * 2 ;
   #endif
 //#endif
 //#if defined (__AVR_ATmega328P__)
 #else
-    OCR2B = _motorCommand / 16 ;
-    OCR1A = _motorCommand * 2 ;
-    OCR1B = _motorCommand * 2 ;
-    OCR2A = _motorCommand / 16 ;
+    OCR2B = motorCommand / 16 ;
+    OCR1A = motorCommand * 2 ;
+    OCR1B = motorCommand * 2 ;
+    OCR2A = motorCommand / 16 ;
 #endif
   }
 };
@@ -311,7 +344,8 @@ public:
 /********************* Fake PWM Motors ****************/
 /******************************************************/
 #ifdef CHR6DM_FAKE_MOTORS
-class Motors_PWM_Fake : public Motors {
+class Motors_PWM_Fake : public Motors 
+{
 private:
   #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
     #define FRONTMOTORPIN 2
@@ -330,17 +364,19 @@ private:
   byte pin;
 
  public:
-  Motors_PWM_Fake() : Motors(){
+  Motors_PWM_Fake() : Motors()
+  {
     // Scale motor commands to analogWrite
     // Only supports commands from 0-255 => 0 - 100% duty cycle
     // Usable pulsewith from approximately 1000-2000 us = 126 - 250
     // m = (250-126)/(2000-1000) = 0.124
     // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-    mMotorCommand = 0.124;
-    bMotorCommand = 2.0;
+    _mMotorCommand = 0.124;
+    _bMotorCommand = 2.0;
   }
 
-  void initialize(void) {
+  void initialize(void) 
+  {
     pinMode(FRONTMOTORPIN, OUTPUT);
     fake_analogWrite(FRONTMOTORPIN, 124);
     pinMode(REARMOTORPIN, OUTPUT);
@@ -350,21 +386,24 @@ private:
     pinMode(LEFTMOTORPIN, OUTPUT);
   }
 
-  void write(void) {
-    fake_analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(REARMOTORPIN, (motorCommand[REAR] * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * mMotorCommand) + bMotorCommand);
+  void write(void) 
+  {
+    fake_analogWrite(FRONTMOTORPIN, (motorCommand[FRONT] * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(REARMOTORPIN, (motorCommand[REAR] * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(RIGHTMOTORPIN, (motorCommand[RIGHT] * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(LEFTMOTORPIN, (motorCommand[LEFT] * _mMotorCommand) + _bMotorCommand);
   }
 
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-    fake_analogWrite(FRONTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(REARMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(RIGHTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
-    fake_analogWrite(LEFTMOTORPIN, (_motorCommand * mMotorCommand) + bMotorCommand);
+  void commandAllMotors(int _motorCommand) 
+  {   // Sends commands to all motors
+    fake_analogWrite(FRONTMOTORPIN, (_motorCommand * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(REARMOTORPIN, (_motorCommand * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(RIGHTMOTORPIN, (_motorCommand * _mMotorCommand) + _bMotorCommand);
+    fake_analogWrite(LEFTMOTORPIN, (_motorCommand * _mMotorCommand) + _bMotorCommand);
   }
 
-  void fake_analogWrite(int pin, int value){
+  void fake_analogWrite(int pin, int value)
+  {
     Serial2.print("analogWrite:");
     Serial2.print(pin);
     Serial2.print(",");
@@ -377,11 +416,13 @@ private:
 /***************** ArduCopter Motors ******************/
 /******************************************************/
 #if defined(ArduCopter) || defined(APM_OP_CHR6DM)
-class Motors_ArduCopter : public Motors {
+class Motors_ArduCopter : public Motors 
+{
 public:
   Motors_ArduCopter() : Motors() {}
 
-  void initialize(void) {
+  void initialize(void) 
+  {
     // Init PWM Timer 1
     //pinMode(11,OUTPUT); //     (PB5/OC1A)
     pinMode(12,OUTPUT); //OUT2 (PB6/OC1B)
@@ -439,14 +480,16 @@ public:
     commandAllMotors(1000);
   }
 
-  void write (void) {
-    OCR1B = motorCommand[FRONT] * 2;
-    OCR1C = motorCommand[REAR] * 2;
-    OCR5B = motorCommand[RIGHT] * 2;
-    OCR5C = motorCommand[LEFT] * 2;
+  void write (void) 
+  {
+    OCR1B = _motorCommand[FRONT] * 2;
+    OCR1C = _motorCommand[REAR] * 2;
+    OCR5B = _motorCommand[RIGHT] * 2;
+    OCR5C = _motorCommand[LEFT] * 2;
   }
 
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
+  void commandAllMotors(int _motorCommand) 
+  {   // Sends commands to all motors
     OCR1B = _motorCommand * 2;
     OCR1C = _motorCommand * 2;
     OCR5B = _motorCommand * 2;
@@ -459,9 +502,9 @@ public:
 /********************* Multipilot Motors *********************/
 /*************************************************************/
 #ifdef MultipilotI2C
-class Motors_I2C : public Motors {
+class Motors_I2C : public Motors 
+{
 public:
-
 
 /* Mixertable VAR */
   float MotorGas[LASTMOTOR];
@@ -475,66 +518,67 @@ public:
   unsigned char MotorI2C[LASTMOTOR];
   Motors_I2C() : Motors() {}
 
-  void initialize(void) {
-  char Motor[LASTMOTOR];
-  // Scale motor commands to analogWrite
-  // m = (250-126)/(2000-1000) = 0.124
-  // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
-  //float mMotorCommand = 0.124;
-  //float bMotorCommand = 2 ;
+  void initialize(void) 
+  {
+    char Motor[LASTMOTOR];
+    // Scale motor commands to analogWrite
+    // m = (250-126)/(2000-1000) = 0.124
+    // b = y1 - (m * x1) = 126 - (0.124 * 1000) = 2
+    //float _mMotorCommand = 0.124;
+    //float _bMotorCommand = 2 ;
 
-  mMotorCommand = 0.255;
-  bMotorCommand = -255;
-  timer_debug=0;
+    _mMotorCommand = 0.255;
+    _bMotorCommand = -255;
+    timer_debug=0;
 
-  //motorCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
+    //motorCommand[8] = {1000,1000,1000,1000,1000,1000,1000,1000};
 
-  //int subtrim[4] = {1500,1500,1500,1500};    //SUBTRIM li esprimo in millisecondi come i servi per standardizzazione.
-  //motorAxisCommand[3] = {0,0,0};
+    //int subtrim[4] = {1500,1500,1500,1500};    //SUBTRIM li esprimo in millisecondi come i servi per standardizzazione.
+    //motorAxisCommand[3] = {0,0,0};
 
-  // If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V
-  // Scale gyro output (-465 to +465) to motor commands (1000 to 2000)
-  // use y = mx + b
-  //mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465))
-  //bMotorRate = 1500;   // b = y1 - m * x1
-  init_mixer_table(); // Init MixerTable
-  Wire.begin(0x29);
+    // If AREF = 3.3V, then A/D is 931 at 3V and 465 = 1.5V
+    // Scale gyro output (-465 to +465) to motor commands (1000 to 2000)
+    // use y = mx + b
+    //mMotorRate = 1.0753; // m = (y2 - y1) / (x2 - x1) = (2000 - 1000) / (465 - (-465))
+    //bMotorRate = 1500;   // b = y1 - m * x1
+    init_mixer_table(); // Init MixerTable
+    Wire.begin(0x29);
  }
 
 // C'e' im
 #ifdef HEXARADIAL
 void init_mixer_table()
 {
-// Example for Hexa configuration
-MotorGas[0] = 100;
-MotorPitch[0] = -100;
-MotorRoll[0] =  0;
-MotorYaw[0] =  100;
-
-MotorGas[1] = 100;
-MotorPitch[1] = -50;
-MotorRoll[1] =  -100;
-MotorYaw[1] =  -100;
-
-MotorGas[2] = 100;
-MotorPitch[2] = +50  ;
-MotorRoll[2] =  -100;
-MotorYaw[2] =  100;
-
-MotorGas[3] = 100;
-MotorPitch[3] =  +100;
-MotorRoll[3] =  0;
-MotorYaw[3] =  -100;
-
-MotorGas[4] = 100;
-MotorPitch[4] = +50;
-MotorRoll[4] =  100;
-MotorYaw[4] =  100;
-
-MotorGas[5] = 100;
-MotorPitch[5] =  -50;
-MotorRoll[5] =  100;
-MotorYaw[5] =  -100;
+  // Example for Hexa configuration
+  MotorGas[0] = 100;
+  MotorPitch[0] = -100;
+  MotorRoll[0] =  0;
+  MotorYaw[0] =  100;
+  
+  MotorGas[1] = 100;
+  MotorPitch[1] = -50;
+  MotorRoll[1] =  -100;
+  MotorYaw[1] =  -100;
+  
+  MotorGas[2] = 100;
+  MotorPitch[2] = +50  ;
+  MotorRoll[2] =  -100;
+  MotorYaw[2] =  100;
+  
+  MotorGas[3] = 100;
+  MotorPitch[3] =  +100;
+  MotorRoll[3] =  0;
+  MotorYaw[3] =  -100;
+  
+  MotorGas[4] = 100;
+  MotorPitch[4] = +50;
+  MotorRoll[4] =  100;
+  MotorYaw[4] =  100;
+  
+  MotorGas[5] = 100;
+  MotorPitch[5] =  -50;
+  MotorRoll[5] =  100;
+  MotorYaw[5] =  -100;
 }
 #endif
 
@@ -558,62 +602,62 @@ MotorYaw[5] =  -100;
 #ifdef HEXACOAXIAL
 void init_mixer_table()
 {
-// Example for Hexa configuration
-MotorGas[0] = 95;
-MotorPitch[0] = 100;
-MotorRoll[0] =  0;
-MotorYaw[0] =  100;
-
-MotorGas[1] = 100;
-MotorPitch[1] = 100;
-MotorRoll[1] =  0;
-MotorYaw[1] =  -100;
-
-MotorGas[2] = 95;
-MotorPitch[2] = -50  ;
-MotorRoll[2] =  100;
-MotorYaw[2] =  -100;
-
-MotorGas[3] = 100;
-MotorPitch[3] =  -50;
-MotorRoll[3] =  100;
-MotorYaw[3] =  100;
-
-MotorGas[4] = 95;
-MotorPitch[4] = -50;
-MotorRoll[4] =  -100;
-MotorYaw[4] =  -100;
-
-MotorGas[5] = 100;
-MotorPitch[5] =  -50;
-MotorRoll[5] =  -100;
-MotorYaw[5] =  100;
+  // Example for Hexa configuration
+  MotorGas[0] = 95;
+  MotorPitch[0] = 100;
+  MotorRoll[0] =  0;
+  MotorYaw[0] =  100;
+  
+  MotorGas[1] = 100;
+  MotorPitch[1] = 100;
+  MotorRoll[1] =  0;
+  MotorYaw[1] =  -100;
+  
+  MotorGas[2] = 95;
+  MotorPitch[2] = -50  ;
+  MotorRoll[2] =  100;
+  MotorYaw[2] =  -100;
+  
+  MotorGas[3] = 100;
+  MotorPitch[3] =  -50;
+  MotorRoll[3] =  100;
+  MotorYaw[3] =  100;
+  
+  MotorGas[4] = 95;
+  MotorPitch[4] = -50;
+  MotorRoll[4] =  -100;
+  MotorYaw[4] =  -100;
+  
+  MotorGas[5] = 100;
+  MotorPitch[5] =  -50;
+  MotorRoll[5] =  -100;
+  MotorYaw[5] =  100;
 }
 #endif
 
 
 void motor_axis_correction()
 {
-int i;
-for (i=0;i<LASTMOTOR;i++)
+  byte i;
+  for (i=0;i<LASTMOTOR;i++)
   {
-  motorAxisCommandPitch[i] = (motorAxisCommand[PITCH] / 100.0) * MotorPitch[i];
-  motorAxisCommandRoll[i] = (motorAxisCommand[ROLL] / 100.0) * MotorRoll[i];
-  motorAxisCommandYaw[i] = (motorAxisCommand[YAW] / 100.0) * MotorYaw[i];
+    motorAxisCommandPitch[i] = (motorAxisCommand[PITCH] / 100.0) * MotorPitch[i];
+    motorAxisCommandRoll[i] = (motorAxisCommand[ROLL] / 100.0) * MotorRoll[i];
+    motorAxisCommandYaw[i] = (motorAxisCommand[YAW] / 100.0) * MotorYaw[i];
   }
 }
 
 //After that we can mix them together:
 void motor_matrix_command()
 {
-int i;
-float valuemotor;
-for (i=0;i<LASTMOTOR;i++)
+  int i;
+  float valuemotor;
+  for (i=0;i<LASTMOTOR;i++)
   {
-   valuemotor = ((Throttle* MotorGas[i])/100) + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i];
-   //valuemotor = Throttle + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i]; // OLD VERSION WITHOUT GAS CONTROL ON Mixertable
-   valuemotor = constrain(valuemotor, minAcro, MAXCOMMAND);
-   motorCommand[i]=valuemotor;
+     valuemotor = ((Throttle* MotorGas[i])/100) + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i];
+     //valuemotor = Throttle + motorAxisCommandPitch[i] + motorAxisCommandYaw[i] + motorAxisCommandRoll[i]; // OLD VERSION WITHOUT GAS CONTROL ON Mixertable
+     valuemotor = constrain(valuemotor, minAcro, MAXCOMMAND);
+     motorCommand[i]=valuemotor;
   }
 }
 
@@ -737,116 +781,119 @@ void matrix_debug()
      Serial.println();
 #endif
 
-// Example of Hexa Coaxial.
-//Configurazione Motori Hexa Coaxial
-
-//Dietro 			GAS		NICK		        ROLL		        YAW
-//Sopra 1         		64		-64			0			-64
-//Sotto 2			76		-64			0			64
-
-//Guardando l'Hexafox da dietro braccio  Sinistro
-//Sopra 3			64		32			64			64
-//Sotto 4			76		32			64			-64
-
-//Guardando l'Hexafox da dietro braccio  Destro.
-
-//Sopra 5			64		32			-64			64
-//Sotto 6			76		32			-64			-64
-
-
-#ifdef HEXACOAXIAL
-     Serial.println();
-     Serial.print((unsigned int)MotorI2C[2]);
-     comma();
-     Serial.print((unsigned int)MotorI2C[4]);
-     Serial.println();
-     //comma();
-     Serial.print((unsigned int)MotorI2C[3]);
-     comma();
-     Serial.print((unsigned int)MotorI2C[5]);
-     Serial.println();
-     Serial.print ("   ");
-     //comma();
-     Serial.print((unsigned int)MotorI2C[0]);
-     Serial.println();
-     Serial.print ("   ");
-     //comma();
-     Serial.println((unsigned int)MotorI2C[1]);
-     Serial.println("---------------");
-     Serial.println();
-#endif
-
-#endif
-}
-
-void WireMotorWrite()
-{
-int i = 0;
-int nmotor=0;
-int index=0;
-int tout=0;
-char buff_i2c[10];
-
-Wire.endTransmission(); //end transmission
-for(nmotor=0;nmotor<6;nmotor++)
-  {
-  index=0x29+nmotor;
-  Wire.beginTransmission(index);
-  Wire.send(MotorI2C[nmotor]);
-  Wire.endTransmission(); //end transmission
-  Wire.requestFrom(index, 1);    // request 6 bytes from device
-  i=0;
-  while(1)
-  //while((Wire.available())&&(i<6))
-  {
-    buff_i2c[i] = Wire.receive();  // receive one byte
-    i++;
-    if (i>6)break;
-    //Serial.print(i);
-    if (Wire.available()==0)break;
+  // Example of Hexa Coaxial.
+  //Configurazione Motori Hexa Coaxial
+  
+  //Dietro 			GAS		NICK		        ROLL		        YAW
+  //Sopra 1         		64		-64			0			-64
+  //Sotto 2			76		-64			0			64
+  
+  //Guardando l'Hexafox da dietro braccio  Sinistro
+  //Sopra 3			64		32			64			64
+  //Sotto 4			76		32			64			-64
+  
+  //Guardando l'Hexafox da dietro braccio  Destro.
+  
+  //Sopra 5			64		32			-64			64
+  //Sotto 6			76		32			-64			-64
+  
+  
+  #ifdef HEXACOAXIAL
+       Serial.println();
+       Serial.print((unsigned int)MotorI2C[2]);
+       comma();
+       Serial.print((unsigned int)MotorI2C[4]);
+       Serial.println();
+       //comma();
+       Serial.print((unsigned int)MotorI2C[3]);
+       comma();
+       Serial.print((unsigned int)MotorI2C[5]);
+       Serial.println();
+       Serial.print ("   ");
+       //comma();
+       Serial.print((unsigned int)MotorI2C[0]);
+       Serial.println();
+       Serial.print ("   ");
+       //comma();
+       Serial.println((unsigned int)MotorI2C[1]);
+       Serial.println("---------------");
+       Serial.println();
+  #endif
+  
+  #endif
   }
-
+  
+  void WireMotorWrite()
+  {
+    int i = 0;
+    int nmotor=0;
+    int index=0;
+    int tout=0;
+    char buff_i2c[10];
+  
+    Wire.endTransmission(); //end transmission
+    for(nmotor=0;nmotor<6;nmotor++)
+    {
+      index=0x29+nmotor;
+      Wire.beginTransmission(index);
+      Wire.send(MotorI2C[nmotor]);
+      Wire.endTransmission(); //end transmission
+      Wire.requestFrom(index, 1);    // request 6 bytes from device
+      i=0;
+      while(1)
+      //while((Wire.available())&&(i<6))
+      {
+        buff_i2c[i] = Wire.receive();  // receive one byte
+        i++;
+        if (i>6)
+        {
+          break;
+        }
+        //Serial.print(i);
+        if (Wire.available()==0)
+        {
+          break;
+        }
+      }
+    }
   }
-
-}
-  void write (void) {
+  void write (void) 
+  {
     // Matrix transformation.
     motor_axis_correction();
     // Matrix Command.
     motor_matrix_command();
    // Matrix Assignment.
-    MotorI2C[MOTORID1]=(char)((motorCommand[0] * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID2]=(char)((motorCommand[1] * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID3]=(char)((motorCommand[2] * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID4]=(char)((motorCommand[3] * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID5]=(char)((motorCommand[4] * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID6]=(char)((motorCommand[5] * mMotorCommand) + bMotorCommand);
-
-   if((millis()-timer_debug)>1000)   // 100ms => 10 Hz loop rate
-  {
-    timer_debug=millis();
-    #ifdef TELEMETRY_DEBUG
-    matrix_debug();
-    #endif
-}
-
-
+    MotorI2C[MOTORID1]=(char)((motorCommand[0] * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID2]=(char)((motorCommand[1] * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID3]=(char)((motorCommand[2] * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID4]=(char)((motorCommand[3] * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID5]=(char)((motorCommand[4] * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID6]=(char)((motorCommand[5] * _mMotorCommand) + _bMotorCommand);
+  
+    if((millis()-timer_debug)>1000)   // 100ms => 10 Hz loop rate
+    {
+      timer_debug=millis();
+      #ifdef TELEMETRY_DEBUG
+      matrix_debug();
+      #endif
+    }
     WireMotorWrite();
-}
-
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-
+  }
+  
+  void commandAllMotors(int _motorCommand) 
+  {   // Sends commands to all motors
     // Matrix transformation.
     motor_axis_correction();
     // Matrix Command.
     motor_matrix_command();
    // Matrix Assignment.
-    MotorI2C[MOTORID1]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID2]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID3]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID4]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID5]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
-    MotorI2C[MOTORID6]=(char)((_motorCommand * mMotorCommand) + bMotorCommand);
+    MotorI2C[MOTORID1]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID2]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID3]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID4]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID5]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
+    MotorI2C[MOTORID6]=(char)((_motorCommand * _mMotorCommand) + _bMotorCommand);
     matrix_debug();
     WireMotorWrite();
   }
@@ -858,23 +905,23 @@ for(nmotor=0;nmotor<6;nmotor++)
 /******************************************************/
 // Tested AeroQuad I2C class authored by jihlein
 // http://code.google.com/p/aeroquad/issues/detail?id=67
-class Motors_AeroQuadI2C : public Motors {
-private:
-  #define MOTORBASE 0x28            // I2C controller base address
+#define MOTORBASE 0x28            // I2C controller base address
+#define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
+#define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers
+#define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
+#define LEFTMOTORID  MOTORBASE + 4  // inspired frame
 
-  #define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
-  #define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers
-  #define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
-  #define LEFTMOTORID  MOTORBASE + 4  // inspired frame
-
-  public:
-  Motors_AeroQuadI2C() : Motors(){
+class Motors_AeroQuadI2C : public Motors 
+{
+public:
+  Motors_AeroQuadI2C() : Motors()
+  {
     // Scale motor commands to 0 to 255
     // for I2C commands
     // m = (255 - 0)/(2000-1000) = 0.255
     // b = y1 - (m * x1) = 0 - (0.255 * 1000) = -255
-    mMotorCommand = 0.255;
-    bMotorCommand = -255.0;
+    _mMotorCommand = 0.255;
+    _bMotorCommand = -255.0;
   }
 
   void initialize(void)
@@ -887,18 +934,18 @@ private:
 
   void write(void)
   {
-    sendByteI2C(FRONTMOTORID, constrain((motorCommand[FRONT] * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(REARMOTORID,  constrain((motorCommand[REAR]  * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(RIGHTMOTORID, constrain((motorCommand[RIGHT] * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(LEFTMOTORID,  constrain((motorCommand[LEFT]  * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(FRONTMOTORID, constrain((_motorCommand[FRONT] * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(REARMOTORID,  constrain((_motorCommand[REAR]  * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(RIGHTMOTORID, constrain((_motorCommand[RIGHT] * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(LEFTMOTORID,  constrain((_motorCommand[LEFT]  * _mMotorCommand) + _bMotorCommand, 0, 255));
   }
 
   void commandAllMotors(int motorCommand)
   {
-    sendByteI2C(FRONTMOTORID, constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(REARMOTORID,  constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(RIGHTMOTORID, constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
-    sendByteI2C(LEFTMOTORID,  constrain((motorCommand * mMotorCommand) + bMotorCommand, 0, 255));
+    sendByteI2C(FRONTMOTORID, constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(REARMOTORID,  constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(RIGHTMOTORID, constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
+    sendByteI2C(LEFTMOTORID,  constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
   }
 };
 

@@ -21,15 +21,18 @@
 // FlightCommand.pde is responsible for decoding transmitter stick combinations
 // for setting up AeroQuad modes such as motor arming and disarming
 
-void readPilotCommands() {
+void readPilotCommands() 
+{
   _receiver->read();
   // Read quad configuration commands from transmitter when throttle down
-  if (_receiver->getRaw(THROTTLE) < MINCHECK) {
+  if (_receiver->getRaw(THROTTLE) < MINCHECK) 
+  {
     zeroIntegralError();
     _throttleAdjust = 0;
     //_receiver->adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
-    if (_receiver->getRaw(YAW) < MINCHECK && _armed == ON) {
+    if (_receiver->getRaw(YAW) < MINCHECK && _armed == ON) 
+    {
       _armed = OFF;
       _motors->commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -37,7 +40,10 @@ void readPilotCommands() {
       #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((_receiver->getRaw(YAW) < MINCHECK) && (_receiver->getRaw(ROLL) > MAXCHECK) && (_receiver->getRaw(PITCH) < MINCHECK)) {
+    if ((_receiver->getRaw(YAW) < MINCHECK) && 
+        (_receiver->getRaw(ROLL) > MAXCHECK) && 
+        (_receiver->getRaw(PITCH) < MINCHECK)) 
+    {
       _gyro->calibrate(); // defined in Gyro.h
       _accel->calibrate(); // defined in Accel.h
       storeSensorsToEEPROM();
@@ -56,7 +62,8 @@ void readPilotCommands() {
       #endif
     }   
     // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
-    if ((_receiver->getRaw(ROLL) > MAXCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) {
+    if ((_receiver->getRaw(ROLL) > MAXCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
+    {
       _accel->calibrate(); // defined in Accel.h
       storeSensorsToEEPROM();
       zeroIntegralError();
@@ -66,7 +73,8 @@ void readPilotCommands() {
       #endif
     }   
     // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
-    if ((_receiver->getRaw(ROLL) < MINCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) {
+    if ((_receiver->getRaw(ROLL) < MINCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
+    {
       _gyro->calibrate();
       zeroIntegralError();
       _motors->pulseMotors(4);
@@ -75,7 +83,8 @@ void readPilotCommands() {
       #endif
     }
     // Arm motors (left stick lower right corner)
-    if (_receiver->getRaw(YAW) > MAXCHECK && _armed == OFF && _safetyCheck == ON) {
+    if (_receiver->getRaw(YAW) > MAXCHECK && _armed == OFF && _safetyCheck == ON) 
+    {
       zeroIntegralError();
       _armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -94,14 +103,16 @@ void readPilotCommands() {
   }
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
-  if (_receiver->getRaw(THROTTLE) < 1300) {
+  if (_receiver->getRaw(THROTTLE) < 1300) 
+  {
     _receiver->setTransmitterTrim(ROLL, _receiver->getRaw(ROLL));
     _receiver->setTransmitterTrim(PITCH, _receiver->getRaw(PITCH));
     _receiver->setTransmitterTrim(YAW, _receiver->getRaw(YAW));
   }
   
   // Check Mode switch for Acro or Stable
-  if (_receiver->getRaw(MODE) > 1500) {
+  if (_receiver->getRaw(MODE) > 1500) 
+  {
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       if (_flightMode == ACRO)
       {
@@ -110,7 +121,8 @@ void readPilotCommands() {
     #endif
     _flightMode = STABLE;
  }
-  else {
+  else 
+  {
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       if (_flightMode == STABLE)
       {

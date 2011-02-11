@@ -35,12 +35,15 @@ void processArdupirateSuperStableMode(void)
   // ROLL
   float errorRoll = (_receiver->getAngle(ROLL) - _flightAngle->getData(ROLL));     
   errorRoll = constrain(errorRoll,-50,50);
-  if (_receiver->getAngle(ROLL) < 30) {
+  if (_receiver->getAngle(ROLL) < 30) 
+  {
     PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
     PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
   }
   else
+  {
     PID[LEVELROLL].integratedError = 0;
+  }
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
   errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
   _motors->setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -48,12 +51,15 @@ void processArdupirateSuperStableMode(void)
   // PITCH
   float errorPitch = (_receiver->getAngle(PITCH) + _flightAngle->getData(PITCH));     
   errorPitch = constrain(errorPitch,-50,50);                    
-  if (_receiver->getAngle(PITCH) < 30) {
+  if (_receiver->getAngle(PITCH) < 30) 
+  {
     PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
     PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
   }
   else
+  {
     PID[LEVELPITCH].integratedError = 0;
+  }
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
   errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
   _motors->setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
@@ -68,7 +74,8 @@ void processAeroQuadStableMode(void)
   _levelAdjust[ROLL] = (_receiver->getAngle(ROLL) - _flightAngle->getData(ROLL)) * PID[LEVELROLL].P;
   _levelAdjust[PITCH] = (_receiver->getAngle(PITCH) + _flightAngle->getData(PITCH)) * PID[LEVELPITCH].P;
   // Check if pilot commands are not in hover, don't auto trim
-  if ((abs(_receiver->getTrimData(ROLL)) > _levelOff) || (abs(_receiver->getTrimData(PITCH)) > _levelOff)) {
+  if ((abs(_receiver->getTrimData(ROLL)) > _levelOff) || (abs(_receiver->getTrimData(PITCH)) > _levelOff)) 
+  {
     zeroIntegralError();
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       digitalWrite(LED2PIN, LOW);
@@ -77,7 +84,8 @@ void processAeroQuadStableMode(void)
       digitalWrite(LED_Green, LOW);
     #endif
   }
-  else {
+  else 
+  {
     PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((_receiver->getAngle(ROLL) - _flightAngle->getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -_levelLimit, _levelLimit);
     PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((_receiver->getAngle(PITCH) + _flightAngle->getData(PITCH)) * G_Dt) * PID[LEVELROLL].I), -_levelLimit, _levelLimit);
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
@@ -97,7 +105,8 @@ void processAeroQuadStableMode(void)
 //////////////////////////////////////////////////////////////////////////////
 void calculateFlightError(void)
 {
-  if (_flightMode == ACRO) {
+  if (_flightMode == ACRO) 
+  {
     // Acrobatic Mode
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
@@ -106,7 +115,8 @@ void calculateFlightError(void)
     _motors->setMotorAxisCommand(PITCH, updatePID(_receiver->getData(PITCH), _gyro->getFlightData(PITCH) + 1500, &PID[PITCH]));
     zeroIntegralError();
   }
-  else {
+  else 
+  {
     processStableMode();
   }
 }
@@ -116,7 +126,8 @@ void calculateFlightError(void)
 //////////////////////////////////////////////////////////////////////////////
 void processCalibrateESC(void)
 {
-  switch (_calibrateESC) { // used for calibrating ESC's
+  switch (_calibrateESC) // used for calibrating ESC's
+  { 
   case 1:
     for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       _motors->setMotorCommand(motor, MAXCOMMAND);
@@ -143,7 +154,8 @@ void processCalibrateESC(void)
 //////////////////////////////////////////////////////////////////////////////
 void processHeading(void)
 {
-  if (_headingHoldConfig == ON) {
+  if (_headingHoldConfig == ON) 
+  {
     //gyro.calculateHeading();
 
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -166,19 +178,24 @@ void processHeading(void)
     }
 
     // Apply heading hold only when throttle high enough to start flight
-    if (_receiver->getData(THROTTLE) > MINCHECK ) { 
-      if ((_receiver->getData(YAW) > (MIDCOMMAND + 25)) || (_receiver->getData(YAW) < (MIDCOMMAND - 25))) {
+    if (_receiver->getData(THROTTLE) > MINCHECK ) 
+    { 
+      if ((_receiver->getData(YAW) > (MIDCOMMAND + 25)) || (_receiver->getData(YAW) < (MIDCOMMAND - 25))) 
+      {
         // If commanding yaw, turn off heading hold and store latest heading
         _setHeading = _heading;
         _headingHold = 0;
         PID[HEADING].integratedError = 0;
       }
       else 
+      {
         // No new yaw input, calculate current heading vs. desired heading heading hold
-      // Relative heading is always centered around zero
-      _headingHold = updatePID(0, _relativeHeading, &PID[HEADING]);
+        // Relative heading is always centered around zero
+        _headingHold = updatePID(0, _relativeHeading, &PID[HEADING]);
+      }
     }
-    else {
+    else 
+    {
       // minimum throttle not reached, use off settings
       _setHeading = _heading;
       _headingHold = 0;
@@ -200,10 +217,12 @@ void processAltitudeHold(void)
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
-  if (_altitudeHold == ON) {
+  if (_altitudeHold == ON) 
+  {
     _throttleAdjust = updatePID(_holdAltitude, _altitude->getData(), &PID[ALTITUDE]);
     _zDampening = updatePID(0, _accel->getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-    if((abs(_flightAngle->getData(ROLL)) > 5) ||  (abs(_flightAngle->getData(PITCH)) > 5)) { 
+    if((abs(_flightAngle->getData(ROLL)) > 5) ||  (abs(_flightAngle->getData(PITCH)) > 5)) 
+    { 
       PID[ZDAMPENING].integratedError = 0; 
     }
     _throttleAdjust = constrain((_holdAltitude - _altitude->getData()) * PID[ALTITUDE].P, _minThrottleAdjust, _maxThrottleAdjust);
@@ -216,7 +235,8 @@ void processAltitudeHold(void)
       _holdAltitude -= 0.1;
     }
   }
-  else {
+  else 
+  {
     // Altitude hold is off, get throttle from receiver
     _holdThrottle = _receiver->getData(THROTTLE);
     _throttleAdjust = _autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
@@ -317,7 +337,8 @@ void processHardManuevers()
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// X MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processFlightControlXMode(void) {
+void processFlightControlXMode(void) 
+{
   // ********************** Calculate Flight Error ***************************
   calculateFlightError();
   
@@ -381,7 +402,8 @@ void processFlightControlXMode(void) {
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// PLUS MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processFlightControlPlusMode(void) {
+void processFlightControlPlusMode(void) 
+{
   // ********************** Calculate Flight Error ***************************
   calculateFlightError();
   
@@ -414,13 +436,16 @@ void processFlightControlPlusMode(void) {
   }
 
   // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++) 
+  {
     _motors->setMotorCommand(motor, constrain(_motors->getMotorCommand(motor), _motors->getMinCommand(motor), _motors->getMaxCommand(motor)));
   }
 
   // If throttle in minimum position, don't apply yaw
-  if (_receiver->getData(THROTTLE) < MINCHECK) {
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+  if (_receiver->getData(THROTTLE) < MINCHECK) 
+  {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) 
+    {
       _motors->setMotorCommand(motor, MINTHROTTLE);
     }
   }
