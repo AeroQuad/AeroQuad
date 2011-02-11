@@ -18,33 +18,43 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-class  Receiver {
-public:
-  int receiverData[LASTCHANNEL];
-  int transmitterCommand[LASTCHANNEL];
-  int transmitterCommandSmooth[LASTCHANNEL];
-  int transmitterZero[3];
-  int transmitterTrim[3];
+class  Receiver 
+{
+private:
+  int _transmitterTrim[3];
   // Controls the strength of the commands sent from the transmitter
   // xmitFactor ranges from 0.01 - 1.0 (0.01 = weakest, 1.0 - strongest)
-  float xmitFactor; // Read in from EEPROM
-  float transmitterSmooth[LASTCHANNEL];
-  float mTransmitter[LASTCHANNEL];
-  float bTransmitter[LASTCHANNEL];
-  unsigned long currentTime, previousTime;
 
-  Receiver(void) {
-    transmitterCommand[ROLL] = 1500;
-    transmitterCommand[PITCH] = 1500;
-    transmitterCommand[YAW] = 1500;
-    transmitterCommand[THROTTLE] = 1000;
-    transmitterCommand[MODE] = 1000;
-    transmitterCommand[AUX] = 1000;
+protected:
+  int _transmitterCommand[LASTCHANNEL];
+  int _receiverData[LASTCHANNEL];
+  int _transmitterCommandSmooth[LASTCHANNEL];
+  int _transmitterZero[3];
+  float _mTransmitter[LASTCHANNEL];
+  float _bTransmitter[LASTCHANNEL];  
+  float _xmitFactor; // Read in from EEPROM
+  float _transmitterSmooth[LASTCHANNEL];
+  unsigned long _currentTime;
+  unsigned long _previousTime;
+  
+public:
+  Receiver(void) 
+  {
+    _transmitterCommand[ROLL] = 1500;
+    _transmitterCommand[PITCH] = 1500;
+    _transmitterCommand[YAW] = 1500;
+    _transmitterCommand[THROTTLE] = 1000;
+    _transmitterCommand[MODE] = 1000;
+    _transmitterCommand[AUX] = 1000;
 
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
-      transmitterCommandSmooth[channel] = 1.0;
+    {
+      _transmitterCommandSmooth[channel] = 1.0;
+    }
     for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterZero[channel] = 1500;
+    {
+      _transmitterZero[channel] = 1500;
+    }
   }
 
   // ******************************************************************
@@ -57,83 +67,101 @@ public:
   // The following functions are common between all Gyro subclasses
   // **************************************************************
 
-  void _initialize(void) {
-    xmitFactor = readFloat(XMITFACTOR_ADR);
+  void _initialize(void) 
+  {
+    _xmitFactor = readFloat(XMITFACTOR_ADR);
 
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
       byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-      mTransmitter[channel] = readFloat(offset+0);
-      bTransmitter[channel] = readFloat(offset+4);
-      transmitterSmooth[channel] = readFloat(offset+8);
+      _mTransmitter[channel] = readFloat(offset+0);
+      _bTransmitter[channel] = readFloat(offset+4);
+      _transmitterSmooth[channel] = readFloat(offset+8);
     }
   }
 
-  const int getRaw(byte channel) {
-    return receiverData[channel];
+  const int getRaw(byte channel) 
+  {
+    return _receiverData[channel];
   }
 
-  const int getData(byte channel) {
+  const int getData(byte channel) 
+  {
     // reduce sensitivity of transmitter input by xmitFactor
-    return transmitterCommand[channel];
+    return _transmitterCommand[channel];
   }
 
-  const int getTrimData(byte channel) {
-    return receiverData[channel] - transmitterTrim[channel];
+  const int getTrimData(byte channel) 
+  {
+    return _receiverData[channel] - _transmitterTrim[channel];
   }
 
-  const int getZero(byte channel) {
-    return transmitterZero[channel];
+  const int getZero(byte channel) 
+  {
+    return _transmitterZero[channel];
   }
 
-  void setZero(byte channel, int value) {
-    transmitterZero[channel] = value;
+  void setZero(byte channel, int value) 
+  {
+    _transmitterZero[channel] = value;
   }
 
-  const int getTransmitterTrim(byte channel) {
-    return transmitterTrim[channel];
+  const int getTransmitterTrim(byte channel) 
+  {
+    return _transmitterTrim[channel];
   }
 
-  void setTransmitterTrim(byte channel, int value) {
-    transmitterTrim[channel] = value;
+  void setTransmitterTrim(byte channel, int value) 
+  {
+    _transmitterTrim[channel] = value;
   }
 
-  const float getSmoothFactor(byte channel) {
-    return transmitterSmooth[channel];
+  const float getSmoothFactor(byte channel) 
+  {
+    return _transmitterSmooth[channel];
   }
 
-  void setSmoothFactor(byte channel, float value) {
-    transmitterSmooth[channel] = value;
+  void setSmoothFactor(byte channel, float value) 
+  {
+    _transmitterSmooth[channel] = value;
   }
 
-  const float getXmitFactor(void) {
-    return xmitFactor;
+  const float getXmitFactor(void) 
+  {
+    return _xmitFactor;
   }
 
-  void setXmitFactor(float value) {
-    xmitFactor = value;
+  void setXmitFactor(float value) 
+  {
+    _xmitFactor = value;
   }
 
-  const float getTransmitterSlope(byte channel) {
-    return mTransmitter[channel];
+  const float getTransmitterSlope(byte channel) 
+  {
+    return _mTransmitter[channel];
   }
 
-  void setTransmitterSlope(byte channel, float value) {
-    mTransmitter[channel] = value;
+  void setTransmitterSlope(byte channel, float value) 
+  {
+    _mTransmitter[channel] = value;
   }
 
-  const float getTransmitterOffset(byte channel) {
-    return bTransmitter[channel];
+  const float getTransmitterOffset(byte channel) 
+  {
+    return _bTransmitter[channel];
   }
 
-  void setTransmitterOffset(byte channel, float value) {
-    bTransmitter[channel] = value;
+  void setTransmitterOffset(byte channel, float value) 
+  {
+    _bTransmitter[channel] = value;
   }
 
-  const float getAngle(byte channel) {
+  const float getAngle(byte channel) 
+  {
     // Scale 1000-2000 usecs to -45 to 45 degrees
     // m = 0.09, b = -135
     // reduce transmitterCommand by xmitFactor to lower sensitivity of transmitter input
-    return (0.09 * transmitterCommand[channel]) - 135;
+    return (0.09 * _transmitterCommand[channel]) - 135;
   }
 };
 
@@ -141,32 +169,40 @@ public:
 /*************** AeroQuad PCINT ******************/
 /*************************************************/
 #if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuad_Wii) || defined(AeroQuad_v1_IDG)
-volatile uint8_t *port_to_pcmask[] = {
+volatile uint8_t *port_to_pcmask[] = 
+{
   &PCMSK0,
   &PCMSK1,
   &PCMSK2
 };
+
 volatile static uint8_t PCintLast[3];
+
 // Channel data
-typedef struct {
+typedef struct 
+{
   byte edge;
   unsigned long riseTime;
   unsigned long fallTime;
   unsigned int  lastGoodWidth;
 } tPinTimingData;
+
 volatile static tPinTimingData pinData[9];
 
 // Attaches PCINT to Arduino Pin
-void attachPinChangeInterrupt(uint8_t pin) {
+void attachPinChangeInterrupt(uint8_t pin) 
+{
   uint8_t bit = digitalPinToBitMask(pin);
   uint8_t port = digitalPinToPort(pin);
   volatile uint8_t *pcmask;
 
   // map pin to PCIR register
-  if (port == NOT_A_PORT) {
+  if (port == NOT_A_PORT) 
+  {
     return;
   }
-  else {
+  else 
+  {
     port -= 2;
     pcmask = port_to_pcmask[port];
   }
@@ -177,7 +213,8 @@ void attachPinChangeInterrupt(uint8_t pin) {
 }
 
 // ISR which records time of rising or falling edge of signal
-static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
+static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) 
+{
   uint8_t bit;
   uint8_t curr;
   uint8_t mask;
@@ -190,28 +227,38 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
   mask = curr ^ PCintLast[port];
   PCintLast[port] = curr;
   // mask is pins that have changed. screen out non pcint pins.
-  if ((mask &= *port_to_pcmask[port]) == 0) {
+  if ((mask &= *port_to_pcmask[port]) == 0) 
+  {
     return;
   }
   currentTime = micros();
   // mask is pcint pins that have changed.
-  for (uint8_t i=0; i < 8; i++) {
+  for (uint8_t i=0; i < 8; i++) 
+  {
     bit = 0x01 << i;
-    if (bit & mask) {
+    if (bit & mask) 
+    {
       pin = pinoffset + i;
       // for each pin changed, record time of change
-      if (bit & PCintLast[port]) {
+      if (bit & PCintLast[port]) 
+      {
         time = currentTime - pinData[pin].fallTime;
         pinData[pin].riseTime = currentTime;
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
+        {
           pinData[pin].edge = RISING_EDGE;
+        }
         else
+        {
           pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
+        }
       }
-      else {
+      else 
+      {
         time = currentTime - pinData[pin].riseTime;
         pinData[pin].fallTime = currentTime;
-        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
+        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) 
+        {
           pinData[pin].lastGoodWidth = time;
           pinData[pin].edge = FALLING_EDGE;
         }
@@ -220,23 +267,28 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
   }
 }
 
-SIGNAL(PCINT0_vect) {
+SIGNAL(PCINT0_vect) 
+{
   measurePulseWidthISR(0, 8); // PORT B
 }
 
-SIGNAL(PCINT2_vect) {
+SIGNAL(PCINT2_vect) 
+{
   measurePulseWidthISR(2, 0); // PORT D
 }
 
 // defines arduino pins used for receiver in arduino pin numbering schema
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
-class Receiver_AeroQuad : public Receiver {
+class Receiver_AeroQuad : public Receiver 
+{
 public:
   // Configure each receiver pin for PCINT
-  void initialize() {
+  void initialize() 
+  {
     this->_initialize(); // load in calibration xmitFactor from EEPROM
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
       pinMode(receiverPin[channel], INPUT);
       pinData[receiverPin[channel]].edge = FALLING_EDGE;
       attachPinChangeInterrupt(receiverPin[channel]);
@@ -245,8 +297,10 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  void read(void) 
+  {
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;
       cli();
@@ -255,17 +309,21 @@ public:
       SREG = oldSREG;
 
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
+      _receiverData[channel] = (_mTransmitter[channel] * lastGoodWidth) + _bTransmitter[channel];
       // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+      _transmitterCommandSmooth[channel] = filterSmooth(_receiverData[channel], _transmitterCommandSmooth[channel], _transmitterSmooth[channel]);
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+    {
+      _transmitterCommand[channel] = ((_transmitterCommandSmooth[channel] - _transmitterZero[channel]) * _xmitFactor) + _transmitterZero[channel];
+    }
     // No xmitFactor reduction applied for throttle, mode and
     for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    {
+      _transmitterCommand[channel] = _transmitterCommandSmooth[channel];
+    }
   }
 };
 #endif
@@ -274,22 +332,28 @@ public:
 /*************** AeroQuad Mega PCINT ******************/
 /******************************************************/
 #if defined(AeroQuadMega_v1) || defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM)
-volatile uint8_t *port_to_pcmask[] = {
+volatile uint8_t *port_to_pcmask[] = 
+{
   &PCMSK0,
   &PCMSK1,
   &PCMSK2
 };
+
 volatile static uint8_t PCintLast[3];
+
 // Channel data
-typedef struct {
+typedef struct 
+{
   byte edge;
   unsigned long riseTime;
   unsigned long fallTime;
   unsigned int lastGoodWidth;
 } tPinTimingData;
+
 volatile static tPinTimingData pinData[LASTCHANNEL];
 
-static void MegaPcIntISR() {
+static void MegaPcIntISR() 
+{
   uint8_t bit;
   uint8_t curr;
   uint8_t mask;
@@ -302,30 +366,40 @@ static void MegaPcIntISR() {
   PCintLast[0] = curr;
 
   // mask is pins that have changed. screen out non pcint pins.
-  if ((mask &= PCMSK2) == 0) {
+  if ((mask &= PCMSK2) == 0) 
+  {
     return;
   }
 
   currentTime = micros();
 
   // mask is pcint pins that have changed.
-  for (uint8_t i=0; i < 8; i++) {
+  for (uint8_t i=0; i < 8; i++) 
+  {
     bit = 0x01 << i;
-    if (bit & mask) {
+    if (bit & mask) 
+    {
       pin = i;
       // for each pin changed, record time of change
-      if (bit & PCintLast[0]) {
+      if (bit & PCintLast[0]) 
+      {
         time = currentTime - pinData[pin].fallTime;
         pinData[pin].riseTime = currentTime;
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
+        {
           pinData[pin].edge = RISING_EDGE;
+        }
         else
+        {
           pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
+        }
       }
-      else {
+      else 
+      {
         time = currentTime - pinData[pin].riseTime;
         pinData[pin].fallTime = currentTime;
-        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
+        if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) 
+        {
           pinData[pin].lastGoodWidth = time;
           pinData[pin].edge = FALLING_EDGE;
         }
@@ -334,7 +408,8 @@ static void MegaPcIntISR() {
   }
 }
 
-SIGNAL(PCINT2_vect) {
+SIGNAL(PCINT2_vect) 
+{
   MegaPcIntISR();
 }
 
@@ -346,23 +421,29 @@ SIGNAL(PCINT2_vect) {
   static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #endif
 
-class Receiver_AeroQuadMega : public Receiver {
+class Receiver_AeroQuadMega : public Receiver 
+{
 public:
-  void initialize() {
+  void initialize() 
+  {
     this->_initialize(); // load in calibration xmitFactor from EEPROM
     DDRK = 0;
     PORTK = 0;
     PCMSK2 |= 0x3F;
     PCICR |= 0x1 << 2;
 
-  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
-      pinData[receiverPin[channel]].edge = FALLING_EDGE;
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+    {
+        pinData[receiverPin[channel]].edge = FALLING_EDGE;
+    }
   }
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  void read(void) 
+  {
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;
       cli();
@@ -371,30 +452,37 @@ public:
       SREG = oldSREG;
 
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
+      _receiverData[channel] = (_mTransmitter[channel] * lastGoodWidth) + _bTransmitter[channel];
       // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+      _transmitterCommandSmooth[channel] = filterSmooth(_receiverData[channel], _transmitterCommandSmooth[channel], _transmitterSmooth[channel]);
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+    {
+      _transmitterCommand[channel] = ((_transmitterCommandSmooth[channel] - _transmitterZero[channel]) * _xmitFactor) + _transmitterZero[channel];
+    }
     // No xmitFactor reduction applied for throttle, mode and AUX
     for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    {
+      _transmitterCommand[channel] = _transmitterCommandSmooth[channel];
+    }
   }
 };
 
 class Receiver_AeroQuadMega_Fake :
-public Receiver {
+public Receiver 
+{
 private:
 
 public:
   Receiver_AeroQuadMega_Fake() :
-  Receiver(){
+  Receiver()
+  {
   }
 
-  void initialize() {
+  void initialize() 
+  {
     this->_initialize(); // load in calibration xmitFactor from EEPROM
     DDRK = 0;
     PORTK = 0;
@@ -404,7 +492,8 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) {
+  void read(void) 
+  {
     uint16_t data[6];
     uint8_t oldSREG;
 
@@ -415,22 +504,27 @@ public:
       data[channel] = 1500;
     SREG = oldSREG;
 
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      currentTime = micros();
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
+      _currentTime = micros();
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
+      _receiverData[channel] = (_mTransmitter[channel] * data[channel]) + _bTransmitter[channel];
       // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+      _transmitterCommandSmooth[channel] = filterSmooth(_receiverData[channel], _transmitterCommandSmooth[channel], _transmitterSmooth[channel]);
       //transmitterCommandSmooth[channel] = transmitterFilter[channel].filter(receiverData[channel]);
-      previousTime = currentTime;
+      _previousTime = _currentTime;
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+    {
+      _transmitterCommand[channel] = ((_transmitterCommandSmooth[channel] - _transmitterZero[channel]) * _xmitFactor) + _transmitterZero[channel];
+    }
     // No xmitFactor reduction applied for throttle, mode and AUX
     for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    {
+      _transmitterCommand[channel] = _transmitterCommandSmooth[channel];
+    }
   }
 };
 #endif
@@ -444,8 +538,7 @@ volatile unsigned int Start_Pulse = 0;
 volatile unsigned int Stop_Pulse = 0;
 volatile unsigned int Pulse_Width = 0;
 volatile byte PPM_Counter=0;
-volatile int PWM_RAW[8] = {
-  2400,2400,2400,2400,2400,2400,2400,2400};
+volatile int PWM_RAW[8] = {2400,2400,2400,2400,2400,2400,2400,2400};
 
 /****************************************************
  * Interrupt Vector
@@ -481,13 +574,14 @@ ISR(TIMER4_CAPT_vect)//interrupt.
   //Counter++;
 }
 //#endif
-class Receiver_ArduCopter : public Receiver {
+class Receiver_ArduCopter : public Receiver 
+{
 private:
   int receiverPin[6];
 
 public:
-  Receiver_ArduCopter() :
-  Receiver(){
+  Receiver_ArduCopter() : Receiver()
+  {
     receiverPin[ROLL] = 0;
     receiverPin[PITCH] = 1;
     receiverPin[YAW] = 3;
@@ -496,7 +590,8 @@ public:
     receiverPin[AUX] = 5;
   }
 
-  void initialize(void) {
+  void initialize(void) 
+  {
     this->_initialize(); // load in calibration and xmitFactor from EEPROM
     /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos
      OCR4A is used as the top counter*/
@@ -515,22 +610,28 @@ public:
     sei();
   }
 
-  void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      currentTime = micros();
+  void read(void) 
+  {
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
+      _currentTime = micros();
       // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + bTransmitter[channel];
+      _receiverData[channel] = (_mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + _bTransmitter[channel];
       // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-      previousTime = currentTime;
+      _transmitterCommandSmooth[channel] = filterSmooth(_receiverData[channel], _transmitterCommandSmooth[channel], _transmitterSmooth[channel]);
+      _previousTime = _currentTime;
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+    {
+      _transmitterCommand[channel] = ((_transmitterCommandSmooth[channel] - _transmitterZero[channel]) * _xmitFactor) + _transmitterZero[channel];
+    }
     // No xmitFactor reduction applied for throttle, mode and
     for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    {
+      _transmitterCommand[channel] = _transmitterCommandSmooth[channel];
+    }
   }
 };
 #endif
@@ -549,14 +650,14 @@ public:
 #define CAMERAROLLCH 5
 #define CAMERAPITCHCH 6
 
-class Receiver_Multipilot :
-public Receiver {
+class Receiver_Multipilot : public Receiver 
+{
 private:
   int receiverChannel[LASTCHANNEL];
 
 public:
-  Receiver_Multipilot() :
-  Receiver(){
+  Receiver_Multipilot() : Receiver()
+  {
     receiverChannel[ROLL] = ROLLCH;
     receiverChannel[PITCH] = PITCHCH;
     receiverChannel[YAW] = YAWCH;
@@ -567,7 +668,8 @@ public:
   }
 
   // Configure each receiver pin for PCINT
-  void initialize() {
+  void initialize() 
+  {
     this->_initialize(); // load in calibration xmitFactor from EEPROM
     ServoDecode.begin();
     ServoDecode.setFailsafe(3,1234); // set channel 3 failsafe pulse  width
@@ -575,7 +677,8 @@ public:
 
   // Calculate PWM pulse width of receiver data
   // If invalid PWM measured, use last known good time
-  void read(void) {
+  void read(void) 
+  {
     uint16_t data[6];
 
     if(ServoDecode.getState()!= READY_state)
@@ -598,7 +701,8 @@ public:
     }
 
 
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+    {
       currentTime = micros();
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
@@ -609,11 +713,15 @@ public:
 
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < THROTTLE; channel++)
+    {
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    //transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel])) + transmitterZero[channel];
+      //transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel])) + transmitterZero[channel];
+    }
     // No xmitFactor reduction applied for throttle, mode and
     for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
+    {
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    }
 
   }
 };

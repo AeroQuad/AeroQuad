@@ -29,7 +29,8 @@
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
-void readSerialPID(unsigned char PIDid) {
+void readSerialPID(unsigned char PIDid) 
+{
   struct PIDdata* pid = &PID[PIDid];
   pid->P = readFloatSerial();
   pid->I = readFloatSerial();
@@ -38,12 +39,15 @@ void readSerialPID(unsigned char PIDid) {
   pid->integratedError = 0;
 }
 
-void readSerialCommand() {
+void readSerialCommand() 
+{
   // Check for serial message
-  if (Serial.available()) {
+  if (Serial.available()) 
+  {
     digitalWrite(LEDPIN, LOW);
     _queryType = Serial.read();
-    switch (_queryType) {
+    switch (_queryType) 
+    {
     case 'A': // Receive roll and pitch gyro PID
       readSerialPID(ROLL);
       readSerialPID(PITCH);
@@ -88,12 +92,14 @@ void readSerialCommand() {
       break;
     case 'M': // Receive transmitter smoothing values
       _receiver->setXmitFactor(readFloatSerial());
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) 
+      {
         _receiver->setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) 
+      {
         _receiver->setTransmitterSlope(channel, readFloatSerial());
         _receiver->setTransmitterOffset(channel, readFloatSerial());
       }
@@ -223,9 +229,11 @@ void PrintPID(unsigned char IDPid)
   PrintValueComma(PID[IDPid].D);
 }
 
-void sendSerialTelemetry() {
+void sendSerialTelemetry() 
+{
   _update = 0;
-  switch (_queryType) {
+  switch (_queryType) 
+  {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     //printFreeMemory();
     Serial.print(_receiver->getAngle(ROLL));
@@ -272,7 +280,8 @@ void sendSerialTelemetry() {
     PrintValueComma(PID[ZDAMPENING].I);
     Serial.println(PID[ZDAMPENING].D);
 #else
-    for(byte i=0; i<9; i++) {
+    for(byte i=0; i<9; i++) 
+    {
      PrintValueComma(0);
     }
     Serial.println('0');
@@ -289,14 +298,16 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(_receiver->getXmitFactor());
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) 
+    {
       PrintValueComma(_receiver->getSmoothFactor(axis));
     }
     Serial.println(_receiver->getSmoothFactor(AUX));
     _queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < AUX; axis++) 
+    {
       PrintValueComma(_receiver->getTransmitterSlope(axis));
       PrintValueComma(_receiver->getTransmitterOffset(axis));
     }
@@ -305,13 +316,16 @@ void sendSerialTelemetry() {
     _queryType = 'X';
     break;
   case 'Q': // Send sensor data
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
       PrintValueComma(_gyro->getData(axis));
     }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
       PrintValueComma(_accel->getData(axis));
     }
-    for (byte axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) 
+    {
       PrintValueComma(_levelAdjust[axis]);
     }
     PrintValueComma(_flightAngle->getData(ROLL));
@@ -393,10 +407,12 @@ void sendSerialTelemetry() {
     break;
   case 'T': // Send processed transmitter values
     PrintValueComma(_receiver->getXmitFactor());
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
+    {
       PrintValueComma(_receiver->getData(axis));
     }
-    for (byte axis = ROLL; axis < YAW; axis++) {
+    for (byte axis = ROLL; axis < YAW; axis++) 
+    {
       PrintValueComma(_levelAdjust[axis]);
     }
     PrintValueComma(_motors->getMotorAxisCommand(ROLL));
@@ -404,13 +420,15 @@ void sendSerialTelemetry() {
     Serial.println(_motors->getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
-    for (byte channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) 
+    {
       PrintValueComma(_receiver->getData(channel));
     }
     Serial.println(_receiver->getData(AUX));
     break;
   case 'V': // Send receiver status
-    for (byte channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < AUX; channel++) 
+    {
       PrintValueComma(_receiver->getRaw(channel));
     }
     Serial.println(_receiver->getRaw(AUX));
@@ -424,7 +442,8 @@ void sendSerialTelemetry() {
     Serial.println(_relativeHeading);
     break;
   case '6': // Report remote commands
-    for (byte motor = FRONT; motor < LEFT; motor++) {
+    for (byte motor = FRONT; motor < LEFT; motor++) 
+    {
       PrintValueComma(_motors->getRemoteCommand(motor));
     }
     Serial.println(_motors->getRemoteCommand(LEFT));
@@ -533,18 +552,22 @@ void sendSerialTelemetry() {
 }
 
 // Used to read floating point values from the serial port
-float readFloatSerial() {
+float readFloatSerial() 
+{
   #define SERIALFLOATSIZE 10
   byte index = 0;
   byte timeout = 0;
   char data[SERIALFLOATSIZE] = "";
 
-  do {
-    if (Serial.available() == 0) {
+  do 
+  {
+    if (Serial.available() == 0) 
+    {
       delay(10);
       timeout++;
     }
-    else {
+    else 
+    {
       data[index] = Serial.read();
       timeout = 0;
       index++;
@@ -555,11 +578,13 @@ float readFloatSerial() {
   return atof(data);
 }
 
-void comma() {
+void comma() 
+{
   Serial.print(',');
 }
 
-void printInt(int data) {
+void printInt(int data) 
+{
   byte msb, lsb;
 
   msb = data >> 8;

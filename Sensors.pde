@@ -20,7 +20,8 @@
 
 // Sensors.pde is responsible for taking on board sensor measuremens of the AeroQuad
 
-void readSensors(void) {
+void readSensors(void) 
+{
   // *********************** Read Critical Sensors **********************
   // Apply low pass filter to sensor values and center around zero
   _gyro->measure(); // defined in Gyro.h
@@ -31,13 +32,15 @@ void readSensors(void) {
  
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
-    if (_currentTime > _compassTime) {
+    if (_currentTime > _compassTime) 
+    {
       _compass->measure(); // defined in compass.h
       _compassTime = _currentTime + COMPASSLOOPTIME;
     }
   #endif
   #if defined(AltitudeHold)
-    if (_currentTime > _altitudeTime) {
+    if (_currentTime > _altitudeTime) 
+    {
       _altitude->measure(); // defined in altitude.h
       _altitudeTime = _currentTime + ALTITUDELOOPTIME;
     }

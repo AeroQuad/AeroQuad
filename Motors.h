@@ -23,22 +23,11 @@ class Motors
 private:
   // Assume maximum number of motors is 8, leave array indexes unused if lower number
   int _motorAxisCommand[3];
-  //int motorAxisCommandRoll[LASTMOTOR];
-  //int motorAxisCommandPitch[LASTMOTOR];
-  //int motorAxisCommandYaw[LASTMOTOR];
-  //int motorMixerSettingRoll[LASTMOTOR];
-  //int motorMixerSettingPitch[LASTMOTOR];
-  //int motorMixerSettingYaw[LASTMOTOR];
   int _minCommand[LASTMOTOR];
   int _maxCommand[LASTMOTOR];
   float _throttle;
-//  float _timerDebug;
-//  int _delta;
-//  byte _axis;
   // Ground station control
   int _remoteCommand[LASTMOTOR];
-
-
 
 protected:
   int _motorCommand[LASTMOTOR];
@@ -54,12 +43,6 @@ public:
     _motorAxisCommand[YAW] = 0;
     for (byte motor = 0; motor < LASTMOTOR; motor++) 
     {
-      //motorAxisCommandRoll[motor] = 0;
-      //motorAxisCommandPitch[motor] = 0;
-      //motorAxisCommandYaw[motor] = 0;
-      //motorMixerSettingRoll[motor] = 0;
-      //motorMixerSettingPitch[motor] = 0;
-      //motorMixerSettingYaw[motor] = 0;
       _motorCommand[motor] = 1000;
       _minCommand[motor] = MINCOMMAND;
       _maxCommand[motor] = MAXCOMMAND;
@@ -156,30 +139,27 @@ public:
   }
 };
 
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #define FRONTMOTORPIN  2
+  #define REARMOTORPIN   3
+  #define RIGHTMOTORPIN  5
+  #define LEFTMOTORPIN   6
+  #define LASTMOTORPIN   7
+#else
+  #define FRONTMOTORPIN  3
+  #define REARMOTORPIN   9
+  #define RIGHTMOTORPIN 10
+  #define LEFTMOTORPIN  11
+  #define LASTMOTORPIN  12
+#endif
+
 
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
 class Motors_PWM : public Motors 
 {
-private:
-  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
-    #define FRONTMOTORPIN  2
-    #define REARMOTORPIN   3
-    #define RIGHTMOTORPIN  5
-    #define LEFTMOTORPIN   6
-    #define LASTMOTORPIN   7
-  #else
-    #define FRONTMOTORPIN  3
-    #define REARMOTORPIN   9
-    #define RIGHTMOTORPIN 10
-    #define LEFTMOTORPIN  11
-    #define LASTMOTORPIN  12
-  #endif
-  int minCommand;
-  byte pin;
-
- public:
+public:
   Motors_PWM() : Motors()
   {
    // Analog write supports commands from 0-255 => 0 - 100% duty cycle
@@ -232,6 +212,12 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  tick every 0.5us. If the prescaler was changed, the OCRxy register value would
  be different.
 */
+
+#define PWM_FREQUENCY 300   // in Hz
+#define PWM_PRESCALER 8
+#define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
+
+
 class Motors_PWMtimer : public Motors 
 {
 private:
@@ -241,11 +227,6 @@ private:
     RIGHT         5  PE3             10  PB2                      7  PH4
     LEFT          6  PH3             11  PB3                      8  PH5
 */
-
-#define PWM_FREQUENCY 300   // in Hz
-#define PWM_PRESCALER 8
-#define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
-
 public:
   Motors_PWMtimer() : Motors(){}
 
@@ -318,8 +299,8 @@ public:
 #endif
   }
 
- void commandAllMotors(int motorCommand) 
- {   // Sends commands to all motors
+  void commandAllMotors(int motorCommand) 
+  {   // Sends commands to all motors
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     OCR3B = motorCommand * 2 ;
     OCR3C = motorCommand * 2 ;
@@ -344,22 +325,25 @@ public:
 /********************* Fake PWM Motors ****************/
 /******************************************************/
 #ifdef CHR6DM_FAKE_MOTORS
+
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #define FRONTMOTORPIN 2
+  #define REARMOTORPIN 3
+  #define RIGHTMOTORPIN 5
+  #define LEFTMOTORPIN 6
+  #define LASTMOTORPIN 7
+#else
+  #define FRONTMOTORPIN 3
+  #define REARMOTORPIN 9
+  #define RIGHTMOTORPIN 10
+  #define LEFTMOTORPIN 11
+  #define LASTMOTORPIN 12
+#endif
+
 class Motors_PWM_Fake : public Motors 
 {
 private:
-  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii) || defined (AeroQuadMega_CHR6DM)
-    #define FRONTMOTORPIN 2
-    #define REARMOTORPIN 3
-    #define RIGHTMOTORPIN 5
-    #define LEFTMOTORPIN 6
-    #define LASTMOTORPIN 7
-  #else
-    #define FRONTMOTORPIN 3
-    #define REARMOTORPIN 9
-    #define RIGHTMOTORPIN 10
-    #define LEFTMOTORPIN 11
-    #define LASTMOTORPIN 12
-  #endif
+
   int minCommand;
   byte pin;
 
