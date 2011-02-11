@@ -44,7 +44,8 @@ const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF
 volatile long adc_value[8];
 volatile unsigned char adc_counter[8];
 
-unsigned char ADC_SPI_transfer(unsigned char data) {
+unsigned char ADC_SPI_transfer(unsigned char data) 
+{
   /* Wait for empty transmit buffer */
   while ( !( UCSR2A & (1<<UDRE2)) );
   /* Put data into buffer, sends the data */
@@ -55,14 +56,16 @@ unsigned char ADC_SPI_transfer(unsigned char data) {
   return UDR2;
 }
 
-ISR (TIMER2_OVF_vect) {
+ISR (TIMER2_OVF_vect) 
+{
   uint8_t ch;
   unsigned int adc_tmp;
   
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
   ADC_SPI_transfer(adc_cmd[0]);       // Command to read the first channel
-  for (ch=0;ch<7;ch++) {
+  for (ch=0;ch<7;ch++) 
+  {
     adc_tmp = ADC_SPI_transfer(0)<<8;    // Read first byte
     adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
     adc_value[ch] += adc_tmp>>3;     // Shift to 12 bits
@@ -73,7 +76,9 @@ ISR (TIMER2_OVF_vect) {
   TCNT2 = 104;        // 400 Hz
 }
 
-void initialize_ArduCopter_ADC() {
+void initialize_ArduCopter_ADC() 
+{
+  
   unsigned char tmp;
   
   pinMode(ADC_CHIP_SELECT,OUTPUT);
@@ -90,7 +95,6 @@ void initialize_ArduCopter_ADC() {
   // Set Baud rate
   UBRR2 = 2; // SPI clock running at 2.6MHz
 
-
   // Enable Timer2 Overflow interrupt to capture ADC data
   TIMSK2 = 0;  // Disable interrupts 
   TCCR2A = 0;  // normal counting mode 
@@ -100,21 +104,28 @@ void initialize_ArduCopter_ADC() {
   TIMSK2 =  _BV(TOIE2) ; // enable the overflow interrupt
 }
 
-int analogRead_ArduCopter_ADC(unsigned char ch_num) {
+int analogRead_ArduCopter_ADC(unsigned char ch_num) 
+{
   int result;
   cli();  // We stop interrupts to read the variables
   if (adc_counter[ch_num]>0)
-	result = adc_value[ch_num]/adc_counter[ch_num];
+  {
+    result = adc_value[ch_num]/adc_counter[ch_num];
+  }
   else
-	result = 0;
+  {
+    result = 0;
+  }
   adc_value[ch_num] = 0;    // Initialize for next reading
   adc_counter[ch_num] = 0;
   sei();
   return(result);
 }
   
-void zero_ArduCopter_ADC() {
-  for (byte n; n<8; n++) {
+void zero_ArduCopter_ADC() 
+{
+  for (byte n; n<8; n++) 
+  {
     adc_value[n] = 0;
     adc_counter[n] = 0;
   }
@@ -134,7 +145,8 @@ short NWMP_gyro[3];
 void Init_Gyro_acc();
 void updateControls();
 
-void Init_Gyro_Acc() {
+void Init_Gyro_Acc() 
+{
   //Init WM+ and Nunchuk
   updateRegisterI2C(0x53, 0xFE, 0x05);
   delay(100);
@@ -142,21 +154,25 @@ void Init_Gyro_Acc() {
   delay(100);
 };
 
-void updateControls() {
+void updateControls() 
+{
   int i,j;
   unsigned char buffer[6];
 
-  for(j=0;j<2;j++) {
+  for(j=0;j<2;j++) 
+  {
     sendByteI2C(0x52, 0x00);
     Wire.requestFrom(0x52,6);
     for(i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
-    if (buffer[5] & 0x02) { //If WiiMP
+    if (buffer[5] & 0x02) 
+    { //If WiiMP
       NWMP_gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
       NWMP_gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
       NWMP_gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
     }
-    else {//If Nunchuk
+    else 
+    {//If Nunchuk
       NWMP_acc[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01);  //hji
       NWMP_acc[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01);  //hji
       NWMP_acc[2]=buffer[4];                             //hji
@@ -172,7 +188,8 @@ void updateControls() {
     #include "CHR6DM.h"
     CHR6DM chr6dm;
 
-    void initCHR6DM(){
+    void initCHR6DM()
+    {
         Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
         chr6dm.resetToFactory();
         chr6dm.setListenMode();
@@ -180,7 +197,8 @@ void updateControls() {
         chr6dm.requestPacket();
     }
 
-    void readCHR6DM(){
+    void readCHR6DM()
+    {
         chr6dm.waitForAndReadPacket();
         chr6dm.requestPacket();
     }

@@ -85,6 +85,7 @@ void readSerialCommand()
     case 'K': // Receive data filtering values
       _gyro->setSmoothFactor(readFloatSerial());
       _accel->setSmoothFactor(readFloatSerial());
+      storeSensorsToEEPROM();
       _timeConstant = readFloatSerial();
 #if defined(AeroQuad_v1) || defined(AeroQuad_v18)
       _flightAngle->initialize();

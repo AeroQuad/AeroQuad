@@ -77,7 +77,6 @@ public:
     _gyroChannel[ROLL] = rollChannel;
     _gyroChannel[PITCH] = pitchChannel;
     _gyroChannel[ZAXIS] = yawChannel;
-    
     _previousTime = micros();
   }
     
@@ -439,7 +438,7 @@ public:
       for (int i=0; i<FINDZERO; i++) 
       {
         findZero[i] = analogRead_ArduCopter_ADC(_gyroChannel[calAxis]);
-        delay(5);
+        delay(2);
       }
       _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }

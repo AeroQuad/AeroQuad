@@ -408,14 +408,14 @@ public:
       for (int i=0; i<FINDZERO; i++) 
       {
         _findZero[i] = analogRead_ArduCopter_ADC(_accelChannel[calAxis]);
-        delay(5);
+        delay(2);
       }
       _accelZero[calAxis] = findMedianInt(_findZero, FINDZERO);
     }
 
     // store accel value that represents 1g
-    _accelOneG = _accelZero[ZAXIS];
-    //accelOneG = 486;    // tested value with the configurator at flat level
+//    _accelOneG = _accelZero[ZAXIS];
+    _accelOneG = 486;    // tested value with the configurator at flat level
     // replace with estimated Z axis 0g value
     _accelZero[ZAXIS] = (_accelZero[ROLL] + _accelZero[PITCH]) / 2;
   }

@@ -66,19 +66,21 @@ void initSensorsFromEEPROM()
   _accel->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
   
   _gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
-  _gyro->setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
-  _gyro->setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
-  _gyro->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
+  _gyro->setZero(ROLL,  readFloat(GYRO_ROLL_ZERO_ADR));
+  _gyro->setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));
+  _gyro->setZero(ZAXIS, readFloat(GYRO_YAW_ZERO_ADR));
 }
 
 void storeSensorsToEEPROM()
 {
+  writeFloat(_accel->getSmoothFactor(),ACCSMOOTH_ADR);
   writeFloat(_accel->getOneG(), ACCEL1G_ADR);
   writeFloat(_accel->getZero(ROLL),  LEVELROLLCAL_ADR);
   writeFloat(_accel->getZero(PITCH), LEVELPITCHCAL_ADR);
   writeFloat(_accel->getZero(ZAXIS), LEVELZCAL_ADR);
   
-  writeFloat(_gyro->getZero(ROLL),  LEVELROLLCAL_ADR);
-  writeFloat(_gyro->getZero(PITCH), LEVELPITCHCAL_ADR);
-  writeFloat(_gyro->getZero(ZAXIS), LEVELZCAL_ADR);
+  writeFloat(_gyro->getSmoothFactor(),GYROSMOOTH_ADR);
+  writeFloat(_gyro->getZero(ROLL),  GYRO_ROLL_ZERO_ADR);
+  writeFloat(_gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
+  writeFloat(_gyro->getZero(ZAXIS), GYRO_YAW_ZERO_ADR);
 }
