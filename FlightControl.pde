@@ -200,8 +200,8 @@ void processAltitudeHold(void)
     if((abs(_flightAngle->getData(ROLL)) > 5) || (abs(_flightAngle->getData(PITCH)) > 5)) { 
       PID[ZDAMPENING].integratedError = 0;
     }
-    //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-    throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
+    throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
+    //throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
     if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
       holdAltitude += 0.1;
     if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
