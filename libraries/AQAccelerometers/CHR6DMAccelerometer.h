@@ -25,9 +25,13 @@
 
 class CHR6DMAccelerometer : public Accelerometer 
 {
+private:
+  CHR6DM *_chr6dm;
+
 public:
-  CHR6DMAccelerometer() : Accelerometer() 
+  CHR6DMAccelerometer(CHR6DM chr6dm) : Accelerometer() 
   {
+    _chr6dm = &chr6dm;
     _accelScaleFactor = 0;
   }
 
@@ -39,9 +43,9 @@ public:
   void measure() 
   {
     _currentAccelTime = micros();
-    _accelADC[XAXIS] = chr6dm.data.ax - _accelZero[XAXIS];
-    _accelADC[YAXIS] = chr6dm.data.ay - _accelZero[YAXIS];
-    _accelADC[ZAXIS] = chr6dm.data.az - _accelOneG;
+    _accelADC[XAXIS] = _chr6dm->data.ax - _accelZero[XAXIS];
+    _accelADC[YAXIS] = _chr6dm->data.ay - _accelZero[YAXIS];
+    _accelADC[ZAXIS] = _chr6dm->data.az - _accelOneG;
 
     _accelData[XAXIS] = filterSmoothWithTime(_accelADC[XAXIS], _accelData[XAXIS], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0)); //to get around 1
     _accelData[YAXIS] = filterSmoothWithTime(_accelADC[YAXIS], _accelData[YAXIS], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0));
@@ -63,10 +67,10 @@ public:
 
     for (int i=0; i<FINDZERO; i++) 
     {
-        chr6dm.requestAndReadPacket();
-        zeroXreads[i] = chr6dm.data.ax;
-        zeroYreads[i] = chr6dm.data.ay;
-        zeroZreads[i] = chr6dm.data.az;
+        _chr6dm->requestAndReadPacket();
+        zeroXreads[i] = _chr6dm->data.ax;
+        zeroYreads[i] = _chr6dm->data.ay;
+        zeroZreads[i] = _chr6dm->data.az;
     }
 
     _accelZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);

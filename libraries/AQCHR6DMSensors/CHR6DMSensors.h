@@ -23,6 +23,11 @@
 // Usage: define a global var such as  "CHR6DM chr6 ;" in Aeroquad.pde
 // Values can then be read such as chr6.data.pitch and so on
 
+#ifndef _AQ_CHR6DM_SENSORS_H_
+#define _AQ_CHR6DM_SENSORS_H_
+
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 #define DEFAULT_TIMEOUT 1000
 
 // Null packet
@@ -122,16 +127,16 @@ const int CHANNEL_ALL_MASK           = 65535;
 
 
 // Scale factors
-const double SCALE_YAW        = 0.0109863; // ï¿½/LSB
+const double SCALE_YAW        = 0.0109863; // �/LSB
 const double SCALE_PITCH      = 0.0109863;
 const double SCALE_ROLL       = 0.0109863;
-const double SCALE_YAW_RATE   = 0.0137329; // ï¿½/s/LSB
+const double SCALE_YAW_RATE   = 0.0137329; // �/s/LSB
 const double SCALE_PITCH_RATE = 0.0137329;
 const double SCALE_ROLL_RATE  = 0.0137329;
 const double SCALE_MAG_X      = 0.061035; // mGauss/LSB
 const double SCALE_MAG_Y      = 0.061035;
 const double SCALE_MAG_Z      = 0.061035;
-const double SCALE_GYRO_X     = 0.01812; // ï¿½/s/LSB
+const double SCALE_GYRO_X     = 0.01812; // �/s/LSB
 const double SCALE_GYRO_Y     = 0.01812;
 const double SCALE_GYRO_Z     = 0.01812;
 const double SCALE_ACCEL_X    = 0.106812; // mg/LSB
@@ -140,6 +145,8 @@ const double SCALE_ACCEL_Z    = 0.106812;
 
 const char PACKET_HEADER[] = {'s','n','p'};
 const int HEADER_CHECKSUM = 's'+'n'+'p';
+
+
 
 
 struct Data
@@ -473,5 +480,28 @@ public:
     Serial.println("Timed out! 2");
     return false;
   }
+  
+  void initCHR6DM()
+  {
+	Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
+	resetToFactory();
+	setListenMode();
+	setActiveChannels(CHANNEL_ALL_MASK);
+	requestPacket();
+  }
+
+  void readCHR6DM()
+  {
+	waitForAndReadPacket();
+	requestPacket();
+  }
+
 };
 
+//extern CHR6DM chr6dm;
+
+
+
+#endif // #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+#endif // #define _AQ_CHR6DM_SENSORS_H_

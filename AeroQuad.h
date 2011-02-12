@@ -23,6 +23,8 @@
 #include "WProgram.h"
 #include "pins_arduino.h"
 
+#include <CHR6DMSensors.h>
+
 // Flight Software Version
 #define VERSION 2.1
 
