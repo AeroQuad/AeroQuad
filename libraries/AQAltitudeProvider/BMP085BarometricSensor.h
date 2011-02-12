@@ -18,91 +18,11 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Class to define sensors that can determine altitude
+#ifndef _AQ_BMP085_BAROMETRIC_SENSOR_H_
+#define _AQ_BMP085_BAROMETRIC_SENSOR_H_
 
-// ***********************************************************************
-// ************************** Altitude Class *****************************
-// ***********************************************************************
+#include "AltitudeProvider.h"
 
-class AltitudeProvider 
-{
-protected:
-  float _groundPressure; // remove later
-  float _groundTemperature; // remove later
-  float _groundAltitude;  
-  float _smoothFactor;
-  double _rawAltitude;
-  double _altitude; 
-  
-public:
-  
-  AltitudeProvider () 
-  { 
-    _altitude = 0;
-    _smoothFactor = 0.02;
-  }
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(); 
-  virtual void measure();
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData() 
-  {
-    return _altitude - _groundAltitude;
-  }
-  
-  const float getRawData() 
-  {
-    return _rawAltitude;
-  }
-  
-  void setStartAltitude(float value) 
-  {
-    _altitude = value;
-  }
-  
-  void measureGround() 
-  {
-    // measure initial ground pressure (multiple samples)
-    _groundAltitude = 0;
-    for (int i=0; i < 25; i++) 
-    {
-      measure();
-      delay(26);
-      _groundAltitude += _rawAltitude;
-    }
-    _groundAltitude = _groundAltitude / 25.0;
-  }
-  
-  void setGroundAltitude(float value) 
-  {
-    _groundAltitude = value;
-  }
-  
-  const float getGroundAltitude() 
-  {
-    return _groundAltitude;
-  }
-  
-  void setSmoothFactor(float value) 
-  {
-    _smoothFactor = value;
-  }
-  
-  const float getSmoothFactor() 
-  {
-    return _smoothFactor;
-  }
-};
-
-// ***********************************************************************
-// ************************* BMP085 Subclass *****************************
-// ***********************************************************************
 class BMP085BarometricSensor : public AltitudeProvider 
 {
 // This sets up the BMP085 from Sparkfun
@@ -295,4 +215,4 @@ public:
   }
 };
 
-
+#endif

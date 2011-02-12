@@ -151,7 +151,7 @@
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
-    #include "Altitude.h"
+    #include <BMP085BarometricSensor.h>
     BMP085BarometricSensor tempAltitude;
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
@@ -211,9 +211,9 @@
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
-    #include "Altitude.h"
+    #include <BMP085BarometricSensor.h>
     BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitude = &tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
@@ -247,9 +247,9 @@
     Compass *_compass = &tempCompass;
   #endif
   #ifdef AltitudeHold
-    #include "Altitude.h"
+    #include <BMP085BarometricSensor.h>
     BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitude = &tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
@@ -319,9 +319,9 @@
   Compass_CHR6DM tempCompass;
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
-    #include "Altitude.h"
+    #include <BMP085BarometricSensor.h>
     BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitude = &tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
@@ -353,9 +353,9 @@
   Compass_CHR6DM tempCompass;
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
-    #include "Altitude.h"
+    #include <BMP085BarometricSensor.h>
     BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitude = &tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
