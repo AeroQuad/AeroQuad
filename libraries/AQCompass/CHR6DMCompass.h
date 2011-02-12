@@ -29,8 +29,14 @@
 // ***********************************************************************
 class CHR6DMCompass : public Compass 
 {
+private:
+  CHR6DM *_chr6dm;
+
 public:
-  CHR6DMCompass() : Compass() {}
+  CHR6DMCompass(CHR6DM chr6dm)
+  {
+	_chr6dm = &chr6dm;
+  }
   
   void initialize() {}
   
@@ -38,7 +44,7 @@ public:
   
   void measure() 
   {
-    _heading = chr6dm.data.yaw; //this hardly needs any filtering :)
+    _heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
     if (_heading < 0)
     {

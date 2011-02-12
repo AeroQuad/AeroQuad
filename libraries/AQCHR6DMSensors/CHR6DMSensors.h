@@ -192,10 +192,14 @@ class CHR6DM
 public:
 
   Data data;
+  
+  float CHR_RollAngle;
+  float CHR_PitchAngle;
 
   CHR6DM()
   {
-      //Nothing here
+      CHR_RollAngle = 0.0;
+	  CHR_PitchAngle = 0.0;
   }
 
   void EKFReset() 

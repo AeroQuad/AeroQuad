@@ -29,7 +29,7 @@ private:
   CHR6DM *_chr6dm;
 
 public:
-  CHR6DMAccelerometer(CHR6DM chr6dm) : Accelerometer() 
+  CHR6DMAccelerometer(CHR6DM chr6dm)
   {
     _chr6dm = &chr6dm;
     _accelScaleFactor = 0;
@@ -86,7 +86,7 @@ public:
   void calculateAltitude(unsigned long currentTime) 
   {
     _currentAccelTime = currentTime;
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
+    if ((abs(_chr6dm->CHR_RollAngle) < 5) && (abs(_chr6dm->CHR_PitchAngle) < 5)) 
     {
       _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);
     }

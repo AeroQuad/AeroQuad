@@ -23,8 +23,6 @@
 #include "WProgram.h"
 #include "pins_arduino.h"
 
-#include <CHR6DMSensors.h>
-
 // Flight Software Version
 #define VERSION 2.1
 
@@ -154,10 +152,10 @@ int _levelOff; // Read in from EEPROM
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float CHR_RollAngle;
-  float CHR_PitchAngle;
-#endif
+//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+//  float CHR_RollAngle;
+//  float CHR_PitchAngle;
+//#endif
 
 // Heading hold
 byte _headingHoldConfig;
@@ -365,11 +363,11 @@ void comma(); // defined in SerialCom.pde
 void initSensorsFromEEPROM(); // defined in Sensors.pde
 void storeSensorsToEEPROM();  // defined in Sensors.pde
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
-#else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
-#endif
+//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+//float findMode(float *data, int arraySize); // defined in Sensors.pde
+//#else
+//int findMode(int *data, int arraySize); // defined in Sensors.pde
+//#endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
 extern int  __bss_end; // used by freemem 
