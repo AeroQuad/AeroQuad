@@ -75,12 +75,17 @@
 #define ZDAMPENING 9
 
 // PID Variables
-struct PIDdata {
-  float P, I, D;
+// PID Variables
+struct PIDdata 
+{
+  float P;
+  float I;
+  float D;
   float lastPosition;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[10];
+
 // This struct above declares the variable PID[] to hold each of the PID values for various functions
 // The following constants are declared in AeroQuad.h
 // ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)

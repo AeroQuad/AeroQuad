@@ -82,7 +82,6 @@
 #include <AQMath.h>
 #include "AeroQuad.h"
 #include "PID.h"
-#include "DataAcquisition.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
@@ -269,6 +268,7 @@
 #endif
 
 #ifdef AeroQuad_Wii
+  #include <AQWiiSensorAccessor.h>
   #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
@@ -293,6 +293,7 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
+  #include <AQWiiSensorAccessor.h>
   #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;

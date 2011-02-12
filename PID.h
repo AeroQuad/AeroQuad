@@ -22,7 +22,7 @@
 float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) 
 {
   float error = targetPosition - currentPosition;
-
+  
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   
