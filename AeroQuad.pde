@@ -97,6 +97,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -118,6 +119,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -139,6 +141,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMTimedMotors.h>
   PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
@@ -178,6 +181,7 @@
   #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -193,6 +197,7 @@
 #ifdef AeroQuadMega_v2
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMTimedMotors.h>
   PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
@@ -236,6 +241,7 @@
   Accelerometer *_accel = &tempAccel;
   ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <APMMotors.h>
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -267,6 +273,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -289,6 +296,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -310,6 +318,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
@@ -344,6 +353,7 @@
   Gyroscope *_gyro = &tempGyro;
   ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <APMMotors.h>
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngle.h"
