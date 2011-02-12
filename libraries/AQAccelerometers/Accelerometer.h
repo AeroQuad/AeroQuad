@@ -21,6 +21,21 @@
 #ifndef _AQ_ACCELEROMETER_H_
 #define _AQ_ACCELEROMETER_H_
 
+#include "WProgram.h"
+
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define ZAXIS 2
+#define LASTAXIS 3
+
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+
+
 class Accelerometer 
 {
 private:
@@ -50,20 +65,15 @@ protected:
 
   
 public:  
-  Accelerometer() 
-  {
-    _sign[ROLL] = 1;
-    _sign[PITCH] = 1;
-    _sign[YAW] = 1;
-  }
+  // ******************************************************************
+  // Constructor
+  // ******************************************************************
+  Accelerometer();
 
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize() 
-  {
-    this->_initialize(_rollChannel, _pitchChannel, _zAxisChannel);
-  }
+  virtual void initialize();
   virtual void measure();
   virtual void calibrate();
   virtual const int getFlightData(byte);
@@ -71,109 +81,39 @@ public:
   // **************************************************************
   // The following functions are common between all Gyro subclasses
   // **************************************************************
-  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) 
-  {
-    _accelChannel[ROLL] = rollChannel;
-    _accelChannel[PITCH] = pitchChannel;
-    _accelChannel[ZAXIS] = zAxisChannel;
-    _currentAccelTime = micros();
-    _previousAccelTime = _currentAccelTime;
-  }
+  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel);
   
-  const int getRaw(byte axis) 
-  {
-    return _accelADC[axis] * _sign[axis];
-  }
+  const int getRaw(byte axis);
   
-  const int getData(byte axis) 
-  {
-    return _accelData[axis] * _sign[axis];
-  }
+  const int getData(byte axis);
   
-  const int invert(byte axis) 
-  {
-    _sign[axis] = -_sign[axis];
-    return _sign[axis];
-  }
+  const int invert(byte axis);
   
-  const int getZero(byte axis) 
-  {
-    return _accelZero[axis];
-  }
+  const int getZero(byte axis);
   
-  void setZero(byte axis, int value) 
-  {
-    _accelZero[axis] = value;
-  }
+  void setZero(byte axis, int value);
   
-  const float getScaleFactor() 
-  {
-    return _accelScaleFactor;
-  }
+  const float getScaleFactor();
   
-  const float getSmoothFactor() 
-  {
-    return _smoothFactor;
-  }
+  const float getSmoothFactor();
   
-  void setSmoothFactor(float value) 
-  {
-    _smoothFactor = value;
-  }
+  void setSmoothFactor(float value);
   
-  const float angleRad(byte axis) 
-  {
-    if (axis == PITCH) 
-    {
-      return arctan2(_accelData[PITCH] * _sign[PITCH], sqrt((long(_accelData[ROLL]) * _accelData[ROLL]) + (long(_accelData[ZAXIS]) * _accelData[ZAXIS])));
-    }
-    // then it have to be the ROLL axis
-    return arctan2(_accelData[ROLL] * _sign[ROLL], sqrt((long(_accelData[PITCH]) * _accelData[PITCH]) + (long(_accelData[ZAXIS]) * _accelData[ZAXIS])));
-  }
+  const float angleRad(byte axis);
 
-  const float angleDeg(byte axis) 
-  {
-    return degrees(angleRad(axis));
-  }
+  const float angleDeg(byte axis);
   
-  void setOneG(int value) 
-  {
-    _accelOneG = value;
-  }
+  void setOneG(int value);
   
-  const int getOneG() 
-  {
-    return _accelOneG;
-  }
+  const int getOneG();
   
-  const int getZaxis() 
-  {
-    //currentAccelTime = micros();
-    //zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    //previousAccelTime = currentAccelTime;
-    //return zAxis;
-    return _accelOneG - getData(ZAXIS);
-  }
+  const int getZaxis();
   
-  const float getAltitude() 
-  {
-    return _rawAltitude;
-  }
+  const float getAltitude();
   
-  const float rateG(const byte axis) 
-  {
-    return getData(axis) / _accelOneG;
-  }
+  const float rateG(const byte axis);
   
-  virtual void calculateAltitude(unsigned long currentTime) 
-  {
-	_currentAccelTime = currentTime;
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-    {
-      _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);
-    }
-    _previousAccelTime = currentTime;
-  } 
+  virtual void calculateAltitude(unsigned long currentTime);
 
 };
 

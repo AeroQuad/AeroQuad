@@ -21,6 +21,20 @@
 #ifndef _AQ_GYROSCOPE_H_
 #define _AQ_GYROSCOPE_H_
 
+#include "WProgram.h"
+
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define ZAXIS 2
+#define LASTAXIS 3
+
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+
 
 class Gyroscope 
 {
@@ -57,122 +71,49 @@ protected:
   unsigned long _previousGyroTime;
   
 public:    
-  Gyroscope()
-  {
-    _sign[ROLL] = 1;
-    _sign[PITCH] = 1;
-    _sign[YAW] = -1;
-  }
+  Gyroscope();
   
   // The following function calls must be defined in any new subclasses
-  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) 
-  {
-    this->_initialize(rollChannel, pitchChannel, yawChannel);
-  }
+  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel);
   virtual void measure();
   virtual void calibrate();
-  virtual void autoZero(){};
+  virtual void autoZero();
   virtual const int getFlightData(byte);
   virtual void initialize();
 
   // The following functions are common between all Gyro subclasses
-  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) 
-  {
-    _gyroChannel[ROLL] = rollChannel;
-    _gyroChannel[PITCH] = pitchChannel;
-    _gyroChannel[ZAXIS] = yawChannel;
-    _previousTime = micros();
-  }
+  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel);
     
-  const int getRaw(byte axis) 
-  {
-    return _gyroADC[axis] * _sign[axis];
-  }
+  const int getRaw(byte axis);
   
-  const int getData(byte axis) 
-  {
-    return _gyroData[axis] * _sign[axis];
-  }
+  const int getData(byte axis);
   
-  void setData(byte axis, int value) 
-  {
-    _gyroData[axis] = value;
-  }
+  void setData(byte axis, int value);
   
-  const int invert(byte axis) 
-  {
-    _sign[axis] = -_sign[axis];
-    return _sign[axis];
-  }
+  const int invert(byte axis);
   
-  const int getZero(byte axis) 
-  {
-    return _gyroZero[axis];
-  }
+  const int getZero(byte axis);
   
-  void setZero(byte axis, int value) 
-  {
-    _gyroZero[axis] = value;
-  }    
+  void setZero(byte axis, int value);
   
-  const float getScaleFactor() 
-  {
-    return _gyroScaleFactor;
-  }
+  const float getScaleFactor();
 
-  const float getSmoothFactor() 
-  {
-    return _smoothFactor;
-  }
+  const float getSmoothFactor();
   
-  void setSmoothFactor(float value) 
-  {
-    _smoothFactor = value;
-  }
+  void setSmoothFactor(float value);
 
-  const float rateDegPerSec(byte axis) 
-  {
-    return ((_gyroADC[axis] * _sign[axis])) * _gyroScaleFactor;
-  }
+  const float rateDegPerSec(byte axis);
 
-  const float rateRadPerSec(byte axis) 
-  {
-    return radians(rateDegPerSec(axis));
-  }
+  const float rateRadPerSec(byte axis);
   
   // returns heading as +/- 180 degrees
-  const float getHeading() 
-  {
-    div_t integerDivide;
-    
-    integerDivide = div(_rawHeading, 360);
-    _gyroHeading = _rawHeading + (integerDivide.quot * -360);
-    if (_gyroHeading > 180)
-    {
-      _gyroHeading -= 360;
-    }
-    if (_gyroHeading < -180)
-    {
-      _gyroHeading += 360;
-    }
-    return _gyroHeading;
-  }
+  const float getHeading();
   
-  const float getRawHeading() 
-  {
-    return _rawHeading;
-  }
+  const float getRawHeading();
   
-  void setStartHeading(float value) 
-  {
-    // since a relative heading, get starting absolute heading from compass class
-    _rawHeading = value;
-  }
+  void setStartHeading(float value);
   
-  void setReceiverYaw(int value) 
-  {
-    _receiverYaw = value;
-  }
+  void setReceiverYaw(int value);
 };
 
 #endif
