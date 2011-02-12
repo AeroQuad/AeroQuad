@@ -24,13 +24,13 @@
 *****************************************************************************/
 
 /****************************************************************************
- ************************* Hardware Configuration ***************************
- ****************************************************************************/
+************************* Hardware Configuration ***************************
+****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -38,7 +38,7 @@
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
-#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
+//#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
                               // (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -235,6 +235,7 @@
 #endif
 
 #ifdef ArduCopter
+  #include <AQAPMADCSensorsAccessor.h>
   #include <IDG500_ADCGyroscope.h>
   IDG500_ADCGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
@@ -315,7 +316,7 @@
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
-  #include <CHR6DMSensors.h>
+  #include <CHR6DMSensorsAccessor.h>
   CHR6DM _chr6dm;
   #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel(_chr6dm);
@@ -353,7 +354,7 @@
 #endif
 
 #ifdef APM_OP_CHR6DM
-  #include <CHR6DMSensors.h>
+  #include <CHR6DMSensorsAccessor.h>
   CHR6DM _chr6dm;
   #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel(_chr6dm);

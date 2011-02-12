@@ -23,9 +23,6 @@
 
 #include "Gyroscope.h"
 
-#include "CHR6DMSensors.h"
-
-
 class CHR6DMGyroscope : public Gyroscope 
 {
 private:

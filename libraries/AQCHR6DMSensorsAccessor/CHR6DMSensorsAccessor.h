@@ -23,8 +23,8 @@
 // Usage: define a global var such as  "CHR6DM chr6 ;" in Aeroquad.pde
 // Values can then be read such as chr6.data.pitch and so on
 
-#ifndef _AQ_CHR6DM_SENSORS_H_
-#define _AQ_CHR6DM_SENSORS_H_
+#ifndef _AQ_CHR6DM_SENSORS_ACCESSOR_H_
+#define _AQ_CHR6DM_SENSORS_ACCESSOR_H_
 
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
