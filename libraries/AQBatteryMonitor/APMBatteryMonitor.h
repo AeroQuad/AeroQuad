@@ -18,65 +18,10 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Written by Honk: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13282#post13282
+#ifndef _AQ_APM_BETTERY_MONITOR_H_
+#define _AQ_APM_BETTERY_MONITOR_H_
 
-#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-#define OK 0
-#define WARNING 1
-#define ALARM 2
-
-
-// *************************************************************************
-// ************************** Battery Monitor ******************************
-// *************************************************************************
-class BatteryMonitor 
-{
-private:
-  byte _batteryStatus;
-  float _lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
-  float _lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
-  float _batteryVoltage;
-
-public:  
-
-  BatteryMonitor() 
-  {
-    _lowVoltageWarning = 10.2; //10.8;
-    _lowVoltageAlarm = 9.5; //10.2;
-    _batteryVoltage = _lowVoltageWarning + 2;
-    _batteryStatus = OK;
-  }
-
-  virtual void initialize();
-  virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-  virtual void lowBatteryEvent(byte);
-
-  void measure(byte armed) 
-  {
-    _batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), _batteryVoltage, 0.1);
-    if (armed == ON) 
-    {
-      if (_batteryVoltage < _lowVoltageWarning) 
-      {
-        _batteryStatus = WARNING;
-      }
-      if (_batteryVoltage < _lowVoltageAlarm)
-      {
-        _batteryStatus = ALARM;
-      }
-    }
-    else
-    {
-      _batteryStatus = OK;
-    }
-    lowBatteryEvent(_batteryStatus);
-  }
-
-  const float getData() 
-  {
-    return _batteryVoltage;
-  }
-};
+#include "BatteryMonitor.h"
 
 // ***********************************************************************************
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
@@ -199,7 +144,7 @@ public:
       #else
         if (_throttle > 1400) 
         {
-          _autoDescent -= 2; //will remove 2Âµs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
+          _autoDescent -= 2; //will remove 2µs throttle every time led's blink in two speeds (10.8 and 10.2V) as long as there is throttle to lower
         }
       #endif
       else if (batteryCounter < freq) 
@@ -219,101 +164,4 @@ public:
   }
 };
 
-// *******************************************************************************
-// ************************ AeroQuad Battery Monitor *****************************
-// *******************************************************************************
-class AeroQuadBatteryMonitor : public BatteryMonitor 
-{
-private:
-  #if defined (__AVR_ATmega328P__)
-    #define BUZZERPIN 12
-  #else
-    #define BUZZERPIN 49
-  #endif
-  
-  long _previousTime;
-  byte _state;
-  byte _firstAlarm;
-  float _diode; // raw voltage goes through diode on Arduino
-  float _batteryScaleFactor;
-
-public:
-  AeroQuadBatteryMonitor() : BatteryMonitor(){}
-
-  void initialize() 
-  {
-    float R1   = 15000;
-    float R2   =  7500;
-    float Aref =     5.0;
-    _batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
-    _diode = 0.9; // measured with DMM
-    analogReference(DEFAULT);
-    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
-    digitalWrite(BUZZERPIN, LOW);
-    _previousTime = millis();
-    _state = LOW;
-    _firstAlarm = OFF;
-  }
-
-  void lowBatteryEvent(byte level) 
-  {
-    long currentTime = millis()- _previousTime;
-    if (level == OK) 
-    {
-      digitalWrite(BUZZERPIN, LOW);
-      _autoDescent = 0;
-    }
-    if (level == WARNING) 
-    {
-      if ((_autoDescent == 0) && (_currentTime > 1000)) 
-      {
-        _autoDescent = -50;
-      }
-      if (_currentTime > 1100) 
-      {
-        _autoDescent = 50;
-        digitalWrite(LED2PIN, HIGH);
-        digitalWrite(BUZZERPIN, HIGH);
-      }
-      if (_currentTime > 1200) 
-      {
-        _previousTime = millis();
-        _autoDescent = 0;
-        digitalWrite(LED2PIN, LOW);
-        digitalWrite(BUZZERPIN, LOW);
-      }
-    }
-    if (level == ALARM) 
-    {
-      if (_firstAlarm == OFF) 
-      {
-        _autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
-      }
-      _firstAlarm = ON;
-      digitalWrite(BUZZERPIN, HIGH); // enable buzzer
-      if ((_currentTime > 500) && (_throttle > 1400)) 
-      {
-        _autoDescent -= 1; // auto descend quad
-        _holdAltitude -= 0.2; // descend if in attitude hold mode
-        _previousTime = millis();
-        if (_state == LOW) 
-        {
-          _state = HIGH;
-        }
-        else
-        { 
-          _state = LOW;
-        }
-        digitalWrite(LEDPIN, _state);
-        digitalWrite(LED2PIN, _state);
-        digitalWrite(LED3PIN, _state);
-      }
-    }
-  }
-
-  const float readBatteryVoltage(byte channel) 
-  {
-    return (analogRead(channel) * _batteryScaleFactor) + _diode;
-  }
-};
-
+#endif

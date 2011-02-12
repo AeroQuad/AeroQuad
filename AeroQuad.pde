@@ -156,7 +156,7 @@
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
+    #include <AeroQuadBatteryMonitor.h>
     AeroQuadBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
@@ -216,7 +216,7 @@
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
+    #include <AeroQuadBatteryMonitor.h>
     AeroQuadBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
@@ -252,7 +252,7 @@
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
+    #include <APMBatteryMonitor.h>
     APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
@@ -324,7 +324,7 @@
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
+    #include <APMBatteryMonitor.h>
     APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
@@ -358,7 +358,7 @@
     AltitudeProvider *_altitudeProvider = &tempAltitude;
   #endif
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
+    #include "APMBatteryMonitor.h"
     APMBatteryMonitor tempBatteryMonitor;
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
