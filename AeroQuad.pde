@@ -95,6 +95,7 @@
   #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverFor328p.h>
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMMotors.h>
@@ -117,6 +118,7 @@
   #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverFor328p.h>
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMMotors.h>
@@ -139,6 +141,7 @@
   #include <ITG3200Gyroscope.h>
   ITG3200Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverFor328p.h>
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMTimedMotors.h>
@@ -173,6 +176,7 @@
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
+  #include <ReceiverForMega.h>
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <ADXL335Accelerometer.h>
@@ -195,6 +199,7 @@
 #endif
 
 #ifdef AeroQuadMega_v2
+  #include <ReceiverForMega.h>
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMTimedMotors.h>
@@ -239,6 +244,7 @@
   #include <ADXL335_ADCAccelerometer.h>
   ADXL335_ADCAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <ReceiverForAPM.h>
   ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <APMMotors.h>
@@ -271,6 +277,7 @@
   #include <WiiGyroscope.h>
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverFor328p.h>
   ReceiverFor328p tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMMotors.h>
@@ -294,6 +301,7 @@
   #include <WiiGyroscope.h>
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverForMega.h>
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMMotors.h>
@@ -316,6 +324,7 @@
   #include <CHR6DMGyroscope.h>
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverForMega.h>
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <PWMMotors.h>
@@ -351,6 +360,7 @@
   #include <CHR6DMGyroscope.h>
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverForAPM.h>
   ReceiverForAPM tempReceiver;
   Receiver *_receiver = &tempReceiver;
   #include <APMMotors.h>
