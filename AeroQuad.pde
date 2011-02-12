@@ -146,7 +146,7 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
+    #include <HMC5843Magnetometer.h>
     HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
@@ -206,7 +206,7 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
+    #include <HMC5843Magnetometer.h>
     HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
@@ -242,7 +242,7 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
+    #include <HMC5843Magnetometer.h>
     HMC5843Magnetometer tempCompass;
     Compass *_compass = &tempCompass;
   #endif
@@ -315,8 +315,8 @@
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM tempCompass;
+  #include <CHR6DMCompass.h>
+  CHR6DMCompass tempCompass;
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
     #include <BMP085BarometricSensor.h>
@@ -349,8 +349,8 @@
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM tempCompass;
+  #include "CHR6DMCompass.h"
+  CHR6DMCompass tempCompass;
   Compass *_compass = &tempCompass;
   #ifdef AltitudeHold
     #include <BMP085BarometricSensor.h>

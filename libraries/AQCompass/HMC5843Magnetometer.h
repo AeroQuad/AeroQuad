@@ -18,78 +18,10 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Class to define sensors that can determine absolute heading
+#ifndef _AQ_HMC5843_MAGNETOMETER_H_
+#define _AQ_HMC5843_MAGNETOMETER_H_
 
-// ***********************************************************************
-// ************************** Compass Class ******************************
-// ***********************************************************************
-class Compass 
-{
-private:  
-  float _magMax[3];
-  float _magMin[3];
-  
-protected:  
-  float _absoluteHeading; 
-  float _heading; 
-  float _compass;
-  int _compassAddress;
-  float _gyroStartHeading;
-  float _magScale[3];
-  float _magOffset[3];
-  
-public: 
-
-  Compass() {}
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(); 
-  virtual void measure();
-  virtual const int getRawData(byte);
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData() 
-  {
-    return _compass;
-  }
-  
-  const float getHeading() 
-  {
-    return _heading;
-  }
-  
-  const float getAbsoluteHeading() 
-  {
-    return _absoluteHeading;
-  }
-  
-  void setMagCal(byte axis, float maxValue, float minValue) 
-  {
-    _magMax[axis] = maxValue;
-    _magMin[axis] = minValue;
-    // Assume max/min is scaled to +1 and -1
-    // y2 = 1, x2 = max; y1 = -1, x1 = min
-    // m = (y2 - y1) / (x2 - x1)
-    // m = 2 / (max - min)
-    _magScale[axis] = 2.0 / (_magMax[axis] - _magMin[axis]);
-    // b = y1 - mx1; b = -1 - (m * min)
-    _magOffset[axis] = -(_magScale[axis] * _magMin[axis]) - 1;
-  }
-  
-  const float getMagMax(byte axis) 
-  {
-    return _magMax[axis];
-  }
-  
-  const float getMagMin(byte axis) 
-  {
-    return _magMin[axis];
-  }
-};
+#include "Compass.h"
 
 // ***********************************************************************
 // ************************ HMC5843 Subclass *****************************
@@ -216,55 +148,4 @@ public:
   }
 };
 
-// ***********************************************************************
-// ************************* CHR6DM Subclass *****************************
-// ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class Compass_CHR6DM : public Compass 
-{
-public:
-  Compass_CHR6DM() : Compass() {}
-  
-  void initialize() {}
-  
-  const int getRawData(byte) {}
-  
-  void measure() 
-  {
-    _heading = chr6dm.data.yaw; //this hardly needs any filtering :)
-    // Change from +/-180 to 0-360
-    if (_heading < 0)
-    {
-      _absoluteHeading = 360 + _heading;
-    }
-    else 
-    {
-      _absoluteHeading = _heading;
-    }
-  }
-};
-
-class Compass_CHR6DM_Fake : public Compass 
-{
-public:
-  Compass_CHR6DM_Fake() : Compass() {}
-  
-  void initialize() {}
-  
-  const int getRawData(byte) {}
-  
-  void measure() 
-  {
-    _heading = 0;
-    // Change from +/-180 to 0-360
-    if (_heading < 0) 
-    {
-      _absoluteHeading = 360 + _heading;
-    }
-    else
-    { 
-      _absoluteHeading = _heading;
-    }
-  }
-};
 #endif
