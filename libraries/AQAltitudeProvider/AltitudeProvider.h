@@ -18,8 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ALTITUDE_PROVIDER_H
-#define _AQ_ALTITUDE_PROVIDER_H
+#ifndef _AQ_ALTITUDE_PROVIDER_H_
+#define _AQ_ALTITUDE_PROVIDER_H_
+#include "WProgram.h"
 
 class AltitudeProvider 
 {
@@ -33,11 +34,7 @@ protected:
   
 public:
   
-  AltitudeProvider () 
-  { 
-    _altitude = 0;
-    _smoothFactor = 0.02;
-  }
+  AltitudeProvider ();
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
@@ -48,53 +45,14 @@ public:
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData() 
-  {
-    return _altitude - _groundAltitude;
-  }
-  
-  const float getRawData() 
-  {
-    return _rawAltitude;
-  }
-  
-  void setStartAltitude(float value) 
-  {
-    _altitude = value;
-  }
-  
-  void measureGround() 
-  {
-    // measure initial ground pressure (multiple samples)
-    _groundAltitude = 0;
-    for (int i=0; i < 25; i++) 
-    {
-      measure();
-      delay(26);
-      _groundAltitude += _rawAltitude;
-    }
-    _groundAltitude = _groundAltitude / 25.0;
-  }
-  
-  void setGroundAltitude(float value) 
-  {
-    _groundAltitude = value;
-  }
-  
-  const float getGroundAltitude() 
-  {
-    return _groundAltitude;
-  }
-  
-  void setSmoothFactor(float value) 
-  {
-    _smoothFactor = value;
-  }
-  
-  const float getSmoothFactor() 
-  {
-    return _smoothFactor;
-  }
+  const float getData();
+  const float getRawData();
+  void setStartAltitude(float value);
+  void measureGround();
+  void setGroundAltitude(float value);
+  const float getGroundAltitude();
+  void setSmoothFactor(float value);
+  const float getSmoothFactor();
 };
 
 #endif

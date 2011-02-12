@@ -173,8 +173,6 @@ float _absoluteHeading = 0;;
 float _setHeading = 0;
 
 // Altitude Hold
-#define TEMPERATURE 0
-#define PRESSURE 1
 int _throttleAdjust = 0;
 int _throttle = 1000;
 int _autoDescent = 0;

@@ -27,7 +27,7 @@ void readSensors()
   _gyro->measure(); // defined in Gyro.h
   _accel->measure(); // defined in Accel.h
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    _compass->measure();
+    _compass->measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH));
   #endif
  
   // ********************* Read Slower Sensors *******************
