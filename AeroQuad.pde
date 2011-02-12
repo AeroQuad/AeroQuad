@@ -85,8 +85,6 @@
 #include "AQMath.h"
 #include "Receiver.h"
 #include "DataAcquisition.h"
-#include "Accel.h"
-#include "Gyro.h"
 #include "Motors.h"
 
 // Create objects defined from Configuration Section above
@@ -94,6 +92,7 @@
   #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
@@ -114,6 +113,7 @@
   #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
@@ -134,6 +134,7 @@
   #include <BMA180Accelerometer.h>
   BMA180Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <ITG3200Gyroscope.h>
   ITG3200Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
@@ -174,6 +175,7 @@
   #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <IDGIXZ500Gyroscope.h>
   IDGIXZ500Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   PWMMotors tempMotors;
@@ -197,6 +199,7 @@
   #include <BMA180Accelerometer.h>
   BMA180Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <ITG3200Gyroscope.h>
   ITG3200Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   #include "FlightAngle.h"
@@ -225,6 +228,7 @@
 #endif
 
 #ifdef ArduCopter
+  #include <IDG500_ADCGyroscope.h>
   IDG500_ADCGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   #include <ADXL335_ADCAccelerometer.h>
@@ -258,6 +262,7 @@
   #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <WiiGyroscope.h>
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverFor328p tempReceiver;
@@ -279,6 +284,7 @@
   #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <WiiGyroscope.h>
   WiiGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverForMega tempReceiver;
@@ -299,6 +305,7 @@
   #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <CHR6DMGyroscope.h>
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverForMega tempReceiver;
@@ -332,6 +339,7 @@
   #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
+  #include <CHR6DMGyroscope.h>
   CHR6DMGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   ReceiverForAPM tempReceiver;
