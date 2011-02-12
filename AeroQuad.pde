@@ -91,6 +91,7 @@
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
+  #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
@@ -110,6 +111,7 @@
 #endif
 
 #ifdef AeroQuad_v1_IDG
+  #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
@@ -129,6 +131,7 @@
 #endif
 
 #ifdef AeroQuad_v18
+  #include <BMA180Accelerometer.h>
   BMA180Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   ITG3200Gyroscope tempGyro;
@@ -168,6 +171,7 @@
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   ReceiverForMega tempReceiver;
   Receiver *_receiver = &tempReceiver;
+  #include <ADXL335Accelerometer.h>
   ADXL335Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   IDGIXZ500Gyroscope tempGyro;
@@ -190,6 +194,7 @@
   PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  #include <BMA180Accelerometer.h>
   BMA180Accelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   ITG3200Gyroscope tempGyro;
@@ -222,6 +227,7 @@
 #ifdef ArduCopter
   IDG500_ADCGyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
+  #include <ADXL335_ADCAccelerometer.h>
   ADXL335_ADCAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   ReceiverForAPM tempReceiver;
@@ -249,6 +255,7 @@
 #endif
 
 #ifdef AeroQuad_Wii
+  #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   WiiGyroscope tempGyro;
@@ -269,6 +276,7 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
+  #include <WiiAccelerometer.h>
   WiiAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   WiiGyroscope tempGyro;
@@ -288,6 +296,7 @@
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
+  #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   CHR6DMGyroscope tempGyro;
@@ -320,6 +329,7 @@
 #endif
 
 #ifdef APM_OP_CHR6DM
+  #include <CHR6DMAccelerometer.h>
   CHR6DMAccelerometer tempAccel;
   Accelerometer *_accel = &tempAccel;
   CHR6DMGyroscope tempGyro;
