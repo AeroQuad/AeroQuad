@@ -184,8 +184,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
@@ -221,8 +221,8 @@
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
@@ -274,8 +274,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
@@ -295,8 +295,8 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
@@ -329,8 +329,8 @@
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
@@ -363,8 +363,8 @@
     BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
   #endif
   #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad tempCamera;
+    #include <AeroQuadCameraStabilizer.h>
+    AeroQuadCameraStabilizer tempCamera;
     CameraStabilizer *_cameraStabilizer = &tempCamera;
   #endif
 #endif
