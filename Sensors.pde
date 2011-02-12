@@ -34,7 +34,7 @@ void readSensors()
   #if defined(HeadingMagHold)
     if (_currentTime > _compassTime) 
     {
-      _compass->measure(); // defined in compass.h
+      _compass->measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH)); // defined in compass.h
       _compassTime = _currentTime + COMPASSLOOPTIME;
     }
   #endif

@@ -21,6 +21,8 @@
 #ifndef _AQ_COMPASS_H_
 #define _AQ_COMPASS_H_
 
+#include "WProgram.h"
+
 // Class to define sensors that can determine absolute heading
 
 // ***********************************************************************
@@ -43,55 +45,24 @@ protected:
   
 public: 
 
-  Compass() {}
+  Compass();
 
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
   virtual void initialize(); 
-  virtual void measure();
+  virtual void measure(const float rollAngle, const float pitchAngle);
   virtual const int getRawData(byte);
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getData() 
-  {
-    return _compass;
-  }
-  
-  const float getHeading() 
-  {
-    return _heading;
-  }
-  
-  const float getAbsoluteHeading() 
-  {
-    return _absoluteHeading;
-  }
-  
-  void setMagCal(byte axis, float maxValue, float minValue) 
-  {
-    _magMax[axis] = maxValue;
-    _magMin[axis] = minValue;
-    // Assume max/min is scaled to +1 and -1
-    // y2 = 1, x2 = max; y1 = -1, x1 = min
-    // m = (y2 - y1) / (x2 - x1)
-    // m = 2 / (max - min)
-    _magScale[axis] = 2.0 / (_magMax[axis] - _magMin[axis]);
-    // b = y1 - mx1; b = -1 - (m * min)
-    _magOffset[axis] = -(_magScale[axis] * _magMin[axis]) - 1;
-  }
-  
-  const float getMagMax(byte axis) 
-  {
-    return _magMax[axis];
-  }
-  
-  const float getMagMin(byte axis) 
-  {
-    return _magMin[axis];
-  }
+  const float getData();
+  const float getHeading();
+  const float getAbsoluteHeading();
+  void setMagCal(byte axis, float maxValue, float minValue);
+  const float getMagMax(byte axis);
+  const float getMagMin(byte axis);
 };
 
 #endif

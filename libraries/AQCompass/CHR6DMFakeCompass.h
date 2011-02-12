@@ -32,7 +32,7 @@ public:
   
   const int getRawData(byte) {}
   
-  void measure() 
+  void measure(const float rollAngle, const float pitchAngle) 
   {
     _heading = 0;
     // Change from +/-180 to 0-360

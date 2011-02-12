@@ -42,7 +42,7 @@ public:
   
   const int getRawData(byte) {}
   
-  void measure() 
+  void measure(const float rollAngle, const float pitchAngle) 
   {
     _heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
