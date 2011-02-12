@@ -216,8 +216,18 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
+  
+   // @todo: the autoDescent with battery monitor have to be check
+   // I remove some depedencies in the battery monitor process and I'm affraid 
+   // to have broke something! Honk, please :)  @see Kenny
+  int autoDescent = 0;
+  #ifdef BattMonitor
+    autoDescent = _batteryMonitor->getAutoDescent();
+  #endif
+  
+  
 #ifdef AltitudeHold
-  if (_altitudeHold == ON) 
+  if (_altitudeHold == ON)
   {
     _throttleAdjust = updatePID(_holdAltitude, _altitudeProvider->getData(), &PID[ALTITUDE]);
     _zDampening = updatePID(0, _accel->getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
@@ -239,7 +249,7 @@ void processAltitudeHold()
   {
     // Altitude hold is off, get throttle from receiver
     _holdThrottle = _receiver->getData(THROTTLE);
-    _throttleAdjust = _autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
+    _throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
   }
   // holdThrottle set in FlightCommand.pde if altitude hold is on
   _throttle = _holdThrottle + _throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
@@ -247,7 +257,7 @@ void processAltitudeHold()
   //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
   //throttle = _receiver->getData(THROTTLE) - zDampening + autoDescent; 
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-  _throttle = _receiver->getData(THROTTLE) + _autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
+  _throttle = _receiver->getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
 }
 

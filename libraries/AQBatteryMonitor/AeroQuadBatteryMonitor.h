@@ -30,96 +30,21 @@
 class AeroQuadBatteryMonitor : public BatteryMonitor 
 {
 private:
-  #if defined (__AVR_ATmega328P__)
-    #define BUZZERPIN 12
-  #else
-    #define BUZZERPIN 49
-  #endif
   
-  long _previousTime;
+  unsigned long _previousTime;
   byte _state;
   byte _firstAlarm;
   float _diode; // raw voltage goes through diode on Arduino
   float _batteryScaleFactor;
-
+  unsigned long _currentTime;
+  
+  
 public:
-  AeroQuadBatteryMonitor() : BatteryMonitor(){}
+  AeroQuadBatteryMonitor();
 
-  void initialize() 
-  {
-    float R1   = 15000;
-    float R2   =  7500;
-    float Aref =     5.0;
-    _batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
-    _diode = 0.9; // measured with DMM
-    analogReference(DEFAULT);
-    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
-    digitalWrite(BUZZERPIN, LOW);
-    _previousTime = millis();
-    _state = LOW;
-    _firstAlarm = OFF;
-  }
-
-  void lowBatteryEvent(byte level) 
-  {
-    long currentTime = millis()- _previousTime;
-    if (level == OK) 
-    {
-      digitalWrite(BUZZERPIN, LOW);
-      _autoDescent = 0;
-    }
-    if (level == WARNING) 
-    {
-      if ((_autoDescent == 0) && (_currentTime > 1000)) 
-      {
-        _autoDescent = -50;
-      }
-      if (_currentTime > 1100) 
-      {
-        _autoDescent = 50;
-        digitalWrite(LED2PIN, HIGH);
-        digitalWrite(BUZZERPIN, HIGH);
-      }
-      if (_currentTime > 1200) 
-      {
-        _previousTime = millis();
-        _autoDescent = 0;
-        digitalWrite(LED2PIN, LOW);
-        digitalWrite(BUZZERPIN, LOW);
-      }
-    }
-    if (level == ALARM) 
-    {
-      if (_firstAlarm == OFF) 
-      {
-        _autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
-      }
-      _firstAlarm = ON;
-      digitalWrite(BUZZERPIN, HIGH); // enable buzzer
-      if ((_currentTime > 500) && (_throttle > 1400)) 
-      {
-        _autoDescent -= 1; // auto descend quad
-        _holdAltitude -= 0.2; // descend if in attitude hold mode
-        _previousTime = millis();
-        if (_state == LOW) 
-        {
-          _state = HIGH;
-        }
-        else
-        { 
-          _state = LOW;
-        }
-        digitalWrite(LEDPIN, _state);
-        digitalWrite(LED2PIN, _state);
-        digitalWrite(LED3PIN, _state);
-      }
-    }
-  }
-
-  const float readBatteryVoltage(byte channel) 
-  {
-    return (analogRead(channel) * _batteryScaleFactor) + _diode;
-  }
+  void initialize();
+  void lowBatteryEvent(byte level,int throttle);
+  const float readBatteryVoltage(byte channel);
 };
 
 #endif

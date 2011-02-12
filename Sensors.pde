@@ -48,7 +48,7 @@ void readSensors()
   #if defined(BattMonitor)
     if (_currentTime > _batteryTime) 
     {
-      _batteryMonitor->measure(_armed);
+      _batteryMonitor->measure(_armed,_throttle);
       _batteryTime = _currentTime + BATTERYLOOPTIME;
     }
   #endif

@@ -23,10 +23,15 @@
 #ifndef _AQ_BETTERY_MONITOR_H_
 #define _AQ_BETTERY_MONITOR_H_
 
+#include "WProgram.h"
+
 #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
 #define OK 0
 #define WARNING 1
 #define ALARM 2
+
+#define ON 1
+#define OFF 0
 
 
 // *************************************************************************
@@ -39,46 +44,21 @@ private:
   float _lowVoltageWarning;  // Pack voltage at which to trigger alarm (first alarm)
   float _lowVoltageAlarm;    // Pack voltage at which to trigger alarm (critical alarm)
   float _batteryVoltage;
-
+ 
+protected:
+  int _autoDescent;
+  virtual void lowBatteryEvent(byte,int);
+ 
 public:  
 
-  BatteryMonitor() 
-  {
-    _lowVoltageWarning = 10.2; //10.8;
-    _lowVoltageAlarm = 9.5; //10.2;
-    _batteryVoltage = _lowVoltageWarning + 2;
-    _batteryStatus = OK;
-  }
+  BatteryMonitor();
 
   virtual void initialize();
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-  virtual void lowBatteryEvent(byte);
-
-  void measure(byte armed) 
-  {
-    _batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), _batteryVoltage, 0.1);
-    if (armed == ON) 
-    {
-      if (_batteryVoltage < _lowVoltageWarning) 
-      {
-        _batteryStatus = WARNING;
-      }
-      if (_batteryVoltage < _lowVoltageAlarm)
-      {
-        _batteryStatus = ALARM;
-      }
-    }
-    else
-    {
-      _batteryStatus = OK;
-    }
-    lowBatteryEvent(_batteryStatus);
-  }
-
-  const float getData() 
-  {
-    return _batteryVoltage;
-  }
+  void measure(byte armed,int throttle);
+  const float getData();
+  const int getAutoDescent();
+  
 };
 
 #endif

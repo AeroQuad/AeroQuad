@@ -44,12 +44,12 @@
   #define PIANO_SW1 42
   #define PIANO_SW2 43
 #endif
-#ifdef AeroQuadMega_v2  
-  #define LED2PIN 4
-  #define LED3PIN 31
-#else
+#if defined (__AVR_ATmega328P__)
   #define LED2PIN 12
   #define LED3PIN 12
+#else
+  #define LED2PIN 4
+  #define LED3PIN 31
 #endif
 
 // Basic axis definitions
@@ -175,7 +175,7 @@ float _setHeading = 0;
 // Altitude Hold
 int _throttleAdjust = 0;
 int _throttle = 1000;
-int _autoDescent = 0;
+//int _autoDescent = 0;
 //#ifndef AeroQuad_v18
 int _minThrottleAdjust = -50;
 int _maxThrottleAdjust = 50;
