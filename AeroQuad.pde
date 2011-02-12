@@ -27,6 +27,7 @@
  ************************* Hardware Configuration ***************************
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
+
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 #define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8

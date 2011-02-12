@@ -26,62 +26,17 @@
 class IDGIXZ500Gyroscope : public Gyroscope 
 {
 public:
-  IDGIXZ500Gyroscope() : Gyroscope() 
-  {
-    _gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    _gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-  }
+  IDGIXZ500Gyroscope();
   
-  void initialize() 
-  {
-    analogReference(EXTERNAL);
-    // Configure gyro auto zero pins
-    pinMode (AZPIN, OUTPUT);
-    digitalWrite(AZPIN, LOW);
-    delay(1);
+  void initialize();
+  
+  void measure();
 
-    // rollChannel = 4
-    // pitchChannel = 3
-    // yawChannel = 5
-    this->_initialize(4,3,5);
-  }
+  const int getFlightData(byte axis);
   
-  void measure() 
-  {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
-    {
-      _gyroADC[axis] = _gyroZero[axis] - analogRead(_gyroChannel[axis]);
-      _gyroData[axis] = filterSmooth(_gyroADC[axis], _gyroData[axis], _smoothFactor);
-    }
-  }
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
+  void calibrate();
   
- void calibrate() 
- {
-    autoZero();
-  }
-  
-  void autoZero() 
-  {
-    int findZero[FINDZERO];
-    digitalWrite(AZPIN, HIGH);
-    delayMicroseconds(750);
-    digitalWrite(AZPIN, LOW);
-    delay(8);
-
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++)
-      {
-        findZero[i] = analogRead(_gyroChannel[calAxis]);
-      }
-      _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-  }
+  void autoZero();
 };
 
 #endif

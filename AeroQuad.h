@@ -95,11 +95,11 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
+//#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+//  #define FINDZERO 9
+//#else
+//  #define FINDZERO 49
+//#endif
 float _smoothHeading;
 
 // Sensor pin assignments
@@ -109,7 +109,7 @@ float _smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-#define AZPIN 12 // Auto zero pin for IDG500 gyros
+//#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 // Motor control variables
 #define FRONT 0

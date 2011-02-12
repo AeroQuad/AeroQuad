@@ -26,59 +26,16 @@
 class ADXL335Accelerometer : public Accelerometer 
 {
 public:
-  ADXL335Accelerometer() : Accelerometer()
-  {
-    // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    _accelScaleFactor = 0.000329062;
-  }
+  ADXL335Accelerometer();
   
-  void initialize() 
-  {
-    // rollChannel = 1
-    // pitchChannel = 0
-    // zAxisChannel = 2
-    this->_initialize(1, 0, 2);
-  }
+  void initialize();
   
-  void measure() 
-  {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
-    {
-      _accelADC[axis] = analogRead(_accelChannel[axis]) - _accelZero[axis];
-      _accelData[axis] = filterSmooth(_accelADC[axis], _accelData[axis], _smoothFactor);
-    }
-  }
+  void measure();
 
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
+  const int getFlightData(byte axis);
   
   // Allows user to zero accelerometers on command
-  void calibrate() 
-  {
-    int findZero[FINDZERO];
-
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++)
-      {
-        findZero[i] = analogRead(_accelChannel[calAxis]);
-      }
-      _accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-    
-    // store accel value that represents 1g
-    _accelOneG = _accelZero[ZAXIS];
-    // replace with estimated Z axis 0g value
-    _accelZero[ZAXIS] = (_accelZero[ROLL] + _accelZero[PITCH]) / 2;
-  }
+  void calibrate();
 };
 
 #endif
