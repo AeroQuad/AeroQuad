@@ -23,7 +23,6 @@
 
 #include "Gyroscope.h"
 
-
 class IDG500_ADCGyroscope : public Gyroscope 
 {
 private:

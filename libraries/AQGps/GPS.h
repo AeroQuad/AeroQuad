@@ -23,7 +23,8 @@
 /**************************************************************/
 // This is experimental, it is not yet functional
 
-#ifdef GPS
+#ifndef _AQ_GPS_H_
+#define _AQ_GPS_H_
 
 TinyGPS gps;
 NewSoftSerial nss(13, 3);

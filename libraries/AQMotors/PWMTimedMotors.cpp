@@ -45,17 +45,9 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
 
 #include "PWMTimedMotors.h"
 
-
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-
-
 #define PWM_FREQUENCY 300   // in Hz
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
-
 
 PWMTimedMotors::PWMTimedMotors()
 {

@@ -23,10 +23,6 @@
 
 #include <I2C.h>
 
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-
 
 HMC5843Magnetometer::HMC5843Magnetometer(Gyroscope *gyro)
 {

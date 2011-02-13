@@ -23,16 +23,6 @@
 
 #include "Receiver.h"
 
-
-#define ROLLCH 4
-#define PITCHCH 3
-#define YAWCH 1
-#define THROTTLECH 2
-#define MODECH 8
-#define AUXCH  7
-#define CAMERAROLLCH 5
-#define CAMERAPITCHCH 6
-
 class ReceiverForMultipilot : public Receiver 
 {
 private:

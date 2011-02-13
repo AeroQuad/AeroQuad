@@ -23,18 +23,7 @@
 
 #include "WProgram.h"
 
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define ZAXIS 2
-#define LASTAXIS 3
-
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
-
+#include <Axis.h>
 
 class Gyroscope 
 {
@@ -46,11 +35,7 @@ private:
   float _gyroHeading;
 
 protected:
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    float _gyroZero[3];
-  #else
-    int _gyroZero[3];
-  #endif
+  float _gyroZero[3];
   int _gyroADC[3];
   int _gyroChannel[3];  
   int _gyroData[3];  

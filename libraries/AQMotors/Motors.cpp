@@ -20,13 +20,12 @@
 
 #include "Motors.h"
 
-
 Motors::Motors()
 {
   _throttle = 0;
-  _motorAxisCommand[ROLL] = 0;
-  _motorAxisCommand[PITCH] = 0;
-  _motorAxisCommand[YAW] = 0;
+  _motorAxisCommand[0] = 0;
+  _motorAxisCommand[1] = 0;
+  _motorAxisCommand[2] = 0;
   for (byte motor = 0; motor < LASTMOTOR; motor++) 
   {
     _motorCommand[motor] = 1000;
@@ -34,7 +33,6 @@ Motors::Motors()
     _maxCommand[motor] = MAXCOMMAND;
     _remoteCommand[motor] = 1000;
   }
-//  _delta = 0;
 };
 
 // The following function calls must be defined in any new subclasses

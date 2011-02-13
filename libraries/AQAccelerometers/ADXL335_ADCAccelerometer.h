@@ -23,7 +23,6 @@
 
 #include "Accelerometer.h"
 
-
 class ADXL335_ADCAccelerometer : public Accelerometer 
 {
 private:

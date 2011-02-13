@@ -86,6 +86,9 @@
 #include <Wire.h>
 #include <I2C.h>
 #include <AQMath.h>
+#include <Axis.h>
+#include <MotorsGlobalNames.h>
+#include <ReceiverGlobalVariables.h>
 #include "AeroQuad.h"
 #include "PID.h"
 

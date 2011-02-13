@@ -23,21 +23,7 @@
 
 #include "WProgram.h"
 
-#if defined(plusConfig) || defined(XConfig)
-  #define LASTMOTOR 4
-#endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#else
-  #define LASTMOTOR 4
-#endif
-
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-
+#include "MotorsGlobalNames.h"
 
 class Motors 
 {

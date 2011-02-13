@@ -18,33 +18,36 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ITG3200_GYROSCOPE_H_
-#define _AQ_ITG3200_GYROSCOPE_H_
+#ifndef _AQ_AXIS_DEFINITION_H_
+#define _AQ_AXIS_DEFINITION_H_
 
-#include "Gyroscope.h"
+// Basic axis definitions
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define THROTTLE 3
+#define MODE 4
+#define AUX 5
+#define AUX2 6
+#define AUX3 7
+#define XAXIS 0
+#define YAXIS 1
+#define ZAXIS 2
+#define LASTAXIS 3
+#define LEVELROLL 3
+#define LEVELPITCH 4
+#define LASTLEVELAXIS 5
+#define HEADING 5
+#define LEVELGYROROLL 6
+#define LEVELGYROPITCH 7
+#define ALTITUDE 8
+#define ZDAMPENING 9
 
-/*
-  10kOhm pull-ups on I2C lines.
-  VDD & VIO = 3.3V
-  SDA -> A4 (PC4)
-  SCL -> A5 (PC5)
-  INT -> D2 (PB2) (or no connection, not used here)
-  CLK -> GND
-*/
-class ITG3200Gyroscope : public Gyroscope 
-{
-private:
-  int _gyroAddress;
-  unsigned int _previousGyroTime;
-  
-public:
-  ITG3200Gyroscope();
-  
-  void initialize();
-  void measure();
-  const int getFlightData(byte axis);
-  void calibrate();
-  void autoZero();
-};
+#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define FINDZERO 9
+#else
+  #define FINDZERO 49
+#endif
+
 
 #endif

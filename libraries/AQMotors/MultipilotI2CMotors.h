@@ -23,7 +23,6 @@
 
 #include "Motors.h"
 
-
 class MultipilotI2CMotors : public Motors 
 {
 public:

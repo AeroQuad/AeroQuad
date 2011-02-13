@@ -52,28 +52,6 @@
   #define LED3PIN 31
 #endif
 
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
-
 // PID Variables
 // PID Variables
 struct PIDdata 
@@ -98,11 +76,6 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-//#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-//  #define FINDZERO 9
-//#else
-//  #define FINDZERO 49
-//#endif
 float _smoothHeading;
 
 // Sensor pin assignments
@@ -113,26 +86,6 @@ float _smoothHeading;
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
 //#define AZPIN 12 // Auto zero pin for IDG500 gyros
-
-// Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
-//#define MINCOMMAND 1000
-//#define MAXCOMMAND 2000
-//#if defined(plusConfig) || defined(XConfig)
-//  #define LASTMOTOR 4
-//#endif
-//#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-//  #define LASTMOTOR 6
-//#endif
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -156,11 +109,6 @@ int _levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
-
-//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-//  float CHR_RollAngle;
-//  float CHR_PitchAngle;
-//#endif
 
 // Heading hold
 byte _headingHoldConfig;
@@ -186,25 +134,8 @@ byte _storeAltitude = OFF;
 byte _altitudeHold = OFF;
 //#endif
 
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
-#define LASTCHANNEL 6
 int _delta;
 
-//#define RISING_EDGE 1
-//#define FALLING_EDGE 0
-//#define MINONWIDTH 950
-//#define MAXONWIDTH 2075
-//#define MINOFFWIDTH 12000
-//#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float _timeConstant;

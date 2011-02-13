@@ -21,10 +21,6 @@
 #include "CHR6DMAccelerometer.h"
 #include <AQMath.h>
 
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-
 CHR6DMAccelerometer::CHR6DMAccelerometer(CHR6DM chr6dm)
 {
   _chr6dm = &chr6dm;

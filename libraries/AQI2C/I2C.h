@@ -26,17 +26,11 @@
 #include "WProgram.h"
 
 void sendByteI2C(int deviceAddress, byte dataValue);
-
 byte readByteI2C(int deviceAddress);
-
 int readWordI2C(int deviceAddress);
-
 int readWordWaitI2C(int deviceAddress);
-
 int readReverseWordI2C(int deviceAddress);
-
 byte readWhoI2C(int deviceAddress);
-
 void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue);
 
 #endif

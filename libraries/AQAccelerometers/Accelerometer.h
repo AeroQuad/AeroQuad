@@ -23,18 +23,7 @@
 
 #include "WProgram.h"
 
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define ZAXIS 2
-#define LASTAXIS 3
-
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
-
+#include <Axis.h>
 
 class Accelerometer 
 {
@@ -45,11 +34,7 @@ private:
   byte _zAxisChannel;
   
 protected:  
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    float _accelZero[3];
-  #else
-    int _accelZero[3];
-  #endif
+  float _accelZero[3];
   int _accelChannel[3];
   int _accelADC[3];
   int _accelData[3];  
@@ -60,9 +45,6 @@ protected:
   
   unsigned long _currentAccelTime;
   unsigned long _previousAccelTime;
-
-
-
   
 public:  
   // ******************************************************************

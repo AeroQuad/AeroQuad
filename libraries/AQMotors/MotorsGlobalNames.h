@@ -18,31 +18,42 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "PWMMotors.h"
+#ifndef _AQ_MOTORS_GLOBAL_NAMES_H_
+#define _AQ_MOTORS_GLOBAL_NAMES_H_
 
-PWMMotors::PWMMotors()
-{
- // Analog write supports commands from 0-255 => 0 - 100% duty cycle
- // Using 125-250 for motor setting 1000-2000
-}
+#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+  #define LASTMOTOR 6
+#else
+  #define LASTMOTOR 4
+#endif
 
-void PWMMotors::initialize() 
-{
-  commandAllMotors(1000);
-}
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #define FRONTMOTORPIN  2
+  #define REARMOTORPIN   3
+  #define RIGHTMOTORPIN  5
+  #define LEFTMOTORPIN   6
+  #define LASTMOTORPIN   7
+#else
+  #define FRONTMOTORPIN  3
+  #define REARMOTORPIN   9
+  #define RIGHTMOTORPIN 10
+  #define LEFTMOTORPIN  11
+  #define LASTMOTORPIN  12
+#endif
 
-void PWMMotors::write() 
-{
-  analogWrite(FRONTMOTORPIN, _motorCommand[FRONT] / 8);
-  analogWrite(REARMOTORPIN,  _motorCommand[REAR]  / 8);
-  analogWrite(RIGHTMOTORPIN, _motorCommand[RIGHT] / 8);
-  analogWrite(LEFTMOTORPIN,  _motorCommand[LEFT]  / 8);
-}
 
-void PWMMotors::commandAllMotors(int motorCommand) 
-{   // Sends commands to all motors
-  analogWrite(FRONTMOTORPIN, motorCommand / 8);
-  analogWrite(REARMOTORPIN,  motorCommand / 8);
-  analogWrite(RIGHTMOTORPIN, motorCommand / 8);
-  analogWrite(LEFTMOTORPIN,  motorCommand / 8);
-}
+#define FRONT 0
+#define REAR 1
+#define RIGHT 2
+#define LEFT 3
+#define MOTORID1 0		
+#define MOTORID2 1		
+#define MOTORID3 2		
+#define MOTORID4 3		
+#define MOTORID5 4		
+#define MOTORID6 5
+#define MINCOMMAND 1000
+#define MAXCOMMAND 2000
+
+
+#endif

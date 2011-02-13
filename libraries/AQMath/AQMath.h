@@ -119,7 +119,6 @@ float arctan2(float y, float x);
 // Used for sensor calibration
 // Takes the median of 50 results as zero
 float findMedianFloat(float *data, int arraySize);
-
 int findMedianInt(int *data, int arraySize); 
 
 #endif

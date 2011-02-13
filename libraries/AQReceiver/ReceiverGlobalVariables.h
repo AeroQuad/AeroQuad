@@ -18,31 +18,35 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "PWMMotors.h"
+#ifndef _AQ_RECEIVER_GLOBAL_VARIABLES_H_
+#define _AQ_RECEIVER_GLOBAL_VARIABLES_H_
 
-PWMMotors::PWMMotors()
-{
- // Analog write supports commands from 0-255 => 0 - 100% duty cycle
- // Using 125-250 for motor setting 1000-2000
-}
+// Receiver variables
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define THROTTLE 3
+#define MODE 4
+#define AUX 5
+#define LASTCHANNEL 6
 
-void PWMMotors::initialize() 
-{
-  commandAllMotors(1000);
-}
+#define RISING_EDGE 1
+#define FALLING_EDGE 0
+#define MINONWIDTH 950
+#define MAXONWIDTH 2075
+#define MINOFFWIDTH 12000
+#define MAXOFFWIDTH 24000
 
-void PWMMotors::write() 
-{
-  analogWrite(FRONTMOTORPIN, _motorCommand[FRONT] / 8);
-  analogWrite(REARMOTORPIN,  _motorCommand[REAR]  / 8);
-  analogWrite(RIGHTMOTORPIN, _motorCommand[RIGHT] / 8);
-  analogWrite(LEFTMOTORPIN,  _motorCommand[LEFT]  / 8);
-}
 
-void PWMMotors::commandAllMotors(int motorCommand) 
-{   // Sends commands to all motors
-  analogWrite(FRONTMOTORPIN, motorCommand / 8);
-  analogWrite(REARMOTORPIN,  motorCommand / 8);
-  analogWrite(RIGHTMOTORPIN, motorCommand / 8);
-  analogWrite(LEFTMOTORPIN,  motorCommand / 8);
-}
+#define TIMEOUT 25000
+#define MINCOMMAND 1000
+#define MIDCOMMAND 1500
+#define MAXCOMMAND 2000
+#define MINDELTA 200
+#define MINCHECK MINCOMMAND + 100
+#define MAXCHECK MAXCOMMAND - 100
+#define MINTHROTTLE MINCOMMAND + 100
+#define LEVELOFF 100
+#define LASTCHANNEL 6
+
+#endif

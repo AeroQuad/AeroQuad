@@ -22,12 +22,6 @@
 
 #include "APMMotors.h"
 
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-
-
 APMMotors::APMMotors()
 {
 }

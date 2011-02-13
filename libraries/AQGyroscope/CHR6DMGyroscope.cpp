@@ -21,9 +21,6 @@
 #include "CHR6DMGyroscope.h"
 #include <AQMath.h>
 
-#define XAXIS 0
-#define YAXIS 1
-
 CHR6DMGyroscope::CHR6DMGyroscope(CHR6DM chr6dm)
 {
   _chr6dm = &chr6dm;

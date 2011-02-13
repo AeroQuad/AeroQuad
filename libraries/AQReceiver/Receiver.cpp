@@ -20,7 +20,6 @@
 
 #include "Receiver.h"
 
-
 Receiver::Receiver() 
 {
   _transmitterCommand[ROLL] = 1500;

@@ -22,11 +22,6 @@
 
 #include <I2C.h>
 
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-
 #define MOTORBASE 0x28            // I2C controller base address
 #define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
 #define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers

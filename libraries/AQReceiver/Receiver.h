@@ -23,22 +23,7 @@
 
 #include "WProgram.h"
 
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define LASTCHANNEL 6
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
-
-
+#include "ReceiverGlobalVariables.h"
 
 class Receiver 
 {
