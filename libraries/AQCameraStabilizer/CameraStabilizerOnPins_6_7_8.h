@@ -26,25 +26,9 @@
 class CameraStabilizerOnPins_6_7_8 : public CameraStabilizer 
 {
 public:
-  CameraStabilizerOnPins_6_7_8() : CameraStabilizer() {}
-  
-  void _initialize() 
-  {
-    // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
-    DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
-    TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
-    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    ICR4 = 39999; //50hz freq (standard servos)
-  }
-  
-  void move() 
-  {
-    if (_mode > 0) {
-      OCR4A = _servoPitch * 2;
-      OCR4B = _servoRoll * 2;
-      OCR4C = _servoYaw * 2;
-    }
-  }
+  CameraStabilizerOnPins_6_7_8();
+  void _initialize();
+  void move();
 };
 
 #endif

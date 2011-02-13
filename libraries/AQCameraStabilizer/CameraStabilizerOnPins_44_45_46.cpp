@@ -18,17 +18,32 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_CAMERA_STABILIZER_ON_PIN_44_45_46_H_
-#define _AQ_CAMERA_STABILIZER_ON_PIN_44_45_46_H_
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#include "CameraStabilizer.h"
+#include "CameraStabilizerOnPins_44_45_46.h"
 
-class CameraStabilizerOnPins_44_45_46 : public CameraStabilizer 
+
+CameraStabilizerOnPins_44_45_46::CameraStabilizerOnPins_44_45_46()
 {
-public:
-  CameraStabilizerOnPins_44_45_46();
-  void _initialize();
-  void move();
-};
+}
+  
+void CameraStabilizerOnPins_44_45_46::_initialize() 
+{
+  // Init PWM Timer 5   Probable conflict with Arducopter Motor
+  DDRL = DDRL | B00111000;                                  //Set to Output Mega Port-Pin PL3-46, PE4-45, PE5-44
+  TCCR5A =((1<<WGM51)|(1<<COM5A1)|(1<<COM5B1)|(1<<COM5C1)); 
+  TCCR5B = (1<<WGM53)|(1<<WGM52)|(1<<CS51);
+  ICR5 = 39999; //50hz freq (standard servos)
+}
+  
+void CameraStabilizerOnPins_44_45_46::move() 
+{
+  if (_mode > 0) 
+  {
+    OCR5A = _servoPitch * 2;
+    OCR5B = _servoRoll * 2;
+    OCR5C = _servoYaw * 2;      
+  }
+}
 
 #endif

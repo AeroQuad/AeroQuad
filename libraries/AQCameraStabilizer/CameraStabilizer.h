@@ -18,8 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_CAMERA_STABILIZER_H_
-#define _AQ_CAMERA_STABILIZER_H_
 
 // Written by CupOfTea:
 // http://aeroquad.com/showthread.php?1484-Camera-Stablisation
@@ -44,6 +42,13 @@ The high time shall be 1500?s, so the OCRxy register is set to 3000. A change of
  tick every 0.5?s. If the prescaler was changed, the OCRxy register value would
  be different. 
 */
+
+#ifndef _AQ_CAMERA_STABILIZER_H_
+#define _AQ_CAMERA_STABILIZER_H_
+
+
+#include "WProgram.h"
+
 class CameraStabilizer 
 {
 private:
@@ -67,213 +72,44 @@ protected:
   int _servoYaw;
 
 public:  
-  CameraStabilizer() {}
+  CameraStabilizer();
+  
   virtual void _initialize();
   virtual void move();
 
-  void initialize() 
-  {
-    _mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
-    _mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
-    _mCameraRoll = 11.11;        
-    _mCameraYaw = 11.11;
-    _centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
-    _centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
-    _centerYaw = 1500;  
-    _servoMinPitch = 1000;     // don't drive the servo past here  
-    _servoMinRoll = 1000;
-    _servoMinYaw = 1000;
-    _servoMaxPitch = 2000;
-    _servoMaxRoll = 2000;
-    _servoMaxYaw = 2000;
-    
-    _initialize(); // specific init for timer chosen
-    setPitch(0);
-    setRoll(0);
-    setYaw(0);
-    move();
-  }
-  
-  void setPitch (float angle) 
-  {
-    if (_mode == 1) 
-    {
-      _servoPitch = constrain((_mCameraPitch * angle) + _centerPitch , _servoMinPitch , _servoMaxPitch);
-    }
-    else 
-    {
-      _servoPitch = constrain(_centerPitch , _servoMinPitch , _servoMaxPitch);
-    }
-  }
-  
-  void setRoll (float angle) 
-  {
-    if (_mode == 1) 
-    {
-      _servoRoll = constrain((_mCameraRoll * angle) + _centerRoll , _servoMinRoll , _servoMaxRoll);
-    }
-    else 
-    {
-      _servoRoll = constrain(_centerRoll , _servoMinRoll , _servoMaxRoll);
-    }
-  }
-  
-  void setYaw (float angle) 
-  {
-    if (_mode == 1) 
-    {
-      _servoYaw = constrain((_mCameraYaw * angle) + _centerYaw , _servoMinYaw , _servoMaxYaw);
-    }
-    else 
-    {
-      _servoYaw = constrain(_centerYaw , _servoMinYaw , _servoMaxYaw);
-    }
-  }
-  
-  void setmCameraPitch(float gear) 
-  {
-    _mCameraPitch = gear;
-  }  
-  
-  void setmCameraRoll(float gear) 
-  {
-    _mCameraRoll = gear;        
-  }
-  
-  void setmCameraYaw(float gear) 
-  {
-    _mCameraYaw = gear;
-  }
-  
-  void setCenterPitch(int servoCenter) 
-  {
-    _centerPitch = servoCenter;
-  }
-  
-  void setCenterRoll(int servoCenter) 
-  {
-    _centerRoll = servoCenter;
-  }
-  
-  void setCenterYaw(int servoCenter)
-  {
-    _centerYaw = servoCenter;
-  }
-  
-  void setServoMinPitch (int servoMin) 
-  {
-    _servoMinPitch = servoMin;
-  }
-  
-  void setServoMinRoll (int servoMin) 
-  {
-    _servoMinRoll = servoMin;
-  }
-  
-  void setServoMinYaw (int servoMin) 
-  {
-    _servoMinYaw = servoMin;
-  }
-  
-  void setServoMaxPitch (int servoMax) 
-  {
-    _servoMaxPitch = servoMax;
-  }
-  
-  void setServoMaxRoll (int servoMax) 
-  {
-    _servoMaxRoll = servoMax;
-  }
-  
-  void setServoMaxYaw (int servoMax) 
-  {
-    _servoMaxYaw = servoMax;
-  }
-  
-  void setMode (int camMode) 
-  {
-    _mode = camMode;
-  }
-  
-  int getMode () 
-  {
-    return _mode;
-  } 
-  
-  int getPitch () 
-  {
-    return _servoPitch;
-  }
-  
-  int getRoll () 
-  {
-    return _servoRoll;
-  }
-  
-  int getYaw () 
-  {
-    return _servoYaw;
-  }
-  
-  float getmCameraPitch() 
-  {
-    return _mCameraPitch;
-  }  
-  
-  float getmCameraRoll() 
-  {
-    return _mCameraRoll;        
-  }
-  
-  float getmCameraYaw() 
-  {
-    return _mCameraYaw;
-  }
-  
-  int getCenterPitch() 
-  {
-    return _centerPitch;
-  }
-  
-  int getCenterRoll() 
-  {
-    return _centerRoll;
-  }
-  
-  int getCenterYaw() 
-  {
-    return _centerYaw;
-  }
-  
-  int getServoMinPitch() 
-  {
-    return _servoMinPitch;
-  }
-  
-  int getServoMinRoll() 
-  {
-    return _servoMinRoll;
-  }
-  
-  int getServoMinYaw() 
-  {
-    return _servoMinYaw;
-  }
-  
-  int getServoMaxPitch() 
-  {
-    return _servoMaxPitch;
-  }
-  
-  int getServoMaxRoll() 
-  {
-    return _servoMaxRoll;
-  }
-  
-  int getServoMaxYaw() 
-  {
-    return _servoMaxYaw;
-  }
+  void initialize();
+  void setPitch (float angle);
+  void setRoll (float angle);
+  void setYaw (float angle);
+  void setmCameraPitch(float gear);
+  void setmCameraRoll(float gear);
+  void setmCameraYaw(float gear);
+  void setCenterPitch(int servoCenter);
+  void setCenterRoll(int servoCenter);
+  void setCenterYaw(int servoCenter);
+  void setServoMinPitch (int servoMin);
+  void setServoMinRoll (int servoMin);
+  void setServoMinYaw (int servoMin);
+  void setServoMaxPitch (int servoMax);
+  void setServoMaxRoll (int servoMax);
+  void setServoMaxYaw (int servoMax);
+  void setMode (int camMode);
+  int getMode();
+  int getPitch();
+  int getRoll();
+  int getYaw();
+  float getmCameraPitch();
+  float getmCameraRoll();
+  float getmCameraYaw();
+  int getCenterPitch();
+  int getCenterRoll();
+  int getCenterYaw();
+  int getServoMinPitch();
+  int getServoMinRoll();
+  int getServoMinYaw();
+  int getServoMaxPitch();
+  int getServoMaxRoll();
+  int getServoMaxYaw();
 };
 
 #endif

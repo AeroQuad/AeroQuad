@@ -26,27 +26,11 @@
 class AeroQuadCameraStabilizer : public CameraStabilizer 
 {
 public:
-  AeroQuadCameraStabilizer() : CameraStabilizer() {}
+  AeroQuadCameraStabilizer();
   
-  void _initialize() 
-  {
-     // Init PWM Timer 1      Probable conflict with Arducopter Motor
-    DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
-                                                              //WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
-    TCCR1A =((1<<WGM11)|(1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); //Clear OCRnA/OCRnB/OCRnC outputs on compare match, set OCRnA/OCRnB/OCRnC outputs at BOTTOM (non-inverting mode).      
-    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);                 //Prescaler set to 8, that give us a resolution of 0.5us
-    ICR1 = 39999;    //50hz freq (standard servos) 20ms = 40000 * 0.5us
-  }
+  void _initialize();
 
-  void move() 
-  {
-    if (_mode > 0) 
-    {
-      OCR1A = _servoPitch * 2;
-      OCR1B = _servoRoll * 2;
-      OCR1C = _servoYaw * 2;
-    }
-  }
+  void move();
 };
 
 #endif
