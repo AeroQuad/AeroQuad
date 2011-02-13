@@ -34,6 +34,9 @@ ReceiverFor328p tempReceiver;
 Receiver *_receiver = &tempReceiver;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
+#include <FlightAngleDCM.h>
+FlightAngleDCM tempFlightAngle;
+FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 Motors *_motors = &tempMotors;
 //  #ifdef CameraControl
 //    #include "AeroQuadCameraStabilizer.h"

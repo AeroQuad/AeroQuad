@@ -18,32 +18,51 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_WII_CONFIG_H_
-#define _AQ_WII_CONFIG_H_
+#ifndef _AQ_FLIGHT_ANGLE_PROCESSOR_H_
+#define _AQ_FLIGHT_ANGLE_PROCESSOR_H_
 
-#define AeroQuad_Wii
+#define CF 0
+#define KF 1
+#define DCM 2
+#define IMU 3
 
-#include <AQWiiSensorAccessor.h>
-AQWiiSensorAccessor _wiiSensorAccessor;
-#include <WiiAccelerometer.h>
-WiiAccelerometer tempAccel(_wiiSensorAccessor);
-Accelerometer *_accel = &tempAccel;
-#include <WiiGyroscope.h>
-WiiGyroscope tempGyro(_wiiSensorAccessor);
-Gyroscope *_gyro = &tempGyro;
-#include <ReceiverFor328p.h>
-ReceiverFor328p tempReceiver;
-Receiver *_receiver = &tempReceiver;
-#include <PWMMotors.h>
-PWMMotors tempMotors;
-Motors *_motors = &tempMotors;
-#include <FlightAngleDCM.h>
-FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-#ifdef CameraControl
-  #include <AeroQuadCameraStabilizer.h>
-  AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *_cameraStabilizer = &tempCamera;
-#endif
+
+// This class is responsible for calculating vehicle attitude
+class FlightAngleProcessor 
+{
+private:
+  float _gyroAngle[2];
+
+protected:
+  byte _type;
+  float _angle[3];
+
+public:
+  
+  FlightAngleProcessor(void) 
+  {
+    _angle[ROLL] = 0;
+    _angle[PITCH] = 0;
+    _angle[YAW] = 0;
+    _gyroAngle[ROLL] = 0;
+    _gyroAngle[PITCH] = 0;
+  }
+  
+  virtual void initialize();
+  virtual void calculate();
+  virtual float getGyroUnbias(byte axis);
+  virtual void calibrate();
+ 
+  const float getData(byte axis) 
+  {
+    return _angle[axis];
+  }
+  
+  const byte getType(void) 
+  {
+    // This is set in each subclass to identify which algorithm used
+    return _type;
+  }
+};
 
 #endif

@@ -61,27 +61,27 @@ void readPilotCommands()
         zeroADC();
       #endif
     }   
-    // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
-    if ((_receiver->getRaw(ROLL) > MAXCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
-    {
-      _accel->calibrate(); // defined in Accel.h
-      storeSensorsToEEPROM();
-      zeroIntegralError();
-      _motors->pulseMotors(3);
-      #ifdef ArduCopter
-        zeroADC();
-      #endif
-    }   
-    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
-    if ((_receiver->getRaw(ROLL) < MINCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
-    {
-      _gyro->calibrate();
-      zeroIntegralError();
-      _motors->pulseMotors(4);
-      #ifdef ArduCopter
-        zeroADC();
-      #endif
-    }
+//    // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
+//    if ((_receiver->getRaw(ROLL) > MAXCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
+//    {
+//      _accel->calibrate(); // defined in Accel.h
+//      storeSensorsToEEPROM();
+//      zeroIntegralError();
+//      _motors->pulseMotors(3);
+//      #ifdef ArduCopter
+//        zeroADC();
+//      #endif
+//    }   
+//    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
+//    if ((_receiver->getRaw(ROLL) < MINCHECK) && (_receiver->getRaw(PITCH) > MAXCHECK)) 
+//    {
+//      _gyro->calibrate();
+//      zeroIntegralError();
+//      _motors->pulseMotors(4);
+//      #ifdef ArduCopter
+//        zeroADC();
+//      #endif
+//    }
     // Arm motors (left stick lower right corner)
     if (_receiver->getRaw(YAW) > MAXCHECK && _armed == OFF && _safetyCheck == ON) 
     {

@@ -38,6 +38,9 @@ Gyroscope *_gyro = &tempGyro;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
 Motors *_motors = &tempMotors;
+#include <FlightAngleDCM.h>
+FlightAngleDCM tempFlightAngle;
+FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 #ifdef CameraControl
   #include <AeroQuadCameraStabilizer.h>
   AeroQuadCameraStabilizer tempCamera;

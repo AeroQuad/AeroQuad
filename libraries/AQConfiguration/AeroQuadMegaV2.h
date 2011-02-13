@@ -36,6 +36,9 @@ Accelerometer *_accel = &tempAccel;
 #include <ITG3200Gyroscope.h>
 ITG3200Gyroscope tempGyro;
 Gyroscope *_gyro = &tempGyro;
+#include <FlightAngleDCM.h>
+FlightAngleDCM tempFlightAngle;
+FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 #ifdef HeadingMagHold
   #include <HMC5843Magnetometer.h>
   HMC5843Magnetometer tempCompass(_gyro);
