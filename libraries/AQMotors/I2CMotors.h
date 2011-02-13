@@ -23,49 +23,14 @@
 
 #include "Motors.h"
 
-
-#define MOTORBASE 0x28            // I2C controller base address
-#define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
-#define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers
-#define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
-#define LEFTMOTORID  MOTORBASE + 4  // inspired frame
-
 class I2CMotors : public Motors 
 {
 public:
-  I2CMotors() : Motors()
-  {
-    // Scale motor commands to 0 to 255
-    // for I2C commands
-    // m = (255 - 0)/(2000-1000) = 0.255
-    // b = y1 - (m * x1) = 0 - (0.255 * 1000) = -255
-    _mMotorCommand = 0.255;
-    _bMotorCommand = -255.0;
-  }
+  I2CMotors();
 
-  void initialize()
-  {
-    sendByteI2C(FRONTMOTORID, 0);
-    sendByteI2C(REARMOTORID,  0);
-    sendByteI2C(RIGHTMOTORID, 0);
-    sendByteI2C(LEFTMOTORID,  0);
-  }
-
-  void write()
-  {
-    sendByteI2C(FRONTMOTORID, constrain((_motorCommand[FRONT] * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(REARMOTORID,  constrain((_motorCommand[REAR]  * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(RIGHTMOTORID, constrain((_motorCommand[RIGHT] * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(LEFTMOTORID,  constrain((_motorCommand[LEFT]  * _mMotorCommand) + _bMotorCommand, 0, 255));
-  }
-
-  void commandAllMotors(int motorCommand)
-  {
-    sendByteI2C(FRONTMOTORID, constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(REARMOTORID,  constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(RIGHTMOTORID, constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
-    sendByteI2C(LEFTMOTORID,  constrain((motorCommand * _mMotorCommand) + _bMotorCommand, 0, 255));
-  }
+  void initialize();
+  void write();
+  void commandAllMotors(int motorCommand);
 };
 
 #endif

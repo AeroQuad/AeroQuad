@@ -23,20 +23,6 @@
 
 #include "Motors.h"
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  #define FRONTMOTORPIN  2
-  #define REARMOTORPIN   3
-  #define RIGHTMOTORPIN  5
-  #define LEFTMOTORPIN   6
-  #define LASTMOTORPIN   7
-#else
-  #define FRONTMOTORPIN  3
-  #define REARMOTORPIN   9
-  #define RIGHTMOTORPIN 10
-  #define LEFTMOTORPIN  11
-  #define LASTMOTORPIN  12
-#endif
-
 
 /******************************************************/
 /********************* PWM Motors *********************/
@@ -44,33 +30,11 @@
 class PWMMotors : public Motors 
 {
 public:
-  PWMMotors() : Motors()
-  {
-   // Analog write supports commands from 0-255 => 0 - 100% duty cycle
-   // Using 125-250 for motor setting 1000-2000
-  }
+  PWMMotors();
 
-  void initialize() 
-  {
-    commandAllMotors(1000);
-  }
-
-  void write() 
-  {
-    analogWrite(FRONTMOTORPIN, _motorCommand[FRONT] / 8);
-    analogWrite(REARMOTORPIN,  _motorCommand[REAR]  / 8);
-    analogWrite(RIGHTMOTORPIN, _motorCommand[RIGHT] / 8);
-    analogWrite(LEFTMOTORPIN,  _motorCommand[LEFT]  / 8);
-
-  }
-
-  void commandAllMotors(int motorCommand) 
-  {   // Sends commands to all motors
-    analogWrite(FRONTMOTORPIN, motorCommand / 8);
-    analogWrite(REARMOTORPIN,  motorCommand / 8);
-    analogWrite(RIGHTMOTORPIN, motorCommand / 8);
-    analogWrite(LEFTMOTORPIN,  motorCommand / 8);
-  }
+  void initialize();
+  void write();
+  void commandAllMotors(int motorCommand);
 };
 
 #endif

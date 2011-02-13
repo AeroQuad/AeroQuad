@@ -21,6 +21,24 @@
 #ifndef _AQ_MOTORS_H_
 #define _AQ_MOTORS_H_
 
+#include "WProgram.h"
+
+#if defined(plusConfig) || defined(XConfig)
+  #define LASTMOTOR 4
+#endif
+#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+  #define LASTMOTOR 6
+#else
+  #define LASTMOTOR 4
+#endif
+
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define MINCOMMAND 1000
+#define MAXCOMMAND 2000
+
+
 class Motors 
 {
 private:
@@ -39,21 +57,7 @@ protected:
   
 public:
 
-  Motors()
-  {
-    _throttle = 0;
-    _motorAxisCommand[ROLL] = 0;
-    _motorAxisCommand[PITCH] = 0;
-    _motorAxisCommand[YAW] = 0;
-    for (byte motor = 0; motor < LASTMOTOR; motor++) 
-    {
-      _motorCommand[motor] = 1000;
-      _minCommand[motor] = MINCOMMAND;
-      _maxCommand[motor] = MAXCOMMAND;
-      _remoteCommand[motor] = 1000;
-    }
-    _delta = 0;
-  };
+  Motors();
 
   // The following function calls must be defined in any new subclasses
   virtual void initialize();
@@ -61,86 +65,22 @@ public:
   virtual void commandAllMotors(int motorCommand);
 
   //Any number of optional methods can be configured as needed by the SubSystem to expose functionality externally
-  void pulseMotors(byte quantity) 
-  {
-    for (byte i = 0; i < quantity; i++) 
-    {
-      commandAllMotors(MINCOMMAND + 100);
-      delay(250);
-      commandAllMotors(MINCOMMAND);
-      delay(250);
-    }
-  }
+  void pulseMotors(byte quantity);
 
-  void setRemoteCommand(byte motor, int value) 
-  {
-    _remoteCommand[motor] = value;
-  }
-
-  const int getRemoteCommand(byte motor) 
-  {
-    return _remoteCommand[motor];
-  }
-
-  const float getMotorSlope() 
-  {
-    return _mMotorCommand;
-  }
-
-  const float getMotorOffset() 
-  {
-    return _bMotorCommand;
-  }
-
-  void setMinCommand(byte motor, int value) 
-  {
-    _minCommand[motor] = value;
-  }
-
-  const int getMinCommand(byte motor) 
-  {
-    return _minCommand[motor];
-  }
-
-  void setMaxCommand(byte motor, int value) 
-  {
-    _maxCommand[motor] = value;
-  }
-
-  const int getMaxCommand(byte motor) 
-  {
-    return _maxCommand[motor];
-  }
-
-  void setMotorAxisCommand(byte motor, int value) 
-  {
-    _motorAxisCommand[motor] = value;
-  }
-
-  const int getMotorAxisCommand(byte motor) 
-  {
-    return _motorAxisCommand[motor];
-  }
-
-  void setMotorCommand(byte motor, int value) 
-  {
-    _motorCommand[motor] = value;
-  }
-
-  const int getMotorCommand(byte motor) 
-  {
-    return _motorCommand[motor];
-  }
-  
-  void setThrottle(float value) 
-  {
-    _throttle = value;
-  }
-  
-  const float getThrottle() 
-  {
-    return _throttle;
-  }
+  void setRemoteCommand(byte motor, int value);
+  const int getRemoteCommand(byte motor);
+  const float getMotorSlope();
+  const float getMotorOffset();
+  void setMinCommand(byte motor, int value);
+  const int getMinCommand(byte motor);
+  void setMaxCommand(byte motor, int value);
+  const int getMaxCommand(byte motor);
+  void setMotorAxisCommand(byte motor, int value);
+  const int getMotorAxisCommand(byte motor);
+  void setMotorCommand(byte motor, int value);
+  const int getMotorCommand(byte motor);
+  void setThrottle(float value);
+  const float getThrottle();
 };
 
 #endif
