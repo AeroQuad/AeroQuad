@@ -23,55 +23,20 @@
 
 #include "Gyroscope.h"
 
+#include <AQWiiSensorAccessor.h>
+
 class WiiGyroscope : public Gyroscope 
 {
+private:
+  AQWiiSensorAccessor *_wiiSensorAccessor;
+  
 public:
-  WiiGyroscope() : Gyroscope() 
-  {
-    // 0.5mV/Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
-    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
-    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
-    _gyroFullScaleOutput = 2000;
-    _gyroScaleFactor = 0.069565217391304;
-  }
+  WiiGyroscope(AQWiiSensorAccessor wiiSensorAccessor);
   
-  void initialize() 
-  {
-    Init_Gyro_Acc(); // defined in DataAquisition.h
-  }
-  
-  void measure() 
-  {
-    _currentGyroTime = micros();
-    updateControls(); // defined in DataAcquisition.h
-    _gyroADC[ROLL] = NWMP_gyro[ROLL] - _gyroZero[ROLL];
-    _gyroData[ROLL] = filterSmoothWithTime(_gyroADC[ROLL], _gyroData[ROLL], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _gyroADC[PITCH] = _gyroZero[PITCH] - NWMP_gyro[PITCH];
-    _gyroData[PITCH] = filterSmoothWithTime(_gyroADC[PITCH], _gyroData[PITCH], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _gyroADC[YAW] =  _gyroZero[YAW] - NWMP_gyro[YAW];
-    _gyroData[YAW] = filterSmoothWithTime(_gyroADC[YAW], _gyroData[YAW], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _previousGyroTime = _currentGyroTime;
-  }
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
-
-  void calibrate() 
-  {
-    int findZero[FINDZERO];
-  
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++) 
-      {
-        updateControls();
-        findZero[i] = NWMP_gyro[calAxis];
-      }
-      _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-  }
+  void initialize();
+  void measure();
+  const int getFlightData(byte axis);
+  void calibrate();
 };
 
 #endif

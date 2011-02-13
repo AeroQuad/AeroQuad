@@ -23,52 +23,20 @@
 
 #include "Accelerometer.h"
 
+#include <AQWiiSensorAccessor.h>
+
 class WiiAccelerometer : public Accelerometer 
 {
+private:
+  AQWiiSensorAccessor *_wiiSensorAccessor;
+  
 public:
-  WiiAccelerometer() : Accelerometer()
-  {
-    _accelScaleFactor = 0;    
-  }
+  WiiAccelerometer(AQWiiSensorAccessor wiiSensorAccessor);
   
-  void measure() 
-  {
-    _currentAccelTime = micros();
-    // Actual measurement performed in gyro class
-    // We just update the appropriate variables here
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
-    {
-      _accelADC[axis] = _accelZero[axis] - NWMP_acc[axis];
-      _accelData[axis] = filterSmoothWithTime(_accelADC[axis], _accelData[axis], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0));
-    }
-    _previousAccelTime = _currentAccelTime;
-  }
-  
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
- 
+  void measure();
+  const int getFlightData(byte axis);
   // Allows user to zero accelerometers on command
-  void calibrate() 
-  {
-    int findZero[FINDZERO];
-
-    for(byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++) 
-      {
-        updateControls();
-        findZero[i] = NWMP_acc[calAxis];
-      }
-      _accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-    
-    // store accel value that represents 1g
-    _accelOneG = getRaw(ZAXIS);
-    // replace with estimated Z axis 0g value
-    _accelZero[ZAXIS] = (_accelZero[ROLL] + _accelZero[PITCH]) / 2;
-  }
+  void calibrate();
 };
 
 #endif

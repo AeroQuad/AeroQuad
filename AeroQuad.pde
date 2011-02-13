@@ -275,11 +275,12 @@
 
 #ifdef AeroQuad_Wii
   #include <AQWiiSensorAccessor.h>
+  AQWiiSensorAccessor _wiiSensorAccessor;
   #include <WiiAccelerometer.h>
-  WiiAccelerometer tempAccel;
+  WiiAccelerometer tempAccel(_wiiSensorAccessor);
   Accelerometer *_accel = &tempAccel;
   #include <WiiGyroscope.h>
-  WiiGyroscope tempGyro;
+  WiiGyroscope tempGyro(_wiiSensorAccessor);
   Gyroscope *_gyro = &tempGyro;
   #include <ReceiverFor328p.h>
   ReceiverFor328p tempReceiver;
@@ -300,11 +301,12 @@
 
 #ifdef AeroQuadMega_Wii
   #include <AQWiiSensorAccessor.h>
+  AQWiiSensorAccessor _wiiSensorAccessor;
   #include <WiiAccelerometer.h>
-  WiiAccelerometer tempAccel;
+  WiiAccelerometer tempAccel(_wiiSensorAccessor);
   Accelerometer *_accel = &tempAccel;
   #include <WiiGyroscope.h>
-  WiiGyroscope tempGyro;
+  WiiGyroscope tempGyro(_wiiSensorAccessor);
   Gyroscope *_gyro = &tempGyro;
   #include <ReceiverForMega.h>
   ReceiverForMega tempReceiver;
