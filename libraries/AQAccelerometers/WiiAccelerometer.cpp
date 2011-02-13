@@ -41,11 +41,6 @@ void WiiAccelerometer::measure()
   _previousAccelTime = _currentAccelTime;
 }
   
-const int WiiAccelerometer::getFlightData(byte axis) 
-{
-  return getRaw(axis);
-}
- 
 // Allows user to zero accelerometers on command
 void WiiAccelerometer::calibrate() 
 {

@@ -53,11 +53,6 @@ void IDGIXZ500Gyroscope::measure()
   }
 }
 
-const int IDGIXZ500Gyroscope::getFlightData(byte axis) 
-{
-  return getRaw(axis);
-}
-  
 void IDGIXZ500Gyroscope::calibrate() 
 {
   autoZero();

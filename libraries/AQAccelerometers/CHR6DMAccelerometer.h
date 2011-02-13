@@ -22,6 +22,7 @@
 #define _AQ_CHR6DM_ACCELEROMETER_H_
 
 #include "Accelerometer.h"
+#include <CHR6DMSensorsAccessor.h>
 
 class CHR6DMAccelerometer : public Accelerometer 
 {
@@ -29,69 +30,13 @@ private:
   CHR6DM *_chr6dm;
 
 public:
-  CHR6DMAccelerometer(CHR6DM chr6dm)
-  {
-    _chr6dm = &chr6dm;
-    _accelScaleFactor = 0;
-  }
-
-  void initialize() 
-  {
-    calibrate();
-  }
-
-  void measure() 
-  {
-    _currentAccelTime = micros();
-    _accelADC[XAXIS] = _chr6dm->data.ax - _accelZero[XAXIS];
-    _accelADC[YAXIS] = _chr6dm->data.ay - _accelZero[YAXIS];
-    _accelADC[ZAXIS] = _chr6dm->data.az - _accelOneG;
-
-    _accelData[XAXIS] = filterSmoothWithTime(_accelADC[XAXIS], _accelData[XAXIS], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0)); //to get around 1
-    _accelData[YAXIS] = filterSmoothWithTime(_accelADC[YAXIS], _accelData[YAXIS], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0));
-    _accelData[ZAXIS] = filterSmoothWithTime(_accelADC[ZAXIS], _accelData[ZAXIS], _smoothFactor, ((_currentAccelTime - _previousAccelTime) / 5000.0));
-    _previousAccelTime = _currentAccelTime;
-  }    
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
-
+  CHR6DMAccelerometer(CHR6DM chr6dm);
+  
+  void initialize();
+  void measure();
   // Allows user to zero accelerometers on command
-  void calibrate() 
-  {
-   float zeroXreads[FINDZERO];
-   float zeroYreads[FINDZERO];
-   float zeroZreads[FINDZERO];
-
-    for (int i=0; i<FINDZERO; i++) 
-    {
-        _chr6dm->requestAndReadPacket();
-        zeroXreads[i] = _chr6dm->data.ax;
-        zeroYreads[i] = _chr6dm->data.ay;
-        zeroZreads[i] = _chr6dm->data.az;
-    }
-
-    _accelZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
-    _accelZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
-    _accelZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
-   
-    // store accel value that represents 1g
-    _accelOneG = _accelZero[ZAXIS];
-    // replace with estimated Z axis 0g value
-    //accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-  }
-
-  void calculateAltitude() 
-  {
-    _currentAccelTime = micros();
-    if ((abs(_chr6dm->CHR_RollAngle) < 5) && (abs(_chr6dm->CHR_PitchAngle) < 5)) 
-    {
-      _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);
-    }
-    _previousAccelTime = _currentAccelTime;
-  } 
+  void calibrate();
+  void calculateAltitude();
 };
 
 #endif

@@ -78,41 +78,26 @@ public:
   virtual void measure();
   virtual void calibrate();
   virtual void autoZero();
-  virtual const int getFlightData(byte);
   virtual void initialize();
+  virtual const int getFlightData(byte axis);
 
   // The following functions are common between all Gyro subclasses
   void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel);
-    
   const int getRaw(byte axis);
-  
   const int getData(byte axis);
-  
   void setData(byte axis, int value);
-  
   const int invert(byte axis);
-  
   const int getZero(byte axis);
-  
   void setZero(byte axis, int value);
-  
   const float getScaleFactor();
-
   const float getSmoothFactor();
-  
   void setSmoothFactor(float value);
-
   const float rateDegPerSec(byte axis);
-
   const float rateRadPerSec(byte axis);
-  
   // returns heading as +/- 180 degrees
   const float getHeading();
-  
   const float getRawHeading();
-  
   void setStartHeading(float value);
-  
   void setReceiverYaw(int value);
 };
 

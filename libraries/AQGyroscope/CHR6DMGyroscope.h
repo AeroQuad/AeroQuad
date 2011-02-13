@@ -22,6 +22,7 @@
 #define _AQ_CHR6DM_GYROSCOPE_H_
 
 #include "Gyroscope.h"
+#include <CHR6DMSensorsAccessor.h>
 
 class CHR6DMGyroscope : public Gyroscope 
 {
@@ -29,55 +30,11 @@ private:
   CHR6DM *_chr6dm;
 
 public:
-  CHR6DMGyroscope(CHR6DM chr6dm) : Gyroscope() 
-  {
-    _chr6dm = &chr6dm;
-    _gyroFullScaleOutput = 0;
-    _gyroScaleFactor = 0;
-  }
+  CHR6DMGyroscope(CHR6DM chr6dm);
 
-  void initialize() 
-  {
-    _chr6dm->initCHR6DM();
-  }
-
-  void measure()
-  {
-    _currentTime = micros();
-    _chr6dm->readCHR6DM();
-    _gyroADC[ROLL] = _chr6dm->data.rollRate - _gyroZero[ROLL]; //gx yawRate
-    _gyroADC[PITCH] = _gyroZero[PITCH] - _chr6dm->data.pitchRate; //gy pitchRate
-    _gyroADC[YAW] = _chr6dm->data.yawRate - _gyroZero[ZAXIS]; //gz rollRate
-
-    _gyroData[ROLL] = filterSmoothWithTime(_gyroADC[ROLL], _gyroData[ROLL], _smoothFactor, ((_currentTime - _previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _gyroData[PITCH] = filterSmoothWithTime(_gyroADC[PITCH], _gyroData[PITCH], _smoothFactor, ((_currentTime - _previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _gyroData[YAW] = filterSmoothWithTime(_gyroADC[YAW], _gyroData[YAW], _smoothFactor, ((_currentTime - _previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    _previousTime = _currentTime;
-  }
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
-
-  void calibrate() 
-  {
-    float zeroXreads[FINDZERO];
-    float zeroYreads[FINDZERO];
-    float zeroZreads[FINDZERO];
-
-    for (int i=0; i<FINDZERO; i++) 
-    {
-        _chr6dm->readCHR6DM();
-        zeroXreads[i] = _chr6dm->data.rollRate;
-        zeroYreads[i] = _chr6dm->data.pitchRate;
-        zeroZreads[i] = _chr6dm->data.yawRate;
-    }
-
-    _gyroZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
-    _gyroZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
-    _gyroZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
-  }
+  void initialize();
+  void measure();
+  void calibrate();
 };
 
 #endif

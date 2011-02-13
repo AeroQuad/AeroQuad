@@ -18,48 +18,53 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "WiiGyroscope.h"
-
+#include "CHR6DMGyroscope.h"
 #include <AQMath.h>
 
-WiiGyroscope::WiiGyroscope(AQWiiSensorAccessor wiiSensorAccessor)
+#define XAXIS 0
+#define YAXIS 1
+
+CHR6DMGyroscope::CHR6DMGyroscope(CHR6DM chr6dm)
 {
-  _wiiSensorAccessor = &wiiSensorAccessor;
-  // 0.5mV/Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
-  // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
-  // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
-  _gyroFullScaleOutput = 2000;
-  _gyroScaleFactor = 0.069565217391304;
+  _chr6dm = &chr6dm;
+  _gyroFullScaleOutput = 0;
+  _gyroScaleFactor = 0;
 }
-  
-void WiiGyroscope::initialize() 
+
+void CHR6DMGyroscope::initialize() 
 {
-  _wiiSensorAccessor->initialize(); 
+  _chr6dm->initCHR6DM();
 }
-  
-void WiiGyroscope::measure() 
+
+void CHR6DMGyroscope::measure()
 {
   _currentGyroTime = micros();
-  _wiiSensorAccessor->measure();
-  _gyroADC[ROLL] = _wiiSensorAccessor->getGyroscopeValue(ROLL) - _gyroZero[ROLL];
+  _chr6dm->readCHR6DM();
+  _gyroADC[ROLL] = _chr6dm->data.rollRate - _gyroZero[ROLL]; //gx yawRate
+  _gyroADC[PITCH] = _gyroZero[PITCH] - _chr6dm->data.pitchRate; //gy pitchRate
+  _gyroADC[YAW] = _chr6dm->data.yawRate - _gyroZero[ZAXIS]; //gz rollRate
+
   _gyroData[ROLL] = filterSmoothWithTime(_gyroADC[ROLL], _gyroData[ROLL], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-  _gyroADC[PITCH] = _gyroZero[PITCH] - _wiiSensorAccessor->getGyroscopeValue(PITCH);
   _gyroData[PITCH] = filterSmoothWithTime(_gyroADC[PITCH], _gyroData[PITCH], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-  _gyroADC[YAW] =  _gyroZero[YAW] - _wiiSensorAccessor->getGyroscopeValue(YAW);
   _gyroData[YAW] = filterSmoothWithTime(_gyroADC[YAW], _gyroData[YAW], _smoothFactor, ((_currentGyroTime - _previousGyroTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
   _previousGyroTime = _currentGyroTime;
 }
 
-void WiiGyroscope::calibrate() 
+void CHR6DMGyroscope::calibrate() 
 {
-  int findZero[FINDZERO];
-  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
+  float zeroXreads[FINDZERO];
+  float zeroYreads[FINDZERO];
+  float zeroZreads[FINDZERO];
+
+  for (int i=0; i<FINDZERO; i++) 
   {
-    for (int i=0; i<FINDZERO; i++) 
-    {
-      _wiiSensorAccessor->measure();
-      findZero[i] = _wiiSensorAccessor->getGyroscopeValue(calAxis);
-    }
-    _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
+    _chr6dm->readCHR6DM();
+    zeroXreads[i] = _chr6dm->data.rollRate;
+    zeroYreads[i] = _chr6dm->data.pitchRate;
+    zeroZreads[i] = _chr6dm->data.yawRate;
   }
+
+  _gyroZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
+  _gyroZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
+  _gyroZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
 }

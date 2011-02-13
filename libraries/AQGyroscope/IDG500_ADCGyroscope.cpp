@@ -59,11 +59,6 @@ void IDG500_ADCGyroscope::measure()
   }
 }
 
-const int IDG500_ADCGyroscope::getFlightData(byte axis) 
-{
-  return getRaw(axis);
-}
-
 void IDG500_ADCGyroscope::calibrate() 
 {
   int findZero[FINDZERO];

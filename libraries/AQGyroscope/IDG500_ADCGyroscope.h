@@ -34,7 +34,6 @@ public:
   
   void initialize();
   void measure();
-  const int getFlightData(byte axis);
   void calibrate();
 };
 

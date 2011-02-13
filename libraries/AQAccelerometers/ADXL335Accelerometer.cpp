@@ -52,11 +52,6 @@ void ADXL335Accelerometer::measure()
   }
 }
 
-const int ADXL335Accelerometer::getFlightData(byte axis) 
-{
-  return getRaw(axis);
-}
-  
 // Allows user to zero accelerometers on command
 void ADXL335Accelerometer::calibrate() 
 {

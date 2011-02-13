@@ -42,7 +42,11 @@ void Accelerometer::initialize()
 }
 void Accelerometer::measure() {}
 void Accelerometer::calibrate() {}
-const int Accelerometer::getFlightData(byte) {}
+
+const int Accelerometer::getFlightData(byte axis)
+{
+  return getRaw(axis);
+}
 
 // **************************************************************
 // The following functions are common between all Gyro subclasses

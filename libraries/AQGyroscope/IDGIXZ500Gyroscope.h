@@ -29,13 +29,8 @@ public:
   IDGIXZ500Gyroscope();
   
   void initialize();
-  
   void measure();
-
-  const int getFlightData(byte axis);
-  
   void calibrate();
-  
   void autoZero();
 };
 

@@ -76,7 +76,7 @@ public:
   virtual void initialize();
   virtual void measure();
   virtual void calibrate();
-  virtual const int getFlightData(byte);
+  virtual const int getFlightData(byte axis);
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses

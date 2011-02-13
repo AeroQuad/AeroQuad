@@ -35,8 +35,12 @@ void Gyroscope::initialize(byte rollChannel, byte pitchChannel, byte yawChannel)
 void Gyroscope::measure() {}
 void Gyroscope::calibrate() {}
 void Gyroscope::autoZero() {}
-const int Gyroscope::getFlightData(byte) {}
 void Gyroscope::initialize() {}
+
+const int Gyroscope::getFlightData(byte axis)
+{
+  return getRaw(axis);
+}
 
 // The following functions are common between all Gyro subclasses
 void Gyroscope::_initialize(byte rollChannel, byte pitchChannel, byte yawChannel) 
