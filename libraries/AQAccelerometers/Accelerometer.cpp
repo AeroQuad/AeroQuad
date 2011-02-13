@@ -141,12 +141,12 @@ const float Accelerometer::rateG(const byte axis)
   return getData(axis) / _accelOneG;
 }
   
-void Accelerometer::calculateAltitude(unsigned long currentTime) 
+void Accelerometer::calculateAltitude() 
 {
-  _currentAccelTime = currentTime;
+  _currentAccelTime = micros();
   if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
   {
     _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);
   }
-  _previousAccelTime = currentTime;
+  _previousAccelTime = _currentAccelTime;
 } 

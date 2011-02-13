@@ -32,11 +32,8 @@ public:
   BMA180Accelerometer();
   
   void initialize();
-  
   void measure();
-
   const int getFlightData(byte axis);
-  
   // Allows user to zero accelerometers on command
   void calibrate();
 };

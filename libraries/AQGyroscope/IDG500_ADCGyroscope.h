@@ -30,60 +30,12 @@ private:
   int _rawADC;
 
 public:
-  IDG500_ADCGyroscope() : Gyroscope() 
-  {
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-    // Tested values : 
-    //#define Gyro_Gain_X 0.4 //X axis Gyro gain
-    //#define Gyro_Gain_Y 0.41 //Y axis Gyro gain
-    //#define Gyro_Gain_Z 0.41 //Z axis Gyro gain
-    //#define Gyro_Scaled_X(x) x*ToRad(Gyro_Gain_X) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Y(x) x*ToRad(Gyro_Gain_Y) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Z(x) x*ToRad(Gyro_Gain_Z) //Return the scaled ADC raw data of the gyro in radians for second
-    _gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    _gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec) 0.002
-  }
+  IDG500_ADCGyroscope();
   
-  void initialize() 
-  {
-    // rollChannel = 1
-    // pitchChannel = 2
-    // yawChannel = 0
-    this->_initialize(1, 2, 0);
-    initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
-  }
-  
-  void measure() 
-  {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
-    {
-      _rawADC = analogRead_ArduCopter_ADC(_gyroChannel[axis]);
-      if (_rawADC > 500) // Check if good measurement
-      {
-        _gyroADC[axis] =  _rawADC - _gyroZero[axis];
-      }
-      _gyroData[axis] = _gyroADC[axis]; // no smoothing needed
-    }
-   }
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
-
-  void calibrate() 
-  {
-    int findZero[FINDZERO];
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++) 
-      {
-        findZero[i] = analogRead_ArduCopter_ADC(_gyroChannel[calAxis]);
-        delay(2);
-      }
-      _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-  }
+  void initialize();
+  void measure();
+  const int getFlightData(byte axis);
+  void calibrate();
 };
 
 #endif

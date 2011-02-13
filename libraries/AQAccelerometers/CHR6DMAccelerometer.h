@@ -83,9 +83,9 @@ public:
     //accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
   }
 
-  void calculateAltitude(unsigned long currentTime) 
+  void calculateAltitude() 
   {
-    _currentAccelTime = currentTime;
+    _currentAccelTime = micros();
     if ((abs(_chr6dm->CHR_RollAngle) < 5) && (abs(_chr6dm->CHR_PitchAngle) < 5)) 
     {
       _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);

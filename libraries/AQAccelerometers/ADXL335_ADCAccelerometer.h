@@ -31,71 +31,13 @@ private:
   int _rawADC;
 
 public:
-  ADXL335_ADCAccelerometer() : Accelerometer()
-  {
-    // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
-    // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
-    // Tested value : 414
-    // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
-    // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-    _accelScaleFactor = 414.0 / 9.81;    
-  }
+  ADXL335_ADCAccelerometer();
   
-  void initialize() 
-  {
-    // rollChannel = 5
-    // pitchChannel = 4
-    // zAxisChannel = 6
-    this->_initialize(5, 4, 6);
-  }
-  
-  void measure() 
-  {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) 
-    {
-      _rawADC = analogRead_ArduCopter_ADC(_accelChannel[axis]);
-      if (_rawADC > 500) // Check if measurement good
-      {
-        _accelADC[axis] = _rawADC - _accelZero[axis];
-      }
-      _accelData[axis] = _accelADC[axis]; // no smoothing needed
-    }
-  }
-
-  const int getFlightData(byte axis) 
-  {
-    return getRaw(axis);
-  }
-  
+  void initialize();
+  void measure();
+  const int getFlightData(byte axis);
   // Allows user to zero accelerometers on command
-  void calibrate() 
-  {
-    for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) 
-    {
-      for (int i=0; i<FINDZERO; i++) 
-      {
-        _findZero[i] = analogRead_ArduCopter_ADC(_accelChannel[calAxis]);
-        delay(2);
-      }
-      _accelZero[calAxis] = findMedianInt(_findZero, FINDZERO);
-    }
-
-    // store accel value that represents 1g
-//    _accelOneG = _accelZero[ZAXIS];
-    _accelOneG = 486;    // tested value with the configurator at flat level
-    // replace with estimated Z axis 0g value
-    _accelZero[ZAXIS] = (_accelZero[ROLL] + _accelZero[PITCH]) / 2;
-  }
-
-  void calculateAltitude() 
-  {
-    _currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-    {
-      _rawAltitude += (getZaxis()) * ((_currentTime - _previousTime) / 1000000.0);
-    }
-    _previousTime = _currentTime;
-  } 
+  void calibrate();
 };
 
 #endif

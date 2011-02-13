@@ -82,39 +82,22 @@ public:
   // The following functions are common between all Gyro subclasses
   // **************************************************************
   void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel);
-  
   const int getRaw(byte axis);
-  
   const int getData(byte axis);
-  
   const int invert(byte axis);
-  
   const int getZero(byte axis);
-  
   void setZero(byte axis, int value);
-  
   const float getScaleFactor();
-  
   const float getSmoothFactor();
-  
   void setSmoothFactor(float value);
-  
   const float angleRad(byte axis);
-
   const float angleDeg(byte axis);
-  
   void setOneG(int value);
-  
   const int getOneG();
-  
   const int getZaxis();
-  
   const float getAltitude();
-  
   const float rateG(const byte axis);
-  
-  virtual void calculateAltitude(unsigned long currentTime);
-
+  virtual void calculateAltitude();
 };
 
 #endif
