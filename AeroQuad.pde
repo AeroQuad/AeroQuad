@@ -23,35 +23,6 @@
    If you need additional assitance go to http://AeroQuad.com/forum
 *****************************************************************************/
 
-#include <EEPROM.h>
-#include <Wire.h>
-#include <I2C.h>
-#include <AQMath.h>
-#include <Axis.h>
-#include <MotorsGlobalNames.h>
-#include <ReceiverGlobalVariables.h>
-#include "AeroQuad.h"
-#include "PID.h"
-
-/****************************************************************************
-************************* Hardware Configuration ***************************
-****************************************************************************/
-// Select which hardware you wish to use with the AeroQuad Flight Software
-
-//#include "AeroQuadV1.h"         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#include "AeroQuadV1_IDG.h"     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#include "AeroQuadV18.h"        // Arduino 2009 with AeroQuad Shield v1.8
-//#include "AeroQuadWii.h"        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-//#include "AeroQuadMegaV1.h"     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#include "AeroQuadMegaV2.h"     // Arduino Mega with AeroQuad Shield v2.x
-//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and Aero/Quad Shield v2.x
-//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
-//#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
-//#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
-#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
-                              // (just uncomment AltitudeHold for baro), and voltage divider
-
 /****************************************************************************
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
@@ -81,6 +52,37 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
 //#define CameraControl
+
+#include <EEPROM.h>
+#include <Wire.h>
+#include <I2C.h>
+#include <AQMath.h>
+#include <Axis.h>
+#include <MotorsGlobalNames.h>
+#include <ReceiverGlobalVariables.h>
+#include "AeroQuad.h"
+#include "PID.h"
+
+/****************************************************************************
+************************* Hardware Configuration ***************************
+****************************************************************************/
+// Select which hardware you wish to use with the AeroQuad Flight Software
+
+//#include <AeroQuadV1.h>         // Arduino 2009 with AeroQuad Shield v1.7 and below
+//#include <AeroQuadV1_IDG.h>     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
+//#include <AeroQuadV18.h>        // Arduino 2009 with AeroQuad Shield v1.8
+//#include <AeroQuadWii.h>        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#include <AeroQuadMegaV1.h>     // Arduino Mega with AeroQuad Shield v1.7 and below
+//#include <AeroQuadMegaV2.h>     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_Wii        // Arduino Mega with Wii Sensors and Aero/Quad Shield v2.x
+#define ArduCopter              // ArduPilot Mega (APM) with APM Sensor Board
+//#define Multipilot              // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
+//#define MultipilotI2C           // Active Multipilot I2C and Mixertable (needs debug)
+//#define AeroQuadMega_CHR6DM     // Clean Arduino Mega with CHR6DM as IMU/heading ref.
+//#define APM_OP_CHR6DM           // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
+                                  // (just uncomment AltitudeHold for baro), and voltage divider
+
+
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
@@ -116,9 +118,9 @@
   #include <APMMotors.h>
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
-  #include "FlightAngle.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+//  #include "FlightAngle.h"
+//  FlightAngleDCM tempFlightAngle;
+//  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include <HMC5843Magnetometer.h>
     HMC5843Magnetometer tempCompass(_gyro);
@@ -151,9 +153,9 @@
   #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
-  #include "FlightAngle.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+//  #include "FlightAngle.h"
+//  FlightAngleDCM tempFlightAngle;
+//  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include <AeroQuadCameraStabilizer.h>
     AeroQuadCameraStabilizer tempCamera;
@@ -176,9 +178,9 @@
   #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
-  #include "FlightAngle.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+//  #include "FlightAngle.h"
+//  FlightAngleDCM tempFlightAngle;
+//  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #include <CHR6DMCompass.h>
   CHR6DMCompass tempCompass(_chr6dm);
   Compass *_compass = &tempCompass;
@@ -223,9 +225,9 @@
   #include <APMMotors.h>
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
-  #include "FlightAngle.h"
-  FlightAngleCHR6DM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+//  #include "FlightAngle.h"
+//  FlightAngleCHR6DM tempFlightAngle;
+//  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #include "CHR6DMCompass.h"
   CHR6DMCompass tempCompass(_chr6dm);
   Compass *_compass = &tempCompass;
@@ -277,6 +279,14 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
 #endif
+
+#include "FlightAngle.h"
+FlightAngleDCM tempFlightAngle;
+//FlightAngleCompFilter tempFlightAngle;
+//FlightAngleKalmanFilter tempFlightAngle;
+//FlightAngleCHR6DM tempFlightAngle;
+FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+
 
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;

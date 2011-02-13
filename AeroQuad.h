@@ -33,17 +33,6 @@
 #define ON 1
 #define OFF 0
 
-#if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-//  #define LED_Red 35
-//  #define LED_Yellow 36
-//  #define LED_Green 37
-//  #define RELE_pin 47
-//  #define SW1_pin 41
-//  #define SW2_pin 40
-//  #define BUZZER 9
-//  #define PIANO_SW1 42
-//  #define PIANO_SW2 43
-#endif
 #if defined (__AVR_ATmega328P__)
   #define LED2PIN 12
   #define LED3PIN 12
@@ -85,7 +74,6 @@ float _smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-//#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -135,7 +123,6 @@ byte _altitudeHold = OFF;
 //#endif
 
 int _delta;
-
 
 // Flight angle variables
 float _timeConstant;

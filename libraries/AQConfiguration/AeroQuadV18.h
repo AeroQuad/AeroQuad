@@ -14,11 +14,11 @@
   PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  #include "FlightAngle.h"
-  FlightAngleDCM tempFlightAngle;
+//  #include "FlightAngle.h"
+//  FlightAngleDCM tempFlightAngle;
 //  FlightAngleCompFilter tempFlightAngle;
 //  FlightAngleKalmanFilter tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+//  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include <HMC5843Magnetometer.h>
     HMC5843Magnetometer tempCompass(_gyro);
