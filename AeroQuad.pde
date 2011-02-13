@@ -81,6 +81,7 @@
 //#define AeroQuadMega_CHR6DM     // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM           // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
                                   // (just uncomment AltitudeHold for baro), and voltage divider
+//#include "CustomConfig.h"       // Make your own custom config in this file  SAMPLE PURPOSE ONLY                         
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
