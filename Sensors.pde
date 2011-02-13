@@ -84,3 +84,30 @@ void storeSensorsToEEPROM()
   writeFloat(_gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
   writeFloat(_gyro->getZero(ZAXIS), GYRO_YAW_ZERO_ADR);
 }
+
+void initTransmitterFromEEPROM()
+{
+  _receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+  {
+    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
+    _receiver->setTransmitterSlope(channel,readFloat(offset+0));     // _mTransmitter[channel] = readFloat(offset+0);
+    _receiver->setTransmitterOffset(channel,readFloat(offset+4));    // _bTransmitter[channel] = readFloat(offset+4);
+    _receiver->setSmoothFactor(channel,readFloat(offset+8));         //_transmitterSmooth[channel] = readFloat(offset+8);
+  }
+}
+
+void storeTransmitterToEEPROM()
+{
+  writeFloat(_receiver->getXmitFactor(),XMITFACTOR_ADR);
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
+  {
+    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
+    writeFloat(_receiver->getTransmitterSlope(channel),offset+0);     // _mTransmitter[channel] = readFloat(offset+0);
+    writeFloat(_receiver->getTransmitterOffset(channel),offset+4);    // _bTransmitter[channel] = readFloat(offset+4);
+    writeFloat(_receiver->getSmoothFactor(channel),offset+8);         //_transmitterSmooth[channel] = readFloat(offset+8);
+  }
+}
+
+
+

@@ -97,6 +97,7 @@ void readSerialCommand()
       {
         _receiver->setSmoothFactor(channel, readFloatSerial());
       }
+      storeTransmitterToEEPROM();
       break;
     case 'O': // Receive transmitter calibration values
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) 
@@ -104,6 +105,7 @@ void readSerialCommand()
         _receiver->setTransmitterSlope(channel, readFloatSerial());
         _receiver->setTransmitterOffset(channel, readFloatSerial());
       }
+      storeTransmitterToEEPROM();
       break;
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h

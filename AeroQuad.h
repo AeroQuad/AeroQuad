@@ -199,12 +199,12 @@ byte _altitudeHold = OFF;
 #define LASTCHANNEL 6
 int _delta;
 
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
+//#define RISING_EDGE 1
+//#define FALLING_EDGE 0
+//#define MINONWIDTH 950
+//#define MAXONWIDTH 2075
+//#define MINOFFWIDTH 12000
+//#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float _timeConstant;
@@ -365,6 +365,7 @@ void comma(); // defined in SerialCom.pde
 
 void initSensorsFromEEPROM(); // defined in Sensors.pde
 void storeSensorsToEEPROM();  // defined in Sensors.pde
+void initTransmitterFromEEPROM();  // defined in Sensors.pde
 
 //#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 //float findMode(float *data, int arraySize); // defined in Sensors.pde
