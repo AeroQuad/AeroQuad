@@ -54,7 +54,7 @@ void readSensors()
   #endif
   
   // ****************** Calculate Absolute Angle *****************
-  _flightAngle->calculate(G_Dt); // defined in FlightAngle.h
+  _flightAngle->calculate(); // defined in FlightAngle.h
 }
 
 void initSensorsFromEEPROM()
