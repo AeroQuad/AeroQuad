@@ -18,24 +18,31 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#define CF 0
+#define KF 1
+#define DCM 2
+#define IMU 3
+
+
 // This class is responsible for calculating vehicle attitude
 class FlightAngleProcessor 
 {
+private:
+  float _gyroAngle[2];
+
+protected:
+  byte _type;
+  float _angle[3];
+
 public:
-  #define CF 0
-  #define KF 1
-  #define DCM 2
-  #define IMU 3
-  byte type;
-  float angle[3];
-  float gyroAngle[2];
   
-  FlightAngleProcessor(void) {
-    angle[ROLL] = 0;
-    angle[PITCH] = 0;
-    angle[YAW] = 0;
-    gyroAngle[ROLL] = 0;
-    gyroAngle[PITCH] = 0;
+  FlightAngleProcessor(void) 
+  {
+    _angle[ROLL] = 0;
+    _angle[PITCH] = 0;
+    _angle[YAW] = 0;
+    _gyroAngle[ROLL] = 0;
+    _gyroAngle[PITCH] = 0;
   }
   
   virtual void initialize();
@@ -43,13 +50,15 @@ public:
   virtual float getGyroUnbias(byte axis);
   virtual void calibrate();
  
-  const float getData(byte axis) {
-    return angle[axis];
+  const float getData(byte axis) 
+  {
+    return _angle[axis];
   }
   
-  const byte getType(void) {
+  const byte getType(void) 
+  {
     // This is set in each subclass to identify which algorithm used
-    return type;
+    return _type;
   }
 };
 
@@ -61,50 +70,52 @@ public:
 class FlightAngleCompFilter : public FlightAngleProcessor 
 {
 private:
-  float previousAngle[2];
-  float filterTerm0[2];
-  float filterTerm1[2];
-  float filterTerm2[2];
-  float timeConstantCF;
+  float _previousAngle[2];
+  float _filterTerm0[2];
+  float _filterTerm1[2];
+  float _filterTerm2[2];
+  float _timeConstantCF;
 
   void _initialize(byte axis) 
   {
-    previousAngle[axis] = _accel->angleDeg(axis);
-    filterTerm2[axis] = _gyro->rateDegPerSec(axis);
-    timeConstantCF = _timeConstant; // timeConstant is a global variable read in from EEPROM
+    _previousAngle[axis] = _accel->angleDeg(axis);
+    _filterTerm2[axis] = _gyro->rateDegPerSec(axis);
+    _timeConstantCF = _timeConstant; // timeConstant is a global variable read in from EEPROM
     // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
     // Will take care of better OO implementation in future revision
   }
   
   float _calculate(byte axis, float newAngle, float newRate) 
   {
-    filterTerm0[axis] = (newAngle - previousAngle[axis]) * timeConstantCF *  timeConstantCF;
-    filterTerm2[axis] += filterTerm0[axis] * G_Dt;
-    filterTerm1[axis] = filterTerm2[axis] + (newAngle - previousAngle[axis]) * 2 *  timeConstantCF + newRate;
-    previousAngle[axis] = (filterTerm1[axis] * G_Dt) + previousAngle[axis];
-    return previousAngle[axis]; // This is actually the current angle, but is stored for the next iteration
+    _filterTerm0[axis] = (newAngle - _previousAngle[axis]) * _timeConstantCF *  _timeConstantCF;
+    _filterTerm2[axis] += _filterTerm0[axis] * G_Dt;
+    _filterTerm1[axis] = _filterTerm2[axis] + (newAngle - _previousAngle[axis]) * 2 *  _timeConstantCF + newRate;
+    _previousAngle[axis] = (_filterTerm1[axis] * G_Dt) + _previousAngle[axis];
+    return _previousAngle[axis]; // This is actually the current angle, but is stored for the next iteration
   }
 
 public:
   FlightAngleCompFilter() : FlightAngleProcessor() 
   {
-    filterTerm0[ROLL] = 0;
-    filterTerm1[ROLL] = 0;
-    filterTerm0[PITCH] = 0;
-    filterTerm1[PITCH] = 0;
-    type = CF;
+    _filterTerm0[ROLL] = 0;
+    _filterTerm1[ROLL] = 0;
+    _filterTerm0[PITCH] = 0;
+    _filterTerm1[PITCH] = 0;
+    _type = CF;
   }
   
   void initialize(void) 
   {
     for (byte axis = ROLL; axis < YAW; axis++)
+    {
       _initialize(axis);
+    }
   }
   
   void calculate(void) 
   {
-    angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
-    angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
+    _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
+    _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
   }
   
   float getGyroUnbias(byte axis) 
@@ -123,12 +134,19 @@ public:
 class FlightAngleKalmanFilter : public FlightAngleProcessor 
 {
 private:
-    float x_angle[2], x_bias[2];
-    float P_00[2], P_01[2], P_10[2], P_11[2];	
-    float Q_angle, Q_gyro;
+    float x_angle[2]; 
+    float x_bias[2];
+    float P_00[2];
+    float P_01[2];
+    float P_10[2];
+    float P_11[2];	
+    float Q_angle;
+    float Q_gyro;
     float R_angle;
-    float y, S;
-    float K_0, K_1;
+    float y; 
+    float S;
+    float K_0;
+    float K_1;
 
     float _calculate(byte axis, float newAngle, float newRate) 
     {
@@ -165,7 +183,7 @@ public:
       P_10[axis] = 0;
       P_11[axis] = 0;
     }
-    type = KF;
+    _type = KF;
   }
   
   void initialize(void) 
@@ -177,8 +195,8 @@ public:
   
   void calculate(void) 
   {
-    angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
-    angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
+    _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
+    _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
   }
   
   float getGyroUnbias(byte axis) 
@@ -332,9 +350,9 @@ private:
   //**********************************************************************************************
   void eulerAngles(void)
   {
-    angle[ROLL] =  degrees(asin(-DCM_Matrix[6]));
-    angle[PITCH] = degrees(atan2(DCM_Matrix[7],DCM_Matrix[8]));
-    angle[YAW] =   degrees(atan2(DCM_Matrix[3],DCM_Matrix[0]));
+    _angle[ROLL] =  degrees(asin(-DCM_Matrix[6]));
+    _angle[PITCH] = degrees(atan2(DCM_Matrix[7],DCM_Matrix[8]));
+    _angle[YAW] =   degrees(atan2(DCM_Matrix[3],DCM_Matrix[0]));
   } 
   
 public:
@@ -364,7 +382,7 @@ public:
     COGY = 1; //Course overground Y axis    
     dt = 0;
     Gyro_Gain = radians(_gyro->getScaleFactor());
-    type = DCM;
+    _type = DCM;
     Kp_ROLLPITCH = 0.0014;
     Ki_ROLLPITCH = 0.00000012; // was 0.00000015
   }
@@ -377,7 +395,8 @@ public:
     eulerAngles();
   }
   
-  float getGyroUnbias(byte axis) { 
+  float getGyroUnbias(byte axis) 
+  { 
     if (axis == ROLL)
       return degrees(Omega[1]);
     if (axis == PITCH)
@@ -405,7 +424,8 @@ private:
   #define beta sqrt(3.0f / 4.0f) * gyroMeasError // compute beta
   float SEq_1, SEq_2, SEq_3, SEq_4; // estimated orientation quaternion elements with initial conditions
 
-  void filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z) {
+  void filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z) 
+  {
     // Local system variables
     float norm; // vector norm
     float SEqDot_omega_1, SEqDot_omega_2, SEqDot_omega_3, SEqDot_omega_4; // quaternion derrivative from gyroscopes elements
@@ -467,7 +487,8 @@ private:
 public:
   FlightAngleIMU() : FlightAngleProcessor() {}
   
-  void initialize(void) {
+  void initialize(void) 
+  {
     // estimated orientation quaternion elements with initial conditions
     SEq_1 = 1.0f; // w
     SEq_2 = 0.0f; // x
@@ -478,12 +499,13 @@ public:
   void calculate(void) 
   {
     filterUpdate(_gyro->rateRadPerSec(ROLL), _gyro->rateRadPerSec(PITCH), _gyro->rateRadPerSec(YAW), _accel->getRaw(XAXIS), _accel->getRaw(YAXIS), _accel->getRaw(ZAXIS));
-    angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
-    angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
-    angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
+    _angle[ROLL] = degrees(-asin((2 * SEq_2 * SEq_4) + (2 * SEq_1 * SEq_3)));
+    _angle[PITCH] = degrees(atan2((2 * SEq_3 * SEq_4) - (2 *SEq_1 * SEq_2), (2 * SEq_1 * SEq_1) + (2 *SEq_4 * SEq_4) - 1));
+    _angle[YAW] = degrees(atan2((2 * SEq_2 * SEq_3) - (2 * SEq_1 * SEq_4), (2 * SEq_1 * SEq_1) + (2 * SEq_2 * SEq_2) -1));
   }
   
-  float getGyroUnbias(byte axis) {
+  float getGyroUnbias(byte axis) 
+  {
     return _gyro->getFlightData(axis);
   }
 
@@ -580,8 +602,8 @@ public:
     RyEst = (RyAcc + wGyro* RyGyro) / (1.0 + wGyro);
     RzEst = (RzAcc + wGyro* RzGyro) / (1.0 + wGyro);
   
-    angle[ROLL]  =  180/PI * Axz;
-    angle[PITCH] =  180/PI * Ayz;
+    _angle[ROLL]  =  180/PI * Axz;
+    _angle[PITCH] =  180/PI * Ayz;
   }
   
   float getGyroUnbias(byte axis) 
@@ -615,13 +637,14 @@ public:
 
   void calculate(void) 
   {   
-    angle[ROLL]  =  _chr6dm.data.roll - zeroRoll;
-    angle[PITCH] =  _chr6dm.data.pitch - zeroPitch;
-    _chr6dm.CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    _chr6dm.CHR_PitchAngle = angle[PITCH];
+    _angle[ROLL]  =  _chr6dm.data.roll - zeroRoll;
+    _angle[PITCH] =  _chr6dm.data.pitch - zeroPitch;
+    _chr6dm.CHR_RollAngle = _angle[ROLL]; //ugly since gotta access through accel class
+    _chr6dm.CHR_PitchAngle = _angle[PITCH];
   }
   
-   void calibrate(void) {
+   void calibrate(void) 
+   {
     zeroRoll = _chr6dm.data.roll;
     zeroPitch = _chr6dm.data.pitch;
   }
@@ -641,9 +664,8 @@ public:
 class FlightAngleCHR6DMFake : public FlightAngleProcessor 
 {
 private:
-
-float zeroRoll;
-float zeroPitch;
+  float zeroRoll;
+  float zeroPitch;
 
 public:
   FlightAngleCHR6DMFake() : FlightAngleProcessor() {}
