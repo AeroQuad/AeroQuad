@@ -30,7 +30,7 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -39,7 +39,7 @@
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
 //#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
+//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
                               // (just uncomment AltitudeHold for baro), and voltage divider
 
 /****************************************************************************
@@ -106,9 +106,8 @@
   #include <PWMMotors.h>
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
-  #include "FlightAngle.h"
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 //  #ifdef CameraControl
 //    #include "AeroQuadCameraStabilizer.h"
@@ -131,7 +130,7 @@
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 //  #ifdef CameraControl
 //    #include "AeroQuadCameraStabilizer.h"
@@ -154,8 +153,12 @@
   PWMTimedMotors tempMotors;
   Motors *_motors = &tempMotors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+//  #include <FlightAngleDCM.h>
+//  FlightAngleDCM tempFlightAngle(_gyro,_accel);
+  #include <FlightAngleCompFilter.h>
+  FlightAngleCompFilter tempFlightAngle(_gyro,_accel);
+//  #include <FlightAngleKalmanFilter.h>
+//  FlightAngleKalmanFilter tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include <HMC5843Magnetometer.h>
@@ -195,7 +198,7 @@
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include <AeroQuadCameraStabilizer.h>
@@ -219,7 +222,7 @@
   ITG3200Gyroscope tempGyro;
   Gyroscope *_gyro = &tempGyro;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include <HMC5843Magnetometer.h>
@@ -258,7 +261,7 @@
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include <HMC5843Magnetometer.h>
@@ -293,7 +296,7 @@
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
 //  FlightAngle_CompFilter tempFlightAngle;  
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
@@ -319,7 +322,7 @@
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include <AeroQuadCameraStabilizer.h>
@@ -344,7 +347,7 @@
   PWMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include <FlightAngleDCM.h>
-  FlightAngleDCM tempFlightAngle;
+  FlightAngleDCM tempFlightAngle(_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #include <CHR6DMCompass.h>
   CHR6DMCompass tempCompass(_chr6dm);
@@ -382,7 +385,7 @@
   APMMotors tempMotors;
   Motors *_motors = &tempMotors;
   #include "FlightAngleCHR6DM.h"
-  FlightAngleCHR6DM tempFlightAngle;
+  FlightAngleCHR6DM tempFlightAngle(_chr6dm,_gyro,_accel);
   FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   #include "CHR6DMCompass.h"
   CHR6DMCompass tempCompass(_chr6dm);

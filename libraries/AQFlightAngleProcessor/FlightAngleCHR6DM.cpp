@@ -18,44 +18,31 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_FLIGHT_ANGLE_PROCESSOR_H_
-#define _AQ_FLIGHT_ANGLE_PROCESSOR_H_
+#include "FlightAngleCHR6DM.h"
 
-#include "WProgram.h"
-#include "Axis.h"
-
-#include "Gyroscope.h"
-#include "Accelerometer.h"
-
-#define CF 0
-#define KF 1
-#define DCM 2
-#define IMU 3
-
-// This class is responsible for calculating vehicle attitude
-class FlightAngleProcessor 
+FlightAngleCHR6DM::FlightAngleCHR6DM(CHR6DM chr6dm, Gyroscope *gyro,Accelerometer *accel) : FlightAngleProcessor(gyro,accel) 
 {
-private:
-  float _gyroAngle[2];
+  _chr6dm = &chr6dm;
+}
 
-protected:  
-  byte _type;
-  float _angle[3];
-  
-  Accelerometer *_accel;
-  Gyroscope *_gyro;
-  
-public:  
-  FlightAngleProcessor(Gyroscope *gyro,Accelerometer *accel);
-  
-  virtual void initialize();
-  virtual void calculate(unsigned long G_Dt);
-  virtual float getGyroUnbias(byte axis);
-  virtual void calibrate();
- 
-  const float getData(byte axis);
-  
-  const byte getType();
-};
+void FlightAngleCHR6DM::initialize() 
+{
+  calibrate();
+}
 
-#endif
+void FlightAngleCHR6DM::calculate(unsigned long G_Dt) 
+{   
+  _angle[ROLL]  =  _chr6dm->data.roll - _zeroRoll;
+  _angle[PITCH] =  _chr6dm->data.pitch - _zeroPitch;
+  _chr6dm->CHR_RollAngle = _angle[ROLL]; //ugly since gotta access through accel class
+  _chr6dm->CHR_PitchAngle = _angle[PITCH];
+}
+  
+void FlightAngleCHR6DM::calibrate() 
+{
+  _zeroRoll = _chr6dm->data.roll;
+  _zeroPitch = _chr6dm->data.pitch;
+}
+  
+
+

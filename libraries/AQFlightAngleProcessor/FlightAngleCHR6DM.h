@@ -23,39 +23,22 @@
 
 #include "FlightAngleProcessor.h"
 
+#include <CHR6DMSensorsAccessor.h>
+
 class FlightAngleCHR6DM : public FlightAngleProcessor 
 {
 private:
-  float zeroRoll;
-  float zeroPitch;
+  CHR6DM *_chr6dm;
+  
+  float _zeroRoll;
+  float _zeroPitch;
 
 public:
-  FlightAngleCHR6DM() : FlightAngleProcessor() {}
+  FlightAngleCHR6DM(CHR6DM chr6dm, Gyroscope *gyro,Accelerometer *accel);
 
-  void initialize() 
-  {
-    calibrate();
-  }
-
-  void calculate() 
-  {   
-    _angle[ROLL]  =  _chr6dm.data.roll - zeroRoll;
-    _angle[PITCH] =  _chr6dm.data.pitch - zeroPitch;
-    _chr6dm.CHR_RollAngle = _angle[ROLL]; //ugly since gotta access through accel class
-    _chr6dm.CHR_PitchAngle = _angle[PITCH];
-  }
-  
-   void calibrate() 
-   {
-    zeroRoll = _chr6dm.data.roll;
-    zeroPitch = _chr6dm.data.pitch;
-  }
-  
-  float getGyroUnbias(byte axis) 
-  {
-    return _gyro->getFlightData(axis);
-  }
-
+  void initialize();
+  void calculate(unsigned long G_Dt);
+  void calibrate();
 };
 
 

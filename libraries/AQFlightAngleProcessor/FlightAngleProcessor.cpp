@@ -18,44 +18,36 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_FLIGHT_ANGLE_PROCESSOR_H_
-#define _AQ_FLIGHT_ANGLE_PROCESSOR_H_
+#include "FlightAngleProcessor.h"
 
-#include "WProgram.h"
-#include "Axis.h"
-
-#include "Gyroscope.h"
-#include "Accelerometer.h"
-
-#define CF 0
-#define KF 1
-#define DCM 2
-#define IMU 3
-
-// This class is responsible for calculating vehicle attitude
-class FlightAngleProcessor 
+FlightAngleProcessor::FlightAngleProcessor(Gyroscope *gyro,Accelerometer *accel) 
 {
-private:
-  float _gyroAngle[2];
-
-protected:  
-  byte _type;
-  float _angle[3];
+  _gyro = gyro;
+  _accel = accel;
+  _angle[ROLL] = 0;
+  _angle[PITCH] = 0;
+  _angle[YAW] = 0;
+  _gyroAngle[ROLL] = 0;
+  _gyroAngle[PITCH] = 0;
+}
   
-  Accelerometer *_accel;
-  Gyroscope *_gyro;
-  
-public:  
-  FlightAngleProcessor(Gyroscope *gyro,Accelerometer *accel);
-  
-  virtual void initialize();
-  virtual void calculate(unsigned long G_Dt);
-  virtual float getGyroUnbias(byte axis);
-  virtual void calibrate();
+void FlightAngleProcessor::initialize() {}
+void FlightAngleProcessor::calculate(unsigned long G_Dt) {}
+void FlightAngleProcessor::calibrate() {}
  
-  const float getData(byte axis);
+float FlightAngleProcessor::getGyroUnbias(byte axis) 
+{
+  return _gyro->getFlightData(axis);
+}
+ 
+ 
+const float FlightAngleProcessor::getData(byte axis) 
+{
+  return _angle[axis];
+}
   
-  const byte getType();
-};
-
-#endif
+const byte FlightAngleProcessor::getType() 
+{
+  // This is set in each subclass to identify which algorithm used
+  return _type;
+}

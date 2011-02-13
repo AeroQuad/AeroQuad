@@ -32,53 +32,14 @@ private:
   float _filterTerm2[2];
   float _timeConstantCF;
 
-  void _initialize(byte axis) 
-  {
-    _previousAngle[axis] = _accel->angleDeg(axis);
-    _filterTerm2[axis] = _gyro->rateDegPerSec(axis);
-    _timeConstantCF = _timeConstant; // timeConstant is a global variable read in from EEPROM
-    // timeConstantCF should have been read in from set method, but needed common way for CF and KF to be initialized
-    // Will take care of better OO implementation in future revision
-  }
-  
-  float _calculate(byte axis, float newAngle, float newRate) 
-  {
-    _filterTerm0[axis] = (newAngle - _previousAngle[axis]) * _timeConstantCF *  _timeConstantCF;
-    _filterTerm2[axis] += _filterTerm0[axis] * G_Dt;
-    _filterTerm1[axis] = _filterTerm2[axis] + (newAngle - _previousAngle[axis]) * 2 *  _timeConstantCF + newRate;
-    _previousAngle[axis] = (_filterTerm1[axis] * G_Dt) + _previousAngle[axis];
-    return _previousAngle[axis]; // This is actually the current angle, but is stored for the next iteration
-  }
+  void _initialize(byte axis);
+  float _calculate(byte axis, float newAngle, float newRate, unsigned long G_Dt);
 
 public:
-  FlightAngleCompFilter() : FlightAngleProcessor() 
-  {
-    _filterTerm0[ROLL] = 0;
-    _filterTerm1[ROLL] = 0;
-    _filterTerm0[PITCH] = 0;
-    _filterTerm1[PITCH] = 0;
-    _type = CF;
-  }
+  FlightAngleCompFilter(Gyroscope *gyro,Accelerometer *accel);
   
-  void initialize() 
-  {
-    for (byte axis = ROLL; axis < YAW; axis++)
-    {
-      _initialize(axis);
-    }
-  }
-  
-  void calculate() 
-  {
-    _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
-    _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
-  }
-  
-  float getGyroUnbias(byte axis) 
-  {
-    return _gyro->getFlightData(axis);
-  }
-  
+  void initialize();
+  void calculate(unsigned long G_Dt);
   void calibrate() {}
 };
 
