@@ -198,12 +198,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -313,12 +313,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -383,12 +383,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -449,12 +449,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -529,12 +529,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -613,12 +613,12 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
 
@@ -686,11 +686,11 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
-  void calculateAltitude() {
+  //void calculateAltitude() {
     //currentTime = micros();
-    if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    //if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
+      //rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     //previousTime = currentTime;
-  } 
+  //} 
 };
 #endif
