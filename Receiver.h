@@ -31,7 +31,7 @@ public:
   float transmitterSmooth[LASTCHANNEL];
   float mTransmitter[LASTCHANNEL];
   float bTransmitter[LASTCHANNEL];
-  unsigned long currentTime, previousTime;
+  //unsigned long currentTime, previousTime;
 
   Receiver(void) {
     transmitterCommand[ROLL] = 1500;
@@ -416,13 +416,13 @@ public:
     SREG = oldSREG;
 
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      currentTime = micros();
+      //currentTime = micros();
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
       //transmitterCommandSmooth[channel] = transmitterFilter[channel].filter(receiverData[channel]);
-      previousTime = currentTime;
+      //previousTime = currentTime;
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
@@ -517,12 +517,12 @@ public:
 
   void read(void) {
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      currentTime = micros();
+      //currentTime = micros();
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-      previousTime = currentTime;
+      //previousTime = currentTime;
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
@@ -599,12 +599,12 @@ public:
 
 
     for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      currentTime = micros();
+      //currentTime = micros();
       // Apply transmitter calibration adjustment
       receiverData[channel] = (mTransmitter[channel] * data[channel]) + bTransmitter[channel];
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-      previousTime = currentTime;
+      //previousTime = currentTime;
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500

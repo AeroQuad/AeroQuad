@@ -251,9 +251,9 @@ public:
     rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
     //rawAltitude = (101325.0-pressure)/4096*346;
     //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
-    currentTime = micros();
+    //currentTime = micros();
     altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
-    previousTime = currentTime;
+    //previousTime = currentTime;
   }
 };
 
