@@ -42,7 +42,6 @@
 #endif
 
 // PID Variables
-// PID Variables
 struct PIDdata 
 {
   float P;
@@ -100,7 +99,6 @@ int _levelOff; // Read in from EEPROM
 
 // Heading hold
 byte _headingHoldConfig;
-//float headingScaleFactor;
 float _commandedYaw = 0;
 float _headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float _heading = 0; // measured heading from yaw gyro (process variable)

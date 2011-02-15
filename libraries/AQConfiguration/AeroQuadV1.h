@@ -21,8 +21,6 @@
 #ifndef _AQ_V1_CONFIG_H_
 #define _AQ_V1_CONFIG_H_
 
-#define AeroQuad_v1
-
 #include <ADXL335Accelerometer.h>
 ADXL335Accelerometer tempAccel;
 Accelerometer *_accel = &tempAccel;
@@ -45,4 +43,8 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 //  #endif
 //#endif
 
+void initPlatform()
+{
+  _gyro->invert(YAW);
+}
 #endif

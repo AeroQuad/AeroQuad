@@ -62,5 +62,9 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
 #endif
 
+void initPlatform()
+{
+}
+
 
 #endif

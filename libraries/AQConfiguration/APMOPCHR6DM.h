@@ -18,38 +18,49 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_MEGA_V2_CONFIG_H_
-#define _AQ_MEGA_V2_CONFIG_H_
+#ifndef _AQ_APM_OP_CHR6DM_CONFIG_H_
+#define _AQ_APM_OP_CHR6DM_CONFIG_H_
 
-#include <ReceiverForMega.h>
-ReceiverForMega tempReceiver;
-Receiver *_receiver = &tempReceiver;
-#include <PWMTimedMotors.h>
-PWMTimedMotors tempMotors;
-Motors *_motors = &tempMotors;
-//Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-#include <BMA180Accelerometer.h>
-BMA180Accelerometer tempAccel;
+#define LED_Red 35
+#define LED_Yellow 36
+#define LED_Green 37
+#define RELE_pin 47
+#define SW1_pin 41
+#define SW2_pin 40
+#define BUZZER 9
+#define PIANO_SW1 42
+#define PIANO_SW2 43
+
+
+//#include <CHR6DMSensorsAccessor.h>
+CHR6DM _chr6dm;
+#include <CHR6DMAccelerometer.h>
+CHR6DMAccelerometer tempAccel(_chr6dm);
 Accelerometer *_accel = &tempAccel;
-#include <ITG3200Gyroscope.h>
-ITG3200Gyroscope tempGyro;
+#include <CHR6DMGyroscope.h>
+CHR6DMGyroscope tempGyro(_chr6dm);
 Gyroscope *_gyro = &tempGyro;
-#include <FlightAngleDCM.h>
+#include <ReceiverForAPM.h>
+ReceiverForAPM tempReceiver;
+Receiver *_receiver = &tempReceiver;
+#include <APMMotors.h>
+APMMotors tempMotors;
+Motors *_motors = &tempMotors;
+#include "FlightAngleDCM.h"
+//  FlightAngleCHR6DM tempFlightAngle;
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-#ifdef HeadingMagHold
-  #include <HMC5843Magnetometer.h>
-  HMC5843Magnetometer tempCompass(_gyro);
-  Compass *_compass = &tempCompass;
-#endif
+#include "CHR6DMCompass.h"
+CHR6DMCompass tempCompass(_chr6dm);
+Compass *_compass = &tempCompass;
 #ifdef AltitudeHold
   #include <BMP085BarometricSensor.h>
   BMP085BarometricSensor tempAltitude;
   AltitudeProvider *_altitudeProvider = &tempAltitude;
 #endif
 #ifdef BattMonitor
-  #include <AeroQuadBatteryMonitor.h>
-  AeroQuadBatteryMonitor tempBatteryMonitor;
+  #include "APMBatteryMonitor.h"
+  APMBatteryMonitor tempBatteryMonitor;
   BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
 #endif
 #ifdef CameraControl
@@ -58,20 +69,20 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   CameraStabilizer *_cameraStabilizer = &tempCamera;
 #endif
 
+
+
+
 void initPlatform()
 {
-  pinMode(LED2PIN, OUTPUT);
-  digitalWrite(LED2PIN, LOW);
-  pinMode(LED3PIN, OUTPUT);
-  digitalWrite(LED3PIN, LOW);
+  Serial1.begin(BAUD);
+  PORTD = B00000100;
   
-  // pins set to INPUT for camera stabilization so won't interfere with new camera class
-  pinMode(33, INPUT);
-  pinMode(34, INPUT);
-  pinMode(35, INPUT);
+  pinMode(LED_Red, OUTPUT);
+  pinMode(LED_Yellow, OUTPUT);
+  pinMode(LED_Green, OUTPUT);
 
   Wire.begin();
-  TWBR = 12;
 }
+
 
 #endif

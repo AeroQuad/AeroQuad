@@ -21,7 +21,7 @@
 #ifndef _AQ_V18_CONFIG_H_
 #define _AQ_V18_CONFIG_H_
 
-#define AeroQuad_v18
+
 #include <BMA180Accelerometer.h>
 BMA180Accelerometer tempAccel;
 Accelerometer *_accel = &tempAccel;
@@ -62,4 +62,15 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 //    AeroQuadCameraStabilizer tempCamera;
 //    CameraStabilizer *_cameraStabilizer = &tempCamera;
 //  #endif
+
+void initPlatform()
+{
+  pinMode(LED2PIN, OUTPUT);
+  digitalWrite(LED2PIN, LOW);
+  pinMode(LED3PIN, OUTPUT);
+  digitalWrite(LED3PIN, LOW);
+  
+  Wire.begin();  
+  TWBR = 12;
+}
 #endif

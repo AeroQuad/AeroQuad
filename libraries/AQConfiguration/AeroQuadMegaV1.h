@@ -22,8 +22,6 @@
 #define _AQ_MEGA_WII_CONFIG_H_
 
 
-#define AeroQuadMega_v1
-
 // Special thanks to Wilafau for fixes for this setup
 // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
 #include <ReceiverForMega.h>
@@ -46,5 +44,9 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   AeroQuadCameraStabilizer tempCamera;
   CameraStabilizer *_cameraStabilizer = &tempCamera;
 #endif
+
+void initPlatform()
+{
+}
 
 #endif

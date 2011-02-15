@@ -21,8 +21,6 @@
 #ifndef _AQ_WII_CONFIG_H_
 #define _AQ_WII_CONFIG_H_
 
-#define AeroQuad_Wii
-
 #include <AQWiiSensorAccessor.h>
 AQWiiSensorAccessor _wiiSensorAccessor;
 #include <WiiAccelerometer.h>
@@ -45,5 +43,13 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   AeroQuadCameraStabilizer tempCamera;
   CameraStabilizer *_cameraStabilizer = &tempCamera;
 #endif
+
+void initPlatform()
+{
+  Wire.begin();
+  
+  _accel->invert(PITCH);
+  _accel->invert(ZAXIS);
+}
 
 #endif

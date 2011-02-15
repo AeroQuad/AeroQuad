@@ -68,20 +68,22 @@
 ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-//#include <AeroQuadV1.h>         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#include <AeroQuadV1_IDG.h>     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#include <AeroQuadV18.h>        // Arduino 2009 with AeroQuad Shield v1.8
-//#include <AeroQuadWii.h>        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-//#include <AeroQuadMegaV1.h>     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#include <AeroQuadMegaV2.h>     // Arduino Mega with AeroQuad Shield v2.x
-//#define AeroQuadMega_Wii        // Arduino Mega with Wii Sensors and Aero/Quad Shield v2.x
-#define ArduCopter              // ArduPilot Mega (APM) with APM Sensor Board
-//#define Multipilot              // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
-//#define MultipilotI2C           // Active Multipilot I2C and Mixertable (needs debug)
-//#define AeroQuadMega_CHR6DM     // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-//#define APM_OP_CHR6DM           // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer 
-                                  // (just uncomment AltitudeHold for baro), and voltage divider
-//#include "CustomConfig.h"       // Make your own custom config in this file  SAMPLE PURPOSE ONLY                         
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+//#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
+//#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
+//#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
+//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., 
+                              // Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
+
+//#define CustomConfig       // Make your own custom config in this file  SAMPLE PURPOSE ONLY                         
+//#define DefaultConfig      // simplified v1.8 DO NOT USE, fix a compilation problem for other platform, probably arduino compiler problem! @see Kenny9999
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
@@ -93,160 +95,36 @@
 // need to be fixed, CupOfTea, help please
 //****************************************************** 
 
-#ifdef ArduCopter
-  #define LED_Red 35
-  #define LED_Yellow 36
-  #define LED_Green 37
-  #define RELE_pin 47
-  #define SW1_pin 41
-  #define SW2_pin 40
-  #define BUZZER 9
-  #define PIANO_SW1 42
-  #define PIANO_SW2 43
-  
-  #include <AQAPMADCSensorsAccessor.h>
-  #include <IDG500_ADCGyroscope.h>
-  IDG500_ADCGyroscope tempGyro;
-  Gyroscope *_gyro = &tempGyro;
-  #include <ADXL335_ADCAccelerometer.h>
-  ADXL335_ADCAccelerometer tempAccel;
-  Accelerometer *_accel = &tempAccel;
-  #include <ReceiverForAPM.h>
-  ReceiverForAPM tempReceiver;
-  Receiver *_receiver = &tempReceiver;
-  #include <APMMotors.h>
-  APMMotors tempMotors;
-  Motors *_motors = &tempMotors;
-  #include "FlightAngleDCM.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-  #ifdef HeadingMagHold
-    #include <HMC5843Magnetometer.h>
-    HMC5843Magnetometer tempCompass(_gyro);
-    Compass *_compass = &tempCompass;
-  #endif
-  #ifdef AltitudeHold
-    #include <BMP085BarometricSensor.h>
-    BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitudeProvider = &tempAltitude;
-  #endif
-  #ifdef BattMonitor
-    #include <APMBatteryMonitor.h>
-    APMBatteryMonitor tempBatteryMonitor;
-    BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
-  #endif
-#endif
 
-#ifdef AeroQuadMega_Wii
+
+#ifdef AeroQuad_v1   
+  #include <AeroQuadV1.h>
+#elif defined(AeroQuad_v1_IDG) 
+  #include <AeroQuadV1_IDG.h>
+#elif defined(AeroQuad_v18)
+  #include <AeroQuadV18.h>
+#elif defined(AeroQuad_Wii)
+  #include <AeroQuadWii.h>
+#elif defined(AeroQuadMega_v1)
+  #include <AeroQuadMegaV1.h>
+#elif defined(AeroQuadMega_v2)
+  #include <AeroQuadMegaV2.h>
+#elif defined(AeroQuadMega_Wii)
   #include <AQWiiSensorAccessor.h>
-  AQWiiSensorAccessor _wiiSensorAccessor;
-  #include <WiiAccelerometer.h>
-  WiiAccelerometer tempAccel(_wiiSensorAccessor);
-  Accelerometer *_accel = &tempAccel;
-  #include <WiiGyroscope.h>
-  WiiGyroscope tempGyro(_wiiSensorAccessor);
-  Gyroscope *_gyro = &tempGyro;
-  #include <ReceiverForMega.h>
-  ReceiverForMega tempReceiver;
-  Receiver *_receiver = &tempReceiver;
-  #include <PWMMotors.h>
-  PWMMotors tempMotors;
-  Motors *_motors = &tempMotors;
-  #include "FlightAngleDCM.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-  #ifdef CameraControl
-    #include <AeroQuadCameraStabilizer.h>
-    AeroQuadCameraStabilizer tempCamera;
-    CameraStabilizer *_cameraStabilizer = &tempCamera;
-  #endif
+  #include <AeroQuadMegaWii.h>
+#elif defined(ArduCopter)
+  #include <AQAPMADCSensorsAccessor.h>
+  #include "Arducopter.h"
+#elif defined(AeroQuadMega_CHR6DM)
+  #include <CHR6DMSensorsAccessor.h>
+  #include <AeroQuadMegaCHR6DM.h>
+#elif defined(APM_OP_CHR6DM)  
+  #include <CHR6DMSensorsAccessor.h>
+  #include <APMOPCHR6DM.h>
+#elif defined(CustomConfig)
+  #include "CustomConfig.h"
 #endif
 
-#ifdef AeroQuadMega_CHR6DM
-  #include <CHR6DMSensorsAccessor.h>
-  CHR6DM _chr6dm;
-  #include <CHR6DMAccelerometer.h>
-  CHR6DMAccelerometer tempAccel(_chr6dm);
-  Accelerometer *_accel = &tempAccel;
-  #include <CHR6DMGyroscope.h>
-  CHR6DMGyroscope tempGyro(_chr6dm);
-  Gyroscope *_gyro = &tempGyro;
-  #include <ReceiverForMega.h>
-  ReceiverForMega tempReceiver;
-  Receiver *_receiver = &tempReceiver;
-  #include <PWMMotors.h>
-  PWMMotors tempMotors;
-  Motors *_motors = &tempMotors;
-  #include "FlightAngleDCM.h"
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-  #include <CHR6DMCompass.h>
-  CHR6DMCompass tempCompass(_chr6dm);
-  Compass *_compass = &tempCompass;
-  #ifdef AltitudeHold
-    #include <BMP085BarometricSensor.h>
-    BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitudeProvider = &tempAltitude;
-  #endif
-  #ifdef BattMonitor
-    #include <APMBatteryMonitor.h>
-    APMBatteryMonitor tempBatteryMonitor;
-    BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
-  #endif
-  #ifdef CameraControl
-    #include <AeroQuadCameraStabilizer.h>
-    AeroQuadCameraStabilizer tempCamera;
-    CameraStabilizer *_cameraStabilizer = &tempCamera;
-  #endif
-#endif
-
-#ifdef APM_OP_CHR6DM
-  #define LED_Red 35
-  #define LED_Yellow 36
-  #define LED_Green 37
-  #define RELE_pin 47
-  #define SW1_pin 41
-  #define SW2_pin 40
-  #define BUZZER 9
-  #define PIANO_SW1 42
-  #define PIANO_SW2 43
-  #include <CHR6DMSensorsAccessor.h>
-  CHR6DM _chr6dm;
-  #include <CHR6DMAccelerometer.h>
-  CHR6DMAccelerometer tempAccel(_chr6dm);
-  Accelerometer *_accel = &tempAccel;
-  #include <CHR6DMGyroscope.h>
-  CHR6DMGyroscope tempGyro(_chr6dm);
-  Gyroscope *_gyro = &tempGyro;
-  #include <ReceiverForAPM.h>
-  ReceiverForAPM tempReceiver;
-  Receiver *_receiver = &tempReceiver;
-  #include <APMMotors.h>
-  APMMotors tempMotors;
-  Motors *_motors = &tempMotors;
-  #include "FlightAngleDCM.h"
-//  FlightAngleCHR6DM tempFlightAngle;
-  FlightAngleDCM tempFlightAngle;
-  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-  #include "CHR6DMCompass.h"
-  CHR6DMCompass tempCompass(_chr6dm);
-  Compass *_compass = &tempCompass;
-  #ifdef AltitudeHold
-    #include <BMP085BarometricSensor.h>
-    BMP085BarometricSensor tempAltitude;
-    AltitudeProvider *_altitudeProvider = &tempAltitude;
-  #endif
-  #ifdef BattMonitor
-    #include "APMBatteryMonitor.h"
-    APMBatteryMonitor tempBatteryMonitor;
-    BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
-  #endif
-  #ifdef CameraControl
-    #include <AeroQuadCameraStabilizer.h>
-    AeroQuadCameraStabilizer tempCamera;
-    CameraStabilizer *_cameraStabilizer = &tempCamera;
-  #endif
-#endif
 
 //#ifdef Multipilot
 //  MultipilotAccelerometer tempAccel;
@@ -281,6 +159,45 @@
 //#endif
 
 
+#ifdef DefaultConfig  
+  #include <BMA180Accelerometer.h>
+  BMA180Accelerometer tempAccel;
+  Accelerometer *_accel = &tempAccel;
+  #include <ITG3200Gyroscope.h>
+  ITG3200Gyroscope tempGyro;
+  Gyroscope *_gyro = &tempGyro;
+  #include <ReceiverFor328p.h>
+  ReceiverFor328p tempReceiver;
+  Receiver *_receiver = &tempReceiver;
+  #include <PWMTimedMotors.h>
+  PWMTimedMotors tempMotors;
+  Motors *_motors = &tempMotors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  //#include "FlightAngleDCM.h"
+  //FlightAngleDCM tempFlightAngle;
+  //#include "FlightAngleCompFilter.h"
+  //FlightAngleCompFilter tempFlightAngle;
+  #include "FlightAngleKalmanFilter.h"
+  FlightAngleKalmanFilter tempFlightAngle;
+  FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+  #include <HMC5843Magnetometer.h>
+    HMC5843Magnetometer tempCompass(_gyro);
+    Compass *_compass = &tempCompass;
+  #endif
+  #ifdef AltitudeHold
+  #include <BMP085BarometricSensor.h>
+    BMP085BarometricSensor tempAltitude;
+    AltitudeProvider *_altitudeProvider = &tempAltitude;
+  #endif
+  #ifdef BattMonitor
+  #include <AeroQuadBatteryMonitor.h>
+    AeroQuadBatteryMonitor tempBatteryMonitor;
+    BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
+  #endif
+#endif
+
+
 
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
@@ -300,41 +217,14 @@
 // ************************************************************
 // ********************** Setup AeroQuad **********************
 // ************************************************************
-void setup() {
+void setup() 
+{
   Serial.begin(BAUD);
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
-
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    Serial1.begin(BAUD);
-    PORTD = B00000100;
-  #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
-  #endif
-  #ifdef AeroQuadMega_v2
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
-    pinMode(33, INPUT);
-    pinMode(34, INPUT);
-    pinMode(35, INPUT);
-  #endif
-  #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-    pinMode(LED_Red, OUTPUT);
-    pinMode(LED_Yellow, OUTPUT);
-    pinMode(LED_Green, OUTPUT);
-  #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
-    Wire.begin();
-  #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-    // Recommendation from Mgros to increase I2C speed to 400kHz
-    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
-    TWBR = 12;
-  #endif
+  // Init platform specific
+  initPlatform();
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -363,23 +253,18 @@ void setup() {
   _levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
-  #ifdef AeroQuad_v1
-    _gyro->invert(YAW);
-  #endif
-  #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-    _accel->invert(PITCH);
-    _accel->invert(ZAXIS);
-  #endif
-  #ifdef Multipilot
-    _accel->invert(PITCH);
-    _gyro->invert(ROLL);
-  #endif
+//  #ifdef Multipilot
+//    _accel->invert(PITCH);
+//    _gyro->invert(ROLL);
+//  #endif
   
   // Flight angle estimiation
   _flightAngle->setGyroscope(_gyro);
   _flightAngle->setAccelerometer(_accel);
   _flightAngle->initialize(); // defined in FlightAngle.h
 
+
+  // Sub Process initialization
   // Optional Sensors
   #ifdef HeadingMagHold
     _compass->initialize();
@@ -388,12 +273,9 @@ void setup() {
   #ifdef AltitudeHold
     _altitudeProvider->initialize();
   #endif
-  
-  // Battery Monitor
   #ifdef BattMonitor
     _batteryMonitor->initialize();
   #endif
-  
   // Camera stabilization setup
   #ifdef CameraControl
     _cameraStabilizer->initialize();
@@ -411,7 +293,8 @@ void setup() {
 // ************************************************************
 // ******************** Main AeroQuad Loop ********************
 // ************************************************************
-void loop () {
+void loop () 
+{
   // Measure loop rate
   _currentTime = micros();
   _deltaTime = _currentTime - _previousTime;
@@ -424,23 +307,27 @@ void loop () {
   #endif
   
   // Measures sensor data and calculates attitude
-  if (_sensorLoop == ON) {
+  if (_sensorLoop == ON) 
+  {
     readSensors(); // defined in Sensors.pde
   } 
 
   // Combines external pilot commands and measured sensor data to generate motor commands
-  if (_controlLoop == ON) {
+  if (_controlLoop == ON) 
+  {
     processFlightControl();
   } 
   
   // Reads external pilot commands and performs functions based on stick configuration
-  if ((_receiverLoop == ON) && (_currentTime > _receiverTime)) {// 50Hz
+  if ((_receiverLoop == ON) && (_currentTime > _receiverTime)) // 50Hz
+  {
     readPilotCommands(); // defined in FlightCommand.pde
     _receiverTime = _currentTime + RECEIVERLOOPTIME;
   }
   
   // Listen for configuration commands and reports telemetry
-  if ((_telemetryLoop == ON) && (_currentTime > _telemetryTime)) { // 20Hz
+  if ((_telemetryLoop == ON) && (_currentTime > _telemetryTime)) // 20Hz 
+  { 
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
     _telemetryTime = _currentTime + TELEMETRYLOOPTIME;

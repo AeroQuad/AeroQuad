@@ -18,23 +18,23 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_MEGA_V2_CONFIG_H_
-#define _AQ_MEGA_V2_CONFIG_H_
+#ifndef _AQ_ARDUCOPTER_CONFIG_H_
+#define _AQ_ARDUCOPTER_CONFIG_H_
 
-#include <ReceiverForMega.h>
-ReceiverForMega tempReceiver;
-Receiver *_receiver = &tempReceiver;
-#include <PWMTimedMotors.h>
-PWMTimedMotors tempMotors;
-Motors *_motors = &tempMotors;
-//Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-#include <BMA180Accelerometer.h>
-BMA180Accelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
-#include <ITG3200Gyroscope.h>
-ITG3200Gyroscope tempGyro;
+//#include <AQAPMADCSensorsAccessor.h>
+#include <IDG500_ADCGyroscope.h>
+IDG500_ADCGyroscope tempGyro;
 Gyroscope *_gyro = &tempGyro;
-#include <FlightAngleDCM.h>
+#include <ADXL335_ADCAccelerometer.h>
+ADXL335_ADCAccelerometer tempAccel;
+Accelerometer *_accel = &tempAccel;
+#include <ReceiverForAPM.h>
+ReceiverForAPM tempReceiver;
+Receiver *_receiver = &tempReceiver;
+#include <APMMotors.h>
+APMMotors tempMotors;
+Motors *_motors = &tempMotors;
+#include "FlightAngleDCM.h"
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 #ifdef HeadingMagHold
@@ -48,30 +48,27 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
   AltitudeProvider *_altitudeProvider = &tempAltitude;
 #endif
 #ifdef BattMonitor
-  #include <AeroQuadBatteryMonitor.h>
-  AeroQuadBatteryMonitor tempBatteryMonitor;
+  #include <APMBatteryMonitor.h>
+  APMBatteryMonitor tempBatteryMonitor;
   BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
 #endif
-#ifdef CameraControl
-  #include <AeroQuadCameraStabilizer.h>
-  AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *_cameraStabilizer = &tempCamera;
-#endif
+//#endif
+
+#define LED_Red 35
+#define LED_Yellow 36
+#define LED_Green 37
+#define RELE_pin 47
+#define SW1_pin 41
+#define SW2_pin 40
+#define BUZZER 9
+#define PIANO_SW1 42
+#define PIANO_SW2 43
+
 
 void initPlatform()
 {
-  pinMode(LED2PIN, OUTPUT);
-  digitalWrite(LED2PIN, LOW);
-  pinMode(LED3PIN, OUTPUT);
-  digitalWrite(LED3PIN, LOW);
-  
-  // pins set to INPUT for camera stabilization so won't interfere with new camera class
-  pinMode(33, INPUT);
-  pinMode(34, INPUT);
-  pinMode(35, INPUT);
-
   Wire.begin();
-  TWBR = 12;
 }
+
 
 #endif

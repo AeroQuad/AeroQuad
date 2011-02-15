@@ -18,33 +18,39 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_V1_IDG_CONFIG_H_
-#define _AQ_V1_IDG_CONFIG_H_
 
-#include <ADXL335Accelerometer.h>
-ADXL335Accelerometer tempAccel;
+#ifndef _AQ_MEGA_WII_CONFIG_H_
+#define _AQ_MEGA_WII_CONFIG_H_
+
+#include <AQWiiSensorAccessor.h>
+AQWiiSensorAccessor _wiiSensorAccessor;
+#include <WiiAccelerometer.h>
+WiiAccelerometer tempAccel(_wiiSensorAccessor);
 Accelerometer *_accel = &tempAccel;
-#include <IDGIXZ500Gyroscope.h>
-IDGIXZ500Gyroscope tempGyro;
+#include <WiiGyroscope.h>
+WiiGyroscope tempGyro(_wiiSensorAccessor);
 Gyroscope *_gyro = &tempGyro;
-#include <ReceiverFor328p.h>
-ReceiverFor328p tempReceiver;
+#include <ReceiverForMega.h>
+ReceiverForMega tempReceiver;
 Receiver *_receiver = &tempReceiver;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
-#include <FlightAngleDCM.h>
+Motors *_motors = &tempMotors;
+#include "FlightAngleDCM.h"
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-Motors *_motors = &tempMotors;
-//  #ifdef CameraControl
-//    #include "AeroQuadCameraStabilizer.h"
-//    AeroQuadCameraStabilizer tempCamera;
-//    CameraStabilizer *_cameraStabilizer = &tempCamera;
-//  #endif
-//#endif
+#ifdef CameraControl
+  #include <AeroQuadCameraStabilizer.h>
+  AeroQuadCameraStabilizer tempCamera;
+  CameraStabilizer *_cameraStabilizer = &tempCamera;
+#endif
 
 void initPlatform()
 {
+  Wire.begin();
+  
+  _accel->invert(PITCH);
+  _accel->invert(ZAXIS);
 }
 
 #endif
