@@ -40,61 +40,16 @@ private:
     float K_0;
     float K_1;
 
-    float _calculate(byte axis, float newAngle, float newRate) 
-    {
-      x_angle[axis] += G_Dt * (newRate - x_bias[axis]);
-      P_00[axis] +=  - G_Dt * (P_10[axis] + P_01[axis]) + Q_angle * G_Dt;
-      P_01[axis] +=  - G_Dt * P_11[axis];
-      P_10[axis] +=  - G_Dt * P_11[axis];
-      P_11[axis] +=  + Q_gyro * G_Dt;
-      
-      y = newAngle - x_angle[axis];
-      S = P_00[axis] + R_angle;
-      K_0 = P_00[axis] / S;
-      K_1 = P_10[axis] / S;
-      
-      x_angle[axis] +=  K_0 * y;
-      x_bias[axis]  +=  K_1 * y;
-      P_00[axis] -= K_0 * P_00[axis];
-      P_01[axis] -= K_0 * P_01[axis];
-      P_10[axis] -= K_1 * P_00[axis];
-      P_11[axis] -= K_1 * P_01[axis];
-      
-      return x_angle[axis];
-    }
+    float _calculate(byte axis, float newAngle, float newRate, float G_Dt);
 
 public:
-  FlightAngleKalmanFilter() : FlightAngleProcessor() 
-  {
-    for (byte axis = ROLL; axis < YAW; axis ++) 
-    {
-      x_angle[axis] = 0;
-      x_bias[axis] = 0;
-      P_00[axis] = 0;
-      P_01[axis] = 0;
-      P_10[axis] = 0;
-      P_11[axis] = 0;
-    }
-    _type = KF;
-  }
+  FlightAngleKalmanFilter();
   
-  void initialize(void) 
-  {
-    Q_angle = 0.001;
-    Q_gyro = 0.003;
-    R_angle = 0.03;
-  }
+  void initialize(void);
   
-  void calculate(void) 
-  {
-    _angle[ROLL] = _calculate(ROLL, _accel->angleDeg(ROLL), _gyro->rateDegPerSec(ROLL));
-    _angle[PITCH] = _calculate(PITCH, _accel->angleDeg(PITCH), _gyro->rateDegPerSec(PITCH));
-  }
+  void calculate(float G_Dt);
   
-  float getGyroUnbias(byte axis) 
-  {
-    return _gyro->getFlightData(axis);
-  }
+  float getGyroUnbias(byte axis);
 
   void calibrate(void) {}
 };

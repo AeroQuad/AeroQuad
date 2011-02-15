@@ -18,31 +18,44 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_FLIGHT_ANGLE_PROCESSOR_IMU_FILTER_H_
-#define _AQ_FLIGHT_ANGLE_PROCESSOR_IMU_FILTER_H_
-
-#include "FlightAngleProcessor.h"
-
-class FlightAngleIMU : public FlightAngleProcessor 
+#include "FlightAngleProcessor.h"  
+  
+FlightAngleProcessor::FlightAngleProcessor(void) 
 {
-private:
-  // System constants
-  #define gyroMeasError 3.14159265358979f * (75.0f / 180.0f) // gyroscope measurement error in rad/s (shown as 5 deg/s)
-  #define beta sqrt(3.0f / 4.0f) * gyroMeasError // compute beta
-  float SEq_1, SEq_2, SEq_3, SEq_4; // estimated orientation quaternion elements with initial conditions
+  _angle[ROLL] = 0;
+  _angle[PITCH] = 0;
+  _angle[YAW] = 0;
+  _gyroAngle[ROLL] = 0;
+  _gyroAngle[PITCH] = 0;
+}
+  
+void FlightAngleProcessor::initialize() {}
+void FlightAngleProcessor::calculate(float G_Dt) {}
+float FlightAngleProcessor::getGyroUnbias(byte axis) {}
+void FlightAngleProcessor::calibrate() {}
+ 
+const float FlightAngleProcessor::getData(byte axis) 
+{
+  return _angle[axis];
+}
+  
+const byte FlightAngleProcessor::getType(void) 
+{
+  // This is set in each subclass to identify which algorithm used
+  return _type;
+}
 
-  void filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z,float G_Dt);
-  
-public:
-  FlightAngleIMU() {}
-  
-  void initialize(void);
-  
-  void calculate(float G_Dt);
-  
-  float getGyroUnbias(byte axis);
 
-  void calibrate(void) {}
-};
+void FlightAngleProcessor::setGyroscope(Gyroscope *gyro)
+{
+  _gyro = gyro;
+}
 
-#endif
+void FlightAngleProcessor::setAccelerometer(Accelerometer *accel)
+{
+  _accel = accel;
+}
+  
+  
+  
+  

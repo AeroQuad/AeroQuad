@@ -26,6 +26,8 @@
 #define DCM 2
 #define IMU 3
 
+#include <Gyroscope.h>
+#include <Accelerometer.h>
 
 // This class is responsible for calculating vehicle attitude
 class FlightAngleProcessor 
@@ -36,33 +38,25 @@ private:
 protected:
   byte _type;
   float _angle[3];
+  
+  Gyroscope *_gyro;
+  Accelerometer *_accel;
 
 public:
   
-  FlightAngleProcessor(void) 
-  {
-    _angle[ROLL] = 0;
-    _angle[PITCH] = 0;
-    _angle[YAW] = 0;
-    _gyroAngle[ROLL] = 0;
-    _gyroAngle[PITCH] = 0;
-  }
+  FlightAngleProcessor(void);
   
   virtual void initialize();
-  virtual void calculate();
+  virtual void calculate(float G_Dt);
   virtual float getGyroUnbias(byte axis);
   virtual void calibrate();
  
-  const float getData(byte axis) 
-  {
-    return _angle[axis];
-  }
+  const float getData(byte axis);
   
-  const byte getType(void) 
-  {
-    // This is set in each subclass to identify which algorithm used
-    return _type;
-  }
+  const byte getType(void);
+  
+  void setGyroscope(Gyroscope *gyro);
+  void setAccelerometer(Accelerometer *accel);
 };
 
 #endif

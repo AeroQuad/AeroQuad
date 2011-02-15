@@ -21,7 +21,7 @@
 #ifndef _AQ_FLIGHT_ANGLE_PROCESSOR_WII_FILTER_H_
 #define _AQ_FLIGHT_ANGLE_PROCESSOR_WII_FILTER_H_
 
-
+#include "FlightAngleProcessor.h"
 
 // ***********************************************************************
 // ********************* MultiWii Kalman Filter **************************
@@ -51,76 +51,16 @@ private:
   //float meanTime; // **** Need to update this ***
 
 public: 
-  FlightAngleMultiWii() : FlightAngleProcessor() 
-  {
-    RxEst = 0; // init acc in stable mode
-    RyEst = 0;
-    RzEst = 1;
-    wGyro = 50.0f; // gyro weight/smooting factor
-  }
+  FlightAngleMultiWii();
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {}
   
-  void calculate(void) 
-  {
-    //get accelerometer readings in g, gives us RAcc vector
-    RxAcc = _accel->getRaw(ROLL);
-    RyAcc = _accel->getRaw(PITCH);
-    RzAcc = _accel->getRaw(YAW);
+  void calculate(float G_Dt);
   
-    //normalize vector (convert to a vector with same direction and with length 1)
-    R = sqrt(square(RxAcc) + square(RyAcc) + square(RzAcc));
-    RxAcc /= R;
-    RyAcc /= R;  
-    RzAcc /= R;  
-  
-    gyroFactor = G_Dt/83e6; //empirical, depends on WMP on IDG datasheet, tied of deg/ms sensibility
-    
-    //evaluate R Gyro vector
-    if(abs(RzEst) < 0.1f) 
-    {
-      //Rz is too small and because it is used as reference for computing Axz, Ayz it's error fluctuations will amplify leading to bad results
-      //in this case skip the gyro data and just use previous estimate
-      RxGyro = RxEst;
-      RyGyro = RyEst;
-      RzGyro = RzEst;
-    }
-    else 
-    {
-      //get angles between projection of R on ZX/ZY plane and Z axis, based on last REst
-      //Convert ADC value for to physical units
-      //For gyro it will return  deg/ms (rate of rotation)
-      atanx = atan2(RxEst,RzEst);
-      atany = atan2(RyEst,RzEst);
-    
-      Axz = atanx + _gyro->getRaw(ROLL)  * gyroFactor;  // convert ADC value for to physical units
-      Ayz = atany + _gyro->getRaw(PITCH) * gyroFactor; // and get updated angle according to gyro movement
-    
-      //estimate sign of RzGyro by looking in what qudrant the angle Axz is, 
-      signRzGyro = ( cos(Axz) >=0 ) ? 1 : -1;
-  
-      //reverse calculation of RwGyro from Awz angles, for formulas deductions see  http://starlino.com/imu_guide.html
-      RxGyro = sin(Axz) / sqrt( 1 + square(cos(Axz)) * square(tan(Ayz)) );
-      RyGyro = sin(Ayz) / sqrt( 1 + square(cos(Ayz)) * square(tan(Axz)) );        
-      RzGyro = signRzGyro * sqrt(1 - square(RxGyro) - square(RyGyro));
-    }
-    
-    //combine Accelerometer and gyro readings
-    RxEst = (RxAcc + wGyro* RxGyro) / (1.0 + wGyro);
-    RyEst = (RyAcc + wGyro* RyGyro) / (1.0 + wGyro);
-    RzEst = (RzAcc + wGyro* RzGyro) / (1.0 + wGyro);
-  
-    _angle[ROLL]  =  180/PI * Axz;
-    _angle[PITCH] =  180/PI * Ayz;
-  }
-  
-  float getGyroUnbias(byte axis) 
-  {
-    return _gyro->getFlightData(axis);
-  }
+  float getGyroUnbias(byte axis);
 
   void calibrate(void) {}
 };
