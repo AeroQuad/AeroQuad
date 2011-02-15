@@ -22,9 +22,8 @@
 
 #include <AQMath.h>
 
-WiiAccelerometer::WiiAccelerometer(AQWiiSensorAccessor wiiSensorAccessor)
+WiiAccelerometer::WiiAccelerometer()
 {
-  _wiiSensorAccessor = &wiiSensorAccessor;
   _accelScaleFactor = 0;    
 }
   
@@ -59,4 +58,9 @@ void WiiAccelerometer::calibrate()
   _accelOneG = getRaw(ZAXIS);
   // replace with estimated Z axis 0g value
   _accelZero[ZAXIS] = (_accelZero[ROLL] + _accelZero[PITCH]) / 2;
+}
+
+void WiiAccelerometer::setWiiSensorAccessor(AQWiiSensorAccessor *wiiSensorAccessor)
+{
+  _wiiSensorAccessor = wiiSensorAccessor;
 }

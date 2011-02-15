@@ -23,6 +23,7 @@
 
 #include "Compass.h"
 
+#include <CHR6DMSensorsAccessor.h>
 
 // ***********************************************************************
 // ************************* CHR6DM Subclass *****************************
@@ -33,28 +34,15 @@ private:
   CHR6DM *_chr6dm;
 
 public:
-  CHR6DMCompass(CHR6DM chr6dm)
-  {
-	_chr6dm = &chr6dm;
-  }
+  CHR6DMCompass() {}
   
   void initialize() {}
   
   const int getRawData(byte) {}
   
-  void measure(const float rollAngle, const float pitchAngle) 
-  {
-    _heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
-    // Change from +/-180 to 0-360
-    if (_heading < 0)
-    {
-      _absoluteHeading = 360 + _heading;
-    }
-    else 
-    {
-      _absoluteHeading = _heading;
-    }
-  }
+  void measure(const float rollAngle, const float pitchAngle);
+  
+  void setChr6dm(CHR6DM *chr6dm);
 };
 
 #endif

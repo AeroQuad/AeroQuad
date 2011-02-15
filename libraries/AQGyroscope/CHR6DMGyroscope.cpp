@@ -21,9 +21,8 @@
 #include "CHR6DMGyroscope.h"
 #include <AQMath.h>
 
-CHR6DMGyroscope::CHR6DMGyroscope(CHR6DM chr6dm)
+CHR6DMGyroscope::CHR6DMGyroscope()
 {
-  _chr6dm = &chr6dm;
   _gyroFullScaleOutput = 0;
   _gyroScaleFactor = 0;
 }
@@ -65,3 +64,9 @@ void CHR6DMGyroscope::calibrate()
   _gyroZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
   _gyroZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
 }
+
+void CHR6DMGyroscope::setChr6dm(CHR6DM *chr6dm)
+{
+  _chr6dm = chr6dm;
+}
+

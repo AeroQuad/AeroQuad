@@ -43,7 +43,6 @@ void IDG500_ADCGyroscope::initialize()
   // pitchChannel = 2
   // yawChannel = 0
   this->_initialize(1, 2, 0);
-  initializeADC(); // this is needed for both gyros and accels, done once in this class
 }
   
 void IDG500_ADCGyroscope::measure() 

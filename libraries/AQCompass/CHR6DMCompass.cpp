@@ -18,27 +18,23 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_CHR6DM_ACCELEROMETER_H_
-#define _AQ_CHR6DM_ACCELEROMETER_H_
+#include "CHR6DMCompass.h"
 
-#include "Accelerometer.h"
-#include <CHR6DMSensorsAccessor.h>
-
-class CHR6DMAccelerometer : public Accelerometer 
+void CHR6DMCompass::measure(const float rollAngle, const float pitchAngle) 
 {
-private:
-  CHR6DM *_chr6dm;
-
-public:
-  CHR6DMAccelerometer();
+  _heading = _chr6dm->data.yaw; //this hardly needs any filtering :)
+  // Change from +/-180 to 0-360
+  if (_heading < 0)
+  {
+    _absoluteHeading = 360 + _heading;
+  }
+  else 
+  {
+    _absoluteHeading = _heading;
+  }
+}
   
-  void initialize();
-  void measure();
-  // Allows user to zero accelerometers on command
-  void calibrate();
-  void calculateAltitude();
-  
-  void setChr6dm(CHR6DM *chr6dm);
-};
-
-#endif
+void CHR6DMCompass::setChr6dm(CHR6DM *chr6dm)
+{
+  _chr6dm = chr6dm;
+}

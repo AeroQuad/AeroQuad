@@ -25,10 +25,10 @@
 #include <AQWiiSensorAccessor.h>
 AQWiiSensorAccessor _wiiSensorAccessor;
 #include <WiiAccelerometer.h>
-WiiAccelerometer tempAccel(_wiiSensorAccessor);
+WiiAccelerometer tempAccel;
 Accelerometer *_accel = &tempAccel;
 #include <WiiGyroscope.h>
-WiiGyroscope tempGyro(_wiiSensorAccessor);
+WiiGyroscope tempGyro;
 Gyroscope *_gyro = &tempGyro;
 #include <ReceiverForMega.h>
 ReceiverForMega tempReceiver;
@@ -49,8 +49,13 @@ void initPlatform()
 {
   Wire.begin();
   
+  tempAccel.setWiiSensorAccessor(&_wiiSensorAccessor);
+  tempGyro.setWiiSensorAccessor(&_wiiSensorAccessor);
+  
   _accel->invert(PITCH);
   _accel->invert(ZAXIS);
+  
+  _wiiSensorAccessor.initialize(); 
 }
 
 #endif

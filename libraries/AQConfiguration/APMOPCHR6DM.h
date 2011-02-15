@@ -35,10 +35,10 @@
 //#include <CHR6DMSensorsAccessor.h>
 CHR6DM _chr6dm;
 #include <CHR6DMAccelerometer.h>
-CHR6DMAccelerometer tempAccel(_chr6dm);
+CHR6DMAccelerometer tempAccel;
 Accelerometer *_accel = &tempAccel;
 #include <CHR6DMGyroscope.h>
-CHR6DMGyroscope tempGyro(_chr6dm);
+CHR6DMGyroscope tempGyro;
 Gyroscope *_gyro = &tempGyro;
 #include <ReceiverForAPM.h>
 ReceiverForAPM tempReceiver;
@@ -51,7 +51,7 @@ Motors *_motors = &tempMotors;
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 #include "CHR6DMCompass.h"
-CHR6DMCompass tempCompass(_chr6dm);
+CHR6DMCompass tempCompass;
 Compass *_compass = &tempCompass;
 #ifdef AltitudeHold
   #include <BMP085BarometricSensor.h>
@@ -70,8 +70,6 @@ Compass *_compass = &tempCompass;
 #endif
 
 
-
-
 void initPlatform()
 {
   Serial1.begin(BAUD);
@@ -82,6 +80,10 @@ void initPlatform()
   pinMode(LED_Green, OUTPUT);
 
   Wire.begin();
+  
+  tempAccel.setChr6dm(&_chr6dm);
+  tempGyro.setChr6dm(&_chr6dm);
+  tempCompass.setChr6dm(&_chr6dm);
 }
 
 

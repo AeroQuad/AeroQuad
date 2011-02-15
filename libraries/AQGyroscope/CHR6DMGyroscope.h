@@ -30,11 +30,13 @@ private:
   CHR6DM *_chr6dm;
 
 public:
-  CHR6DMGyroscope(CHR6DM chr6dm);
+  CHR6DMGyroscope();
 
   void initialize();
   void measure();
   void calibrate();
+  
+  void setChr6dm(CHR6DM *chr6dm);
 };
 
 #endif

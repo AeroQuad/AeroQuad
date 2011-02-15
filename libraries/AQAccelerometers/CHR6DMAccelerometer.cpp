@@ -21,9 +21,8 @@
 #include "CHR6DMAccelerometer.h"
 #include <AQMath.h>
 
-CHR6DMAccelerometer::CHR6DMAccelerometer(CHR6DM chr6dm)
+CHR6DMAccelerometer::CHR6DMAccelerometer()
 {
-  _chr6dm = &chr6dm;
   _accelScaleFactor = 0;
 }
 
@@ -80,3 +79,8 @@ void CHR6DMAccelerometer::calculateAltitude()
   }
   _previousAccelTime = _currentAccelTime;
 } 
+
+void CHR6DMAccelerometer::setChr6dm(CHR6DM *chr6dm)
+{
+  _chr6dm = chr6dm;
+}

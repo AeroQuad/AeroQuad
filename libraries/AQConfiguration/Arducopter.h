@@ -21,7 +21,6 @@
 #ifndef _AQ_ARDUCOPTER_CONFIG_H_
 #define _AQ_ARDUCOPTER_CONFIG_H_
 
-//#include <AQAPMADCSensorsAccessor.h>
 #include <IDG500_ADCGyroscope.h>
 IDG500_ADCGyroscope tempGyro;
 Gyroscope *_gyro = &tempGyro;
@@ -68,6 +67,8 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 void initPlatform()
 {
   Wire.begin();
+  
+  initializeADC(); // this is needed for both gyros and accels, done once in this class
 }
 
 

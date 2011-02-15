@@ -31,11 +31,13 @@ private:
   AQWiiSensorAccessor *_wiiSensorAccessor;
   
 public:
-  WiiGyroscope(AQWiiSensorAccessor wiiSensorAccessor);
+  WiiGyroscope();
   
   void initialize();
   void measure();
   void calibrate();
+  
+  void setWiiSensorAccessor(AQWiiSensorAccessor *wiiSensorAccessor);
 };
 
 #endif

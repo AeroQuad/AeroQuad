@@ -22,9 +22,8 @@
 
 #include <AQMath.h>
 
-WiiGyroscope::WiiGyroscope(AQWiiSensorAccessor wiiSensorAccessor)
+WiiGyroscope::WiiGyroscope()
 {
-  _wiiSensorAccessor = &wiiSensorAccessor;
   // 0.5mV/Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
   // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
   // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
@@ -34,7 +33,7 @@ WiiGyroscope::WiiGyroscope(AQWiiSensorAccessor wiiSensorAccessor)
   
 void WiiGyroscope::initialize() 
 {
-  _wiiSensorAccessor->initialize(); 
+  
 }
   
 void WiiGyroscope::measure() 
@@ -63,3 +62,9 @@ void WiiGyroscope::calibrate()
     _gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
   }
 }
+
+void WiiGyroscope::setWiiSensorAccessor(AQWiiSensorAccessor *wiiSensorAccessor)
+{
+  _wiiSensorAccessor = wiiSensorAccessor;
+}
+

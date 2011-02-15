@@ -31,11 +31,13 @@ private:
   AQWiiSensorAccessor *_wiiSensorAccessor;
   
 public:
-  WiiAccelerometer(AQWiiSensorAccessor wiiSensorAccessor);
+  WiiAccelerometer();
   
   void measure();
   // Allows user to zero accelerometers on command
   void calibrate();
+  
+  void setWiiSensorAccessor(AQWiiSensorAccessor *wiiSensorAccessor);
 };
 
 #endif
