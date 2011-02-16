@@ -21,6 +21,17 @@
 #ifndef _AQ_ARDUCOPTER_CONFIG_H_
 #define _AQ_ARDUCOPTER_CONFIG_H_
 
+#define LED_Red 35
+#define LED_Yellow 36
+#define LED_Green 37
+#define RELE_pin 47
+#define SW1_pin 41
+#define SW2_pin 40
+#define BUZZER 9
+#define PIANO_SW1 42
+#define PIANO_SW2 43
+
+
 #include <IDG500_ADCGyroscope.h>
 IDG500_ADCGyroscope tempGyro;
 Gyroscope *gyro = &tempGyro;
@@ -37,8 +48,10 @@ Motors *motors = &tempMotors;
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #ifdef HeadingMagHold
-  #include <HMC5843Magnetometer.h>
-  HMC5843Magnetometer tempCompass;
+//  #include <HMC5843Magnetometer.h>
+//  HMC5843Magnetometer tempCompass;
+  #include <HMC6352Magnetometer.h>
+  HMC6352Magnetometer tempCompass;
   Compass *compass = &tempCompass;
 #endif
 #ifdef AltitudeHold
@@ -53,15 +66,6 @@ FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #endif
 //#endif
 
-#define LED_Red 35
-#define LED_Yellow 36
-#define LED_Green 37
-#define RELE_pin 47
-#define SW1_pin 41
-#define SW2_pin 40
-#define BUZZER 9
-#define PIANO_SW1 42
-#define PIANO_SW2 43
 
 
 void initPlatform()
@@ -70,9 +74,10 @@ void initPlatform()
   
   initializeADC(); // this is needed for both gyros and accels, done once in this class
   
-  #ifdef HeadingMagHold
-    tempCompass.setGyroscope(gyro);
-  #endif
+  // needed for HMC5843Magnetometer
+//  #ifdef HeadingMagHold
+//    tempCompass.setGyroscope(gyro);
+//  #endif
 }
 
 
