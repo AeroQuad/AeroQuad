@@ -21,30 +21,35 @@
 // Special thanks for 1k space optimization update from Ala42
 // http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13359&viewfull=1#post13359
 
-// Utilities for writing and reading from the EEPROM
-float readFloat(int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatOut;
+#include <AltitudeProvider.h>
 
+union floatStore 
+{
+  byte floatByte[4];
+  float floatVal;
+} floatOut,floatIn;
+
+// Utilities for writing and reading from the EEPROM
+float readFloat(int address) 
+{
   for (int i = 0; i < 4; i++)
+  {
     floatOut.floatByte[i] = EEPROM.read(address + i);
+  }
   return floatOut.floatVal;
 }
 
-void writeFloat(float value, int address) {
-  union floatStore {
-    byte floatByte[4];
-    float floatVal;
-  } floatIn;
-
+void writeFloat(float value, int address) 
+{
   floatIn.floatVal = value;
   for (int i = 0; i < 4; i++)
+  {
     EEPROM.write(address + i, floatIn.floatByte[i]);
+  }
 }
 
-void readPID(unsigned char IDPid, unsigned int IDEeprom) {
+void readPID(unsigned char IDPid, unsigned int IDEeprom) 
+{
   struct PIDdata* pid = &PID[IDPid];
   pid->P = readFloat(IDEeprom);
   pid->I = readFloat(IDEeprom+4);
@@ -53,7 +58,8 @@ void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->integratedError = 0;
 }
 
-void writePID(unsigned char IDPid, unsigned int IDEeprom) {
+void writePID(unsigned char IDPid, unsigned int IDEeprom) 
+{
   struct PIDdata* pid = &PID[IDPid];
   writeFloat(pid->P, IDEeprom);
   writeFloat(pid->I, IDEeprom+4);
@@ -61,7 +67,8 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 }
 
 // contains all default values when re-writing EEPROM
-void initializeEEPROM(void) {
+void initializeEEPROM() 
+{
   PID[ROLL].P = 1.0;
   PID[ROLL].I = 0.0;
   PID[ROLL].D = -3.0;
@@ -96,27 +103,27 @@ void initializeEEPROM(void) {
     PID[ZDAMPENING].D = 0.0;
     minThrottleAdjust = -50.0;
     maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
-    altitude.setSmoothFactor(0.1);
+    altitudeProvider->setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
-    compass.setMagCal(XAXIS, 1, 0);
-    compass.setMagCal(YAXIS, 1, 0);
-    compass.setMagCal(ZAXIS, 1, 0);
+    compass->setMagCal(XAXIS, 1, 0);
+    compass->setMagCal(YAXIS, 1, 0);
+    compass->setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  receiver.setXmitFactor(0.50);
+  receiver->setXmitFactor(0.50);
   levelLimit = 500.0;
   levelOff = 150.0;
-  gyro.setSmoothFactor(1.0);
-  accel.setSmoothFactor(1.0);
-  accel.setOneG(500);
+  gyro->setSmoothFactor(1.0);
+  accel->setSmoothFactor(1.0);
+  accel->setOneG(500);
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver.setTransmitterSlope(channel, 1.0);
-    receiver.setTransmitterOffset(channel, 0.0);
-    receiver.setSmoothFactor(channel, 1.0);
+    receiver->setTransmitterSlope(channel, 1.0);
+    receiver->setTransmitterOffset(channel, 0.0);
+    receiver->setSmoothFactor(channel, 1.0);
   }
-  receiver.setSmoothFactor(YAW, 0.5);
+  receiver->setSmoothFactor(YAW, 0.5);
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -140,7 +147,8 @@ void initializeEEPROM(void) {
   #endif*/
 }
 
-void readEEPROM(void) {
+void readEEPROM() 
+{
   readPID(ROLL, ROLL_PID_GAIN_ADR);
   readPID(PITCH, PITCH_PID_GAIN_ADR);
   readPID(YAW, YAW_PID_GAIN_ADR);
@@ -157,14 +165,14 @@ void readEEPROM(void) {
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
-    altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+    altitudeProvider->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
 
   #ifdef HeadingMagHold
-    compass.setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
-    compass.setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
-    compass.setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
+    compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -176,7 +184,7 @@ void readEEPROM(void) {
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   minAcro = readFloat(MINACRO_ADR);
-  accel.setOneG(readFloat(ACCEL1G_ADR));
+  accel->setOneG(readFloat(ACCEL1G_ADR));
   
   /*#ifdef Camera
   mCameraPitch = readFloat(MCAMERAPITCH_ADR);
@@ -194,7 +202,8 @@ void readEEPROM(void) {
   #endif*/
 }
 
-void writeEEPROM(void){
+void writeEEPROM()
+{
   cli(); // Needed so that APM sensor data doesn't overflow
   writePID(ROLL, ROLL_PID_GAIN_ADR);
   writePID(PITCH, PITCH_PID_GAIN_ADR);
@@ -209,30 +218,30 @@ void writeEEPROM(void){
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(altitudeProvider->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
     writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
   #ifdef HeadingMagHold
-    writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
-    writeFloat(compass.getMagMin(XAXIS), MAGXMIN_ADR);
-    writeFloat(compass.getMagMax(YAXIS), MAGYMAX_ADR);
-    writeFloat(compass.getMagMin(YAXIS), MAGYMIN_ADR);
-    writeFloat(compass.getMagMax(ZAXIS), MAGZMAX_ADR);
-    writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
+    writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
+    writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
+    writeFloat(compass->getMagMax(YAXIS), MAGYMAX_ADR);
+    writeFloat(compass->getMagMin(YAXIS), MAGYMIN_ADR);
+    writeFloat(compass->getMagMax(ZAXIS), MAGZMAX_ADR);
+    writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(levelLimit, LEVELLIMIT_ADR);
   writeFloat(levelOff, LEVELOFF_ADR);
-  writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
-  writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
-  writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
+  writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
+  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
+  writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    writeFloat(receiver.getTransmitterSlope(channel),  offset+0);
-    writeFloat(receiver.getTransmitterOffset(channel), offset+4);
-    writeFloat(receiver.getSmoothFactor(channel),      offset+8);
+    writeFloat(receiver->getTransmitterSlope(channel),  offset+0);
+    writeFloat(receiver->getTransmitterOffset(channel), offset+4);
+    writeFloat(receiver->getSmoothFactor(channel),      offset+8);
   }
 
 
@@ -241,7 +250,7 @@ void writeEEPROM(void){
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(minAcro, MINACRO_ADR);
-  writeFloat(accel.getOneG(), ACCEL1G_ADR);
+  writeFloat(accel->getOneG(), ACCEL1G_ADR);
     
   /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);

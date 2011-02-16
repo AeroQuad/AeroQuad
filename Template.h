@@ -23,11 +23,15 @@
 // ***********************************************************************
 // ************************** Example Class ******************************
 // ***********************************************************************
-class exampleClass {
+class exampleClass 
+{
+private:
+  int _exampleVariable;
+  float _exampleData[3];
+
 public: 
-  int exampleVariable;
-  float exampleData[3];
-  exampleClass(void) { 
+  exampleClass() 
+  { 
     // this is the constructor of the object and must have the same name 
     // can be used to initialize any of the variables declared above 
   }
@@ -35,34 +39,41 @@ public:
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
-  virtual void initialize(void); 
+  virtual void initialize(); 
   virtual void exampleFunction(int); 
   virtual const int getExampleData(byte);
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  void examplePublicFunction(byte axis, int value) {
+  void examplePublicFunction(byte axis, int value) 
+  {
     // insert common code here 
   }
-  const int getPublicData(byte axis) {
-    return exampleData[axis];
+  
+  const int getPublicData(byte axis) 
+  {
+    return _exampleData[axis];
   }
 };
 
 // ***********************************************************************
 // ************************ Example Subclass *****************************
 // ***********************************************************************
-class exampleSubClass : public exampleClass { 
+class exampleSubClass : public exampleClass 
+{ 
 private:
-  int exampleArray[3]; // only for use inside this subclass
-  int examplePrivateData; // only for use inside this subclass
-  void examplePrivateFunction(int functionVariable) {
+  int _exampleArray[3]; // only for use inside this subclass
+  int _examplePrivateData; // only for use inside this subclass
+  
+  void examplePrivateFunction(int functionVariable) 
+  {
     // it's possible to declare functions just for this subclass 
   }
   
 public: 
-  exampleSubClass() : exampleClass(){
+  exampleSubClass() : exampleClass()
+  {
     // this is the constructor of the object and must have the same name
     // can be used to initialize any of the variables declared above
   }
@@ -70,14 +81,19 @@ public:
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {
+  void initialize() 
+  {
     // insert code here 
   }
-  void exampleFunction(int someVariable) {
+  
+  void exampleFunction(int someVariable) 
+  {
     // insert code here 
     examplePrivateFunction(someVariable); 
   }
-  const int getExampleData(byte axis) { 
+  
+  const int getExampleData(byte axis) 
+  { 
     // insert code here 
     return exampleArray[axis]; 
   } 
@@ -87,23 +103,24 @@ public:
 // ***********************************************************************
 // ************************** Compass Class ******************************
 // ***********************************************************************
-class CompassExample {
+class CompassExample 
+{
 private: // not found in the example above, but it's possible to declare private variables only seen in the main class
-  float cosRoll;
-  float sinRoll;
-  float cosPitch;
-  float sinPitch;
-  float magX;
-  float magY;
+  float _cosRoll;
+  float _sinRoll;
+  float _cosPitch;
+  float _sinPitch;
+  float _magX;
+  float _magY;
+  int _compassAddress;
+  float _heading;
+  int _measuredMagX;
+  int _measuredMagY;
+  int _measuredMagZ;
   
-public: 
-  int compassAddress;
-  float heading;
-  int measuredMagX;
-  int measuredMagY;
-  int measuredMagZ;
-  
-  CompassExample(void) { 
+public:   
+  CompassExample() 
+  { 
     // this is the constructor of the object and must have the same name 
     // can be used to initialize any of the variables declared above 
   }
@@ -111,21 +128,22 @@ public:
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void); 
+  virtual void initialize(); 
+  virtual void measure(); 
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getHeading(void) {
+  const float getHeading() 
+  {
     // Heading calculation based on code written by FabQuad
     // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
-    cosRoll = cos(radians(flightAngle.getData(ROLL)));
-    sinRoll = sin(radians(flightAngle.getData(ROLL)));
-    cosPitch = cos(radians(flightAngle.getData(PITCH)));
-    sinPitch = sin(radians(flightAngle.getData(PITCH)));
-    magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
-    magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;
+    _cosRoll = cos(radians(_flightAngle->getData(ROLL)));
+    _sinRoll = sin(radians(_flightAngle->getData(ROLL)));
+    _cosPitch = cos(radians(_flightAngle->getData(PITCH)));
+    _sinPitch = sin(radians(_flightAngle->getData(PITCH)));
+    _magX = _measuredMagX * _cosPitch + _measuredMagY * _sinRoll * _sinPitch + _measuredMagZ * _cosRoll * _sinPitch;
+    _magY = _measuredMagY * _cosRoll - _measuredMagZ * _sinRoll;
     return degrees(atan2(-magY, magX));
   }
 };
@@ -133,27 +151,31 @@ public:
 // ***********************************************************************
 // ************************ Example Subclass *****************************
 // ***********************************************************************
-class Compass_AeroQuad_v2 : public CompassExample {
+class Compass_AeroQuad_v2 : public CompassExample 
+{
 // This sets up the HMC5843 from Sparkfun
 public: 
-  Compass_AeroQuad_v2() : CompassExample(){
-    compassAddress = 0x1E;
+  Compass_AeroQuad_v2() : CompassExample()
+  {
+    _compassAddress = 0x1E;
   }
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
   // ***********************************************************
-  void initialize(void) {
-    updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
+  void initialize() 
+  {
+    updateRegisterI2C(_compassAddress, 0x02, 0x00); // continuous 10Hz mode
     delay(100);
   }
   
-  void measure(void) {
-    sendByteI2C(compassAddress, 0x03);
-    Wire.requestFrom(compassAddress, 6);
-    measuredMagX = (Wire.receive() << 8) | Wire.receive();
-    measuredMagY = (Wire.receive() << 8) | Wire.receive();
-    measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+  void measure() 
+  {
+    sendByteI2C(_compassAddress, 0x03);
+    Wire.requestFrom(_compassAddress, 6);
+    _measuredMagX = (Wire.receive() << 8) | Wire.receive();
+    _measuredMagY = (Wire.receive() << 8) | Wire.receive();
+    _measuredMagZ = (Wire.receive() << 8) | Wire.receive();
     Wire.endTransmission();
   }
 };

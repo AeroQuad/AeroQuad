@@ -19,24 +19,29 @@
 */
 
 // I2C functions
+#include "I2C.h"
 
-void sendByteI2C(int deviceAddress, byte dataValue) {
+void sendByteI2C(int deviceAddress, byte dataValue) 
+{
   Wire.beginTransmission(deviceAddress);
   Wire.send(dataValue);
   Wire.endTransmission();
 }
 
-byte readByteI2C(int deviceAddress) {
+byte readByteI2C(int deviceAddress) 
+{
     Wire.requestFrom(deviceAddress, 1);
     return Wire.receive();
 }
 
-int readWordI2C(int deviceAddress) {
+int readWordI2C(int deviceAddress) 
+{
   Wire.requestFrom(deviceAddress, 2);
   return (Wire.receive() << 8) | Wire.receive();
 }
 
-int readWordWaitI2C(int deviceAddress) {
+int readWordWaitI2C(int deviceAddress) 
+{
   unsigned char msb, lsb;
   Wire.requestFrom(deviceAddress, 2); // request two bytes
   while(!Wire.available()); // wait until data available
@@ -46,14 +51,16 @@ int readWordWaitI2C(int deviceAddress) {
   return (((int)msb<<8) | ((int)lsb));
 }
 
-int readReverseWordI2C(int deviceAddress) {
+int readReverseWordI2C(int deviceAddress) 
+{
   byte lowerByte;
   Wire.requestFrom(deviceAddress, 2);
   lowerByte = Wire.receive();
   return (Wire.receive() << 8) | lowerByte;
 }
 
-byte readWhoI2C(int deviceAddress) {
+byte readWhoI2C(int deviceAddress) 
+{
   // read the ID of the I2C device
   Wire.beginTransmission(deviceAddress);
   Wire.send(0x00);
@@ -63,11 +70,11 @@ byte readWhoI2C(int deviceAddress) {
   return Wire.receive();
 }
 
-void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) {
+void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) 
+{
   Wire.beginTransmission(deviceAddress);
   Wire.send(dataAddress);
   Wire.send(dataValue);
   Wire.endTransmission();
 }  
-
 

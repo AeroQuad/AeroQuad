@@ -33,54 +33,25 @@
 #define ON 1
 #define OFF 0
 
-#if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-  #define LED_Red 35
-  #define LED_Yellow 36
-  #define LED_Green 37
-  #define RELE_pin 47
-  #define SW1_pin 41
-  #define SW2_pin 40
-  #define BUZZER 9
-  #define PIANO_SW1 42
-  #define PIANO_SW2 43
-#endif
-#ifdef AeroQuadMega_v2  
-  #define LED2PIN 4
-  #define LED3PIN 31
-#else
+#if defined (__AVR_ATmega328P__)
   #define LED2PIN 12
   #define LED3PIN 12
+#else
+  #define LED2PIN 4
+  #define LED3PIN 31
 #endif
 
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
-
 // PID Variables
-struct PIDdata {
-  float P, I, D;
+struct PIDdata 
+{
+  float P;
+  float I;
+  float D;
   float lastPosition;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[10];
+
 // This struct above declares the variable PID[] to hold each of the PID values for various functions
 // The following constants are declared in AeroQuad.h
 // ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
@@ -93,11 +64,6 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
 float smoothHeading;
 
 // Sensor pin assignments
@@ -107,27 +73,6 @@ float smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-#define AZPIN 12 // Auto zero pin for IDG500 gyros
-
-// Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-#if defined(plusConfig) || defined(XConfig)
-  #define LASTMOTOR 4
-#endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#endif
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -152,14 +97,8 @@ int levelOff; // Read in from EEPROM
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  float CHR_RollAngle;
-  float CHR_PitchAngle;
-#endif
-
 // Heading hold
 byte headingHoldConfig;
-//float headingScaleFactor;
 float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
@@ -168,11 +107,9 @@ float absoluteHeading = 0;;
 float setHeading = 0;
 
 // Altitude Hold
-#define TEMPERATURE 0
-#define PRESSURE 1
 int throttleAdjust = 0;
 int throttle = 1000;
-int autoDescent = 0;
+//int autoDescent = 0;
 //#ifndef AeroQuad_v18
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
@@ -183,25 +120,7 @@ byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 //#endif
 
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
-#define LASTCHANNEL 6
 int delta;
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float timeConstant;
@@ -346,25 +265,29 @@ byte testSignal = LOW;
 float arctan2(float y, float x); // defined in Sensors.pde
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-//void calibrateESC(void); // defined in FlightControl.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
-void processAeroQuadStableMode(void);  // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
+void readEEPROM(); // defined in DataStorage.h
+void readPilotCommands(); // defined in FlightCommand.pde
+void readSensors(); // defined in Sensors.pde
+//void calibrateESC(); // defined in FlightControl.pde
+void processFlightControlXMode(); // defined in FlightControl.pde
+void processFlightControlPlusMode(); // defined in FlightControl.pde
+void processArdupirateSuperStableMode();  // defined in FlightControl.pde
+void processAeroQuadStableMode();  // defined in FlightControl.pde
+void readSerialCommand();  //defined in SerialCom.pde
+void sendSerialTelemetry(); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
+float readFloatSerial(); // defined in SerialCom.pde
+void comma(); // defined in SerialCom.pde
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
-#else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
-#endif
+void initSensorsFromEEPROM(); // defined in Sensors.pde
+void storeSensorsToEEPROM();  // defined in Sensors.pde
+void initTransmitterFromEEPROM();  // defined in Sensors.pde
+
+//#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+//float findMode(float *data, int arraySize); // defined in Sensors.pde
+//#else
+//int findMode(int *data, int arraySize); // defined in Sensors.pde
+//#endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
 extern int  __bss_end; // used by freemem 

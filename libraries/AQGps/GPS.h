@@ -23,7 +23,8 @@
 /**************************************************************/
 // This is experimental, it is not yet functional
 
-#ifdef GPS
+#ifndef _AQ_GPS_H_
+#define _AQ_GPS_H_
 
 TinyGPS gps;
 NewSoftSerial nss(13, 3);
@@ -47,7 +48,9 @@ void printFloat(double number, int digits)
   // Round correctly so that print(1.999, 2) prints as "2.00"
   double rounding = 0.5;
   for (uint8_t i=0; i<digits; ++i)
+  {
     rounding /= 10.0;
+  }
   
   number += rounding;
 
@@ -58,7 +61,9 @@ void printFloat(double number, int digits)
 
   // Print the decimal point, but only if there are digits beyond
   if (digits > 0)
+  {
     Serial.print("."); 
+  }
 
   // Extract digits from the remainder one at a time
   while (digits-- > 0)
@@ -72,12 +77,23 @@ void printFloat(double number, int digits)
 
 void gpsdump(TinyGPS &gps)
 {
-  long lat, lon;
-  float flat, flon;
-  unsigned long age, date, time, chars;
+  long lat;
+  long lon;
+  float flat; 
+  float flon;
+  unsigned long age; 
+  unsigned long date;
+  unsigned long time;
+  unsigned long chars;
   int year;
-  byte month, day, hour, minute, second, hundredths;
-  unsigned short sentences, failed;
+  byte month;
+  byte day; 
+  byte hour; 
+  byte minute;
+  byte second; 
+  byte hundredths;
+  unsigned short sentences;
+  unsigned short failed;
 
   gps.get_position(&lat, &lon, &age);
   Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat); Serial.print(", "); Serial.print(lon); 
@@ -120,11 +136,12 @@ bool feedgps()
   while (nss.available())
   {
     if (gps.encode(nss.read()))
+    {
       return true;
+    }
   }
   return false;
 }
 
 #endif
-
 
