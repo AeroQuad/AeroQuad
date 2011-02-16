@@ -101,8 +101,8 @@ void initializeEEPROM()
     PID[ZDAMPENING].P = 0.0;
     PID[ZDAMPENING].I = 0.0;
     PID[ZDAMPENING].D = 0.0;
-    _minThrottleAdjust = -50.0;
-    _maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
+    minThrottleAdjust = -50.0;
+    maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
     altitudeProvider->setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
@@ -112,12 +112,12 @@ void initializeEEPROM()
   #endif
   windupGuard = 1000.0;
   receiver->setXmitFactor(0.50);
-  _levelLimit = 500.0;
-  _levelOff = 150.0;
+  levelLimit = 500.0;
+  levelOff = 150.0;
   gyro->setSmoothFactor(1.0);
   accel->setSmoothFactor(1.0);
   accel->setOneG(500);
-  _timeConstant = 7.0;
+  timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver->setTransmitterSlope(channel, 1.0);
     receiver->setTransmitterOffset(channel, 0.0);
@@ -125,10 +125,10 @@ void initializeEEPROM()
   }
   receiver->setSmoothFactor(YAW, 0.5);
 
-  _smoothHeading = 1.0;
-  _flightMode = ACRO;
-  _headingHoldConfig = OFF;
-  _minAcro = 1300;
+  smoothHeading = 1.0;
+  flightMode = ACRO;
+  headingHoldConfig = OFF;
+  minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
   /*#ifdef Camera
@@ -163,8 +163,8 @@ void readEEPROM()
     // Previously had issue where EEPROM was not reading right data
     readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
-    _minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
-    _maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+    minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
+    maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitudeProvider->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
@@ -176,14 +176,14 @@ void readEEPROM()
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
-  _levelLimit = readFloat(LEVELLIMIT_ADR);
-  _levelOff = readFloat(LEVELOFF_ADR);
-  _timeConstant = readFloat(FILTERTERM_ADR);
-  _smoothHeading = readFloat(HEADINGSMOOTH_ADR);
+  levelLimit = readFloat(LEVELLIMIT_ADR);
+  levelOff = readFloat(LEVELOFF_ADR);
+  timeConstant = readFloat(FILTERTERM_ADR);
+  smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
-  _flightMode = readFloat(FLIGHTMODE_ADR);
-  _headingHoldConfig = readFloat(HEADINGHOLD_ADR);
-  _minAcro = readFloat(MINACRO_ADR);
+  flightMode = readFloat(FLIGHTMODE_ADR);
+  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
+  minAcro = readFloat(MINACRO_ADR);
   accel->setOneG(readFloat(ACCEL1G_ADR));
   
   /*#ifdef Camera
@@ -216,8 +216,8 @@ void writeEEPROM()
   #ifdef AltitudeHold
     writePID(ALTITUDE, ALTITUDE_PGAIN_ADR);
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
-    writeFloat(_minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
-    writeFloat(_maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+    writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
+    writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
     writeFloat(altitudeProvider->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
     writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
@@ -230,12 +230,12 @@ void writeEEPROM()
     writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(_levelLimit, LEVELLIMIT_ADR);
-  writeFloat(_levelOff, LEVELOFF_ADR);
+  writeFloat(levelLimit, LEVELLIMIT_ADR);
+  writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
-  writeFloat(_timeConstant, FILTERTERM_ADR);
+  writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
@@ -245,11 +245,11 @@ void writeEEPROM()
   }
 
 
-  writeFloat(_smoothHeading, HEADINGSMOOTH_ADR);
+  writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
-  writeFloat(_flightMode, FLIGHTMODE_ADR);
-  writeFloat(_headingHoldConfig, HEADINGHOLD_ADR);
-  writeFloat(_minAcro, MINACRO_ADR);
+  writeFloat(flightMode, FLIGHTMODE_ADR);
+  writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
+  writeFloat(minAcro, MINACRO_ADR);
   writeFloat(accel->getOneG(), ACCEL1G_ADR);
     
   /*#ifdef Camera

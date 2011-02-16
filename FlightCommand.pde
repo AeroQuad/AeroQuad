@@ -28,12 +28,12 @@ void readPilotCommands()
   if (receiver->getRaw(THROTTLE) < MINCHECK) 
   {
     zeroIntegralError();
-    _throttleAdjust = 0;
+    throttleAdjust = 0;
     //receiver->adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
-    if (receiver->getRaw(YAW) < MINCHECK && _armed == ON) 
+    if (receiver->getRaw(YAW) < MINCHECK && armed == ON) 
     {
-      _armed = OFF;
+      armed = OFF;
       motors->commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       digitalWrite(LED_Red, LOW);
@@ -63,22 +63,22 @@ void readPilotCommands()
     }   
 
     // Arm motors (left stick lower right corner)
-    if (receiver->getRaw(YAW) > MAXCHECK && _armed == OFF && _safetyCheck == ON) 
+    if (receiver->getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) 
     {
       zeroIntegralError();
-      _armed = ON;
+      armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       digitalWrite(LED_Red, HIGH);
       #endif
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors->setMinCommand(motor, MINTHROTTLE);
       //   delay(100);
-      //_altitude->measureGround();
+      //altitude->measureGround();
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiver->getRaw(YAW) > MINCHECK) 
     {
-      _safetyCheck = ON; 
+      safetyCheck = ON; 
     }
   }
   
@@ -94,31 +94,31 @@ void readPilotCommands()
   if (receiver->getRaw(MODE) > 1500) 
   {
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      if (_flightMode == ACRO)
+      if (flightMode == ACRO)
       {
         digitalWrite(LED2PIN, HIGH);
       }
     #endif
-    _flightMode = STABLE;
+    flightMode = STABLE;
  }
   else 
   {
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      if (_flightMode == STABLE)
+      if (flightMode == STABLE)
       {
         digitalWrite(LED2PIN, LOW);
       }
     #endif
-    _flightMode = ACRO;
+    flightMode = ACRO;
   }
   
    #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-      if (_flightMode == ACRO)
+      if (flightMode == ACRO)
       {
         digitalWrite(LED_Yellow, HIGH);
         digitalWrite(LED_Green, LOW);
       }
-      else if (_flightMode == STABLE) 
+      else if (flightMode == STABLE) 
       {
         digitalWrite(LED_Green, HIGH);
         digitalWrite(LED_Yellow, LOW); 
@@ -129,20 +129,20 @@ void readPilotCommands()
     
    if (receiver->getRaw(AUX) < 1750) 
    {
-      if (_storeAltitude == ON) 
+      if (storeAltitude == ON) 
       {
-        _holdAltitude = altitudeProvider->getData();
-        _holdThrottle = receiver->getData(THROTTLE);
+        holdAltitude = altitudeProvider->getData();
+        holdThrottle = receiver->getData(THROTTLE);
         PID[ALTITUDE].integratedError = 0;
         accel->setOneG(accel->getFlightData(ZAXIS));
-        _storeAltitude = OFF;
+        storeAltitude = OFF;
       }
-      _altitudeHold = ON;
+      altitudeHold = ON;
     }
     else 
     {
-      _storeAltitude = ON;
-      _altitudeHold = OFF;
+      storeAltitude = ON;
+      altitudeHold = OFF;
     }
   #endif
   

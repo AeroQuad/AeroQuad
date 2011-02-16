@@ -64,7 +64,7 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-float _smoothHeading;
+float smoothHeading;
 
 // Sensor pin assignments
 #define PITCHACCELPIN 0
@@ -86,55 +86,55 @@ float aref; // Read in from EEPROM
 // Flight Mode
 #define ACRO 0
 #define STABLE 1
-byte _flightMode;
-int _minAcro; // Read in from EEPROM, defines min throttle during flips
+byte flightMode;
+int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 // Auto level setup
-int _levelAdjust[2] = {0,0};
-int _levelLimit; // Read in from EEPROM
-int _levelOff; // Read in from EEPROM
+int levelAdjust[2] = {0,0};
+int levelLimit; // Read in from EEPROM
+int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
 // Heading hold
-byte _headingHoldConfig;
-float _commandedYaw = 0;
-float _headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-float _heading = 0; // measured heading from yaw gyro (process variable)
-float _relativeHeading = 0; // current heading the quad is set to (set point)
-float _absoluteHeading = 0;;
-float _setHeading = 0;
+byte headingHoldConfig;
+float commandedYaw = 0;
+float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
+float heading = 0; // measured heading from yaw gyro (process variable)
+float relativeHeading = 0; // current heading the quad is set to (set point)
+float absoluteHeading = 0;;
+float setHeading = 0;
 
 // Altitude Hold
-int _throttleAdjust = 0;
-int _throttle = 1000;
-//int _autoDescent = 0;
+int throttleAdjust = 0;
+int throttle = 1000;
+//int autoDescent = 0;
 //#ifndef AeroQuad_v18
-int _minThrottleAdjust = -50;
-int _maxThrottleAdjust = 50;
-float _holdAltitude = 0.0;
-int _holdThrottle = 1000;
-float _zDampening = 0.0;
-byte _storeAltitude = OFF;
-byte _altitudeHold = OFF;
+int minThrottleAdjust = -50;
+int maxThrottleAdjust = 50;
+float holdAltitude = 0.0;
+int holdThrottle = 1000;
+float zDampening = 0.0;
+byte storeAltitude = OFF;
+byte altitudeHold = OFF;
 //#endif
 
-int _delta;
+int delta;
 
 // Flight angle variables
-float _timeConstant;
+float timeConstant;
 
 // ESC Calibration
-byte _calibrateESC = 0;
-int _testCommand = 1000;
+byte calibrateESC = 0;
+int testCommand = 1000;
 
 // Communication
-char _queryType = 'X';
-byte _tlmType = 0;
-byte _armed = OFF;
-byte _safetyCheck = OFF;
-byte _update = 0;
+char queryType = 'X';
+byte tlmType = 0;
+byte armed = OFF;
+byte safetyCheck = OFF;
+byte update = 0;
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -149,17 +149,17 @@ byte _update = 0;
 
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
-unsigned long _previousTime = 0;
-unsigned long _currentTime = 0;
-unsigned long _deltaTime = 0;
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
+unsigned long deltaTime = 0;
 unsigned long receiverTime = 0;
-unsigned long _compassTime = 5000;
-unsigned long _altitudeTime = 10000;
-unsigned long _batteryTime = 15000;
-unsigned long _autoZeroGyroTime = 0;
-unsigned long _cameraTime = 10000;
-unsigned long _fastTelemetryTime = 0;
-unsigned long _telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
+unsigned long compassTime = 5000;
+unsigned long altitudeTime = 10000;
+unsigned long batteryTime = 15000;
+unsigned long autoZeroGyroTime = 0;
+unsigned long cameraTime = 10000;
+unsigned long fastTelemetryTime = 0;
+unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
 // jihlein: wireless telemetry defines
 /**************************************************************/
@@ -194,12 +194,12 @@ unsigned long _telemetryTime = 50000; // make telemetry output 50ms offset from 
 // Enable/disable control loops for debug
 //#define DEBUG
 byte receiverLoop = ON;
-byte _telemetryLoop = ON;
-byte _sensorLoop = ON;
-byte _controlLoop = ON;
-byte _cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
-byte _fastTransfer = OFF; // Used for troubleshooting
-byte _testSignal = LOW;
+byte telemetryLoop = ON;
+byte sensorLoop = ON;
+byte controlLoop = ON;
+byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+byte fastTransfer = OFF; // Used for troubleshooting
+byte testSignal = LOW;
 
 // **************************************************************
 // *************************** EEPROM ***************************

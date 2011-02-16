@@ -32,24 +32,24 @@ void readSensors()
  
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
-    if (_currentTime > _compassTime) 
+    if (currentTime > compassTime) 
     {
       compass->measure(flightAngle->getData(ROLL),flightAngle->getData(PITCH)); // defined in compass.h
-      _compassTime = _currentTime + COMPASSLOOPTIME;
+      compassTime = currentTime + COMPASSLOOPTIME;
     }
   #endif
   #if defined(AltitudeHold)
-    if (_currentTime > _altitudeTime) 
+    if (currentTime > altitudeTime) 
     {
       altitudeProvider->measure(); // defined in altitude.h
-      _altitudeTime = _currentTime + ALTITUDELOOPTIME;
+      altitudeTime = currentTime + ALTITUDELOOPTIME;
     }
   #endif
   #if defined(BattMonitor)
-    if (_currentTime > _batteryTime) 
+    if (currentTime > batteryTime) 
     {
-      batteryMonitor->measure(_armed,_throttle);
-      _batteryTime = _currentTime + BATTERYLOOPTIME;
+      batteryMonitor->measure(armed,throttle);
+      batteryTime = currentTime + BATTERYLOOPTIME;
     }
   #endif
   

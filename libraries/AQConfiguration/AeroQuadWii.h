@@ -38,11 +38,11 @@ Motors *motors = &tempMotors;
 #include <FlightAngleDCM.h>
 FlightAngleDCM tempFlightAngle;
 FlightAngleProcessor *flightAngle = &tempFlightAngle;
-#ifdef CameraControl
-  #include <AeroQuadCameraStabilizer.h>
-  AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *cameraStabilizer = &tempCamera;
-#endif
+//#ifdef CameraControl
+//  #include <AeroQuadCameraStabilizer.h>
+//  AeroQuadCameraStabilizer tempCamera;
+//  CameraStabilizer *cameraStabilizer = &tempCamera;
+//#endif
 
 void initPlatform()
 {

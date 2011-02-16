@@ -106,6 +106,7 @@
 #elif defined(AeroQuadMega_v1)
   #include <AeroQuadMegaV1.h>
 #elif defined(AeroQuadMega_v2)
+  #include <AeroQuadCameraStabilizer.h>
   #include <AeroQuadMegaV2.h>
 #elif defined(AeroQuadMega_Wii)
   #include <AQWiiSensorAccessor.h>
@@ -216,8 +217,8 @@ void setup()
   
   // Calibrate sensors
   zeroIntegralError();
-  _levelAdjust[ROLL] = 0;
-  _levelAdjust[PITCH] = 0;
+  levelAdjust[ROLL] = 0;
+  levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
 //  #ifdef Multipilot
@@ -235,7 +236,7 @@ void setup()
   // Optional Sensors
   #ifdef HeadingMagHold
     compass->initialize();
-    _setHeading = compass->getHeading();
+    setHeading = compass->getHeading();
   #endif
   #ifdef AltitudeHold
     altitudeProvider->initialize();
@@ -245,16 +246,16 @@ void setup()
   #endif
   // Camera stabilization setup
   #ifdef CameraControl
-    _cameraStabilizer->initialize();
-    _cameraStabilizer->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    _cameraStabilizer->setCenterRoll(1500); // Need to figure out nice way to set center position
-    _cameraStabilizer->setmCameraPitch(11.11);
-    _cameraStabilizer->setCenterPitch(1300);
+    cameraStabilizer->initialize();
+    cameraStabilizer->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    cameraStabilizer->setCenterRoll(1500); // Need to figure out nice way to set center position
+    cameraStabilizer->setmCameraPitch(11.11);
+    cameraStabilizer->setCenterPitch(1300);
   #endif
   
-  _previousTime = micros();
+  previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
-  _safetyCheck = 0;
+  safetyCheck = 0;
 }
 
 // ************************************************************
@@ -263,10 +264,10 @@ void setup()
 void loop () 
 {
   // Measure loop rate
-  _currentTime = micros();
-  _deltaTime = _currentTime - _previousTime;
-  G_Dt = _deltaTime / 1000000.0;
-  _previousTime = _currentTime;
+  currentTime = micros();
+  deltaTime = currentTime - previousTime;
+  G_Dt = deltaTime / 1000000.0;
+  previousTime = currentTime;
   #ifdef DEBUG
     if (testSignal == LOW) testSignal = HIGH;
     else testSignal = LOW;
@@ -274,40 +275,40 @@ void loop ()
   #endif
   
   // Measures sensor data and calculates attitude
-  if (_sensorLoop == ON) 
+  if (sensorLoop == ON) 
   {
     readSensors(); // defined in Sensors.pde
   } 
 
   // Combines external pilot commands and measured sensor data to generate motor commands
-  if (_controlLoop == ON) 
+  if (controlLoop == ON) 
   {
     processFlightControl();
   } 
   
   // Reads external pilot commands and performs functions based on stick configuration
-  if ((receiverLoop == ON) && (_currentTime > receiverTime)) // 50Hz
+  if ((receiverLoop == ON) && (currentTime > receiverTime)) // 50Hz
   {
     readPilotCommands(); // defined in FlightCommand.pde
-    receiverTime = _currentTime + RECEIVERLOOPTIME;
+    receiverTime = currentTime + RECEIVERLOOPTIME;
   }
   
   // Listen for configuration commands and reports telemetry
-  if ((_telemetryLoop == ON) && (_currentTime > _telemetryTime)) // 20Hz 
+  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) // 20Hz 
   { 
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
-    _telemetryTime = _currentTime + TELEMETRYLOOPTIME;
+    telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
 
   #ifdef CameraControl // Experimental, not fully implemented yet
-    if ((_cameraLoop == ON) && (_currentTime > _cameraTime)) // 50Hz
+    if ((cameraLoop == ON) && (currentTime > cameraTime)) // 50Hz
     { 
-      _cameraStabilizer->setPitch(flightAngle->getData(PITCH));
-      _cameraStabilizer->setRoll(flightAngle->getData(ROLL));
-      _cameraStabilizer->setYaw(flightAngle->getData(YAW));
-      _cameraStabilizer->move();
-      _cameraTime = _currentTime + CAMERALOOPTIME;
+      cameraStabilizer->setPitch(flightAngle->getData(PITCH));
+      cameraStabilizer->setRoll(flightAngle->getData(ROLL));
+      cameraStabilizer->setYaw(flightAngle->getData(YAW));
+      cameraStabilizer->move();
+      cameraTime = currentTime + CAMERALOOPTIME;
     }
   #endif
 }
