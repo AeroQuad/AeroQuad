@@ -55,8 +55,10 @@ FlightAngleProcessor *flightAngle = &tempFlightAngle;
   Compass *compass = &tempCompass;
 #endif
 #ifdef AltitudeHold
-  #include <BMP085BarometricSensor.h>
-  BMP085BarometricSensor tempAltitude;
+//  #include <BMP085BarometricSensor.h>
+//  BMP085BarometricSensor tempAltitude;
+  #include <MPXBarometerOilpan.h>
+  MPXBarometerOilpan tempAltitude;
   AltitudeProvider *altitudeProvider = &tempAltitude;
 #endif
 #ifdef BattMonitor
