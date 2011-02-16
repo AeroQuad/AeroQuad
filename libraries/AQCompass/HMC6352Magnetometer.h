@@ -32,10 +32,8 @@ class HMC6352Magnetometer : public Compass
 // This sets up the HMC6352 from Sparkfun
 private:
   byte headingData[2];
-  byte i;
-  float compassTrueHeading;
   int HMC6352Address; // wtf about 0x42>>1
-  bool available;
+  bool avail;
 
 public:
   HMC6352Magnetometer();
@@ -46,7 +44,7 @@ public:
   void initialize();
   const int getRawData(byte axis);
   void measure(const float rollAngle, const float pitchAngle);
-  const int isAvailable();
+  const int available();
 };
 
 #endif

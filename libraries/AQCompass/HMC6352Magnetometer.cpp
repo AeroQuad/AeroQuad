@@ -40,32 +40,36 @@ void HMC6352Magnetometer::initialize()
 
 const int HMC6352Magnetometer::getRawData(byte axis)
 {
-	return compassTrueHeading;
+	return _heading;
 }
 
 void HMC6352Magnetometer::measure(const float rollAngle, const float pitchAngle)
 {
-	if((abs(rollAngle)<2) && (abs(pitchAngle)<2)) { // no use reading it unless level
-	Wire.requestFrom(HMC6352Address, 2);      // MSB first
-	  i = 0;
+	if((abs(rollAngle)<2) && (abs(pitchAngle)<2))   // no use reading it unless level
+	{ 
+	  Wire.requestFrom(HMC6352Address, 2);      // MSB first
+	  byte i = 0;
 	  while(Wire.available() && i < 2)
 	  {
 	    headingData[i] = Wire.receive();
 	    i++;
 	  }
 
-	  compassTrueHeading = (headingData[0]*256 + headingData[1])/10;
+	  _heading = (headingData[0]*256 + headingData[1])/10;
 
-	  Wire.beginTransmission(HMC6352Address); // read to have data available next measure call
+	  Wire.beginTransmission(HMC6352Address); // read to have data avail next measure call
 	  Wire.send(0x41);
 	  Wire.endTransmission();
 
-	  available = true;
+	  avail = true;
 	}
-	else available = false; // out of angle
+	else 
+	{
+	  avail = false; // out of angle
+	}
 }
 
-const int HMC6352Magnetometer::isAvailable()
+const int HMC6352Magnetometer::available()
 {
-	return available;
+	return avail;
 }
