@@ -33,39 +33,39 @@
 
 
 //#include <CHR6DMSensorsAccessor.h>
-CHR6DM _chr6dm;
+CHR6DM chr6dm;
 #include <CHR6DMAccelerometer.h>
 CHR6DMAccelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <CHR6DMGyroscope.h>
 CHR6DMGyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <ReceiverForMega.h>
 ReceiverForMega tempReceiver;
-Receiver *_receiver = &tempReceiver;
+Receiver *receiver = &tempReceiver;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
-Motors *_motors = &tempMotors;
+Motors *motors = &tempMotors;
 #include "FlightAngleDCM.h"
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #include <CHR6DMCompass.h>
 CHR6DMCompass tempCompass;
-Compass *_compass = &tempCompass;
+Compass *compass = &tempCompass;
 #ifdef AltitudeHold
   #include <BMP085BarometricSensor.h>
   BMP085BarometricSensor tempAltitude;
-  AltitudeProvider *_altitudeProvider = &tempAltitude;
+  AltitudeProvider *altitudeProvider = &tempAltitude;
 #endif
 #ifdef BattMonitor
   #include <APMBatteryMonitor.h>
   APMBatteryMonitor tempBatteryMonitor;
-  BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
+  BatteryMonitor *batteryMonitor = &tempBatteryMonitor;
 #endif
 #ifdef CameraControl
   #include <AeroQuadCameraStabilizer.h>
   AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *_cameraStabilizer = &tempCamera;
+  CameraStabilizer *cameraStabilizer = &tempCamera;
 #endif
 
 
@@ -80,9 +80,9 @@ void initPlatform()
 
   Wire.begin();
   
-  tempAccel.setChr6dm(&_chr6dm);
-  tempGyro.setChr6dm(&_chr6dm);
-  tempCompass.setChr6dm(&_chr6dm);
+  tempAccel.setChr6dm(&chr6dm);
+  tempGyro.setChr6dm(&chr6dm);
+  tempCompass.setChr6dm(&chr6dm);
 }
 
 #endif

@@ -49,7 +49,7 @@ private:
   int _gyroZero;
   
 public: 
-  HMC5843Magnetometer(Gyroscope *gyro);
+  HMC5843Magnetometer();
 
   // ***********************************************************
   // Define all the virtual functions declared in the main class
@@ -57,6 +57,11 @@ public:
   void initialize();
   const int getRawData(byte axis);
   void measure(const float rollAngle, const float pitchAngle);
+  
+  void setGyroscope(Gyroscope *gyro)
+  {
+    _gyro = gyro;
+  }
 };
 
 #endif

@@ -23,19 +23,19 @@
 
 #include <ADXL335Accelerometer.h>
 ADXL335Accelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <IDGIXZ500Gyroscope.h>
 IDGIXZ500Gyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <ReceiverFor328p.h>
 ReceiverFor328p tempReceiver;
-Receiver *_receiver = &tempReceiver;
-#include <PWMMotors.h>
-PWMMotors tempMotors;
+Receiver *receiver = &tempReceiver;
 #include <FlightAngleDCM.h>
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
-Motors *_motors = &tempMotors;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
+#include <PWMMotors.h>
+PWMMotors tempMotors;
+Motors *motors = &tempMotors;
 //  #ifdef CameraControl
 //    #include "AeroQuadCameraStabilizer.h"
 //    AeroQuadCameraStabilizer tempCamera;

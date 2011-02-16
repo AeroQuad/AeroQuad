@@ -24,9 +24,8 @@
 #include <I2C.h>
 
 
-HMC5843Magnetometer::HMC5843Magnetometer(Gyroscope *gyro)
+HMC5843Magnetometer::HMC5843Magnetometer()
 {
-  _gyro = gyro;
   _compassAddress = 0x1E;
   // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
   // time greater than smoothFactor depend on magnetometer more (mags are very noisy)

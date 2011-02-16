@@ -23,19 +23,19 @@
 
 #include <ADXL335Accelerometer.h>
 ADXL335Accelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <IDGIXZ500Gyroscope.h>
 IDGIXZ500Gyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <ReceiverFor328p.h>
 ReceiverFor328p tempReceiver;
-Receiver *_receiver = &tempReceiver;
+Receiver *receiver = &tempReceiver;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
-Motors *_motors = &tempMotors;
+Motors *motors = &tempMotors;
 #include <FlightAngleDCM.h>
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
 //  #ifdef CameraControl
 //    #include "AeroQuadCameraStabilizer.h"
 //    AeroQuadCameraStabilizer tempCamera;
@@ -45,6 +45,6 @@ FlightAngleProcessor *_flightAngle = &tempFlightAngle;
 
 void initPlatform()
 {
-  _gyro->invert(YAW);
+  gyro->invert(YAW);
 }
 #endif

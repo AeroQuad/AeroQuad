@@ -22,39 +22,39 @@
 #define _AQ_WII_CONFIG_H_
 
 #include <AQWiiSensorAccessor.h>
-AQWiiSensorAccessor _wiiSensorAccessor;
+AQWiiSensorAccessor wiiSensorAccessor;
 #include <WiiAccelerometer.h>
 WiiAccelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <WiiGyroscope.h>
 WiiGyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <ReceiverFor328p.h>
 ReceiverFor328p tempReceiver;
-Receiver *_receiver = &tempReceiver;
+Receiver *receiver = &tempReceiver;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
-Motors *_motors = &tempMotors;
+Motors *motors = &tempMotors;
 #include <FlightAngleDCM.h>
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #ifdef CameraControl
   #include <AeroQuadCameraStabilizer.h>
   AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *_cameraStabilizer = &tempCamera;
+  CameraStabilizer *cameraStabilizer = &tempCamera;
 #endif
 
 void initPlatform()
 {
   Wire.begin();
   
-  tempAccel.setWiiSensorAccessor(&_wiiSensorAccessor);
-  tempGyro.setWiiSensorAccessor(&_wiiSensorAccessor);
+  tempAccel.setWiiSensorAccessor(&wiiSensorAccessor);
+  tempGyro.setWiiSensorAccessor(&wiiSensorAccessor);
   
-  _accel->invert(PITCH);
-  _accel->invert(ZAXIS);
+  accel->invert(PITCH);
+  accel->invert(ZAXIS);
   
-  _wiiSensorAccessor.initialize(); 
+  wiiSensorAccessor.initialize(); 
 }
 
 #endif

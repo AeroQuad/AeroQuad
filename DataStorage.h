@@ -103,27 +103,27 @@ void initializeEEPROM()
     PID[ZDAMPENING].D = 0.0;
     _minThrottleAdjust = -50.0;
     _maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
-    _altitudeProvider->setSmoothFactor(0.1);
+    altitudeProvider->setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
-    _compass->setMagCal(XAXIS, 1, 0);
-    _compass->setMagCal(YAXIS, 1, 0);
-    _compass->setMagCal(ZAXIS, 1, 0);
+    compass->setMagCal(XAXIS, 1, 0);
+    compass->setMagCal(YAXIS, 1, 0);
+    compass->setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  _receiver->setXmitFactor(0.50);
+  receiver->setXmitFactor(0.50);
   _levelLimit = 500.0;
   _levelOff = 150.0;
-  _gyro->setSmoothFactor(1.0);
-  _accel->setSmoothFactor(1.0);
-  _accel->setOneG(500);
+  gyro->setSmoothFactor(1.0);
+  accel->setSmoothFactor(1.0);
+  accel->setOneG(500);
   _timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    _receiver->setTransmitterSlope(channel, 1.0);
-    _receiver->setTransmitterOffset(channel, 0.0);
-    _receiver->setSmoothFactor(channel, 1.0);
+    receiver->setTransmitterSlope(channel, 1.0);
+    receiver->setTransmitterOffset(channel, 0.0);
+    receiver->setSmoothFactor(channel, 1.0);
   }
-  _receiver->setSmoothFactor(YAW, 0.5);
+  receiver->setSmoothFactor(YAW, 0.5);
 
   _smoothHeading = 1.0;
   _flightMode = ACRO;
@@ -165,14 +165,14 @@ void readEEPROM()
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     _minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     _maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
-    _altitudeProvider->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+    altitudeProvider->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
     readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
 
   #ifdef HeadingMagHold
-    _compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
-    _compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
-    _compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
+    compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -184,7 +184,7 @@ void readEEPROM()
   _flightMode = readFloat(FLIGHTMODE_ADR);
   _headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   _minAcro = readFloat(MINACRO_ADR);
-  _accel->setOneG(readFloat(ACCEL1G_ADR));
+  accel->setOneG(readFloat(ACCEL1G_ADR));
   
   /*#ifdef Camera
   mCameraPitch = readFloat(MCAMERAPITCH_ADR);
@@ -218,30 +218,30 @@ void writeEEPROM()
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
     writeFloat(_minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(_maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(_altitudeProvider->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(altitudeProvider->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
     writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
   #ifdef HeadingMagHold
-    writeFloat(_compass->getMagMax(XAXIS), MAGXMAX_ADR);
-    writeFloat(_compass->getMagMin(XAXIS), MAGXMIN_ADR);
-    writeFloat(_compass->getMagMax(YAXIS), MAGYMAX_ADR);
-    writeFloat(_compass->getMagMin(YAXIS), MAGYMIN_ADR);
-    writeFloat(_compass->getMagMax(ZAXIS), MAGZMAX_ADR);
-    writeFloat(_compass->getMagMin(ZAXIS), MAGZMIN_ADR);
+    writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
+    writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
+    writeFloat(compass->getMagMax(YAXIS), MAGYMAX_ADR);
+    writeFloat(compass->getMagMin(YAXIS), MAGYMIN_ADR);
+    writeFloat(compass->getMagMax(ZAXIS), MAGZMAX_ADR);
+    writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(_levelLimit, LEVELLIMIT_ADR);
   writeFloat(_levelOff, LEVELOFF_ADR);
-  writeFloat(_receiver->getXmitFactor(), XMITFACTOR_ADR);
-  writeFloat(_gyro->getSmoothFactor(), GYROSMOOTH_ADR);
-  writeFloat(_accel->getSmoothFactor(), ACCSMOOTH_ADR);
+  writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
+  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
+  writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(_timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    writeFloat(_receiver->getTransmitterSlope(channel),  offset+0);
-    writeFloat(_receiver->getTransmitterOffset(channel), offset+4);
-    writeFloat(_receiver->getSmoothFactor(channel),      offset+8);
+    writeFloat(receiver->getTransmitterSlope(channel),  offset+0);
+    writeFloat(receiver->getTransmitterOffset(channel), offset+4);
+    writeFloat(receiver->getSmoothFactor(channel),      offset+8);
   }
 
 
@@ -250,7 +250,7 @@ void writeEEPROM()
   writeFloat(_flightMode, FLIGHTMODE_ADR);
   writeFloat(_headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(_minAcro, MINACRO_ADR);
-  writeFloat(_accel->getOneG(), ACCEL1G_ADR);
+  writeFloat(accel->getOneG(), ACCEL1G_ADR);
     
   /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);

@@ -26,23 +26,23 @@
 // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
 #include <ReceiverForMega.h>
 ReceiverForMega tempReceiver;
-Receiver *_receiver = &tempReceiver;
+Receiver *receiver = &tempReceiver;
 #include <ADXL335Accelerometer.h>
 ADXL335Accelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <IDGIXZ500Gyroscope.h>
 IDGIXZ500Gyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <PWMMotors.h>
 PWMMotors tempMotors;
-Motors *_motors = &tempMotors;
+Motors *motors = &tempMotors;
 #include <FlightAngleDCM.h>
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #ifdef CameraControl
   #include <AeroQuadCameraStabilizer.h>
   AeroQuadCameraStabilizer tempCamera;
-  CameraStabilizer *_cameraStabilizer = &tempCamera;
+  CameraStabilizer *cameraStabilizer = &tempCamera;
 #endif
 
 void initPlatform()

@@ -152,7 +152,7 @@ float G_Dt = 0.002;
 unsigned long _previousTime = 0;
 unsigned long _currentTime = 0;
 unsigned long _deltaTime = 0;
-unsigned long _receiverTime = 0;
+unsigned long receiverTime = 0;
 unsigned long _compassTime = 5000;
 unsigned long _altitudeTime = 10000;
 unsigned long _batteryTime = 15000;
@@ -193,7 +193,7 @@ unsigned long _telemetryTime = 50000; // make telemetry output 50ms offset from 
 /**************************************************************/
 // Enable/disable control loops for debug
 //#define DEBUG
-byte _receiverLoop = ON;
+byte receiverLoop = ON;
 byte _telemetryLoop = ON;
 byte _sensorLoop = ON;
 byte _controlLoop = ON;

@@ -24,88 +24,88 @@ void readSensors()
 {
   // *********************** Read Critical Sensors **********************
   // Apply low pass filter to sensor values and center around zero
-  _gyro->measure(); // defined in Gyro.h
-  _accel->measure(); // defined in Accel.h
+  gyro->measure(); // defined in Gyro.h
+  accel->measure(); // defined in Accel.h
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    _compass->measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH));
+    compass->measure(flightAngle->getData(ROLL),flightAngle->getData(PITCH));
   #endif
  
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
     if (_currentTime > _compassTime) 
     {
-      _compass->measure(_flightAngle->getData(ROLL),_flightAngle->getData(PITCH)); // defined in compass.h
+      compass->measure(flightAngle->getData(ROLL),flightAngle->getData(PITCH)); // defined in compass.h
       _compassTime = _currentTime + COMPASSLOOPTIME;
     }
   #endif
   #if defined(AltitudeHold)
     if (_currentTime > _altitudeTime) 
     {
-      _altitudeProvider->measure(); // defined in altitude.h
+      altitudeProvider->measure(); // defined in altitude.h
       _altitudeTime = _currentTime + ALTITUDELOOPTIME;
     }
   #endif
   #if defined(BattMonitor)
     if (_currentTime > _batteryTime) 
     {
-      _batteryMonitor->measure(_armed,_throttle);
+      batteryMonitor->measure(_armed,_throttle);
       _batteryTime = _currentTime + BATTERYLOOPTIME;
     }
   #endif
   
   // ****************** Calculate Absolute Angle *****************
-  _flightAngle->calculate(G_Dt); // defined in FlightAngle.h
+  flightAngle->calculate(G_Dt); // defined in FlightAngle.h
 }
 
 void initSensorsFromEEPROM()
 {
-  _accel->setSmoothFactor(readFloat(ACCSMOOTH_ADR));
-  _accel->setOneG(readFloat(ACCEL1G_ADR));
-  _accel->setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
-  _accel->setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
-  _accel->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
+  accel->setSmoothFactor(readFloat(ACCSMOOTH_ADR));
+  accel->setOneG(readFloat(ACCEL1G_ADR));
+  accel->setZero(ROLL, readFloat(LEVELROLLCAL_ADR));
+  accel->setZero(PITCH, readFloat(LEVELPITCHCAL_ADR));
+  accel->setZero(ZAXIS, readFloat(LEVELZCAL_ADR));
   
-  _gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
-  _gyro->setZero(ROLL,  readFloat(GYRO_ROLL_ZERO_ADR));
-  _gyro->setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));
-  _gyro->setZero(ZAXIS, readFloat(GYRO_YAW_ZERO_ADR));
+  gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
+  gyro->setZero(ROLL,  readFloat(GYRO_ROLL_ZERO_ADR));
+  gyro->setZero(PITCH, readFloat(GYRO_PITCH_ZERO_ADR));
+  gyro->setZero(ZAXIS, readFloat(GYRO_YAW_ZERO_ADR));
 }
 
 void storeSensorsToEEPROM()
 {
-  writeFloat(_accel->getSmoothFactor(),ACCSMOOTH_ADR);
-  writeFloat(_accel->getOneG(), ACCEL1G_ADR);
-  writeFloat(_accel->getZero(ROLL),  LEVELROLLCAL_ADR);
-  writeFloat(_accel->getZero(PITCH), LEVELPITCHCAL_ADR);
-  writeFloat(_accel->getZero(ZAXIS), LEVELZCAL_ADR);
+  writeFloat(accel->getSmoothFactor(),ACCSMOOTH_ADR);
+  writeFloat(accel->getOneG(), ACCEL1G_ADR);
+  writeFloat(accel->getZero(ROLL),  LEVELROLLCAL_ADR);
+  writeFloat(accel->getZero(PITCH), LEVELPITCHCAL_ADR);
+  writeFloat(accel->getZero(ZAXIS), LEVELZCAL_ADR);
   
-  writeFloat(_gyro->getSmoothFactor(),GYROSMOOTH_ADR);
-  writeFloat(_gyro->getZero(ROLL),  GYRO_ROLL_ZERO_ADR);
-  writeFloat(_gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
-  writeFloat(_gyro->getZero(ZAXIS), GYRO_YAW_ZERO_ADR);
+  writeFloat(gyro->getSmoothFactor(),GYROSMOOTH_ADR);
+  writeFloat(gyro->getZero(ROLL),  GYRO_ROLL_ZERO_ADR);
+  writeFloat(gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
+  writeFloat(gyro->getZero(ZAXIS), GYRO_YAW_ZERO_ADR);
 }
 
 void initTransmitterFromEEPROM()
 {
-  _receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
+  receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
   {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    _receiver->setTransmitterSlope(channel,readFloat(offset+0));     // _mTransmitter[channel] = readFloat(offset+0);
-    _receiver->setTransmitterOffset(channel,readFloat(offset+4));    // _bTransmitter[channel] = readFloat(offset+4);
-    _receiver->setSmoothFactor(channel,readFloat(offset+8));         //_transmitterSmooth[channel] = readFloat(offset+8);
+    receiver->setTransmitterSlope(channel,readFloat(offset+0));     // _mTransmitter[channel] = readFloat(offset+0);
+    receiver->setTransmitterOffset(channel,readFloat(offset+4));    // _bTransmitter[channel] = readFloat(offset+4);
+    receiver->setSmoothFactor(channel,readFloat(offset+8));         //_transmitterSmooth[channel] = readFloat(offset+8);
   }
 }
 
 void storeTransmitterToEEPROM()
 {
-  writeFloat(_receiver->getXmitFactor(),XMITFACTOR_ADR);
+  writeFloat(receiver->getXmitFactor(),XMITFACTOR_ADR);
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
   {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    writeFloat(_receiver->getTransmitterSlope(channel),offset+0);     // _mTransmitter[channel] = readFloat(offset+0);
-    writeFloat(_receiver->getTransmitterOffset(channel),offset+4);    // _bTransmitter[channel] = readFloat(offset+4);
-    writeFloat(_receiver->getSmoothFactor(channel),offset+8);         //_transmitterSmooth[channel] = readFloat(offset+8);
+    writeFloat(receiver->getTransmitterSlope(channel),offset+0);     // _mTransmitter[channel] = readFloat(offset+0);
+    writeFloat(receiver->getTransmitterOffset(channel),offset+4);    // _bTransmitter[channel] = readFloat(offset+4);
+    writeFloat(receiver->getSmoothFactor(channel),offset+8);         //_transmitterSmooth[channel] = readFloat(offset+8);
   }
 }
 

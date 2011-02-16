@@ -23,33 +23,33 @@
 
 #include <IDG500_ADCGyroscope.h>
 IDG500_ADCGyroscope tempGyro;
-Gyroscope *_gyro = &tempGyro;
+Gyroscope *gyro = &tempGyro;
 #include <ADXL335_ADCAccelerometer.h>
 ADXL335_ADCAccelerometer tempAccel;
-Accelerometer *_accel = &tempAccel;
+Accelerometer *accel = &tempAccel;
 #include <ReceiverForAPM.h>
 ReceiverForAPM tempReceiver;
-Receiver *_receiver = &tempReceiver;
+Receiver *receiver = &tempReceiver;
 #include <APMMotors.h>
 APMMotors tempMotors;
-Motors *_motors = &tempMotors;
+Motors *motors = &tempMotors;
 #include "FlightAngleDCM.h"
 FlightAngleDCM tempFlightAngle;
-FlightAngleProcessor *_flightAngle = &tempFlightAngle;
+FlightAngleProcessor *flightAngle = &tempFlightAngle;
 #ifdef HeadingMagHold
   #include <HMC5843Magnetometer.h>
-  HMC5843Magnetometer tempCompass(_gyro);
-  Compass *_compass = &tempCompass;
+  HMC5843Magnetometer tempCompass;
+  Compass *compass = &tempCompass;
 #endif
 #ifdef AltitudeHold
   #include <BMP085BarometricSensor.h>
   BMP085BarometricSensor tempAltitude;
-  AltitudeProvider *_altitudeProvider = &tempAltitude;
+  AltitudeProvider *altitudeProvider = &tempAltitude;
 #endif
 #ifdef BattMonitor
   #include <APMBatteryMonitor.h>
   APMBatteryMonitor tempBatteryMonitor;
-  BatteryMonitor *_batteryMonitor = &tempBatteryMonitor;
+  BatteryMonitor *batteryMonitor = &tempBatteryMonitor;
 #endif
 //#endif
 
@@ -69,6 +69,10 @@ void initPlatform()
   Wire.begin();
   
   initializeADC(); // this is needed for both gyros and accels, done once in this class
+  
+  #ifdef HeadingMagHold
+    tempCompass.setGyroscope(gyro);
+  #endif
 }
 
 
