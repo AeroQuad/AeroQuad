@@ -18,11 +18,11 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_CHR6DM_ACCELEROMETER_H_
-#define _AQ_CHR6DM_ACCELEROMETER_H_
+#ifndef _AQ_ACCELEROMETER_CHR6DM_H_
+#define _AQ_ACCELEROMETER_CHR6DM_H_
 
 #include "Accelerometer.h"
-#include <CHR6DMSensorsAccessor.h>
+#include <CHR6DM.h>
 
 class CHR6DMAccelerometer : public Accelerometer 
 {

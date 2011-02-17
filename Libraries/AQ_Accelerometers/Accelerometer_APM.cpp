@@ -18,43 +18,43 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "Accel_APM.h"
+#include "Accelerometer_APM.h"
 
-Accel_APM::Accel_APM() {
+Accelerometer_APM::Accelerometer_APM() {
   accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);
 }
 
-void Accel_APM::initialize(void) { 
-  //initializeApmADC();
+void Accelerometer_APM::initialize(void) { 
+  initializeADC();
 }
 
-void Accel_APM::measure(void) {
+void Accelerometer_APM::measure(void) {
   // The following 3 lines marked with ** read the accelerometer and assign it's 
   // data to accelRaw in the correct order and phase to suit the standard shield 
   // installation orientation.  See TBD for details.  If your shield is not
   //  installed in this orientation, this is where you make the changes.
-  //accelRaw[XAXIS] = readApmADC(XAXIS + 3);
+  accelRaw[XAXIS] = readADC(XAXIS + 3);
   if (accelRaw[XAXIS] > 500)
     accelRaw[XAXIS] = accelRaw[XAXIS] - accelZero[XAXIS];  // **
     
-  //accelRaw[YAXIS] = readApmADC(YAXIS + 3);
+  accelRaw[YAXIS] = readADC(YAXIS + 3);
   if (accelRaw[YAXIS] > 500)
     accelRaw[YAXIS] = accelZero[YAXIS] - accelRaw[YAXIS];  // **
     
-  //accelRaw[ZAXIS] = readApmADC(ZAXIS + 3);
+  accelRaw[ZAXIS] = readADC(ZAXIS + 3);
   if (accelRaw[ZAXIS] > 500)
     accelRaw[ZAXIS] = accelZero[ZAXIS] - accelRaw[ZAXIS];  // **
   
-    //for (byte axis = XAXIS; axis < LASTAXIS; axis++)
-      //accelVector[axis] = smooth(accelRaw[axis] * accelScaleFactor, accelVector[axis], smoothFactor);
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++)
+      accelVector[axis] = smooth(accelRaw[axis] * accelScaleFactor, accelVector[axis], smoothFactor);
  }
  
- void Accel_APM::calibrate(void) {
+ void Accelerometer_APM::calibrate(void) {
   int findZero[FINDZERO];
   
   for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) {
     for (int i=0; i<FINDZERO; i++) {
-      //findZero[i] = readApmADC(calAxis + 3);
+      findZero[i] = readADC(calAxis + 3);
       delay(10);
     }
     accelZero[calAxis] = findMedian(findZero, FINDZERO);
@@ -68,7 +68,7 @@ void Accel_APM::measure(void) {
   accelOneG = -accelVector[ZAXIS];
 }
 
-/*void Accel_APM::zero() {
+/*void Accelerometer_APM::zero() {
   for (byte n = 3; n < 6; n++) {
     adc_value[n] = 0;
     adc_counter[n] = 0;

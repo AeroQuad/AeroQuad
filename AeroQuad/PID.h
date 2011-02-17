@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.1 - January 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -19,25 +19,24 @@
 */
 
 // Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) 
-{
-  float error = targetPosition - currentPosition;
+float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+  float error;
+  float dTerm;
+
+  error = targetPosition - currentPosition;
   
   PIDparameters->integratedError += error * G_Dt;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -windupGuard, windupGuard);
   
-  float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (G_Dt*100); // dT fix from Honk
+  dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / G_Dt;
   PIDparameters->lastPosition = currentPosition;
   return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
 
 void zeroIntegralError() __attribute__ ((noinline));
-void zeroIntegralError() 
-{
+void zeroIntegralError() {
   for (byte axis = ROLL; axis < LASTLEVELAXIS; axis++)
-  {
     PID[axis].integratedError = 0;
-  }
 }
 
 

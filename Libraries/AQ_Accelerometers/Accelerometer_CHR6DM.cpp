@@ -18,7 +18,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "CHR6DMAccelerometer.h"
+#include "Accelerometer_CHR6DM.h"
 #include <AQMath.h>
 
 CHR6DMAccelerometer::CHR6DMAccelerometer()

@@ -18,15 +18,15 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef Accel_APM_h
-#define Accel_APM_h
+#ifndef _AQ_ACCELEROMETER_APM_H_
+#define _AQ_ACCELEROMETER_APM_H_
 
-#include "Accel.h"
+#include "Accelerometer.h"
 #include "..\APM_ADC\APM_ADC.h"
 
 class Accel_APM : public Accel {
 public:
-  Accel_APM();
+  Accelerometer_APM();
   void initialize(void);
   void measure(void);
   void calibrate(void);	

@@ -1,0 +1,3 @@
+Copy the contents of this folder into your Sketchbook.  This will automatically setup the required AeroQuad Libraries and Flight Software.
+
+The Sketchbook location is defined under File->Preferences of the Arduino IDE.

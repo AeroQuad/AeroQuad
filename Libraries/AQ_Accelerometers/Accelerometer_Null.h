@@ -18,13 +18,14 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef Accel_Null_h
-#define Accel_Null_h
+#ifndef _AQ_ACCELEROMETER_NULL_H_
+#define _AQ_ACCELEROMETER_NULL_H_
 
-#include "Accel.h"
+#include "Accelerometer.h"
 
-class Accel_Null : public Accel {
+class Accelerometer_Null : public Accel {
 public:
+  Accelerometer_Null();
   void initialize(void);
   void measure(void);
   void calibrate(void);	

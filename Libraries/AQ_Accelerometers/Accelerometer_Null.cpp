@@ -18,13 +18,16 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "Accel_Null.h"
+#include "Accelerometer_Null.h"
 
-void Accel_Null::initialize() {
+Accelerometer_Null::Accelerometer_Null() {
 }
 
-void Accel_Null::measure() {
+void Accelerometer_Null::initialize() {
 }
 
-void Accel_Null::calibrate() {
+void Accelerometer_Null::measure() {
+}
+
+void Accelerometer_Null::calibrate() {
 }
