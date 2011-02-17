@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_APM_ADC_SENSOR_ACCESSOR_H_
-#define _AQ_APM_ADC_SENSOR_ACCESSOR_H_
+#ifndef _APM_ADC_H_
+#define _APM_ADC_H_
 
 
 unsigned char ADCSPItransfer(unsigned char data);
