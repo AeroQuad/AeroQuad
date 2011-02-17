@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,14 +18,18 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ACCELEROMETER_ADXL335_H_
-#define _AQ_ACCELEROMETER_ADXL335_H_
+#ifndef _AQ_ACCELEROMETER_BMA180_h
+#define _AQ_ACCELEROMETER_BMA180_h
 
 #include "Accelerometer.h"
+#include <Wire.h>
+#include "..\AQ_I2C\AQ_I2C.h"
 
-class Accelerometer_ADXL335 : public Accelerometer {
+
+class Accelerometer_BMA180 : public Accel {
 public:
-  Accelerometer_ADXL335();
+  I2C i2c;
+  Accelerometer_BMA180();
   void initialize(void);
   void measure(void);
   void calibrate(void);	
