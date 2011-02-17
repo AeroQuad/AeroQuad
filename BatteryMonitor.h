@@ -182,7 +182,7 @@ private:
   #else
     #define BUZZERPIN 49
   #endif
-  long previousTime;
+  long previousBatteryTime;
   byte state, firstAlarm;
   float diode; // raw voltage goes through diode on Arduino
   float batteryScaleFactor;
@@ -199,13 +199,13 @@ public:
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
     digitalWrite(BUZZERPIN, LOW);
-    previousTime = millis();
+    previousBatteryTime = millis();
     state = LOW;
     firstAlarm = OFF;
   }
 
   void lowBatteryEvent(byte level) {
-    long currentTime = millis()- previousTime;
+    long currentTime = millis()- previousBatteryTime;
     if (level == OK) {
       digitalWrite(BUZZERPIN, LOW);
       autoDescent = 0;
@@ -220,7 +220,7 @@ public:
         digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentTime > 1200) {
-        previousTime = millis();
+        previousBatteryTime = millis();
         autoDescent = 0;
         digitalWrite(LED2PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
@@ -233,7 +233,7 @@ public:
       if ((currentTime > 500) && (throttle > 1400)) {
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
-        previousTime = millis();
+        previousBatteryTime = millis();
         if (state == LOW) state = HIGH;
         else state = LOW;
         digitalWrite(LEDPIN, state);

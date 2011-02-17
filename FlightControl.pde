@@ -1,4 +1,4 @@
-/*
+/**
   AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.

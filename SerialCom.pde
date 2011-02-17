@@ -492,38 +492,22 @@ void sendSerialTelemetry() {
     break;
   case '`': // Send Camera values 
     #ifdef Camera
-    //Serial.print(camera.getMode());
-    //comma();
     PrintValueComma(camera.getMode());
-    //Serial.print(camera.getCenterPitch());
-    //comma();
     PrintValueComma(camera.getCenterPitch());
-    //Serial.print(camera.getCenterRoll());
-    //comma();
     PrintValueComma(camera.getCenterRoll());
-    //Serial.print(camera.getCenterYaw());
-    //comma();
     PrintValueComma(camera.getCenterYaw());
+
     Serial.print(camera.getmCameraPitch() , 2);
     comma();
     Serial.print(camera.getmCameraRoll() , 2);
     comma();
     Serial.print(camera.getmCameraYaw() , 2);
     comma();
-    //Serial.print(camera.getServoMinPitch());
-    //comma();
+
     PrintValueComma(camera.getServoMinPitch());
-    //Serial.print(camera.getServoMinRoll());
-    //comma();
     PrintValueComma(camera.getServoMinRoll());
-    //Serial.print(camera.getServoMinYaw());
-    //comma();
     PrintValueComma(camera.getServoMinYaw());
-    //Serial.print(camera.getServoMaxPitch());
-    //comma();
     PrintValueComma(camera.getServoMaxPitch());
-    //Serial.print(camera.getServoMaxRoll());
-    //comma();
     PrintValueComma(camera.getServoMaxRoll());
     Serial.println(camera.getServoMaxYaw());
     #endif

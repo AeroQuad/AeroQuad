@@ -235,7 +235,6 @@ void writeEEPROM(void){
     writeFloat(receiver.getSmoothFactor(channel),      offset+8);
   }
 
-
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);

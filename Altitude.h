@@ -1,4 +1,4 @@
-/*
+/**
   AeroQuad v2.2 - Feburary 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
@@ -234,8 +234,6 @@ public:
     tmp = (tmp * 4 + x3) << overSamplingSetting;
     b3 = (tmp + 2) >> 2;
  
-
-
     x1 = ac3 * b6 >> 13;
     x2 = (b1 * (b6 * b6 >> 12)) >> 16;
     x3 = ((x1 + x2) + 2) >> 2;

@@ -34,7 +34,7 @@ public:
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
   float rawHeading, gyroHeading;
-  unsigned long currentTime, previousTime;
+  //unsigned long currentTime, previousTime;
   
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
@@ -69,7 +69,7 @@ public:
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
     
-    previousTime = micros();
+    //previousTime = micros();
   }
     
   const int getRaw(byte axis) {

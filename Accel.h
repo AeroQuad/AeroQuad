@@ -53,7 +53,7 @@ public:
   virtual void measure(void);
   virtual void calibrate(void);
   virtual const int getFlightData(byte);
-  virtual void calculateAltitude(void);
+  //virtual void calculateAltitude(void);
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -574,6 +574,11 @@ public:
       //accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
       //accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
       //accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      
+      accelData[XAXIS] = smoothFilter(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[YAXIS] = smoothFilter(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[ZAXIS] = smoothFilter(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      
       
     //previousTime = currentTime;
   }
