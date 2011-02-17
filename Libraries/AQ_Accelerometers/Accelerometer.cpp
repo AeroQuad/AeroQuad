@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,139 +18,61 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-
 #include "Accelerometer.h"
 
-#include "AQMath.h"
-
-// ******************************************************************
-// Accelerometer
-// ******************************************************************
-Accelerometer::Accelerometer() 
-{
-  _sign[ROLL] = 1;
-  _sign[PITCH] = 1;
-  _sign[YAW] = 1;
-}
-
-// ******************************************************************
-// The following function calls must be defined in any new subclasses
-// ******************************************************************
-void Accelerometer::initialize() 
-{
-  this->_initialize(_rollChannel, _pitchChannel, _zAxisChannel);
-}
-void Accelerometer::measure() {}
-void Accelerometer::calibrate() {}
-
-const int Accelerometer::getFlightData(byte axis)
-{
-  return getRaw(axis);
-}
-
-// **************************************************************
-// The following functions are common between all Gyro subclasses
-// **************************************************************
-void Accelerometer::_initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) 
-{
-  _accelChannel[ROLL] = rollChannel;
-  _accelChannel[PITCH] = pitchChannel;
-  _accelChannel[ZAXIS] = zAxisChannel;
-  _currentAccelTime = micros();
-  _previousAccelTime = _currentAccelTime;
-}
-  
-const int Accelerometer::getRaw(byte axis) 
-{
-  return _accelADC[axis] * _sign[axis];
-}
-  
-const int Accelerometer::getData(byte axis) 
-{
-  return _accelData[axis] * _sign[axis];
-}
-  
-const int Accelerometer::invert(byte axis) 
-{
-  _sign[axis] = -_sign[axis];
-  return _sign[axis];
-}
-  
-const int Accelerometer::getZero(byte axis) 
-{
-  return _accelZero[axis];
-}
-  
-void Accelerometer::setZero(byte axis, int value) 
-{
-  _accelZero[axis] = value;
-}
-  
-const float Accelerometer::getScaleFactor() 
-{
-  return _accelScaleFactor;
-}
-  
-const float Accelerometer::getSmoothFactor() 
-{
-  return _smoothFactor;
-}
-  
-void Accelerometer::setSmoothFactor(float value) 
-{
-  _smoothFactor = value;
-}
-  
-const float Accelerometer::angleRad(byte axis) 
-{
-  if (axis == PITCH) 
-  {
-    return arctan2(_accelData[PITCH] * _sign[PITCH], sqrt((long(_accelData[ROLL]) * _accelData[ROLL]) + (long(_accelData[ZAXIS]) * _accelData[ZAXIS])));
+Accel::Accel() {
+ for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    accelVector[axis] = 0;
+    accelRaw[axis] = 0;
+    accelZero[axis] = 0;
   }
-  // then it have to be the ROLL axis
-  return arctan2(_accelData[ROLL] * _sign[ROLL], sqrt((long(_accelData[PITCH]) * _accelData[PITCH]) + (long(_accelData[ZAXIS]) * _accelData[ZAXIS])));
+  accelOneG = 0.0;
+  accelScaleFactor = 1.0;
+  smoothFactor = 1.0;
 }
 
-const float Accelerometer::angleDeg(byte axis) 
-{
-  return degrees(angleRad(axis));
+const int Accel::getData(byte axis)  {
+  return accelVector[axis];
 }
-  
-void Accelerometer::setOneG(int value) 
-{
-  _accelOneG = value;
+
+void Accel::setZero(byte axis, int value)  {
+  accelZero[axis] = value;
 }
-  
-const int Accelerometer::getOneG() 
-{
-  return _accelOneG;
+
+const int Accel::getZero(byte axis)  {
+  return accelZero[axis];
 }
-  
-const int Accelerometer::getZaxis() 
-{
-  //currentAccelTime = micros();
-  //zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-  //previousAccelTime = currentAccelTime;
-  //return zAxis;
-  return _accelOneG - getData(ZAXIS);
+
+void Accel::setOneG(float value)  {
+  accelOneG = value;
 }
-  
-const float Accelerometer::getAltitude() 
-{
-  return _rawAltitude;
+
+const float Accel::getOneG(void) {
+  return accelOneG;
 }
-  
-const float Accelerometer::rateG(const byte axis) 
-{
-  return getData(axis) / _accelOneG;
+
+void Accel::setSmoothFactor(float value)  {
+  smoothFactor = value;
 }
+ 
+//Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+int Accel::findMedian(int *data, int arraySize) { 
+  int temp;
+  boolean done = 0;
+  byte i;
   
-void Accelerometer::calculateAltitude() 
-{
-  _currentAccelTime = micros();
-  if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
-  {
-    _rawAltitude += (getZaxis()) * ((_currentAccelTime - _previousAccelTime) / 1000000.0);
+   // Sorts numbers from lowest to highest
+  while (done != 1) {        
+    done = 1;
+    for (i=0; i<(arraySize-1); i++) {
+      if (data[i] > data[i+1]) {     // numbers are out of order - swap
+        temp = data[i+1];
+        data[i+1] = data[i];
+        data[i] = temp;
+        done = 0;
+      }
+    }
   }
-  _previousAccelTime = _currentAccelTime;
-} 
+  
+  return data[arraySize/2]; // return the median value
+}

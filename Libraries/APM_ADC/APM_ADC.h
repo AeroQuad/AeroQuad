@@ -21,7 +21,6 @@
 #ifndef _APM_ADC_H_
 #define _APM_ADC_H_
 
-
 unsigned char ADCSPItransfer(unsigned char data);
 void initializeADC();
 int readADC(unsigned char ch_num);

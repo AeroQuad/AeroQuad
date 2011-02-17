@@ -18,20 +18,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ADXL335_ACCELEROMETER_H_
-#define _AQ_ADXL335_ACCELEROMETER_H_
+#ifndef _AQ_ACCELEROMETER_ADXL335_H_
+#define _AQ_ACCELEROMETER_ADXL335_H_
 
 #include "Accelerometer.h"
 
-class ADXL335Accelerometer : public Accelerometer 
-{
+class Accelerometer_ADXL335 : public Accelerometer {
 public:
-  ADXL335Accelerometer();
-  
-  void initialize();
-  void measure();
-  // Allows user to zero accelerometers on command
-  void calibrate();
+  Accelerometer_ADXL335();
+  void initialize(void);
+  void measure(void);
+  void calibrate(void);	
 };
 
 #endif

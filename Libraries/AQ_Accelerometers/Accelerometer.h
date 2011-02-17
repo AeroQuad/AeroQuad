@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,65 +21,37 @@
 #ifndef _AQ_ACCELEROMETER_H_
 #define _AQ_ACCELEROMETER_H_
 
-#include "WProgram.h"
+#include <WProgram.h>
 
-#include <Axis.h>
-
-class Accelerometer 
-{
-private:
-  int _sign[3];
-  byte _rollChannel;
-  byte _pitchChannel;
-  byte _zAxisChannel;
+class Accel {
+public:
+  #define XAXIS 0
+  #define YAXIS 1
+  #define ZAXIS 2
+  #define LASTAXIS 3
+  #define G_2_MPS2(g) (g * 9.80665)
+  #define MPS2_2_G(m) (m * 0.10197162)
+  #define FINDZERO 49
   
-protected:  
-  float _accelZero[3];
-  int _accelChannel[3];
-  int _accelADC[3];
-  int _accelData[3];  
-  float _accelScaleFactor;
-  float _accelOneG;
-  float _smoothFactor;
-  float _rawAltitude;  
-  
-  unsigned long _currentAccelTime;
-  unsigned long _previousAccelTime;
-  
-public:  
-  // ******************************************************************
-  // Constructor
-  // ******************************************************************
-  Accelerometer();
+  float accelOneG;
+  float accelScaleFactor;
+  float accelVector[3];
+  float smoothFactor;
+  int   accelZero[3];
+  int   accelRaw[3];
 
-  // ******************************************************************
-  // The following function calls must be defined in any new subclasses
-  // ******************************************************************
-  virtual void initialize();
-  virtual void measure();
-  virtual void calibrate();
-  virtual const int getFlightData(byte axis);
-
-  // **************************************************************
-  // The following functions are common between all Gyro subclasses
-  // **************************************************************
-  void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel);
-  const int getRaw(byte axis);
-  const int getData(byte axis);
-  const int invert(byte axis);
-  const int getZero(byte axis);
-  void setZero(byte axis, int value);
-  const float getScaleFactor();
-  const float getSmoothFactor();
-  void setSmoothFactor(float value);
-  const float angleRad(byte axis);
-  const float angleDeg(byte axis);
-  void setOneG(int value);
-  const int getOneG();
-  const int getZaxis();
-  const float getAltitude();
-  const float rateG(const byte axis);
-  virtual void calculateAltitude();
+  Accel();
+  virtual void initialize(void) {};
+  virtual void measure(void) {};
+  virtual void calibrate(void) {};
+  
+  const int getData(byte);
+  void setZero(byte, int);
+  const int getZero(byte);
+  void setOneG(float);
+  const float getOneG(void);
+  void setSmoothFactor(float);
+  int findMedian(int *, int);
 };
 
 #endif
