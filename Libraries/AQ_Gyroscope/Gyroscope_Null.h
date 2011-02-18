@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,33 +18,16 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ITG3200_GYROSCOPE_H_
-#define _AQ_ITG3200_GYROSCOPE_H_
+#ifndef Gyro_Null_h
+#define Gyro_Null_h
 
-#include "Gyroscope.h"
+#include <WProgram.h>
+#include <Gyro.h>
 
-/*
-  10kOhm pull-ups on I2C lines.
-  VDD & VIO = 3.3V
-  SDA -> A4 (PC4)
-  SCL -> A5 (PC5)
-  INT -> D2 (PB2) (or no connection, not used here)
-  CLK -> GND
-*/
-class ITG3200Gyroscope : public Gyroscope 
-{
-private:
-  int _gyroAddress;
-  unsigned int _previousGyroTime;
-  
+class Gyro_Null : public Gyro {
 public:
-  ITG3200Gyroscope();
-  
-  void initialize();
-  void measure();
-  const int getFlightData(byte axis);
-  void calibrate();
-  void autoZero();
+  void initialize(void);
+  void measure(void);
+  void calibrate(void);	
 };
-
 #endif

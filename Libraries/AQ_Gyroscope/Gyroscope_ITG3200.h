@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,27 +18,16 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ACCELEROMETER_CHR6DM_H_
-#define _AQ_ACCELEROMETER_CHR6DM_H_
+#ifndef Gyro_Null_h
+#define Gyro_Null_h
 
-#include "Accelerometer.h"
-#include <CHR6DM.h>
+#include <WProgram.h>
+#include <Gyro.h>
 
-class CHR6DMAccelerometer : public Accelerometer 
-{
-private:
-  CHR6DM *_chr6dm;
-
+class Gyro_Null : public Gyro {
 public:
-  CHR6DMAccelerometer();
-  
-  void initialize();
-  void measure();
-  // Allows user to zero accelerometers on command
-  void calibrate();
-  void calculateAltitude();
-  
-  void setChr6dm(CHR6DM *chr6dm);
+  void initialize(void);
+  void measure(void);
+  void calibrate(void);	
 };
-
 #endif

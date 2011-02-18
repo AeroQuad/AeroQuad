@@ -18,15 +18,15 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ACCELEROMETER_BMA180_h
-#define _AQ_ACCELEROMETER_BMA180_h
+#ifndef ACCELEROMETER_BMA180
+#define ACCELEROMETER_BMA180
 
 #include "Accelerometer.h"
 #include <Wire.h>
 #include "..\AQ_I2C\AQ_I2C.h"
 
 
-class Accelerometer_BMA180 : public Accel {
+class Accelerometer_BMA180 : public Accelerometer {
 public:
   I2C i2c;
   Accelerometer_BMA180();

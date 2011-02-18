@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ACCELEROMETER_H_
-#define _AQ_ACCELEROMETER_H_
+#ifndef ACCELEROMETER_H
+#define ACCELEROMETER_H
 
 #include <WProgram.h>
 

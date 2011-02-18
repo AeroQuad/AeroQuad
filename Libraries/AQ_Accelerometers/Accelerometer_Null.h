@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - February 2011
+  AeroQuad v3.0 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_ACCELEROMETER_NULL_H_
-#define _AQ_ACCELEROMETER_NULL_H_
+#ifndef ACCELEROMETER_NULL_H
+#define ACCELEROMETER_NULL_H
 
 #include "Accelerometer.h"
 

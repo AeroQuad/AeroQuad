@@ -20,123 +20,44 @@
 
 #include "Gyroscope.h"
 
-Gyroscope::Gyroscope()
-{
-  _sign[ROLL] = 1;
-  _sign[PITCH] = 1;
-  _sign[YAW] = -1;
-}
-  
-// The following function calls must be defined in any new subclasses
-void Gyroscope::initialize(byte rollChannel, byte pitchChannel, byte yawChannel) 
-{
-  this->_initialize(rollChannel, pitchChannel, yawChannel);
-}
-void Gyroscope::measure() {}
-void Gyroscope::calibrate() {}
-void Gyroscope::autoZero() {}
-void Gyroscope::initialize() {}
+#include <Gyro.h>
 
-const int Gyroscope::getFlightData(byte axis)
-{
-  return getRaw(axis);
+const int Gyro::getData(byte axis) {
+  return data[axis];
 }
 
-// The following functions are common between all Gyro subclasses
-void Gyroscope::_initialize(byte rollChannel, byte pitchChannel, byte yawChannel) 
-{
-  _gyroChannel[ROLL] = rollChannel;
-  _gyroChannel[PITCH] = pitchChannel;
-  _gyroChannel[ZAXIS] = yawChannel;
-  _previousGyroTime = micros();
-}
-    
-const int Gyroscope::getRaw(byte axis) 
-{
-  return _gyroADC[axis] * _sign[axis];
-}
-  
-const int Gyroscope::getData(byte axis) 
-{
-  return _gyroData[axis] * _sign[axis];
-}
-  
-void Gyroscope::setData(byte axis, int value) 
-{
-  _gyroData[axis] = value;
-}
-  
-const int Gyroscope::invert(byte axis) 
-{
-  _sign[axis] = -_sign[axis];
-  return _sign[axis];
-}
- 
-const int Gyroscope::getZero(byte axis) 
-{
-  return _gyroZero[axis];
-}
-  
-void Gyroscope::setZero(byte axis, int value) 
-{
-  _gyroZero[axis] = value;
-}    
-  
-const float Gyroscope::getScaleFactor() 
-{
-  return _gyroScaleFactor;
+const int Gyro::getZero(byte axis) {
+  return zero[axis];
 }
 
-const float Gyroscope::getSmoothFactor() 
-{
-  return _smoothFactor;
-}
-  
-void Gyroscope::setSmoothFactor(float value) 
-{
-  _smoothFactor = value;
+void Gyro::setZero(byte axis, int value) {
+  data[axis] = value;
 }
 
-const float Gyroscope::rateDegPerSec(byte axis) 
-{
-  return ((_gyroADC[axis] * _sign[axis])) * _gyroScaleFactor;
-}
-
-const float Gyroscope::rateRadPerSec(byte axis) 
-{
-  return radians(rateDegPerSec(axis));
-}
+class Gyroscope {
+public:
+  float gyroScaleFactor;
+  float smoothFactor;
+  float gyroVector[3];
+  int   gyroZero[3];
+  int   gyroRaw[3];
   
-// returns heading as +/- 180 degrees
-const float Gyroscope::getHeading() 
-{
-  div_t integerDivide;
-   
-  integerDivide = div(_rawHeading, 360);
-  _gyroHeading = _rawHeading + (integerDivide.quot * -360);
-  if (_gyroHeading > 180)
-  {
-    _gyroHeading -= 360;
+  RateGyro(void){
+    gyroZero[ROLL]  = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[YAW]   = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor    = readFloat(GYROSMOOTH_ADR);
   }
-  if (_gyroHeading < -180)
-  {
-    _gyroHeading += 360;
+  
+  const float getNonDriftCorrectedRate(byte axis) {
+    return gyroVector[axis];
   }
-  return _gyroHeading;
-}
   
-const float Gyroscope::getRawHeading() 
-{
-  return _rawHeading;
-}
+  const float getSmoothFactor(void) {
+    return smoothFactor;
+  }
   
-void Gyroscope::setStartHeading(float value) 
-{
-  // since a relative heading, get starting absolute heading from compass class
-  _rawHeading = value;
-}
-  
-void Gyroscope::setReceiverYaw(int value) 
-{
-  _receiverYaw = value;
-}
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
+  }
+};

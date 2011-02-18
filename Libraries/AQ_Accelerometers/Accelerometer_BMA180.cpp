@@ -20,8 +20,8 @@
 
 #include "Accelerometer_BMA180.h"
 
-Accelerometer_BMA180::Accel_BMA180() {
-  _accelAddress = 0x40; // page 54 and 61 of datasheet
+Accelerometer_BMA180::Accelerometer_BMA180() {
+  accelAddress = 0x40; // page 54 and 61 of datasheet
   // Accelerometer value if BMA180 setup for 1.0G
   // Page 27 of datasheet = 0.00013g/LSB
   accelScaleFactor = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range

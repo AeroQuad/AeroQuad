@@ -18,72 +18,56 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_GYROSCOPE_H_
-#define _AQ_GYROSCOPE_H_
+#ifndef GYROSCOPE_H
+#define GYROSCOPE_H
 
 #include "WProgram.h"
 
-#include <Axis.h>
+#include <WProgram.h>
 
-class Gyroscope 
-{
-private:
-  byte _rollChannel; 
-  byte _pitchChannel;
-  byte _yawChannel;
-  int _sign[3];
-  float _gyroHeading;
-
-protected:
-  float _gyroZero[3];
-  int _gyroADC[3];
-  int _gyroChannel[3];  
-  int _gyroData[3];  
-  int _lastReceiverYaw;  
-  int _positiveGyroYawCount; 
-  int _negativeGyroYawCount;  
-  int _zeroGyroYawCount;  
-  int _receiverYaw;  
-  // ************ Correct for gyro drift by FabQuad **************  
-  // ************ http://aeroquad.com/entry.php?4-  **************     
-  long _yawAge;
-  float _gyroFullScaleOutput;
-  float _gyroScaleFactor;
-  float _smoothFactor;  
-  float _rawHeading;  
-
-  unsigned long _currentGyroTime;
-  unsigned long _previousGyroTime;
+class Gyro {
+public:
+  #define XAXIS 0
+  #define YAXIS 1
+  #define YAWAXIS 2
+  #define LASTAXIS 3
+  int data[3];
+  int zero[3];
   
-public:    
-  Gyroscope();
-  
-  // The following function calls must be defined in any new subclasses
-  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel);
-  virtual void measure();
-  virtual void calibrate();
-  virtual void autoZero();
-  virtual void initialize();
-  virtual const int getFlightData(byte axis);
+  virtual void initialize(void);
+  virtual void measure(void);
+  virtual void calibrate(void);
+  const int getData(byte);
+  const int getZero(byte);
+  void setZero(byte, int);
+};
 
-  // The following functions are common between all Gyro subclasses
-  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel);
-  const int getRaw(byte axis);
-  const int getData(byte axis);
-  void setData(byte axis, int value);
-  const int invert(byte axis);
-  const int getZero(byte axis);
-  void setZero(byte axis, int value);
-  const float getScaleFactor();
-  const float getSmoothFactor();
-  void setSmoothFactor(float value);
-  const float rateDegPerSec(byte axis);
-  const float rateRadPerSec(byte axis);
-  // returns heading as +/- 180 degrees
-  const float getHeading();
-  const float getRawHeading();
-  void setStartHeading(float value);
-  void setReceiverYaw(int value);
+class Gyroscope {
+public:
+  float gyroScaleFactor;
+  float smoothFactor;
+  float gyroVector[3];
+  int   gyroZero[3];
+  int   gyroRaw[3];
+  
+  RateGyro(void){
+    gyroZero[ROLL]  = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[YAW]   = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor    = readFloat(GYROSMOOTH_ADR);
+  }
+  
+  const float getNonDriftCorrectedRate(byte axis) {
+    return gyroVector[axis];
+  }
+  
+  const float getSmoothFactor(void) {
+    return smoothFactor;
+  }
+  
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
+  }
 };
 
 #endif
