@@ -575,9 +575,9 @@ public:
       //accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
       //accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
       
-      accelData[XAXIS] = smoothFilter(accelADC[XAXIS], accelData[XAXIS], smoothFactor);
-      accelData[YAXIS] = smoothFilter(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
-      accelData[ZAXIS] = smoothFilter(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
+      accelData[XAXIS] = filterSmooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor);
+      accelData[YAXIS] = filterSmooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
+      accelData[ZAXIS] = filterSmooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
       
       
     //previousTime = currentTime;
