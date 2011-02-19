@@ -89,7 +89,7 @@ Version 1.6 Release Notes (3/5/2010)
 
 This release fixes a yaw bug that exhibits itself with the new capacitors installed which allows the user to use higher PID values.  Also the comments were fixed to reflect usage of IDG500 or IXZ500 gyros.  If the user does not select the correct gyro, the yaw axis may become inverted.  Started implementing certain functions using classes (C++).  The FlightAngle class defines the algorithm to use for angle estimation, the Motors class defines how PWM works and the Filter class allows multiple filter objects to be called to reduce the number of global variables needed and to encapsulate and retain the data needed for those filters to work.
 
-Version 1.5 Release Notes
+Version 1.5 Release Notes (11/2009)
 ----------------------------------------
 
 This is a maintenance release for users of an Arduino Mega with an AeroQuad Shield v1.5 which provides receiver support.  There is a bug in the Arduino core code which doesn't allow the proper PCINT assignments to PCINT 8-23.  This release will hardcode AI pins 8-13 (PCINT 16-21) for use as receiver pins.  To enable this capability, please uncomment #define Mega_AQ1x located in AeroQuad.pde.
@@ -103,7 +103,7 @@ Place jumper wires as indicated below to make your AeroQuad Shield v1.5 receiver
   * Mode (Gear) Channel, place jumper between AQ Shield pin 7 and Mega AI9
   * Aux Channel, place jumper between AQ Shield 8 and Mega AI8
 
-Version 1.4 Release Notes
+Version 1.4 Release Notes (10/2009)
 ----------------------------------------
 
 Warning!  If you are a previous AeroQuad user and are using the Sparkfun 5DOF with the original IDG300 gyros, please review AeroQuad.pde and uncomment the line: #define OriginalIMU.  Failure to do so will result in unstable flight.  When Sparkfun updated the 5DOF IMU to use the IDG500, the roll/pitch gyro axes were inverted.  The default AeroQuad Flight Software behavior is to assume the user is using the latest Sparkfun 5DOF IMU to make it easier for new users.
@@ -116,7 +116,7 @@ The heading hold feature is also operational but not optimal.  The IDG gyros exh
 
 With the updated Servo library of Arduino 0017, the older ServoTimer2 library will not be used for future versions of the AeroQuad Flight Software.
 
-Version 1.3.2 Release Notes
+Version 1.3.2 Release Notes (9/2009)
 ----------------------------------------
 
 This version provides additional communication messages for the Configurator to make the new calibration procedures more robust.  New support added to allow Configurator to auto-reconnect to the AeroQuad (via USB or Wireless) for more convenience to the user. The Pin Change Interrupt (PCINT) code has been improved to work better for Futaba transmitters.  The variable declaration section in the main AeroQuad.pde sketch has been organized into separate header files for easier maintainability into the future.  The new default EEPROM values now include a suggested setting for yaw to allow a smoother yaw transition (in the past it would cause the quad to pop up and down a bit).  The main loop is now organized into different timed loops, to make sure the sampling of the sensors and control algorithm execution are now performed at regular timed intervals (500Hz). 
@@ -126,12 +126,12 @@ If you'd like to maintain as much PWM resolution as possible for PWM Motor Contr
 
 The default #define statement for PWM Motor Control is AnalogWrite.  This will provide an update rate to the motors at 490Hz.  No modification to the code, or installation of the ServoTimer2 library is necessary for this default.
 
-Version 1.3.1 Release Notes
+Version 1.3.1 Release Notes (9/2009)
 ----------------------------------------
 
 This version allows the user to calibrate a transmitter in either Airplane or Helicopter Mode.  There is also a calibration for ESC's and the ability for the user to return EEPROM values to a default value (which is also useful for first time setup).  To use these features, you must download the AeroQuad Configurator v1.3.1 or greater.  The transmitter calibration is meant to fix the situation where the trims could potentially move the transmitter beyond the 1000-2000 ms PWM pulse width range the AeroQuad is expecting.  This had resulted in a non-response from the AeroQuad when moving the transmitter stick to an extreme position.
 
-Version 1.2 Release Notes
+Version 1.2 Release Notes (6/2009)
 ----------------------------------------
 
 This version incorporates the use of the Pin Change Interrupts (PCINT) to read output from an R/C receiver.  This removes the need to know the channel order of the receiver used.  This PCINT method has been tested with:
@@ -150,7 +150,7 @@ The PCINT pins are unfortunately different between the Arduino Duemilanove and A
   * Auto calibration of sensors at powerup disabled by default.  To enable, remove the comment of the appropriate #define statement in AeroQuad.pde.
   * Manual calibration of sensors can be performed by moving left transmitter stick to the lower left, and the right transmitter stick to the lower right corners.
 
-Version 1.1 Release Notes
+Version 1.1 Release Notes (4/2009)
 ----------------------------------------
 
 This version of the code now uses analogWrite() to efficiently write PWM commands to the ESC's.  The tradeoff is that we can only achieve 128 steps of resolution.  The Turnigy ESC's specified in the parts list have been measured to only have 128 steps of resolution, so if you are using this ESC, there shouldn't be any issues.  Also, if you've built a previous MikroQuad or AeroQuad you will be required to update wiring in your shield per the AeroQuad website instructions.
