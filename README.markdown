@@ -5,6 +5,7 @@ AeroQuad Flight Software Source Code 3.0
 Version 3.0 Release Notes (x/x/xxxx)
 
   * under construction
+  * new libraries
 
 Version 2.2 Release Notes (2/6/2010)
 ----------------------------------------
