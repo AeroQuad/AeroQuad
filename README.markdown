@@ -1,6 +1,6 @@
 AeroQuad Flight Software Source Code 3.0
 ========================================
-[http://www.aeroquad.com](http://www.aeroquad.com)
+[http://www.AeroQuad.com](http://www.AeroQuad.com)
 
 Version 3.0 Release Notes (x/x/xxxx)
 
