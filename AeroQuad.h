@@ -32,8 +32,8 @@
 #define G_2_MPS2(g) (g * 9.80665)
 #define MPS2_2_G(m) (m * 0.10197162)
 
-#define BAUD 115200
-//#define BAUD 111111
+//#define BAUD 115200
+#define BAUD 111111
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
