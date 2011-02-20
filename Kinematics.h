@@ -42,7 +42,10 @@ public:
   }
   
   const float getDriftCorrectedRate(byte axis) {
-    return correctedRateVector[axis];
+    if (axis == PITCH)
+      return -correctedRateVector[PITCH];
+    else
+      return correctedRateVector[axis];
   }
   
   const float getEarthAxisAccel(byte axis) {

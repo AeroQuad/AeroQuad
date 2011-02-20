@@ -61,6 +61,15 @@ public:
   const float getOneG(void) {
     return accelOneG;
   }
+  
+  const float getRaw(byte axis) {
+    if (axis == XAXIS)
+      return -accelRaw[PITCH] >> 3;
+    if (axis == YAXIS)
+      return accelRaw[ROLL] >> 3;
+    if (axis == ZAXIS)
+      return -accelRaw[YAW] >> 3;
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

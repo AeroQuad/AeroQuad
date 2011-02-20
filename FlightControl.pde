@@ -30,11 +30,10 @@
 //////////////////////////////////////////////////////////////////////////////
 void processArdupirateSuperStableMode(void)
 {
-  /*
   // ArduPirate adaptation
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
-  float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
+  float errorRoll = (receiver.getAngle(ROLL) - RAD_2_DEG(kinematics.getAttitude(ROLL)));     
   errorRoll = constrain(errorRoll,-50,50);
   if (receiver.getAngle(ROLL) < 30) {
     PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
@@ -43,11 +42,11 @@ void processArdupirateSuperStableMode(void)
   else
     PID[LEVELROLL].integratedError = 0;
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
-  errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
+  errorRoll = stableRoll - RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL));
   motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
 
   // PITCH
-  float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
+  float errorPitch = (receiver.getAngle(PITCH) + RAD_2_DEG(kinematics.getAttitude(PITCH)));     
   errorPitch = constrain(errorPitch,-50,50);                    
   if (receiver.getAngle(PITCH) < 30) {
     PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
@@ -56,8 +55,8 @@ void processArdupirateSuperStableMode(void)
   else
     PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
-  errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
-  motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));*/
+  errorPitch = stablePitch - RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH));
+  motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
 }
 
 

@@ -118,19 +118,19 @@ public:
     // orientation.  See TBD for details.  If your shield/sensor is not installed in this
     // orientation, this is where you make the changes.
     
-    #ifdef AEROQUAD_MEGA_V2  // Sparkfun board on AeroQuad 2.0.6 shield
+    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)  // Sparkfun board on AeroQuad 2.0.6 shield
       measuredMagX = (Wire.receive() << 8) | Wire.receive();
       measuredMagY = (Wire.receive() << 8) | Wire.receive();
       measuredMagZ = (Wire.receive() << 8) | Wire.receive();
     #endif
     
-    #ifdef APM  // DIY Drones board with pins facing aft, components facing up
+    #ifdef ArduCopter  // DIY Drones board with pins facing aft, components facing up
       measuredMagX = (Wire.receive() << 8) | Wire.receive();
       measuredMagY = (Wire.receive() << 8) | Wire.receive();
       measuredMagZ = (Wire.receive() << 8) | Wire.receive();
     #endif
     
-    #ifdef AEROQUAD_WII
+    #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
       measuredMagX = (Wire.receive() << 8) | Wire.receive();
       measuredMagY = (Wire.receive() << 8) | Wire.receive();
       measuredMagZ = (Wire.receive() << 8) | Wire.receive();

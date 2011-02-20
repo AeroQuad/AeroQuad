@@ -316,7 +316,7 @@ void sendSerialTelemetry() {
       PrintValueComma((float)RAD_2_DEG(kinematics.getDriftCorrectedRate(axis)));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getData(axis));
+      PrintValueComma(accel.getRaw(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
@@ -368,7 +368,7 @@ void sendSerialTelemetry() {
       PrintValueComma(motors.getMotorCommand(motor));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getData(axis));
+      PrintValueComma(accel.getRaw(axis));
     }
     Serial.print(armed, BIN);
     comma();
