@@ -1,5 +1,5 @@
-/**
-  AeroQuad v2.2 - Feburary 2011
+/*
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -30,6 +30,7 @@
 //////////////////////////////////////////////////////////////////////////////
 void processArdupirateSuperStableMode(void)
 {
+  /*
   // ArduPirate adaptation
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
@@ -56,7 +57,7 @@ void processArdupirateSuperStableMode(void)
     PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
   errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
-  motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
+  motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));*/
 }
 
 
@@ -65,30 +66,30 @@ void processArdupirateSuperStableMode(void)
 //////////////////////////////////////////////////////////////////////////////
 void processAeroQuadStableMode(void)
 {
-  levelAdjust[ROLL] = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL)) * PID[LEVELROLL].P;
-  levelAdjust[PITCH] = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH)) * PID[LEVELPITCH].P;
+  levelAdjust[ROLL]  = (receiver.getAngle(ROLL)  - RAD_2_DEG(kinematics.getAttitude(ROLL)))  * PID[LEVELROLL].P;   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+  levelAdjust[PITCH] = (receiver.getAngle(PITCH) + RAD_2_DEG(kinematics.getAttitude(PITCH))) * PID[LEVELPITCH].P;  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
   // Check if pilot commands are not in hover, don't auto trim
   if ((abs(receiver.getTrimData(ROLL)) > levelOff) || (abs(receiver.getTrimData(PITCH)) > levelOff)) {
     zeroIntegralError();
-    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      digitalWrite(LED2PIN, LOW);
+    #if defined(AEROQUAD_V18) || defined(AEROQUAD_MEGA_V2)
+      digitalWrite(LED2_PIN, LOW);
     #endif
     #ifdef APM_OP_CHR
       digitalWrite(LED_Green, LOW);
     #endif
   }
   else {
-    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - _flightAngle->getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
-    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + _flightAngle->getData(PITCH)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
-    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      digitalWrite(LED2PIN, HIGH);
+    PID[LEVELROLL].integratedError  = constrain(PID[LEVELROLL].integratedError  + (((receiver.getAngle(ROLL)  - RAD_2_DEG(kinematics.getAttitude(ROLL)))  * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + RAD_2_DEG(kinematics.getAttitude(PITCH))) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    #if defined(AEROQUAD_V18) || defined(AEROQUAD_MEGA_V2)
+      digitalWrite(LED2_PIN, HIGH);
     #endif
     #ifdef APM_OP_CHR
       digitalWrite(LED_Green, HIGH);
     #endif
   }
-  motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
-  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
+  motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL)  + levelAdjust[ROLL],  RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL))  + 1500, &PID[LEVELGYROROLL]) +  PID[LEVELROLL].integratedError);   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
 }
 
 
@@ -102,8 +103,8 @@ void calculateFlightError(void)
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     // updatePID() is defined in PID.h
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getFlightData(ROLL) + 1500, &PID[ROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
+    motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL),  RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL)) + 1500,  &PID[ROLL]));   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) + 1500, &PID[PITCH]));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
     zeroIntegralError();
   }
   else {
@@ -147,9 +148,9 @@ void processHeading(void)
     //gyro.calculateHeading();
 
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    heading = compass.getHeading();
+  heading = RAD_2_DEG(kinematics.getAttitude(YAW));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
 #else
-    heading = gyro.getHeading();
+  heading = RAD_2_DEG(kinematics.getAttitude(YAW));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
 #endif
 
     // Always center relative heading around absolute heading chosen during yaw command
@@ -180,7 +181,7 @@ void processHeading(void)
     }
   }
   commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
-  motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));
+  motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, RAD_2_DEG(kinematics.getDriftCorrectedRate(YAW)) + 1500, &PID[YAW]));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
 }
 
 //////////////////////////////////////////////////////////////////////////////

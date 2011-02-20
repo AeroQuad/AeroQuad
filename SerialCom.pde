@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -83,7 +83,7 @@ void readSerialCommand() {
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
 #if defined(AeroQuad_v1) || defined(AeroQuad_v18)
-      _flightAngle->initialize();
+      //_flightAngle->initialize();
 #endif
       break;
     case 'M': // Receive transmitter smoothing values
@@ -313,7 +313,7 @@ void sendSerialTelemetry() {
     break;
   case 'Q': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getData(axis));
+      PrintValueComma((float)RAD_2_DEG(kinematics.getDriftCorrectedRate(axis)));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
@@ -321,10 +321,10 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
-    PrintValueComma(_flightAngle->getData(ROLL));
-    PrintValueComma(_flightAngle->getData(PITCH));
+    PrintValueComma((float)RAD_2_DEG(kinematics.getAttitude(ROLL)));
+    PrintValueComma((float)RAD_2_DEG(kinematics.getAttitude(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma((float)(RAD_2_DEG(kinematics.getAttitude(YAW))));    // jihlein: remove float(RAD_2_DEG()) when configurator is updated to accept radians as input, displayed as degrees
     #else
       PrintValueComma(0);
     #endif
@@ -354,7 +354,7 @@ void sendSerialTelemetry() {
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getFlightData(axis));
+      PrintValueComma((float)RAD_2_DEG(kinematics.getDriftCorrectedRate(axis)));
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
@@ -368,7 +368,7 @@ void sendSerialTelemetry() {
       PrintValueComma(motors.getMotorCommand(motor));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getFlightData(axis));
+      PrintValueComma(accel.getData(axis));
     }
     Serial.print(armed, BIN);
     comma();
@@ -377,7 +377,7 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       PrintValueComma(1000);
     #ifdef HeadingMagHold
-      PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma((float)(RAD_2_DEG(kinematics.getAttitude(YAW))));  // jihlein: remove float(RAD_2_DEG()) when configurator is updated to accept radians as input, displayed as degrees
     #else
       PrintValueComma(0);
     #endif

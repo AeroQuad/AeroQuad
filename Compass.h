@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,43 +18,35 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Class to define sensors that can determine absolute heading
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// ***********************************************************************
-// ************************** Compass Class ******************************
-// ***********************************************************************
 class Compass {
 public: 
-  int compassAddress;
-  float heading, absoluteHeading, gyroStartHeading;
-  float compass;
   float magMax[3];
   float magMin[3];
   float magScale[3];
   float magOffset[3];
-
+  float hdgX;
+  float hdgY;
+  int   measuredMagX;
+  int   measuredMagY;
+  int   measuredMagZ;
+  
   Compass(void) {}
 
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
-  virtual const int getRawData(byte);
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData(void) {
-    return compass;
+  const float getHdgXY(byte axis) {
+    if (axis == XAXIS) return hdgX;
+    if (axis == YAXIS) return hdgY;
   }
-  
-  const float getHeading(void) {
-    return heading;
-  }
-  
-  const float getAbsoluteHeading(void) {
-    return absoluteHeading;
+
+    const int getRawData(byte axis) {
+    if (axis == XAXIS) return measuredMagX;
+    if (axis == YAXIS) return measuredMagY;
+    if (axis == ZAXIS) return measuredMagZ;
   }
   
   void setMagCal(byte axis, float maxValue, float minValue) {
@@ -78,123 +70,96 @@ public:
   }
 };
 
-// ***********************************************************************
-// ************************ HMC5843 Subclass *****************************
-// ***********************************************************************
-class Compass_AeroQuad_v2 : public Compass {
-// This sets up the HMC5843 from Sparkfun
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Magnetometer (HMC5843)
+////////////////////////////////////////////////////////////////////////////////
+
+class Magnetometer_HMC5843 : public Compass {
 private:
   float cosRoll;
   float sinRoll;
   float cosPitch;
   float sinPitch;
-  float magX;
-  float magY;
-  int measuredMagX;
-  int measuredMagY;
-  int measuredMagZ;
-  float smoothFactor; // time constant for complementary filter
-  float filter1, filter2; // coefficients for complementary filter
-  float adjustedGyroHeading, previousHead;
-  int gyroZero;
-  
+
 public: 
-  Compass_AeroQuad_v2() : Compass() {
-    compassAddress = 0x1E;
-    // smoothFactor means time in seconds less than smoothFactor, depend on gyro more
-    // time greater than smoothFactor depend on magnetometer more (mags are very noisy)
-    smoothFactor = 1.0; 
-    filter1 = smoothFactor / (smoothFactor + G_Dt);
-    filter2 = 1 - filter1;
-    gyroZero = gyro.getZero(YAW);
-  }
+  Magnetometer_HMC5843() : Compass() {}
 
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(void) {
-    // Should do a WhoAmI to know if mag is present
-    updateRegisterI2C(compassAddress, 0x01, 0x20);
-    updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
-    measure();
-    gyroStartHeading = getData();
-    if (gyroStartHeading < 0) gyroStartHeading += 360;
-    gyro.setStartHeading(gyroStartHeading);
+  ////////////////////////////////////////////////////////////////////////////////
+  // Initialize AeroQuad Mega v2.0 Magnetometer
+  ////////////////////////////////////////////////////////////////////////////////
+
+ void initialize(void) {
+    updateRegisterI2C(0x1E, 0x01, 0x20);
+    updateRegisterI2C(0x1E, 0x02, 0x00); // continuous 10Hz mode
+    
+    measure(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
   }
   
-  const int getRawData(byte axis) {
-    if (axis == XAXIS) return measuredMagX;
-    if (axis == YAXIS) return measuredMagY;
-    if (axis == ZAXIS) return measuredMagZ;
-  }
-  
-  void measure(void) {
-    sendByteI2C(compassAddress, 0x03);
-    Wire.requestFrom(compassAddress, 6);
-    measuredMagX = (Wire.receive() << 8) | Wire.receive();
-    measuredMagY = (Wire.receive() << 8) | Wire.receive();
-    measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+  ////////////////////////////////////////////////////////////////////////////////
+  // Measure AeroQuad Mega v2.0 Magnetometer
+  ////////////////////////////////////////////////////////////////////////////////
+
+  void measure(float roll, float pitch) {
+    float magX;
+    float magY;
+    float tmp;
+    
+    sendByteI2C(0x1E, 0x03);
+    Wire.requestFrom(0x1E, 6);
+
+    // The following 3 lines read the magnetometer and assign it's data to measuredMagX
+    // Y and Z in the correct order and phase to suit the standard shield installation
+    // orientation.  See TBD for details.  If your shield/sensor is not installed in this
+    // orientation, this is where you make the changes.
+    
+    #ifdef AEROQUAD_MEGA_V2  // Sparkfun board on AeroQuad 2.0.6 shield
+      measuredMagX = (Wire.receive() << 8) | Wire.receive();
+      measuredMagY = (Wire.receive() << 8) | Wire.receive();
+      measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+    #endif
+    
+    #ifdef APM  // DIY Drones board with pins facing aft, components facing up
+      measuredMagX = (Wire.receive() << 8) | Wire.receive();
+      measuredMagY = (Wire.receive() << 8) | Wire.receive();
+      measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+    #endif
+    
+    #ifdef AEROQUAD_WII
+      measuredMagX = (Wire.receive() << 8) | Wire.receive();
+      measuredMagY = (Wire.receive() << 8) | Wire.receive();
+      measuredMagZ = (Wire.receive() << 8) | Wire.receive();
+    #endif
+    
     Wire.endTransmission();
-    // Heading calculation based on code written by FabQuad
-    // http://aeroquad.com/showthread.php?691-Hold-your-heading-with-HMC5843-Magnetometer
-    cosRoll = cos(radians(_flightAngle->getData(ROLL)));
-    sinRoll = sin(radians(_flightAngle->getData(ROLL)));
-    cosPitch = cos(radians(_flightAngle->getData(PITCH)));
-    sinPitch = sin(radians(_flightAngle->getData(PITCH)));
-    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
-    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
-    //magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
-    //magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;   
-    compass = -degrees(atan2(-magY, magX));
+
+    cosRoll =  cos(roll);
+    sinRoll =  sin(roll);
+    cosPitch = cos(pitch);
+    sinPitch = sin(pitch);
+
+    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + \
+           ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+           
+    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
+
+    tmp  = sqrt(magX * magX + magY * magY);
     
-    // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value
-    if (gyroZero != gyro.getZero(YAW)) {
-      gyro.setStartHeading(heading);
-      gyroZero = gyro.getZero(YAW);
-    }
-    
-    adjustedGyroHeading = gyro.getHeading();
-    // if compass is positive while gyro is negative force gyro positive past 180
-    if ((compass > 90) && adjustedGyroHeading < -90) adjustedGyroHeading += 360;
-    // if compass is negative whie gyro is positive force gyro negative past -180
-    if ((compass < -90) && adjustedGyroHeading > 90) adjustedGyroHeading -= 360;
-    
-    // Complementry filter from http://chiefdelphi.com/media/papers/2010
-    heading = (filter1 * adjustedGyroHeading) + (filter2 * compass);
-    
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
+    hdgX = magX / tmp;
+    hdgY = magY / tmp;
   }
 };
 
-// ***********************************************************************
-// ************************* CHR6DM Subclass *****************************
-// ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class Compass_CHR6DM : public Compass {
-public:
-  Compass_CHR6DM() : Compass() {}
-  void initialize(void) {}
-  const int getRawData(byte) {}
-  void measure(void) {
-    heading = chr6dm.data.yaw; //this hardly needs any filtering :)
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Compass_CHR6DM_Fake : public Compass {
-public:
-  Compass_CHR6DM_Fake() : Compass() {}
-  void initialize(void) {}
-  const int getRawData(byte) {}
-  void measure(void) {
-    heading = 0;
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
-#endif

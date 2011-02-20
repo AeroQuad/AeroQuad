@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,6 +25,12 @@
 
 // Flight Software Version
 #define VERSION 2.2
+
+#define DEG_2_RAD(d) (d * 0.01745329252)
+#define RAD_2_DEG(r) (r * 57.2957795131)
+
+#define G_2_MPS2(g) (g * 9.80665)
+#define MPS2_2_G(m) (m * 0.10197162)
 
 #define BAUD 115200
 //#define BAUD 111111
@@ -343,22 +349,54 @@ byte testSignal = LOW;
 #define GYRO_PITCH_ZERO_ADR 376
 #define GYRO_YAW_ZERO_ADR 380
 
-float arctan2(float y, float x); // defined in Sensors.pde
-float readFloat(int address); // defined in DataStorage.h
-void writeFloat(float value, int address); // defined in DataStorage.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-//void calibrateESC(void); // defined in FlightControl.pde
+float readFloat(int address);                                                                                    // defined in DataStorage.h
+void  writeFloat(float value, int address);                                                                      // defined in DataStorage.h
+void  readEEPROM(void);                                                                                          // defined in DataStorage.h
+
+void  readPilotCommands(void);                                                                                   // defined in FlightCommand.pde
+
+void  flightControl(void);                                                                                       // defined in FlightControl.pde
+
+int   readApmADC(unsigned char ch_num);                                                                          // defined in ApmAdc.h
+
+float smooth(float currentData, float previousData, float smoothFactor);                                         // defined in Filter.h
+
+void  updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue);                                    // defined in I2C.h
+void  sendByteI2C(int deviceAddress, byte dataValue);                                                            // defined in I2C.h
+byte  readByteI2C(int deviceAddress);                                                                            // defined in I2C.h
+int   readWordI2C(int deviceAddress);                                                                            // defined in I2C.h
+int   readWordWaitI2C(int deviceAddress);                                                                        // defined in I2C.h
+int   readReverseWordI2C(int deviceAddress);                                                                     // defined in I2C.h
+byte  readWhoI2C(int deviceAddress);                                                                             // defined in I2C.h
+
+void  matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], float matrixA[], float matrixB[]);  // defined in Matrix.pde
+void  matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matrixB[]);                          // defined in Matrix.pde
+void  matrixSubtract(int rows, int cols, float matrixC[], float matrixA[], float matrixB[]);                     // defined in Matrix.pde
+void  matrixScale(int rows, int cols, float matrixC[], float scaler, float matrixA[]);                           // defined in Matrix.pde
+void  matrixTranspose3x3(float matrixC[9], float matrixA[9]);                                                    // defined in Matrix.pde
+void  matrixInverse3x3(float matrixC[9], float matrixA[9]);                                                      // defined in Matrix.pde
+
+void  readWii(int readWithZeroBias);                                                                             // defined in ReadWii.pde
+
+void  readSensors(void);                                                                                         // defined in Sensors.pde
+float arctan2(float y, float x);                                                                                 // defined in Sensors.pde
+
+void  readSerialCommand(void);                                                                                   // defined in SerialCom.pde
+void  sendSerialTelemetry(void);                                                                                 // defined in SerialCom.pde
+void  printInt(int data);                                                                                        // defined in SerialCom.pde
+float readFloatSerial(void);                                                                                     // defined in SerialCom.pde
+void  comma(void);                                                                                               // defined in SerialCom.pde
+
+float vectorDotProduct(int length, float vector1[], float vector2[]);                                            // defined in Vector.pde
+void  vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3]);                                  // defined in Vector.pde
+void  vectorScale(int length, float scaledVector[], float inputVector[], float scalar);                          // defined in Vector.pde
+void  vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[]);                                  // defined in Vector.pde
+void  vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[]);                             // defined in Vector.pde
+
 void processFlightControlXMode(void); // defined in FlightControl.pde
 void processFlightControlPlusMode(void); // defined in FlightControl.pde
 void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
 void processAeroQuadStableMode(void);  // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
-void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize); // defined in Sensors.pde

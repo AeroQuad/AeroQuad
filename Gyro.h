@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -387,7 +387,7 @@ public:
 /********************** Wii Gyro **********************/
 /******************************************************/
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-class Gyro_Wii : public Gyro {
+/*class Gyro_Wii : public Gyro {
 private:
 
 public:
@@ -440,7 +440,7 @@ public:
     writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
     writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
-};
+};*/
 #endif
 
 /******************************************************/

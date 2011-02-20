@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -85,6 +85,7 @@ public:
   } 
 };
 
+/*
 //**********************************************************************************************
 //
 //  Vector Dot Product
@@ -196,7 +197,7 @@ void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matri
     matrixC[i] = matrixA[i] + matrixB[i];
   }
 }
-
+*/
 
 // Alternate method to calculate arctangent from: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 float arctan2(float y, float x) {

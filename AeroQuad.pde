@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - February 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -30,10 +30,10 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
@@ -55,7 +55,7 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 //#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
@@ -118,16 +118,21 @@
 
 #ifdef AeroQuad_v18
   Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
+  //Gyro_AeroQuadMega_v2 gyro;
+  #include "RateGyro.h"
+  RateGyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  //#include "FlightAngle.h"
+  //FlightAngle_DCM tempFlightAngle;
+  //FlightAngle *_flightAngle = &tempFlightAngle;
+  #include "Kinematics.h"
+  Kinematics_DCM kinematics;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    //Compass_AeroQuad_v2 compass;
+    Magnetometer_HMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -164,13 +169,18 @@
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  //Gyro_AeroQuadMega_v2 gyro;
+  #include "RateGyro.h"
+  RateGyro_AeroQuadMega_v2 gyro;
+  //#include "FlightAngle.h"
+  //FlightAngle_DCM tempFlightAngle;
+  //FlightAngle *_flightAngle = &tempFlightAngle;
+  #include "Kinematics.h"
+  Kinematics_DCM kinematics;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    //Compass_AeroQuad_v2 compass;
+    Magnetometer_HMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -187,13 +197,18 @@
 #endif
 
 #ifdef ArduCopter
-  Gyro_ArduCopter gyro;
-  Accel_ArduCopter accel;
+  //Gyro_ArduCopter gyro;
+  #include "RateGyro.h"
+  Gyro_APM rateGyro;
+  //Accel_ArduCopter accel;
+  Accel_APM accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  //#include "FlightAngle.h"
+  //FlightAngle_DCM tempFlightAngle;
+  //FlightAngle *_flightAngle = &tempFlightAngle;
+  #include "Kinematics.h"
+  Kinematics_DCM kinematics;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -213,10 +228,11 @@
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
-  #include "FlightAngle.h"
-//  FlightAngle_CompFilter tempFlightAngle;
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  //#include "FlightAngle.h"
+  //FlightAngle_DCM tempFlightAngle;
+  //FlightAngle *_flightAngle = &tempFlightAngle;
+  #include "Kinematics.h"
+  Kinematics_DCM kinematics; 
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -228,9 +244,11 @@
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  //#include "FlightAngle.h"
+  //FlightAngle_DCM tempFlightAngle;
+  //FlightAngle *_flightAngle = &tempFlightAngle;
+  #include "Kinematics.h"
+  Kinematics_DCM kinematics; 
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -308,6 +326,7 @@
   FlightAngle_DCM tempFlightAngle;
   FlightAngle *_flightAngle = &tempFlightAngle;
 #endif
+
 
 
 
@@ -400,12 +419,15 @@ void setup() {
   #endif
   
   // Flight angle estimiation
-  _flightAngle->initialize(); // defined in FlightAngle.h
+  //_flightAngle->initialize(); // defined in FlightAngle.h
 
   // Optional Sensors
   #ifdef HeadingMagHold
     compass.initialize();
-    setHeading = compass.getHeading();
+    kinematics.initialize(compass.getHdgXY(XAXIS), compass.getHdgXY(YAXIS));
+    //setHeading = compass.getHeading();
+  #else
+    kinematics.initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
   #ifdef AltitudeHold
     altitude.initialize();
@@ -452,6 +474,7 @@ void loop () {
 
   // Combines external pilot commands and measured sensor data to generate motor commands
   if (controlLoop == ON) {
+    //flightControl(); // defined in FlightControl.pde
     processFlightControl();
   } 
   
