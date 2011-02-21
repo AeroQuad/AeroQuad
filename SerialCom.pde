@@ -234,10 +234,10 @@ void sendSerialTelemetry() {
     Serial.print(" rxAUX: ");
     Serial.print(receiver.getRaw(AUX));
     Serial.print(" ThottleA: ");
-    Serial.print(throttleAdjust);
-    Serial.print(" Throttle: ");
-    Serial.println(throttle);
-    */
+    Serial.print(throttleAdjust);*/
+    PrintValueComma((float)RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL)));
+    Serial.print(gyro.getFlightData(ROLL));
+    Serial.println();
     //printFreeMemory();
     //queryType = 'X';
     break;
@@ -354,7 +354,8 @@ void sendSerialTelemetry() {
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma((float)RAD_2_DEG(kinematics.getDriftCorrectedRate(axis)));
+      //PrintValueComma((float)(RAD_2_DEG(kinematics.getDriftCorrectedRate(axis))) * 2);
+      PrintValueComma(gyro.getFlightData(axis));
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());

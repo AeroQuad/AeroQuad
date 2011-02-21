@@ -42,9 +42,6 @@ public:
   }
   
   const float getDriftCorrectedRate(byte axis) {
-    if (axis == PITCH)
-      return -correctedRateVector[PITCH];
-    else
       return correctedRateVector[axis];
   }
   

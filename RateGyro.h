@@ -131,7 +131,14 @@ public:
 
   void zero() {
     // Not required for AeroQuad 2.0 Gyro
-  }  
+  }
+      
+  const int getFlightData(byte axis) {
+    if (axis == PITCH)
+      return -gyroRaw[PITCH] >> 3;
+    else
+      return gyroRaw[axis] >> 3;
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +227,15 @@ void measure(void) {
       adc_value[n] = 0;
       adc_counter[n] = 0;
     }
-  }  
+  }
+   
+  const int getFlightData(byte axis) {
+    return gyroRaw[axis] >> 3;
+  }
+  
+  const int getFlightData(byte axis) {
+    return getNonDriftCorrectedRate(axis);
+  }
 };
 
 #endif
@@ -293,6 +308,10 @@ void measure() {
 
   void zero() {
     // Not required for Wii Gyro
+  }
+
+  const int getFlightData(byte axis) {
+    return getNonDriftCorrectedRate(axis);
   }
 };
 #endif

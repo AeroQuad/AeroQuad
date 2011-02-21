@@ -24,7 +24,7 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.2
+#define VERSION 2.3
 
 #define DEG_2_RAD(d) (d * 0.01745329252)
 #define RAD_2_DEG(r) (r * 57.2957795131)

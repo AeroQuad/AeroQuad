@@ -28,7 +28,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// ArduPirateSuperStableProcessor ///////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processArdupirateSuperStableMode(void)
+void processArdupirateSuperStableMode(void) // NOT FLIGHT TESTED
 {
   // ArduPirate adaptation
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
@@ -87,8 +87,10 @@ void processAeroQuadStableMode(void)
       digitalWrite(LED_Green, HIGH);
     #endif
   }
-  motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL)  + levelAdjust[ROLL],  RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL))  + 1500, &PID[LEVELGYROROLL]) +  PID[LEVELROLL].integratedError);   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
-  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+  //motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL)  + levelAdjust[ROLL],  RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL))  + 1500, &PID[LEVELGYROROLL]) +  PID[LEVELROLL].integratedError);   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+  //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+  motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL)  + levelAdjust[ROLL],  gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) +  PID[LEVELROLL].integratedError);
+  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
 }
 
 
@@ -102,8 +104,11 @@ void calculateFlightError(void)
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     // updatePID() is defined in PID.h
-    motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL),  RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL)) + 1500,  &PID[ROLL]));   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) + 1500, &PID[PITCH]));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    //motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL),  (RAD_2_DEG(kinematics.getDriftCorrectedRate(ROLL)) * 2) + 1500,  &PID[ROLL]));   // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), (RAD_2_DEG(kinematics.getDriftCorrectedRate(PITCH)) * 2) + 1500, &PID[PITCH]));  // jihlein: remove RAD_2_DEG when ready to rescale PID gains
+    motors.setMotorAxisCommand(ROLL,  updatePID(receiver.getData(ROLL),  gyro.getFlightData(ROLL) + 1500,  &PID[ROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
+    
     zeroIntegralError();
   }
   else {
