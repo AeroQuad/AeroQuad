@@ -147,7 +147,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(APM)
+#if defined(ArduCopter)
 
 ////////////////////////////////////////////////////////////////////////////////
 //  APM Gyro
@@ -165,8 +165,8 @@ public:
 // Initialize APM Gyro
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize(void) {
-  initializeApmADC();  // this is needed for both gyros and accels, done once in this class
+  void initialize(void) {
+    initializeApmADC();  // this is needed for both gyros and accels, done once in this class
   }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ void measure(void) {
     gyroRaw[YAW] = gyroZero[YAW] - gyroRaw[YAW];        // **
     
   for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroVector[axis] = smooth(gyroRaw[axis] * gyroScaleFactor, gyroVector[axis], smoothFactor);
+    gyroVector[axis] = filterSmooth(gyroRaw[axis] * gyroScaleFactor, gyroVector[axis], smoothFactor);
   }  
 }
 
@@ -229,9 +229,9 @@ void measure(void) {
     }
   }
    
-  const int getFlightData(byte axis) {
-    return gyroRaw[axis] >> 3;
-  }
+//  const int getFlightData(byte axis) {
+//    return gyroRaw[axis] >> 3;
+//  }
   
   const int getFlightData(byte axis) {
     return getNonDriftCorrectedRate(axis);

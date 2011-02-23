@@ -359,8 +359,6 @@ void  flightControl(void);                                                      
 
 int   readApmADC(unsigned char ch_num);                                                                          // defined in ApmAdc.h
 
-float smooth(float currentData, float previousData, float smoothFactor);                                         // defined in Filter.h
-
 void  updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue);                                    // defined in I2C.h
 void  sendByteI2C(int deviceAddress, byte dataValue);                                                            // defined in I2C.h
 byte  readByteI2C(int deviceAddress);                                                                            // defined in I2C.h
@@ -393,16 +391,13 @@ void  vectorScale(int length, float scaledVector[], float inputVector[], float s
 void  vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[]);                                  // defined in Vector.pde
 void  vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[]);                             // defined in Vector.pde
 
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
-void processAeroQuadStableMode(void);  // defined in FlightControl.pde
+void processFlightControlXMode(void);                                                                            // defined in FlightControl.pde
+void processFlightControlPlusMode(void);                                                                         // defined in FlightControl.pde
+void processArdupirateSuperStableMode(void);                                                                     // defined in FlightControl.pde
+void processAeroQuadStableMode(void);                                                                            // defined in FlightControl.pde
 
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
-#else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
-#endif
+
+int findMode(int *data, int arraySize);                                                                          // defined in Sensors.pde
 
 // FUNCTION: return the number of bytes currently free in RAM      
 extern int  __bss_end; // used by freemem 

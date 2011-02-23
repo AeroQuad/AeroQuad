@@ -21,11 +21,19 @@
 // This header file defines function calls and ISR's needed to communicatw
 // over SPI, I2C and other bus communication protocols for measuring sensor data
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // *******************************************
 // SPI Communication for APM ADC
 // Code written by: Jordi Munoz and Jose Julio
 // *******************************************
 #if defined(ArduCopter)
+
 #include <inttypes.h>
 #include <avr/interrupt.h>
 #include "WConstants.h"
@@ -40,7 +48,9 @@
 #define ADC_CHIP_SELECT 33    // PC4   9 // PH6  Puerto:0x08 Bit mask : 0x40
 
 // Commands for reading ADC channels on ADS7844
-const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
+//                                 pRate  qRate  rRate  aX     aY     aZ     temp   JP5
+// ADC Input Channel               Ch1    Ch2    Ch0    Ch4    Ch5    Ch6    Ch3    Ch7
+const unsigned char adc_cmd[9] = { 0xC7,  0x97,  0x87,  0xA7,  0xE7,  0xB7,  0xD7,  0xF7,  0x00 };
 volatile long adc_value[8];
 volatile unsigned char adc_counter[8];
 
@@ -56,13 +66,13 @@ unsigned char ADC_SPI_transfer(unsigned char data) {
 }
 
 ISR (TIMER2_OVF_vect) {
-  //uint8_t ch;
+  uint8_t ch;
   unsigned int adc_tmp;
   
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
   ADC_SPI_transfer(adc_cmd[0]);       // Command to read the first channel
-  for (uint8_t ch=0;ch<7;ch++) {
+  for (ch=0;ch<7;ch++) {
     adc_tmp = ADC_SPI_transfer(0)<<8;    // Read first byte
     adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
     adc_value[ch] += adc_tmp>>3;     // Shift to 12 bits
@@ -73,7 +83,7 @@ ISR (TIMER2_OVF_vect) {
   TCNT2 = 104;        // 400 Hz
 }
 
-void initialize_ArduCopter_ADC(void) {
+void initializeApmADC(void) {
   unsigned char tmp;
   
   pinMode(ADC_CHIP_SELECT,OUTPUT);
@@ -100,7 +110,7 @@ void initialize_ArduCopter_ADC(void) {
   TIMSK2 =  _BV(TOIE2) ; // enable the overflow interrupt
 }
 
-int analogRead_ArduCopter_ADC(unsigned char ch_num) {
+int readApmADC(unsigned char ch_num) {
   int result;
   cli();  // We stop interrupts to read the variables
   if (adc_counter[ch_num]>0)
@@ -113,12 +123,6 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   return(result);
 }
   
-void zero_ArduCopter_ADC(void) {
-  for (byte n; n<8; n++) {
-    adc_value[n] = 0;
-    adc_counter[n] = 0;
-  }
-}
 #endif
 
 // ********************************************

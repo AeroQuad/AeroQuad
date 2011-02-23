@@ -50,9 +50,8 @@ void readPilotCommands() {
       //#if defined(BattMonitor) && defined(ArduCopter)
       //  ledCW(); ledCW(); ledCW();
       //#endif
-      #ifdef ArduCopter
-        zero_ArduCopter_ADC();
-      #endif
+      gyro.zero();
+      accel.zero();
     }   
     #ifdef Multipilot
     // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
@@ -131,7 +130,7 @@ void readPilotCommands() {
         holdAltitude = altitude.getData();
         holdThrottle = receiver.getData(THROTTLE);
         PID[ALTITUDE].integratedError = 0;
-        accel.setOneG(accel.getFlightData(ZAXIS));
+        accel.setOneG(accel.getData(ZAXIS));
         storeAltitude = OFF;
       }
       altitudeHold = ON;
