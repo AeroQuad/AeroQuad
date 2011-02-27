@@ -218,9 +218,7 @@ private:
 public:
   Accel_AeroQuadMega_v2() : Accel(){
     accelAddress = 0x40; // page 54 and 61 of datasheet
-    // Accelerometer value if BMA180 setup for 1.0G
-    // Page 27 of datasheet = 0.00013g/LSB
-    accelScaleFactor = 0.00013;
+    accelScaleFactor = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range
   }
   
   void initialize(void) {
@@ -333,12 +331,7 @@ private:
 
 public:
   Accel_ArduCopter() : Accel(){
-    // ADC : Voltage reference 3.3v / 12bits(4096 steps) => 0.8mV/ADC step
-    // ADXL335 Sensitivity(from datasheet) => 330mV/g, 0.8mV/ADC step => 330/0.8 = 412
-    // Tested value : 414
-    // #define GRAVITY 414 //this equivalent to 1G in the raw data coming from the accelerometer 
-    // #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
-    accelScaleFactor = 414.0 / 9.81;    
+    accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);    
   }
   
   void initialize(void) {
@@ -399,7 +392,7 @@ public:
 class Accel_Wii : public Accel {
 public:
   Accel_Wii() : Accel(){
-    accelScaleFactor = 0;    
+    accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2    
   }
   
   void initialize(void) {
