@@ -224,7 +224,7 @@ public:
   Gyro_AeroQuadMega_v2() : Gyro() {
     gyroAddress = 0x69;
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
-    gyroScaleFactor = 1.0 / 14.375;       //  ITG3200 14.375 LSBs per °/sec
+    gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
     lastReceiverYaw=0;
     yawAge=0;
@@ -334,16 +334,8 @@ private:
 
 public:
   Gyro_ArduCopter() : Gyro() {
-    // IDG500 Sensitivity (from datasheet) => 2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-    // Tested values : 
-    //#define Gyro_Gain_X 0.4 //X axis Gyro gain
-    //#define Gyro_Gain_Y 0.41 //Y axis Gyro gain
-    //#define Gyro_Gain_Z 0.41 //Z axis Gyro gain
-    //#define Gyro_Scaled_X(x) x*ToRad(Gyro_Gain_X) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Y(x) x*ToRad(Gyro_Gain_Y) //Return the scaled ADC raw data of the gyro in radians for second
-    //#define Gyro_Scaled_Z(x) x*ToRad(Gyro_Gain_Z) //Return the scaled ADC raw data of the gyro in radians for second
+    gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.4;       // IDG/IXZ500 sensitivity = 2mV/(deg/sec) 0.002
   }
   
   void initialize(void) {
@@ -396,7 +388,7 @@ public:
     // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
     // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
     gyroFullScaleOutput = 2000;
-    gyroScaleFactor = 0.069565217391304;
+    gyroScaleFactor = radians(0.06201166);
   }
   
   void initialize(void) {
