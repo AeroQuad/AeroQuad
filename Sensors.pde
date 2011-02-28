@@ -51,25 +51,25 @@ void readSensors(void) {
   
   // ****************** Calculate Absolute Angle *****************
   #if defined(HeadingMagHold)
-    flightAngle->calculate(gyro.getData(ROLL),                      \
-                         gyro.getData(PITCH),                      \
-                         gyro.getData(YAW),                        \
-                         accel.getData(XAXIS),                     \
-                         accel.getData(YAXIS),                     \
-                         accel.getData(ZAXIS),                     \
-                         accel.getOneG(),                          \
-                         compass.getHdgXY(XAXIS),                  \
-                         compass.getHdgXY(YAXIS));
+    flightAngle->calculate(gyro.getData(ROLL),                       \
+                           gyro.getData(PITCH),                      \
+                           gyro.getData(YAW),                        \
+                           accel.getData(XAXIS),                     \
+                           accel.getData(YAXIS),                     \
+                           accel.getData(ZAXIS),                     \
+                           accel.getOneG(),                          \
+                           compass.getHdgXY(XAXIS),                  \
+                           compass.getHdgXY(YAXIS));
   #else
-    flightAngle->calculate(gyro.getData(ROLL),                      \
-                         gyro.getData(PITCH),                      \
-                         gyro.getData(YAW),                        \
-                         accel.getData(XAXIS),                     \
-                         accel.getData(YAXIS),                     \
-                         accel.getData(ZAXIS),                     \
-                         accel.getOneG(),                          \
-                         0.0,                                      \
-                         0.0);
+    flightAngle->calculate(gyro.getData(ROLL),                       \
+                           gyro.getData(PITCH),                      \
+                           gyro.getData(YAW),                        \
+                           accel.getData(XAXIS),                     \
+                           accel.getData(YAXIS),                     \
+                           accel.getData(ZAXIS),                     \
+                           accel.getOneG(),                          \
+                           0.0,                                      \
+                           0.0);
   
   #endif
 }

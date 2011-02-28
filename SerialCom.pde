@@ -449,10 +449,6 @@ void sendSerialTelemetry() {
     PrintValueComma(5);
 #elif defined(ArduCopter)
     PrintValueComma(6);
-#elif defined(Multipilot)
-    PrintValueComma(7);
-#elif defined(MultipilotI2C)
-    PrintValueComma(8);
 #elif defined(AeroQuadMega_CHR6DM)
     PrintValueComma(5);
 #elif defined(APM_OP_CHR6DM)

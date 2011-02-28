@@ -315,10 +315,6 @@ void processFlightControlXMode(void) {
     motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
-#ifdef MultipilotI2C
-    // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
-    motors.setThrottle(receiver.getData(THROTTLE));
-#endif
   } 
 
   // *********************** process min max motor command *******************
@@ -371,10 +367,6 @@ void processFlightControlPlusMode(void) {
     motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(RIGHT, throttle - motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
     motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
-#ifdef MultipilotI2C
-    // if using Mixertable need only Throttle MotorAxixCommand Roll,Pitch,Yaw Yet set
-    motors.setThrottle(receiver.getData(THROTTLE));
-#endif
   } 
 
   // *********************** process min max motor command *******************

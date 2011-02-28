@@ -36,8 +36,6 @@
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
-//#define Multipilot          // Multipilot board with Lys344 and ADXL 610 Gyro (needs debug)
-//#define MultipilotI2C       // Active Multipilot I2C and Mixertable (needs debug)
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -285,32 +283,6 @@
   #endif
 #endif
 
-#ifdef Multipilot
-  Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
-  Receiver_Multipilot receiver;
-  Motors_PWM motors;
-  //#define PRINT_MIXERTABLE
-  //#define TELEMETRY_DEBUG
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *flightAngle = &tempFlightAngle;
-#endif
-
-#ifdef MultipilotI2C  
-  Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
-  Receiver_Multipilot receiver;
-  Motors_I2C motors;
-  //#define PRINT_MIXERTABLE
-  //#define TELEMETRY_DEBUG
-  #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-  FlightAngle *flightAngle = &tempFlightAngle;
-#endif
-
-
-
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
 #else
@@ -391,12 +363,8 @@ void setup() {
     gyro.invert(YAW);
   #endif
   #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-    accel.invert(PITCH);
+    accel.invert(XAXIS);
     accel.invert(ZAXIS);
-  #endif
-  #ifdef Multipilot
-    accel.invert(PITCH);
-    gyro.invert(ROLL);
   #endif
   
   // Flight angle estimation

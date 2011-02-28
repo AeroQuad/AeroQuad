@@ -213,7 +213,7 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
 void eulerAngles(void)
 {
   angle[ROLL]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
-  angle[PITCH] = -asin(dcmMatrix[6]);
+  angle[PITCH] =  asin(dcmMatrix[6]);
   angle[YAW]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   

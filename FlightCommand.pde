@@ -54,26 +54,6 @@ void readPilotCommands() {
         zero_ArduCopter_ADC();
       #endif
     }   
-    #ifdef Multipilot
-    // Multipilot Zero Gyro sensors (left stick no throttle, right stick upper right corner)
-    if ((receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
-      accel.calibrate(); // defined in Accel.h
-      zeroIntegralError();
-      motors.pulseMotors(3);
-      #ifdef ArduCopter
-        zero_ArduCopter_ADC();
-      #endif
-    }   
-    // Multipilot Zero Gyros (left stick no throttle, right stick upper left corner)
-    if ((receiver.getRaw(ROLL) < MINCHECK) && (receiver.getRaw(PITCH) > MAXCHECK)) {
-      gyro.calibrate();
-      zeroIntegralError();
-      motors.pulseMotors(4);
-      #ifdef ArduCopter
-        zero_ArduCopter_ADC();
-      #endif
-    }
-    #endif
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
