@@ -472,9 +472,9 @@ void loop () {
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-      camera.setPitch(flightAngle->getData(PITCH));
-      camera.setRoll(flightAngle->getData(ROLL));
-      camera.setYaw(flightAngle->getData(YAW));
+      camera.setPitch(degrees(flightAngle->getData(PITCH)));
+      camera.setRoll(degrees(flightAngle->getData(ROLL)));
+      camera.setYaw(degrees(flightAngle->getData(YAW)));
       camera.move();
       cameraTime = currentTime + CAMERALOOPTIME;
     }

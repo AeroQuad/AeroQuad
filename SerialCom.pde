@@ -184,20 +184,22 @@ void readSerialCommand() {
 //********************************* Serial Telemetry ************************************************
 //***************************************************************************************************
 
-void PrintValueComma(float val)
-{
+void PrintValueComma(float val) {
   Serial.print(val);
   comma();
 }
 
-void PrintValueComma(char val)
-{
+void PrintValueComma(double val) {
   Serial.print(val);
   comma();
 }
 
-void PrintValueComma(int val)
-{
+void PrintValueComma(char val) {
+  Serial.print(val);
+  comma();
+}
+
+void PrintValueComma(int val) {
   Serial.print(val);
   comma();
 }
@@ -318,10 +320,11 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
-    PrintValueComma(flightAngle->getData(ROLL));
-    PrintValueComma(flightAngle->getData(PITCH));
+    PrintValueComma(degrees(flightAngle->getData(ROLL)));
+    PrintValueComma(degrees(flightAngle->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(compass.getAbsoluteHeading());
+      //PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma(degrees(flightAngle->getData(YAW)));
     #else
       PrintValueComma(0);
     #endif
@@ -374,7 +377,8 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       PrintValueComma(1000);
     #ifdef HeadingMagHold
-      PrintValueComma(compass.getAbsoluteHeading());
+      //PrintValueComma(compass.getAbsoluteHeading());
+      PrintValueComma(degrees(flightAngle->getData(YAW)));
     #else
       PrintValueComma(0);
     #endif

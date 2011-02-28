@@ -24,7 +24,7 @@ public:
   float gyroScaleFactor;
   float smoothFactor;
   int gyroChannel[3];
-  int gyroData[3];
+  float gyroData[3];
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     float gyroZero[3];
   #else
@@ -76,12 +76,8 @@ public:
     return gyroADC[axis] * sign[axis];
   }
   
-  const int getData(byte axis) {
+  const float getData(byte axis) {
     return gyroData[axis] * sign[axis];
-  }
-  
-  void setData(byte axis, int value) {
-    gyroData[axis] = value;
   }
   
   const int invert(byte axis) {
@@ -150,7 +146,7 @@ class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    gyroScaleFactor = 0.4;         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
+    gyroScaleFactor = radians(0.4);         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
   }
   
   void initialize(void) {
@@ -171,7 +167,7 @@ public:
     currentTime = micros();
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
-      gyroData[axis] = filterSmooth(gyroADC[axis], gyroData[axis], smoothFactor);
+      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
     previousTime = currentTime;
   }
@@ -255,7 +251,7 @@ public:
 
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
-      gyroData[axis] = filterSmooth(gyroADC[axis], gyroData[axis], smoothFactor);
+      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
 
     //calculateHeading();
@@ -351,7 +347,7 @@ public:
       rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
         gyroADC[axis] =  rawADC - gyroZero[axis];
-      gyroData[axis] = gyroADC[axis]; // no smoothing needed
+      gyroData[axis] = smooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
    }
 
@@ -403,11 +399,11 @@ public:
    currentTime = micros();
     updateControls(); // defined in DataAcquisition.h
     gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
-    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL] * gyroScaleFactor, gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroADC[PITCH] = gyroZero[PITCH] - NWMP_gyro[PITCH];
-    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroADC[YAW] =  gyroZero[YAW] - NWMP_gyro[YAW];
-    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
    previousTime = currentTime;
   }
 
