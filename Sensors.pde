@@ -32,7 +32,7 @@ void readSensors(void) {
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
     if (currentTime > compassTime) {
-      compass.measure(kinematics.getAttitude(ROLL), kinematics.getAttitude(PITCH)); // defined in compass.h
+      compass.measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
       compassTime = currentTime + COMPASSLOOPTIME;
     }
   #endif

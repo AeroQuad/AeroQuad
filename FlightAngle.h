@@ -50,6 +50,14 @@ public:
     return angle[axis];
   }
   
+  const float getHeading(void) {
+    // Change from +/-180 to 0-360
+    if (angle[YAW] < 0.0)
+      return (TWO_PI + angle[YAW]);
+    else
+      return angle[YAW];
+  }
+  
   const byte getType(void) {
     // This is set in each subclass to identify which algorithm used
     return type;
