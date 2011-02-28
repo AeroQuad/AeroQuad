@@ -413,15 +413,23 @@ public:
     currentTime = micros();
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
+    // Depending on how your accel is mounted, you can change X/Y axis to pitch/roll mapping here
+    accelADC[XAXIS] = accelZero[PITCH] - NWMP_acc[PITCH];
+    accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
+    accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
       accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
     }
     previousTime = currentTime;
   }
   
   const int getFlightData(byte axis) {
-    return getRaw(axis);
+    if (axis == ROLL)
+      return -getRaw(YAXIS);
+    if (axis == PITCH)
+      return -getRaw(XAXIS);
+    if (axis == ZAXIS)
+      return -getRaw(ZAXIS);
   }
  
   // Allows user to zero accelerometers on command
@@ -439,11 +447,11 @@ public:
     // store accel value that represents 1g
     accelOneG = -accelData[ZAXIS];
     // replace with estimated Z axis 0g value
-    accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+    accelZero[ZAXIS] = (accelZero[XAXIS] + accelZero[YAXIS]) / 2;
     
     writeFloat(accelOneG, ACCEL1G_ADR);
-    writeFloat(accelZero[ROLL], LEVELROLLCAL_ADR);
-    writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
+    writeFloat(accelZero[XAXIS], LEVELROLLCAL_ADR);
+    writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
