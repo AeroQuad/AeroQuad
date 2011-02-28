@@ -30,10 +30,10 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -53,8 +53,8 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
@@ -168,7 +168,7 @@
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    Magnetometer_HMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -370,7 +370,7 @@ void setup() {
   // Flight angle estimation
   #ifdef HeadingMagHold
     compass.initialize();
-    setHeading = compass.getHeading();
+    //setHeading = compass.getHeading();
     flightAngle->initialize(compass.getHdgXY(XAXIS), compass.getHdgXY(YAXIS));
   #else
     flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
