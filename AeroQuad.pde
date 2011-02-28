@@ -125,7 +125,7 @@
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    Magnetometer_HMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -194,7 +194,7 @@
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
-    Compass_AeroQuad_v2 compass;
+    Magnetometer_HMC5843 compass;
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"

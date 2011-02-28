@@ -423,7 +423,6 @@ public:
     accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
     accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
       //accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));  // AKA changes to remove total Time from Honks smoothing changes
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
