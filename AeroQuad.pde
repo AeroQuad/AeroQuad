@@ -285,7 +285,8 @@
 
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
-#else
+#endif
+#ifdef plusConfig
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 

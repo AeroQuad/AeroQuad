@@ -296,7 +296,8 @@ void processHardManuevers()
     motors.setMaxCommand(LEFT, MAXCOMMAND);
     motors.setMaxCommand(RIGHT, minAcro);
   }
-#else
+#endif
+#ifdef plusConfig
   if (receiver.getRaw(ROLL) < MINCHECK) {
     motors.setMinCommand(LEFT, minAcro);
     motors.setMaxCommand(RIGHT, MAXCOMMAND);
@@ -369,7 +370,8 @@ void processFlightControlXMode(void) {
     motors.write(); // Defined in Motors.h
   }
 }
-#else
+#endif
+#ifdef plusConfig
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// PLUS MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
