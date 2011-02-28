@@ -33,7 +33,7 @@ void processArdupirateSuperStableMode(void)
   // ArduPirate adaptation
   // default value are P = 4, I = 0.15, P (gyro) = 1.2
   // ROLL
-  float errorRoll = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL));     
+  float errorRoll = (receiver.getAngle(ROLL) - flightAngle->getData(ROLL));     
   errorRoll = constrain(errorRoll,-50,50);
   if (receiver.getAngle(ROLL) < 30) {
     PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
@@ -42,11 +42,11 @@ void processArdupirateSuperStableMode(void)
   else
     PID[LEVELROLL].integratedError = 0;
   const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
-  errorRoll = stableRoll - _flightAngle->getGyroUnbias(ROLL);
+  errorRoll = stableRoll - flightAngle->getGyroUnbias(ROLL);
   motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
 
   // PITCH
-  float errorPitch = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH));     
+  float errorPitch = (receiver.getAngle(PITCH) + flightAngle->getData(PITCH));     
   errorPitch = constrain(errorPitch,-50,50);                    
   if (receiver.getAngle(PITCH) < 30) {
     PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
@@ -55,7 +55,7 @@ void processArdupirateSuperStableMode(void)
   else
     PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
-  errorPitch = stablePitch - _flightAngle->getGyroUnbias(PITCH);
+  errorPitch = stablePitch - flightAngle->getGyroUnbias(PITCH);
   motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
 }
 
@@ -65,8 +65,8 @@ void processArdupirateSuperStableMode(void)
 //////////////////////////////////////////////////////////////////////////////
 void processAeroQuadStableMode(void)
 {
-  levelAdjust[ROLL] = (receiver.getAngle(ROLL) - _flightAngle->getData(ROLL)) * PID[LEVELROLL].P;
-  levelAdjust[PITCH] = (receiver.getAngle(PITCH) + _flightAngle->getData(PITCH)) * PID[LEVELPITCH].P;
+  levelAdjust[ROLL] = (receiver.getAngle(ROLL) - flightAngle->getData(ROLL)) * PID[LEVELROLL].P;
+  levelAdjust[PITCH] = (receiver.getAngle(PITCH) + flightAngle->getData(PITCH)) * PID[LEVELPITCH].P;
   // Check if pilot commands are not in hover, don't auto trim
   if ((abs(receiver.getTrimData(ROLL)) > levelOff) || (abs(receiver.getTrimData(PITCH)) > levelOff)) {
     zeroIntegralError();
@@ -78,8 +78,8 @@ void processAeroQuadStableMode(void)
     #endif
   }
   else {
-    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - _flightAngle->getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
-    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + _flightAngle->getData(PITCH)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
+    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - flightAngle->getData(ROLL)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + flightAngle->getData(PITCH)) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       digitalWrite(LED2PIN, HIGH);
     #endif
@@ -197,7 +197,7 @@ void processAltitudeHold(void)
   if (altitudeHold == ON) {
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
     zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-    if((abs(_flightAngle->getData(ROLL)) > 5) || (abs(_flightAngle->getData(PITCH)) > 5)) { 
+    if((abs(flightAngle->getData(ROLL)) > 5) || (abs(flightAngle->getData(PITCH)) > 5)) { 
       PID[ZDAMPENING].integratedError = 0;
     }
     throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);

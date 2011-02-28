@@ -32,7 +32,7 @@ void readSensors(void) {
   // ********************* Read Slower Sensors *******************
   #if defined(HeadingMagHold)
     if (currentTime > compassTime) {
-      compass.measure(); // defined in compass.h
+      compass.measure(kinematics.getAttitude(ROLL), kinematics.getAttitude(PITCH)); // defined in compass.h
       compassTime = currentTime + COMPASSLOOPTIME;
     }
   #endif
@@ -50,7 +50,28 @@ void readSensors(void) {
   #endif
   
   // ****************** Calculate Absolute Angle *****************
-  _flightAngle->calculate(); // defined in FlightAngle.h
+  #if defined(HeadingMagHold)
+    flightAngle->calculate(gyro.getData(ROLL),                      \
+                         gyro.getData(PITCH),                      \
+                         gyro.getData(YAW),                        \
+                         accel.getData(XAXIS),                     \
+                         accel.getData(YAXIS),                     \
+                         accel.getData(ZAXIS),                     \
+                         accel.getOneG(),                          \
+                         compass.getHdgXY(XAXIS),                  \
+                         compass.getHdgXY(YAXIS));
+  #else
+    flightAngle->calculate(gyro.getData(ROLL),                      \
+                         gyro.getData(PITCH),                      \
+                         gyro.getData(YAW),                        \
+                         accel.getData(XAXIS),                     \
+                         accel.getData(YAXIS),                     \
+                         accel.getData(ZAXIS),                     \
+                         accel.getOneG(),                          \
+                         0.0,                                      \
+                         0.0);
+  
+  #endif
 }
 
 

@@ -95,7 +95,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -109,7 +109,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -124,7 +124,7 @@
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -152,7 +152,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -167,7 +167,7 @@
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -193,7 +193,7 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
     Compass_AeroQuad_v2 compass;
@@ -216,7 +216,7 @@
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -230,7 +230,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -244,7 +244,7 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -268,7 +268,7 @@
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #include "Compass.h"
   Compass_CHR6DM compass;
   #ifdef AltitudeHold
@@ -294,7 +294,7 @@
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
 #endif
 
 #ifdef MultipilotI2C  
@@ -306,7 +306,7 @@
   //#define TELEMETRY_DEBUG
   #include "FlightAngle.h"
   FlightAngle_DCM tempFlightAngle;
-  FlightAngle *_flightAngle = &tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
 #endif
 
 
@@ -399,14 +399,16 @@ void setup() {
     gyro.invert(ROLL);
   #endif
   
-  // Flight angle estimiation
-  _flightAngle->initialize(); // defined in FlightAngle.h
-
-  // Optional Sensors
+  // Flight angle estimation
   #ifdef HeadingMagHold
     compass.initialize();
     setHeading = compass.getHeading();
+    flightAngle->initialize(compass.getHdgXY(XAXIS), compass.getHdgXY(YAXIS));
+  #else
+    flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
+
+  // Optional Sensors
   #ifdef AltitudeHold
     altitude.initialize();
   #endif
@@ -470,9 +472,9 @@ void loop () {
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-      camera.setPitch(_flightAngle->getData(PITCH));
-      camera.setRoll(_flightAngle->getData(ROLL));
-      camera.setYaw(_flightAngle->getData(YAW));
+      camera.setPitch(flightAngle->getData(PITCH));
+      camera.setRoll(flightAngle->getData(ROLL));
+      camera.setYaw(flightAngle->getData(YAW));
       camera.move();
       cameraTime = currentTime + CAMERALOOPTIME;
     }
