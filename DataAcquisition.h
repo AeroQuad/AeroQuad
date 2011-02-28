@@ -42,7 +42,7 @@
 // Commands for reading ADC channels on ADS7844
 const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
 volatile long adc_value[8];
-volatile unsigned char adc_counter[8];
+volatile unsigned int adc_counter[8];
 
 unsigned char ADC_SPI_transfer(unsigned char data) {
   /* Wait for empty transmit buffer */
@@ -62,8 +62,8 @@ ISR (TIMER2_OVF_vect) {
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
   ADC_SPI_transfer(adc_cmd[0]);       // Command to read the first channel
-  for (unit8_t ch=0;ch<7;ch++) {
-    adc_tmp = ADC_SPI_transfer(0)<<8;    // Read first byte
+  for (uint8_t ch = 0; ch < 8; ch++) {
+    adc_tmp = ADC_SPI_transfer(0) << 8;    // Read first byte
     adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
     adc_value[ch] += adc_tmp>>3;     // Shift to 12 bits
     adc_counter[ch]++;               // Number of samples
@@ -114,7 +114,7 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
 }
   
 void zero_ArduCopter_ADC(void) {
-  for (byte n; n<8; n++) {
+  for (byte n; n < 8; n++) {
     adc_value[n] = 0;
     adc_counter[n] = 0;
   }
@@ -127,7 +127,7 @@ void zero_ArduCopter_ADC(void) {
 // Modifications by jihlein 
 // ********************************************
 // I2C function calls defined in I2C.h
-#ifndef AeroQuad_v18
+//#ifndef AeroQuad_v18
 short NWMP_acc[3];
 short NWMP_gyro[3];
 
@@ -166,7 +166,7 @@ void updateControls() {
     }
   }
 }
-#endif
+//#endif
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     #include "CHR6DM.h"

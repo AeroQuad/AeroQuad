@@ -205,9 +205,9 @@ void processAltitudeHold(void)
     throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     //throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
     if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-      holdAltitude += 0.1;
+      holdAltitude += 0.01;
     if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-      holdAltitude -= 0.1;
+      holdAltitude -= 0.01;
   }
   else {
     // Altitude hold is off, get throttle from receiver
@@ -271,6 +271,7 @@ void processMinMaxMotorCommand(void)
 //////////////////////////////////////////////////////////////////////////////
 void processHardManuevers()
 {
+#ifdef XConfig    // Fix for + mode hardmanuevers
   if (receiver.getRaw(ROLL) < MINCHECK) {
     motors.setMaxCommand(FRONT, minAcro);
     motors.setMaxCommand(REAR, MAXCOMMAND);
@@ -295,8 +296,27 @@ void processHardManuevers()
     motors.setMaxCommand(LEFT, MAXCOMMAND);
     motors.setMaxCommand(RIGHT, minAcro);
   }
+#else
+  if (receiver.getRaw(ROLL) < MINCHECK) {
+    motors.setMinCommand(LEFT, minAcro);
+    motors.setMaxCommand(RIGHT, MAXCOMMAND);
+  }
+  else if (receiver.getRaw(ROLL) > MAXCHECK) {
+    motors.setMaxCommand(LEFT, MAXCOMMAND);
+    motors.setMinCommand(RIGHT, minAcro);
+  }
+  else if (receiver.getRaw(PITCH) < MINCHECK) {
+    motors.setMaxCommand(FRONT, MAXCOMMAND);
+    motors.setMinCommand(REAR, minAcro);
+  }
+  else if (receiver.getRaw(PITCH) > MAXCHECK) {
+    motors.setMinCommand(FRONT, minAcro);
+    motors.setMaxCommand(REAR, MAXCOMMAND);
+  }
+#endif  
 }
 
+#ifdef XConfig
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// X MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -349,7 +369,7 @@ void processFlightControlXMode(void) {
     motors.write(); // Defined in Motors.h
   }
 }
-
+#else
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// PLUS MODE //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -401,5 +421,5 @@ void processFlightControlPlusMode(void) {
     motors.write(); // Defined in Motors.h
   }
 }
-
+#endif
 

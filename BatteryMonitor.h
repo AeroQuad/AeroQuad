@@ -182,10 +182,11 @@ private:
   #else
     #define BUZZERPIN 49
   #endif
-  long previousTime;
+  //long previousTime;
   byte state, firstAlarm;
   float diode; // raw voltage goes through diode on Arduino
   float batteryScaleFactor;
+  long currentBatteryTime, previousBatteryTime;
 
 public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
@@ -199,13 +200,13 @@ public:
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
     digitalWrite(BUZZERPIN, LOW);
-    previousTime = millis();
+    previousBatteryTime = millis();
     state = LOW;
     firstAlarm = OFF;
   }
 
   void lowBatteryEvent(byte level) {
-    long currentTime = millis()- previousTime;
+    long currentBatteryTime = millis()- previousBatteryTime;
     if (level == OK) {
       digitalWrite(BUZZERPIN, LOW);
       autoDescent = 0;
@@ -214,13 +215,13 @@ public:
       if ((autoDescent == 0) && (currentTime > 1000)) {
         autoDescent = -50;
       }
-      if (currentTime > 1100) {
+      if (currentBatteryTime > 1100) {
         autoDescent = 50;
         digitalWrite(LED2PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
       }
-      if (currentTime > 1200) {
-        previousTime = millis();
+      if (currentBatteryTime > 1200) {
+        previousBatteryTime = millis();
         autoDescent = 0;
         digitalWrite(LED2PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
@@ -230,10 +231,10 @@ public:
       if (firstAlarm == OFF) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
       firstAlarm = ON;
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
-      if ((currentTime > 500) && (throttle > 1400)) {
+      if ((currentBatteryTime > 500) && (throttle > 1400)) {
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
-        previousTime = millis();
+        previousBatteryTime = millis();
         if (state == LOW) state = HIGH;
         else state = LOW;
         digitalWrite(LEDPIN, state);

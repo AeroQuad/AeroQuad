@@ -97,9 +97,9 @@ public:
 float vectorDotProduct(int length, float vector1[], float vector2[])
 {
   float dotProduct = 0;
-  int   i;
+  //int   i;
 
-  for (i = 0; i < length; i++)
+  for (int i = 0; i < length; i++)
   {
   dotProduct += vector1[i] * vector2[i];
   }
@@ -132,9 +132,9 @@ void vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3])
 
 void vectorScale(int length, float scaledVector[], float inputVector[], float scalar)
 {
-  int i;
+  //int i;
 
-  for (i = 0; i < length; i++)
+  for (int i = 0; i < length; i++)
   {
    scaledVector[i] = inputVector[i] * scalar;
   }
@@ -150,9 +150,9 @@ void vectorScale(int length, float scaledVector[], float inputVector[], float sc
 
 void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[])
 {
-  int i;
+  //int i;
 
-  for(i = 0; i < length; i++)
+  for(int i = 0; i < length; i++)
   {
      vectorC[i] = vectorA[i] + vectorB[i];
   }
@@ -168,9 +168,9 @@ void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[])
 
 void vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[])
 {
-  int i;
+  //int i;
 
-  for(i = 0; i < length; i++)
+  for(int i = 0; i < length; i++)
   {
      vectorC[i] = vectorA[i] - vectorB[i];
   }
@@ -186,18 +186,18 @@ void vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[
 
 void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], float matrixA[], float matrixB[])
 {
-  int i, j, k;
+  //int i, j, k;
 
-  for (i = 0; i < aRows * bCols; i++)
+  for (int i = 0; i < aRows * bCols; i++)
   {
     matrixC[i] = 0.0;
   }
 
-  for (i = 0; i < aRows; i++)
+  for (int i = 0; i < aRows; i++)
   {
-    for(j = 0; j < aCols_bRows; j++)
+    for(int j = 0; j < aCols_bRows; j++)
     {
-      for(k = 0;  k < bCols; k++)
+      for(int k = 0;  k < bCols; k++)
       {
        matrixC[i * bCols + k] += matrixA[i * aCols_bRows + j] * matrixB[j * bCols + k];
       }
@@ -215,9 +215,9 @@ void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], floa
 
 void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matrixB[])
 {
-  int i;
+  //int i;
 
-  for (i = 0; i < rows * cols; i++)
+  for (int i = 0; i < rows * cols; i++)
   {
     matrixC[i] = matrixA[i] + matrixB[i];
   }
@@ -233,9 +233,9 @@ void matrixAdd(int rows, int cols, float matrixC[], float matrixA[], float matri
 
 void matrixSubtract(int rows, int cols, float matrixC[], float matrixA[], float matrixB[])
 {
-  int i;
+  //int i;
 
-  for (i = 0; i < rows * cols; i++)
+  for (int i = 0; i < rows * cols; i++)
   {
     matrixC[i] = matrixA[i] - matrixB[i];
   }
@@ -252,9 +252,9 @@ void matrixSubtract(int rows, int cols, float matrixC[], float matrixA[], float 
 
 void matrixScale(int rows, int cols, float matrixC[], float scaler, float matrixA[])
 {
-  int i;
+  //int i;
 
-  for (i = 0; i < rows * cols; i++)
+  for (int i = 0; i < rows * cols; i++)
   {
     matrixC[i] = scaler * matrixA[i];
   }
@@ -358,7 +358,7 @@ int findMedian(int *data, int arraySize) {                  //Thanks ala42! Post
    // Sorts numbers from lowest to highest
   while (done != 1) {        
     done = 1;
-    for (byte i=0; i<(arraySize-1); i++) {
+    for (byte i = 0; i<(arraySize-1); i++) {
       if (data[i] > data[i+1]) {     // numbers are out of order - swap
         temp = data[i+1];
         data[i+1] = data[i];

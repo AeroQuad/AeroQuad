@@ -34,7 +34,7 @@ public:
   int sign[3];
   float accelOneG, zAxis;
   byte rollChannel, pitchChannel, zAxisChannel;
-  unsigned long currentAccelTime, previousAccelTime;
+  //unsigned long currentAccelTime, previousAccelTime;  // AKA changes to remove total Time from Honks smoothing changes
   
   Accel(void) {
     sign[ROLL] = 1;
@@ -53,7 +53,7 @@ public:
   virtual void measure(void);
   virtual void calibrate(void);
   virtual const int getFlightData(byte);
-  virtual void calculateAltitude(void);
+  //virtual void calculateAltitude(void); // AKA changes to remove total Time from Honks smoothing changes
 
   // **************************************************************
   // The following functions are common between all Gyro subclasses
@@ -67,8 +67,8 @@ public:
     accelZero[YAXIS] = readFloat(LEVELROLLCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
     smoothFactor     = readFloat(ACCSMOOTH_ADR);
-    currentAccelTime = micros();
-    previousAccelTime = currentAccelTime;    
+    //currentAccelTime = micros(); // AKA changes to remove total Time from Honks smoothing changes
+    //previousAccelTime = currentAccelTime;    // AKA changes to remove total Time from Honks smoothing changes
   }
   
   const int getRaw(byte axis) {
@@ -165,12 +165,12 @@ public:
   }
   
   void measure(void) {
-    currentTime = micros();
+    //currentTime = micros(); // AKA changes to remove total Time from Honks smoothing changes
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
-    previousTime = currentTime;
+    //previousTime = currentTime; // AKA changes to remove total Time from Honks smoothing changes
   }
 
   const int getFlightData(byte axis) {
@@ -198,13 +198,15 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
+  /* // AKA - NOT USED
   void calculateAltitude() {
-    currentTime = micros();
+    //currentTime = micros();
     if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
+    //previousTime = currentTime;
   } 
-};
+  */
+  };
 #endif
 
 /******************************************************/
@@ -315,12 +317,14 @@ public:
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
 
+/* AKA - NOT USED
   void calculateAltitude() {
     currentTime = micros();
     if ((abs(getRaw(XAXIS)) < 1500) && (abs(getRaw(YAXIS)) < 1500)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     previousTime = currentTime;
   } 
+*/  
 };
 #endif
 
@@ -350,7 +354,7 @@ public:
       rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         accelADC[axis] = rawADC - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
 
@@ -381,13 +385,14 @@ public:
     writeFloat(accelZero[YAXIS], LEVELROLLCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-
+/* AKA - NOT USED
   void calculateAltitude() {
     currentTime = micros();
     if ((abs(getRaw(XAXIS)) < 1500) && (abs(getRaw(YAXIS)) < 1500)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     previousTime = currentTime;
   } 
+*/  
 };
 #endif
 
@@ -410,14 +415,15 @@ public:
   }
   
   void measure(void) {
-    currentTime = micros();
+    //currentTime = micros(); // AKA changes to remove total Time from Honks smoothing changes
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       accelADC[axis] = accelZero[axis] - NWMP_acc[axis];
-      accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));  // AKA changes to remove total Time from Honks smoothing changes
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
-    previousTime = currentTime;
+    //previousTime = currentTime;  // AKA changes to remove total Time from Honks smoothing changes  
   }
   
   const int getFlightData(byte axis) {
@@ -446,13 +452,14 @@ public:
     writeFloat(accelZero[PITCH], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-
+/*  AKA - NOT USED
   void calculateAltitude() {
     currentTime = micros();
     if ((abs(getRaw(ROLL)) < 1500) && (abs(getRaw(PITCH)) < 1500)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     previousTime = currentTime;
   } 
+*/  
 };
 #endif
 
@@ -476,15 +483,19 @@ public:
   }
 
   void measure(void) {
-    currentTime = micros();
+    //currentTime = micros(); accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
       accelADC[XAXIS] = chr6dm.data.ax - accelZero[XAXIS];
       accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
       accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
 
-      accelData[XAXIS] = filterSmoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
-      accelData[YAXIS] = filterSmoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = filterSmoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-    previousTime = currentTime;
+      //accelData[XAXIS] = filterSmoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
+      //accelData[YAXIS] = filterSmoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[ZAXIS] = filterSmoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = filterSmooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor); //to get around 1
+      accelData[YAXIS] = filterSmooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
+      accelData[ZAXIS] = filterSmooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
+
+    //previousTime = currentTime; accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
   }    
 
   const int getFlightData(byte axis) {
@@ -521,13 +532,14 @@ public:
     writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-
+/*  AKA - NOT USED
   void calculateAltitude() {
     currentTime = micros();
     if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     previousTime = currentTime;
   } 
+*/  
 };
 #endif
 
@@ -558,16 +570,20 @@ public:
   }
 
   void measure(void) {
-    currentTime = micros();
+    //currentTime = micros(); // AKA removed as a result of Honks original work, not needed further
       //read done in gyro   //TODO
       accelADC[XAXIS] = fakeAccelRoll - accelZero[XAXIS];
       accelADC[YAXIS] = fakeAccelPitch - accelZero[YAXIS];
       accelADC[ZAXIS] = fakeAccelYaw - accelOneG;
 
-      accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-    previousTime = currentTime;
+      //accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      //accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
+      accelData[XAXIS] = smooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor);
+      accelData[YAXIS] = smooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
+      accelData[ZAXIS] = smooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
+
+    //previousTime = currentTime; // AKA removed as a result of Honks original work, not needed further
   }
   
   const int getFlightData(byte axis) {
@@ -604,12 +620,13 @@ public:
     writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-
+/* AKA - NOT USED
   void calculateAltitude() {
     currentTime = micros();
     if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
       rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
     previousTime = currentTime;
   } 
+*/  
 };
 #endif
