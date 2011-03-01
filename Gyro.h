@@ -347,7 +347,7 @@ public:
       rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
       if (rawADC > 500) // Check if good measurement
         gyroADC[axis] =  rawADC - gyroZero[axis];
-      gyroData[axis] = smooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
    }
 

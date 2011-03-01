@@ -350,7 +350,7 @@ public:
       rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         accelADC[axis] = rawADC - accelZero[axis];
-      accelData[axis] = smooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
 
