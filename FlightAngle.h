@@ -32,9 +32,11 @@ public:
   float earthAccel[3];
   
   FlightAngle(void) {
-    angle[ROLL] = 0;
-    angle[PITCH] = 0;
-    angle[YAW] = 0;
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+      angle[axis] = 0.0;
+    //angle[ROLL] = 0;
+    //angle[PITCH] = 0;
+    //angle[YAW] = 0;
     gyroAngle[ROLL] = 0;
     gyroAngle[PITCH] = 0;
   }
@@ -218,7 +220,7 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
 void eulerAngles(void)
 {
   angle[ROLL]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
-  angle[PITCH] =  asin(dcmMatrix[6]);
+  angle[PITCH] =  -asin(dcmMatrix[6]);
   angle[YAW]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   
