@@ -52,10 +52,7 @@ public:
   
   const float getHeading(void) {
     // Change from +/-180 to 0-360
-    if (angle[YAW] > 0.0)
-      return (PI + angle[YAW]);
-    else
-      return (PI + angle[YAW]);
+    return (PI + angle[YAW]);
   }
   
   const byte getType(void) {
