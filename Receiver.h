@@ -132,8 +132,8 @@ public:
   const float getAngle(byte channel) {
     // Scale 1000-2000 usecs to -45 to 45 degrees
     // m = 0.09, b = -135
-    // reduce transmitterCommand by xmitFactor to lower sensitivity of transmitter input
-    return (0.09 * transmitterCommand[channel]) - 135;
+    //return (0.09 * transmitterCommand[channel]) - 135;
+    return (0.09 * receiverData[channel]) - 135;
   }
 };
 

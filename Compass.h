@@ -136,8 +136,8 @@ public:
 
     tmp  = sqrt(magX * magX + magY * magY);
     
-    hdgX = magX / tmp;
-    hdgY = magY / tmp;
+    hdgX = -magX / tmp;
+    hdgY = -magY / tmp;
   }
 };
 
