@@ -43,6 +43,7 @@
 const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
 volatile long adc_value[8] = { 0,0,0,0,0,0,0,0 };
 volatile unsigned char adc_counter[8]= { 0,0,0,0,0,0,0,0 };
+//volatile unsigned int adc_counter[8]= { 0,0,0,0,0,0,0,0 };
 
 unsigned char ADC_SPI_transfer(unsigned char data) {
   /* Wait for empty transmit buffer */

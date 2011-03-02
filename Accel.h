@@ -48,7 +48,6 @@ public:
   // ******************************************************************
   virtual void initialize(void) {
     this->_initialize(rollChannel, pitchChannel, zAxisChannel);
-    //smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   virtual void measure(void);
   virtual void calibrate(void);

@@ -68,6 +68,7 @@ public:
     gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
     
     //previousTime = micros();
   }
@@ -160,7 +161,6 @@ public:
     // pitchChannel = 3
     // yawChannel = 5
     this->_initialize(4,3,5);
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
   void measure(void) {
@@ -232,7 +232,6 @@ public:
   
   void initialize(void) {
     this->_initialize(0,1,2);
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
     
     // Check if gyro is connected
     if (readWhoI2C(gyroAddress) != gyroAddress)
