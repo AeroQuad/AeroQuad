@@ -48,7 +48,7 @@ public:
   // ******************************************************************
   virtual void initialize(void) {
     this->_initialize(rollChannel, pitchChannel, zAxisChannel);
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
+    //smoothFactor = readFloat(ACCSMOOTH_ADR);
   }
   virtual void measure(void);
   virtual void calibrate(void);
@@ -66,7 +66,7 @@ public:
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[YAXIS] = readFloat(LEVELROLLCAL_ADR);
     accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-    smoothFactor     = readFloat(ACCSMOOTH_ADR);
+    //smoothFactor     = readFloat(ACCSMOOTH_ADR);
     //currentAccelTime = micros(); // AKA changes to remove total Time from Honks smoothing changes
     //previousAccelTime = currentAccelTime;    // AKA changes to remove total Time from Honks smoothing changes
   }
@@ -162,6 +162,7 @@ public:
     // pitchChannel = 0
     // zAxisChannel = 2
     this->_initialize(1, 0, 2);
+    smoothFactor     = readFloat(ACCSMOOTH_ADR);
   }
   
   void measure(void) {
@@ -346,6 +347,7 @@ public:
     // pitchChannel = 4
     // zAxisChannel = 6
     this->_initialize(5, 4, 6);
+    smoothFactor     = readFloat(ACCSMOOTH_ADR);
   }
   
   void measure(void) {

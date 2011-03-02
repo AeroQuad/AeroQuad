@@ -340,6 +340,7 @@ public:
     // yawChannel = 0
     this->_initialize(1, 2, 0);
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
   
   void measure(void) {
