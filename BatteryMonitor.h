@@ -231,15 +231,16 @@ public:
       if (firstAlarm == OFF) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
       firstAlarm = ON;
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
+      digitalWrite(LED3PIN, HIGH);
       if ((currentBatteryTime > 500) && (throttle > 1400)) {
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
         previousBatteryTime = millis();
-        if (state == LOW) state = HIGH;
-        else state = LOW;
-        digitalWrite(LEDPIN, state);
-        digitalWrite(LED2PIN, state);
-        digitalWrite(LED3PIN, state);
+        //if (state == LOW) state = HIGH;
+        //else state = LOW;
+        //digitalWrite(LEDPIN, state);
+        //digitalWrite(LED2PIN, state);
+        //digitalWrite(LED3PIN, state);
       }
     }
   }

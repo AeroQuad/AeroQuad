@@ -271,10 +271,9 @@ public:
     Wire.send(0x02);
     Wire.endTransmission();
     Wire.requestFrom(accelAddress, 6);
-    accelADC[XAXIS] = accelZero[XAXIS] - ((Wire.receive()|(Wire.receive() << 8)) >> 2); // pitch
-    accelADC[YAXIS] = accelZero[YAXIS] - ((Wire.receive()|(Wire.receive() << 8)) >> 2); // roll
-    accelADC[ZAXIS] = accelZero[ZAXIS] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+      accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
+    //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
@@ -350,7 +349,7 @@ public:
   }
   
   void measure(void) {
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         accelADC[axis] = rawADC - accelZero[axis];
@@ -364,7 +363,7 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-    for(byte calAxis = 0; calAxis < LASTAXIS; calAxis++) {
+    for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
         delay(2);
@@ -491,7 +490,7 @@ public:
   }
 
   void measure(void) {
-    //currentTime = micros(); accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+    //currentTime = micros(); // AKA removed as a result of Honks original work, not needed further
       accelADC[XAXIS] = chr6dm.data.ax - accelZero[XAXIS];
       accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
       accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
@@ -503,7 +502,7 @@ public:
       accelData[YAXIS] = filterSmooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
       accelData[ZAXIS] = filterSmooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
 
-    //previousTime = currentTime; accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));
+    //previousTime = currentTime; // AKA removed as a result of Honks original work, not needed further
   }    
 
   const int getFlightData(byte axis) {
