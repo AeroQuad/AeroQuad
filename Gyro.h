@@ -47,7 +47,7 @@ public:
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
-    sign[YAW] = -1;
+    sign[YAW] = 1;
   }
   
   // The following function calls must be defined in any new subclasses
