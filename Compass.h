@@ -90,6 +90,7 @@ private:
   float sinRoll;
   float cosPitch;
   float sinPitch;
+  int sign;
 
 public: 
   Magnetometer_HMC5843() : Compass() {
@@ -106,6 +107,8 @@ public:
     magCalibration[XAXIS] = 1.0;
     magCalibration[YAXIS] = 1.0;
     magCalibration[ZAXIS] = 1.0;
+    
+    sign = 1;
    
     updateRegisterI2C(0x1E, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
     delay(50);
@@ -162,8 +165,8 @@ public:
 
     tmp  = sqrt(magX * magX + magY * magY);
     
-    hdgX = magX / tmp;
-    hdgY = magY / tmp;
+    hdgX = (magX / tmp) * sign;
+    hdgY = (magY / tmp) * sign;
   }
 };
 

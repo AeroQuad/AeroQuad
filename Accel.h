@@ -112,15 +112,15 @@ public:
     return degrees(angleRad(axis));
   }
   
-  void setOneG(int value) {
+  void setOneG(float value) {
     accelOneG = value;
   }
   
-  const int getOneG(void) {
+  const float getOneG(void) {
     return accelOneG;
   }
   
-  const int getZaxis() {
+  const float getZaxis() {
     //currentAccelTime = micros();
     //zAxis = filterSmoothWithTime(getFlightData(ZAXIS), zAxis, 0.25, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     //previousAccelTime = currentAccelTime;
@@ -265,15 +265,17 @@ public:
   }
   
   void measure(void) {
-    int rawData[3];
+    //int rawData[3];
 
     Wire.beginTransmission(accelAddress);
     Wire.send(0x02);
     Wire.endTransmission();
     Wire.requestFrom(accelAddress, 6);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
-    //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+      if (axis == XAXIS)
+        accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis];
+      else
+        accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }

@@ -47,7 +47,7 @@ public:
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
-    sign[YAW] = 1;
+    sign[YAW] = -1;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -249,7 +249,10 @@ public:
     Wire.requestFrom(gyroAddress, 6);
 
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
+      if (axis == ROLL)
+        gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
+      else
+        gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
 
