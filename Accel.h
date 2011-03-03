@@ -225,6 +225,8 @@ public:
   
   void initialize(void) {
     byte data;
+    
+    this->_initialize(0,1,2);  // AKA added for consistency
   
     accelOneG        = readFloat(ACCEL1G_ADR);
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
@@ -352,13 +354,26 @@ public:
   }
   
   void measure(void) {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
-      if (rawADC > 500) // Check if measurement good
-        if (axis == ROLL)
-          accelADC[axis] = rawADC - accelZero[axis];
-        else
-          accelADC[axis] = accelZero[axis] - rawADC;
+//    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+  //    rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
+   //   if (rawADC > 500) // Check if measurement good
+     //   if (axis == ROLL)
+       //   accelADC[axis] = rawADC - accelZero[axis];
+        //else
+          //accelADC[axis] = accelZero[axis] - rawADC;
+    accelADC[XAXIS] = analogRead_ArduCopter_ADC(XAXIS + 4);
+    if (accelADC[XAXIS] > 500)
+      accelADC[XAXIS] = accelADC[XAXIS] - accelZero[XAXIS];  // **
+      
+    accelADC[YAXIS] = analogRead_ArduCopter_ADC(YAXIS + 4);
+    if (accelADC[YAXIS] > 500)
+      accelADC[YAXIS] = accelZero[YAXIS] - accelADC[YAXIS];  // **
+      
+    accelADC[ZAXIS] = analogRead_ArduCopter_ADC(ZAXIS + 4);
+    if (accelADC[ZAXIS] > 500)
+      accelADC[ZAXIS] = accelZero[ZAXIS] - accelADC[ZAXIS];  // **
+    
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }

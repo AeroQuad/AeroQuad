@@ -360,7 +360,7 @@ void setup() {
   levelAdjust[PITCH] = 0;
   
   // Setup correct sensor orientation
-  #if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+  #if defined(AeroQuad_v1) || defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(ArduCopter)
     gyro.invert(YAW);
   #endif
   //#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)

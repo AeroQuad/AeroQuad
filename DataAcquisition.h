@@ -72,7 +72,7 @@ ISR (TIMER2_OVF_vect) {
     adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
     adc_value[ch] += adc_tmp >> 3;     // Shift to 12 bits
     adc_counter[ch]++;               // Number of samples
-    }
+  }
   bit_set(PORTC,4);                // Disable Chip Select (PIN PC4)
   //bit_clear(PORTL,6); // To test performance
   TCNT2 = 104;        // 400 Hz
@@ -112,9 +112,9 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   
   cli();  // We stop interrupts to read the variables
   if (adc_counter[ch_num]>0)
-	result = adc_value[ch_num]/adc_counter[ch_num];
+	  result = adc_value[ch_num]/adc_counter[ch_num];
   else
-	result = 0;
+	  result = 0;
   adc_value[ch_num] = 0;    // Initialize for next reading
   adc_counter[ch_num] = 0;
   sei();
