@@ -279,8 +279,10 @@ public:
         }
         yawAge = 0;
         if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
-          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyroZero is too low
-          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyroZero is too high
+          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) 
+            gyroZero[YAW]--;  // enough signals the gyroZero is too low
+          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) 
+            gyroZero[YAW]++;  // enough signals the gyroZero is too high
           zeroGyroYawCount=0;
           negativeGyroYawCount=0;
           positiveGyroYawCount=0;
@@ -337,10 +339,15 @@ public:
   }
   
   void initialize(void) {
+    // old AQ way
     // rollChannel = 1
     // pitchChannel = 2
     // yawChannel = 0
-    this->_initialize(1, 2, 0);
+    // revised in 2.3 way
+    // rollChannel = 0
+    // pitchChannel = 1
+    //yawChannel = 2
+    this->_initialize(0, 1, 2);
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }

@@ -52,9 +52,19 @@ public:
     return angle[axis];
   }
   
-  const float getHeading(void) {
+  const float getHeading(byte axis) {
     // Change from +/-180 to 0-360
-    return (PI + angle[YAW]);
+    return (PI + angle[axis]);
+  }
+  
+  const float getDegreesHeading(byte axis) {
+    float tDegrees;
+    
+    tDegrees = degrees(angle[axis]);
+    if (tDegrees < 0)
+      return (tDegrees + 360);
+    else
+      return (tDegrees);
   }
   
   const byte getType(void) {

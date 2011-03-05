@@ -149,7 +149,7 @@ void processHeading(void)
     //gyro.calculateHeading();
 
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    heading = degrees(flightAngle->getHeading());
+    heading = degrees(flightAngle->getHeading(YAW));
 #else
     heading = gyro.getHeading();
 #endif
