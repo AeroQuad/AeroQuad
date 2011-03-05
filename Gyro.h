@@ -38,11 +38,11 @@ public:
   
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
-  int lastReceiverYaw, receiverYaw;
-  long yawAge;
-  int positiveGyroYawCount;
-  int negativeGyroYawCount;
-  int zeroGyroYawCount;
+  //int lastReceiverYaw, receiverYaw;
+  //long yawAge;
+  //int positiveGyroYawCount;
+  //int negativeGyroYawCount;
+  //int zeroGyroYawCount;
     
   Gyro(void){
     sign[ROLL] = 1;
@@ -133,10 +133,12 @@ public:
     // since a relative heading, get starting absolute heading from compass class
     rawHeading = value;
   }
-  
+
+/*  
   void setReceiverYaw(int value) {
     receiverYaw = value;
   }
+*/  
 };
 
 /******************************************************/
@@ -222,12 +224,15 @@ public:
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
+    /*
     lastReceiverYaw=0;
     yawAge=0;
     positiveGyroYawCount=1;
     negativeGyroYawCount=1;
     zeroGyroYawCount=1;
+    */
     previousGyroTime = micros();
+    
   }
   
   void initialize(void) {

@@ -61,8 +61,8 @@ public:
     float tDegrees;
     
     tDegrees = degrees(angle[axis]);
-    if (tDegrees < 0)
-      return (tDegrees + 360);
+    if (tDegrees < 0.0)
+      return (tDegrees + 360.0);
     else
       return (tDegrees);
   }
