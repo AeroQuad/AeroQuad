@@ -253,7 +253,7 @@ public:
         gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
       else
         gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+      gyroData[axis] = filterSmooth((float)gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
 
     //calculateHeading();
@@ -262,6 +262,7 @@ public:
     //Serial.println(rawHeading);
     previousGyroTime = currentGyroTime;
 
+/*
     // ************ Correct for gyro drift by FabQuad **************
     // ************ http://aeroquad.com/entry.php?4-  **************
     // Modified FabQuad's approach to use yaw transmitter command instead of checking accelerometer
@@ -293,6 +294,7 @@ public:
       lastReceiverYaw = receiverYaw;
       yawAge = 0;
     }
+    */
   }
   
   const int getFlightData(byte axis) {
