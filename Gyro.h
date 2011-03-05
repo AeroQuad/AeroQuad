@@ -307,7 +307,10 @@ public:
     
     reducedData = getRaw(axis) >> 3;
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
-    return reducedData;
+    if (axis == PITCH)
+      return -reducedData;
+    else
+      return reducedData;
   }
 
   void calibrate() {
