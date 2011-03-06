@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -436,6 +436,26 @@ void loop () {
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
+  }
+  
+  // **************************************************************
+  // ***************** Fast Transfer Of Sensor Data ***************
+  // **************************************************************
+  // AeroQuad.h defines the output rate to be 10ms
+  // Since writing to UART is done by hardware, unable to measure data rate directly
+  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+  // If float = 4 bytes, then 3600 floats/second
+  // If 10 ms output rate, then 36 floats/10ms
+  // Number of floats written using sendBinaryFloat is 15
+  if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
+    printInt(21845); // Start word of 0x5555
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(compass.getRawData(axis));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+    printInt(32767); // Stop word of 0x7FFF
+    fastTelemetryTime = currentTime;
   }
 
   #ifdef CameraControl // Experimental, not fully implemented yet

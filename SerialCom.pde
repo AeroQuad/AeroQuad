@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -135,8 +135,11 @@ void readSerialCommand() {
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setRemoteCommand(motor, readFloatSerial());
       break;
-    case 'a':
-      // spare
+    case 'a': // fast telemetry transfer
+      if (readFloatSerial() == 1.0)
+        fastTransfer = ON;
+      else
+        fastTransfer = OFF;
       break;
     case 'b': // calibrate gyros
       gyro.calibrate();
@@ -552,5 +555,18 @@ void printInt(int data) {
 
   Serial.print(msb, BYTE);
   Serial.print(lsb, BYTE);
+}
+
+void sendBinaryFloat(float data) {
+  union binaryFloatType {
+    byte floatByte[4];
+    float floatVal;
+  } binaryFloat;
+  
+  binaryFloat.floatVal = data;
+  Serial.print(binaryFloat.floatByte[3], BYTE);
+  Serial.print(binaryFloat.floatByte[2], BYTE);
+  Serial.print(binaryFloat.floatByte[1], BYTE);
+  Serial.print(binaryFloat.floatByte[0], BYTE);
 }
 
