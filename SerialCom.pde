@@ -224,10 +224,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    PrintValueComma(degrees(flightAngle->getHeading()));
-    PrintValueComma(flightAngle->getData(YAW));
-    Serial.print(degrees(flightAngle->getData(YAW)));
-    Serial.println();
+    //PrintValueComma(degrees(flightAngle->getHeading()));
+    //PrintValueComma(flightAngle->getData(YAW));
+    //PrintValueComma(gyro.gyroData[YAW]);
+    //Serial.print(degrees(flightAngle->getData(YAW)));
+    //Serial.println();
     //printFreeMemory();
     //queryType = 'X';
     break;
@@ -315,7 +316,7 @@ void sendSerialTelemetry() {
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       //PrintValueComma(compass.getAbsoluteHeading());
-      PrintValueComma(degrees(flightAngle->getHeading()));
+      PrintValueComma(flightAngle->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
     #endif
@@ -369,7 +370,7 @@ void sendSerialTelemetry() {
       PrintValueComma(1000);
     #ifdef HeadingMagHold
       //PrintValueComma(compass.getAbsoluteHeading());
-      PrintValueComma(degrees(flightAngle->getHeading()));
+      PrintValueComma(flightAngle->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
     #endif
