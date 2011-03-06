@@ -163,10 +163,12 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   float accelMagnitude;
   float accelVector[3];
   float accelWeight;
-  float errorCourse;
   float errorRollPitch[3];
+#ifdef HeadingMagHold  
+  float errorCourse;
   float errorYaw[3];
   float scaledOmegaP[3];
+#endif  
   float scaledOmegaI[3];
   
   //  Roll and Pitch Compensation
