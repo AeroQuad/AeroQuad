@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -105,21 +105,32 @@ void readPilotCommands() {
    #endif
   
   #ifdef AltitudeHold
-    
    if (receiver.getRaw(AUX) < 1750) {
-      if (storeAltitude == ON) {
-        holdAltitude = altitude.getData();
-        holdThrottle = receiver.getData(THROTTLE);
-        PID[ALTITUDE].integratedError = 0;
-        accel.setOneG(accel.getFlightData(ZAXIS));
-        storeAltitude = OFF;
-      }
-      altitudeHold = ON;
-    }
-    else {
-      storeAltitude = ON;
-      altitudeHold = OFF;
-    }
+     if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+       if (storeAltitude == ON) {
+         holdAltitude = altitude.getData();
+         holdThrottle = receiver.getData(THROTTLE);
+         PID[ALTITUDE].integratedError = 0;
+         PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
+         accel.setOneG(accel.getFlightData(ZAXIS));
+         storeAltitude = OFF;
+       }
+       altitudeHold = ON;
+      
+       //stickMovement = abs(holdThrottle - receiver.getData(THROTTLE));
+      
+       //if (stickMovement > PANICSTICK_MOVEMENT )
+         //altitudeHold = ALTPANIC;
+          
+       //if (stickMovement > MIN_STICK_MOVEMENT && stickMovement < PANICSTICK_MOVEMENT)
+         //storeAltitude = ON;
+     }
+     // note, Panic will stay set until Althold is toggled off/on
+   } 
+   else {
+     storeAltitude = ON;
+     altitudeHold = OFF;
+   }
   #endif
   
   // Use for correcting gyro drift with v2.0 Shield

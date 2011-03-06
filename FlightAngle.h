@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -54,7 +54,8 @@ public:
   
   const float getHeading(byte axis) {
     // Change from +/-180 to 0-360
-    return (PI + angle[axis]);
+    //return (PI + angle[axis]);
+    return(angle[axis]);
   }
   
   const float getDegreesHeading(byte axis) {

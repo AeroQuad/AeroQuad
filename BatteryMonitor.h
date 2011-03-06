@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -182,7 +182,7 @@ private:
   #else
     #define BUZZERPIN 49
   #endif
-  //long previousTime;
+
   byte state, firstAlarm;
   float diode; // raw voltage goes through diode on Arduino
   float batteryScaleFactor;
@@ -198,7 +198,7 @@ public:
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
     diode = 0.9; // measured with DMM
     analogReference(DEFAULT);
-    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to pin 49
+    pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
     digitalWrite(BUZZERPIN, LOW);
     previousBatteryTime = millis();
     state = LOW;
@@ -217,13 +217,13 @@ public:
       }
       if (currentBatteryTime > 1100) {
         autoDescent = 50;
-        digitalWrite(LED2PIN, HIGH);
+        digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
         autoDescent = 0;
-        digitalWrite(LED2PIN, LOW);
+        digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
       }
     }
