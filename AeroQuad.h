@@ -167,12 +167,18 @@ float relativeHeading = 0; // current heading the quad is set to (set point)
 float absoluteHeading = 0;;
 float setHeading = 0;
 
+// batteryMonitor & Altutude Hold
+int throttle = 1000;
+int autoDescent = 0;
+
 // Altitude Hold
+#define ALTPANIC 2 // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+#define ALTBUMP 90 // amount of stick movement to cause an altutude bump (up or down)
+#define PANICSTICK_MOVEMENT 250 // 80 if althold on and throttle commanded to move by a gross amount, set PANIC
+//#define MINSTICK_MOVEMENT 32 // any movement less than this doesn't not trigger a rest of the holdaltitude
 #define TEMPERATURE 0
 #define PRESSURE 1
 int throttleAdjust = 0;
-int throttle = 1000;
-int autoDescent = 0;
 //#ifndef AeroQuad_v18
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;

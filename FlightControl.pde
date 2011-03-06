@@ -151,7 +151,7 @@ void processHeading(void)
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     heading = degrees(flightAngle->getHeading(YAW));
 #else
-    heading = gyro.getHeading();
+    heading = degrees(gyro.getHeading());
 #endif
 
     // Always center relative heading around absolute heading chosen during yaw command
@@ -202,12 +202,18 @@ void processAltitudeHold(void)
     if((abs(flightAngle->getData(ROLL)) > 5) || (abs(flightAngle->getData(PITCH)) > 5)) { 
       PID[ZDAMPENING].integratedError = 0;
     }
-    throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-    //throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
-    if (receiver.getData(THROTTLE) > MAXCHECK) //above 1900
-      holdAltitude += 0.01;
-    if (receiver.getData(THROTTLE) <= MINCHECK) //below 1100
-      holdAltitude -= 0.01;
+    //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
+    throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
+    if (abs(holdThrottle - receiver.getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
+      altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+    } else {
+      if (receiver.getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+        holdAltitude += 0.01;
+      }
+      if (receiver.getData(THROTTLE) < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+        holdAltitude -= 0.01;
+      }
+    }
   }
   else {
     // Altitude hold is off, get throttle from receiver

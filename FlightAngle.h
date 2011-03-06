@@ -54,7 +54,8 @@ public:
   
   const float getHeading(byte axis) {
     // Change from +/-180 to 0-360
-    return (PI + angle[axis]);
+    //return (PI + angle[axis]);
+    return(angle[axis]);
   }
   
   const float getDegreesHeading(byte axis) {

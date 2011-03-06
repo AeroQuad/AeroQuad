@@ -118,10 +118,10 @@ public:
   const float getHeading(void) {
     div_t integerDivide;
     
-    integerDivide = div(rawHeading, 360);
-    gyroHeading = rawHeading + (integerDivide.quot * -360);
-    if (gyroHeading > 180) gyroHeading -= 360;
-    if (gyroHeading < -180) gyroHeading += 360;
+    integerDivide = div(rawHeading, 2*PI);
+    gyroHeading = rawHeading + (integerDivide.quot * -(2*PI));
+    if (gyroHeading > PI) gyroHeading -= (2*PI);
+    if (gyroHeading < -PI) gyroHeading += (2*PI);
     return gyroHeading;
   }
   
@@ -217,6 +217,7 @@ class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int gyroAddress;
   long int previousGyroTime;
+  int gyroLastADC;
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
@@ -237,6 +238,8 @@ public:
   
   void initialize(void) {
     this->_initialize(0,1,2);
+    
+    gyroLastADC = 0;  // initalize for rawHeading, may be able to be removed in the future
     
     // Check if gyro is connected
     if (readWhoI2C(gyroAddress) != gyroAddress)
@@ -262,10 +265,23 @@ public:
     }
 
     //calculateHeading();
+    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
+    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
+    
     long int currentGyroTime = micros();
-    rawHeading += -gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
-    //Serial.println(rawHeading);
+    if ((gyroADC[YAW] - gyroLastADC) > 3 || (gyroADC[YAW] - gyroLastADC) < -3) {
+      //Serial.print(gyroADC[YAW]);
+      //Serial.print(",");
+      //Serial.print(rawHeading);
+      //Serial.print(",");
+      //Serial.print(currentGyroTime - previousGyroTime);      
+      //Serial.print(",");
+      rawHeading += gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
+      //Serial.print(rawHeading);
+      //Serial.println();
+    }
     previousGyroTime = currentGyroTime;
+      //gyroLastADC = gyroADC[YAW];
 
 /*
     // ************ Correct for gyro drift by FabQuad **************
@@ -303,9 +319,9 @@ public:
   }
   
   const int getFlightData(byte axis) {
-    int reducedData;
     
-    reducedData = getRaw(axis) >> 3;
+    int reducedData = getRaw(axis) >> 3;
+    
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
     if (axis == PITCH)
       return -reducedData;
@@ -356,7 +372,7 @@ public:
     // revised in 2.3 way
     // rollChannel = 0
     // pitchChannel = 1
-    //yawChannel = 2
+    // yawChannel = 2
     this->_initialize(0, 1, 2);
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
     smoothFactor = readFloat(GYROSMOOTH_ADR);
