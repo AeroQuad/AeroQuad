@@ -346,16 +346,21 @@ public:
   }
   
   void initialize(void) {
+    // old AQ way
     // rollChannel = 5
     // pitchChannel = 4
     // zAxisChannel = 6
-    this->_initialize(5, 4, 6);
+    // new way in 2.3
+    // rollChannel = 3
+    // pitchChannel = 4
+    // zAxisChannel = 5
+    this->_initialize(3, 4, 5);
     smoothFactor     = readFloat(ACCSMOOTH_ADR);
   }
   
   void measure(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_ArduCopter_ADC(axis + 4);
+      rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
       if (rawADC > 500) // Check if measurement good
         if (axis == ROLL)
           accelADC[axis] = rawADC - accelZero[axis];

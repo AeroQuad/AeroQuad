@@ -90,7 +90,6 @@ private:
   float sinRoll;
   float cosPitch;
   float sinPitch;
-  int sign;
 
 public: 
   Magnetometer_HMC5843() : Compass() {
@@ -102,36 +101,47 @@ public:
   ////////////////////////////////////////////////////////////////////////////////
 
   void initialize(void) {
+    byte numAttempts = 0;
+    bool success = false;
     delay(10);                             // Power up delay **
    
     magCalibration[XAXIS] = 1.0;
     magCalibration[YAXIS] = 1.0;
     magCalibration[ZAXIS] = 1.0;
     
-    sign = 1;
+    while (success == false && numAttempts < 5 ) {
+      
+      numAttempts++;
    
-    updateRegisterI2C(0x1E, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
-    delay(50);
+      updateRegisterI2C(0x1E, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      delay(50);
    
-    updateRegisterI2C(0x1E, 0x02, 0x01);  // Perform single conversion
-    delay(10);
-   
-    measure(0.0, 0.0);                    // Read calibration data
-    delay(10);
-   
-    magCalibration[XAXIS] = abs(715.0 / measuredMagX);
-    magCalibration[YAXIS] = abs(715.0 / measuredMagY);
-    magCalibration[ZAXIS] = abs(715.0 / measuredMagZ);
-   
-    updateRegisterI2C(compassAddress, 0x00, 0x10);  // Set 10hz update rate and normal operaiton
-    delay(100);
+      updateRegisterI2C(compassAddress, 0x01, 0x20); // Set +/- 1G gain
+      delay(10);
 
-    updateRegisterI2C(compassAddress, 0x01, 0x20); // set 1G gain
-    delay(100);
-
-    updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous Update mode
-    delay(100);                           // Mode change delay (1/Update Rate) **
+      updateRegisterI2C(0x1E, 0x02, 0x01);  // Perform single conversion
+      delay(10);
+   
+      measure(0.0, 0.0);                    // Read calibration data
+      delay(10);
+   
+      if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1000.0 \
+          && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1000.0 \
+          && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1000.0) {
+        magCalibration[XAXIS] = fabs(715.0 / measuredMagX);
+        magCalibration[YAXIS] = fabs(715.0 / measuredMagY);
+        magCalibration[ZAXIS] = fabs(715.0 / measuredMagZ);
     
+        success = true;
+      }
+   
+      updateRegisterI2C(compassAddress, 0x00, 0x10);  // Set 10hz update rate and normal operaiton
+      delay(50);
+
+      updateRegisterI2C(compassAddress, 0x02, 0x00); // Continuous Update mode
+      delay(50);                           // Mode change delay (1/Update Rate) **
+    }
+
     measure(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
   }
   
@@ -146,9 +156,11 @@ public:
     
     sendByteI2C(compassAddress, 0x03);
     Wire.requestFrom(compassAddress, 6);
-    measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-    measuredMagY = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-    measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+
+    measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+
     Wire.endTransmission();
 
     cosRoll =  cos(roll);
@@ -165,8 +177,9 @@ public:
 
     tmp  = sqrt(magX * magX + magY * magY);
     
-    hdgX = (magX / tmp) * sign;
-    hdgY = (magY / tmp) * sign;
+    hdgX = magX / tmp;
+    hdgY = -magY / tmp;
+
   }
 };
 

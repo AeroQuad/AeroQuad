@@ -52,9 +52,19 @@ public:
     return angle[axis];
   }
   
-  const float getHeading(void) {
+  const float getHeading(byte axis) {
     // Change from +/-180 to 0-360
-    return (PI + angle[YAW]);
+    return (PI + angle[axis]);
+  }
+  
+  const float getDegreesHeading(byte axis) {
+    float tDegrees;
+    
+    tDegrees = degrees(angle[axis]);
+    if (tDegrees < 0.0)
+      return (tDegrees + 360.0);
+    else
+      return (tDegrees);
   }
   
   const byte getType(void) {
@@ -153,10 +163,12 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   float accelMagnitude;
   float accelVector[3];
   float accelWeight;
-  float errorCourse;
   float errorRollPitch[3];
+#ifdef HeadingMagHold  
+  float errorCourse;
   float errorYaw[3];
   float scaledOmegaP[3];
+#endif  
   float scaledOmegaI[3];
   
   //  Roll and Pitch Compensation

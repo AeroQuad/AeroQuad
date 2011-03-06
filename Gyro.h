@@ -38,11 +38,11 @@ public:
   
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
-  int lastReceiverYaw, receiverYaw;
-  long yawAge;
-  int positiveGyroYawCount;
-  int negativeGyroYawCount;
-  int zeroGyroYawCount;
+  //int lastReceiverYaw, receiverYaw;
+  //long yawAge;
+  //int positiveGyroYawCount;
+  //int negativeGyroYawCount;
+  //int zeroGyroYawCount;
     
   Gyro(void){
     sign[ROLL] = 1;
@@ -133,10 +133,12 @@ public:
     // since a relative heading, get starting absolute heading from compass class
     rawHeading = value;
   }
-  
+
+/*  
   void setReceiverYaw(int value) {
     receiverYaw = value;
   }
+*/  
 };
 
 /******************************************************/
@@ -222,12 +224,15 @@ public:
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
+    /*
     lastReceiverYaw=0;
     yawAge=0;
     positiveGyroYawCount=1;
     negativeGyroYawCount=1;
     zeroGyroYawCount=1;
+    */
     previousGyroTime = micros();
+    
   }
   
   void initialize(void) {
@@ -253,7 +258,7 @@ public:
         gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
       else
         gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+      gyroData[axis] = filterSmooth((float)gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
 
     //calculateHeading();
@@ -262,6 +267,7 @@ public:
     //Serial.println(rawHeading);
     previousGyroTime = currentGyroTime;
 
+/*
     // ************ Correct for gyro drift by FabQuad **************
     // ************ http://aeroquad.com/entry.php?4-  **************
     // Modified FabQuad's approach to use yaw transmitter command instead of checking accelerometer
@@ -279,8 +285,10 @@ public:
         }
         yawAge = 0;
         if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
-          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) gyroZero[YAW]--;  // enough signals the gyroZero is too low
-          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) gyroZero[YAW]++;  // enough signals the gyroZero is too high
+          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) 
+            gyroZero[YAW]--;  // enough signals the gyroZero is too low
+          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) 
+            gyroZero[YAW]++;  // enough signals the gyroZero is too high
           zeroGyroYawCount=0;
           negativeGyroYawCount=0;
           positiveGyroYawCount=0;
@@ -291,6 +299,7 @@ public:
       lastReceiverYaw = receiverYaw;
       yawAge = 0;
     }
+    */
   }
   
   const int getFlightData(byte axis) {
@@ -298,7 +307,10 @@ public:
     
     reducedData = getRaw(axis) >> 3;
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
-    return reducedData;
+    if (axis == PITCH)
+      return -reducedData;
+    else
+      return reducedData;
   }
 
   void calibrate() {
@@ -337,10 +349,15 @@ public:
   }
   
   void initialize(void) {
+    // old AQ way
     // rollChannel = 1
     // pitchChannel = 2
     // yawChannel = 0
-    this->_initialize(1, 2, 0);
+    // revised in 2.3 way
+    // rollChannel = 0
+    // pitchChannel = 1
+    //yawChannel = 2
+    this->_initialize(0, 1, 2);
     initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
     smoothFactor = readFloat(GYROSMOOTH_ADR);
   }
