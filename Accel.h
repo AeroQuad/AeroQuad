@@ -153,7 +153,8 @@ public:
     // If Vs = 3.6V, then output sensitivity is 360mV/g
     // If Vs = 2V, then it's 195 mV/g
     // Then if Vs = 3.3V, then it's 329.062 mV/g
-    accelScaleFactor = 0.000329062;
+    //accelScaleFactor = 0.000329062;
+    accelScaleFactor = G_2_MPS2((3.3/4096) / 0.000329062);
   }
   
   void initialize(void) {
@@ -166,10 +167,11 @@ public:
   
   void measure(void) {
     //currentTime = micros(); // AKA changes to remove total Time from Honks smoothing changes
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      accelADC[axis] = analogRead(accelChannel[axis]) - accelZero[axis];
-      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
-    }
+    accelADC[XAXIS] = analogRead(accelChannel[XAXIS]) - accelZero[XAXIS];
+    accelADC[YAXIS] = analogRead(accelChannel[YAXIS]) - accelZero[YAXIS];
+    accelADC[ZAXIS] = analogRead(accelChannel[ZAXIS]) - accelZero[ZAXIS];
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     //previousTime = currentTime; // AKA changes to remove total Time from Honks smoothing changes
   }
 
