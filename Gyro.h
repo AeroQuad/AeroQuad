@@ -170,7 +170,7 @@ public:
     //currentTime = micros(); // AKA - Changed to remove HONKS time smoothing
     gyroADC[ROLL] = gyroZero[ROLL] - analogRead(gyroChannel[ROLL]);
     gyroADC[PITCH] = analogRead(gyroChannel[PITCH]) - gyroZero[PITCH];
-    gyroADC[YAW] = analogRead(gyroChannel[YAW]) - gyroZero[YAW];
+    gyroADC[YAW] = gyroZero[YAW] - analogRead(gyroChannel[YAW]);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     //previousTime = currentTime; // AKA - Changed to remove HONKS time smoothing
@@ -453,7 +453,7 @@ public:
     gyroADC[PITCH] = gyroZero[PITCH] - NWMP_gyro[PITCH];
     //gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroData[PITCH] = filterSmooth(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[YAW] =  gyroZero[YAW] - NWMP_gyro[YAW];
+    gyroADC[YAW] =  NWMP_gyro[YAW] - gyroZero[YAW];
     //gyroData[YAW] = filterSmoothWithTime(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroData[YAW] = filterSmooth(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
    //previousTime = currentTime; // AKA - Changed to remove HONKS time smoothing
