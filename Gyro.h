@@ -47,7 +47,7 @@ public:
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
-    sign[YAW] = -1;
+    sign[YAW] = 1;
   }
   
   // The following function calls must be defined in any new subclasses
@@ -324,9 +324,7 @@ public:
   }
   
   const int getFlightData(byte axis) {
-    
     int reducedData = getRaw(axis) >> 3;
-    
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
     if (axis == PITCH)
       return -reducedData;
@@ -396,7 +394,10 @@ public:
    }
 
   const int getFlightData(byte axis) {
-    return getRaw(axis);
+    if (axis == PITCH)
+      return -gyroADC[PITCH];
+    else
+      return gyroADC[axis];
   }
 
   void calibrate() {

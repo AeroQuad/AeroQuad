@@ -373,7 +373,12 @@ public:
   }
 
   const int getFlightData(byte axis) {
-    return getRaw(axis);
+    if (axis == ROLL)
+      return -accelADC[YAXIS];
+    if (axis == PITCH)
+      return -accelADC[XAXIS];
+    if (axis == YAW)
+      return accelADC[YAW];
   }
   
   // Allows user to zero accelerometers on command
