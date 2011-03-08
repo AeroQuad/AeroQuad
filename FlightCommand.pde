@@ -112,7 +112,7 @@ void readPilotCommands() {
          holdThrottle = receiver.getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
-         accel.setOneG(accel.getFlightData(ZAXIS));
+         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
          storeAltitude = OFF;
        }
        altitudeHold = ON;

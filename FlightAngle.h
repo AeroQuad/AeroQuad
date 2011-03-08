@@ -48,6 +48,7 @@ public:
   virtual float getGyroUnbias(byte axis);
   virtual void calibrate();
  
+ // returns the angle of a specific asix in SI units
   const float getData(byte axis) {
     return angle[axis];
   }

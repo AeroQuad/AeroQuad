@@ -109,7 +109,8 @@ void initializeEEPROM(void) {
   levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
-  accel.setOneG(500);
+  // AKA - old setOneG not in SI - accel.setOneG(500);
+  accel.setOneG(9.80665); // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);
@@ -234,7 +235,6 @@ void writeEEPROM(void){
     writeFloat(receiver.getTransmitterOffset(channel), offset+4);
     writeFloat(receiver.getSmoothFactor(channel),      offset+8);
   }
-
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);

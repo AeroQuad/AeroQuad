@@ -72,15 +72,18 @@ public:
     
     //previousTime = micros();
   }
-    
+
+  // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
   const int getRaw(byte axis) {
     return gyroADC[axis] * sign[axis];
   }
   
+  // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
   const float getData(byte axis) {
     return gyroData[axis] * sign[axis];
   }
   
+  //  inverts, if needed the sign on the specific axis
   const int invert(byte axis) {
     sign[axis] = -sign[axis];
     return sign[axis];
@@ -94,10 +97,12 @@ public:
     gyroZero[axis] = value;
   }    
   
+  // returns the scale factor used for SI units on the gyro
   const float getScaleFactor() {
     return gyroScaleFactor;
   }
 
+  // returns the smooth factor used on the gyro
   const float getSmoothFactor(void) {
     return smoothFactor;
   }
@@ -106,6 +111,7 @@ public:
     smoothFactor = value;
   }
 
+/*  AKA commented out, not used and not correct based upon SI unit conversion
   const float rateDegPerSec(byte axis) {
     return ((gyroADC[axis] * sign[axis])) * gyroScaleFactor;
   }
@@ -113,8 +119,9 @@ public:
   const float rateRadPerSec(byte axis) {
     return radians(rateDegPerSec(axis));
   }
+*/
   
-  // returns heading as +/- 180 degrees
+  // returns gyro based heading as +/- PI in radians
   const float getHeading(void) {
     div_t integerDivide;
     
@@ -124,7 +131,8 @@ public:
     if (gyroHeading < -PI) gyroHeading += (2*PI);
     return gyroHeading;
   }
-  
+
+/* AKA commeted out as not used  
   const float getRawHeading(void) {
     return rawHeading;
   }
@@ -133,7 +141,7 @@ public:
     // since a relative heading, get starting absolute heading from compass class
     rawHeading = value;
   }
-
+*/
 /*  
   void setReceiverYaw(int value) {
     receiverYaw = value;
@@ -167,20 +175,20 @@ public:
   }
   
   void measure(void) {
-    //currentTime = micros(); // AKA - Changed to remove HONKS time smoothing
-    gyroADC[ROLL] = gyroZero[ROLL] - analogRead(gyroChannel[ROLL]);
-    gyroADC[PITCH] = analogRead(gyroChannel[PITCH]) - gyroZero[PITCH];
-    gyroADC[YAW] = gyroZero[YAW] - analogRead(gyroChannel[YAW]);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+		for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+			if (axis == PITCH)
+        gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
+			else
+	      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
-    //previousTime = currentTime; // AKA - Changed to remove HONKS time smoothing
+    }
   }
 
   const int getFlightData(byte axis) {
     if (axis == PITCH)
-      return -gyroADC[PITCH];
+      return -getRaw(axis);
     else
-      return gyroADC[axis];
+      return getRaw(axis);
   }
   
  void calibrate() {
@@ -324,12 +332,12 @@ public:
   }
   
   const int getFlightData(byte axis) {
-    int reducedData = getRaw(axis) >> 3;
+    //int reducedData = getRaw(axis) >> 3;
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
     if (axis == PITCH)
-      return -reducedData;
+      return -(getRaw(axis) >> 3);
     else
-      return reducedData;
+      return (getRaw(axis) >> 3);
   }
 
   void calibrate() {
@@ -395,9 +403,9 @@ public:
 
   const int getFlightData(byte axis) {
     if (axis == PITCH)
-      return -gyroADC[PITCH];
+      return -getRaw(axis);
     else
-      return gyroADC[axis];
+      return getRaw(axis);
   }
 
   void calibrate() {
