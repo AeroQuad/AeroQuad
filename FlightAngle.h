@@ -59,6 +59,8 @@ public:
     return(angle[axis]);
   }
   
+  // This really needs to be in Radians to be consistent
+  // I'll fix later - AKA
   const float getDegreesHeading(byte axis) {
     float tDegrees;
     

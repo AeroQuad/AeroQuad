@@ -134,7 +134,7 @@ public:
     //return zAxis;
     return accelOneG - getData(ZAXIS);
   }
-  
+/*  AKA not used
   const float getAltitude(void) {
     return rawAltitude;
   }
@@ -142,6 +142,7 @@ public:
   const float rateG(const byte axis) {
     return getData(axis) / accelOneG;
   }
+*/  
 };
 
 /******************************************************/
