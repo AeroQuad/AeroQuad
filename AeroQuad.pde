@@ -28,12 +28,12 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -53,10 +53,11 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -293,7 +294,8 @@
 #ifdef UseArduPirateSuperStable
   void (*processStableMode)() = &processArdupirateSuperStableMode;
 #else
-  void (*processStableMode)() = &processAeroQuadStableMode;
+  //void (*processStableMode)() = &processAeroQuadStableMode;
+  void (*processStableMode)() = &processAttitudeMode;
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -319,9 +321,17 @@ void setup() {
   #endif
   #ifdef AeroQuadMega_v2
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
-    pinMode(33, INPUT);
-    pinMode(34, INPUT);
-    pinMode(35, INPUT);
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on  
   #endif
   #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
     pinMode(LED_Red, OUTPUT);
@@ -430,30 +440,32 @@ void loop () {
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
   
-  // **************************************************************
-  // ***************** Fast Transfer Of Sensor Data ***************
-  // **************************************************************
-  // AeroQuad.h defines the output rate to be 10ms
-  // Since writing to UART is done by hardware, unable to measure data rate directly
-  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
-  // If float = 4 bytes, then 3600 floats/second
-  // If 10 ms output rate, then 36 floats/10ms
-  // Number of floats written using sendBinaryFloat is 15
-  if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
-    printInt(21845); // Start word of 0x5555
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-    #ifdef HeadingMagHold
-      sendBinaryFloat(compass.getRawData(axis));
-    #else
-      sendBinaryFloat(0);
-    #endif
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-    printInt(32767); // Stop word of 0x7FFF
-    fastTelemetryTime = currentTime;
-  }
+  #ifdef BinaryWrite
+    // **************************************************************
+    // ***************** Fast Transfer Of Sensor Data ***************
+    // **************************************************************
+    // AeroQuad.h defines the output rate to be 10ms
+    // Since writing to UART is done by hardware, unable to measure data rate directly
+    // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+    // If float = 4 bytes, then 3600 floats/second
+    // If 10 ms output rate, then 36 floats/10ms
+    // Number of floats written using sendBinaryFloat is 15
+    if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
+      printInt(21845); // Start word of 0x5555
+      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+      for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+      for (byte axis = ROLL; axis < LASTAXIS; axis++)
+      #ifdef HeadingMagHold
+        sendBinaryFloat(compass.getRawData(axis));
+      #else
+        sendBinaryFloat(0);
+      #endif
+      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
+      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+      printInt(32767); // Stop word of 0x7FFF
+      fastTelemetryTime = currentTime;
+    }
+  #endif
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz

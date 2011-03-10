@@ -91,6 +91,23 @@ void processAeroQuadStableMode(void)
   //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// Attitude Mode ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processAttitudeMode(void)
+{
+  // To Do
+  // Figure out how to zero integrator when entering attitude mode from rate mode
+  
+  float attitudeScaling = 0.002; // +/-1 radian attitude
+
+  // Assume receiver.getRaw(axis) returns +/-500 by using constrain() function 
+  float rateCmdRoll = updatePID(constrain(receiver.getRaw(ROLL), -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float rateCmdPitch = updatePID(constrain(receiver.getRaw(PITCH), -500, 500) * attitudeScaling, flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  
+  motors.setMotorAxisCommand(ROLL, updatePID(rateCmdRoll, gyro.getFlightData(ROLL), &PID[LEVELGYROROLL]) + 1500);
+  motors.setMotorAxisCommand(PITCH, updatePID(rateCmdPitch, gyro.getFlightData(PITCH), &PID[LEVELGYROPITCH]) + 1500);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// calculateFlightError /////////////////////////////
@@ -439,4 +456,4 @@ void processFlightControlPlusMode(void) {
   }
 }
 #endif
-
+
