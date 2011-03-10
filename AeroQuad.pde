@@ -292,10 +292,10 @@
 #endif
 
 #ifdef UseArduPirateSuperStable
-  void (*processStableMode)() = &processArdupirateSuperStableMode;
-#else
-  //void (*processStableMode)() = &processAeroQuadStableMode;
+  //void (*processStableMode)() = &processArdupirateSuperStableMode;
   void (*processStableMode)() = &processAttitudeMode;
+#else
+  void (*processStableMode)() = &processAeroQuadStableMode;
 #endif
 
 // Include this last as it contains objects from above declarations

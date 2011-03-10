@@ -102,13 +102,25 @@ void processAttitudeMode(void)
   // Figure out how to zero integrator when entering attitude mode from rate mode
   
   float attitudeScaling = 0.002; // +/-1 radian attitude
+  PID[LEVELROLL].integratedError = 0;
+  PID[LEVELPITCH].integratedError = 0;
+  PID[LEVELGYROROLL].integratedError = 0;
+  PID[LEVELGYROPITCH].integratedError = 0;
 
   // Assume receiver.getRaw(axis) returns +/-500 by using constrain() function 
-  float rateCmdRoll = updatePID(constrain(receiver.getRaw(ROLL), -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float rateCmdPitch = updatePID(constrain(receiver.getRaw(PITCH), -500, 500) * attitudeScaling, flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  float rateCmdRoll = updatePID(constrain(receiver.getRaw(ROLL) - 1500, -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float rateCmdPitch = updatePID(constrain(receiver.getRaw(PITCH) - 1500, -500, 500) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
   
-  motors.setMotorAxisCommand(ROLL, updatePID(rateCmdRoll, gyro.getFlightData(ROLL), &PID[LEVELGYROROLL]) + 1500);
-  motors.setMotorAxisCommand(PITCH, updatePID(rateCmdPitch, gyro.getFlightData(PITCH), &PID[LEVELGYROPITCH]) + 1500);
+  //Serial.print(rateCmdRoll);Serial.print(',');Serial.print(flightAngle->getData(ROLL));Serial.print(',');Serial.print(constrain(receiver.getRaw(ROLL) - 1500, -500, 500));Serial.print(',');
+  //Serial.print(rateCmdPitch);Serial.print(',');Serial.print(flightAngle->getData(PITCH));Serial.print(',');Serial.println(constrain(receiver.getRaw(PITCH) - 1500, -500, 500));
+  //Serial.print(rateCmdRoll);Serial.print(',');Serial.print(gyro.getData(ROLL));Serial.print(',');
+  //Serial.print(rateCmdPitch);Serial.print(',');Serial.println(gyro.getData(PITCH));
+  
+  motors.setMotorAxisCommand(ROLL, updatePID(rateCmdRoll, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+  motors.setMotorAxisCommand(PITCH, updatePID(rateCmdPitch, gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  
+  //Serial.print(updatePID(rateCmdRoll, gyro.getData(ROLL), &PID[LEVELGYROROLL]));Serial.print(',');
+  //Serial.println(updatePID(rateCmdPitch, gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
 }
 
 //////////////////////////////////////////////////////////////////////////////
