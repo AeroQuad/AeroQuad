@@ -76,6 +76,13 @@ public:
     // reduce sensitivity of transmitter input by xmitFactor
     return transmitterCommand[channel];
   }
+  
+  #define PWM_TO_RAD .009713 // 1 PWM converted to rad/sec based upon max rate of gyro
+
+  const float getSIData(byte channel) {
+    // return the number of radians/sec in stick movement
+    return ((transmitterCommand[channel] - transmitterZero[channel]) * PWM_TO_RAD);
+  }
 
   const int getTrimData(byte channel) {
     return receiverData[channel] - transmitterTrim[channel];

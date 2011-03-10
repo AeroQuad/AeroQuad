@@ -62,14 +62,14 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.0;
+  PID[ROLL].P = 51.47;
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -3.0;
-  PID[PITCH].P = 1.0;
+  PID[ROLL].D = -154.43;
+  PID[PITCH].P = 51.47;
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -3.0;
-  PID[YAW].P = 3.0;
-  PID[YAW].I = 0.05;
+  PID[PITCH].D = -154.43;
+  PID[YAW].P = 154.43;
+  PID[YAW].I = 2.57;
   PID[YAW].D = 0.0;
   PID[LEVELROLL].P = 4.0;
   PID[LEVELROLL].I = 0.15;
@@ -80,12 +80,12 @@ void initializeEEPROM(void) {
   PID[HEADING].P = 3.0;
   PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
-  PID[LEVELGYROROLL].P = 1.0;
+  PID[LEVELGYROROLL].P = 51.47;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -3.0;
-  PID[LEVELGYROPITCH].P = 1.0;
+  PID[LEVELGYROROLL].D = -154.43;
+  PID[LEVELGYROPITCH].P = 51.47;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -3.0;
+  PID[LEVELGYROPITCH].D = -154.43;
   #ifdef AltitudeHold
     PID[ALTITUDE].P = 25.0;
     PID[ALTITUDE].I = 0.1;

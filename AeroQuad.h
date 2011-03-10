@@ -145,7 +145,7 @@ byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 // Auto level setup
-int levelAdjust[2] = {0,0};
+float levelAdjust[2] = {0.0,0.0};
 int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
@@ -164,7 +164,7 @@ float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-float absoluteHeading = 0;;
+//float absoluteHeading = 0;;
 float setHeading = 0;
 
 // batteryMonitor & Altutude Hold
@@ -179,7 +179,7 @@ int autoDescent = 0;
 #define TEMPERATURE 0
 #define PRESSURE 1
 int throttleAdjust = 0;
-//#ifndef AeroQuad_v18
+
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
 float holdAltitude = 0.0;
@@ -187,7 +187,6 @@ int holdThrottle = 1000;
 float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
-//#endif
 
 // Receiver variables
 #define TIMEOUT 25000
@@ -384,4 +383,4 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
-
+
