@@ -366,7 +366,10 @@ void sendSerialTelemetry() {
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getFlightData(axis));
+      if (axis == PITCH)
+        PrintValueComma(-gyro.getFlightData(axis));
+      else
+        PrintValueComma(gyro.getFlightData(axis));
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
@@ -386,7 +389,8 @@ void sendSerialTelemetry() {
         PrintValueComma(accel.getFlightData(XAXIS));
       else
         PrintValueComma(accel.getFlightData(ZAXIS));
-    }  
+    }
+
     Serial.print(armed, BIN);
     comma();
     if (flightMode == STABLE)
@@ -594,4 +598,4 @@ void sendBinaryFloat(float data) {
   Serial.print(binaryFloat.floatByte[1], BYTE);
   Serial.print(binaryFloat.floatByte[0], BYTE);
 }
-
+

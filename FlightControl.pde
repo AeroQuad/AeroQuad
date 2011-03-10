@@ -57,6 +57,7 @@ void processArdupirateSuperStableMode(void)
   // OLD NON SI
   //motors.setMotorAxisCommand(PITCH, updatePID(stablePitch, gyro.getFlightData(PITCH), &PID[LEVELGYROPITCH]));  
 }
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// AQ Original Stable Mode //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -119,13 +120,12 @@ void calculateFlightError(void)
     // updatePID(target, measured, PIDsettings);
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     // updatePID() is defined in PID.h
-    //#ifdef TESTING
+
     motors.setMotorAxisCommand(ROLL, (updatePID(receiver.getSIData(ROLL), gyro.getData(ROLL), &PID[ROLL]) / receiver.xmitFactor));
     motors.setMotorAxisCommand(PITCH, (-updatePID(-receiver.getSIData(PITCH), gyro.getData(PITCH), &PID[PITCH]) / receiver.xmitFactor));
-    //#else
+    // OLD NON SI
     //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getFlightData(ROLL) + 1500, &PID[ROLL]));
     //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH), gyro.getFlightData(PITCH) + 1500, &PID[PITCH]));
-    //#endif
     zeroIntegralError();
   }
   else {
