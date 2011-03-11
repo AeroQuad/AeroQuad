@@ -145,7 +145,8 @@ byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 // Auto level setup
-float levelAdjust[2] = {0.0,0.0};
+//float levelAdjust[2] = {0.0,0.0};
+int levelAdjust[2] = {0,0};
 int levelLimit; // Read in from EEPROM
 int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees

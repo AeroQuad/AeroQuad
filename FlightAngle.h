@@ -48,13 +48,12 @@ public:
   virtual float getGyroUnbias(byte axis);
   virtual void calibrate();
  
- // returns the angle of a specific axis in SI units (radians)
+  // returns the angle of a specific axis in SI units (radians)
   const float getData(byte axis) {
     return angle[axis];
   }
-  
+  // return heading as +PI/-PI
   const float getHeading(byte axis) {
-    // returns angle as +PI/-PI
     return(angle[axis]);
   }
   
@@ -280,11 +279,11 @@ public:
     dcmMatrix[7] =  0;
     dcmMatrix[8] =  1;
 
-    kpRollPitch = 1.6;
-    kiRollPitch = 0.005;
+    kpRollPitch = 1.0;
+    kiRollPitch = 0.002;
     
-    kpYaw = -1.6;
-    kiYaw = -0.005;
+    kpYaw = -1.0;
+    kiYaw = -0.002;
   }
   
 ////////////////////////////////////////////////////////////////////////////////

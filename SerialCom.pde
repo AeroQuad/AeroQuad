@@ -221,31 +221,11 @@ void PrintPID(unsigned char IDPid)
 }
 
 void sendSerialTelemetry() {
-  //float t;
-  
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(receiver.transmitterCommand[ROLL]);
-    //PrintValueComma(levelAdjust[ROLL]);
-    //PrintValueComma(PID[LEVELROLL].integratedError);
-    //PrintValueComma(updatePID(receiver.getSIData(ROLL) + radians(levelAdjust[ROLL]), gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-    //PrintValueComma(updatePID(receiver.getSIData(ROLL) + radians(levelAdjust[ROLL]), gyro.getData(ROLL), &PID[LEVELGYROROLL]) / receiver.xmitFactor);
-    //PrintValueComma((updatePID(receiver.getSIData(ROLL) + radians(levelAdjust[ROLL]), gyro.getData(ROLL), &PID[LEVELGYROROLL]) / receiver.xmitFactor) + PID[LEVELROLL].integratedError);
-    //PrintValueComma((updatePID(receiver.getSIData(PITCH) + levelAdjust[PITCH], gyro.getData(PITCH), &PID[LEVELGYROPITCH]) / receiver.xmitFactor) + (PID[LEVELPITCH].integratedError / .009713));
-    //PrintValueComma(t);
-    //PrintValueComma(PID[LEVELROLL].integratedError / .009713);
-    //PrintValueComma(radians(receiver.getAngle(ROLL)));
-    //PrintValueComma(flightAngle->getData(ROLL));
-    //PrintValueComma(receiver.getSIData(ROLL));
-
-    //PrintValueComma(PID[LEVELPITCH].integratedError);
-    //PrintValueComma(receiver.getAngle(PITCH));
-    //PrintValueComma(flightAngle->getData(PITCH));
-    //PrintValueComma(heading);
-    //PrintValueComma(setHeading);
-    //PrintValueComma(relativeHeading);
-    //PrintValueComma(headingHold);
+    //PrintValueComma(degrees(flightAngle->getHeading()));
+    //PrintValueComma(rollPidUpdate);
     //PrintValueComma(commandedYaw);
     //Serial.print(degrees(flightAngle->getData(YAW)));
     //Serial.println();
@@ -389,8 +369,7 @@ void sendSerialTelemetry() {
         PrintValueComma(accel.getFlightData(XAXIS));
       else
         PrintValueComma(accel.getFlightData(ZAXIS));
-    }
-
+    }  
     Serial.print(armed, BIN);
     comma();
     if (flightMode == STABLE)
@@ -598,4 +577,4 @@ void sendBinaryFloat(float data) {
   Serial.print(binaryFloat.floatByte[1], BYTE);
   Serial.print(binaryFloat.floatByte[0], BYTE);
 }
-
+

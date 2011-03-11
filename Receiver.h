@@ -68,20 +68,20 @@ public:
     }
   }
 
+  // returns non-smoothed non-scaled ADC data in PWM full range 1000-2000 values
   const int getRaw(byte channel) {
     return receiverData[channel];
   }
   
-  // returns smoothed reciever in PWM full range 1000-2000 values
+  // returns smoothed & scaled receiver(channel) in PWM full range 1000-2000 values
   const int getData(byte channel) {
-    // reduce sensitivity of transmitter input by xmitFactor
     return transmitterCommand[channel];
   }
   
   // AKA - this could be changed to match up with a .01 reference value that is being discussed
   #define PWM_TO_RAD .009713 // 1 PWM converted to rad/sec based upon max rate of gyro
 
-  // return the number of radians/sec in stick movement - zero centered
+  // return the smoothed & scaled number of radians/sec in stick movement - zero centered
   const float getSIData(byte channel) {
     return ((transmitterCommand[channel] - transmitterZero[channel]) * PWM_TO_RAD);
   }
