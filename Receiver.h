@@ -78,8 +78,7 @@ public:
     return transmitterCommand[channel];
   }
   
-  // AKA - this could be changed to match up with a .01 reference value that is being discussed
-  #define PWM_TO_RAD .009713 // 1 PWM converted to rad/sec based upon max rate of gyro
+  #define PWM_TO_RAD .01 // 1 PWM converted to rad/sec based upon max rate of gyro and 5RPS for full stick movement from 0
 
   // return the smoothed & scaled number of radians/sec in stick movement - zero centered
   const float getSIData(byte channel) {
