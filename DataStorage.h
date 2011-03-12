@@ -62,19 +62,19 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 50;
+  PID[ROLL].P = 1;
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -150;
-  PID[PITCH].P = 50;
+  PID[ROLL].D = -3;
+  PID[PITCH].P = 1;
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -150;
-  PID[YAW].P = 150;
-  PID[YAW].I = 2.5;
+  PID[PITCH].D = -3;
+  PID[YAW].P = 3;
+  PID[YAW].I = .05;
   PID[YAW].D = 0.0;
-  PID[LEVELROLL].P = 6.0;
+  PID[LEVELROLL].P = 4.0;
   PID[LEVELROLL].I = 0.15;
   PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 6.0;
+  PID[LEVELPITCH].P = 4.0;
   PID[LEVELPITCH].I = 0.15;
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
