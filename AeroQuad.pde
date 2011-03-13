@@ -55,11 +55,11 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-//#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
+//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
+#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
 #define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 
