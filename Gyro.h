@@ -79,6 +79,7 @@ public:
   }
   
   // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
+  // centered on zero radians +/-
   const float getData(byte axis) {
     return gyroData[axis] * sign[axis];
   }
@@ -331,6 +332,7 @@ public:
     */
   }
   
+  // returns raw ADC data from the Gyro centered on zero +/- values
   const int getFlightData(byte axis) {
     //int reducedData = getRaw(axis) >> 3;
     //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;

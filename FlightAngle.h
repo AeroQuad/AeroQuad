@@ -48,19 +48,18 @@ public:
   virtual float getGyroUnbias(byte axis);
   virtual void calibrate();
  
- // returns the angle of a specific asix in SI units
+  // returns the angle of a specific axis in SI units (radians)
   const float getData(byte axis) {
     return angle[axis];
   }
-  
+  // return heading as +PI/-PI
   const float getHeading(byte axis) {
-    // Change from +/-180 to 0-360
-    //return (PI + angle[axis]);
     return(angle[axis]);
   }
   
   // This really needs to be in Radians to be consistent
   // I'll fix later - AKA
+  // returns heading in degrees as 0-360
   const float getDegreesHeading(byte axis) {
     float tDegrees;
     
