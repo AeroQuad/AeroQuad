@@ -154,15 +154,6 @@ private:
   
 public:
   Accel_AeroQuad_v1() : Accel(){
-    // Accelerometer Values
-    // Update these variables if using a different accel
-    // Output is ratiometric for ADXL 335
-    // Note: Vs is not AREF voltage
-    // If Vs = 3.6V, then output sensitivity is 360mV/g
-    // If Vs = 2V, then it's 195 mV/g
-    // Then if Vs = 3.3V, then it's 329.062 mV/g
-    //accelScaleFactor = 0.000329062;
-    accelScaleFactor = G_2_MPS2((3.3/4096) / 0.000329062);
   }
   
   void initialize(void) {
@@ -171,6 +162,7 @@ public:
     // zAxisChannel = 2
     this->_initialize(1, 0, 2);
     smoothFactor     = readFloat(ACCSMOOTH_ADR);
+    accelScaleFactor = G_2_MPS2((aref/1024.0) / 0.300);
   }
   
   void measure(void) {
@@ -182,7 +174,12 @@ public:
   }
 
   const int getFlightData(byte axis) {
-    return getRaw(axis);
+    if (axis == XAXIS)
+      return getRaw(PITCH);
+    if (axis == YAXIS)
+      return getRaw(ROLL);
+    if (axis == YAW)
+      return getRaw(YAW);
   }
   
   // Allows user to zero accelerometers on command

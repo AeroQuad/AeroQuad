@@ -157,9 +157,6 @@ public:
 class Gyro_AeroQuad_v1 : public Gyro {
 public:
   Gyro_AeroQuad_v1() : Gyro() {
-    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-    //gyroScaleFactor = radians(0.4);         // IDG/IXZ500 sensitivity = 2mV/(deg/sec)  2.0mV/Ã‚Âº/s, 0.8mV/ADC step => 0.8/3.33 = 0.4
-    gyroScaleFactor = radians((3.0/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
   
   void initialize(void) {
@@ -173,6 +170,8 @@ public:
     // pitchChannel = 3
     // yawChannel = 5
     this->_initialize(4,3,5);
+    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
+    gyroScaleFactor = radians((aref/1024.0) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
   
   void measure(void) {
