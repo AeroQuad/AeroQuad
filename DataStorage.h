@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -62,30 +62,30 @@ void writePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
-  PID[ROLL].P = 1.0;
+  PID[ROLL].P = 100.0;
   PID[ROLL].I = 0.0;
-  PID[ROLL].D = -3.0;
-  PID[PITCH].P = 1.0;
+  PID[ROLL].D = -300.0;
+  PID[PITCH].P = 100.0;
   PID[PITCH].I = 0.0;
-  PID[PITCH].D = -3.0;
-  PID[YAW].P = 3.0;
-  PID[YAW].I = 0.05;
+  PID[PITCH].D = -300.0;
+  PID[YAW].P = 300.0;
+  PID[YAW].I = 5.0;
   PID[YAW].D = 0.0;
-  PID[LEVELROLL].P = 7.0;
-  PID[LEVELROLL].I = 1.0;
+  PID[LEVELROLL].P = 4.0;
+  PID[LEVELROLL].I = 0.15;
   PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 7.0;
-  PID[LEVELPITCH].I = 1.0;
+  PID[LEVELPITCH].P = 4.0;
+  PID[LEVELPITCH].I = 0.15;
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
   PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
-  PID[LEVELGYROROLL].P = 1.0;
+  PID[LEVELGYROROLL].P = 100.0;
   PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -3.0;
-  PID[LEVELGYROPITCH].P = 1.0;
+  PID[LEVELGYROROLL].D = -300.0;
+  PID[LEVELGYROPITCH].P = 100.0;
   PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -3.0;
+  PID[LEVELGYROPITCH].D = -300.0;
   #ifdef AltitudeHold
     PID[ALTITUDE].P = 25.0;
     PID[ALTITUDE].I = 0.1;
@@ -104,12 +104,13 @@ void initializeEEPROM(void) {
     compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
-  receiver.setXmitFactor(0.50);
+  receiver.setXmitFactor(1.0);
   levelLimit = 500.0;
   levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
-  accel.setOneG(500);
+  // AKA - old setOneG not in SI - accel.setOneG(500);
+  accel.setOneG(9.80665); // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     receiver.setTransmitterSlope(channel, 1.0);

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -40,9 +40,16 @@
 #define ADC_CHIP_SELECT 33    // PC4   9 // PH6  Puerto:0x08 Bit mask : 0x40
 
 // Commands for reading ADC channels on ADS7844
-const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
-volatile long adc_value[8];
-volatile unsigned char adc_counter[8];
+//                                 pRate  qRate  rRate  aX     aY     aZ     temp   JP5
+// ADC Input Channel               Ch1    Ch2    Ch0    Ch4    Ch5    Ch6    Ch3    Ch7
+const unsigned char adc_cmd[9] = { 0xC7,  0x97,  0x87,  0xA7,  0xE7,  0xB7,  0xD7,  0xF7,  0x00 };
+
+// Commands for reading ADC channels on ADS7844  (old AQ way
+// ADC channel mapping             Ch0   Ch1   Ch2   Ch3   Ch4   Ch5   Ch6   Ch7 
+//const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
+volatile long adc_value[8] = { 0,0,0,0,0,0,0,0 };
+volatile unsigned char adc_counter[8]= { 0,0,0,0,0,0,0,0 };
+//volatile unsigned int adc_counter[8]= { 0,0,0,0,0,0,0,0 };
 
 unsigned char ADC_SPI_transfer(unsigned char data) {
   /* Wait for empty transmit buffer */
@@ -62,12 +69,16 @@ ISR (TIMER2_OVF_vect) {
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
   ADC_SPI_transfer(adc_cmd[0]);       // Command to read the first channel
-  for (uint8_t ch=0;ch<7;ch++) {
-    adc_tmp = ADC_SPI_transfer(0)<<8;    // Read first byte
-    adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
-    adc_value[ch] += adc_tmp>>3;     // Shift to 12 bits
-    adc_counter[ch]++;               // Number of samples
+  for (uint8_t ch = 0; ch < 8; ch++) {
+    if (adc_counter[ch] >= 16) {
+        adc_value[ch] /=2;
+        adc_counter[ch] /=2;
     }
+    adc_tmp = ADC_SPI_transfer(0) << 8;    // Read first byte
+    adc_tmp |= ADC_SPI_transfer(adc_cmd[ch+1]);  // Read second byte and send next command
+    adc_value[ch] += adc_tmp >> 3;     // Shift to 12 bits
+    adc_counter[ch]++;               // Number of samples
+  }
   bit_set(PORTC,4);                // Disable Chip Select (PIN PC4)
   //bit_clear(PORTL,6); // To test performance
   TCNT2 = 104;        // 400 Hz
@@ -102,11 +113,14 @@ void initialize_ArduCopter_ADC(void) {
 
 int analogRead_ArduCopter_ADC(unsigned char ch_num) {
   int result;
+  
+  //while(adc_counter[ch_num] < 2) { }
+  
   cli();  // We stop interrupts to read the variables
   if (adc_counter[ch_num]>0)
-	result = adc_value[ch_num]/adc_counter[ch_num];
+	  result = adc_value[ch_num]/adc_counter[ch_num];
   else
-	result = 0;
+	  result = 0;
   adc_value[ch_num] = 0;    // Initialize for next reading
   adc_counter[ch_num] = 0;
   sei();
@@ -114,7 +128,7 @@ int analogRead_ArduCopter_ADC(unsigned char ch_num) {
 }
   
 void zero_ArduCopter_ADC(void) {
-  for (byte n; n<8; n++) {
+  for (byte n; n < 8; n++) {
     adc_value[n] = 0;
     adc_counter[n] = 0;
   }
@@ -127,7 +141,7 @@ void zero_ArduCopter_ADC(void) {
 // Modifications by jihlein 
 // ********************************************
 // I2C function calls defined in I2C.h
-#ifndef AeroQuad_v18
+//#ifndef AeroQuad_v18
 short NWMP_acc[3];
 short NWMP_gyro[3];
 
@@ -166,7 +180,7 @@ void updateControls() {
     }
   }
 }
-#endif
+//#endif
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     #include "CHR6DM.h"
