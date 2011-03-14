@@ -434,8 +434,8 @@ public:
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
     // Depending on how your accel is mounted, you can change X/Y axis to pitch/roll mapping here
-    accelADC[XAXIS] = NWMP_acc[PITCH] - accelZero[PITCH];
-    accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
+    accelADC[XAXIS] =  NWMP_acc[PITCH] - accelZero[PITCH];
+    accelADC[YAXIS] = accelZero[ROLL] - NWMP_acc[ROLL];
     accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       //accelData[axis] = filterSmoothWithTime(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor, ((currentTime - previousTime) / 5000.0));  // AKA changes to remove total Time from Honks smoothing changes
@@ -445,12 +445,13 @@ public:
   }
   
   const int getFlightData(byte axis) {
-    if (axis == ROLL)
-      return -getRaw(YAXIS);
-    if (axis == PITCH)
-      return -getRaw(XAXIS);
+    if (axis == XAXIS)
+      return getRaw(XAXIS);
+    if (axis == YAXIS)
+      return -getRaw(YAXIS); 
     if (axis == ZAXIS)
       return -getRaw(ZAXIS);
+
   }
  
   // Allows user to zero accelerometers on command

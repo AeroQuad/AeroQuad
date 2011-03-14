@@ -460,7 +460,7 @@ public:
     gyroADC[ROLL] = NWMP_gyro[ROLL] - gyroZero[ROLL];
     //gyroData[ROLL] = filterSmoothWithTime(gyroADC[ROLL] * gyroScaleFactor, gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroData[ROLL] = filterSmooth(gyroADC[ROLL] * gyroScaleFactor, gyroData[ROLL], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroADC[PITCH] = gyroZero[PITCH] - NWMP_gyro[PITCH];
+    gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
     //gyroData[PITCH] = filterSmoothWithTime(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroData[PITCH] = filterSmooth(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
     gyroADC[YAW] =  NWMP_gyro[YAW] - gyroZero[YAW];
@@ -470,7 +470,10 @@ public:
   }
 
   const int getFlightData(byte axis) {
-    return getRaw(axis);
+    if (axis == PITCH)
+      return -getRaw(PITCH);
+    else
+      return getRaw(axis);
   }
 
   void calibrate() {
