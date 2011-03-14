@@ -560,4 +560,3 @@ void sendBinaryFloat(float data) {
   Serial.print(binaryFloat.floatByte[1], BYTE);
   Serial.print(binaryFloat.floatByte[0], BYTE);
 }
-
