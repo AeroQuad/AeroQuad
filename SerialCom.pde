@@ -421,7 +421,13 @@ void sendSerialTelemetry() {
     PrintValueComma(receiver.getData(YAW));
     PrintValueComma(headingHold);
     PrintValueComma(setHeading);
-    Serial.println(relativeHeading);
+    // AKA - Configurator wants -180/180 for headings,
+    // when heading hold active, the relative heading can be > 180 due to the way it's calculated
+    // this corrects it just for the configurator.
+    if ((setHeading + relativeHeading) > 180)
+      Serial.println(-360 + relativeHeading);
+    else
+      Serial.println(relativeHeading);
     break;
   case '6': // Report remote commands
     for (byte motor = FRONT; motor < LEFT; motor++) {
@@ -493,6 +499,7 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getCenterPitch());
     PrintValueComma(camera.getCenterRoll());
     PrintValueComma(camera.getCenterYaw());
+
     Serial.print(camera.getmCameraPitch() , 2);
     comma();
     Serial.print(camera.getmCameraRoll() , 2);
@@ -559,4 +566,3 @@ void sendBinaryFloat(float data) {
   Serial.print(binaryFloat.floatByte[1], BYTE);
   Serial.print(binaryFloat.floatByte[0], BYTE);
 }
-
