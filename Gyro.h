@@ -175,20 +175,17 @@ public:
   }
   
   void measure(void) {
-		for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-			if (axis == PITCH)
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+      if (axis == PITCH)
         gyroADC[axis] = analogRead(gyroChannel[axis]) - gyroZero[axis];
-			else
-	      gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
+      else
+        gyroADC[axis] = gyroZero[axis] - analogRead(gyroChannel[axis]);
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
   }
 
   const int getFlightData(byte axis) {
-    if (axis == PITCH)
-      return -getRaw(axis);
-    else
-      return getRaw(axis);
+    return getRaw(axis);
   }
   
  void calibrate() {
