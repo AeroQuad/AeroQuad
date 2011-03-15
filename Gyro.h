@@ -185,10 +185,7 @@ public:
   }
 
   const int getFlightData(byte axis) {
-    if (axis == PITCH)
-      return -getRaw(axis);
-    else
-      return getRaw(axis);
+    return getRaw(axis);
   }
   
  void calibrate() {
