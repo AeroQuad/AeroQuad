@@ -459,7 +459,9 @@ void sendSerialTelemetry() {
     PrintValueComma(5);
 #elif defined(APM_OP_CHR6DM)
     PrintValueComma(6);
-#endif
+#elif defined(AeroQuad_Mini)
+    PrintValueComma(2);
+#endif    
     // Determine which motor flight configuration for Configurator GUI
 #if defined(plusConfig)
     Serial.print('0');

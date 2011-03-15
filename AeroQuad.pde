@@ -28,9 +28,10 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -136,6 +137,25 @@
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
+#endif
+
+#ifdef AeroQuad_Mini
+  Accel_AeroQuadMini accel;
+  Gyro_AeroQuadMega_v2 gyro;
+  Receiver_AeroQuad receiver;
+  Motors_PWMtimer motors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  #include "FlightAngle.h"
+  FlightAngle_DCM tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
@@ -346,10 +366,10 @@ void setup() {
     pinMode(LED_Green, OUTPUT);
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
     Wire.begin();
   #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
     // Recommendation from Mgros to increase I2C speed to 400kHz
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
     TWBR = 12;
@@ -403,7 +423,7 @@ void setup() {
     camera.setmCameraPitch(11.11);
     camera.setCenterPitch(1300);
   #endif
-  
+
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;

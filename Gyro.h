@@ -217,7 +217,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
 /*
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V
@@ -234,7 +234,11 @@ private:
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
+#ifdef AeroQuad_Mini
+    gyroAddress = 0x68;
+#else        
     gyroAddress = 0x69;
+#endif    
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
@@ -255,7 +259,11 @@ public:
     gyroLastADC = 0;  // initalize for rawHeading, may be able to be removed in the future
     
     // Check if gyro is connected
-    if (readWhoI2C(gyroAddress) != gyroAddress)
+#ifdef AeroQuad_Mini    
+    if (readWhoI2C(gyroAddress) != gyroAddress +1)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+#else    
+    if (readWhoI2C(gyroAddress) != gyroAddress)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+#endif    
       Serial.println("Gyro not found!");
         
     // Thanks to SwiftingSpeed for updates on these settings
@@ -283,18 +291,10 @@ public:
     
     long int currentGyroTime = micros();
     if ((gyroADC[YAW] - gyroLastADC) > 3 || (gyroADC[YAW] - gyroLastADC) < -3) {
-      //Serial.print(gyroADC[YAW]);
-      //Serial.print(",");
-      //Serial.print(rawHeading);
-      //Serial.print(",");
-      //Serial.print(currentGyroTime - previousGyroTime);      
-      //Serial.print(",");
       rawHeading += gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
-      //Serial.print(rawHeading);
-      //Serial.println();
     }
     previousGyroTime = currentGyroTime;
-      //gyroLastADC = gyroADC[YAW];
+    //gyroLastADC = gyroADC[YAW];
 
 /*
     // ************ Correct for gyro drift by FabQuad **************

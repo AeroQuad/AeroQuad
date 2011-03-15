@@ -332,6 +332,99 @@ public:
 #endif
 
 /******************************************************/
+/********* AeroQuad Mini v1 Accelerometer *************/
+/******************************************************/
+#if defined(AeroQuad_Mini)
+class Accel_AeroQuadMini : public Accel {
+private:
+  int accelAddress;
+  
+public:
+  Accel_AeroQuadMini() : Accel(){
+    accelAddress = 0x53; // page 10 of datasheet
+    accelScaleFactor = G_2_MPS2(4.0/1024.0);  // +/- 2G at 10bits of ADC
+  }
+  
+  void initialize(void) {
+    byte data;
+    
+    this->_initialize(0,1,2);  // AKA added for consistency
+  
+    accelOneG        = readFloat(ACCEL1G_ADR);
+    accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
+    accelZero[YAXIS] = readFloat(LEVELROLLCAL_ADR);
+    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+    smoothFactor     = readFloat(ACCSMOOTH_ADR);
+    
+    // Check if accel is connected
+    
+    if (readWhoI2C(accelAddress) !=  0xE5) // page 14 of datasheet
+      Serial.println("Accelerometer not found!");
+
+    updateRegisterI2C(accelAddress, 0x2D, 1<<3); // set device to *measure*
+    updateRegisterI2C(accelAddress, 0x31, 0x08); // set full range and +/- 2G
+    updateRegisterI2C(accelAddress, 0x2C, 8+2+1);    // 200hz sampling
+    delay(10); 
+  }
+  
+  void measure(void) {
+
+    sendByteI2C(accelAddress, 0x32);
+    Wire.requestFrom(accelAddress, 6);
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+      if (axis == XAXIS)
+        accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
+      else
+        accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+    }
+  }
+
+  const int getFlightData(byte axis) {
+      return getRaw(axis);
+  }
+  
+  // Allows user to zero accelerometers on command
+  void calibrate(void) {  
+    int findZero[FINDZERO];
+    int dataAddress;
+    
+    for (byte calAxis = XAXIS; calAxis < ZAXIS; calAxis++) {
+      if (calAxis == XAXIS) dataAddress = 0x32;
+      if (calAxis == YAXIS) dataAddress = 0x34;
+      if (calAxis == ZAXIS) dataAddress = 0x36;
+      for (int i=0; i<FINDZERO; i++) {
+        sendByteI2C(accelAddress, dataAddress);
+        findZero[i] = readReverseWordI2C(accelAddress);
+        delay(10);
+      }
+      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+    }
+
+    // replace with estimated Z axis 0g value
+    accelZero[ZAXIS] = (accelZero[XAXIS] + accelZero[PITCH]) / 2;
+    // store accel value that represents 1g
+    measure();
+    accelOneG = -accelData[ZAXIS];
+     
+    writeFloat(accelOneG,        ACCEL1G_ADR);
+    writeFloat(accelZero[XAXIS], LEVELPITCHCAL_ADR);
+    writeFloat(accelZero[YAXIS], LEVELROLLCAL_ADR);
+    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
+  }
+
+/* AKA - NOT USED
+  void calculateAltitude() {
+    currentTime = micros();
+    if ((abs(getRaw(XAXIS)) < 1500) && (abs(getRaw(YAXIS)) < 1500)) 
+      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
+    previousTime = currentTime;
+  } 
+*/  
+};
+#endif
+
+/******************************************************/
 /*********** ArduCopter ADC Accelerometer *************/
 /******************************************************/
 #ifdef ArduCopter
