@@ -112,18 +112,18 @@ void processAttitudeMode(void)
   float attitudeScaling = 0.002; // +/-1 radian attitude
 
   // Assume receiver.getRaw(axis) returns +/-500 by using constrain() function 
-  float rollAttitudeCmd = updatePID(constrain(receiver.getRaw(ROLL) - 1500, -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID(constrain(receiver.getRaw(PITCH) - 1500, -500, 500) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  //float rollAttitudeCmd = updatePID(constrain(receiver.getRaw(ROLL) - 1500, -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  //float pitchAttitudeCmd = updatePID(constrain(receiver.getRaw(PITCH) - 1500, -500, 500) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  //motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+  //motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
 
   // these should be the same as the above with one exception.
   // these use the getData method which uses the smoothed and scaled RX values 
   // if you want to try them
-  //float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  //float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  //motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-  //motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -194,6 +194,8 @@ void processHeading(void)
     // Always center relative heading around absolute heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
     // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
+    // AKA - THERE IS A BUG HERE - if relative heading is greater than 180 degrees, the PID will swing from negative to positive
+    // Doubt that will happen as it would have to be uncommanded.
     relativeHeading = heading - setHeading;
     if (heading <= (setHeading - 180)) relativeHeading += 360;
     if (heading >= (setHeading + 180)) relativeHeading -= 360;
@@ -208,8 +210,8 @@ void processHeading(void)
       }
       else 
         // No new yaw input, calculate current heading vs. desired heading heading hold
-      // Relative heading is always centered around zero
-      headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
+        // Relative heading is always centered around zero
+        headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
     }
     else {
       // minimum throttle not reached, use off settings
