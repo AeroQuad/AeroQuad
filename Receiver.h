@@ -83,7 +83,7 @@ public:
     return transmitterCommand[channel];
   }
   
-  #define PWM_TO_RAD .005 //.01 // 1 PWM converted to rad/sec based upon max rate of gyro and 5RPS for full stick movement from 0
+  #define PWM_TO_RAD .005 // 1 PWM converted to rad/sec based upon max rate of gyro and 5RPS (.01 scaling) for full stick movement from 0 or 2.5rad for .005
 
   // return the smoothed & scaled number of radians/sec in stick movement - zero centered
   const float getSIData(byte channel) {
@@ -281,7 +281,7 @@ public:
       else
     // No xmitFactor reduction applied for throttle, mode and
     //for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
+        transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
 };
 #endif
