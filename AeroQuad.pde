@@ -28,12 +28,12 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
+//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -55,11 +55,11 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
+//#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 #define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 
@@ -370,6 +370,10 @@ void setup() {
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
   
+  #ifdef AeroQuad_v1_IDG
+    gyro.invert(YAW);
+  #endif
+
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
@@ -455,7 +459,8 @@ void loop () {
     // Since writing to UART is done by hardware, unable to measure data rate directly
     // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
     // If float = 4 bytes, then 3600 floats/second
-    // If 10 ms output rate, then 36 floats/10ms
+    // Experimentally found 15ms output rate produces no flight jitter.
+    // If 15 ms output rate, then 54 floats/15ms
     // Number of floats written using sendBinaryFloat is 15
     if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
       printInt(21845); // Start word of 0x5555

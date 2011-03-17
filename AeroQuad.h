@@ -231,7 +231,7 @@ byte update = 0;
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz
 #define CAMERALOOPTIME 20000     // 20ms, 50Hz
-#define FASTTELEMETRYTIME 10000  // 10ms, 100Hz
+#define FASTTELEMETRYTIME 15000  // 15ms, 67Hz
 #define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
 
 float G_Dt = 0.002;
