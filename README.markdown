@@ -1,11 +1,12 @@
-AeroQuad Flight Software Source Code 2.2
+AeroQuad Flight Software Source Code 2.3
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.3 Release Notes (3/14/2011)
+Version 2.3 Release Notes (3/17/2011)
 ----------------------------------------
  * Implemented common SI units for sensors
  * Implemented common DCM gains for all hardware platforms
+ * Calculate heading using Compass & DCM
  * Acro Mode utilizes SI units only for common starting gains compared with other hardware platorms
  * New altitude hold updates
    * initialized PID with hold altitude as last postion
