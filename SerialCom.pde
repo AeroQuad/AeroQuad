@@ -36,6 +36,7 @@ void readSerialPID(unsigned char PIDid) {
   pid->D = readFloatSerial();
   pid->lastPosition = 0;
   pid->integratedError = 0;
+  pid->firstPass = true;
 }
 
 void readSerialCommand() {
@@ -224,9 +225,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(degrees(flightAngle->getHeading()));
-    //PrintValueComma(rollPidUpdate);
-    //PrintValueComma(commandedYaw);
+    //PrintValueComma(gyro.getFlightData(PITCH));
+    //PrintValueComma(flightAngle->getData(PITCH));
+    //PrintValueComma(flightAngle->getGyroUnbias(PITCH));
+    //PrintValueComma(receiver.getZero(ROLL));
+    //PrintValueComma(flightAngle->getData(ROLL));
     //Serial.print(degrees(flightAngle->getData(YAW)));
     //Serial.println();
     //printFreeMemory();
@@ -567,4 +570,4 @@ void sendBinaryFloat(float data) {
   Serial.print(binaryFloat.floatByte[2], BYTE);
   Serial.print(binaryFloat.floatByte[1], BYTE);
   Serial.print(binaryFloat.floatByte[0], BYTE);
-}
+}

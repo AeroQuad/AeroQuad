@@ -26,8 +26,8 @@
 // Flight Software Version
 #define VERSION 2.3
 
-//#define BAUD 115200
-#define BAUD 111111 // use this to be compatible with USB and XBee connections
+#define BAUD 115200
+//#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -78,6 +78,9 @@
 struct PIDdata {
   float P, I, D;
   float lastPosition;
+  // AKA experiments with PID
+  float previousPIDTime;
+  bool firstPass;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[10];
@@ -93,11 +96,7 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
+#define FINDZERO 49
 float smoothHeading;
 
 // Sensor pin assignments
@@ -143,6 +142,7 @@ float aref; // Read in from EEPROM
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
+#define PWM2RPS 0.002 //  Based upon 5RPS for full stick movement, you take this times the RPS to get the PWM conversion factor
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};

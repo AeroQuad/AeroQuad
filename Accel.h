@@ -382,7 +382,6 @@ public:
 #ifdef ArduCopter
 class Accel_ArduCopter : public Accel {
 private:
-  int findZero[FINDZERO];
   int rawADC;
 
 public:
@@ -421,6 +420,8 @@ public:
   
   // Allows user to zero accelerometers on command
   void calibrate(void) {
+    int findZero[FINDZERO];
+    
     for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);

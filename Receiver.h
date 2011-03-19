@@ -83,11 +83,12 @@ public:
     return transmitterCommand[channel];
   }
   
-  #define PWM_TO_RAD .005 // 1 PWM converted to rad/sec based upon max rate of gyro and 5RPS (.01 scaling) for full stick movement from 0 or 2.5rad for .005
-
   // return the smoothed & scaled number of radians/sec in stick movement - zero centered
   const float getSIData(byte channel) {
-    return ((transmitterCommand[channel] - transmitterZero[channel]) * PWM_TO_RAD);
+    // 2.3 Original
+    return ((transmitterCommand[channel] - transmitterZero[channel]) * (2.5 * PWM2RPS));  // +/- 2.5RPS 50% of full rate
+    // 2.3 Stable
+    //return ((transmitterCommand[channel] - transmitterZero[channel]) * (5.0 * PWM2RPS));  // +/- 5RPS factored by xmitfactor of full rate
   }
 
   const int getTrimData(byte channel) {
@@ -146,8 +147,8 @@ public:
   const float getAngle(byte channel) {
     // Scale 1000-2000 usecs to -45 to 45 degrees
     // m = 0.09, b = -135
-    //return (0.09 * transmitterCommand[channel]) - 135;
-    return (0.09 * receiverData[channel]) - 135;
+    return (0.09 * transmitterCommand[channel]) - 135;
+    //return (0.09 * receiverData[channel]) - 135;
   }
 };
 

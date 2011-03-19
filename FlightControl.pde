@@ -23,7 +23,8 @@
 // Special thanks to Keny9999 for suggesting a more readable format for FlightControl.pde and for
 // porting over the ArduPirates Stable Mode (please note this is still experimental, use at your own risk)
 
-//#define MAX_CONTROL_OUTPUT 1000
+#ifdef UseArduPirateSuperStable
+#define MAX_CONTROL_OUTPUT 500
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// ArduPirateSuperStableProcessor ///////////////////
@@ -33,45 +34,59 @@ void processArdupirateSuperStableMode(void)
   // ArduPirate adaptation
   // default value are P = 4, I = 0.15
   // ROLL
-  float errorRoll = receiver.getAngle(ROLL) - degrees(flightAngle->getData(ROLL));     
-  errorRoll = constrain(errorRoll,-50,50);
+  float errorRoll = receiver.getAngle(ROLL) - degrees(flightAngle->getData(ROLL));  // calculate the  accel error   
+  errorRoll = constrain(errorRoll, -50, 50);  // constrain the error
   if (abs(receiver.getAngle(ROLL)) < 30) {
-    PID[LEVELROLL].integratedError += errorRoll*G_Dt;                            
-    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError,-20,20);
+    PID[LEVELROLL].integratedError += errorRoll * G_Dt; // calculate the integrated error
+    PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError, -20, 20); // constrain it to a windup values
   }
   else
-    PID[LEVELROLL].integratedError = 0;
-  const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError;
-  //errorRoll = stableRoll - gyro.getFlightData(ROLL);
+    PID[LEVELROLL].integratedError = 0; // zero integral error
+  const float stableRoll = PID[LEVELROLL].P * errorRoll + PID[LEVELROLL].I * PID[LEVELROLL].integratedError; // calculate the leveing PI
+  errorRoll = stableRoll - gyro.getFlightData(ROLL); // calculate the rate error
   //motors.setMotorAxisCommand(ROLL,constrain(PID[LEVELGYROROLL].P*errorRoll,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
   // NEW SI Version
-  motors.setMotorAxisCommand(ROLL, updatePID(radians(stableRoll), gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+  //motors.setMotorAxisCommand(ROLL, updatePID(radians(stableRoll), gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   // OLD NON SI
   //motors.setMotorAxisCommand(ROLL, updatePID(stableRoll, gyro.getFlightData(ROLL), &PID[LEVELGYROROLL]));
+  // ORIGINAL
+  motors.setMotorAxisCommand(ROLL, constrain(PID[LEVELGYROROLL].P * errorRoll, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT)); // use P only PID calculate the rate PID
 
   // PITCH
   float errorPitch = receiver.getAngle(PITCH) + degrees(flightAngle->getData(PITCH));     
-  errorPitch = constrain(errorPitch,-50,50);                    
+  errorPitch = constrain(errorPitch, -50, 50);                    
   if (abs(receiver.getAngle(PITCH)) < 30) {
-    PID[LEVELPITCH].integratedError += errorPitch*G_Dt;                            
-    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError,-20,20);
+    PID[LEVELPITCH].integratedError += errorPitch * G_Dt;                            
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError, -20, 20);
   }
   else
     PID[LEVELPITCH].integratedError = 0;
   const float stablePitch = PID[LEVELPITCH].P * errorPitch + PID[LEVELPITCH].I * PID[LEVELPITCH].integratedError;
-  //errorPitch = stablePitch - gyro.getFlightData(PITCH);
+  errorPitch = stablePitch - gyro.getFlightData(PITCH);
   //motors.setMotorAxisCommand(PITCH,constrain(PID[LEVELGYROPITCH].P*errorPitch,-MAX_CONTROL_OUTPUT,MAX_CONTROL_OUTPUT));
   // NEW SI Version
-  motors.setMotorAxisCommand(PITCH, updatePID(radians(stablePitch), -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  //motors.setMotorAxisCommand(PITCH, updatePID(radians(stablePitch), -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
   // OLD NON SI
   //motors.setMotorAxisCommand(PITCH, updatePID(stablePitch, gyro.getFlightData(PITCH), &PID[LEVELGYROPITCH]));  
+  // ORIGINAL
+  motors.setMotorAxisCommand(PITCH, constrain(PID[LEVELGYROPITCH].P * errorPitch, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT));
 }
 
+#endif
+#ifdef UseAQStable
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// AQ Original Stable Mode //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void processAeroQuadStableMode(void)
 {
+  // an attempt to make AQ Stable work with the new SI Scaling...
+  // AKA 2011-03-17
+  //float attitudeScaling = (1.5 * PWM2RPS); // +/-1.5 radian attitude
+  //float rollStickScaled = ((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling) - flightAngle->getData(ROLL);
+  //float pitchStickScaled = ((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling) + flightAngle->getData(PITCH);
+  
+  //levelAdjust[ROLL] = rollStickScaled * PID[LEVELROLL].P;
+  //levelAdjust[PITCH] = pitchStickScaled * PID[LEVELPITCH].P;
   levelAdjust[ROLL] = (receiver.getAngle(ROLL) - degrees(flightAngle->getData(ROLL))) * PID[LEVELROLL].P;
   levelAdjust[PITCH] = (receiver.getAngle(PITCH) + degrees(flightAngle->getData(PITCH))) * PID[LEVELPITCH].P;
   // Check if pilot commands are not in hover, don't auto trim
@@ -85,8 +100,10 @@ void processAeroQuadStableMode(void)
     #endif
   }
   else {
+    //PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + ((rollStickScaled * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
+    //PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + ((pitchStickScaled * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
     PID[LEVELROLL].integratedError = constrain(PID[LEVELROLL].integratedError + (((receiver.getAngle(ROLL) - degrees(flightAngle->getData(ROLL))) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
-    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + degrees(flightAngle->getData(PITCH))) * G_Dt) * PID[LEVELROLL].I), -levelLimit, levelLimit);
+    PID[LEVELPITCH].integratedError = constrain(PID[LEVELPITCH].integratedError + (((receiver.getAngle(PITCH) + degrees(flightAngle->getData(PITCH))) * G_Dt) * PID[LEVELPITCH].I), -levelLimit, levelLimit);
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
       digitalWrite(LED2PIN, HIGH);
     #endif
@@ -95,12 +112,15 @@ void processAeroQuadStableMode(void)
     #endif
   }
   // NEW SI Version
-  motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL) + radians(levelAdjust[ROLL]), gyro.getData(ROLL), &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
-  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH) + radians(levelAdjust[PITCH]), -gyro.getData(PITCH), &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
+  //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL) + levelAdjust[ROLL], gyro.getData(ROLL), &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
+  //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH) + levelAdjust[PITCH], -gyro.getData(PITCH), &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
+  //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL) + radians(levelAdjust[ROLL]), gyro.getData(ROLL), &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
+  //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH) + radians(levelAdjust[PITCH]), -gyro.getData(PITCH), &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
   // OLD NON SI
-  //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
-  //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
+  motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL) + levelAdjust[ROLL], gyro.getFlightData(ROLL) + 1500, &PID[LEVELGYROROLL]) + PID[LEVELROLL].integratedError);
+  motors.setMotorAxisCommand(PITCH, updatePID(receiver.getData(PITCH) + levelAdjust[PITCH], gyro.getFlightData(PITCH) + 1500, &PID[LEVELGYROPITCH]) + PID[LEVELPITCH].integratedError);
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// Attitude Mode ///////////////////////////////
@@ -109,7 +129,10 @@ void processAttitudeMode(void)
 {
   // To Do
   // Figure out how to zero integrator when entering attitude mode from rate mode 
-  float attitudeScaling = 0.002; // +/-1 radian attitude
+  // 2.3 Original
+  float attitudeScaling = (0.75 * PWM2RPS); // +/-.75 radian attitude
+  // 2.3 Stable
+  //float attitudeScaling = (1.5 * PWM2RPS); // +/-1.5 radian attitude factored further by transmitter factor
 
   // Assume receiver.getRaw(axis) returns +/-500 by using constrain() function 
   //float rollAttitudeCmd = updatePID(constrain(receiver.getRaw(ROLL) - 1500, -500, 500) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
@@ -122,8 +145,12 @@ void processAttitudeMode(void)
   // if you want to try them
   float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
   float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  // 2.3 Original
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  // 2.3 Stable
+  //motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[ROLL]));
+  //motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[PITCH]));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -241,15 +268,20 @@ void processAltitudeHold(void)
 #ifdef AltitudeHold
   if (altitudeHold == ON) {
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-    zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-    if((abs(flightAngle->getData(ROLL)) > 5) || (abs(flightAngle->getData(PITCH)) > 5)) { 
-      PID[ZDAMPENING].integratedError = 0;
-    }
+    //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
+    //if((abs(flightAngle->getData(ROLL)) > radians(5)) || (abs(flightAngle->getData(PITCH)) > radians(5))) { 
+    //  PID[ZDAMPENING].integratedError = 0;
+    //}
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
     if (abs(holdThrottle - receiver.getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
       altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
+    #ifdef OpenlogWrite      
+      SerialLog.dumpRecord(LOG_REC_FLIGHT);
+      SerialLog.dumpRecord(LOG_REC_ALTHOLD);
+      SerialLog.dumpRecord(LOG_REC_ALTPID);
+    #endif      
       if (receiver.getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
         holdAltitude += 0.01;
       }
