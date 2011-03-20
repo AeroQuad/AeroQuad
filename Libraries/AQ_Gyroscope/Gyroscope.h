@@ -19,7 +19,7 @@ public:
 
   void setZero(byte axis, float value);
   const float getZero(byte axis);
-  void setProcessTime(unsigned long time, unsigned long offset);
+  void setProcessTime(unsigned long time);
   const float getRadPerSec(byte axis);
 };
 #endif
