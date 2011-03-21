@@ -30,8 +30,8 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -152,6 +152,7 @@
   Accel_AeroQuadMini accel;
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
+  //Motors_PWM motors;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
@@ -309,10 +310,12 @@
   #endif
 #endif
 
+#ifdef BinaryWrite
 #ifdef OpenlogWrite
 #include "Log.h"
 
 serialLogger  SerialLog;
+#endif
 #endif
 
 #ifdef XConfig
@@ -431,10 +434,15 @@ void setup() {
     camera.setCenterPitch(1300);
   #endif
 
+  #ifdef BinaryWrite
   #ifdef OpenlogWrite  
     SerialLog.begin (1, 115200);  // (port, baud) This will take over 2 sec - wait on reset of OpenLog
-    SerialLog.dumpRecord(LOG_REC_BAROGND); // capture ground data from baro
+    //SerialLog.dumpRecord(LOG_REC_BAROGND); // capture ground data from baro
   #endif
+  #endif
+  
+	// AKA use a new low pass filter called a Lag Filter
+  setupFilters();
 
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
@@ -480,6 +488,14 @@ void loop () {
   }
   
   #ifdef BinaryWrite
+  #ifdef OpenlogWrite    
+    if (armed == ON) {
+      SerialLog.dumpRecord(LOG_REC_PQR); // capture DCM data
+      SerialLog.dumpRecord(LOG_REC_XYZ);
+      SerialLog.dumpRecord(LOG_REC_PT);
+    }
+  #else
+
     // **************************************************************
     // ***************** Fast Transfer Of Sensor Data ***************
     // **************************************************************
@@ -505,6 +521,7 @@ void loop () {
       fastTelemetryTime = currentTime;
     }
   #endif
+  #endif
 
   #ifdef CameraControl // Experimental, not fully implemented yet
     if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
@@ -515,4 +532,4 @@ void loop () {
       cameraTime = currentTime + CAMERALOOPTIME;
     }
   #endif
-}
+}

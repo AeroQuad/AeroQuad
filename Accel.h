@@ -244,7 +244,11 @@ public:
         accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis];
       else
         accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
-      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+      //if (axis == ROLL) {
+        //Serial.print(accelADC[axis] *accelScaleFactor); Serial.print(","); Serial.println(accelData[axis]);
+      //}
+      //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
 

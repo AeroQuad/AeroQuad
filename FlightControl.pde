@@ -235,10 +235,18 @@ void processHeading(void)
         headingHold = 0;
         PID[HEADING].integratedError = 0;
       }
-      else 
+      else {
+        if (relativeHeading < .25 && relativeHeading > -.25) {
+          //setHeading = heading;
+          headingHold = 0;
+          PID[HEADING].integratedError = 0;
+        }
+        else {
         // No new yaw input, calculate current heading vs. desired heading heading hold
         // Relative heading is always centered around zero
-        headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
+          headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
+        }
+      }
     }
     else {
       // minimum throttle not reached, use off settings
@@ -277,11 +285,13 @@ void processAltitudeHold(void)
     if (abs(holdThrottle - receiver.getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
       altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
+    #ifdef BinaryWrite
     #ifdef OpenlogWrite      
       SerialLog.dumpRecord(LOG_REC_FLIGHT);
-      SerialLog.dumpRecord(LOG_REC_ALTHOLD);
-      SerialLog.dumpRecord(LOG_REC_ALTPID);
+      //SerialLog.dumpRecord(LOG_REC_ALTHOLD);
+      //SerialLog.dumpRecord(LOG_REC_ALTPID);
     #endif      
+    #endif
       if (receiver.getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
         holdAltitude += 0.01;
       }

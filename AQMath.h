@@ -21,6 +21,100 @@
 #define G_2_MPS2(g) (g * 9.80665)
 #define MPS2_2_G(m) (m * 0.10197162)
 
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Constant Definitions
+//
+//  General:
+//
+//    a = (2 * tau)/T
+//      tau = filter time constant
+//      T   = sample time
+//
+//  Lag Filter:
+//
+//    gx1 = 1/(1+a)
+//    gx2 = 1/(1+a)
+//    gx3 = (1-a)/(1+a)
+//
+//  Washout Filter:
+//
+//    gx1 = a/(1+a)
+//    gx2 = -a/(1+a)
+//    gx3 = (1-a)/(1+a)
+//
+////////////////////////////////////////////////////////////////////////////////
+struct firstOrderData
+{
+  float gx1;
+  float gx2;
+  float gx3;
+  float lastInput;
+  float lastOutput;
+} firstOrder[3];
+
+float computeFirstOrder(float currentInput, struct firstOrderData *filterParameters)
+{
+  filterParameters->lastOutput = filterParameters->gx1 * currentInput + 
+                                 filterParameters->gx2 * filterParameters->lastInput - 
+                                 filterParameters->gx3 * filterParameters->lastOutput;
+           
+  filterParameters->lastInput = currentInput;
+    
+  return filterParameters->lastOutput;
+}
+
+#define AX_LAG 0
+#define AY_LAG 1
+#define AZ_LAG 2
+
+void setupFilters()
+{
+  // ax 0.05 sec Lag Filter at 50 Hz
+  firstOrder[AX_LAG].gx1 =  0.166666666666667;
+  firstOrder[AX_LAG].gx2 =  0.166666666666667;
+  firstOrder[AX_LAG].gx3 = -0.666666666666667;
+  firstOrder[AX_LAG].lastInput =  0.0;
+  firstOrder[AX_LAG].lastOutput = 0.0;
+  
+  // ay 0.05 sec Lag Filter at 50 Hz
+  firstOrder[AY_LAG].gx1 =  0.166666666666667;
+  firstOrder[AY_LAG].gx2 =  0.166666666666667;
+  firstOrder[AY_LAG].gx3 = -0.666666666666667;
+  firstOrder[AY_LAG].lastInput =  0.0;
+  firstOrder[AY_LAG].lastOutput = 0.0;
+  
+  // az 0.05 sec Lag Filter at 50 Hz
+  firstOrder[AZ_LAG].gx1 =  0.166666666666667;
+  firstOrder[AZ_LAG].gx2 =  0.166666666666667;
+  firstOrder[AZ_LAG].gx3 = -0.666666666666667;
+  firstOrder[AZ_LAG].lastInput =  -1.0;
+  firstOrder[AZ_LAG].lastOutput = -1.0;
+  
+/*  
+  // az 0.05 sec Washout Filter at 50 Hz
+  firstOrder[AX_LAG].gx1 =  0.833333333333333;
+  firstOrder[AX_LAG].gx2 = -0.833333333333333;
+  firstOrder[AX_LAG].gx3 = -0.666666666666667;
+  firstOrder[AX_LAG].lastInput =  -1.0;
+  firstOrder[AX_LAG].lastOutput = -1.0;
+
+  // az 0.05 sec Washout Filter at 50 Hz
+  firstOrder[AY_LAG].gx1 =  0.833333333333333;
+  firstOrder[AY_LAG].gx2 = -0.833333333333333;
+  firstOrder[AY_LAG].gx3 = -0.666666666666667;
+  firstOrder[AY_LAG].lastInput =  -1.0;
+  firstOrder[AY_LAG].lastOutput = -1.0;
+
+  // az 0.05 sec Washout Filter at 50 Hz
+  firstOrder[AZ_LAG].gx1 =  0.833333333333333;
+  firstOrder[AZ_LAG].gx2 = -0.833333333333333;
+  firstOrder[AZ_LAG].gx3 = -0.666666666666667;
+  firstOrder[AZ_LAG].lastInput =  -1.0;
+  firstOrder[AZ_LAG].lastOutput = -1.0;
+*/  
+}
+
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor) {
   if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
