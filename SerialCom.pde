@@ -555,8 +555,8 @@ void printInt(int data) {
   msb = data >> 8;
   lsb = data & 0xff;
 
-  Serial.print(msb, BYTE);
-  Serial.print(lsb, BYTE);
+  binaryPort->print(msb, BYTE);
+  binaryPort->print(lsb, BYTE);
 }
 
 void sendBinaryFloat(float data) {
@@ -566,8 +566,21 @@ void sendBinaryFloat(float data) {
   } binaryFloat;
   
   binaryFloat.floatVal = data;
-  Serial.print(binaryFloat.floatByte[3], BYTE);
-  Serial.print(binaryFloat.floatByte[2], BYTE);
-  Serial.print(binaryFloat.floatByte[1], BYTE);
-  Serial.print(binaryFloat.floatByte[0], BYTE);
-}
+  binaryPort->print(binaryFloat.floatByte[3], BYTE);
+  binaryPort->print(binaryFloat.floatByte[2], BYTE);
+  binaryPort->print(binaryFloat.floatByte[1], BYTE);
+  binaryPort->print(binaryFloat.floatByte[0], BYTE);
+}
+
+void sendBinaryuslong(unsigned long data) {
+  union binaryuslongType {
+    byte uslongByte[4];
+    unsigned long uslongVal;
+  } binaryuslong;
+  
+  binaryuslong.uslongVal = data;
+  binaryPort->print(binaryuslong.uslongByte[3], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[2], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[1], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[0], BYTE);
+}

@@ -68,8 +68,9 @@ float computeFirstOrder(float currentInput, struct firstOrderData *filterParamet
 #define AY_LAG 1
 #define AZ_LAG 2
 
-void setupFilters()
+void setupFilters(float oneG)
 {
+/*  
   // ax 0.05 sec Lag Filter at 50 Hz
   firstOrder[AX_LAG].gx1 =  0.166666666666667;
   firstOrder[AX_LAG].gx2 =  0.166666666666667;
@@ -90,7 +91,24 @@ void setupFilters()
   firstOrder[AZ_LAG].gx3 = -0.666666666666667;
   firstOrder[AZ_LAG].lastInput =  -1.0;
   firstOrder[AZ_LAG].lastOutput = -1.0;
+*/  
+  firstOrder[AX_LAG].gx1 =  0.007;
+  firstOrder[AX_LAG].gx2 =  0.007;
+  firstOrder[AX_LAG].gx3 = -0.986;
+  firstOrder[AX_LAG].lastInput =  0.0;
+  firstOrder[AX_LAG].lastOutput = 0.0;
   
+  firstOrder[AY_LAG].gx1 =  0.007;
+  firstOrder[AY_LAG].gx2 =  0.007;
+  firstOrder[AY_LAG].gx3 = -0.986;
+  firstOrder[AY_LAG].lastInput =  0.0;
+  firstOrder[AY_LAG].lastOutput = 0.0;
+  
+  firstOrder[AZ_LAG].gx1 =  0.007;
+  firstOrder[AZ_LAG].gx2 =  0.007;
+  firstOrder[AZ_LAG].gx3 = -0.986;
+  firstOrder[AZ_LAG].lastInput =  -oneG;
+  firstOrder[AZ_LAG].lastOutput = -oneG;
 /*  
   // az 0.05 sec Washout Filter at 50 Hz
   firstOrder[AX_LAG].gx1 =  0.833333333333333;

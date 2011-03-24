@@ -31,10 +31,10 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -58,12 +58,13 @@
 //#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
 //#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
 #define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-//#define OpenlogWrite // Enables fast binary transfer to openlod hardware
+//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
+//#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -310,14 +311,6 @@
   #endif
 #endif
 
-#ifdef BinaryWrite
-#ifdef OpenlogWrite
-#include "Log.h"
-
-serialLogger  SerialLog;
-#endif
-#endif
-
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
 #endif
@@ -435,14 +428,18 @@ void setup() {
   #endif
 
   #ifdef BinaryWrite
-  #ifdef OpenlogWrite  
-    SerialLog.begin (1, 115200);  // (port, baud) This will take over 2 sec - wait on reset of OpenLog
-    //SerialLog.dumpRecord(LOG_REC_BAROGND); // capture ground data from baro
-  #endif
+  #ifdef OpenlogBinaryWrite
+    binaryPort = &Serial1;
+    binaryPort->begin(115200);
+    delay(1000);
+    //binaryPort->println("hi there");
+  #else
+   binaryPort = &Serial;
+  #endif 
   #endif
   
-	// AKA use a new low pass filter called a Lag Filter
-  setupFilters();
+  // AKA use a new low pass filter called a Lag Filter
+  setupFilters(accel.accelOneG);
 
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
@@ -486,16 +483,8 @@ void loop () {
     sendSerialTelemetry(); // defined in SerialCom.pde
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
-  
-  #ifdef BinaryWrite
-  #ifdef OpenlogWrite    
-    if (armed == ON) {
-      SerialLog.dumpRecord(LOG_REC_PQR); // capture DCM data
-      SerialLog.dumpRecord(LOG_REC_XYZ);
-      SerialLog.dumpRecord(LOG_REC_PT);
-    }
-  #else
 
+ #ifdef BinaryWrite
     // **************************************************************
     // ***************** Fast Transfer Of Sensor Data ***************
     // **************************************************************
@@ -506,21 +495,40 @@ void loop () {
     // If 10 ms output rate, then 36 floats/10ms
     // Number of floats written using sendBinaryFloat is 15
     if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
-      printInt(21845); // Start word of 0x5555
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-      for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-      for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      #ifdef HeadingMagHold
-        sendBinaryFloat(compass.getRawData(axis));
-      #else
-        sendBinaryFloat(0);
+      if (armed == ON) {
+    #ifdef OpenlogBinaryWrite
+        printInt(21845); // Start word of 0x5555
+        sendBinaryuslong(currentTime);
+        printInt(flightMode);
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+        sendBinaryFloat(accel.accelOneG);
+        #ifdef HeadingMagHold
+          sendBinaryFloat(compass.hdgX);
+          sendBinaryFloat(compass.hdgY);
+        #else
+          sendBinaryFloat(0.0);
+          sendBinaryFloat(0.0);
+        #endif
+        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+        printInt(32767); // Stop word of 0x7FFF
+    #else
+        printInt(21845); // Start word of 0x5555
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+        for (byte axis = ROLL; axis < LASTAXIS; axis++)
+        #ifdef HeadingMagHold
+          sendBinaryFloat(compass.getRawData(axis));
+        #else
+          sendBinaryFloat(0);
+        #endif
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+        printInt(32767); // Stop word of 0x7FFF
       #endif
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-      printInt(32767); // Stop word of 0x7FFF
+      }
       fastTelemetryTime = currentTime;
     }
-  #endif
   #endif
 
   #ifdef CameraControl // Experimental, not fully implemented yet
@@ -532,4 +540,4 @@ void loop () {
       cameraTime = currentTime + CAMERALOOPTIME;
     }
   #endif
-}
+}

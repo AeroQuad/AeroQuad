@@ -130,7 +130,7 @@ void processAttitudeMode(void)
   // To Do
   // Figure out how to zero integrator when entering attitude mode from rate mode 
   // 2.3 Original
-  float attitudeScaling = (0.75 * PWM2RPS); // +/-.75 radian attitude
+  float attitudeScaling = (0.75 * PWM2RPS); // +/-0.75 radian attitude
   // 2.3 Stable
   //float attitudeScaling = (1.5 * PWM2RPS); // +/-1.5 radian attitude factored further by transmitter factor
 
@@ -143,14 +143,42 @@ void processAttitudeMode(void)
   // these should be the same as the above with one exception.
   // these use the getData method which uses the smoothed and scaled RX values 
   // if you want to try them
-  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
+  float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
+  float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
   // 2.3 Original
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
   // 2.3 Stable
   //motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[ROLL]));
   //motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[PITCH]));
+  #ifdef BinaryWritePID
+    // **************************************************************
+    // ***************** Fast Transfer Of Sensor Data ***************
+    // **************************************************************
+    // AeroQuad.h defines the output rate to be 10ms
+    // Since writing to UART is done by hardware, unable to measure data rate directly
+    // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+    // If float = 4 bytes, then 3600 floats/second
+    // If 10 ms output rate, then 36 floats/10ms
+    // Number of floats written using sendBinaryFloat is 15
+    #ifdef OpenlogBinaryWrite
+        printInt(21845); // Start word of 0x5555
+        sendBinaryuslong(currentTime);
+        sendBinaryFloat(recRollScaled);
+        sendBinaryFloat(recPitchScaled);
+        sendBinaryFloat(flightAngle->getData(ROLL));
+        sendBinaryFloat(-flightAngle->getData(PITCH));
+        sendBinaryFloat(rollAttitudeCmd);
+        sendBinaryFloat(pitchAttitudeCmd);
+        sendBinaryFloat(receiver.getSIData(YAW));
+        sendBinaryFloat(gyro.getData(ROLL));
+        sendBinaryFloat(-gyro.getData(PITCH));
+        sendBinaryFloat(gyro.getData(YAW));
+        printInt(32767); // Stop word of 0x7FFF
+    #endif
+  #endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -286,8 +314,9 @@ void processAltitudeHold(void)
       altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
     #ifdef BinaryWrite
-    #ifdef OpenlogWrite      
-      SerialLog.dumpRecord(LOG_REC_FLIGHT);
+    #ifdef OpenlogBinaryWrite
+      // change this to the new BinaryWrite
+      //SerialLog.dumpRecord(LOG_REC_FLIGHT);
       //SerialLog.dumpRecord(LOG_REC_ALTHOLD);
       //SerialLog.dumpRecord(LOG_REC_ALTPID);
     #endif      

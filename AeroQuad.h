@@ -222,6 +222,7 @@ byte tlmType = 0;
 byte armed = OFF;
 byte safetyCheck = OFF;
 byte update = 0;
+HardwareSerial *binaryPort;
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -366,6 +367,7 @@ void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void sendBinaryFloat(float); // defined in SerialCom.pde
+void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)

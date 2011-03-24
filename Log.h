@@ -51,11 +51,12 @@
 #define  LOG_REC_ITOD          3
 #define  LOG_REC_ALTHOLD       4
 #define  LOG_REC_VRSWITCH      5
-#define  LOG_REC_ALTPID        6
+//#define  LOG_REC_ALTPID        6
 //#define  LOG_REC_BARODATA      7
 //#define  LOG_REC_BAROGND       8
-#define  LOG_REC_PQR           7
-#define  LOG_REC_XYZ           8
+#define  LOG_REC_PQR           6
+#define  LOG_REC_XYZ           7
+#define  LOG_REC_HDG           8
 #define  LOG_REC_PT            9
 
 
@@ -88,11 +89,12 @@ _descriptors[] = {
   {LOG_REC_ITOD,    "Tffffa",      "raw Alt, Roll, Pitch, Yaw"},
   {LOG_REC_ALTHOLD, "Thib",       "H Alt,H Thr,AltH f"},
   {LOG_REC_VRSWITCH,"Tv",        "bit flags"},
-  {LOG_REC_ALTPID,  "Thhii",    "H Alt,C Alt,Th Adj,Mtr Cmd"},
+//  {LOG_REC_ALTPID,  "Thhii",    "H Alt,C Alt,Th Adj,Mtr Cmd"},
 //  {LOG_REC_BARODATA,"Tblf",     "flags,iir_b5,iir_Alt"},
 //  {LOG_REC_BAROGND, "Tfff",      "GndTemp,GndPress,GndAlt"},
   {LOG_REC_PQR,     "Tfff",        "p,q,r"},
   {LOG_REC_XYZ,     "Tfff",        "ax,ay,az"},
+  {LOG_REC_HDG,     "Tfff",        "1G,hdgX,hdgY"},
   {LOG_REC_PT,      "Tff",        "Phi,Theta"}
 };
 
@@ -253,7 +255,8 @@ public:
 #define DUMP(X) vptr=(uint8_t *)&X;for(uint8_t i=0;i<sizeof(X);i++)*bptr++=*vptr++; 
 #define DUMPA(X,Y) vptr=(uint8_t *)X;for(uint8_t i=0;i<Y;i++)*bptr++=*vptr++;  //addr, size 
 
-      //  TYPE1  start with altitude stuff
+      //  TYPE1  start with altitude stuf
+/*
       case (LOG_REC_FLIGHT):
         // Type, Timestamp, 
         DUMP(type);                               // Type
@@ -276,16 +279,16 @@ public:
         DUMP(i_val);                          //i Motor cmd - assuming stable level hover so only dump one
         DUMP(altitudeHold);
   
-        /*
-                DUMP(accel.accelData[0]);         //i X axis smooth
-         DUMP(accel.accelData[1]);         //i Y axis smooth
-         DUMP(accel.accelData[2]);         //i Z axis smooth
-         */
+
+         //DUMP(accel.accelData[0]);         //i X axis smooth
+         //DUMP(accel.accelData[1]);         //i Y axis smooth
+         //DUMP(accel.accelData[2]);         //i Z axis smooth
+
         //DUMP(batteryMonitor.batteryVoltage); //
         //DUMP(GPS.Altitude);               //l GPS altitude
         //DUMP(GPS.Fix);                    //b GPS Fix = 1, nofix = 0;
       break;  // end case 1
-
+*/
 /* AKA
       case (LOG_REC_GPS): 
       {
@@ -301,7 +304,7 @@ public:
       }              
       // throttle, motor out battery 
       break;
-*/      
+    
       case (LOG_REC_ITOD):
         DUMP(type);
         DUMPA(&currentTime,3); 
@@ -315,7 +318,7 @@ public:
         i_val = 0; // AKA i_val = (tempFlightAngle.groundZaccel * 1000);
         DUMP(i_val); //a
             break;
-            
+*/              
       case (LOG_REC_ALTHOLD):
         DUMP(type);
         DUMPA(&currentTime,3); 
@@ -335,7 +338,7 @@ public:
         b_val |= flightMode << 5;            
         DUMP(b_val); //h
             break;
-*/            
+           
       case (LOG_REC_ALTPID):
         DUMP(type);
         DUMPA(&currentTime,3);
@@ -347,7 +350,7 @@ public:
         i_val = motors.getMotorCommand(FRONT);
         DUMP(i_val);                          //i Motor cmd - assuming stable level hover so only dump one
             break;
-/*            
+            
        case (LOG_REC_BARODATA):
          DUMP(type);
          DUMPA(&currentTime,3);
@@ -384,6 +387,14 @@ public:
          DUMP(accel.accelData[ROLL]);
          DUMP(accel.accelData[PITCH]);
          DUMP(accel.accelData[YAW]);
+         break;
+         
+      case (LOG_REC_HDG):
+         DUMP(type);
+         DUMPA(&currentTime,3);
+         DUMP(accel.accelOneG);
+         DUMP(compass.hdgX);
+         DUMP(compass.hdgY);
          break;
          
       case (LOG_REC_PT):
