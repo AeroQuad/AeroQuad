@@ -245,7 +245,9 @@ unsigned long compassTime = 5000;
 unsigned long altitudeTime = 10000;
 unsigned long batteryTime = 15000;
 unsigned long autoZeroGyroTime = 0;
+#ifdef CameraControl
 unsigned long cameraTime = 10000;
+#endif
 unsigned long fastTelemetryTime = 0;
 unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
@@ -285,7 +287,9 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
+#ifdef CameraControl
 byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+#endif
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
 

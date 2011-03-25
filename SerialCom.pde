@@ -163,7 +163,7 @@ void readSerialCommand() {
 #endif
       break;
     case '~': //  read Camera values 
-      #ifdef Camera
+#ifdef Camera
       camera.setMode(readFloatSerial());
       camera.setCenterPitch(readFloatSerial());
       camera.setCenterRoll(readFloatSerial());
@@ -177,7 +177,7 @@ void readSerialCommand() {
       camera.setServoMaxPitch(readFloatSerial());
       camera.setServoMaxRoll(readFloatSerial());
       camera.setServoMaxYaw(readFloatSerial());
-      #endif
+#endif
       break;
     }
     digitalWrite(LEDPIN, HIGH);
@@ -499,7 +499,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case '`': // Send Camera values 
-    #ifdef Camera
+#ifdef Camera
     PrintValueComma(camera.getMode());
     PrintValueComma(camera.getCenterPitch());
     PrintValueComma(camera.getCenterRoll());
@@ -517,7 +517,7 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getServoMaxPitch());
     PrintValueComma(camera.getServoMaxRoll());
     Serial.println(camera.getServoMaxYaw());
-    #endif
+#endif
     break;
   }
 }

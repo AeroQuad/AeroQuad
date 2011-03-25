@@ -143,6 +143,7 @@ void processAttitudeMode(void)
   // these should be the same as the above with one exception.
   // these use the getData method which uses the smoothed and scaled RX values 
   // if you want to try them
+  // AKA change this back once data collection is complete
   float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
   float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
   float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);

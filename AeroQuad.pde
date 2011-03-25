@@ -432,7 +432,6 @@ void setup() {
     binaryPort = &Serial1;
     binaryPort->begin(115200);
     delay(1000);
-    //binaryPort->println("hi there");
   #else
    binaryPort = &Serial;
   #endif 
@@ -455,9 +454,11 @@ void loop () {
   deltaTime = currentTime - previousTime;
   G_Dt = deltaTime / 1000000.0;
   previousTime = currentTime;
+  
   #ifdef DEBUG
-    if (testSignal == LOW) testSignal = HIGH;
-    else testSignal = LOW;
+    testSignal ^= HIGH;
+//    if (testSignal == LOW) testSignal = HIGH;
+//    else testSignal = LOW;
     digitalWrite(LEDPIN, testSignal);
   #endif
   
@@ -472,13 +473,13 @@ void loop () {
   } 
   
   // Reads external pilot commands and performs functions based on stick configuration
-  if ((receiverLoop == ON) && (currentTime > receiverTime)) {// 50Hz
+  if ((receiverLoop == ON) && (currentTime > receiverTime)) { // 10Hz
     readPilotCommands(); // defined in FlightCommand.pde
     receiverTime = currentTime + RECEIVERLOOPTIME;
   }
   
   // Listen for configuration commands and reports telemetry
-  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 20Hz
+  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 10Hz
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
@@ -499,7 +500,7 @@ void loop () {
     #ifdef OpenlogBinaryWrite
         printInt(21845); // Start word of 0x5555
         sendBinaryuslong(currentTime);
-        printInt(flightMode);
+        printInt((int)flightMode);
         for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
         for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
         sendBinaryFloat(accel.accelOneG);
