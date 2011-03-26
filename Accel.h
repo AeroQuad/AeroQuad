@@ -408,7 +408,7 @@ public:
   void measure(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
-      if (rawADC > 500) { / / Check if measurement good
+      if (rawADC > 500) { // Check if measurement good
         if (axis == ROLL)
           accelADC[axis] = rawADC - accelZero[axis];
         else
