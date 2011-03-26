@@ -142,8 +142,8 @@ public:
     accelADC[YAXIS] = analogRead(accelChannel[ROLL]) - accelZero[ROLL];
     accelADC[ZAXIS] = accelZero[ZAXIS] - analogRead(accelChannel[ZAXIS]);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
-      //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
 
@@ -245,8 +245,11 @@ public:
         accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis];
       else
         accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
-      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
-      //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+//      if (axis == ROLL) {
+//        Serial.print(accelData[axis]); Serial.print(",");Serial.print(smoothFactor);Serial.print(",");Serial.println(accelADC[axis]*accelScaleFactor);
+//      }
     }
   }
 
@@ -330,8 +333,8 @@ public:
         accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
       else
         accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
-      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
-      //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
 
@@ -413,8 +416,8 @@ public:
           accelADC[axis] = rawADC - accelZero[axis];
         else
           accelADC[axis] = accelZero[axis] - rawADC;
-        accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
-        //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+        //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+        accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
       }
     }
   }
@@ -477,8 +480,8 @@ public:
     accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
     accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
-      //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
+      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
   

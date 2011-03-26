@@ -143,22 +143,26 @@ void processAttitudeMode(void)
   // these should be the same as the above with one exception.
   // these use the getData method which uses the smoothed and scaled RX values 
   // if you want to try them
+  #ifdef BinaryWritePID  
   // AKA change this back once data collection is complete
-  //float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
-  //float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
-  //float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  //float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  //////
+  float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
+  float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
+  float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  #else  
   float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
   float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  #endif  
   // 2.3 Original
-  //float rollMotorCmd = updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]);
-  //float pitchMotorCmd = updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]);
-  //motors.setMotorAxisCommand(ROLL, rollMotorCmd);
-  //motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
-  //////
+  #ifdef BinaryWritePID  
+  float rollMotorCmd = updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]);
+  float pitchMotorCmd = updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]);
+  motors.setMotorAxisCommand(ROLL, rollMotorCmd);
+  motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
+  #else  
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  #endif  
   // 2.3 Stable
   //motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[ROLL]));
   //motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[PITCH]));

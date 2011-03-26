@@ -71,82 +71,62 @@ float computeFirstOrder(float currentInput, struct firstOrderData *filterParamet
 void setupFilters(float oneG)
 {
 /*  
-  // ax 0.05 sec Lag Filter at 50 Hz
-  firstOrder[AX_LAG].gx1 =  0.166666666666667;
-  firstOrder[AX_LAG].gx2 =  0.166666666666667;
-  firstOrder[AX_LAG].gx3 = -0.666666666666667;
+  // 1 sec @ 100hz - logging filter
+  firstOrder[AX_LAG].gx1 =  0.005;
+  firstOrder[AX_LAG].gx2 =  0.005;
+  firstOrder[AX_LAG].gx3 = -0.990;
   firstOrder[AX_LAG].lastInput =  0.0;
   firstOrder[AX_LAG].lastOutput = 0.0;
   
-  // ay 0.05 sec Lag Filter at 50 Hz
-  firstOrder[AY_LAG].gx1 =  0.166666666666667;
-  firstOrder[AY_LAG].gx2 =  0.166666666666667;
-  firstOrder[AY_LAG].gx3 = -0.666666666666667;
+  firstOrder[AY_LAG].gx1 =  0.005;
+  firstOrder[AY_LAG].gx2 =  0.005;
+  firstOrder[AY_LAG].gx3 = -0.990;
   firstOrder[AY_LAG].lastInput =  0.0;
   firstOrder[AY_LAG].lastOutput = 0.0;
   
-  // az 0.05 sec Lag Filter at 50 Hz
-  firstOrder[AZ_LAG].gx1 =  0.166666666666667;
-  firstOrder[AZ_LAG].gx2 =  0.166666666666667;
-  firstOrder[AZ_LAG].gx3 = -0.666666666666667;
-  firstOrder[AZ_LAG].lastInput =  -1.0;
-  firstOrder[AZ_LAG].lastOutput = -1.0;
-*/  
-  firstOrder[AX_LAG].gx1 =  0.002;
-  firstOrder[AX_LAG].gx2 =  0.002;
-  firstOrder[AX_LAG].gx3 = -0.995;
-  firstOrder[AX_LAG].lastInput =  0.0;
-  firstOrder[AX_LAG].lastOutput = 0.0;
-  
-  firstOrder[AY_LAG].gx1 =  0.002;
-  firstOrder[AY_LAG].gx2 =  0.002;
-  firstOrder[AY_LAG].gx3 = -0.995;
-  firstOrder[AY_LAG].lastInput =  0.0;
-  firstOrder[AY_LAG].lastOutput = 0.0;
-  
-  firstOrder[AZ_LAG].gx1 =  0.002;
-  firstOrder[AZ_LAG].gx2 =  0.002;
-  firstOrder[AZ_LAG].gx3 = -0.995;
+  firstOrder[AZ_LAG].gx1 =  0.005;
+  firstOrder[AZ_LAG].gx2 =  0.005;
+  firstOrder[AZ_LAG].gx3 = -0.990;
   firstOrder[AZ_LAG].lastInput =  -oneG;
   firstOrder[AZ_LAG].lastOutput = -oneG;
-/*  
-  // az 0.05 sec Washout Filter at 50 Hz
-  firstOrder[AX_LAG].gx1 =  0.833333333333333;
-  firstOrder[AX_LAG].gx2 = -0.833333333333333;
-  firstOrder[AX_LAG].gx3 = -0.666666666666667;
-  firstOrder[AX_LAG].lastInput =  -1.0;
-  firstOrder[AX_LAG].lastOutput = -1.0;
-
-  // az 0.05 sec Washout Filter at 50 Hz
-  firstOrder[AY_LAG].gx1 =  0.833333333333333;
-  firstOrder[AY_LAG].gx2 = -0.833333333333333;
-  firstOrder[AY_LAG].gx3 = -0.666666666666667;
-  firstOrder[AY_LAG].lastInput =  -1.0;
-  firstOrder[AY_LAG].lastOutput = -1.0;
-
-  // az 0.05 sec Washout Filter at 50 Hz
-  firstOrder[AZ_LAG].gx1 =  0.833333333333333;
-  firstOrder[AZ_LAG].gx2 = -0.833333333333333;
-  firstOrder[AZ_LAG].gx3 = -0.666666666666667;
-  firstOrder[AZ_LAG].lastInput =  -1.0;
-  firstOrder[AZ_LAG].lastOutput = -1.0;
-*/  
+*/
+  // .3 second @ 250hz
+  firstOrder[AX_LAG].gx1 =  0.007;
+  firstOrder[AX_LAG].gx2 =  0.007;
+  firstOrder[AX_LAG].gx3 = -0.987;
+  firstOrder[AX_LAG].lastInput =  0.0;
+  firstOrder[AX_LAG].lastOutput = 0.0;
+  
+  firstOrder[AY_LAG].gx1 =  0.007;
+  firstOrder[AY_LAG].gx2 =  0.007;
+  firstOrder[AY_LAG].gx3 = -0.987;
+  firstOrder[AY_LAG].lastInput =  0.0;
+  firstOrder[AY_LAG].lastOutput = 0.0;
+  
+  firstOrder[AZ_LAG].gx1 =  0.007;
+  firstOrder[AZ_LAG].gx2 =  0.007;
+  firstOrder[AZ_LAG].gx3 = -0.987;
+  firstOrder[AZ_LAG].lastInput =  -oneG;
+  firstOrder[AZ_LAG].lastOutput = -oneG;
 }
+
 
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor) {
-  if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
+  if (smoothFactor != 1.0) // only apply time compensated filter if smoothFactor is applied
     return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor)); 
   else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
+    return currentData; // if smoothFactor == 1.0, do not calculate, just bypass!
 }
 
+/* AKA NOT USED ANYMORE
 float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
   if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
     return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
   else
     return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
 }
+*/
 
 
 

@@ -77,6 +77,9 @@ void readPilotCommands() {
     receiver.setTransmitterTrim(YAW, receiver.getRaw(YAW));
   }
   
+  #ifdef AeroQuad_Mini
+  flightMode = ACRO;
+  #else
   // Check Mode switch for Acro or Stable
   if (receiver.getRaw(MODE) > 1500) {
     #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
@@ -92,6 +95,7 @@ void readPilotCommands() {
     #endif
     flightMode = ACRO;
   }
+  #endif
   
    #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       if (flightMode == ACRO) {

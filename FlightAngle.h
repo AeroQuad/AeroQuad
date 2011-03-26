@@ -186,10 +186,12 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
                          accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
                          
   // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
+  // accelWeight = constrain(1 - 4 * abs(1 - accelMagnitude), 0, 1);
   
   // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
   accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
+  
+  //accelWeight = 1.0;
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
   vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
@@ -279,11 +281,25 @@ public:
     dcmMatrix[7] =  0;
     dcmMatrix[8] =  1;
 
+    // Original from John
+//    kpRollPitch = 1.6;
+//    kiRollPitch = 0.005;
+    
+//    kpYaw = -1.6;
+//    kiYaw = -0.005;
+/*    
+    // released in 2.2
     kpRollPitch = 1.0;
     kiRollPitch = 0.002;
     
     kpYaw = -1.0;
     kiYaw = -0.002;
+*/
+    kpRollPitch = 0.5;
+    kiRollPitch = 0.001;
+    
+    kpYaw = -0.5;
+    kiYaw = -0.001;
   }
   
 ////////////////////////////////////////////////////////////////////////////////
