@@ -163,9 +163,9 @@ void normalize(void)
 void driftCorrection(float ax, float ay, float az, float oneG, float magX, float magY) 
 {
   //  Compensation of the Roll, Pitch and Yaw drift. 
-  float accelMagnitude;
+//  float accelMagnitude;
   float accelVector[3];
-  float accelWeight;
+//  float accelWeight;
   float errorRollPitch[3];
 #ifdef HeadingMagHold  
   float errorCourse;
@@ -175,26 +175,29 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   float scaledOmegaI[3];
   
   //  Roll and Pitch Compensation
-  
-  accelVector[XAXIS] = ax;
-  accelVector[YAXIS] = ay;
-  accelVector[ZAXIS] = az;
+  #define ACCEL_MOOTHING_FACTOR 0.05
+  #define ACCEL_SCALING_FACTOR 0.05
+  accelVector[XAXIS] = accelVector[XAXIS]*ACCEL_MOOTHING_FACTOR + ax*ACCEL_SCALING_FACTOR;
+  accelVector[YAXIS] = accelVector[YAXIS]*ACCEL_MOOTHING_FACTOR + ay*ACCEL_SCALING_FACTOR;
+  accelVector[ZAXIS] = accelVector[ZAXIS]*ACCEL_MOOTHING_FACTOR + az*ACCEL_SCALING_FACTOR;
+
+ 
 
   // Calculate the magnitude of the accelerometer vector
-  accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + \
-                         accelVector[YAXIS] * accelVector[YAXIS] + \
-                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
+//  accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + \
+//                         accelVector[YAXIS] * accelVector[YAXIS] + \
+//                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
                          
   // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
   // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
   
   // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
+//  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
-  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
+  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);
   
-  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
+  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
   
   //  Yaw Compensation
@@ -302,7 +305,8 @@ public:
   }
   
   float getGyroUnbias(byte axis) {
-    return correctedRateVector[axis];
+//    return correctedRateVector[axis];
+    return omega[axis];
   }
   
   void calibrate() {};
