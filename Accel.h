@@ -477,7 +477,7 @@ public:
     accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
     accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
+      accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       //accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
