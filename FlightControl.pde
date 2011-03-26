@@ -130,7 +130,7 @@ void processAttitudeMode(void)
   // To Do
   // Figure out how to zero integrator when entering attitude mode from rate mode 
   // 2.3 Original
-  float attitudeScaling = (0.75 * PWM2RPS); // +/-0.75 radian attitude
+  float attitudeScaling = (1.0 * PWM2RPS); // +/-1.0 radian attitude
   // 2.3 Stable
   //float attitudeScaling = (1.5 * PWM2RPS); // +/-1.5 radian attitude factored further by transmitter factor
 
@@ -144,11 +144,19 @@ void processAttitudeMode(void)
   // these use the getData method which uses the smoothed and scaled RX values 
   // if you want to try them
   // AKA change this back once data collection is complete
-  float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
-  float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
-  float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  //float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
+  //float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
+  //float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  //float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  //////
+  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
   // 2.3 Original
+  //float rollMotorCmd = updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]);
+  //float pitchMotorCmd = updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]);
+  //motors.setMotorAxisCommand(ROLL, rollMotorCmd);
+  //motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
+  //////
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
   // 2.3 Stable
@@ -165,6 +173,7 @@ void processAttitudeMode(void)
     // If 10 ms output rate, then 36 floats/10ms
     // Number of floats written using sendBinaryFloat is 15
     #ifdef OpenlogBinaryWrite
+      if (armed == ON) {
         printInt(21845); // Start word of 0x5555
         sendBinaryuslong(currentTime);
         sendBinaryFloat(recRollScaled);
@@ -173,11 +182,14 @@ void processAttitudeMode(void)
         sendBinaryFloat(-flightAngle->getData(PITCH));
         sendBinaryFloat(rollAttitudeCmd);
         sendBinaryFloat(pitchAttitudeCmd);
-        sendBinaryFloat(receiver.getSIData(YAW));
         sendBinaryFloat(gyro.getData(ROLL));
         sendBinaryFloat(-gyro.getData(PITCH));
-        sendBinaryFloat(gyro.getData(YAW));
+        sendBinaryFloat(rollMotorCmd);
+        sendBinaryFloat(pitchMotorCmd);
+//        sendBinaryFloat(receiver.getSIData(YAW));
+//        sendBinaryFloat(gyro.getData(YAW));
         printInt(32767); // Stop word of 0x7FFF
+      }
     #endif
   #endif
 }
@@ -195,6 +207,9 @@ void calculateFlightError(void)
     // measured = rate data from gyros scaled to Radians (-1.5*PI/+1.5*PI), since PID settings are found experimentally
     motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), gyro.getData(ROLL), &PID[ROLL]));
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro.getData(PITCH), &PID[PITCH]));
+    // NEW SI Version uses DCM unbias rate
+    //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), flightAngle->getGyroUnbias(ROLL), &PID[ROLL]));
+    //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -flightAngle->getGyroUnbias(PITCH), &PID[PITCH]));
     // OLD NON SI
     // measured = rate data from gyros scaled to PWM (1000-2000), since PID settings are found experimentally
     //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getData(ROLL), gyro.getFlightData(ROLL) + 1500, &PID[ROLL]));
@@ -287,6 +302,7 @@ void processHeading(void)
   // NEW SI Version
   commandedYaw = constrain(receiver.getSIData(YAW) + radians(headingHold), -PI, PI);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getData(YAW), &PID[YAW]));
+  //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
   // OLD NON SI
   //commandedYaw = constrain(receiver.getData(YAW) + headingHold, 1000, 2000);
   //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getFlightData(YAW) + 1500, &PID[YAW]));

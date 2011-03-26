@@ -427,7 +427,7 @@ void setup() {
     camera.setCenterPitch(1300);
   #endif
 
-  #ifdef BinaryWrite
+  #if defined(BinaryWrite) || defined(BinaryWritePID)
   #ifdef OpenlogBinaryWrite
     binaryPort = &Serial1;
     binaryPort->begin(115200);
@@ -455,7 +455,7 @@ void loop () {
   G_Dt = deltaTime / 1000000.0;
   previousTime = currentTime;
   
-  #ifdef DEBUG
+  #ifdef DEBUG_LOOP
     testSignal ^= HIGH;
 //    if (testSignal == LOW) testSignal = HIGH;
 //    else testSignal = LOW;
