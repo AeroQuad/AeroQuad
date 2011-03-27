@@ -195,8 +195,12 @@ public:
     float R1   = 15000;
     float R2   =  7500;
     float Aref =     5.0;
-    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));    
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+#ifdef AeroQuad_Mini
+    diode = 0.0;
+#else    
     diode = 0.9; // measured with DMM
+#endif    
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
     digitalWrite(BUZZERPIN, LOW);

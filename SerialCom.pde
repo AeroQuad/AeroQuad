@@ -36,6 +36,7 @@ void readSerialPID(unsigned char PIDid) {
   pid->D = readFloatSerial();
   pid->lastPosition = 0;
   pid->integratedError = 0;
+  pid->firstPass = true;
 }
 
 void readSerialCommand() {
@@ -162,7 +163,7 @@ void readSerialCommand() {
 #endif
       break;
     case '~': //  read Camera values 
-      #ifdef Camera
+#ifdef Camera
       camera.setMode(readFloatSerial());
       camera.setCenterPitch(readFloatSerial());
       camera.setCenterRoll(readFloatSerial());
@@ -176,7 +177,7 @@ void readSerialCommand() {
       camera.setServoMaxPitch(readFloatSerial());
       camera.setServoMaxRoll(readFloatSerial());
       camera.setServoMaxYaw(readFloatSerial());
-      #endif
+#endif
       break;
     }
     digitalWrite(LEDPIN, HIGH);
@@ -224,9 +225,11 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(degrees(flightAngle->getHeading()));
-    //PrintValueComma(rollPidUpdate);
-    //PrintValueComma(commandedYaw);
+    //PrintValueComma(gyro.getFlightData(PITCH));
+    //PrintValueComma(flightAngle->getData(PITCH));
+    //PrintValueComma(flightAngle->getGyroUnbias(PITCH));
+    //PrintValueComma(receiver.getZero(ROLL));
+    //PrintValueComma(flightAngle->getData(ROLL));
     //Serial.print(degrees(flightAngle->getData(YAW)));
     //Serial.println();
     //printFreeMemory();
@@ -459,7 +462,9 @@ void sendSerialTelemetry() {
     PrintValueComma(5);
 #elif defined(APM_OP_CHR6DM)
     PrintValueComma(6);
-#endif
+#elif defined(AeroQuad_Mini)
+    PrintValueComma(2);
+#endif    
     // Determine which motor flight configuration for Configurator GUI
 #if defined(plusConfig)
     Serial.print('0');
@@ -494,7 +499,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case '`': // Send Camera values 
-    #ifdef Camera
+#ifdef Camera
     PrintValueComma(camera.getMode());
     PrintValueComma(camera.getCenterPitch());
     PrintValueComma(camera.getCenterRoll());
@@ -512,7 +517,7 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getServoMaxPitch());
     PrintValueComma(camera.getServoMaxRoll());
     Serial.println(camera.getServoMaxYaw());
-    #endif
+#endif
     break;
   }
 }
@@ -550,8 +555,8 @@ void printInt(int data) {
   msb = data >> 8;
   lsb = data & 0xff;
 
-  Serial.print(msb, BYTE);
-  Serial.print(lsb, BYTE);
+  binaryPort->print(msb, BYTE);
+  binaryPort->print(lsb, BYTE);
 }
 
 void sendBinaryFloat(float data) {
@@ -561,8 +566,21 @@ void sendBinaryFloat(float data) {
   } binaryFloat;
   
   binaryFloat.floatVal = data;
-  Serial.print(binaryFloat.floatByte[3], BYTE);
-  Serial.print(binaryFloat.floatByte[2], BYTE);
-  Serial.print(binaryFloat.floatByte[1], BYTE);
-  Serial.print(binaryFloat.floatByte[0], BYTE);
+  binaryPort->print(binaryFloat.floatByte[3], BYTE);
+  binaryPort->print(binaryFloat.floatByte[2], BYTE);
+  binaryPort->print(binaryFloat.floatByte[1], BYTE);
+  binaryPort->print(binaryFloat.floatByte[0], BYTE);
+}
+
+void sendBinaryuslong(unsigned long data) {
+  union binaryuslongType {
+    byte uslongByte[4];
+    unsigned long uslongVal;
+  } binaryuslong;
+  
+  binaryuslong.uslongVal = data;
+  binaryPort->print(binaryuslong.uslongByte[3], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[2], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[1], BYTE);
+  binaryPort->print(binaryuslong.uslongByte[0], BYTE);
 }

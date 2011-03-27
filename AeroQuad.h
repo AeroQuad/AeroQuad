@@ -26,8 +26,8 @@
 // Flight Software Version
 #define VERSION 2.3
 
-//#define BAUD 115200
-#define BAUD 111111 // use this to be compatible with USB and XBee connections
+#define BAUD 115200
+//#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -78,6 +78,9 @@
 struct PIDdata {
   float P, I, D;
   float lastPosition;
+  // AKA experiments with PID
+  float previousPIDTime;
+  bool firstPass;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[10];
@@ -93,11 +96,7 @@ float windupGuard; // Read in from EEPROM
 // Smoothing filter parameters
 #define GYRO 0
 #define ACCEL 1
-#if defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-  #define FINDZERO 9
-#else
-  #define FINDZERO 49
-#endif
+#define FINDZERO 49
 float smoothHeading;
 
 // Sensor pin assignments
@@ -143,6 +142,7 @@ float aref; // Read in from EEPROM
 #define STABLE 1
 byte flightMode;
 int minAcro; // Read in from EEPROM, defines min throttle during flips
+#define PWM2RPS 0.002 //  Based upon 5RPS for full stick movement, you take this times the RPS to get the PWM conversion factor
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
@@ -222,6 +222,7 @@ byte tlmType = 0;
 byte armed = OFF;
 byte safetyCheck = OFF;
 byte update = 0;
+HardwareSerial *binaryPort;
 
 /**************************************************************/
 /******************* Loop timing parameters *******************/
@@ -231,7 +232,7 @@ byte update = 0;
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz
 #define CAMERALOOPTIME 20000     // 20ms, 50Hz
-#define FASTTELEMETRYTIME 15000  // 15ms, 67Hz
+#define FASTTELEMETRYTIME 10000  // 10ms, 100Hz
 #define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
 
 float G_Dt = 0.002;
@@ -244,7 +245,9 @@ unsigned long compassTime = 5000;
 unsigned long altitudeTime = 10000;
 unsigned long batteryTime = 15000;
 unsigned long autoZeroGyroTime = 0;
+#ifdef CameraControl
 unsigned long cameraTime = 10000;
+#endif
 unsigned long fastTelemetryTime = 0;
 unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
@@ -284,7 +287,9 @@ byte receiverLoop = ON;
 byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
+#ifdef CameraControl
 byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+#endif
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
 
@@ -366,6 +371,7 @@ void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void sendBinaryFloat(float); // defined in SerialCom.pde
+void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)

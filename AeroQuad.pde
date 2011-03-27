@@ -31,6 +31,7 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
@@ -55,13 +56,15 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-//#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
+//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
+#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
+//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
+//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
+//#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -136,6 +139,26 @@
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
+#endif
+
+#ifdef AeroQuad_Mini
+  Accel_AeroQuadMini accel;
+  Gyro_AeroQuadMega_v2 gyro;
+  Receiver_AeroQuad receiver;
+  //Motors_PWM motors;
+  Motors_PWMtimer motors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  #include "FlightAngle.h"
+  FlightAngle_DCM tempFlightAngle;
+  FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
@@ -320,7 +343,7 @@ void setup() {
     Serial1.begin(BAUD);
     PORTD = B00000100;
   #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
@@ -346,10 +369,10 @@ void setup() {
     pinMode(LED_Green, OUTPUT);
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
     Wire.begin();
   #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
     // Recommendation from Mgros to increase I2C speed to 400kHz
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
     TWBR = 12;
@@ -370,10 +393,6 @@ void setup() {
   gyro.initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
   
-  #ifdef AeroQuad_v1_IDG
-    gyro.invert(YAW);
-  #endif
-
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
@@ -407,7 +426,20 @@ void setup() {
     camera.setmCameraPitch(11.11);
     camera.setCenterPitch(1300);
   #endif
+
+  #if defined(BinaryWrite) || defined(BinaryWritePID)
+  #ifdef OpenlogBinaryWrite
+    binaryPort = &Serial1;
+    binaryPort->begin(115200);
+    delay(1000);
+  #else
+   binaryPort = &Serial;
+  #endif 
+  #endif
   
+  // AKA use a new low pass filter called a Lag Filter
+  setupFilters(accel.accelOneG);
+
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;
@@ -422,9 +454,11 @@ void loop () {
   deltaTime = currentTime - previousTime;
   G_Dt = deltaTime / 1000000.0;
   previousTime = currentTime;
-  #ifdef DEBUG
-    if (testSignal == LOW) testSignal = HIGH;
-    else testSignal = LOW;
+  
+  #ifdef DEBUG_LOOP
+    testSignal ^= HIGH;
+//    if (testSignal == LOW) testSignal = HIGH;
+//    else testSignal = LOW;
     digitalWrite(LEDPIN, testSignal);
   #endif
   
@@ -439,19 +473,19 @@ void loop () {
   } 
   
   // Reads external pilot commands and performs functions based on stick configuration
-  if ((receiverLoop == ON) && (currentTime > receiverTime)) {// 50Hz
+  if ((receiverLoop == ON) && (currentTime > receiverTime)) { // 10Hz
     readPilotCommands(); // defined in FlightCommand.pde
     receiverTime = currentTime + RECEIVERLOOPTIME;
   }
   
   // Listen for configuration commands and reports telemetry
-  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 20Hz
+  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 10Hz
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
     telemetryTime = currentTime + TELEMETRYLOOPTIME;
   }
-  
-  #ifdef BinaryWrite
+
+ #ifdef BinaryWrite
     // **************************************************************
     // ***************** Fast Transfer Of Sensor Data ***************
     // **************************************************************
@@ -459,22 +493,41 @@ void loop () {
     // Since writing to UART is done by hardware, unable to measure data rate directly
     // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
     // If float = 4 bytes, then 3600 floats/second
-    // Experimentally found 15ms output rate produces no flight jitter.
-    // If 15 ms output rate, then 54 floats/15ms
+    // If 10 ms output rate, then 36 floats/10ms
     // Number of floats written using sendBinaryFloat is 15
     if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
-      printInt(21845); // Start word of 0x5555
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-      for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-      for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      #ifdef HeadingMagHold
-        sendBinaryFloat(compass.getRawData(axis));
-      #else
-        sendBinaryFloat(0);
+      if (armed == ON) {
+    #ifdef OpenlogBinaryWrite
+        printInt(21845); // Start word of 0x5555
+        sendBinaryuslong(currentTime);
+        printInt((int)flightMode);
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+        sendBinaryFloat(accel.accelOneG);
+        #ifdef HeadingMagHold
+          sendBinaryFloat(compass.hdgX);
+          sendBinaryFloat(compass.hdgY);
+        #else
+          sendBinaryFloat(0.0);
+          sendBinaryFloat(0.0);
+        #endif
+        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+        printInt(32767); // Stop word of 0x7FFF
+    #else
+        printInt(21845); // Start word of 0x5555
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+        for (byte axis = ROLL; axis < LASTAXIS; axis++)
+        #ifdef HeadingMagHold
+          sendBinaryFloat(compass.getRawData(axis));
+        #else
+          sendBinaryFloat(0);
+        #endif
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
+        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
+        printInt(32767); // Stop word of 0x7FFF
       #endif
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
-      for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-      printInt(32767); // Stop word of 0x7FFF
+      }
       fastTelemetryTime = currentTime;
     }
   #endif

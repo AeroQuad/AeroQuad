@@ -51,6 +51,8 @@ void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->D = readFloat(IDEeprom+8);
   pid->lastPosition = 0;
   pid->integratedError = 0;
+  // AKA experiements with PIDS
+  pid->firstPass = true;
 }
 
 void writePID(unsigned char IDPid, unsigned int IDEeprom) {
@@ -104,6 +106,13 @@ void initializeEEPROM(void) {
     compass.setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
+
+  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
+  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
+    if (i != ALTITUDE)
+        PID[i].windupGuard = windupGuard;
+  }
+    
   receiver.setXmitFactor(1.0);
   levelLimit = 500.0;
   levelOff = 150.0;
@@ -169,6 +178,13 @@ void readEEPROM(void) {
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
+
+  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
+  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
+    if (i != ALTITUDE)
+        PID[i].windupGuard = windupGuard;
+  }
+    
   levelLimit = readFloat(LEVELLIMIT_ADR);
   levelOff = readFloat(LEVELOFF_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);

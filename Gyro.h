@@ -35,15 +35,15 @@ public:
   int sign[3];
   float rawHeading, gyroHeading;
   //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
-  
+/*  
   // ************ Correct for gyro drift by FabQuad **************  
   // ************ http://aeroquad.com/entry.php?4-  **************     
-  //int lastReceiverYaw, receiverYaw;
-  //long yawAge;
-  //int positiveGyroYawCount;
-  //int negativeGyroYawCount;
-  //int zeroGyroYawCount;
-    
+  int lastReceiverYaw, receiverYaw;
+  long yawAge;
+  int positiveGyroYawCount;
+  int negativeGyroYawCount;
+  int zeroGyroYawCount;
+*/    
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
@@ -69,8 +69,6 @@ public:
     gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
     gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
     smoothFactor = readFloat(GYROSMOOTH_ADR);
-    
-    //previousTime = micros();
   }
 
   // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
@@ -124,12 +122,13 @@ public:
   
   // returns gyro based heading as +/- PI in radians
   const float getHeading(void) {
-    div_t integerDivide;
+    //div_t integerDivide;
     
-    integerDivide = div(rawHeading, 2*PI);
-    gyroHeading = rawHeading + (integerDivide.quot * -(2*PI));
+    //integerDivide = div(rawHeading, 2*PI);
+    gyroHeading = rawHeading; // + (integerDivide.quot * -(2*PI));
     if (gyroHeading > PI) gyroHeading -= (2*PI);
     if (gyroHeading < -PI) gyroHeading += (2*PI);
+    //Serial.print(integerDivide.quot);Serial.print(",");Serial.print(integerDivide.rem);Serial.println();
     return gyroHeading;
   }
 
@@ -214,7 +213,7 @@ public:
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
 /*
   10kOhm pull-ups on I2C lines.
   VDD & VIO = 3.3V
@@ -227,21 +226,25 @@ class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int gyroAddress;
   long int previousGyroTime;
-  int gyroLastADC;
+  //float gyroLastData;
   
 public:
   Gyro_AeroQuadMega_v2() : Gyro() {
+#ifdef AeroQuad_Mini
+    gyroAddress = 0x68;
+#else        
     gyroAddress = 0x69;
+#endif    
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
-    /*
+/*    
     lastReceiverYaw=0;
     yawAge=0;
     positiveGyroYawCount=1;
     negativeGyroYawCount=1;
     zeroGyroYawCount=1;
-    */
+*/    
     previousGyroTime = micros();
     
   }
@@ -249,10 +252,14 @@ public:
   void initialize(void) {
     this->_initialize(0,1,2);
     
-    gyroLastADC = 0;  // initalize for rawHeading, may be able to be removed in the future
+    //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
     
     // Check if gyro is connected
-    if (readWhoI2C(gyroAddress) != gyroAddress)
+#ifdef AeroQuad_Mini    
+    if (readWhoI2C(gyroAddress) != gyroAddress +1)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+#else    
+    if (readWhoI2C(gyroAddress) != gyroAddress)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+#endif    
       Serial.println("Gyro not found!");
         
     // Thanks to SwiftingSpeed for updates on these settings
@@ -277,22 +284,15 @@ public:
     //calculateHeading();
     // gyroLastADC can maybe replaced with Zero, but will leave as is for now
     // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
-    
     long int currentGyroTime = micros();
-    if ((gyroADC[YAW] - gyroLastADC) > 3 || (gyroADC[YAW] - gyroLastADC) < -3) {
-      //Serial.print(gyroADC[YAW]);
-      //Serial.print(",");
-      //Serial.print(rawHeading);
-      //Serial.print(",");
-      //Serial.print(currentGyroTime - previousGyroTime);      
-      //Serial.print(",");
-      rawHeading += gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
-      //Serial.print(rawHeading);
-      //Serial.println();
+    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+      //rawHeading += gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
+      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+      //gyroLastData = gyroData[YAW];
+      //Serial.print(gyroData[YAW],6);Serial.print(",");Serial.println(rawHeading,6);
     }
     previousGyroTime = currentGyroTime;
-      //gyroLastADC = gyroADC[YAW];
-
+//    gyroLastData = gyroData[YAW];
 /*
     // ************ Correct for gyro drift by FabQuad **************
     // ************ http://aeroquad.com/entry.php?4-  **************
@@ -325,7 +325,7 @@ public:
       lastReceiverYaw = receiverYaw;
       yawAge = 0;
     }
-    */
+*/    
   }
   
   // returns raw ADC data from the Gyro centered on zero +/- values
