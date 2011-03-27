@@ -55,9 +55,6 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
@@ -318,15 +315,6 @@
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
-#if defined(UseArduPirateSuperStable)
-  void (*processStableMode)() = &processArdupirateSuperStableMode;
-#endif
-#if defined(UseAttitudeHold)
-  void (*processStableMode)() = &processAttitudeMode;
-#endif
-#if defined(UseAQStable)
-  void (*processStableMode)() = &processAeroQuadStableMode;
-#endif
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"

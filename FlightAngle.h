@@ -163,9 +163,7 @@ void normalize(void)
 void driftCorrection(float ax, float ay, float az, float oneG, float magX, float magY) 
 {
   //  Compensation of the Roll, Pitch and Yaw drift. 
-  float accelMagnitude;
   float accelVector[3];
-  float accelWeight;
   float errorRollPitch[3];
 #ifdef HeadingMagHold  
   float errorCourse;
@@ -179,24 +177,11 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   accelVector[XAXIS] = accelVector[XAXIS]*0.05 + ax*0.05;
   accelVector[YAXIS] = accelVector[YAXIS]*0.05 + ay*0.05;
   accelVector[ZAXIS] = accelVector[ZAXIS]*0.05 + az*0.05;
-
-  // Calculate the magnitude of the accelerometer vector
-  accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + \
-                         accelVector[YAXIS] * accelVector[YAXIS] + \
-                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
-                         
-  // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // accelWeight = constrain(1 - 4 * abs(1 - accelMagnitude), 0, 1);
-  
-  // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
-  
-//  accelWeight = 1.0;
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
-  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);// * accelWeight);
+  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);
   
-  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);// * accelWeight);
+  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
   
   //  Yaw Compensation
