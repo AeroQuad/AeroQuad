@@ -34,9 +34,9 @@
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -46,8 +46,6 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define HEXACOAXIAL
-//#define HEXARADIAL
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -57,7 +55,7 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
