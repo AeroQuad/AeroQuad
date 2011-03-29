@@ -18,16 +18,17 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef Gyro_Null_h
-#define Gyro_Null_h
+#ifndef _AEROQUAD_GYROSCOPE_ITG3200_H_
+#define _AEROQUAD_GYROSCOPE_ITG3200_H_
 
-#include <WProgram.h>
-#include <Gyro.h>
+#include "WProgram.h"
+#include <Gyroscope.h>
 
-class Gyro_Null : public Gyro {
+class Gyroscope_ITG3200 : public Gyroscope {
 public:
+  Gyroscope_ITG3200();
+  
   void initialize(void);
   void measure(void);
-  void calibrate(void);	
 };
 #endif
