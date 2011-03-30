@@ -6,7 +6,6 @@
 
 class Gyroscope_Test : public Gyroscope {
 public:
-  boolean present(void);
   void calibrate(void);	
   void initialize(void);
   void measure(void);

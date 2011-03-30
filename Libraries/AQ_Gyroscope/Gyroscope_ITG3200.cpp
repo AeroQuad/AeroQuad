@@ -1,107 +1,52 @@
-/*
-  AeroQuad v3.0 - February 2011
-  www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
-
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
-
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+/**
+	Gyroscope_ITG3200.cpp (ITG3200, I2C 3-axis gyroscope sensor) library
+	by Ivan Todorovic
+	
+	This library is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published
+	by the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+	GNU Lesser General Public License for more details.
+	
+	You should have received a copy of the GNU Lesser General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "Gyro_Null.h"
-//#include <Wire.h>
+#include "Gyroscope_ITG3200.h"
 
-void Gyro_Null::initialize() {
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    data[axis] = 0;
-    zero[axis] = 0;
-  }
+Gyroscope_ITG3200::Gyroscope_ITG3200() {}
+
+void Gyroscope_ITG3200::Init(byte initialiseWireLib) 
+{
+	InitWireLib(initialiseWireLib);
+	BootCalibrate();
 }
 
-void Gyro_Null::measure(){
+void Gyroscope_ITG3200::BootCalibrate() 
+{
+	// Reset the device, ste default register values.
+	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE);
+	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE);
+	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_OSCILLATOR_ADDR, ITG3200_OSCILLATOR_VALUE);
 }
 
-void Gyro_Null::calibrate(){
+void Gyroscope_ITG3200::Measure()
+{
+	if (I2cReadMemory(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS, ITG3200_BUFFER_SIZE, &buffer[0]) \ 
+		== ITG3200_BUFFER_SIZE)  // All bytes received?
+	{
+		X = ((buffer[0] << 8) | buffer[1]) / ITG3200_SCALE_TO_RADIANS;
+		Y = ((buffer[2] << 8) | buffer[3]) / ITG3200_SCALE_TO_RADIANS;
+		Z = ((buffer[4] << 8) | buffer[5]) / ITG3200_SCALE_TO_RADIANS;
+	}
 }
 
-class RateGyro_AeroQuadMega_v2 : public RateGyro {
-private:
-  
-public:
-  RateGyro_AeroQuadMega_v2() : RateGyro() {
-    gyroScaleFactor = DEG_2_RAD(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
-  }
-  
-////////////////////////////////////////////////////////////////////////////////
-// Initialize AeroQuad v2.0 Gyro
-////////////////////////////////////////////////////////////////////////////////
+byte Gyroscope_ITG3200::DetectPresence(byte initialiseWireLib)
+{
+	return I2cDetectDevice(initialiseWireLib, ITG3200_ADDRESS);
+}
 
-  void initialize(void) {
-    updateRegisterI2C(0x69, 0x3E, 0x80); // send a reset to the device
-    updateRegisterI2C(0x69, 0x16, 0x1D); // 10Hz low pass filter
-    updateRegisterI2C(0x69, 0x3E, 0x01); // use internal oscillator 
-  }
-  
-////////////////////////////////////////////////////////////////////////////////
-// Measure AeroQuad v2.0 Gyro
-////////////////////////////////////////////////////////////////////////////////
-
-  void measure(void) {
-    sendByteI2C(0x69, 0x1D);
-    Wire.requestFrom(0x69, 6);
-    
-    // The following 3 lines read the gyro and assign it's data to gyroRaw
-    // in the correct order and phase to suit the standard shield installation
-    // orientation.  See TBD for details.  If your shield is not installed in this
-    // orientation, this is where you make the changes.
-    gyroRaw[ROLL]  = ((Wire.receive() << 8) | Wire.receive())  - gyroZero[ROLL];
-    gyroRaw[PITCH] = gyroZero[PITCH] - ((Wire.receive() << 8) | Wire.receive());
-    gyroRaw[YAW]   = gyroZero[YAW]   - ((Wire.receive() << 8) | Wire.receive());
-
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroVector[axis] = smooth(gyroRaw[axis] * gyroScaleFactor, gyroVector[axis], smoothFactor);
-    }
-  }
-  
-////////////////////////////////////////////////////////////////////////////////
-// Calibrate AeroQuad v2.0 Gyro
-////////////////////////////////////////////////////////////////////////////////
-
-  void calibrate() {
-    autoZero();
-    writeFloat(gyroZero[ROLL],  GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW],   GYRO_YAW_ZERO_ADR);
-  }
-  
-  void autoZero() {
-    int findZero[FINDZERO];
-    
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        sendByteI2C(0x69, (calAxis * 2) + 0x1D);
-        findZero[i] = readWordI2C(0x69);
-        delay(10);
-      }
-      gyroZero[calAxis] = findMode(findZero, FINDZERO);
-    }
-  }
-  
-////////////////////////////////////////////////////////////////////////////////
-// Zero AeroQuad v2.0 Gyro
-////////////////////////////////////////////////////////////////////////////////
-
-  void zero() {
-    // Not required for AeroQuad 2.0 Gyro
-  }  
-};
