@@ -43,7 +43,7 @@ void Gyroscope_ITG3200::measure()
 	}
 }
 
-byte Gyroscope_ITG3200::DetectPresence(byte initializeWireLib)
+byte Gyroscope_ITG3200::detectPresence(byte initializeWireLib)
 {
 	return I2cDetectDevice(initializeWireLib, ITG3200_ADDRESS);
 }

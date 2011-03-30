@@ -44,7 +44,7 @@ public:
 	void initialize(byte initializeWireLib = 0);
 	void measure(void);
 	void calibrate(void);
-	byte DetectPresence(byte initializeWireLib = 0);
+	byte detectPresence(byte initializeWireLib = 0);
 };
 
 #endif	// #ifndef _GYROSCOPE_ITG3200_H_
