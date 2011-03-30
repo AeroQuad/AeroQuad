@@ -34,7 +34,7 @@ class Gyroscope {
 protected:
   float scaleFactor;
   float rate[3];
-  float zero[3];
+  int zero[3];
   float smoothFactor;
   int measureDelay;
   
@@ -43,8 +43,8 @@ public:
 
   virtual void initialize() {}
   virtual void measure() {}
+  virtual void calibrate() {}
 
-  void calibrate();
   void setZero(byte axis, float value);
   const float getZero(byte axis);
   const float getSmoothFactor();

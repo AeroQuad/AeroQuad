@@ -3,21 +3,9 @@
 
 #include "Gyroscope_Test.h"
 
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define LASTAXIS 3
-#define NOT_DETECTED 0
-#define DETECTED 1
-
 Gyroscope_Test::Gyroscope_Test() {
   // Add any required variable initialization here
   scaleFactor = 1.0; // Define the scale factor that converts to radians/second
-}
-
-boolean Gyroscope_Test::present() {
-  // Add check to determine if hardware is present
-  return DETECTED;
 }
 
 void Gyroscope_Test::initialize() {
@@ -26,20 +14,15 @@ void Gyroscope_Test::initialize() {
 }
 
 void Gyroscope_Test::measure() {
-  unsigned long currentTime = micros();
-  if ((currentTime - lastMeasuredTime) >= processTime) {
-
-    // Replace code below with sensor measurement methodology
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      data[axis] = random(0, 1024) - zero[axis];
-    
-    // Invert axis as needed here by switching gyroADC[] and zero[]
-    // Axis definitions: roll right >0, pitch up >0, yaw right >0
-    rate[ROLL] = (data[ROLL] - zero[ROLL]) * scaleFactor;
-    rate[PITCH] = (data[PITCH] - zero[PITCH) * scaleFactor;
-    rate[YAW] = (data[YAW] - zero[YAW]) * scaleFactor;
-  }
-  lastMeasuredTime = currentTime;
+  // Replace code below with sensor measurement methodology
+  for (byte axis = ROLL; axis < LASTAXIS; axis++)
+    data[axis] = random(0, 1024) ;
+  
+  // Invert axis as needed here by switching gyroADC[] and zero[]
+  // Axis definitions: roll right >0, pitch up >0, yaw right >0
+  rate[0] = (data[0] - zero[0]) * scaleFactor;
+  rate[1] = (data[1] - zero[1]) * scaleFactor;
+  rate[2] = (data[2] - zero[2]) * scaleFactor;
 }
 
 void Gyroscope_Test::calibrate() {

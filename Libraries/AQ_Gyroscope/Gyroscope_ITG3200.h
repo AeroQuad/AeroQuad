@@ -1,10 +1,23 @@
 /**
-	Gyroscope_ITG3200.h (ITG3200, I2C 3-axis gyroscope sensor) library
-	by 2010 Ivan Todorovic
+	Gyroscope_ITG3200.cpp (ITG3200, I2C 3-axis gyroscope sensor) library
+	by Ivan Todorovic
+	
+	This library is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published
+	by the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+	GNU Lesser General Public License for more details.
+	
+	You should have received a copy of the GNU Lesser General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _GYROSCOPE_ITG3200_H_
-#define _GYROSCOPE_ITG3200_H_
+#ifndef _AEROQUAD_GYROSCOPE_ITG3200_H_
+#define _AEROQUAD_GYROSCOPE_ITG3200_H_
 
 #include "I2C_Device.h"
 
@@ -23,13 +36,15 @@ class Gyroscope_ITG3200 : I2C_Device
 {
 private:
 	byte buffer[ITG3200_BUFFER_SIZE];
-	void BootCalibrate();
+  int data[3];
+  
 public:
-	float X, Y, Z;
 	Gyroscope_ITG3200();
-	void Init(byte initialiseWireLib = 0);
-	void Measure();
-	byte DetectPresence(byte initialiseWireLib = 0);
+
+	void initialize(byte initializeWireLib = 0);
+	void measure(void);
+	void calibrate(void);
+	byte DetectPresence(byte initializeWireLib = 0);
 };
 
 #endif	// #ifndef _GYROSCOPE_ITG3200_H_

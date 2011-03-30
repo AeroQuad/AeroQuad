@@ -5,12 +5,12 @@
 #include <Gyroscope.h>
 
 class Gyroscope_Test : public Gyroscope {
-public:
-  void calibrate(void);	
-  void initialize(void);
-  void measure(void);
-
 private:
   int data[3]; // raw data from sensor
+
+  public:
+  void initialize(void);
+  void measure(void);
+  void calibrate(void);
 };
 #endif

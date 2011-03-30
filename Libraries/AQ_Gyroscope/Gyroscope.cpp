@@ -43,16 +43,3 @@ void Gyroscope::setSmoothFactor(float value) {
 const float Gyroscope::getRadPerSec(byte axis) {
   return rate[axis];
 }
-
-void Gyroscope::calibrate() {
-  float findZero[FINDZERO];
-    
-  for (byte calAxis = 0; calAxis < 3; calAxis++) {
-    for (int i=0; i<FINDZERO; i++) {
-	  measure();
-      findZero[i] = getRadPerSec(calAxis);
-      delay(measureDelay);
-    }
-    zero[calAxis] = findMedian(findZero, FINDZERO);
-  }
-}

@@ -17,36 +17,46 @@
 */
 
 #include "Gyroscope_ITG3200.h"
+#include "
 
 Gyroscope_ITG3200::Gyroscope_ITG3200() {}
 
-void Gyroscope_ITG3200::Init(byte initialiseWireLib) 
+void Gyroscope_ITG3200::intialize(byte initializeWireLib) 
 {
-	InitWireLib(initialiseWireLib);
-	BootCalibrate();
-}
-
-void Gyroscope_ITG3200::BootCalibrate() 
-{
-	// Reset the device, ste default register values.
+	InitWireLib(initializeWireLib);
 	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE);
 	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE);
 	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_OSCILLATOR_ADDR, ITG3200_OSCILLATOR_VALUE);
 }
 
-void Gyroscope_ITG3200::Measure()
+void Gyroscope_ITG3200::measure()
 {
 	if (I2cReadMemory(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS, ITG3200_BUFFER_SIZE, &buffer[0]) \ 
 		== ITG3200_BUFFER_SIZE)  // All bytes received?
 	{
-		X = ((buffer[0] << 8) | buffer[1]) / ITG3200_SCALE_TO_RADIANS;
-		Y = ((buffer[2] << 8) | buffer[3]) / ITG3200_SCALE_TO_RADIANS;
-		Z = ((buffer[4] << 8) | buffer[5]) / ITG3200_SCALE_TO_RADIANS;
+		data[0] = (((buffer[0] << 8) | buffer[1]) - zero[0]);
+		data[1] = (((buffer[2] << 8) | buffer[3]) - zero[1]);
+		data[2] = (((buffer[4] << 8) | buffer[5]) - zero[2]);
+    
+    for (int i=0; i<3; i++)
+      rate[i] = data[i] / ITG3200_SCALE_TO_RADIANS;
 	}
 }
 
-byte Gyroscope_ITG3200::DetectPresence(byte initialiseWireLib)
+byte Gyroscope_ITG3200::DetectPresence(byte initializeWireLib)
 {
-	return I2cDetectDevice(initialiseWireLib, ITG3200_ADDRESS);
+	return I2cDetectDevice(initializeWireLib, ITG3200_ADDRESS);
 }
 
+void Gyroscope_ITG3200::calibrate() {
+  float findZero[FINDZERO];
+    
+  for (byte calAxis = 0; calAxis < 3; calAxis++) {
+    for (int i=0; i<FINDZERO; i++) {
+	  measure();
+      findZero[i] = data[calAxis];
+      delay(measureDelay);
+    }
+    zero[calAxis] = findMedian(findZero, FINDZERO);
+  }
+}
