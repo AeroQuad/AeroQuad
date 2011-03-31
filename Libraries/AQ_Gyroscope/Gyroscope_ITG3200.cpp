@@ -1,62 +1,74 @@
-/**
-	Gyroscope_ITG3200.cpp (ITG3200, I2C 3-axis gyroscope sensor) library
-	by Ivan Todorovic
-	
-	This library is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-	GNU Lesser General Public License for more details.
-	
-	You should have received a copy of the GNU Lesser General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+/*
+  AeroQuad v3.0 - February 2011
+  www.AeroQuad.com
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
+
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
 #include "Gyroscope_ITG3200.h"
-#include "
 
-Gyroscope_ITG3200::Gyroscope_ITG3200() {}
+#include <Wire.h>
 
-void Gyroscope_ITG3200::intialize(byte initializeWireLib) 
-{
-	InitWireLib(initializeWireLib);
-	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE);
-	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE);
-	I2cWriteRegister(ITG3200_ADDRESS, ITG3200_OSCILLATOR_ADDR, ITG3200_OSCILLATOR_VALUE);
+#include "I2C.h"
+#include "AQMath.h"
+
+
+Gyroscope_ITG3200::Gyroscope_ITG3200() {
+  gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
+  measureDelay = 2;	// process or reading time for ITG3200 is 2ms
 }
+  
 
-void Gyroscope_ITG3200::measure()
-{
-	if (I2cReadMemory(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS, ITG3200_BUFFER_SIZE, &buffer[0]) \ 
-		== ITG3200_BUFFER_SIZE)  // All bytes received?
-	{
-		data[0] = (((buffer[0] << 8) | buffer[1]) - zero[0]);
-		data[1] = (((buffer[2] << 8) | buffer[3]) - zero[1]);
-		data[2] = (((buffer[4] << 8) | buffer[5]) - zero[2]);
+void Gyroscope_ITG3200::initialize(void) {
+  smoothFactor = 1.0;
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_MEMORY_ADDRESS); // 10Hz low pass filter
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
+}
+  
+void Gyroscope_ITG3200::measure(void) {
+  unsigned long currentTime = millis();
+  if ((currentTime - lastMeasuredTime) >= measureDelay) {
+    sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
+    Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
     
-    for (int i=0; i<3; i++)
-      rate[i] = data[i] / ITG3200_SCALE_TO_RADIANS;
-	}
-}
+    // The following 3 lines read the gyro and assign it's data to gyroRaw
+    // in the correct order and phase to suit the standard shield installation
+    // orientation.  See TBD for details.  If your shield is not installed in this
+    // orientation, this is where you make the changes.
+    gyroRaw[0]  = ((Wire.receive() << 8) | Wire.receive())  - zero[0];
+    gyroRaw[1] = zero[1] - ((Wire.receive() << 8) | Wire.receive());
+    gyroRaw[2]   = zero[2] - ((Wire.receive() << 8) | Wire.receive());
 
-byte Gyroscope_ITG3200::detectPresence(byte initializeWireLib)
-{
-	return I2cDetectDevice(initializeWireLib, ITG3200_ADDRESS);
+    for (byte axis = 0; axis < 3; axis++) {
+      rate[axis] = filterSmooth(gyroRaw[axis] * gyroScaleFactor, rate[axis], smoothFactor);
+    }
+	lastMeasuredTime = currentTime;
+  }
 }
 
 void Gyroscope_ITG3200::calibrate() {
   float findZero[FINDZERO];
     
-  for (byte calAxis = 0; calAxis < 3; calAxis++) {
+  for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  measure();
-      findZero[i] = data[calAxis];
+      findZero[i] = gyroRaw[axis];
       delay(measureDelay);
     }
-    zero[calAxis] = findMedian(findZero, FINDZERO);
+    zero[axis] = findMedian(findZero, FINDZERO);
   }
 }

@@ -37,6 +37,7 @@ protected:
   int zero[3];
   float smoothFactor;
   int measureDelay;
+  unsigned long lastMeasuredTime;
   
 public:  
   Gyroscope();
