@@ -1,7 +1,25 @@
-// This is a test child sensor class for gyroscopes
-// Use this as a template to write a gyro class for new hardware
+/*
+  AeroQuad v3.0 - May 2011
+  www.AeroQuad.com
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
+
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+*/
 
 #include "Gyroscope_Test.h"
+#include <AQMath.h>
 
 Gyroscope_Test::Gyroscope_Test() {
   // Add any required variable initialization here
@@ -16,13 +34,13 @@ void Gyroscope_Test::initialize() {
 void Gyroscope_Test::measure() {
   // Replace code below with sensor measurement methodology
   for (byte axis = ROLL; axis < LASTAXIS; axis++)
-    data[axis] = random(0, 1024) ;
+    gyroADC[axis] = random(0, 1024) ;
   
   // Invert axis as needed here by switching gyroADC[] and zero[]
   // Axis definitions: roll right >0, pitch up >0, yaw right >0
-  rate[0] = (data[0] - zero[0]) * scaleFactor;
-  rate[1] = (data[1] - zero[1]) * scaleFactor;
-  rate[2] = (data[2] - zero[2]) * scaleFactor;
+  rate[0] = (gyroADC[0] - zero[0]) * scaleFactor;
+  rate[1] = (gyroADC[1] - zero[1]) * scaleFactor;
+  rate[2] = (gyroADC[2] - zero[2]) * scaleFactor;
 }
 
 void Gyroscope_Test::calibrate() {

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - February 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,7 +21,6 @@
 #ifndef _AEROQUAD_GYROSCOPE_ITG3200_H_
 #define _AEROQUAD_GYROSCOPE_ITG3200_H_
 
-#include "WProgram.h"
 #include <Gyroscope.h>
 
 #define ITG3200_ADDRESS			0x69
@@ -37,7 +36,7 @@
 
 class Gyroscope_ITG3200 : public Gyroscope {
 private:
-  int gyroRaw[3];
+  int gyroADC[3];
   
 public:
   Gyroscope_ITG3200();

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - February 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,9 +21,8 @@
 #include "Gyroscope_ITG3200.h"
 
 #include <Wire.h>
-
-#include "I2C.h"
-#include "AQMath.h"
+#include <I2C.h>
+#include <AQMath.h>
 
 
 Gyroscope_ITG3200::Gyroscope_ITG3200() {
@@ -45,16 +44,16 @@ void Gyroscope_ITG3200::measure(void) {
     sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
     Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
     
-    // The following 3 lines read the gyro and assign it's data to gyroRaw
+    // The following 3 lines read the gyro and assign it's data to gyroADC
     // in the correct order and phase to suit the standard shield installation
     // orientation.  See TBD for details.  If your shield is not installed in this
     // orientation, this is where you make the changes.
-    gyroRaw[0]  = ((Wire.receive() << 8) | Wire.receive())  - zero[0];
-    gyroRaw[1] = zero[1] - ((Wire.receive() << 8) | Wire.receive());
-    gyroRaw[2]   = zero[2] - ((Wire.receive() << 8) | Wire.receive());
+    gyroADC[0]  = ((Wire.receive() << 8) | Wire.receive())  - zero[0];
+    gyroADC[1] = zero[1] - ((Wire.receive() << 8) | Wire.receive());
+    gyroADC[2]   = zero[2] - ((Wire.receive() << 8) | Wire.receive());
 
     for (byte axis = 0; axis < 3; axis++) {
-      rate[axis] = filterSmooth(gyroRaw[axis] * gyroScaleFactor, rate[axis], smoothFactor);
+      rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor);
     }
 	lastMeasuredTime = currentTime;
   }
@@ -66,7 +65,7 @@ void Gyroscope_ITG3200::calibrate() {
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  measure();
-      findZero[i] = gyroRaw[axis];
+      findZero[i] = gyroADC[axis];
       delay(measureDelay);
     }
     zero[axis] = findMedian(findZero, FINDZERO);

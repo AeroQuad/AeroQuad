@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - February 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -19,7 +19,6 @@
 */
 
 #include "Gyroscope.h"
-#include "AQMath.h"
 
 Gyroscope::Gyroscope() {
 }

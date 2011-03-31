@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,12 +18,12 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_WII_SENSORS_ACCESSORS_H_
-#define _AQ_WII_SENSORS_ACCESSORS_H_
+#ifndef _AEROQUAD_PLATFORM_WII_H_
+#define _AEROQUAD_PLATFORM_WII_H_
 
-#include "WProgram.h"
+#include <WProgram.h>
 
-class AQWiiSensorAccessor
+class Platform_Wii
 {
 private:
   short _accel[3];
@@ -34,8 +34,8 @@ public:
   void initialize();
   void measure();
   
-  short getAccelerometerValue(byte axis);
-  short getGyroscopeValue(byte axis);
+  short getAccelADC(byte axis);
+  short getGyroADC(byte axis);
 };
 
 #endif

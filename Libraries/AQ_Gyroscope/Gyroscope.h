@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - February 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -17,7 +17,6 @@
   You should have received a copy of the GNU General Public License 
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
-
 
 #ifndef _AEROQUAD_GYROSCOPE_H_
 #define _AEROQUAD_GYROSCOPE_H_
