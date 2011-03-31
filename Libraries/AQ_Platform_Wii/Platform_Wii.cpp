@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Platform_Wii.h>
-#include <I2C.h>
+#include "Platform_Wii.h"
+#include <Device_I2C.h>
 
 void Platform_Wii::initialize() 
 {
