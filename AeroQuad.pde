@@ -187,7 +187,8 @@
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+//  FlightAngle_DCM tempFlightAngle;
+  FlightAngle_ARG tempFlightAngle;
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
@@ -213,7 +214,8 @@
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+//  FlightAngle_DCM tempFlightAngle;
+  FlightAngle_ARG tempFlightAngle;
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
