@@ -1,64 +1,80 @@
 /*
-	I2C_Device.cpp - Arduino Library for reading I2C sensors
-	Code by Ivan Todorovic
-	
-	This library is free software; you can redistribute it and/or
-	modify it under the terms of the GNU Lesser General Public
-	License as published by the Free Software Foundation; either
-	version 2.1 of the License, or (at your option) any later version.
+  AeroQuad v2.2 - Feburary 2011
+  www.AeroQuad.com
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
+
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "I2C_Device.h"
+// I2C functions
+#include "Device_I2C.h"
 
-I2C_Device::I2C_Device() {}
-
-void I2C_Device::InitWireLib(byte initialiseWireLib)
+void sendByteI2C(int deviceAddress, byte dataValue) 
 {
-	if(initialiseWireLib != 0)
-	{
-		Wire.begin();
-		delay(10);
-	}
+  Wire.beginTransmission(deviceAddress);
+  Wire.send(dataValue);
+  Wire.endTransmission();
 }
 
-void I2C_Device::I2cWriteRegister(byte deviceAddress, byte registerAddress, byte value)
+byte readByteI2C(int deviceAddress) 
 {
-	Wire.beginTransmission(deviceAddress);
-	Wire.send(registerAddress);
-	Wire.send(value);
-	Wire.endTransmission();
+    Wire.requestFrom(deviceAddress, 1);
+    return Wire.receive();
 }
 
-byte I2C_Device::I2cReadMemory(byte deviceAddress, byte memoryAddress, byte numberOfBytes, byte _buffer[])
+int readWordI2C(int deviceAddress) 
 {
-	byte i;
-	Wire.beginTransmission(deviceAddress); 
-	Wire.send(memoryAddress);
-	Wire.endTransmission();
-
-	Wire.requestFrom(deviceAddress, numberOfBytes);
-	i = 0; 
-	while (Wire.available()) {
-		_buffer[i] = Wire.receive();	// receive one byte
-		i++;
-	}
-	Wire.endTransmission();
-	return i;	// number of bytes recieved, for error checking
+  Wire.requestFrom(deviceAddress, 2);
+  return (Wire.receive() << 8) | Wire.receive();
 }
 
-byte I2C_Device::I2cDetectDevice(byte initialiseWireLib, byte deviceAddress)
+int readWordWaitI2C(int deviceAddress) 
 {
-	byte i;
-
-	InitWireLib(initialiseWireLib);
-	Wire.requestFrom(deviceAddress, (byte)1);
-	delay(1);
-	if (Wire.available() != 0) // Found device
-	{	
-		i = Wire.receive();
-		return 0;
-	}
-	else
-		return -1;
+  unsigned char msb, lsb;
+  Wire.requestFrom(deviceAddress, 2); // request two bytes
+  while(!Wire.available()); // wait until data available
+  msb = Wire.receive();
+  while(!Wire.available()); // wait until data available
+  lsb = Wire.receive();
+  return (((int)msb<<8) | ((int)lsb));
 }
+
+int readReverseWordI2C(int deviceAddress) 
+{
+  byte lowerByte;
+  Wire.requestFrom(deviceAddress, 2);
+  lowerByte = Wire.receive();
+  return (Wire.receive() << 8) | lowerByte;
+}
+
+byte readWhoI2C(int deviceAddress) 
+{
+  // read the ID of the I2C device
+  Wire.beginTransmission(deviceAddress);
+  Wire.send(0x00);
+  Wire.endTransmission();
+  delay(100);
+  Wire.requestFrom(deviceAddress, 1);
+  return Wire.receive();
+}
+
+void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) 
+{
+  Wire.beginTransmission(deviceAddress);
+  Wire.send(dataAddress);
+  Wire.send(dataValue);
+  Wire.endTransmission();
+}  
 
