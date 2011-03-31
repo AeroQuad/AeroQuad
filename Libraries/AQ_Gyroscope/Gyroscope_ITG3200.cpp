@@ -21,12 +21,12 @@
 #include "Gyroscope_ITG3200.h"
 
 #include <Wire.h>
-#include <I2C.h>
+#include <Device_I2C.h>
 #include <AQMath.h>
 
 
 Gyroscope_ITG3200::Gyroscope_ITG3200() {
-  gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
+  scaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
   measureDelay = 2;	// process or reading time for ITG3200 is 2ms
 }
   
@@ -53,14 +53,14 @@ void Gyroscope_ITG3200::measure(void) {
     gyroADC[2]   = zero[2] - ((Wire.receive() << 8) | Wire.receive());
 
     for (byte axis = 0; axis < 3; axis++) {
-      rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor);
+      rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
     }
 	lastMeasuredTime = currentTime;
   }
 }
 
 void Gyroscope_ITG3200::calibrate() {
-  float findZero[FINDZERO];
+  int findZero[FINDZERO];
     
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
@@ -68,6 +68,6 @@ void Gyroscope_ITG3200::calibrate() {
       findZero[i] = gyroADC[axis];
       delay(measureDelay);
     }
-    zero[axis] = findMedian(findZero, FINDZERO);
+    zero[axis] = findMedianInt(findZero, FINDZERO);
   }
 }

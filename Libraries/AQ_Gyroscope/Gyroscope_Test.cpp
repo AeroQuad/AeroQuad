@@ -33,7 +33,7 @@ void Gyroscope_Test::initialize() {
 
 void Gyroscope_Test::measure() {
   // Replace code below with sensor measurement methodology
-  for (byte axis = ROLL; axis < LASTAXIS; axis++)
+  for (byte axis = 0; axis <3; axis++)
     gyroADC[axis] = random(0, 1024) ;
   
   // Invert axis as needed here by switching gyroADC[] and zero[]
@@ -45,6 +45,6 @@ void Gyroscope_Test::measure() {
 
 void Gyroscope_Test::calibrate() {
   // Add calibration method for measurement when gyro is motionless
-  for (byte axis = ROLL; axis < LASTAXIS; axis++)
+  for (byte axis = 0; axis < 3; axis++)
     zero[axis] = random(510, 514); // simulate zero measurement around 512
 }

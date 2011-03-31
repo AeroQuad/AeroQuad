@@ -20,7 +20,6 @@
 
 #include "Gyroscope_Wii.h"
 #include <AQMath.h>
-#include "Platform_Wii.h"
 
 Gyroscope_Wii::Gyroscope_Wii() {
     // 0.5mV/º/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
@@ -34,27 +33,21 @@ void Gyroscope_Wii::initialize() {
 
 void Gyroscope_Wii::measure() {
   // Replace code below with sensor measurement methodology
-  for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-    gyroADC[axis] = getGyroADC(axis)  - zero[axis];
+  for (byte axis = 0; axis < 3; axis++) {
+    gyroADC[axis] = wii.getGyroADC(axis)  - zero[axis];
     rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
   }
 }
 
 void Gyroscope_Wii::calibrate() {
-  // Add calibration method for measurement when gyro is motionless
-  for (byte axis = ROLL; axis < LASTAXIS; axis++)
-    zero[axis] = random(510, 514); // simulate zero measurement around 512
-}
-
-void Gyroscope_Wii::calibrate() {
-  float findZero[FINDZERO];
+  int findZero[FINDZERO];
     
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  measure();
-      findZero[i] = gyroADC[axis];
+      findZero[i] = wii.getGyroADC(axis);
       delay(measureDelay);
     }
-    zero[axis] = findMedian(findZero, FINDZERO);
+    zero[axis] = findMedianInt(findZero, FINDZERO);
   }
 }

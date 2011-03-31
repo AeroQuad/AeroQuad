@@ -28,6 +28,7 @@ private:
   int gyroADC[3]; // raw data from sensor
 
   public:
+  Gyroscope_Test();
   void initialize(void);
   void measure(void);
   void calibrate(void);

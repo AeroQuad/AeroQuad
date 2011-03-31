@@ -22,12 +22,15 @@
 #define _AEROQUAD_GYROSCOPE_WII_H_
 
 #include <Gyroscope.h>
+#include "../AQ_Platform_Wii/Platform_Wii.h"
 
 class Gyroscope_Wii : public Gyroscope {
 private:
   int gyroADC[3]; // raw data from sensor
 
   public:
+  Gyroscope_Wii();
+  Platform_Wii wii;
   void initialize(void);
   void measure(void);
   void calibrate(void);
