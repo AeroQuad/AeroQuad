@@ -235,35 +235,21 @@ float arctan2(float y, float x)
 
 // Used for sensor calibration
 // Takes the median of 50 results as zero
-<<<<<<< HEAD:AQMath.h
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMedian(float *data, int arraySize) {
-  float temp;
-#else
-int findMedian(int *data, int arraySize) {                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
-  int temp;
-#endif
-=======
+// Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
 float findMedianFloat(float *data, int arraySize) 
 {
   float temp;
->>>>>>> 1b461eb16c471f4c517176f6e35bdac1423e4d7a:libraries/AQMath/AQMath.cpp
   boolean done = 0;
-  //byte i;
+  byte i;
   
    // Sorts numbers from lowest to highest
   while (done != 1) 
   {        
     done = 1;
-<<<<<<< HEAD:AQMath.h
-    for (byte i=0; i<(arraySize-1); i++) {
-      if (data[i] > data[i+1]) {     // numbers are out of order - swap
-=======
     for (i=0; i<(arraySize-1); i++) 
 	{
       if (data[i] > data[i+1]) 
 	  {     // numbers are out of order - swap
->>>>>>> 1b461eb16c471f4c517176f6e35bdac1423e4d7a:libraries/AQMath/AQMath.cpp
         temp = data[i+1];
         data[i+1] = data[i];
         data[i] = temp;
@@ -277,7 +263,7 @@ float findMedianFloat(float *data, int arraySize)
 
 
 int findMedianInt(int *data, int arraySize) 
-{                  //Thanks ala42! Post: http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code/page5
+{
   int temp;
   boolean done = 0;
   byte i;
