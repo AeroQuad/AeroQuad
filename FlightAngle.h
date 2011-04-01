@@ -163,7 +163,9 @@ void normalize(void)
 void driftCorrection(float ax, float ay, float az, float oneG, float magX, float magY) 
 {
   //  Compensation of the Roll, Pitch and Yaw drift. 
+  float accelMagnitude;
   float accelVector[3];
+  float accelWeight;
   float errorRollPitch[3];
 #ifdef HeadingMagHold  
   float errorCourse;
@@ -174,14 +176,35 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   
   //  Roll and Pitch Compensation
   
-  accelVector[XAXIS] = accelVector[XAXIS]*0.05 + ax*0.05;
-  accelVector[YAXIS] = accelVector[YAXIS]*0.05 + ay*0.05;
-  accelVector[ZAXIS] = accelVector[ZAXIS]*0.05 + az*0.05;
+//  accelVector[XAXIS] = accelVector[XAXIS]*0.05 + ax*0.05;
+//  accelVector[YAXIS] = accelVector[YAXIS]*0.05 + ay*0.05;
+//  accelVector[ZAXIS] = accelVector[ZAXIS]*0.05 + az*0.05;
+//  
+//  vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
+//  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);
+//  
+//  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);
+//  vectorAdd(3, omegaI, omegaI, scaledOmegaI);
+
+  accelVector[XAXIS] = ax;
+  accelVector[YAXIS] = ay;
+  accelVector[ZAXIS] = az;
+
+  // Calculate the magnitude of the accelerometer vector
+  accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + \
+                         accelVector[YAXIS] * accelVector[YAXIS] + \
+                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
+                         
+  // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
+  // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
+  
+  // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
+  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
-  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);
+  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
   
-  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);
+  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
   
   //  Yaw Compensation
@@ -280,8 +303,8 @@ public:
     kpYaw = -1.0;
     kiYaw = -0.002;
 */
-    kpRollPitch = 0.5;
-    kiRollPitch = 0.001;
+    kpRollPitch = 0.05;
+    kiRollPitch = 0.0001;
     
     kpYaw = -0.5;
     kiYaw = -0.001;
@@ -444,12 +467,12 @@ private:
   
     // normalise the measurements
     norm = sqrt(ax*ax + ay*ay + az*az);       
-//    ax = ax / norm;
-//    ay = ay / norm;
-//    az = az / norm;
-    ax = ax*0.1 / norm;
-    ay = ay*0.1 / norm;
-    az = az*0.1 / norm;
+    ax = ax / norm;
+    ay = ay / norm;
+    az = az / norm;
+//    ax = ax*0.1 / norm;
+//    ay = ay*0.1 / norm;
+//    az = az*0.1 / norm;
 
      	
     // estimated direction of gravity and flux (v and w)
@@ -519,8 +542,10 @@ public:
     eyInt = 0.0;
     ezInt = 0.0;
 
-    Kp = 2.0;
-    Ki = 0.005;
+//    Kp = 2.0;
+//    Ki = 0.005;
+    Kp = 0.2;
+    Ki = 0.0005;
   }
   
 ////////////////////////////////////////////////////////////////////////////////
