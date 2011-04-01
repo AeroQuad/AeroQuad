@@ -214,8 +214,8 @@
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
-//  FlightAngle_ARG tempFlightAngle;
+//  FlightAngle_DCM tempFlightAngle;
+  FlightAngle_ARG tempFlightAngle;
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"

@@ -1,3 +1,4 @@
+
 /*
   AeroQuad v2.3 - March 2011
   www.AeroQuad.com
@@ -176,16 +177,6 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   
   //  Roll and Pitch Compensation
   
-//  accelVector[XAXIS] = accelVector[XAXIS]*0.05 + ax*0.05;
-//  accelVector[YAXIS] = accelVector[YAXIS]*0.05 + ay*0.05;
-//  accelVector[ZAXIS] = accelVector[ZAXIS]*0.05 + az*0.05;
-//  
-//  vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
-//  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch);
-//  
-//  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch);
-//  vectorAdd(3, omegaI, omegaI, scaledOmegaI);
-
   accelVector[XAXIS] = ax;
   accelVector[YAXIS] = ay;
   accelVector[ZAXIS] = az;
@@ -289,25 +280,18 @@ public:
     dcmMatrix[7] =  0;
     dcmMatrix[8] =  1;
 
-    // Original from John
-//    kpRollPitch = 1.6;
-//    kiRollPitch = 0.005;
+//    kpRollPitch = 1.0;
+//    kiRollPitch = 0.002;
+
+    kpRollPitch = 0.1;
+    kiRollPitch = 0.0002;
+
     
-//    kpYaw = -1.6;
-//    kiYaw = -0.005;
-/*    
-    // released in 2.2
-    kpRollPitch = 1.0;
-    kiRollPitch = 0.002;
-    
-    kpYaw = -1.0;
-    kiYaw = -0.002;
-*/
-    kpRollPitch = 0.05;
-    kiRollPitch = 0.0001;
-    
-    kpYaw = -0.5;
-    kiYaw = -0.001;
+//    kpYaw = -1.0;
+//    kiYaw = -0.002;
+
+    kpYaw = -0.1;
+    kiYaw = -0.0002;
   }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -333,6 +317,7 @@ public:
   void calibrate() {};
   
 };
+
 
 // ***********************************************************************
 // ********************* CHR6DM "null" Filter ***************************
