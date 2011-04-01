@@ -21,9 +21,8 @@
 #include "Gyroscope_ITG3200.h"
 
 #include <Wire.h>
-#include <Device_I2C.h>
 #include <AQMath.h>
-
+#include <Device_I2C.h>
 
 Gyroscope_ITG3200::Gyroscope_ITG3200() {
   scaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
