@@ -367,15 +367,6 @@ public:
     writeFloat(accelZero[YAXIS], LEVELROLLCAL_ADR);
     writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
   }
-
-/* AKA - NOT USED
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(getRaw(XAXIS)) < 1500) && (abs(getRaw(YAXIS)) < 1500)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
-*/  
 };
 #endif
 
@@ -591,90 +582,4 @@ public:
 };
 #endif
 
-/********************************************/
-/******** CHR6DM Fake Accelerometer *********/
-/********************************************/
-#ifdef CHR6DM_FAKE_ACCEL
-class Accel_CHR6DM_Fake : public Accel {
-public:
-  float fakeAccelRoll;
-  float fakeAccelPitch;
-  float fakeAccelYaw;
-  Accel_CHR6DM_Fake() : Accel() {
-    accelScaleFactor = 0;
-  }
 
-  void initialize(void) {
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
-    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
-    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
-    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-     accelZero[ROLL] = 0;
-        accelZero[PITCH] = 0;
-        accelZero[ZAXIS] = 0;
-
-    accelOneG = readFloat(ACCEL1G_ADR);
-    calibrate();
-  }
-
-  void measure(void) {
-    //currentTime = micros(); // AKA removed as a result of Honks original work, not needed further
-      //read done in gyro   //TODO
-      accelADC[XAXIS] = fakeAccelRoll - accelZero[XAXIS];
-      accelADC[YAXIS] = fakeAccelPitch - accelZero[YAXIS];
-      accelADC[ZAXIS] = fakeAccelYaw - accelOneG;
-
-      //accelData[XAXIS] = smoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      //accelData[YAXIS] = smoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      //accelData[ZAXIS] = smoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[XAXIS] = smooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor);
-      accelData[YAXIS] = smooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
-      accelData[ZAXIS] = smooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
-
-    //previousTime = currentTime; // AKA removed as a result of Honks original work, not needed further
-  }
-  
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
-
-  // Allows user to zero accelerometers on command
-  void calibrate(void) {
-
-   float zeroXreads[FINDZERO];
-   float zeroYreads[FINDZERO];
-   float zeroZreads[FINDZERO];
-
-
-    for (int i=0; i<FINDZERO; i++) {
-        chr6dm.requestAndReadPacket();
-        zeroXreads[i] = 0;
-        zeroYreads[i] = 0;
-        zeroZreads[i] = 0;
-    }
-
-
-    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
-
-    // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
-    // replace with estimated Z axis 0g value
-    //accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-
-    writeFloat(accelOneG, ACCEL1G_ADR);
-    writeFloat(accelZero[XAXIS], LEVELROLLCAL_ADR);
-    writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
-    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
-  }
-/* AKA - NOT USED
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
-*/  
-};
-#endif

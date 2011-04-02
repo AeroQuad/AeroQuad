@@ -78,25 +78,25 @@ void readPilotCommands() {
   }
   
   #ifdef AeroQuad_Mini
-  flightMode = ACRO;
-  #else
-  // Check Mode switch for Acro or Stable
-  if (receiver.getRaw(MODE) > 1500) {
-    if (flightMode == ACRO) {
-      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-        digitalWrite(LED2PIN, HIGH);
-      #endif
-      zeroIntegralError();
-    }
-    flightMode = STABLE;
- }
-  else {
-    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      if (flightMode == STABLE)
-        digitalWrite(LED2PIN, LOW);
-    #endif
     flightMode = ACRO;
-  }
+  #else
+    // Check Mode switch for Acro or Stable
+    if (receiver.getRaw(MODE) > 1500) {
+      if (flightMode == ACRO) {
+        #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+          digitalWrite(LED2PIN, HIGH);
+        #endif
+        zeroIntegralError();
+      }
+      flightMode = STABLE;
+   }
+    else {
+      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+        if (flightMode == STABLE)
+          digitalWrite(LED2PIN, LOW);
+      #endif
+      flightMode = ACRO;
+    }
   #endif
   
    #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -122,14 +122,6 @@ void readPilotCommands() {
          storeAltitude = OFF;
        }
        altitudeHold = ON;
-      
-       //stickMovement = abs(holdThrottle - receiver.getData(THROTTLE));
-      
-       //if (stickMovement > PANICSTICK_MOVEMENT )
-         //altitudeHold = ALTPANIC;
-          
-       //if (stickMovement > MIN_STICK_MOVEMENT && stickMovement < PANICSTICK_MOVEMENT)
-         //storeAltitude = ON;
      }
      // note, Panic will stay set until Althold is toggled off/on
    } 
@@ -138,9 +130,6 @@ void readPilotCommands() {
      altitudeHold = OFF;
    }
   #endif
-  
-  // Use for correcting gyro drift with v2.0 Shield
-  //gyro.setReceiverYaw(receiver.getData(YAW));
 }
 
 

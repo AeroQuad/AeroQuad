@@ -34,16 +34,9 @@ public:
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
   float rawHeading, gyroHeading;
+  long int previousGyroTime;
   //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
-/*  
-  // ************ Correct for gyro drift by FabQuad **************  
-  // ************ http://aeroquad.com/entry.php?4-  **************     
-  int lastReceiverYaw, receiverYaw;
-  long yawAge;
-  int positiveGyroYawCount;
-  int negativeGyroYawCount;
-  int zeroGyroYawCount;
-*/    
+
   Gyro(void){
     sign[ROLL] = 1;
     sign[PITCH] = 1;
@@ -110,16 +103,6 @@ public:
     smoothFactor = value;
   }
 
-/*  AKA commented out, not used and not correct based upon SI unit conversion
-  const float rateDegPerSec(byte axis) {
-    return ((gyroADC[axis] * sign[axis])) * gyroScaleFactor;
-  }
-
-  const float rateRadPerSec(byte axis) {
-    return radians(rateDegPerSec(axis));
-  }
-*/
-  
   // returns gyro based heading as +/- PI in radians
   const float getHeading(void) {
     //div_t integerDivide;
@@ -131,22 +114,6 @@ public:
     //Serial.print(integerDivide.quot);Serial.print(",");Serial.print(integerDivide.rem);Serial.println();
     return gyroHeading;
   }
-
-/* AKA commeted out as not used  
-  const float getRawHeading(void) {
-    return rawHeading;
-  }
-  
-  void setStartHeading(float value) {
-    // since a relative heading, get starting absolute heading from compass class
-    rawHeading = value;
-  }
-*/
-/*  
-  void setReceiverYaw(int value) {
-    receiverYaw = value;
-  }
-*/  
 };
 
 /******************************************************/
@@ -225,7 +192,6 @@ public:
 class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int gyroAddress;
-  long int previousGyroTime;
   //float gyroLastData;
   
 public:
@@ -238,15 +204,7 @@ public:
     gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
     gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
     
-/*    
-    lastReceiverYaw=0;
-    yawAge=0;
-    positiveGyroYawCount=1;
-    negativeGyroYawCount=1;
-    zeroGyroYawCount=1;
-*/    
     previousGyroTime = micros();
-    
   }
   
   void initialize(void) {
@@ -286,45 +244,10 @@ public:
     // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
     long int currentGyroTime = micros();
     if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
-      //rawHeading += gyroADC[YAW] * gyroScaleFactor * ((currentGyroTime - previousGyroTime) / 1000000.0);
       rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
-      //gyroLastData = gyroData[YAW];
     }
     previousGyroTime = currentGyroTime;
-//    gyroLastData = gyroData[YAW];
-/*
-    // ************ Correct for gyro drift by FabQuad **************
-    // ************ http://aeroquad.com/entry.php?4-  **************
-    // Modified FabQuad's approach to use yaw transmitter command instead of checking accelerometer
-    if (abs(lastReceiverYaw - receiverYaw) < 15) {
-      yawAge++;
-      if (yawAge >= 4) {  // if gyro was the same long enough, we can assume that there is no (fast) rotation
-        if (gyroData[YAW] < 0) {
-          negativeGyroYawCount++; // if gyro still indicates negative rotation, that's additional signal that gyroZero is too low
-        }
-        else if (gyroData[YAW] > 0) {
-          positiveGyroYawCount++;  // additional signal that gyroZero is too high
-        }
-        else {
-          zeroGyroYawCount++; // additional signal that gyroZero is correct
-        }
-        yawAge = 0;
-        if (zeroGyroYawCount + negativeGyroYawCount + positiveGyroYawCount > 50) {
-          if (3*negativeGyroYawCount >= 4*(zeroGyroYawCount+positiveGyroYawCount)) 
-            gyroZero[YAW]--;  // enough signals the gyroZero is too low
-          if (3*positiveGyroYawCount >= 4*(zeroGyroYawCount+negativeGyroYawCount)) 
-            gyroZero[YAW]++;  // enough signals the gyroZero is too high
-          zeroGyroYawCount=0;
-          negativeGyroYawCount=0;
-          positiveGyroYawCount=0;
-        }
-      }
-    }
-    else { // gyro different, restart
-      lastReceiverYaw = receiverYaw;
-      yawAge = 0;
-    }
-*/    
+
   }
   
   // returns raw ADC data from the Gyro centered on zero +/- values
@@ -396,6 +319,13 @@ public:
           gyroADC[axis] =  gyroZero[axis] - rawADC;
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
+    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
+    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
+    long int currentGyroTime = micros();
+    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+    }
+    previousGyroTime = currentGyroTime;
    }
 
   const int getFlightData(byte axis) {
@@ -551,118 +481,3 @@ public:
 };
 #endif
 
-/*************************************************/
-/***************** CHR6DM FAKE Gyro **************/
-/*************************************************/
-#ifdef CHR6DM_FAKE_GYRO
-class Gyro_CHR6DM_Fake : public Gyro {
-public:
-  float fakeGyroRoll;
-  float fakeGyroPitch;
-  float fakeGyroYaw;
-  Gyro_CHR6DM_Fake() : Gyro() {
-    gyroFullScaleOutput = 0;
-    gyroScaleFactor = 0;
-  }
-
-  void initialize(void) {
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-    gyroZero[ROLL] = 0;
-    gyroZero[PITCH] = 0;
-    gyroZero[ZAXIS] = 0;
-  }
-
-  void measure(void) {
-    //currentTime = micros();
-    readFakeValues();
-    gyroADC[ROLL] = fakeGyroRoll - gyroZero[ROLL]; //gx yawRate
-    gyroADC[PITCH] = fakeGyroPitch - gyroZero[PITCH]; //gy pitchRate
-    gyroADC[YAW] = fakeGyroYaw - gyroZero[ZAXIS]; //gz rollRate
-
-    //gyroData[ROLL] = filterSmooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    //gyroData[PITCH] = filterSmooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    //gyroData[YAW] = filterSmooth(gyroADC[YAW], gyroData[YAW], smoothFactor, ((currentTime - previousTime) / 5000.0)); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[ROLL] = filterSmooth(gyroADC[ROLL], gyroData[ROLL], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[PITCH] = filterSmooth(gyroADC[PITCH], gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    gyroData[YAW] = filterSmooth(gyroADC[YAW], gyroData[YAW], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-
-    //previousTime = currentTime;
-  }
-
-  const int getFlightData(byte axis) {
-    return getRaw(axis);
-  }
-
-  void calibrate() {
-    float zeroXreads[FINDZERO];
-    float zeroYreads[FINDZERO];
-    float zeroZreads[FINDZERO];
-    for (int i=0; i<FINDZERO; i++) {
-        readFakeValues();
-        zeroXreads[i] = fakeGyroRoll;
-        zeroYreads[i] = fakeGyroPitch;
-        zeroZreads[i] = fakeGyroYaw;
-    }
-
-    gyroZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
-    gyroZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
-    gyroZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
-
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
-
-  void readFakeValues(){
-    if (!syncToHeader()){
-        return;
-    }
-
-    fakeGyroRoll = readInt();
-    fakeGyroPitch = readInt();
-    fakeGyroYaw = readInt();
-
-    fakeAccelRoll = readInt();
-    fakeAccelPitch = readInt();
-    fakeAccelYaw = readInt();
-
-    Serial2.print("fakeGyroRoll=");
-    Serial2.println(fakeGyroRoll);
-    Serial2.print("fakeGyroPitch=");
-    Serial2.println(fakeGyroPitch);
-    Serial2.print("fakeGyroYaw=");
-    Serial2.println(fakeGyroYaw);
-
-    Serial2.print("fakeAccelRoll=");
-    Serial2.println(fakeAccelRoll);
-    Serial2.print("fakeAccelPitch=");
-    Serial2.println(fakeAccelPitch);
-    Serial2.print("fakeAccelYaw=");
-    Serial2.println(fakeAccelYaw);
-  }
-
-  int readInt() {
-    return word(blockingRead(),blockingRead());
-  }
-
-  int blockingRead() {
-    int read=-1;
-
-    long starttime = millis();
-    while(read==-1 && (millis()-starttime)<100) {
-      read = Serial2.read();
-    }
-    return read;
-  }
-
-  bool syncToHeader() {
-    while (Serial2.available()>0){
-      if (blockingRead()=='a' && blockingRead()=='b' && blockingRead()=='c' ) return true;
-    }
-    return false;
-  }
-};
-#endif

@@ -119,17 +119,6 @@ float filterSmooth(float currentData, float previousData, float smoothFactor) {
     return currentData; // if smoothFactor == 1.0, do not calculate, just bypass!
 }
 
-/* AKA NOT USED ANYMORE
-float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
-  if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
-    return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
-  else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
-}
-*/
-
-
-
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
 // ***********************************************************************

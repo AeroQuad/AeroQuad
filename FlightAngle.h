@@ -21,10 +21,9 @@
 // This class is responsible for calculating vehicle attitude
 class FlightAngle {
 public:
-  #define CF 0
-  #define KF 1
   #define DCM 2
-  #define IMU 3
+  #define ARG 3
+  #define MARG 4
   byte type;
   float angle[3];
   float gyroAngle[2];
@@ -285,20 +284,20 @@ public:
     
 //    kpYaw = -1.6;
 //    kiYaw = -0.005;
-    
+/*    
     // released in 2.2
     kpRollPitch = 1.0;
     kiRollPitch = 0.002;
     
     kpYaw = -1.0;
     kiYaw = -0.002;
-/*
-    kpRollPitch = 0.5;
-    kiRollPitch = 0.001;
+*/
+    kpRollPitch = 0.1; //0.05;
+    kiRollPitch = 0.0002; //0.0001;
     
-    kpYaw = -0.5;
-    kiYaw = -0.001;
-*/    
+    kpYaw = -0.1;//-0.05;
+    kiYaw = -0.0002;//-0.0001;
+    
   }
   
 ////////////////////////////////////////////////////////////////////////////////

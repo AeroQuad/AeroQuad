@@ -1,6 +1,6 @@
 /*
   AeroQuad v2.4 - April 2011
-  www.AeroQuad.com
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
@@ -57,18 +57,16 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define FlightAngleMARG
-#define FlightAngleARG
+//#define FlightAngleMARG // Use this if you have a magnetometer installed and enabled HeadingMagHold above
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -89,7 +87,6 @@
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
 // Checks to make sure we have the right combinations defined
-
 #if defined(FlightAngleMARG) && !defined(HeadingMagHold)
 #undef FlightAngleMARG
 #endif
@@ -99,8 +96,6 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-//#include <Task.h>
-//#include <TaskScheduler.h>
 #include "AeroQuad.h"
 #include "I2C.h"
 #include "PID.h"
@@ -389,19 +384,8 @@
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
-#if defined(UseArduPirateSuperStable)
-  void (*processStableMode)() = &processArdupirateSuperStableMode;
-#endif
-#if defined(UseAttitudeHold)
-  void (*processStableMode)() = &processAttitudeMode;
-#endif
-#if defined(UseAQStable)
-  void (*processStableMode)() = &processAeroQuadStableMode;
-#endif
-
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
-//#include "Tasks.h"
 
 // ************************************************************
 // ********************** Setup AeroQuad **********************
@@ -513,13 +497,13 @@ void setup() {
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
-  #ifdef OpenlogBinaryWrite
-    binaryPort = &Serial1;
-    binaryPort->begin(115200);
-    delay(1000);
-  #else
-   binaryPort = &Serial;
-  #endif 
+    #ifdef OpenlogBinaryWrite
+      binaryPort = &Serial1;
+      binaryPort->begin(115200);
+      delay(1000);
+    #else
+     binaryPort = &Serial;
+    #endif 
   #endif
   
   // AKA use a new low pass filter called a Lag Filter uncomment only if using DCM LAG filters
@@ -530,13 +514,29 @@ void setup() {
   safetyCheck = 0;
 }
 
-// ************************************************************
-// ******************** Main AeroQuad Loop ********************
-// ************************************************************
+/*******************************************************************
+  // tasks (microseconds of interval)
+  ReadGyro        readGyro      (   5000); // 200hz
+  ReadAccel       readAccel     (   5000); // 200hz
+  RunDCM          runDCM        (  10000); // 100hz
+  FlightControls  flightControls(  10000); // 100hz
+  ReadReceiver    readReceiver  (  20000); //  50hz
+  ReadBaro        readBaro      (  40000); //  25hz
+  ReadCompass     readCompass   ( 100000); //  10Hz
+  ProcessTelem    processTelem  ( 100000); //  10Hz
+  ReadBattery     readBattery   ( 100000); //  10Hz
+  
+  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
+                   &readReceiver, &readBaro, &readCompass,            \
+                   &processTelem, &readBattery};
+                   
+  TaskScheduler sched(tasks, NUM_TASKS(tasks));
+  
+  sched.run();
+*******************************************************************/
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
-//  G_Dt = deltaTime / 1000000.0;
   
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
@@ -548,29 +548,6 @@ void loop () {
 
     frameCounter++;
     
-/*
-    // ================================================================
-    // 200hz task loop
-    // ================================================================
-    if (frameCounter %   1 == 0) {  // 200 Hz tasks
-      #ifdef DEBUG_LOOP
-        digitalWrite(12, HIGH);
-      #endif
-      
-      G_Dt = (frameCurrentTime - twohundredHZpreviousTime) / 1000000.0;
-      twohundredHZpreviousTime = frameCurrentTime;
-
-      if (sensorLoop == ON ) {
-        gyro.measure();
-        accel.measure();
-      }
-
-      #ifdef DEBUG_LOOP
-        digitalWrite(12, LOW);
-      #endif
-    }
-*/
-
     // ================================================================
     // 100hz task loop
     // ================================================================
@@ -708,6 +685,7 @@ void loop () {
         digitalWrite(9, LOW);
       #endif
     }
+    
     // ================================================================
     // 10hz task loop
     // ================================================================
@@ -737,40 +715,11 @@ void loop () {
         digitalWrite(8, LOW);
       #endif
     }
-/*    
-    // ================================================================
-    // 1hz task loop
-    // ================================================================
-    if (frameCounter % 100 == 0) {  //   1 Hz tasks
-      G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
-      oneHZpreviousTime = currentTime;
-  }
-*/    
+
     previousTime = currentTime;
   }
-  if (frameCounter >= 100)
+  if (frameCounter >= 100) 
       frameCounter = 0;
 }
 
-/*
-void loop() {
-  // tasks (microseconds of interval)
-  ReadGyro        readGyro      (   5000); // 200hz
-  ReadAccel       readAccel     (   5000); // 200hz
-  RunDCM          runDCM        (  10000); // 100hz
-  FlightControls  flightControls(  10000); // 100hz
-  ReadReceiver    readReceiver  (  20000); //  50hz
-  ReadBaro        readBaro      (  40000); //  25hz
-  ReadCompass     readCompass   ( 100000); //  10Hz
-  ProcessTelem    processTelem  ( 100000); //  10Hz
-  ReadBattery     readBattery   ( 100000); //  10Hz
-  
-  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
-                   &readReceiver, &readBaro, &readCompass,            \
-                   &processTelem, &readBattery};
-                   
-  TaskScheduler sched(tasks, NUM_TASKS(tasks));
-  
-  sched.run();
-}
-*/
+
