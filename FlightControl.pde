@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -78,7 +78,11 @@ void processHeading(void)
 {
   if (headingHoldConfig == ON) {
 
-    heading = degrees(flightAngle->getHeading(YAW));
+    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+      heading = degrees(flightAngle->getHeading(YAW));
+    #else
+      heading = degrees(gyro.getHeading());
+    #endif
 
     // Always center relative heading around absolute heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
