@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,10 +21,9 @@
 // This class is responsible for calculating vehicle attitude
 class FlightAngle {
 public:
-  #define CF 0
-  #define KF 1
   #define DCM 2
-  #define IMU 3
+  #define AGR 3
+  #define MAGR 4
   byte type;
   float angle[3];
   float gyroAngle[2];

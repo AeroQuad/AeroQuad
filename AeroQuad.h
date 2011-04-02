@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -377,9 +377,6 @@ void readSensors(void); // defined in Sensors.pde
 //void calibrateESC(void); // defined in FlightControl.pde
 void processFlightControlXMode(void); // defined in FlightControl.pde
 void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
-void processAeroQuadStableMode(void);  // defined in FlightControl.pde
-void processAttitudeMode(void); // defined in FlightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
