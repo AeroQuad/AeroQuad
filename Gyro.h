@@ -34,6 +34,7 @@ public:
   byte rollChannel, pitchChannel, yawChannel;
   int sign[3];
   float rawHeading, gyroHeading;
+  long int previousGyroTime;
   //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
 /*  
   // ************ Correct for gyro drift by FabQuad **************  
@@ -225,7 +226,6 @@ public:
 class Gyro_AeroQuadMega_v2 : public Gyro {
 private:
   int gyroAddress;
-  long int previousGyroTime;
   //float gyroLastData;
   
 public:
@@ -396,6 +396,11 @@ public:
           gyroADC[axis] =  gyroZero[axis] - rawADC;
       gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
+    long int currentGyroTime = micros();
+    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+    }
+    previousGyroTime = currentGyroTime;
    }
 
   const int getFlightData(byte axis) {
