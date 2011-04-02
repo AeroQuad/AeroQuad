@@ -92,12 +92,9 @@ void processCalibrateESC(void)
 void processHeading(void)
 {
   if (headingHoldConfig == ON) {
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        heading = degrees(flightAngle->getHeading(YAW));
-    #else
-        heading = degrees(gyro.getHeading());
-    #endif
 
+    heading = degrees(flightAngle->getHeading(YAW));
+    
     // Always center relative heading around absolute heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
     // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
