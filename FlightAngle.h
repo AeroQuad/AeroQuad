@@ -21,11 +21,6 @@
 // This class is responsible for calculating vehicle attitude
 class FlightAngle {
 public:
-  #define CF 0
-  #define KF 1
-  #define DCM 2
-  #define IMU 3
-  byte type;
   float angle[3];
   float gyroAngle[2];
   float correctedRateVector[3];
@@ -68,11 +63,6 @@ public:
       return (tDegrees + 360.0);
     else
       return (tDegrees);
-  }
-  
-  const byte getType(void) {
-    // This is set in each subclass to identify which algorithm used
-    return type;
   }
 };
 
