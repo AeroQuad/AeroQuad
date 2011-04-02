@@ -362,47 +362,6 @@ public:
 };
 #endif
 
-// ***********************************************************************
-// ********************* CHR6DM "null" Filter ***************************
-// ***********************************************************************
-#ifdef CHR6DM_FAKE_FLIGHTANGLE
-class FlightAngle_CHR6DM_Fake : public FlightAngle {
-private:
-
-float zeroRoll;
-float zeroPitch;
-
-public:
-  FlightAngle_CHR6DM_Fake() : FlightAngle() {}
-
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(float hdgX, float hdgY) {
-    calibrate();
-  }
-
-  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
-                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
-                 float oneG,               float magX,          float magY) {
-    angle[ROLL]  =  0 - zeroRoll;
-    angle[PITCH] =  0 - zeroPitch;
-    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    CHR_PitchAngle = angle[PITCH];
-  }
-
-   void calibrate(void) {
-    zeroRoll = 0;
-    zeroPitch = 0;
-  }
-  
-  float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
-  }
-
-  
-};
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
