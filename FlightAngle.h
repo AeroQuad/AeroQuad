@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -285,20 +285,20 @@ public:
     
 //    kpYaw = -1.6;
 //    kiYaw = -0.005;
-    
+/*    
     // released in 2.2
     kpRollPitch = 1.0;
     kiRollPitch = 0.002;
     
     kpYaw = -1.0;
     kiYaw = -0.002;
-/*
-    kpRollPitch = 0.5;
-    kiRollPitch = 0.001;
+*/
+    kpRollPitch = 0.1; //0.05;
+    kiRollPitch = 0.0002; //0.0001;
     
-    kpYaw = -0.5;
-    kiYaw = -0.001;
-*/    
+    kpYaw = -0.1;//-0.05;
+    kiYaw = -0.0002;//-0.0001;
+    
   }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -362,6 +362,47 @@ public:
 };
 #endif
 
+// ***********************************************************************
+// ********************* CHR6DM "null" Filter ***************************
+// ***********************************************************************
+#ifdef CHR6DM_FAKE_FLIGHTANGLE
+class FlightAngle_CHR6DM_Fake : public FlightAngle {
+private:
+
+float zeroRoll;
+float zeroPitch;
+
+public:
+  FlightAngle_CHR6DM_Fake() : FlightAngle() {}
+
+  // ***********************************************************
+  // Define all the virtual functions declared in the main class
+  // ***********************************************************
+  void initialize(float hdgX, float hdgY) {
+    calibrate();
+  }
+
+  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
+                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
+                 float oneG,               float magX,          float magY) {
+    angle[ROLL]  =  0 - zeroRoll;
+    angle[PITCH] =  0 - zeroPitch;
+    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
+    CHR_PitchAngle = angle[PITCH];
+  }
+
+   void calibrate(void) {
+    zeroRoll = 0;
+    zeroPitch = 0;
+  }
+  
+  float getGyroUnbias(byte axis) {
+    return gyro.getFlightData(axis);
+  }
+
+  
+};
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

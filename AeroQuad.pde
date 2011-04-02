@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -36,9 +36,9 @@
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -57,10 +57,10 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
+#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
@@ -87,7 +87,6 @@
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
 // Checks to make sure we have the right combinations defined
-
 #if defined(FlightAngleMARG) && !defined(HeadingMagHold)
 #undef FlightAngleMARG
 #endif
@@ -387,6 +386,10 @@
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
+#if defined(UseAttitudeHold)
+  void (*processStableMode)() = &processAttitudeMode;
+#endif
+
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
 //#include "Tasks.h"
@@ -518,29 +521,6 @@ void setup() {
   safetyCheck = 0;
 }
 
-// ************************************************************
-// ******************** Main AeroQuad Loop ********************
-// ************************************************************
-/**************************************************************
-  // tasks (microseconds of interval)
-  ReadGyro        readGyro      (   5000); // 200hz
-  ReadAccel       readAccel     (   5000); // 200hz
-  RunDCM          runDCM        (  10000); // 100hz
-  FlightControls  flightControls(  10000); // 100hz
-  ReadReceiver    readReceiver  (  20000); //  50hz
-  ReadBaro        readBaro      (  40000); //  25hz
-  ReadCompass     readCompass   ( 100000); //  10Hz
-  ProcessTelem    processTelem  ( 100000); //  10Hz
-  ReadBattery     readBattery   ( 100000); //  10Hz
-  
-  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
-                   &readReceiver, &readBaro, &readCompass,            \
-                   &processTelem, &readBattery};
-                   
-  TaskScheduler sched(tasks, NUM_TASKS(tasks));
-  
-  sched.run();
-**************************************************************/
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
@@ -556,6 +536,29 @@ void loop () {
 
     frameCounter++;
     
+/*
+    // ================================================================
+    // 200hz task loop
+    // ================================================================
+    if (frameCounter %   1 == 0) {  // 200 Hz tasks
+      #ifdef DEBUG_LOOP
+        digitalWrite(12, HIGH);
+      #endif
+      
+      G_Dt = (frameCurrentTime - twohundredHZpreviousTime) / 1000000.0;
+      twohundredHZpreviousTime = frameCurrentTime;
+
+      if (sensorLoop == ON ) {
+        gyro.measure();
+        accel.measure();
+      }
+
+      #ifdef DEBUG_LOOP
+        digitalWrite(12, LOW);
+      #endif
+    }
+*/
+
     // ================================================================
     // 100hz task loop
     // ================================================================
@@ -693,7 +696,6 @@ void loop () {
         digitalWrite(9, LOW);
       #endif
     }
-    
     // ================================================================
     // 10hz task loop
     // ================================================================
@@ -723,10 +725,40 @@ void loop () {
         digitalWrite(8, LOW);
       #endif
     }
+/*    
+    // ================================================================
+    // 1hz task loop
+    // ================================================================
+    if (frameCounter % 100 == 0) {  //   1 Hz tasks
+      G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+      oneHZpreviousTime = currentTime;
+  }
+*/    
     previousTime = currentTime;
   }
   if (frameCounter >= 100)
       frameCounter = 0;
 }
 
-
+/*
+void loop() {
+  // tasks (microseconds of interval)
+  ReadGyro        readGyro      (   5000); // 200hz
+  ReadAccel       readAccel     (   5000); // 200hz
+  RunDCM          runDCM        (  10000); // 100hz
+  FlightControls  flightControls(  10000); // 100hz
+  ReadReceiver    readReceiver  (  20000); //  50hz
+  ReadBaro        readBaro      (  40000); //  25hz
+  ReadCompass     readCompass   ( 100000); //  10Hz
+  ProcessTelem    processTelem  ( 100000); //  10Hz
+  ReadBattery     readBattery   ( 100000); //  10Hz
+  
+  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
+                   &readReceiver, &readBaro, &readCompass,            \
+                   &processTelem, &readBattery};
+                   
+  TaskScheduler sched(tasks, NUM_TASKS(tasks));
+  
+  sched.run();
+}
+*/

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -20,24 +20,67 @@
 
 // FlightControl.pde is responsible for combining sensor measurements and
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
-
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// Attitude Mode ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-// To Do
-// Figure out how to zero integrator when entering attitude mode from rate mode 
-// 2.3 Original
-float attitudeScaling = (0.75 * PWM2RAD); // +/-1.0 radian attitude
-// 2.3 Stable
-//float attitudeScaling = (1.5 * PWM2RAD); // +/-1.5 radian attitude factored further by transmitter factor
 void processAttitudeMode(void)
 {
-  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
-//  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
+  // To Do
+  // Figure out how to zero integrator when entering attitude mode from rate mode 
+  // 2.3 Original
+  float attitudeScaling = (0.75 * PWM2RAD); // +/-1.0 radian attitude
+  // 2.3 Stable
+  //float attitudeScaling = (1.5 * PWM2RAD); // +/-1.5 radian attitude factored further by transmitter factor
+
+  #ifdef BinaryWritePID  
+    // AKA change this back once data collection is complete
+    float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling;
+    float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling;
+    float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+    float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  #else  
+    float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * attitudeScaling, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+    float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * attitudeScaling, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  #endif  
+  #ifdef BinaryWritePID  
+    float rollMotorCmd = updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]);
+    float pitchMotorCmd = updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]);
+    motors.setMotorAxisCommand(ROLL, rollMotorCmd);
+    motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
+  #else  
+    motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+  #endif  
+  #ifdef BinaryWritePID
+    // **************************************************************
+    // ***************** Fast Transfer Of Sensor Data ***************
+    // **************************************************************
+    // AeroQuad.h defines the output rate to be 10ms
+    // Since writing to UART is done by hardware, unable to measure data rate directly
+    // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+    // If float = 4 bytes, then 3600 floats/second
+    // If 10 ms output rate, then 36 floats/10ms
+    // Number of floats written using sendBinaryFloat is 15
+    #ifdef OpenlogBinaryWrite
+      if (armed == ON) {
+        printInt(21845); // Start word of 0x5555
+        sendBinaryuslong(currentFrameTime);
+        sendBinaryFloat(recRollScaled);
+        sendBinaryFloat(recPitchScaled);
+        sendBinaryFloat(flightAngle->getData(ROLL));
+        sendBinaryFloat(-flightAngle->getData(PITCH));
+        sendBinaryFloat(rollAttitudeCmd);
+        sendBinaryFloat(pitchAttitudeCmd);
+        sendBinaryFloat(gyro.getData(ROLL));
+        sendBinaryFloat(-gyro.getData(PITCH));
+        sendBinaryFloat(rollMotorCmd);
+        sendBinaryFloat(pitchMotorCmd);
+//        sendBinaryFloat(receiver.getSIData(YAW));
+//        sendBinaryFloat(gyro.getData(YAW));
+        printInt(32767); // Stop word of 0x7FFF
+      }
+    #endif
+  #endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -53,9 +96,13 @@ void calculateFlightError(void)
     // measured = rate data from gyros scaled to Radians, since PID settings are found experimentally
     motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), gyro.getData(ROLL), &PID[ROLL]));
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro.getData(PITCH), &PID[PITCH]));
+    // NEW SI Version uses DCM unbias rate
+    //motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), flightAngle->getGyroUnbias(ROLL), &PID[ROLL]));
+    //motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -flightAngle->getGyroUnbias(PITCH), &PID[PITCH]));
+    zeroIntegralError();
   }
   else {
-    processAttitudeMode();
+    processStableMode();
   }
 }
 
@@ -93,8 +140,12 @@ void processHeading(void)
 {
   if (headingHoldConfig == ON) {
 
+#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     heading = degrees(flightAngle->getHeading(YAW));
-    
+#else
+    heading = degrees(gyro.getHeading());
+#endif
+
     // Always center relative heading around absolute heading chosen during yaw command
     // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
     // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
@@ -132,8 +183,11 @@ void processHeading(void)
       PID[HEADING].integratedError = 0;
     }
   }
+  // NEW SI Version
   commandedYaw = constrain(receiver.getSIData(YAW) + radians(headingHold), -PI, PI);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getData(YAW), &PID[YAW]));
+  // uses flightAngle unbias rate
+  //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -149,10 +203,6 @@ void processAltitudeHold(void)
 #ifdef AltitudeHold
   if (altitudeHold == ON) {
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
-    //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-    //if((abs(flightAngle->getData(ROLL)) > radians(5)) || (abs(flightAngle->getData(PITCH)) > radians(5))) { 
-    //  PID[ZDAMPENING].integratedError = 0;
-    //}
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
     if (abs(holdThrottle - receiver.getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
@@ -174,8 +224,6 @@ void processAltitudeHold(void)
   // holdThrottle set in FlightCommand.pde if altitude hold is on
   throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
-  //zDampening = updatePID(0, accel.getZaxis(), &PID[ZDAMPENING]); // This is stil under development - do not use (set PID=0)
-  //throttle = receiver.getData(THROTTLE) - zDampening + autoDescent; 
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif

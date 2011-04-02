@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,7 +24,7 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.4
+#define VERSION 2.3
 
 #define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
@@ -377,6 +377,8 @@ void readSensors(void); // defined in Sensors.pde
 //void calibrateESC(void); // defined in FlightControl.pde
 void processFlightControlXMode(void); // defined in FlightControl.pde
 void processFlightControlPlusMode(void); // defined in FlightControl.pde
+void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
+void processAeroQuadStableMode(void);  // defined in FlightControl.pde
 void processAttitudeMode(void); // defined in FlightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
