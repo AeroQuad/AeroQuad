@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,7 +24,8 @@ public:
   #define CF 0
   #define KF 1
   #define DCM 2
-  #define IMU 3
+  #define ARG 3
+  #define MARG 4
   byte type;
   float angle[3];
   float gyroAngle[2];
@@ -34,9 +35,6 @@ public:
   FlightAngle(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       angle[axis] = 0.0;
-    //angle[ROLL] = 0;
-    //angle[PITCH] = 0;
-    //angle[YAW] = 0;
     gyroAngle[ROLL] = 0;
     gyroAngle[PITCH] = 0;
   }
@@ -293,11 +291,11 @@ public:
     kpYaw = -1.0;
     kiYaw = -0.002;
 */
-    kpRollPitch = 0.1; //0.05;
-    kiRollPitch = 0.0002; //0.0001;
+    kpRollPitch = 0.1;        // alternate 0.05;
+    kiRollPitch = 0.0002;     // alternate 0.0001;
     
-    kpYaw = -0.1;//-0.05;
-    kiYaw = -0.0002;//-0.0001;
+    kpYaw = -0.1;             // alternate -0.05;
+    kiYaw = -0.0002;          // alternate -0.0001;
     
   }
   
@@ -323,86 +321,6 @@ public:
   void calibrate() {};
   
 };
-
-// ***********************************************************************
-// ********************* CHR6DM "null" Filter ***************************
-// ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class FlightAngle_CHR6DM : public FlightAngle {
-private:
-
-float zeroRoll;
-float zeroPitch;
-
-public:
-  FlightAngle_CHR6DM() : FlightAngle() {}
-
-  void initialize(float hdgX, float hdgY) {
-    calibrate();
-  }
-
-  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
-                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
-                 float oneG,               float magX,          float magY) {
-    angle[ROLL]  =  chr6dm.data.roll - zeroRoll;
-    angle[PITCH] =  chr6dm.data.pitch - zeroPitch;
-    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    CHR_PitchAngle = angle[PITCH];
-  }
-  
-   void calibrate(void) {
-    zeroRoll = chr6dm.data.roll;
-    zeroPitch = chr6dm.data.pitch;
-  }
-  
-  float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
-  }
-
-};
-#endif
-
-// ***********************************************************************
-// ********************* CHR6DM "null" Filter ***************************
-// ***********************************************************************
-#ifdef CHR6DM_FAKE_FLIGHTANGLE
-class FlightAngle_CHR6DM_Fake : public FlightAngle {
-private:
-
-float zeroRoll;
-float zeroPitch;
-
-public:
-  FlightAngle_CHR6DM_Fake() : FlightAngle() {}
-
-  // ***********************************************************
-  // Define all the virtual functions declared in the main class
-  // ***********************************************************
-  void initialize(float hdgX, float hdgY) {
-    calibrate();
-  }
-
-  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
-                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
-                 float oneG,               float magX,          float magY) {
-    angle[ROLL]  =  0 - zeroRoll;
-    angle[PITCH] =  0 - zeroPitch;
-    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    CHR_PitchAngle = angle[PITCH];
-  }
-
-   void calibrate(void) {
-    zeroRoll = 0;
-    zeroPitch = 0;
-  }
-  
-  float getGyroUnbias(byte axis) {
-    return gyro.getFlightData(axis);
-  }
-
-  
-};
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +349,6 @@ public:
 // radians/second, accelerometer and magnetometer units are irrelevant as the vector is normalised.
 //
 //=====================================================================================================
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // MARG - Magntometer, Accelerometer, Rate Gyro
@@ -581,8 +498,8 @@ public:
     eyInt = 0.0;
     ezInt = 0.0;
 
-    kpAcc = 2.0;
-    kiAcc = 0.005;
+    kpAcc = 0.2;
+    kiAcc = 0.0005;
     
     kpMag = 2.0;
     kiMag = 0.005;
