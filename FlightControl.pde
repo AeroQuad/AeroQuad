@@ -24,6 +24,17 @@
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
+
+float previousRollError = 0;
+float previousPitchError = 0;
+boolean isErrorSwitched(float previousError, float currentError) {
+  if ( (previousError > 0 &&  currentError < 0) ||
+       (previousError < 0 &&  currentError > 0)) {
+    return true;
+  }
+  return false;
+}
+
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
@@ -32,11 +43,25 @@ void calculateFlightError(void)
   }
   else {
     
-  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
-//  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
+    // Roll error correction
+    float receiverRoll = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING;
+    float rollError = receiverRoll - flightAngle->getData(ROLL);
+    float rollAttitudeCmd = updatePID(receiverRoll, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+    if (isErrorSwitched(previousRollError,rollError)) {
+      PID[LEVELROLL].integratedError = 0.0;  // reset the integrated error to prevent overshooting
+    }
+    previousRollError = rollError;
+    motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+//  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));    
+    
+    // Pitch error correction
+    float pitchError = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING;
+    float pitchAttitudeCmd = updatePID(pitchError, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+    if (isErrorSwitched(previousPitchError,pitchError)) {
+      PID[LEVELPITCH].integratedError = 0.0;  // reset the integrated error to prevent overshooting
+    }
+    previousPitchError = pitchError;
+    motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
 //  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
 
   }
@@ -291,11 +316,11 @@ void processFlightControlXMode(void) {
     motors.setMotorCommand(REAR, throttle + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(YAW));
   } 
 
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == ACRO) {
+    // *********************** process min max motor command *******************
+    processMinMaxMotorCommand();
+    
+    // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers    
     processHardManuevers();
   }
 
@@ -344,11 +369,11 @@ void processFlightControlPlusMode(void) {
     motors.setMotorCommand(LEFT, throttle + motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(YAW));
   } 
 
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == ACRO) {
+    // *********************** process min max motor command *******************
+    processMinMaxMotorCommand();
+
+    // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
     processHardManuevers();
   }
 
