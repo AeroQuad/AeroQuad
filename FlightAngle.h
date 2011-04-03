@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.3 - March 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,9 +21,10 @@
 // This class is responsible for calculating vehicle attitude
 class FlightAngle {
 public:
+  #define CF 0
+  #define KF 1
   #define DCM 2
-  #define ARG 3
-  #define MARG 4
+  #define IMU 3
   byte type;
   float angle[3];
   float gyroAngle[2];
@@ -454,6 +455,7 @@ private:
     float norm;
     float hx, hy, hz, bx, bz;
     float vx, vy, vz, wx, wy, wz;
+    float q0i, q1i, q2i, q3i;
     float exAcc, eyAcc, ezAcc;
     float exMag, eyMag, ezMag;
     
@@ -522,10 +524,23 @@ private:
     gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
     	
     // integrate quaternion rate and normalise
+    q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
+    q1i = ( q0*gx + q2*gz - q3*gy) * halfT;
+    q2i = ( q0*gy - q1*gz + q3*gx) * halfT;
+    q3i = ( q0*gz + q1*gy - q2*gx) * halfT;
+    q0 += q0i;
+    q1 += q1i;
+    q2 += q2i;
+    q3 += q3i;
+
+/*
+    // Original code found to hold a bug
+    // integrate quaternion rate and normalise
     q0 = q0 + (-q1*gx - q2*gy - q3*gz) * halfT;
     q1 = q1 + ( q0*gx + q2*gz - q3*gy) * halfT;
     q2 = q2 + ( q0*gy - q1*gz + q3*gx) * halfT;
     q3 = q3 + ( q0*gz + q1*gy - q2*gx) * halfT;  
+*/    
     	
     // normalise quaternion
     norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
@@ -639,6 +654,7 @@ private:
   void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
     float norm;
     float vx, vy, vz, wx, wy, wz;
+    float q0i, q1i, q2i, q3i;
     float ex, ey, ez;
     
     halfT = G_Dt/2;
@@ -672,13 +688,25 @@ private:
     gx = gx + Kp*ex + exInt;
     gy = gy + Kp*ey + eyInt;
     gz = gz + Kp*ez + ezInt;
-    	
+    
+    // integrate quaternion rate and normalise
+    q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
+    q1i = ( q0*gx + q2*gz - q3*gy) * halfT;
+    q2i = ( q0*gy - q1*gz + q3*gx) * halfT;
+    q3i = ( q0*gz + q1*gy - q2*gx) * halfT;
+    q0 += q0i;
+    q1 += q1i;
+    q2 += q2i;
+    q3 += q3i;
+    
+/*
+    // Original code below, but found to hold a bug    	
     // integrate quaternion rate and normalise
     q0 = q0 + (-q1*gx - q2*gy - q3*gz) * halfT;
     q1 = q1 + ( q0*gx + q2*gz - q3*gy) * halfT;
     q2 = q2 + ( q0*gy - q1*gz + q3*gx) * halfT;
     q3 = q3 + ( q0*gz + q1*gy - q2*gx) * halfT;  
-    	
+*/  	
     // normalise quaternion
     norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
     q0 = q0 / norm;
