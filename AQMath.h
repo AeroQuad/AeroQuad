@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,22 +21,103 @@
 #define G_2_MPS2(g) (g * 9.80665)
 #define MPS2_2_G(m) (m * 0.10197162)
 
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Constant Definitions
+//
+//  General:
+//
+//    a = (2 * tau)/T
+//      tau = filter time constant
+//      T   = sample time
+//
+//  Lag Filter:
+//
+//    gx1 = 1/(1+a)
+//    gx2 = 1/(1+a)
+//    gx3 = (1-a)/(1+a)
+//
+//  Washout Filter:
+//
+//    gx1 = a/(1+a)
+//    gx2 = -a/(1+a)
+//    gx3 = (1-a)/(1+a)
+//
+////////////////////////////////////////////////////////////////////////////////
+struct firstOrderData
+{
+  float gx1;
+  float gx2;
+  float gx3;
+  float lastInput;
+  float lastOutput;
+} firstOrder[3];
+
+float computeFirstOrder(float currentInput, struct firstOrderData *filterParameters)
+{
+  filterParameters->lastOutput = filterParameters->gx1 * currentInput + 
+                                 filterParameters->gx2 * filterParameters->lastInput - 
+                                 filterParameters->gx3 * filterParameters->lastOutput;
+           
+  filterParameters->lastInput = currentInput;
+    
+  return filterParameters->lastOutput;
+}
+
+#define AX_LAG 0
+#define AY_LAG 1
+#define AZ_LAG 2
+
+void setupFilters(float oneG)
+{
+/*  
+  // 1 sec @ 100hz - logging filter
+  firstOrder[AX_LAG].gx1 =  0.005;
+  firstOrder[AX_LAG].gx2 =  0.005;
+  firstOrder[AX_LAG].gx3 = -0.990;
+  firstOrder[AX_LAG].lastInput =  0.0;
+  firstOrder[AX_LAG].lastOutput = 0.0;
+  
+  firstOrder[AY_LAG].gx1 =  0.005;
+  firstOrder[AY_LAG].gx2 =  0.005;
+  firstOrder[AY_LAG].gx3 = -0.990;
+  firstOrder[AY_LAG].lastInput =  0.0;
+  firstOrder[AY_LAG].lastOutput = 0.0;
+  
+  firstOrder[AZ_LAG].gx1 =  0.005;
+  firstOrder[AZ_LAG].gx2 =  0.005;
+  firstOrder[AZ_LAG].gx3 = -0.990;
+  firstOrder[AZ_LAG].lastInput =  -oneG;
+  firstOrder[AZ_LAG].lastOutput = -oneG;
+*/
+  // .3 second @ 250hz
+  firstOrder[AX_LAG].gx1 =  0.007;
+  firstOrder[AX_LAG].gx2 =  0.007;
+  firstOrder[AX_LAG].gx3 = -0.987;
+  firstOrder[AX_LAG].lastInput =  0.0;
+  firstOrder[AX_LAG].lastOutput = 0.0;
+  
+  firstOrder[AY_LAG].gx1 =  0.007;
+  firstOrder[AY_LAG].gx2 =  0.007;
+  firstOrder[AY_LAG].gx3 = -0.987;
+  firstOrder[AY_LAG].lastInput =  0.0;
+  firstOrder[AY_LAG].lastOutput = 0.0;
+  
+  firstOrder[AZ_LAG].gx1 =  0.007;
+  firstOrder[AZ_LAG].gx2 =  0.007;
+  firstOrder[AZ_LAG].gx3 = -0.987;
+  firstOrder[AZ_LAG].lastInput =  -oneG;
+  firstOrder[AZ_LAG].lastOutput = -oneG;
+}
+
+
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor) {
-  if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
+  if (smoothFactor != 1.0) // only apply time compensated filter if smoothFactor is applied
     return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor)); 
   else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
+    return currentData; // if smoothFactor == 1.0, do not calculate, just bypass!
 }
-
-float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
-  if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
-    return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
-  else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
-}
-
-
 
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
