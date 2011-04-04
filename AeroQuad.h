@@ -151,10 +151,10 @@ int minAcro; // Read in from EEPROM, defines min throttle during flips
 #define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
 
 // Auto level setup
-float levelAdjust[2] = {0.0,0.0};
+//float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
-int levelLimit; // Read in from EEPROM
-int levelOff; // Read in from EEPROM
+//int levelLimit; // Read in from EEPROM
+//int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
@@ -171,7 +171,9 @@ float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-//float absoluteHeading = 0;;
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float absoluteHeading = 0;;
+#endif
 float setHeading = 0;
 unsigned long headingTime = micros();
 byte headingHoldState = OFF;
@@ -317,8 +319,8 @@ byte testSignal = LOW;
 #define LEVELROLL_PID_GAIN_ADR 12
 #define YAW_PID_GAIN_ADR 24
 #define WINDUPGUARD_ADR 36
-#define LEVELLIMIT_ADR 40
-#define LEVELOFF_ADR 44
+//#define LEVELLIMIT_ADR 40
+//#define LEVELOFF_ADR 44
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
@@ -405,4 +407,4 @@ int freemem(){
         free_memory = ((int)&free_memory) - ((int)__brkval);
     return free_memory;
 }
-
+

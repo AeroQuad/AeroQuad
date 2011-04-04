@@ -36,10 +36,6 @@ void readSerialPID(unsigned char PIDid) {
   pid->D = readFloatSerial();
   pid->lastPosition = 0;
   pid->integratedError = 0;
-  if (PIDid == HEADING)
-    pid->typePID = TYPEPI;
-  else
-    pid->typePID = NOTYPE;
   pid->firstPass = true;
 }
 
@@ -70,8 +66,8 @@ void readSerialCommand() {
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
     case 'G': // Receive auto level configuration
-      levelLimit = readFloatSerial();
-      levelOff = readFloatSerial();
+//      levelLimit = readFloatSerial();
+//      levelOff = readFloatSerial();
       break;
     case 'I': // Receiver altitude hold PID
 #ifdef AltitudeHold
@@ -260,8 +256,10 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
-		PrintValueComma(levelLimit);
-    Serial.println(levelOff);
+//		PrintValueComma(levelLimit);
+    PrintValueComma(0);
+//    Serial.println(levelOff);
+    Serial.println(0);
     queryType = 'X';
     break;
   case 'J': // Altitude Hold
@@ -315,7 +313,8 @@ void sendSerialTelemetry() {
       PrintValueComma(accel.getData(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
-      PrintValueComma(levelAdjust[axis]);
+      //PrintValueComma(levelAdjust[axis]);
+      PrintValueComma(0);
     }
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
@@ -402,7 +401,8 @@ void sendSerialTelemetry() {
       PrintValueComma(receiver.getData(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
-      PrintValueComma(levelAdjust[axis]);
+//      PrintValueComma(levelAdjust[axis]);
+      PrintValueComma(0);
     }
     PrintValueComma(motors.getMotorAxisCommand(ROLL));
     PrintValueComma(motors.getMotorAxisCommand(PITCH));

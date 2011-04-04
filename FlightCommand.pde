@@ -42,7 +42,7 @@ void readPilotCommands() {
       accel.calibrate(); // defined in Accel.h
       //accel.setOneG(accel.getFlightData(ZAXIS));
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        _flightAngle->calibrate();
+        flightAngle->calibrate();
       #endif
       zeroIntegralError();
       motors.pulseMotors(3);

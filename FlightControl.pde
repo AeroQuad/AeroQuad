@@ -45,7 +45,9 @@ void calculateFlightError(void)
       motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
     #else  
       float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+      //float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getTransmitterTrim(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
       float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+      //float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getTransmitterTrim(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
       
       motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
       motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
@@ -416,4 +418,4 @@ void processFlightControlPlusMode(void) {
   }
 }
 #endif
-
+
