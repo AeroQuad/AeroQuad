@@ -67,7 +67,7 @@ void readSerialCommand() {
       readSerialPID(LEVELPITCH);
       readSerialPID(LEVELGYROROLL);
       readSerialPID(LEVELGYROPITCH);
-      windupGuard = readFloatSerial();
+      windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
     case 'G': // Receive auto level configuration
       levelLimit = readFloatSerial();

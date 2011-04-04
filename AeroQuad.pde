@@ -32,11 +32,11 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -57,16 +57,17 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
+// flightAngle recommendations: use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define FlightAngleMARG // Use this if you have a magnetometer installed and enabled HeadingMagHold above
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -476,6 +477,12 @@ void setup() {
   #else
     flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
+  // Integral Limit for attitude mode
+  // This overrides default set in readEEPROM()
+  // Set for 1/2 max attitude command (+/-0.75 radians)
+  // Rate integral not used for now
+  PID[LEVELROLL].windupGuard = 0.375;
+  PID[LEVELPITCH].windupGuard = 0.375;
 
   // Optional Sensors
   #ifdef AltitudeHold

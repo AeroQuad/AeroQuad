@@ -216,17 +216,17 @@ public:
       autoDescent = 0;
     }
     if (level == WARNING) {
-      if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
-        autoDescent = -50;
-      }
+      //if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
+      //  autoDescent = -50;
+      //}
       if (currentBatteryTime > 1100) {
-        autoDescent = 50;
+        //autoDescent = 50;
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
-        autoDescent = 0;
+        //autoDescent = 0;
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
       }

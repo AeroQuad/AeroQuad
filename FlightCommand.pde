@@ -75,6 +75,9 @@ void readPilotCommands() {
     receiver.setTransmitterTrim(ROLL, receiver.getRaw(ROLL));
     receiver.setTransmitterTrim(PITCH, receiver.getRaw(PITCH));
     receiver.setTransmitterTrim(YAW, receiver.getRaw(YAW));
+    //receiver.setZero(ROLL, receiver.getRaw(ROLL));
+    //receiver.setZero(PITCH, receiver.getRaw(PITCH));
+    //receiver.setZero(YAW, receiver.getRaw(YAW));
   }
   
   #ifdef AeroQuad_Mini
