@@ -483,7 +483,8 @@ ISR(TIMER4_CAPT_vect)//interrupt.
     }
     else
     {
-      PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      //PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      PWM_RAW[PPM_Counter & 0x07]=Pulse_Width; //Saving pulse.
       PPM_Counter++;
     }
     Start_Pulse=ICR4;
