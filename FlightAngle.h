@@ -284,7 +284,7 @@ public:
 //    kpYaw = -1.6;
 //    kiYaw = -0.005;
 /*    
-    // released in 2.2
+    // released in 2.3
     kpRollPitch = 1.0;
     kiRollPitch = 0.002;
     
