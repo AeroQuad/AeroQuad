@@ -44,9 +44,9 @@ public:
   }
   
   // The following function calls must be defined in any new subclasses
-//  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
-//    this->_initialize(rollChannel, pitchChannel, yawChannel);
-//  }
+  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+    this->_initialize(rollChannel, pitchChannel, yawChannel);
+  }
   virtual void measure(void);
   virtual void calibrate(void);
   virtual void autoZero(void){};
@@ -208,6 +208,8 @@ public:
   }
   
   void initialize(void) {
+    this->_initialize(0,1,2);
+    
     //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
     
     // Check if gyro is connected
