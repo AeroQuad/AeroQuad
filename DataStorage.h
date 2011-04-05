@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -53,6 +53,10 @@ void readPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->integratedError = 0;
   // AKA experiements with PIDS
   pid->firstPass = true;
+  if (IDPid == HEADING)
+    pid->typePID = TYPEPI;
+  else
+    pid->typePID = NOTYPE;
 }
 
 void writePID(unsigned char IDPid, unsigned int IDEeprom) {
@@ -70,18 +74,20 @@ void initializeEEPROM(void) {
   PID[PITCH].P = 100.0;
   PID[PITCH].I = 0.0;
   PID[PITCH].D = -300.0;
-  PID[YAW].P = 300.0;
+  PID[YAW].P = 200.0;
   PID[YAW].I = 5.0;
   PID[YAW].D = 0.0;
   PID[LEVELROLL].P = 4.0;
-  PID[LEVELROLL].I = 0.15;
+  PID[LEVELROLL].I = 0.6;
   PID[LEVELROLL].D = 0.0;
   PID[LEVELPITCH].P = 4.0;
-  PID[LEVELPITCH].I = 0.15;
+  PID[LEVELPITCH].I = 0.6;
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
   PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
+  // AKA PID experiements
+  PID[HEADING].typePID = TYPEPI;
   PID[LEVELGYROROLL].P = 100.0;
   PID[LEVELGYROROLL].I = 0.0;
   PID[LEVELGYROROLL].D = -300.0;
@@ -111,6 +117,11 @@ void initializeEEPROM(void) {
   for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
     if (i != ALTITUDE)
         PID[i].windupGuard = windupGuard;
+  }
+  // AKA added so that each PID has a type incase we need special cases like detecting +/- PI
+  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
+    if (i != HEADING)
+        PID[i].typePID = NOTYPE;
   }
     
   receiver.setXmitFactor(1.0);

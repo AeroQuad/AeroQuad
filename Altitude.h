@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -201,7 +201,7 @@ public:
     // each loop, since it's slow to measure pressure
     if (select == PRESSURE) {
       rawPressure = readRawPressure();
-      if (pressureCount == 1) {
+      if (pressureCount == 4) {
         requestRawTemperature();
         pressureCount = 0;
        select = TEMPERATURE;
@@ -248,10 +248,7 @@ public:
     
     rawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters
     //rawAltitude = (101325.0-pressure)/4096*346;
-    //accel.calculateAltitude(); //cumulates onto rawAltitude from fast filtered accel Z reads
-    //currentTime = micros();
     altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
-    //previousTime = currentTime;
   }
 };
 

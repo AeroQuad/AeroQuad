@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -86,9 +86,9 @@ public:
   // return the smoothed & scaled number of radians/sec in stick movement - zero centered
   const float getSIData(byte channel) {
     // 2.3 Original
-    return ((transmitterCommand[channel] - transmitterZero[channel]) * (2.5 * PWM2RPS));  // +/- 2.5RPS 50% of full rate
+    return ((transmitterCommand[channel] - transmitterZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
     // 2.3 Stable
-    //return ((transmitterCommand[channel] - transmitterZero[channel]) * (5.0 * PWM2RPS));  // +/- 5RPS factored by xmitfactor of full rate
+    //return ((transmitterCommand[channel] - transmitterZero[channel]) * (5.0 * PWM2RAD));  // +/- 5RPS factored by xmitfactor of full rate
   }
 
   const int getTrimData(byte channel) {
@@ -483,7 +483,8 @@ ISR(TIMER4_CAPT_vect)//interrupt.
     }
     else
     {
-      PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      //PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      PWM_RAW[PPM_Counter & 0x07]=Pulse_Width; //Saving pulse.
       PPM_Counter++;
     }
     Start_Pulse=ICR4;

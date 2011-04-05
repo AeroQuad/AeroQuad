@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -210,23 +210,23 @@ public:
   }
 
   void lowBatteryEvent(byte level) {
-    long currentBatteryTime = millis()- previousBatteryTime;
+    long currentBatteryTime = millis() - previousBatteryTime;
     if (level == OK) {
       digitalWrite(BUZZERPIN, LOW);
       autoDescent = 0;
     }
     if (level == WARNING) {
-      if ((autoDescent == 0) && (currentTime > 1000)) {
-        autoDescent = -50;
-      }
+      //if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
+      //  autoDescent = -50;
+      //}
       if (currentBatteryTime > 1100) {
-        autoDescent = 50;
+        //autoDescent = 50;
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
-        autoDescent = 0;
+        //autoDescent = 0;
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
       }

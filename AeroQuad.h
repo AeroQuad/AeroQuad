@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,10 +24,10 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.3
+#define VERSION 2.4
 
-#define BAUD 115200
-//#define BAUD 111111 // use this to be compatible with USB and XBee connections
+//#define BAUD 115200
+#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -81,6 +81,7 @@ struct PIDdata {
   // AKA experiments with PID
   float previousPIDTime;
   bool firstPass;
+  bool typePID;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[10];
@@ -92,6 +93,10 @@ struct PIDdata {
 // ALTITUDE = 8 (used for altitude hold)
 // ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
 float windupGuard; // Read in from EEPROM
+
+// PID types
+#define NOTYPE 0
+#define TYPEPI 1
 
 // Smoothing filter parameters
 #define GYRO 0
@@ -141,8 +146,9 @@ float aref; // Read in from EEPROM
 #define ACRO 0
 #define STABLE 1
 byte flightMode;
+unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-#define PWM2RPS 0.002 //  Based upon 5RPS for full stick movement, you take this times the RPS to get the PWM conversion factor
+#define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
@@ -167,6 +173,8 @@ float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 //float absoluteHeading = 0;;
 float setHeading = 0;
+unsigned long headingTime = micros();
+byte headingHoldState = OFF;
 
 // batteryMonitor & Altutude Hold
 int throttle = 1000;
@@ -232,24 +240,32 @@ HardwareSerial *binaryPort;
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz
 #define CAMERALOOPTIME 20000     // 20ms, 50Hz
-#define FASTTELEMETRYTIME 10000  // 10ms, 100Hz
+#define FASTTELEMETRYTIME 15000  // 15ms, 67Hz
 #define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
 
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
+// main loop times
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
-unsigned long receiverTime = 0;
-unsigned long compassTime = 5000;
-unsigned long altitudeTime = 10000;
-unsigned long batteryTime = 15000;
-unsigned long autoZeroGyroTime = 0;
+// sub loop times
+unsigned long oneHZpreviousTime;
+unsigned long tenHZpreviousTime;
+unsigned long twentyFiveHZpreviousTime;
+unsigned long fiftyHZpreviousTime;
+unsigned long hundredHZpreviousTime;
+// old times.
+//unsigned long receiverTime = 0;
+//unsigned long compassTime = 5000;
+//unsigned long altitudeTime = 10000;
+//unsigned long batteryTime = 15000;
+//unsigned long autoZeroGyroTime = 0;
 #ifdef CameraControl
 unsigned long cameraTime = 10000;
 #endif
 unsigned long fastTelemetryTime = 0;
-unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
+//unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
 
 // jihlein: wireless telemetry defines
 /**************************************************************/
@@ -363,15 +379,13 @@ void readSensors(void); // defined in Sensors.pde
 //void calibrateESC(void); // defined in FlightControl.pde
 void processFlightControlXMode(void); // defined in FlightControl.pde
 void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void processArdupirateSuperStableMode(void);  // defined in FlightControl.pde
-void processAeroQuadStableMode(void);  // defined in FlightControl.pde
-void processAttitudeMode(void); // defined in FlightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
 float readFloatSerial(void); // defined in SerialCom.pde
 void sendBinaryFloat(float); // defined in SerialCom.pde
 void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
+void fastTelemetry(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)

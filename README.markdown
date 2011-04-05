@@ -1,8 +1,27 @@
-AeroQuad Flight Software Source Code 2.2
+AeroQuad Flight Software Source Code 2.4
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.2 Release Notes (2/6/2010)
+Version 2.4 Release Notes (4/2/2011)
+----------------------------------------
+ * Added ARG/MARG flight angle estimation routines
+ * Improved timing executive, reduced main flight loop to 100Hz
+ * Stable/Attitude Mode has highly improved auto level capability
+ * All these changes have been made by jihlein and aadamson, THANKS!
+ 
+   Version 2.3 Release Notes (3/17/2011)
+----------------------------------------
+ * Implemented common SI units for sensors
+ * Implemented common DCM gains for all hardware platforms
+ * Calculate heading using Compass & DCM
+ * Acro Mode utilizes SI units only for common starting gains compared with other hardware platorms
+ * New altitude hold updates
+   * initialized PID with hold altitude as last postion
+   * created a deadband in the throttle stick when in altitude hold of 250 step (configurable in aeroquad.h), this also is the extents of the PANIC alarm as noted below.
+   * Added a PANIC mode, where if you move the throttle greater than 250 steps, it will automatically turn off Altitude hold and the throttle will function as it normally does, to turn back on altitude hold, you have to turn it off and back on again, allow for a get out of altitude hold without having to find the switch.  This PANIC can either be UP or DOWN throttle.
+   * Added a bump up or down to altitude hold. Once you have Altitude hold enabled, and you are in the throttle dead band, you can nudge the altitude up or down, by moving the throttle slightly up or slightly down and then back to the middle.  Scaled the climb or descent to be really slow.  Throttle increase is based upon altitude increase and constrained to no more than +/- 50 units.
+
+Version 2.2 Release Notes (2/6/2011)
 ----------------------------------------
 
   * Fixed correct scaling for Kd for all flight modes (thanks to Ziojos & Honk).  Makes it easier to find the right PID gains to remove oscillations during flight.  PID Tuning Guide is updated with best values to use.
@@ -10,7 +29,7 @@ Version 2.2 Release Notes (2/6/2010)
   * Started common SI units for major sensors to work with DCM (thanks to Kenny9999)
   * Addressed issues 82-100 in Google Code Issue Tracker (http://code.google.com/p/aeroquad/issues/list)
 
-Version 2.1 Release Notes (1/20/2010)
+Version 2.1 Release Notes (1/20/2011)
 ----------------------------------------
 
   * Added support for battery monitor for AeroQuad v2.0 Shield

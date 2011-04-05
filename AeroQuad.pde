@@ -1,6 +1,6 @@
 /*
-  AeroQuad v2.3 - March 2011
-  www.AeroQuad.com
+  AeroQuad v2.4 - April 2011
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
@@ -27,6 +27,8 @@
  ************************* Hardware Configuration ***************************
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
+
+//#define DEBUG_LOOP
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
@@ -55,12 +57,17 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define UseArduPirateSuperStable // Enable the imported stable mode imported from ArduPirate (experimental, use at your own risk)
-//#define UseAQStable // Enable the older (pre 2.3) AeroQuad Stable mode
-#define UseAttitudeHold // Enable the new for 2.3 Attitude hold mode
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// You must define *only* one of the following 2 flightAngle calculations
+// if you only want DCM, then don't define either of the below
+// flightAngle recommendations: use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -80,6 +87,13 @@
 /****************************************************************************
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
+// Checks to make sure we have the right combinations defined
+#if defined(FlightAngleMARG) && !defined(HeadingMagHold)
+#undef FlightAngleMARG
+#endif
+#if defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
+#undef FlightAngleARG
+#endif
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -100,7 +114,13 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -114,7 +134,13 @@
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -129,7 +155,13 @@
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
@@ -153,11 +185,16 @@
   Accel_AeroQuadMini accel;
   Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
-  //Motors_PWM motors;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
@@ -177,7 +214,13 @@
   Gyro_AeroQuad_v1 gyro;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -192,7 +235,13 @@
   Accel_AeroQuadMega_v2 accel;
   Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
@@ -218,7 +267,13 @@
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
     #include "Compass.h"
@@ -241,7 +296,13 @@
   Motors_PWM motors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -255,7 +316,13 @@
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
-  FlightAngle_DCM tempFlightAngle;
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef CameraControl
     #include "Camera.h"
@@ -318,16 +385,6 @@
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
-#if defined(UseArduPirateSuperStable)
-  void (*processStableMode)() = &processArdupirateSuperStableMode;
-#endif
-#if defined(UseAttitudeHold)
-  void (*processStableMode)() = &processAttitudeMode;
-#endif
-#if defined(UseAQStable)
-  void (*processStableMode)() = &processAeroQuadStableMode;
-#endif
-
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
 
@@ -338,6 +395,19 @@ void setup() {
   Serial.begin(BAUD);
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
+
+#ifdef DEBUG_LOOP
+  pinMode(12, OUTPUT);
+  pinMode(11, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(8, OUTPUT);
+  digitalWrite(12, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(8, LOW);
+#endif    
 
   #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     Serial1.begin(BAUD);
@@ -407,6 +477,12 @@ void setup() {
   #else
     flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
+  // Integral Limit for attitude mode
+  // This overrides default set in readEEPROM()
+  // Set for 1/2 max attitude command (+/-0.75 radians)
+  // Rate integral not used for now
+  PID[LEVELROLL].windupGuard = 0.375;
+  PID[LEVELPITCH].windupGuard = 0.375;
 
   // Optional Sensors
   #ifdef AltitudeHold
@@ -428,117 +504,229 @@ void setup() {
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
-  #ifdef OpenlogBinaryWrite
-    binaryPort = &Serial1;
-    binaryPort->begin(115200);
-    delay(1000);
-  #else
-   binaryPort = &Serial;
-  #endif 
+    #ifdef OpenlogBinaryWrite
+      binaryPort = &Serial1;
+      binaryPort->begin(115200);
+      delay(1000);
+    #else
+     binaryPort = &Serial;
+    #endif 
   #endif
   
-  // AKA use a new low pass filter called a Lag Filter
-  setupFilters(accel.accelOneG);
+  // AKA use a new low pass filter called a Lag Filter uncomment only if using DCM LAG filters
+  //  setupFilters(accel.accelOneG);
 
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;
 }
 
-// ************************************************************
-// ******************** Main AeroQuad Loop ********************
-// ************************************************************
+/*******************************************************************
+  // tasks (microseconds of interval)
+  ReadGyro        readGyro      (   5000); // 200hz
+  ReadAccel       readAccel     (   5000); // 200hz
+  RunDCM          runDCM        (  10000); // 100hz
+  FlightControls  flightControls(  10000); // 100hz
+  ReadReceiver    readReceiver  (  20000); //  50hz
+  ReadBaro        readBaro      (  40000); //  25hz
+  ReadCompass     readCompass   ( 100000); //  10Hz
+  ProcessTelem    processTelem  ( 100000); //  10Hz
+  ReadBattery     readBattery   ( 100000); //  10Hz
+  
+  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
+                   &readReceiver, &readBaro, &readCompass,            \
+                   &processTelem, &readBattery};
+                   
+  TaskScheduler sched(tasks, NUM_TASKS(tasks));
+  
+  sched.run();
+*******************************************************************/
 void loop () {
-  // Measure loop rate
   currentTime = micros();
   deltaTime = currentTime - previousTime;
-  G_Dt = deltaTime / 1000000.0;
-  previousTime = currentTime;
   
-  #ifdef DEBUG_LOOP
-    testSignal ^= HIGH;
-//    if (testSignal == LOW) testSignal = HIGH;
-//    else testSignal = LOW;
-    digitalWrite(LEDPIN, testSignal);
-  #endif
-  
-  // Measures sensor data and calculates attitude
-  if (sensorLoop == ON) {
-    readSensors(); // defined in Sensors.pde
-  } 
+  // Main scheduler loop set for 100hz
+  if (deltaTime >= 10000) {
 
-  // Combines external pilot commands and measured sensor data to generate motor commands
-  if (controlLoop == ON) {
-    processFlightControl();
-  } 
-  
-  // Reads external pilot commands and performs functions based on stick configuration
-  if ((receiverLoop == ON) && (currentTime > receiverTime)) { // 10Hz
-    readPilotCommands(); // defined in FlightCommand.pde
-    receiverTime = currentTime + RECEIVERLOOPTIME;
-  }
-  
-  // Listen for configuration commands and reports telemetry
-  if ((telemetryLoop == ON) && (currentTime > telemetryTime)) { // 10Hz
-    readSerialCommand(); // defined in SerialCom.pde
-    sendSerialTelemetry(); // defined in SerialCom.pde
-    telemetryTime = currentTime + TELEMETRYLOOPTIME;
-  }
+    #ifdef DEBUG_LOOP
+      testSignal ^= HIGH;
+      digitalWrite(LEDPIN, testSignal);
+    #endif
 
- #ifdef BinaryWrite
-    // **************************************************************
-    // ***************** Fast Transfer Of Sensor Data ***************
-    // **************************************************************
-    // AeroQuad.h defines the output rate to be 10ms
-    // Since writing to UART is done by hardware, unable to measure data rate directly
-    // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
-    // If float = 4 bytes, then 3600 floats/second
-    // If 10 ms output rate, then 36 floats/10ms
-    // Number of floats written using sendBinaryFloat is 15
-    if ((fastTransfer == ON) && (currentTime > (fastTelemetryTime + FASTTELEMETRYTIME))) {
-      if (armed == ON) {
-    #ifdef OpenlogBinaryWrite
-        printInt(21845); // Start word of 0x5555
-        sendBinaryuslong(currentTime);
-        printInt((int)flightMode);
-        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-        sendBinaryFloat(accel.accelOneG);
-        #ifdef HeadingMagHold
-          sendBinaryFloat(compass.hdgX);
-          sendBinaryFloat(compass.hdgY);
-        #else
-          sendBinaryFloat(0.0);
-          sendBinaryFloat(0.0);
-        #endif
-        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-        printInt(32767); // Stop word of 0x7FFF
-    #else
-        printInt(21845); // Start word of 0x5555
-        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-        for (byte axis = ROLL; axis < LASTAXIS; axis++)
-        #ifdef HeadingMagHold
-          sendBinaryFloat(compass.getRawData(axis));
-        #else
-          sendBinaryFloat(0);
-        #endif
-        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
-        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-        printInt(32767); // Stop word of 0x7FFF
+    frameCounter++;
+    
+    // ================================================================
+    // 100hz task loop
+    // ================================================================
+    if (frameCounter %   1 == 0) {  //  100 Hz tasks
+      #ifdef DEBUG_LOOP
+        digitalWrite(11, HIGH);
       #endif
-      }
-      fastTelemetryTime = currentTime;
-    }
-  #endif
+      
+      G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
+      hundredHZpreviousTime = currentTime;
+      
+      if (sensorLoop == ON) {
+        // measure critical sensors
+        gyro.measure();
+        accel.measure();
+        
+        // ****************** Calculate Absolute Angle *****************
+        #if defined HeadingMagHold && defined FlightAngleMARG
+          flightAngle->calculate(gyro.getData(ROLL),                       \
+                                 gyro.getData(PITCH),                      \
+                                 gyro.getData(YAW),                        \
+                                 accel.getData(XAXIS),                     \
+                                 accel.getData(YAXIS),                     \
+                                 accel.getData(ZAXIS),                     \
+                                 compass.getRawData(XAXIS),                \
+                                 compass.getRawData(YAXIS),                \
+                                 compass.getRawData(ZAXIS));
+        #endif
+      
+        #if defined HeadingMagHold && defined FlightAngleARG
+          flightAngle->calculate(gyro.getData(ROLL),                       \
+                                 gyro.getData(PITCH),                      \
+                                 gyro.getData(YAW),                        \
+                                 accel.getData(XAXIS),                     \
+                                 accel.getData(YAXIS),                     \
+                                 accel.getData(ZAXIS),                     \
+                                 0.0,                                      \
+                                 0.0,                                      \
+                                 0.0);
+        #endif
 
-  #ifdef CameraControl // Experimental, not fully implemented yet
-    if ((cameraLoop == ON) && (currentTime > cameraTime)) { // 50Hz
-      camera.setPitch(degrees(flightAngle->getData(PITCH)));
-      camera.setRoll(degrees(flightAngle->getData(ROLL)));
-      camera.setYaw(degrees(flightAngle->getData(YAW)));
-      camera.move();
-      cameraTime = currentTime + CAMERALOOPTIME;
+        #if !defined HeadingMagHold && defined FlightAngleARG
+          flightAngle->calculate(gyro.getData(ROLL),                       \
+                                 gyro.getData(PITCH),                      \
+                                 gyro.getData(YAW),                        \
+                                 accel.getData(XAXIS),                     \
+                                 accel.getData(YAXIS),                     \
+                                 accel.getData(ZAXIS),                     \
+                                 0.0,                                      \
+                                 0.0,                                      \
+                                 0.0);
+        #endif
+      
+        #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
+          flightAngle->calculate(gyro.getData(ROLL),                       \
+                                 gyro.getData(PITCH),                      \
+                                 gyro.getData(YAW),                        \
+                                 accel.getData(XAXIS),                     \
+                                 accel.getData(YAXIS),                     \
+                                 accel.getData(ZAXIS),                     \
+                                 accel.getOneG(),                          \
+                                 compass.getHdgXY(XAXIS),                  \
+                                 compass.getHdgXY(YAXIS));
+        #endif
+        
+        #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
+          flightAngle->calculate(gyro.getData(ROLL),  \
+                                 gyro.getData(PITCH),                      \
+                                 gyro.getData(YAW),                        \
+                                 accel.getData(XAXIS),                     \
+                                 accel.getData(YAXIS),                     \
+                                 accel.getData(ZAXIS),                     \
+                                 accel.getOneG(),                          \
+                                 0.0,                                      \
+                                 0.0);
+        #endif
+      }
+      
+      // Combines external pilot commands and measured sensor data to generate motor commands
+      if (controlLoop == ON) {
+        processFlightControl();
+      } 
+
+      #ifdef BinaryWrite
+        if (fastTransfer == ON) {
+          // write out fastTelemetry to Configurator or openLog
+          fastTelemetry();
+        }
+      #endif      
+      
+      #ifdef DEBUG_LOOP
+        digitalWrite(11, LOW);
+      #endif
     }
-  #endif
+
+    // ================================================================
+    // 50hz task loop
+    // ================================================================
+    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+      #ifdef DEBUG_LOOP
+        digitalWrite(10, HIGH);
+      #endif
+      
+      G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
+      fiftyHZpreviousTime = currentTime;
+      
+      // Reads external pilot commands and performs functions based on stick configuration
+      if (receiverLoop == ON) { 
+        readPilotCommands(); // defined in FlightCommand.pde
+      }
+
+      #ifdef DEBUG_LOOP
+        digitalWrite(10, LOW);
+      #endif
+    }
+
+    // ================================================================
+    // 25hz task loop
+    // ================================================================
+    if (frameCounter %   4 == 0) {  //  25 Hz tasks
+      #ifdef DEBUG_LOOP    
+        digitalWrite(9, HIGH);
+      #endif
+      
+      G_Dt = (currentTime - twentyFiveHZpreviousTime) / 1000000.0;
+      twentyFiveHZpreviousTime = currentTime;
+      
+      if (sensorLoop == ON) {
+        #if defined(AltitudeHold)
+          altitude.measure(); // defined in altitude.h
+        #endif
+      }
+      
+      #ifdef DEBUG_LOOP
+        digitalWrite(9, LOW);
+      #endif
+    }
+    
+    // ================================================================
+    // 10hz task loop
+    // ================================================================
+    if (frameCounter %  10 == 0) {  //   10 Hz tasks
+      #ifdef DEBUG_LOOP
+        digitalWrite(8, HIGH);
+      #endif
+      
+      G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
+      tenHZpreviousTime = currentTime;
+
+      if (sensorLoop == ON) {
+        #if defined(HeadingMagHold)
+          compass.measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
+        #endif
+        #if defined(BattMonitor)
+          batteryMonitor.measure(armed);
+        #endif
+      }
+      // Listen for configuration commands and reports telemetry
+      if (telemetryLoop == ON) {
+        readSerialCommand(); // defined in SerialCom.pde
+        sendSerialTelemetry(); // defined in SerialCom.pde
+      }
+      
+      #ifdef DEBUG_LOOP
+        digitalWrite(8, LOW);
+      #endif
+    }
+
+    previousTime = currentTime;
+  }
+  if (frameCounter >= 100) 
+      frameCounter = 0;
 }
+
+

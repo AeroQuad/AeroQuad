@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.3 - March 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -118,17 +118,6 @@ float filterSmooth(float currentData, float previousData, float smoothFactor) {
   else
     return currentData; // if smoothFactor == 1.0, do not calculate, just bypass!
 }
-
-/* AKA NOT USED ANYMORE
-float filterSmoothWithTime(float currentData, float previousData, float smoothFactor, float dT_scaledAroundOne) {  //time scale factor
-  if (smoothFactor != 1.0) //only apply time compensated filter if smoothFactor is applied
-    return (previousData * (1.0 - (smoothFactor * dT_scaledAroundOne)) + (currentData * (smoothFactor * dT_scaledAroundOne))); 
-  else
-    return currentData; //if smoothFactor == 1.0, do not calculate, just bypass!
-}
-*/
-
-
 
 // ***********************************************************************
 // *********************** Median Filter Class ***************************
