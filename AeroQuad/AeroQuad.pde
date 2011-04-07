@@ -36,9 +36,9 @@
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -98,14 +98,16 @@
 #include <EEPROM.h>
 #include <Wire.h>
 #include "AeroQuad.h"
-#include "I2C.h"
+#include "Device_I2C.h"
 #include "PID.h"
-#include "AQMath.h"
+#include <AQMath.h>
+#include <APM_ADC.h>
 #include "Receiver.h"
 #include "DataAcquisition.h"
 #include "Accel.h"
 #include "Gyro.h"
 #include "Motors.h"
+
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
@@ -262,7 +264,12 @@
 #endif
 
 #ifdef ArduCopter
-  Gyro_ArduCopter gyro;
+//  Gyro_ArduCopter gyro;
+//  #include <AQMath.h>
+  
+  #include <Gyroscope.h>
+  #include <Gyroscope_APM.h>
+  Gyroscope_APM gyro;
   Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
@@ -464,7 +471,7 @@ void setup() {
   accel.initialize(); // defined in Accel.h
   
   // Calibrate sensors
-  gyro.autoZero(); // defined in Gyro.h
+  gyro.calibrate(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
@@ -585,9 +592,9 @@ void loop () {
         #endif
       
         #if defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
+          flightAngle->calculate(gyro.getRadPerSec(ROLL),                       \
+                                 gyro.getRadPerSec(PITCH),                      \
+                                 gyro.getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \

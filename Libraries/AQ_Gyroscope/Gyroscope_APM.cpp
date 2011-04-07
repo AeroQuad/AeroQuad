@@ -40,10 +40,10 @@ void Gyroscope_APM::measure(void) {
       float rawADC = readADC(axis);
       if (rawADC > 500) // Check if good measurement
         if (axis == ROLL)
-          gyroADC[axis] =  rawADC - gyroZero[axis];
+          gyroADC[axis] =  rawADC - zero[axis];
         else
-          gyroADC[axis] =  gyroZero[axis] - rawADC;
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+          gyroADC[axis] =  zero[axis] - rawADC;
+      rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor);
     }
 	lastMeasuredTime = currentTime;
   }

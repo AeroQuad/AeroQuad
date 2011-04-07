@@ -398,7 +398,7 @@ public:
   
   void measure(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_ArduCopter_ADC(accelChannel[axis]);
+      rawADC = readADC(accelChannel[axis]);
       if (rawADC > 500) { // Check if measurement good
         if (axis == ROLL)
           accelADC[axis] = rawADC - accelZero[axis];
@@ -420,10 +420,10 @@ public:
     
     for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogRead_ArduCopter_ADC(accelChannel[calAxis]);
+        findZero[i] = readADC(accelChannel[calAxis]);
         delay(2);
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
 
     //accelOneG = 486;    // tested value with the configurator at flat level

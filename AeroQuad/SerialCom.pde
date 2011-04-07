@@ -309,7 +309,7 @@ void sendSerialTelemetry() {
     break;
   case 'Q': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getData(axis));
+      PrintValueComma(gyro.getRadPerSec(axis));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
@@ -352,9 +352,9 @@ void sendSerialTelemetry() {
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       if (axis == PITCH)
-        PrintValueComma(-gyro.getFlightData(axis));
+        PrintValueComma(-gyro.getRadPerSec(axis));  // was getFlightData from the old gyro API Should no be used anymore @see Kenny
       else
-        PrintValueComma(gyro.getFlightData(axis));
+        PrintValueComma(gyro.getRadPerSec(axis));   // was getFlightData from the old gyro API Should no be used anymore @see Kenny
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());

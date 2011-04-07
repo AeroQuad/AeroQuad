@@ -29,6 +29,11 @@
   #define FINDZERO 49
 #endif
 
+#define ROLL 0
+#define PITCH 1
+#define YAW 2
+#define LASTAXIS 3
+
 class Gyroscope {
 protected:
   float scaleFactor;
@@ -37,6 +42,7 @@ protected:
   float smoothFactor;
   int measureDelay;
   unsigned long lastMeasuredTime;
+  float gyroScaleFactor;
   
 public:  
   Gyroscope();

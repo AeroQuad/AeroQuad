@@ -18,103 +18,103 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-class Gyro {
-public:
-  float gyroFullScaleOutput;
-  float gyroScaleFactor;
-  float smoothFactor;
-  int gyroChannel[3];
-  float gyroData[3];
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    float gyroZero[3];
-  #else
-    int gyroZero[3];
-  #endif
-  int gyroADC[3];
-  byte rollChannel, pitchChannel, yawChannel;
-  int sign[3];
-  float rawHeading, gyroHeading;
-  long int previousGyroTime;
-  //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
-
-  Gyro(void){
-    sign[ROLL] = 1;
-    sign[PITCH] = 1;
-    sign[YAW] = 1;
-  }
-  
-  // The following function calls must be defined in any new subclasses
-  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
-    this->_initialize(rollChannel, pitchChannel, yawChannel);
-  }
-  virtual void measure(void);
-  virtual void calibrate(void);
-  virtual void autoZero(void){};
-  virtual const int getFlightData(byte);
-
-  // The following functions are common between all Gyro subclasses
-  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
-    gyroChannel[ROLL] = rollChannel;
-    gyroChannel[PITCH] = pitchChannel;
-    gyroChannel[ZAXIS] = yawChannel;
-    
-    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-  }
-
-  // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
-  const int getRaw(byte axis) {
-    return gyroADC[axis] * sign[axis];
-  }
-  
-  // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
-  // centered on zero radians +/-
-  const float getData(byte axis) {
-    return gyroData[axis] * sign[axis];
-  }
-  
-  //  inverts, if needed the sign on the specific axis
-  const int invert(byte axis) {
-    sign[axis] = -sign[axis];
-    return sign[axis];
-  }
-  
-  const int getZero(byte axis) {
-    return gyroZero[axis];
-  }
-  
-  void setZero(byte axis, int value) {
-    gyroZero[axis] = value;
-  }    
-  
-  // returns the scale factor used for SI units on the gyro
-  const float getScaleFactor() {
-    return gyroScaleFactor;
-  }
-
-  // returns the smooth factor used on the gyro
-  const float getSmoothFactor(void) {
-    return smoothFactor;
-  }
-  
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
-
-  // returns gyro based heading as +/- PI in radians
-  const float getHeading(void) {
-    //div_t integerDivide;
-    
-    //integerDivide = div(rawHeading, 2*PI);
-    gyroHeading = rawHeading; // + (integerDivide.quot * -(2*PI));
-    if (gyroHeading > PI) gyroHeading -= (2*PI);
-    if (gyroHeading < -PI) gyroHeading += (2*PI);
-    //Serial.print(integerDivide.quot);Serial.print(",");Serial.print(integerDivide.rem);Serial.println();
-    return gyroHeading;
-  }
-};
+//class Gyro {
+//public:
+//  float gyroFullScaleOutput;
+//  float gyroScaleFactor;
+//  float smoothFactor;
+//  int gyroChannel[3];
+//  float gyroData[3];
+//  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+//    float gyroZero[3];
+//  #else
+//    int gyroZero[3];
+//  #endif
+//  int gyroADC[3];
+//  byte rollChannel, pitchChannel, yawChannel;
+//  int sign[3];
+//  float rawHeading, gyroHeading;
+//  long int previousGyroTime;
+//  //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
+//
+//  Gyro(void){
+//    sign[ROLL] = 1;
+//    sign[PITCH] = 1;
+//    sign[YAW] = 1;
+//  }
+//  
+//  // The following function calls must be defined in any new subclasses
+//  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+//    this->_initialize(rollChannel, pitchChannel, yawChannel);
+//  }
+//  virtual void measure(void);
+//  virtual void calibrate(void);
+//  virtual void autoZero(void){};
+//  virtual const int getFlightData(byte);
+//
+//  // The following functions are common between all Gyro subclasses
+//  void _initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+//    gyroChannel[ROLL] = rollChannel;
+//    gyroChannel[PITCH] = pitchChannel;
+//    gyroChannel[ZAXIS] = yawChannel;
+//    
+//    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
+//    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+//    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+//    smoothFactor = readFloat(GYROSMOOTH_ADR);
+//  }
+//
+//  // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
+//  const int getRaw(byte axis) {
+//    return gyroADC[axis] * sign[axis];
+//  }
+//  
+//  // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
+//  // centered on zero radians +/-
+//  const float getData(byte axis) {
+//    return gyroData[axis] * sign[axis];
+//  }
+//  
+//  //  inverts, if needed the sign on the specific axis
+//  const int invert(byte axis) {
+//    sign[axis] = -sign[axis];
+//    return sign[axis];
+//  }
+//  
+//  const int getZero(byte axis) {
+//    return gyroZero[axis];
+//  }
+//  
+//  void setZero(byte axis, int value) {
+//    gyroZero[axis] = value;
+//  }    
+//  
+//  // returns the scale factor used for SI units on the gyro
+//  const float getScaleFactor() {
+//    return gyroScaleFactor;
+//  }
+//
+//  // returns the smooth factor used on the gyro
+//  const float getSmoothFactor(void) {
+//    return smoothFactor;
+//  }
+//  
+//  void setSmoothFactor(float value) {
+//    smoothFactor = value;
+//  }
+//
+//  // returns gyro based heading as +/- PI in radians
+//  const float getHeading(void) {
+//    //div_t integerDivide;
+//    
+//    //integerDivide = div(rawHeading, 2*PI);
+//    gyroHeading = rawHeading; // + (integerDivide.quot * -(2*PI));
+//    if (gyroHeading > PI) gyroHeading -= (2*PI);
+//    if (gyroHeading < -PI) gyroHeading += (2*PI);
+//    //Serial.print(integerDivide.quot);Serial.print(",");Serial.print(integerDivide.rem);Serial.println();
+//    return gyroHeading;
+//  }
+//};
 
 /******************************************************/
 /****************** AeroQuad_v1 Gyro ******************/
@@ -284,76 +284,76 @@ public:
 /******************************************************/
 /**************** ArduCopter Gyro *********************/
 /******************************************************/
-#ifdef ArduCopter
-class Gyro_ArduCopter : public Gyro {
-private:
-  int rawADC;
-
-public:
-  Gyro_ArduCopter() : Gyro() {
-    gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
-  }
-  
-  void initialize(void) {
-    // old AQ way
-    // rollChannel = 1
-    // pitchChannel = 2
-    // yawChannel = 0
-    // revised in 2.3 way
-    // rollChannel = 0
-    // pitchChannel = 1
-    // yawChannel = 2
-    this->_initialize(0, 1, 2);
-    initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-  }
-  
-  void measure(void) {
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
-      if (rawADC > 500) // Check if good measurement
-        if (axis == ROLL)
-          gyroADC[axis] =  rawADC - gyroZero[axis];
-        else
-          gyroADC[axis] =  gyroZero[axis] - rawADC;
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
-    }
-    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
-    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
-    long int currentGyroTime = micros();
-    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
-      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
-    }
-    previousGyroTime = currentGyroTime;
-   }
-
-  const int getFlightData(byte axis) {
-    if (axis == PITCH)
-      return -getRaw(axis);
-    else
-      return getRaw(axis);
-  }
-
-  void calibrate() {
-    autoZero();
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
-  
-  void autoZero() {
-    int findZero[FINDZERO];
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
-        delay(10);
-      }
-      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
-    }
-  }
-};
-#endif
+//#ifdef ArduCopter
+//class Gyro_ArduCopter : public Gyro {
+//private:
+//  int rawADC;
+//
+//public:
+//  Gyro_ArduCopter() : Gyro() {
+//    gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+//    gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
+//  }
+//  
+//  void initialize(void) {
+//    // old AQ way
+//    // rollChannel = 1
+//    // pitchChannel = 2
+//    // yawChannel = 0
+//    // revised in 2.3 way
+//    // rollChannel = 0
+//    // pitchChannel = 1
+//    // yawChannel = 2
+//    this->_initialize(0, 1, 2);
+//    initialize_ArduCopter_ADC(); // this is needed for both gyros and accels, done once in this class
+//    smoothFactor = readFloat(GYROSMOOTH_ADR);
+//  }
+//  
+//  void measure(void) {
+//    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+//      rawADC = analogRead_ArduCopter_ADC(gyroChannel[axis]);
+//      if (rawADC > 500) // Check if good measurement
+//        if (axis == ROLL)
+//          gyroADC[axis] =  rawADC - gyroZero[axis];
+//        else
+//          gyroADC[axis] =  gyroZero[axis] - rawADC;
+//      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+//    }
+//    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
+//    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
+//    long int currentGyroTime = micros();
+//    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+//      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+//    }
+//    previousGyroTime = currentGyroTime;
+//   }
+//
+//  const int getFlightData(byte axis) {
+//    if (axis == PITCH)
+//      return -getRaw(axis);
+//    else
+//      return getRaw(axis);
+//  }
+//
+//  void calibrate() {
+//    autoZero();
+//    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+//    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+//    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+//  }
+//  
+//  void autoZero() {
+//    int findZero[FINDZERO];
+//    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+//      for (int i=0; i<FINDZERO; i++) {
+//        findZero[i] = analogRead_ArduCopter_ADC(gyroChannel[calAxis]);
+//        delay(10);
+//      }
+//      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
+//    }
+//  }
+//};
+//#endif
 
 /******************************************************/
 /********************** Wii Gyro **********************/

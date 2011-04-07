@@ -50,9 +50,6 @@ void readPilotCommands() {
       //#if defined(BattMonitor) && defined(ArduCopter)
       //  ledCW(); ledCW(); ledCW();
       //#endif
-      #ifdef ArduCopter
-        zero_ArduCopter_ADC();
-      #endif
     }   
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
