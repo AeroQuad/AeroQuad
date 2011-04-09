@@ -28,25 +28,31 @@ Gyroscope_Wii::Gyroscope_Wii() {
   scaleFactor = radians(0.06201166); // Define the scale factor that converts to radians/second
 }
 
-void Gyroscope_Wii::initialize() {
-}
-
 void Gyroscope_Wii::measure() {
   // Replace code below with sensor measurement methodology
-  for (byte axis = 0; axis < 3; axis++) {
+  wii.measure();
+  for (byte axis = ROLL; axis <= YAW; axis++) {
     gyroADC[axis] = wii.getGyroADC(axis)  - zero[axis];
     rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
   }
+  
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
+    heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
+  }
+  lastMesuredTime = currentTime;
+
 }
 
 void Gyroscope_Wii::calibrate() {
   int findZero[FINDZERO];
     
-  for (byte axis = 0; axis < 3; axis++) {
+  for (byte axis = ROLL; axis <= YAW; axis++) {
     for (int i=0; i<FINDZERO; i++) {
-	  measure();
+	  wii.measure();
       findZero[i] = wii.getGyroADC(axis);
-      delay(measureDelay);
+      delay(5);
     }
     zero[axis] = findMedianInt(findZero, FINDZERO);
   }

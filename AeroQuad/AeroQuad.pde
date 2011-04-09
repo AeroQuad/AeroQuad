@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -57,9 +57,9 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
@@ -67,7 +67,7 @@
 // flightAngle recommendations: use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -99,6 +99,7 @@
 #include <Wire.h>
 #include "AeroQuad.h"
 #include "Device_I2C.h"
+#include <Axis.h>
 #include "PID.h"
 #include <AQMath.h>
 #include <APM_ADC.h>
@@ -128,6 +129,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+    
+  }
 #endif
 
 #ifdef AeroQuad_v1_IDG
@@ -148,11 +153,20 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+    
+  }
 #endif
 
 #ifdef AeroQuad_v18
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+  Gyroscope_ITG3200 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+  
   Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
   Receiver_AeroQuad receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
@@ -181,6 +195,11 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+
+  void initPlatformSpecific() {
+    Wire.begin();
+    TWBR = 12;
+  }
 #endif
 
 #ifdef AeroQuad_Mini
@@ -206,6 +225,11 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+
+  void initPlatformSpecific() {
+    Wire.begin();
+    TWBR = 12;
+  }
 #endif
 
 #ifdef AeroQuadMega_v1
@@ -228,14 +252,23 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+    
+  }
 #endif
 
 #ifdef AeroQuadMega_v2
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+  Gyroscope_ITG3200 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
   Receiver_AeroQuadMega receiver;
   Motors_PWMtimer motors;
   //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
   Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -261,15 +294,20 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+
+  void initPlatformSpecific() {
+    Wire.begin();
+    TWBR = 12;
+  }
 #endif
 
 #ifdef ArduCopter
-//  Gyro_ArduCopter gyro;
-//  #include <AQMath.h>
-  
+  // Gyroscope declaration 
   #include <Gyroscope.h>
   #include <Gyroscope_APM.h>
-  Gyroscope_APM gyro;
+  Gyroscope_APM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+  
   Accel_ArduCopter accel;
   Receiver_ArduCopter receiver;
   Motors_ArduCopter motors;
@@ -294,11 +332,23 @@
     #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
   #endif
+  
+  void initPlatformSpecific() {
+    initializeADC();
+    
+    Wire.begin();
+  }
 #endif
 
 #ifdef AeroQuad_Wii
+  // Gyroscope declaration
+  #include <Platform_Wii.h>
+  #include <Gyroscope.h>
+  #include <Gyroscope_Wii.h>
+  Gyroscope_Wii gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
   Accel_Wii accel;
-  Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -315,11 +365,21 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+     Wire.begin();
+  }
 #endif
 
 #ifdef AeroQuadMega_Wii
+  // Gyroscope declaration
+  #include <Platform_Wii.h>
+  #include <Gyroscope.h>
+  #include <Gyroscope_Wii.h>
+  Gyroscope_Wii gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
   Accel_Wii accel;
-  Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
   Motors_PWM motors;
   #include "FlightAngle.h"
@@ -335,6 +395,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+
+  void initPlatformSpecific() {
+    Wire.begin();
+  }
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
@@ -359,6 +423,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+    
+  }
 #endif
 
 #ifdef APM_OP_CHR6DM
@@ -383,7 +451,13 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  
+  void initPlatformSpecific() {
+    
+  }
 #endif
+
+void (*initPlatform)() = &initPlatformSpecific;
 
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
@@ -446,15 +520,8 @@ void setup() {
     pinMode(LED_Green, OUTPUT);
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
-    Wire.begin();
-  #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
-    // Recommendation from Mgros to increase I2C speed to 400kHz
-    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
-    TWBR = 12;
-  #endif
-
+  initPlatform();
+  
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   
@@ -467,11 +534,12 @@ void setup() {
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
-  gyro.initialize(); // defined in Gyro.h
+  initSensorsZeroFromEEPROM();
+  gyro->initialize(); // defined in Gyro.h
   accel.initialize(); // defined in Accel.h
   
   // Calibrate sensors
-  gyro.calibrate(); // defined in Gyro.h
+  gyro->calibrate(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
@@ -575,14 +643,14 @@ void loop () {
       
       if (sensorLoop == ON) {
         // measure critical sensors
-        gyro.measure();
+        gyro->measure();
         accel.measure();
         
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
+                                 gyro->getRadPerSec(PITCH),                      \
+                                 gyro->getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \
@@ -592,9 +660,9 @@ void loop () {
         #endif
       
         #if defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro.getRadPerSec(ROLL),                       \
-                                 gyro.getRadPerSec(PITCH),                      \
-                                 gyro.getRadPerSec(YAW),                        \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
+                                 gyro->getRadPerSec(PITCH),                      \
+                                 gyro->getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \
@@ -604,9 +672,9 @@ void loop () {
         #endif
 
         #if !defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
+                                 gyro->getRadPerSec(PITCH),                      \
+                                 gyro->getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \
@@ -616,9 +684,9 @@ void loop () {
         #endif
       
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
+                                 gyro->getRadPerSec(PITCH),                      \
+                                 gyro->getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \
@@ -628,9 +696,9 @@ void loop () {
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),  \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),  \
+                                 gyro->getRadPerSec(PITCH),                      \
+                                 gyro->getRadPerSec(YAW),                        \
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \

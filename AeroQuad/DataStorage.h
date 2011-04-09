@@ -127,7 +127,7 @@ void initializeEEPROM(void) {
   receiver.setXmitFactor(1.0);
   levelLimit = 500.0;
   levelOff = 150.0;
-  gyro.setSmoothFactor(1.0);
+  gyro->setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   // AKA - old setOneG not in SI - accel.setOneG(500);
   accel.setOneG(9.80665); // AKA set one G to 9.8 m/s^2
@@ -252,7 +252,7 @@ void writeEEPROM(void){
   writeFloat(levelLimit, LEVELLIMIT_ADR);
   writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
-  writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
+  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
@@ -287,3 +287,18 @@ void writeEEPROM(void){
   
   sei(); // Restart interrupts
 }
+
+void initSensorsZeroFromEEPROM(void) {
+  gyro->setZero(ROLL,readFloat(GYRO_ROLL_ZERO_ADR));
+  gyro->setZero(PITCH,readFloat(GYRO_PITCH_ZERO_ADR));
+  gyro->setZero(ZAXIS,readFloat(GYRO_YAW_ZERO_ADR));
+  gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
+}
+
+void storeSensorsZeroToEEPROM(void) {
+  writeFloat(gyro->getZero(ROLL), GYRO_ROLL_ZERO_ADR);
+  writeFloat(gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
+  writeFloat(gyro->getZero(YAW), GYRO_YAW_ZERO_ADR);
+  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
+}
+

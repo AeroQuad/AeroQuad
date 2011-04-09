@@ -46,28 +46,28 @@ void Platform_Wii::measure()
 	}
     if (buffer[5] & 0x02) 
     { //If WiiMP
-      _gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16; 
-      _gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16; 
-      _gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16; 
+      gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16; 
+      gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16; 
+      gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16; 
     }
     else 
     {//If Nunchuk
-      _accel[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01); 
-      _accel[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01); 
-      _accel[2]=buffer[4]; 
-      _accel[2]=_accel[2]<<1; 
-      _accel[2]=_accel[2] & 0xFFFC;
-      _accel[2]=_accel[2]|((buffer[5]>>6)&0x03); 
+      accel[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01); 
+      accel[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01); 
+      accel[2]=buffer[4]; 
+      accel[2]=accel[2]<<1; 
+      accel[2]=accel[2] & 0xFFFC;
+      accel[2]=accel[2]|((buffer[5]>>6)&0x03); 
     }
   }
 }
 
 short Platform_Wii::getAccelADC(byte axis)
 {
-  return _accel[axis];
+  return accel[axis];
 }
 
 short Platform_Wii::getGyroADC(byte axis)
 {
-  return _gyro[axis];
+  return gyro[axis];
 }

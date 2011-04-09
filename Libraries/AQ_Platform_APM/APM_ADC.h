@@ -24,6 +24,5 @@
 unsigned char ADCSPItransfer(unsigned char data);
 void initializeADC();
 int readADC(unsigned char ch_num);
-void zeroADC();
 
 #endif

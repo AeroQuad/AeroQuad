@@ -26,8 +26,8 @@
 class Platform_Wii
 {
 private:
-  short _accel[3];
-  short _gyro[3];
+  short accel[3];
+  short gyro[3];
 
 public:
 

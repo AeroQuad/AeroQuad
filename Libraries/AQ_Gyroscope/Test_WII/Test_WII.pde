@@ -7,17 +7,18 @@
 #include <APM_ADC.h>    // @see Kenny, Arduino IDE compiliation bug
 #include <AQMath.h>
 #include <Device_I2C.h>
-#include <Gyroscope_ITG3200.h>
+#include <Platform_Wii.h>
+#include <Gyroscope_Wii.h>
 #include <Axis.h>
 
 unsigned long timer;
 
-Gyroscope_ITG3200 gyro;
+Gyroscope_Wii gyro;
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Gyroscope library test (ITG3200)");
+  Serial.println("Gyroscope library test (WII)");
 
   Wire.begin();
 

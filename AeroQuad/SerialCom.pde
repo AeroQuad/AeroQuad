@@ -84,9 +84,10 @@ void readSerialCommand() {
 #endif
       break;
     case 'K': // Receive data filtering values
-      gyro.setSmoothFactor(readFloatSerial());
+      gyro->setSmoothFactor(readFloatSerial());
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
+      storeSensorsZeroToEEPROM();
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
@@ -106,8 +107,9 @@ void readSerialCommand() {
       break;
     case 'Y': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
-      gyro.calibrate();
+      gyro->calibrate();
       accel.calibrate();
+      storeSensorsZeroToEEPROM();
       zeroIntegralError();
 #ifdef HeadingMagHold
       compass.initialize();
@@ -147,7 +149,8 @@ void readSerialCommand() {
         fastTransfer = OFF;
       break;
     case 'b': // calibrate gyros
-      gyro.calibrate();
+      gyro->calibrate();
+      storeSensorsZeroToEEPROM();
       break;
     case 'c': // calibrate accels
       accel.calibrate();
@@ -229,7 +232,7 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(gyro.getFlightData(PITCH));
+    //PrintValueComma(gyro->getFlightData(PITCH));
     //PrintValueComma(flightAngle->getData(PITCH));
     //PrintValueComma(flightAngle->getGyroUnbias(PITCH));
     //PrintValueComma(receiver.getZero(ROLL));
@@ -283,7 +286,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
-    PrintValueComma(gyro.getSmoothFactor());
+    PrintValueComma(gyro->getSmoothFactor());
     PrintValueComma(accel.getSmoothFactor());
     Serial.println(timeConstant);
     // comma();
@@ -309,7 +312,7 @@ void sendSerialTelemetry() {
     break;
   case 'Q': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro.getRadPerSec(axis));
+      PrintValueComma(gyro->getRadPerSec(axis));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
@@ -352,9 +355,9 @@ void sendSerialTelemetry() {
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       if (axis == PITCH)
-        PrintValueComma(-gyro.getRadPerSec(axis));  // was getFlightData from the old gyro API Should no be used anymore @see Kenny
+        PrintValueComma(-gyro->getRadPerSec(axis));  // was getFlightData from the old gyro API Should no be used anymore @see Kenny
       else
-        PrintValueComma(gyro.getRadPerSec(axis));   // was getFlightData from the old gyro API Should no be used anymore @see Kenny
+        PrintValueComma(gyro->getRadPerSec(axis));   // was getFlightData from the old gyro API Should no be used anymore @see Kenny
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
@@ -605,7 +608,7 @@ void fastTelemetry(void)
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
 //        printInt((int)flightMode);
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
 //        sendBinaryFloat(accel.accelOneG);
        #ifdef HeadingMagHold
@@ -623,7 +626,7 @@ void fastTelemetry(void)
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold

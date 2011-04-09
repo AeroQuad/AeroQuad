@@ -180,106 +180,106 @@ public:
 /******************************************************/
 /****************** AeroQuad_v2 Gyro ******************/
 /******************************************************/
-#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
-/*
-  10kOhm pull-ups on I2C lines.
-  VDD & VIO = 3.3V
-  SDA -> A4 (PC4)
-  SCL -> A5 (PC5)
-  INT -> D2 (PB2) (or no connection, not used here)
-  CLK -> GND
-*/
-class Gyro_AeroQuadMega_v2 : public Gyro {
-private:
-  int gyroAddress;
-  //float gyroLastData;
-  
-public:
-  Gyro_AeroQuadMega_v2() : Gyro() {
-#ifdef AeroQuad_Mini
-    gyroAddress = 0x68;
-#else        
-    gyroAddress = 0x69;
-#endif    
-    gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
-    gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
-    
-    previousGyroTime = micros();
-  }
-  
-  void initialize(void) {
-    this->_initialize(0,1,2);
-    
-    //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
-    
-    // Check if gyro is connected
-#ifdef AeroQuad_Mini    
-    if (readWhoI2C(gyroAddress) != gyroAddress +1)  // hardcoded for +1 of address specific to sparkfun 6dof imu
-#else    
-    if (readWhoI2C(gyroAddress) != gyroAddress)  // hardcoded for +1 of address specific to sparkfun 6dof imu
-#endif    
-      Serial.println("Gyro not found!");
-        
-    // Thanks to SwiftingSpeed for updates on these settings
-    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
-    updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
-    updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
-    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
-  }
-  
-  void measure(void) {
-    sendByteI2C(gyroAddress, 0x1D);
-    Wire.requestFrom(gyroAddress, 6);
-
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      if (axis == ROLL)
-        gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
-      else
-        gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
-      gyroData[axis] = filterSmooth((float)gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
-    }
-
-    //calculateHeading();
-    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
-    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
-    long int currentGyroTime = micros();
-    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
-      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
-    }
-    previousGyroTime = currentGyroTime;
-
-  }
-  
-  // returns raw ADC data from the Gyro centered on zero +/- values
-  const int getFlightData(byte axis) {
-    //int reducedData = getRaw(axis) >> 3;
-    //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
-    if (axis == PITCH)
-      return -(getRaw(axis) >> 3);
-    else
-      return (getRaw(axis) >> 3);
-  }
-
-  void calibrate() {
-    autoZero();
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
-  
-  void autoZero() {
-    int findZero[FINDZERO];
-    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
-        findZero[i] = readWordI2C(gyroAddress);
-        delay(10);
-      }
-      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
-    }
-  }
-};
-#endif
+//#if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
+///*
+//  10kOhm pull-ups on I2C lines.
+//  VDD & VIO = 3.3V
+//  SDA -> A4 (PC4)
+//  SCL -> A5 (PC5)
+//  INT -> D2 (PB2) (or no connection, not used here)
+//  CLK -> GND
+//*/
+//class Gyro_AeroQuadMega_v2 : public Gyro {
+//private:
+//  int gyroAddress;
+//  //float gyroLastData;
+//  
+//public:
+//  Gyro_AeroQuadMega_v2() : Gyro() {
+//#ifdef AeroQuad_Mini
+//    gyroAddress = 0x68;
+//#else        
+//    gyroAddress = 0x69;
+//#endif    
+//    gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
+//    gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
+//    
+//    previousGyroTime = micros();
+//  }
+//  
+//  void initialize(void) {
+//    this->_initialize(0,1,2);
+//    
+//    //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
+//    
+//    // Check if gyro is connected
+//#ifdef AeroQuad_Mini    
+//    if (readWhoI2C(gyroAddress) != gyroAddress +1)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+//#else    
+//    if (readWhoI2C(gyroAddress) != gyroAddress)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+//#endif    
+//      Serial.println("Gyro not found!");
+//        
+//    // Thanks to SwiftingSpeed for updates on these settings
+//    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
+//    updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
+//    updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
+//    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
+//  }
+//  
+//  void measure(void) {
+//    sendByteI2C(gyroAddress, 0x1D);
+//    Wire.requestFrom(gyroAddress, 6);
+//
+//    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+//      if (axis == ROLL)
+//        gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
+//      else
+//        gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
+//      gyroData[axis] = filterSmooth((float)gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
+//    }
+//
+//    //calculateHeading();
+//    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
+//    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
+//    long int currentGyroTime = micros();
+//    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+//      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+//    }
+//    previousGyroTime = currentGyroTime;
+//
+//  }
+//  
+//  // returns raw ADC data from the Gyro centered on zero +/- values
+//  const int getFlightData(byte axis) {
+//    //int reducedData = getRaw(axis) >> 3;
+//    //if ((reducedData < 5) && (reducedData > -5)) reducedData = 0;
+//    if (axis == PITCH)
+//      return -(getRaw(axis) >> 3);
+//    else
+//      return (getRaw(axis) >> 3);
+//  }
+//
+//  void calibrate() {
+//    autoZero();
+//    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+//    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+//    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+//  }
+//  
+//  void autoZero() {
+//    int findZero[FINDZERO];
+//    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+//      for (int i=0; i<FINDZERO; i++) {
+//        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+//        findZero[i] = readWordI2C(gyroAddress);
+//        delay(10);
+//      }
+//      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
+//    }
+//  }
+//};
+//#endif
 
 /******************************************************/
 /**************** ArduCopter Gyro *********************/
@@ -358,63 +358,63 @@ public:
 /******************************************************/
 /********************** Wii Gyro **********************/
 /******************************************************/
-#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
-class Gyro_Wii : public Gyro {
-private:
-
-public:
-  Gyro_Wii() : Gyro() {
-    // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
-    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
-    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
-    gyroFullScaleOutput = 2000;
-    gyroScaleFactor = radians(0.06201166);
-  }
-  
-  void initialize(void) {
-    Init_Gyro_Acc(); // defined in DataAquisition.h
-    smoothFactor = readFloat(GYROSMOOTH_ADR);
-    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-  }
-  
-  void measure(void) {
-    updateControls(); // defined in DataAcquisition.h
-    
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-      //gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
-      //gyroData[PITCH] = filterSmooth(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-      //gyroADC[YAW] =  NWMP_gyro[YAW] - gyroZero[YAW];
-      //gyroData[YAW] = filterSmooth(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-    }
-  }
-
-  const int getFlightData(byte axis) {
-    if (axis == PITCH)
-      return -getRaw(PITCH);
-    else
-      return getRaw(axis);
-  }
-
-  void calibrate() {
-    int findZero[FINDZERO];
-  
-	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        updateControls();
-        findZero[i] = NWMP_gyro[calAxis];
-      }
-      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
-    }
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
-  }
-};
-#endif
+//#if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+//class Gyro_Wii : public Gyro {
+//private:
+//
+//public:
+//  Gyro_Wii() : Gyro() {
+//    // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
+//    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
+//    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
+//    gyroFullScaleOutput = 2000;
+//    gyroScaleFactor = radians(0.06201166);
+//  }
+//  
+//  void initialize(void) {
+//    Init_Gyro_Acc(); // defined in DataAquisition.h
+//    smoothFactor = readFloat(GYROSMOOTH_ADR);
+//    gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
+//    gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+//    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+//  }
+//  
+//  void measure(void) {
+//    updateControls(); // defined in DataAcquisition.h
+//    
+//    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+//      gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
+//      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+//      //gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
+//      //gyroData[PITCH] = filterSmooth(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+//      //gyroADC[YAW] =  NWMP_gyro[YAW] - gyroZero[YAW];
+//      //gyroData[YAW] = filterSmooth(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+//    }
+//  }
+//
+//  const int getFlightData(byte axis) {
+//    if (axis == PITCH)
+//      return -getRaw(PITCH);
+//    else
+//      return getRaw(axis);
+//  }
+//
+//  void calibrate() {
+//    int findZero[FINDZERO];
+//  
+//	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+//      for (int i=0; i<FINDZERO; i++) {
+//        updateControls();
+//        findZero[i] = NWMP_gyro[calAxis];
+//      }
+//      gyroZero[calAxis] = findMedian(findZero, FINDZERO);
+//    }
+//    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+//    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+//    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+//  }
+//};
+//#endif
 
 /******************************************************/
 /********************** CHR6DM Gyro **********************/

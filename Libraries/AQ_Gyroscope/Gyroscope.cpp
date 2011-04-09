@@ -42,3 +42,7 @@ void Gyroscope::setSmoothFactor(float value) {
 const float Gyroscope::getRadPerSec(byte axis) {
   return rate[axis];
 }
+
+const float Gyroscope::getHeading() {
+  return heading;
+}

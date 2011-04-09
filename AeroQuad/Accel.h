@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -268,7 +268,7 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress) >> 2; // last two bits are not part of measurement
         delay(10);
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value
@@ -486,7 +486,7 @@ public:
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g

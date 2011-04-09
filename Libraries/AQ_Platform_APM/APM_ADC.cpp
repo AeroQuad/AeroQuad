@@ -36,24 +36,34 @@
 #define ADC_CHIP_SELECT 33    // PC4   9 // PH6  Puerto:0x08 Bit mask : 0x40
 
 // Commands for reading ADC channels on ADS7844
-const unsigned char _adcCmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
-volatile long _adcValue[8];
-volatile unsigned char _adcCounter[8];
+//                                 pRate  qRate  rRate  aX     aY     aZ     temp   JP5
+// ADC Input Channel               Ch1    Ch2    Ch0    Ch4    Ch5    Ch6    Ch3    Ch7
+const unsigned char adc_cmd[9] = { 0xC7,  0x97,  0x87,  0xA7,  0xE7,  0xB7,  0xD7,  0xF7,  0x00 };
+
+// Commands for reading ADC channels on ADS7844  (old AQ way
+// ADC channel mapping             Ch0   Ch1   Ch2   Ch3   Ch4   Ch5   Ch6   Ch7 
+//const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
+volatile long adc_value[8] = { 0,0,0,0,0,0,0,0 };
+volatile unsigned char adc_counter[8]= { 0,0,0,0,0,0,0,0 };
+
 
 ISR (TIMER2_OVF_vect) 
 {
-  uint8_t ch;
+  //uint8_t ch;
   unsigned int adc_tmp;
   
   //bit_set(PORTL,6); // To test performance
   bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
-  ADCSPItransfer(_adcCmd[0]);       // Command to read the first channel
-  for (ch=0;ch<7;ch++) 
-  {
-    adc_tmp = ADCSPItransfer(0)<<8;    // Read first byte
-    adc_tmp |= ADCSPItransfer(_adcCmd[ch+1]);  // Read second byte and send next command
-    _adcValue[ch] += adc_tmp>>3;     // Shift to 12 bits
-    _adcCounter[ch]++;               // Number of samples
+  ADCSPItransfer(adc_cmd[0]);       // Command to read the first channel
+  for (uint8_t ch = 0; ch < 8; ch++) {
+    if (adc_counter[ch] >= 16) {
+        adc_value[ch] /=2;
+        adc_counter[ch] /=2;
+    }
+    adc_tmp = ADCSPItransfer(0) << 8;    // Read first byte
+    adc_tmp |= ADCSPItransfer(adc_cmd[ch+1]);  // Read second byte and send next command
+    adc_value[ch] += adc_tmp >> 3;     // Shift to 12 bits
+    adc_counter[ch]++;               // Number of samples
   }
   bit_set(PORTC,4);                // Disable Chip Select (PIN PC4)
   //bit_clear(PORTL,6); // To test performance
@@ -102,28 +112,17 @@ void initializeADC()
 int readADC(unsigned char ch_num) 
 {
   int result;
+  
   cli();  // We stop interrupts to read the variables
-  if (_adcCounter[ch_num]>0)
-  {
-    result = _adcValue[ch_num]/_adcCounter[ch_num];
-  }
+  if (adc_counter[ch_num]>0)
+	  result = adc_value[ch_num]/adc_counter[ch_num];
   else
-  {
-    result = 0;
-  }
-  _adcValue[ch_num] = 0;    // Initialize for next reading
-  _adcCounter[ch_num] = 0;
+	  result = 0;
+  adc_value[ch_num] = 0;    // Initialize for next reading
+  adc_counter[ch_num] = 0;
   sei();
   return(result);
 }
   
-void zeroADC() 
-{
-  for (byte n; n<8; n++) 
-  {
-    _adcValue[n] = 0;
-    _adcCounter[n] = 0;
-  }
-}
 
 #endif

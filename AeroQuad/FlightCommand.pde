@@ -38,8 +38,9 @@ void readPilotCommands() {
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
-      gyro.calibrate(); // defined in Gyro.h
+      gyro->calibrate(); // defined in Gyro.h
       accel.calibrate(); // defined in Accel.h
+      storeSensorsZeroToEEPROM();
       //accel.setOneG(accel.getFlightData(ZAXIS));
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
         _flightAngle->calibrate();

@@ -24,10 +24,10 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.4
+#define VERSION 3.0
 
-#define BAUD 115200
-//#define BAUD 111111 // use this to be compatible with USB and XBee connections
+//#define BAUD 115200
+#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -51,28 +51,6 @@
   #define LED2PIN 12
   #define LED3PIN 12
 #endif
-
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
 
 // PID Variables
 struct PIDdata {
@@ -370,23 +348,29 @@ byte testSignal = LOW;
 #define GYRO_PITCH_ZERO_ADR 376
 #define GYRO_YAW_ZERO_ADR 380
 
-float arctan2(float y, float x); // defined in Sensors.pde
-float readFloat(int address); // defined in DataStorage.h
-void writeFloat(float value, int address); // defined in DataStorage.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-//void calibrateESC(void); // defined in FlightControl.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
-void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void sendBinaryFloat(float); // defined in SerialCom.pde
-void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
-void fastTelemetry(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
+// defined in DataStorage.h
+float readFloat(int address); 
+void writeFloat(float value, int address); 
+void readEEPROM(void); 
+void initSensorsZeroFromEEPROM(void);
+void storeSensorsZeroToEEPROM(void);
+
+// defined in FlightCommand.pde
+void readPilotCommands(void); 
+
+// defined in FlightControl.pde
+void processFlightControlXMode(void); 
+void processFlightControlPlusMode(void);
+
+//defined in SerialCom.pde
+void readSerialCommand(void);
+void sendSerialTelemetry(void);
+void printInt(int data);
+float readFloatSerial(void);
+void sendBinaryFloat(float);
+void sendBinaryuslong(unsigned long);
+void fastTelemetry(void);
+void comma(void);
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize); // defined in Sensors.pde

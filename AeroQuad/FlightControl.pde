@@ -27,15 +27,15 @@
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), gyro.getRadPerSec(ROLL), &PID[ROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro.getRadPerSec(PITCH), &PID[PITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
   }
   else {
     
   float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
   float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
-  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
+  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
+  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
 //  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
 //  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
 
@@ -79,7 +79,7 @@ void processHeading(void)
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       heading = degrees(flightAngle->getHeading(YAW));
     #else
-      heading = degrees(gyro.getHeading());
+      heading = degrees(gyro->getHeading());
     #endif
 
     // Always center relative heading around absolute heading chosen during yaw command
@@ -131,7 +131,7 @@ void processHeading(void)
   }
   // NEW SI Version
   commandedYaw = constrain(receiver.getSIData(YAW) + radians(headingHold), -PI, PI);
-  motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro.getRadPerSec(YAW), &PID[YAW]));
+  motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]));
   // uses flightAngle unbias rate
   //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }

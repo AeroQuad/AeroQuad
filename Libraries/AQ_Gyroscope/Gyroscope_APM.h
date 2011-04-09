@@ -32,7 +32,6 @@ private:
 public:
   Gyroscope_APM();
   
-  void initialize(void);
   void measure(void);
   void calibrate(void);
 };

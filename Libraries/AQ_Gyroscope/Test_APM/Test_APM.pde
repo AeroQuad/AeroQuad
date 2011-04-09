@@ -21,16 +21,39 @@
 #include <Wire.h>         // Arduino IDE bug, needed because that the ITG3200 use Wire!
 #include <Device_I2C.h>   // Arduino IDE bug, needed because that the ITG3200 use Wire!
 
-
+#include <Axis.h>
 #include <APM_ADC.h>
 #include <AQMath.h>
 #include <Gyroscope_APM.h>
 
-
+unsigned long timer;
 Gyroscope_APM gyro;
 
 void setup() {
+  
+  Serial.begin(115200);
+  Serial.println("Gyroscope library test (APM)");
+  
+  initializeADC();
+  gyro.calibrate();
 }
 
 void loop() {
+  
+  if((millis() - timer) > 10) // 100Hz
+  {
+    timer = millis();
+    gyro.measure();
+    
+    Serial.print("Roll: ");
+    Serial.print(degrees(gyro.getRadPerSec(ROLL)));
+    Serial.print(" Pitch: ");
+    Serial.print(degrees(gyro.getRadPerSec(PITCH)));
+    Serial.print(" Yaw: ");
+    Serial.print(degrees(gyro.getRadPerSec(YAW)));
+    Serial.print(" Heading: ");
+    Serial.print(degrees(gyro.getHeading()));
+    Serial.println();
+  }
+
 }

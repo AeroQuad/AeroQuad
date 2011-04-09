@@ -27,11 +27,11 @@
 class Gyroscope_Wii : public Gyroscope {
 private:
   int gyroADC[3]; // raw data from sensor
-
-  public:
-  Gyroscope_Wii();
   Platform_Wii wii;
-  void initialize(void);
+
+public:
+  Gyroscope_Wii();
+
   void measure(void);
   void calibrate(void);
 };

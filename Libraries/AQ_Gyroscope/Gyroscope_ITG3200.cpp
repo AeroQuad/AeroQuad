@@ -26,7 +26,6 @@
 
 Gyroscope_ITG3200::Gyroscope_ITG3200() {
   scaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
-  measureDelay = 2;	// process or reading time for ITG3200 is 2ms
 }
   
 
@@ -36,26 +35,29 @@ void Gyroscope_ITG3200::initialize(void) {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_MEMORY_ADDRESS); // 10Hz low pass filter
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
-  
-void Gyroscope_ITG3200::measure(void) {
-  unsigned long currentTime = millis();
-  if ((currentTime - lastMeasuredTime) >= measureDelay) {
-    sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
-    Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
     
-    // The following 3 lines read the gyro and assign it's data to gyroADC
-    // in the correct order and phase to suit the standard shield installation
-    // orientation.  See TBD for details.  If your shield is not installed in this
-    // orientation, this is where you make the changes.
-    gyroADC[0]  = ((Wire.receive() << 8) | Wire.receive())  - zero[0];
-    gyroADC[1] = zero[1] - ((Wire.receive() << 8) | Wire.receive());
-    gyroADC[2]   = zero[2] - ((Wire.receive() << 8) | Wire.receive());
+void Gyroscope_ITG3200::measure(void) {
+  sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
+    
+  // The following 3 lines read the gyro and assign it's data to gyroADC
+  // in the correct order and phase to suit the standard shield installation
+  // orientation.  See TBD for details.  If your shield is not installed in this
+  // orientation, this is where you make the changes.
+  gyroADC[ROLL]  = ((Wire.receive() << 8) | Wire.receive())  - zero[ROLL];
+  gyroADC[PITCH] = zero[PITCH] - ((Wire.receive() << 8) | Wire.receive());
+  gyroADC[YAW]   = zero[YAW] - ((Wire.receive() << 8) | Wire.receive());
 
-    for (byte axis = 0; axis < 3; axis++) {
-      rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
-    }
-	lastMeasuredTime = currentTime;
+  for (byte axis = 0; axis <= YAW; axis++) {
+    rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
   }
+ 
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
+    heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
+  }
+  lastMesuredTime = currentTime;
 }
 
 void Gyroscope_ITG3200::calibrate() {
@@ -63,9 +65,9 @@ void Gyroscope_ITG3200::calibrate() {
     
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
-	  measure();
-      findZero[i] = gyroADC[axis];
-      delay(measureDelay);
+	  sendByteI2C(ITG3200_ADDRESS, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
+      findZero[i] = readWordI2C(ITG3200_ADDRESS);
+      delay(10);
     }
     zero[axis] = findMedianInt(findZero, FINDZERO);
   }
