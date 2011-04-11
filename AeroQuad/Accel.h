@@ -159,7 +159,7 @@ public:
       for (int i=0; i<FINDZERO; i++) {
         findZero[i] = analogRead(accelChannel[calAxis]);
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
     
     // store accel value that represents 1g
@@ -353,7 +353,7 @@ public:
         findZero[i] = readReverseWordI2C(accelAddress);
         delay(10);
       }
-      accelZero[calAxis] = findMedian(findZero, FINDZERO);
+      accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
 
     // replace with estimated Z axis 0g value

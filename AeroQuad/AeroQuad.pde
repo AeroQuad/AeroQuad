@@ -35,10 +35,10 @@
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -58,7 +58,7 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -112,10 +112,20 @@
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
   Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
+  // Receiver declaration
   Receiver_AeroQuad receiver;
+  // Motor declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -125,21 +135,36 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
   
+  /**
+   * Put AeroQuad_v1 specific intialization need here
+   */
   void initPlatformSpecific() {
-    
+    gyroSpecific.setAref(aref);
   }
 #endif
 
 #ifdef AeroQuad_v1_IDG
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
   Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
+  // Receiver declaration
   Receiver_AeroQuad receiver;
+  // Motor declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -149,13 +174,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
-  
+
+  /**
+   * Put AeroQuad_v1_IDG specific intialization need here
+   */
   void initPlatformSpecific() {
-    
+    gyroSpecific.setAref(aref);
   }
 #endif
 
@@ -166,10 +196,14 @@
   Gyroscope_ITG3200 gyroSpecific;
   Gyroscope *gyro = &gyroSpecific;
   
+  // Accelerometer declaraion
   Accel_AeroQuadMega_v2 accel;
+  // Receiver declaration
   Receiver_AeroQuad receiver;
+  // Motors declaration
   Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -179,23 +213,34 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Heading hold declaration
   #ifdef HeadingMagHold
     #include "Compass.h"
     Magnetometer_HMC5843 compass;
   #endif
+  
+  // Altitude declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  
+  // Battery Monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
   #endif
+  
+  // Camera Control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
 
+  /**
+   * Put AeroQuad_v18 specific intialization need here
+   */
   void initPlatformSpecific() {
     Wire.begin();
     TWBR = 12;
@@ -203,11 +248,20 @@
 #endif
 
 #ifdef AeroQuad_Mini
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+  Gyroscope_ITG3200 gyroSpecific(true);
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
   Accel_AeroQuadMini accel;
-  Gyro_AeroQuadMega_v2 gyro;
+  // Receiver declaration
   Receiver_AeroQuad receiver;
+  // Motors declaration
   Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -217,15 +271,22 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Battery Monitor declaraton
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
   #endif
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
 
+  /**
+   * Put AeroQuad_Mini specific intialization need here
+   */
   void initPlatformSpecific() {
     Wire.begin();
     TWBR = 12;
@@ -235,10 +296,20 @@
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
-  Receiver_AeroQuadMega receiver;
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
   Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
+  // Reveiver declaration
+  Receiver_AeroQuadMega receiver;
+  // Motor declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -248,13 +319,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Camera Control
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
   
+  /**
+   * Put AeroQuadMega_v1 specific intialization need here
+   */
   void initPlatformSpecific() {
-    
+    gyroSpecific.setAref(aref);
   }
 #endif
 
@@ -264,11 +340,15 @@
   #include <Gyroscope_ITG3200.h>
   Gyroscope_ITG3200 gyroSpecific;
   Gyroscope *gyro = &gyroSpecific;
-
-  Receiver_AeroQuadMega receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  
+  // Accelerometer declaration
   Accel_AeroQuadMega_v2 accel;
+  // Receiver Declaration
+  Receiver_AeroQuadMega receiver;
+  // Motors declaration
+  Motors_PWMtimer motors;
+
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -278,23 +358,31 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Heading Hold declaration
   #ifdef HeadingMagHold
     #include "Compass.h"
     Magnetometer_HMC5843 compass;
   #endif
+  // Altitude hold declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  // Battery Monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
   #endif
+  // Camera Control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
 
+  /**
+   * Put AeroQuadMega_v2 specific intialization need here
+   */
   void initPlatformSpecific() {
     Wire.begin();
     TWBR = 12;
@@ -308,9 +396,14 @@
   Gyroscope_APM gyroSpecific;
   Gyroscope *gyro = &gyroSpecific;
   
+  // Accelerometer Declaration
   Accel_ArduCopter accel;
+  // Receiver Declaration
   Receiver_ArduCopter receiver;
+  // Motor Declaration
   Motors_ArduCopter motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -320,19 +413,26 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Heading hold declaration
   #ifdef HeadingMagHold
     #include "Compass.h"
     Magnetometer_HMC5843 compass;
   #endif
+  // Altitude Hold declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  // Battery monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
   #endif
   
+  /**
+   * Put ArduCopter specific intialization need here
+   */
   void initPlatformSpecific() {
     initializeADC();
     
@@ -348,11 +448,15 @@
   Gyroscope_Wii gyroSpecific;
   Gyroscope *gyro = &gyroSpecific;
 
+  // Accelerometer declaration
   Accel_Wii accel;
+  // Receiver declaration
   Receiver_AeroQuad receiver;
+  // Motor declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
-//  FlightAngle_CompFilter tempFlightAngle;
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
   #elif defined FlightAngleMARG
@@ -361,11 +465,16 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
   
+  /**
+   * Put AeroQuad_Wii specific intialization need here
+   */
   void initPlatformSpecific() {
      Wire.begin();
   }
@@ -379,9 +488,14 @@
   Gyroscope_Wii gyroSpecific;
   Gyroscope *gyro = &gyroSpecific;
 
+  // Accelerometer declaration
   Accel_Wii accel;
+  // Receiver declaration
   Receiver_AeroQuadMega receiver;
+  // Motors declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -391,11 +505,16 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
 
+  /**
+   * Put AeroQuadMega_Wii specific intialization need here
+   */
   void initPlatformSpecific() {
     Wire.begin();
   }
@@ -424,6 +543,9 @@
     Camera_AeroQuad camera;
   #endif
   
+  /**
+   * Put AeroQuadMega_CHR6DM specific intialization need here
+   */
   void initPlatformSpecific() {
     
   }
@@ -452,11 +574,16 @@
     Camera_AeroQuad camera;
   #endif
   
+  /**
+   * Put APM_OP_CHR6DM specific intialization need here
+   */
   void initPlatformSpecific() {
     
   }
 #endif
 
+
+// Generalization of the specific init platform
 void (*initPlatform)() = &initPlatformSpecific;
 
 #ifdef XConfig
@@ -520,10 +647,10 @@ void setup() {
     pinMode(LED_Green, OUTPUT);
   #endif
   
-  initPlatform();
-  
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
+  
+  initPlatform();
   
   // Configure motors
   motors.initialize(); // defined in Motors.h

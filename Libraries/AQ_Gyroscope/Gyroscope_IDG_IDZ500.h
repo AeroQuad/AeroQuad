@@ -18,29 +18,22 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_ITG3200_H_
-#define _AEROQUAD_GYROSCOPE_ITG3200_H_
+#ifndef _AEROQUAD_GYROSCOPE_IDG_IDZ500_H_
+#define _AEROQUAD_GYROSCOPE_IDG_IDZ500_H_
 
 #include <Gyroscope.h>
 
-#define ITG3200_ADDRESS					0x69
-#define ITG3200_MEMORY_ADDRESS			0x1D
-#define ITG3200_BUFFER_SIZE				6
-#define ITG3200_RESET_ADDRESS			0x3E
-#define ITG3200_RESET_VALUE				0x80
-#define ITG3200_LOW_PASS_FILTER_ADDR	0x16
-#define ITG3200_LOW_PASS_FILTER_VALUE	0x1D	// 10Hz low pass filter
-#define ITG3200_OSCILLATOR_ADDR			0x3E
-#define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
-#define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
+#define AZPIN 12 // Auto zero pin for IDG500 gyros
 
-class Gyroscope_ITG3200 : public Gyroscope {
+class Gyroscope_IDG_IDZ500 : public Gyroscope {
 private:
-  int gyroADC[3];
-  int gyroAddress;
+  int gyroChannel[3];
+  float aref;
   
 public:
-  Gyroscope_ITG3200(boolean useSeccondAddress = false);
+  Gyroscope_IDG_IDZ500();
+  
+  void setAref(float _aref);
   
   void initialize(void);
   void measure(void);
