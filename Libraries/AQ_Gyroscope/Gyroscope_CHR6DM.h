@@ -18,22 +18,24 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_WII_H_
-#define _AEROQUAD_GYROSCOPE_WII_H_
+#ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_
+#define _AEROQUAD_GYROSCOPE_CHR6DM_H_
 
 #include <Gyroscope.h>
-#include "../AQ_Platform_Wii/Platform_Wii.h"
+#include <Platform_CHR6DM.h>
 
-class Gyroscope_Wii : public Gyroscope {
+class Gyroscope_CHR6DM : public Gyroscope {
 private:
-  int gyroADC[3]; // raw data from sensor
-  Platform_Wii *platformWii;
-
-public:
-  Gyroscope_Wii();
+  int gyroADC[3];
+  CHR6DM *chr6dm;
   
-  void setPlatformWii(Platform_Wii *platformWii);
+public:
+  Gyroscope_CHR6DM();
+  
+  void setChr6dm(CHR6DM *chr6dm);
   void measure(void);
   void calibrate(void);
 };
-#endif
+
+#endif  // #ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_
+

@@ -35,10 +35,10 @@
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -104,11 +104,8 @@
 #include <AQMath.h>
 #include <APM_ADC.h>
 #include "Receiver.h"
-#include "DataAcquisition.h"
 #include "Accel.h"
-#include "Gyro.h"
 #include "Motors.h"
-
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
@@ -441,8 +438,10 @@
 #endif
 
 #ifdef AeroQuad_Wii
-  // Gyroscope declaration
+  // Platform Wii declaration
   #include <Platform_Wii.h>
+  Platform_Wii platformWii;
+  // Gyroscope declaration
   #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
   Gyroscope_Wii gyroSpecific;
@@ -477,12 +476,17 @@
    */
   void initPlatformSpecific() {
      Wire.begin();
+     
+     gyroSpecific.setPlatformWii(&platformWii);
+     accel.setPlatformWii(&platformWii);
   }
 #endif
 
 #ifdef AeroQuadMega_Wii
-  // Gyroscope declaration
+  // Platform Wii declaration
   #include <Platform_Wii.h>
+  Platform_Wii platformWii;
+  // Gyroscope declaration
   #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
   Gyroscope_Wii gyroSpecific;
@@ -517,27 +521,50 @@
    */
   void initPlatformSpecific() {
     Wire.begin();
+    
+    gyroSpecific.setPlatformWii(&platformWii);
+    accel.setPlatformWii(&platformWii);    
   }
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
+  #include <Platform_CHR6DM.h>
+  CHR6DM chr6dm;
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_CHR6DM.h>
+  Gyroscope_CHR6DM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
   Accel_CHR6DM accel;
-  Gyro_CHR6DM gyro;
+  // Receiver declaration
   Receiver_AeroQuadMega receiver;
+  // Motors declaration
   Motors_PWM motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  
+  // Compas declaration
+//  #include "Compass.h"
+//  Compass_CHR6DM compass;
+
+  // Altitude hold declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
   #endif
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -547,28 +574,54 @@
    * Put AeroQuadMega_CHR6DM specific intialization need here
    */
   void initPlatformSpecific() {
+    Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
+    chr6dm.resetToFactory();
+    chr6dm.setListenMode();
+    chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
+    chr6dm.requestPacket();
     
+    gyroSpecific.setChr6dm(&chr6dm);
   }
 #endif
 
 #ifdef APM_OP_CHR6DM
+  #include <Platform_CHR6DM.h>
+  CHR6DM chr6dm;
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_CHR6DM.h>
+  Gyroscope_CHR6DM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+  
+  // Accelerometer declaration
   Accel_CHR6DM accel;
-  Gyro_CHR6DM gyro;
+  // Receiver declaration
   Receiver_ArduCopter receiver;
+  // Motors declaration
   Motors_ArduCopter motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   FlightAngle_CHR6DM tempFlightAngle;
   FlightAngle *flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  
+  // Compass declaration
+//  #include "Compass.h"
+//  Compass_CHR6DM compass;
+
+  // Altitude declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_APM batteryMonitor;
   #endif
+  
+  // Camera control declaration
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -578,7 +631,13 @@
    * Put APM_OP_CHR6DM specific intialization need here
    */
   void initPlatformSpecific() {
+    Serial1.begin(115200); //is this needed here? it's already done in Setup, APM TX1 is closest to board edge, RX1 is one step in (green TX wire from CHR goes into APM RX1)
+    chr6dm.resetToFactory();
+    chr6dm.setListenMode();
+    chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
+    chr6dm.requestPacket();
     
+    gyroSpecific.setChr6dm(&chr6dm);
   }
 #endif
 

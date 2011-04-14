@@ -20,27 +20,23 @@
 
 #include <Wire.h>
 #include <APM_ADC.h>          // @see Kenny, Arduino IDE compiliation bug
-#include <Platform_CHR6DM.h>  // @see Kenny, Arduino IDE compiliation bug
-
+#include <Platform_CHR6DM.h> 
 #include <AQMath.h>
 #include <Device_I2C.h>
-#include <Platform_Wii.h>
-#include <Gyroscope_Wii.h>
+#include <Gyroscope_CHR6DM.h>
 #include <Axis.h>
 
 unsigned long timer;
 
-Platform_Wii platformWii;
-Gyroscope_Wii gyro;
+CHR6DM chr6dm;
+Gyroscope_CHR6DM gyro;
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Gyroscope library test (WII)");
+  Serial.println("Gyroscope library test (CHR6DM)");
 
-  Wire.begin();
-  
-  gyro.setPlatformWii(&platformWii);
+  gyro.setChr6dm(&chr6dm);
   gyro.initialize();
   gyro.calibrate();
   timer = millis();

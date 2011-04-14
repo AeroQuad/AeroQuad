@@ -446,10 +446,17 @@ public:
 /****************** Wii Accelerometer *****************/
 /******************************************************/
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+#include <Platform_Wii.h>  // @todo: Kenny, remove this when accel will be extracted as libraries!
 class Accel_Wii : public Accel {
+private:
+  Platform_Wii *platformWii;
 public:
   Accel_Wii() : Accel(){
     accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2    
+  }
+  
+  void setPlatformWii(Platform_Wii *platformWii) {
+    this->platformWii = platformWii;
   }
   
   void initialize(void) {
@@ -464,11 +471,11 @@ public:
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
     // Depending on how your accel is mounted, you can change X/Y axis to pitch/roll mapping here
-    accelADC[XAXIS] =  NWMP_acc[PITCH] - accelZero[PITCH];
-    accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
-    accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
+    platformWii->measure();
+    accelADC[XAXIS] =  platformWii->getAccelADC(PITCH) - accelZero[PITCH];
+    accelADC[YAXIS] = platformWii->getAccelADC(ROLL) - accelZero[ROLL];
+    accelADC[ZAXIS] = accelZero[ZAXIS] - platformWii->getAccelADC(ZAXIS);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
   }
@@ -483,8 +490,8 @@ public:
 
     for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        updateControls();
-        findZero[i] = NWMP_acc[calAxis];
+        platformWii->measure();
+        findZero[i] = platformWii->getAccelADC(calAxis);
       }
       accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
     }
@@ -513,28 +520,26 @@ public:
   }
 
   void initialize(void) {
-    smoothFactor = readFloat(ACCSMOOTH_ADR);
-    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
-    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
-    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
-    accelOneG = readFloat(ACCEL1G_ADR);
-    calibrate();
+//    smoothFactor = readFloat(ACCSMOOTH_ADR);
+//    accelZero[ROLL] = readFloat(LEVELROLLCAL_ADR);
+//    accelZero[PITCH] = readFloat(LEVELPITCHCAL_ADR);
+//    accelZero[ZAXIS] = readFloat(LEVELZCAL_ADR);
+//    accelOneG = readFloat(ACCEL1G_ADR);
+//    calibrate();
+
+    // do nothing, but still be compatible with the rest of the classes, all responsibility is in gyro class for CHR6DM
   }
 
   void measure(void) {
-    //currentTime = micros(); // AKA removed as a result of Honks original work, not needed further
-      accelADC[XAXIS] = chr6dm.data.ax - accelZero[XAXIS];
-      accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
-      accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
+      //accelADC[XAXIS] = chr6dm.data.ax - accelZero[XAXIS];
+      //accelADC[YAXIS] = chr6dm.data.ay - accelZero[YAXIS];
+      //accelADC[ZAXIS] = chr6dm.data.az - accelOneG;
 
-      //accelData[XAXIS] = filterSmoothWithTime(accelADC[XAXIS], accelData[XAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0)); //to get around 1
-      //accelData[YAXIS] = filterSmoothWithTime(accelADC[YAXIS], accelData[YAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      //accelData[ZAXIS] = filterSmoothWithTime(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor, ((currentTime - previousTime) / 5000.0));
-      accelData[XAXIS] = filterSmooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor); //to get around 1
-      accelData[YAXIS] = filterSmooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
-      accelData[ZAXIS] = filterSmooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
-
-    //previousTime = currentTime; // AKA removed as a result of Honks original work, not needed further
+      //accelData[XAXIS] = filterSmooth(accelADC[XAXIS], accelData[XAXIS], smoothFactor); //to get around 1
+      //accelData[YAXIS] = filterSmooth(accelADC[YAXIS], accelData[YAXIS], smoothFactor);
+      //accelData[ZAXIS] = filterSmooth(accelADC[ZAXIS], accelData[ZAXIS], smoothFactor);
+      
+    // do nothing, but still be compatible with the rest of the classes, all responsibility is in gyro class for CHR6DM
   }    
 
   const int getFlightData(byte axis) {
@@ -543,42 +548,8 @@ public:
 
   // Allows user to zero accelerometers on command
   void calibrate(void) {
-
-   float zeroXreads[FINDZERO];
-   float zeroYreads[FINDZERO];
-   float zeroZreads[FINDZERO];
-
-
-    for (int i=0; i<FINDZERO; i++) {
-        chr6dm.requestAndReadPacket();
-        zeroXreads[i] = chr6dm.data.ax;
-        zeroYreads[i] = chr6dm.data.ay;
-        zeroZreads[i] = chr6dm.data.az;
-    }
-
-
-    accelZero[XAXIS] = findMedian(zeroXreads, FINDZERO);
-    accelZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
-    accelZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
-   
-    // store accel value that represents 1g
-    accelOneG = accelZero[ZAXIS];
-    // replace with estimated Z axis 0g value
-    //accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
-
-    writeFloat(accelOneG, ACCEL1G_ADR);
-    writeFloat(accelZero[XAXIS], LEVELROLLCAL_ADR);
-    writeFloat(accelZero[YAXIS], LEVELPITCHCAL_ADR);
-    writeFloat(accelZero[ZAXIS], LEVELZCAL_ADR);
+    // do nothing
   }
-/*  AKA - NOT USED
-  void calculateAltitude() {
-    currentTime = micros();
-    if ((abs(CHR_RollAngle) < 5) && (abs(CHR_PitchAngle) < 5)) 
-      rawAltitude += (getZaxis()) * ((currentTime - previousTime) / 1000000.0);
-    previousTime = currentTime;
-  } 
-*/  
 };
 #endif
 

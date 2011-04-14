@@ -26,13 +26,18 @@ Gyroscope_Wii::Gyroscope_Wii() {
     // ttp://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
     // http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
   scaleFactor = radians(0.06201166); // Define the scale factor that converts to radians/second
+  smoothFactor = 1.0;
+}
+
+void Gyroscope_Wii::setPlatformWii(Platform_Wii *platformWii) {
+  this->platformWii = platformWii;
 }
 
 void Gyroscope_Wii::measure() {
   // Replace code below with sensor measurement methodology
-  wii.measure();
+  platformWii->measure();
   for (byte axis = ROLL; axis <= YAW; axis++) {
-    gyroADC[axis] = wii.getGyroADC(axis)  - zero[axis];
+    gyroADC[axis] = platformWii->getGyroADC(axis) - zero[axis];
     rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
   }
   
@@ -50,8 +55,8 @@ void Gyroscope_Wii::calibrate() {
     
   for (byte axis = ROLL; axis <= YAW; axis++) {
     for (int i=0; i<FINDZERO; i++) {
-	  wii.measure();
-      findZero[i] = wii.getGyroADC(axis);
+	  platformWii->measure();
+      findZero[i] = platformWii->getGyroADC(axis);
       delay(5);
     }
     zero[axis] = findMedianInt(findZero, FINDZERO);

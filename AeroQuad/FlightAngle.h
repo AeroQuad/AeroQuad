@@ -686,6 +686,47 @@ public:
   void calibrate() {}
 };
 
+
+// ***********************************************************************
+// ********************* CHR6DM variable loading *************************
+// ***********************************************************************
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+class FlightAngle_CHR6DM : public FlightAngle {
+private:
+
+float zeroRoll;
+float zeroPitch;
+
+public:
+  FlightAngle_CHR6DM() : FlightAngle() {}
+
+  void initialize(float hdgX, float hdgY) {
+    // do nothing, already done in gyro class
+  }
+
+  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
+                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
+                 float oneG,               float magX,          float magY) {
+    angle[ROLL]  = chr6dm.data.roll - zeroRoll;
+    angle[PITCH] = chr6dm.data.pitch - zeroPitch;
+    angle[YAW]   = chr6dm.data.yaw; 
+  }
+  
+   void calibrate(void) {
+    chr6dm.EKFReset();
+    zeroRoll = chr6dm.data.roll;
+    zeroPitch = chr6dm.data.pitch;
+  }
+  
+  float getGyroUnbias(byte axis) {
+    if(axis == ROLL) return gyro->getRadPerSec(ROLL);
+    if(axis == PITCH) return gyro->getRadPerSec(PITCH);
+    if(axis == YAW) return gyro->getRadPerSec(YAW);
+  }
+
+};
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

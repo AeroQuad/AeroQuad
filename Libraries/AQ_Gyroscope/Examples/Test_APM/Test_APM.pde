@@ -18,8 +18,9 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>         // Arduino IDE bug, needed because that the ITG3200 use Wire!
-#include <Device_I2C.h>   // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Platform_CHR6DM.h>  // Arduino IDE bug, needed because that the CHR6DM use Wire!
 
 #include <Axis.h>
 #include <APM_ADC.h>

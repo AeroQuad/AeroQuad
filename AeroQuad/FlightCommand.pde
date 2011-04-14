@@ -42,9 +42,6 @@ void readPilotCommands() {
       accel.calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
       //accel.setOneG(accel.getFlightData(ZAXIS));
-      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        _flightAngle->calibrate();
-      #endif
       zeroIntegralError();
       motors.pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
