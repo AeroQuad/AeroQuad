@@ -31,14 +31,57 @@ void calculateFlightError(void)
     motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro.getData(PITCH), &PID[PITCH]));
   }
   else {
-    
-  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
-  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
-//  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
+    #ifdef BinaryWritePID  
+      // AKA only used for PID data collection and debugging
+      float recRollScaled = (receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING;
+      float recPitchScaled = (receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING;
+      float rollAttitudeCmd = updatePID(recRollScaled, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+      float pitchAttitudeCmd = updatePID(recPitchScaled, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
 
+      float rollMotorCmd = updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]);
+      float pitchMotorCmd = updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]);
+
+      motors.setMotorAxisCommand(ROLL, rollMotorCmd);
+      motors.setMotorAxisCommand(PITCH, pitchMotorCmd);
+    #else  
+      float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+      //float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getTransmitterTrim(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+      float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+      //float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getTransmitterTrim(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+      
+      motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
+      motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
+    #endif  
+    #ifdef BinaryWritePID
+      // **************************************************************
+      // ***************** Fast Transfer Of Sensor Data ***************
+      // **************************************************************
+      // AeroQuad.h defines the output rate to be 10ms
+      // Since writing to UART is done by hardware, unable to measure data rate directly
+      // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+      // If float = 4 bytes, then 3600 floats/second
+      // If 10 ms output rate, then 36 floats/10ms
+      // Number of floats written using sendBinaryFloat is 15
+      #ifdef OpenlogBinaryWrite
+        if (armed == ON) {
+          printInt(21845); // Start word of 0x5555
+          sendBinaryuslong(currentTime);
+          sendBinaryFloat(recRollScaled);
+          sendBinaryFloat(recPitchScaled);
+          sendBinaryFloat(flightAngle->getData(ROLL));
+          sendBinaryFloat(-flightAngle->getData(PITCH));
+          sendBinaryFloat(rollAttitudeCmd);
+          sendBinaryFloat(pitchAttitudeCmd);
+//          sendBinaryFloat(gyro.getData(ROLL));
+//          sendBinaryFloat(-gyro.getData(PITCH));
+          sendBinaryFloat(rollMotorCmd);
+          sendBinaryFloat(pitchMotorCmd);
+          sendBinaryFloat(PID[LEVELROLL].integratedError);
+          sendBinaryFloat(PID[LEVELPITCH].integratedError);
+          printInt(32767); // Stop word of 0x7FFF
+        }
+      #endif
+    #endif
   }
 }
 
@@ -375,4 +418,4 @@ void processFlightControlPlusMode(void) {
   }
 }
 #endif
-
+

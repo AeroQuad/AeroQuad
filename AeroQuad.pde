@@ -60,12 +60,11 @@
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
 // flightAngle recommendations: use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
 #define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
@@ -466,8 +465,8 @@ void setup() {
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
-  levelAdjust[ROLL] = 0;
-  levelAdjust[PITCH] = 0;
+//  levelAdjust[ROLL] = 0;
+//  levelAdjust[PITCH] = 0;
   
   // Flight angle estimation
   #ifdef HeadingMagHold
@@ -483,6 +482,9 @@ void setup() {
   // Rate integral not used for now
   PID[LEVELROLL].windupGuard = 0.375;
   PID[LEVELPITCH].windupGuard = 0.375;
+  
+  // Setup HEADING PID for +/- PID
+  PID[HEADING].typePID = TYPEPI;
 
   // Optional Sensors
   #ifdef AltitudeHold
@@ -521,26 +523,6 @@ void setup() {
   safetyCheck = 0;
 }
 
-/*******************************************************************
-  // tasks (microseconds of interval)
-  ReadGyro        readGyro      (   5000); // 200hz
-  ReadAccel       readAccel     (   5000); // 200hz
-  RunDCM          runDCM        (  10000); // 100hz
-  FlightControls  flightControls(  10000); // 100hz
-  ReadReceiver    readReceiver  (  20000); //  50hz
-  ReadBaro        readBaro      (  40000); //  25hz
-  ReadCompass     readCompass   ( 100000); //  10Hz
-  ProcessTelem    processTelem  ( 100000); //  10Hz
-  ReadBattery     readBattery   ( 100000); //  10Hz
-  
-  Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
-                   &readReceiver, &readBaro, &readCompass,            \
-                   &processTelem, &readBattery};
-                   
-  TaskScheduler sched(tasks, NUM_TASKS(tasks));
-  
-  sched.run();
-*******************************************************************/
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;

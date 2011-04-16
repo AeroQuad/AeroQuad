@@ -53,7 +53,7 @@ public:
   virtual const int getFlightData(byte);
 
   // **************************************************************
-  // The following functions are common between all Gyro subclasses
+  // The following functions are common between all Accel subclasses
   // **************************************************************
   void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
     accelChannel[ROLL] = rollChannel;
@@ -194,7 +194,7 @@ public:
     byte data;
     
     this->_initialize(0,1,2);  // AKA added for consistency
-  
+    
     accelOneG        = readFloat(ACCEL1G_ADR);
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[YAXIS] = readFloat(LEVELROLLCAL_ADR);
@@ -303,7 +303,7 @@ public:
     byte data;
     
     this->_initialize(0,1,2);  // AKA added for consistency
-  
+    
     accelOneG        = readFloat(ACCEL1G_ADR);
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
     accelZero[YAXIS] = readFloat(LEVELROLLCAL_ADR);

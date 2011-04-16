@@ -135,7 +135,7 @@ public:
     // rollChannel = 4
     // pitchChannel = 3
     // yawChannel = 5
-    this->_initialize(4,3,5);
+    this->_initialize(4, 3, 5);
     gyroFullScaleOutput = 500.0;   // IDG/IXZ500 full scale output = +/- 500 deg/sec
     gyroScaleFactor = radians((aref/1024.0) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
   }
