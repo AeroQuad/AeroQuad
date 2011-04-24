@@ -18,16 +18,19 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_APM_H_
-#define _AEROQUAD_GYROSCOPE_APM_H_
+#ifndef _AEROQUAD_ACCELEROMETER_WII_H_
+#define _AEROQUAD_ACCELEROMETER_WII_H_
 
-#include <Gyroscope.h>
+#include <Accelerometer.h>
+#include <Platform_Wii.h>
 
-//#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-
-class Gyroscope_APM : public Gyroscope {
+class Accelerometer_WII : public Accelerometer {
+private:
+  Platform_Wii *platformWii;
 public:
-  Gyroscope_APM();
+  Accelerometer_WII();
+  
+  void setPlatformWii(Platform_Wii *platformWii);
   
   void measure(void);
   void calibrate(void);

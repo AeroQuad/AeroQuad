@@ -18,45 +18,53 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "Gyroscope_APM.h"
+#include "Accelerometer_APM.h"
 
 #include <APM_ADC.h>
 #include <AQMath.h>
 
 
-Gyroscope_APM::Gyroscope_APM() {
-  gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+Accelerometer_APM::Accelerometer_APM() {
+  accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);
   smoothFactor = 1.0;
 }
   
-void Gyroscope_APM::measure(void) {
-  int gyroADC;
-  for (byte axis = ROLL; axis <= YAW; axis++) {
-    float rawADC = readADC(axis);
-    if (rawADC > 500) // Check if good measurement
+void Accelerometer_APM::measure(void) {
+  int accelADC;
+  for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    const float rawADC = readADC(axis+3);
+    if (rawADC > 500) { // Check if measurement good
       if (axis == ROLL)
-        gyroADC =  rawADC - zero[axis];
+        accelADC = rawADC - zero[axis];
       else
-        gyroADC =  zero[axis] - rawADC;
-    rate[axis] = filterSmooth(gyroADC * gyroScaleFactor, rate[axis], smoothFactor);
+        accelADC = zero[axis] - rawADC;
+      meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], smoothFactor);
+    }
   }
-  
-    // Measure gyro heading
-  long int currentTime = micros();
-  if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
-    heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
-  }
-  lastMesuredTime = currentTime;
 }
 
-void Gyroscope_APM::calibrate() {
+void Accelerometer_APM::calibrate() {
   int findZero[FINDZERO];
     
-  for (byte axis = 0; axis < 3; axis++) {
+  for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
     for (int i=0; i<FINDZERO; i++) {
-	  findZero[i] = readADC(axis);
-      delay(10);
+      findZero[i] = readADC(calAxis+3);
+      delay(2);
     }
-    zero[axis] = findMedianInt(findZero, FINDZERO);
+    zero[calAxis] = findMedianInt(findZero, FINDZERO);
   }
+
+  // replace with estimated Z axis 0g value
+  zero[ZAXIS] = (zero[ROLL] + zero[PITCH]) / 2;
+   
+  // store accel value that represents 1g
+  measure();
+  oneG = -meterPerSec[ZAXIS];
 }
+
+
+
+
+
+
+

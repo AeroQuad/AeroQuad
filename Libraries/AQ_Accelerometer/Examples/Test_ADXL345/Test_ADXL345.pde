@@ -18,51 +18,43 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>
-#include <APM_ADC.h>          // @see Kenny, Arduino IDE compiliation bug
-#include <Platform_CHR6DM.h>  // @see Kenny, Arduino IDE compiliation bug
+#include <APM_ADC.h>          // Arduino IDE bug, needed because that the APM use it
+#include <Platform_CHR6DM.h>  // Arduino IDE bug, needed because that the CHR6DM use
 
-#include <AQMath.h>
+#include <Wire.h>
 #include <Device_I2C.h>
-#include <Platform_Wii.h>
-#include <Gyroscope_Wii.h>
 #include <Axis.h>
+#include <AQMath.h>
+#include <Accelerometer_ADXL345.h>
 
 unsigned long timer;
+Accelerometer_ADXL345 accel;
 
-Platform_Wii platformWii;
-Gyroscope_Wii gyro;
-
-void setup()
-{
+void setup() {
+  
   Serial.begin(115200);
-  Serial.println("Gyroscope library test (WII)");
+  Serial.println("Accelerometer library test (ADXL345)");
 
   Wire.begin();
   
-  platformWii.initialize();
-  gyro.setPlatformWii(&platformWii);
-  gyro.initialize();
-  gyro.calibrate();
-  timer = millis();
+  accel.initialize();  
+  accel.calibrate();
 }
 
-void loop(void) 
-{
+void loop() {
+  
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    gyro.measure();
+    accel.measure();
     
     Serial.print("Roll: ");
-    Serial.print(degrees(gyro.getRadPerSec(ROLL)));
+    Serial.print(accel.getMeterPerSec(XAXIS));
     Serial.print(" Pitch: ");
-    Serial.print(degrees(gyro.getRadPerSec(PITCH)));
+    Serial.print(accel.getMeterPerSec(YAXIS));
     Serial.print(" Yaw: ");
-    Serial.print(degrees(gyro.getRadPerSec(YAW)));
-    Serial.print(" Heading: ");
-    Serial.print(degrees(gyro.getHeading()));
+    Serial.print(accel.getMeterPerSec(ZAXIS));
     Serial.println();
   }
-}
 
+}

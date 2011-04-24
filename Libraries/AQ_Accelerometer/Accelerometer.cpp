@@ -18,18 +18,35 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_APM_H_
-#define _AEROQUAD_GYROSCOPE_APM_H_
+#include "Accelerometer.h"
 
-#include <Gyroscope.h>
+Accelerometer::Accelerometer() {
+}
 
-//#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+const float Accelerometer::getSmoothFactor() {
+  return smoothFactor;
+}
 
-class Gyroscope_APM : public Gyroscope {
-public:
-  Gyroscope_APM();
-  
-  void measure(void);
-  void calibrate(void);
-};
-#endif
+void Accelerometer::setSmoothFactor(float value) {
+  smoothFactor = value;
+}
+
+void Accelerometer::setOneG(float oneG) {
+  this->oneG = oneG;
+}
+
+float Accelerometer::getOneG() {
+  return oneG;
+}
+
+float Accelerometer::getMeterPerSec(byte axis) {
+  return meterPerSec[axis];
+}
+
+float Accelerometer::getZero(byte axis) {
+  return zero[axis];
+}
+
+void Accelerometer::setZero(byte axis, float zero) {
+  this->zero[axis] = zero;
+}

@@ -21,15 +21,11 @@
 // Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
 float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
   float error;
-  float pTerm;
   float dTerm;
-  float iTerm;
-  float pidOut;
   // AKA PID experiments
   float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
 
   PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
-  
   error = targetPosition - currentPosition;
 
 // AKA PID experiments
@@ -49,14 +45,11 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   PIDparameters->integratedError += error * deltaPIDTime;
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
   
-  pTerm = PIDparameters->P * error;
-  iTerm = PIDparameters->I * PIDparameters->integratedError;
   dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (deltaPIDTime * 100); // dT fix from Honk
-  pidOut = pTerm + iTerm + dTerm;
 
   PIDparameters->lastPosition = currentPosition;
   
-  return pidOut;
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
 }
 
 void zeroIntegralError() __attribute__ ((noinline));

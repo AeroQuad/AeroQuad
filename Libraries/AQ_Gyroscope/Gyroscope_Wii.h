@@ -26,7 +26,6 @@
 
 class Gyroscope_Wii : public Gyroscope {
 private:
-  int gyroADC[3]; // raw data from sensor
   Platform_Wii *platformWii;
 
 public:

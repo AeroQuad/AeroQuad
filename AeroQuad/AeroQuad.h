@@ -129,10 +129,10 @@ int minAcro; // Read in from EEPROM, defines min throttle during flips
 #define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
 
 // Auto level setup
-//float levelAdjust[2] = {0.0,0.0};
+float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
-//int levelLimit; // Read in from EEPROM
-//int levelOff; // Read in from EEPROM
+int levelLimit; // Read in from EEPROM
+int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
@@ -149,9 +149,7 @@ float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float absoluteHeading = 0;;
-#endif
+//float absoluteHeading = 0;;
 float setHeading = 0;
 unsigned long headingTime = micros();
 byte headingHoldState = OFF;
@@ -297,14 +295,14 @@ byte testSignal = LOW;
 #define LEVELROLL_PID_GAIN_ADR 12
 #define YAW_PID_GAIN_ADR 24
 #define WINDUPGUARD_ADR 36
-//#define LEVELLIMIT_ADR 40
-//#define LEVELOFF_ADR 44
+#define LEVELLIMIT_ADR 40
+#define LEVELOFF_ADR 44
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
-#define LEVELPITCHCAL_ADR 60
-#define LEVELROLLCAL_ADR 64
-#define LEVELZCAL_ADR 68
+#define ACCEL_XAXIS_ZERO_ADR 60
+#define ACCEL_YAXIS_ZERO_ADR 64
+#define ACCEL_ZAXIS_ZERO_ADR 68
 #define FILTERTERM_ADR 72
 #define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
 #define PITCH_PID_GAIN_ADR 172
@@ -317,7 +315,7 @@ byte testSignal = LOW;
 #define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
-#define ACCEL1G_ADR 256
+#define ACCEL_ONE_G_ADR 256
 #define ALTITUDE_PGAIN_ADR 260
 #define ALTITUDE_IGAIN_ADR 264
 #define ALTITUDE_DGAIN_ADR 268
@@ -350,7 +348,7 @@ byte testSignal = LOW;
 #define GYRO_PITCH_ZERO_ADR 376
 #define GYRO_YAW_ZERO_ADR 380
 
-/ defined in DataStorage.h
+// defined in DataStorage.h
 float readFloat(int address); 
 void writeFloat(float value, int address); 
 void readEEPROM(void); 

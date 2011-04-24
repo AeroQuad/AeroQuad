@@ -32,32 +32,25 @@ void Platform_Wii::initialize()
 
 void Platform_Wii::measure() 
 {
-  int i;
-  int j;
   unsigned char buffer[6];
 
-  for(j=0;j<2;j++) 
-  {
+  for(byte j=0;j<2;j++) {
     sendByteI2C(0x52, 0x00);
     Wire.requestFrom(0x52,6);
-    for(i = 0; i < 6; i++) 
-	{
+    for(byte i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
-	}
-    if (buffer[5] & 0x02) 
-    { //If WiiMP
-      gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16; 
-      gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16; 
-      gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16; 
+    if (buffer[5] & 0x02) { //If WiiMP
+      gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
+      gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
+      gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
     }
-    else 
-    {//If Nunchuk
-      accel[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01); 
-      accel[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01); 
-      accel[2]=buffer[4]; 
-      accel[2]=accel[2]<<1; 
-      accel[2]=accel[2] & 0xFFFC;
-      accel[2]=accel[2]|((buffer[5]>>6)&0x03); 
+    else {//If Nunchuk
+      accel[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01);  //hji
+      accel[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01);  //hji
+      accel[2]=buffer[4];                             //hji
+      accel[2]=accel[2]<<1;                        //hji
+      accel[2]=accel[2] & 0xFFFC;                  //hji
+      accel[2]=accel[2]|((buffer[5]>>6)&0x03);     //hji
     }
   }
 }

@@ -18,16 +18,14 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_APM_H_
-#define _AEROQUAD_GYROSCOPE_APM_H_
+#ifndef _AEROQUAD_ACCELEROMETER_APM_H_
+#define _AEROQUAD_ACCELEROMETER_APM_H_
 
-#include <Gyroscope.h>
+#include <Accelerometer.h>
 
-//#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-
-class Gyroscope_APM : public Gyroscope {
+class Accelerometer_APM : public Accelerometer {
 public:
-  Gyroscope_APM();
+  Accelerometer_APM();
   
   void measure(void);
   void calibrate(void);

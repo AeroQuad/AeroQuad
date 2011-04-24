@@ -39,16 +39,15 @@ void readPilotCommands() {
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
       gyro->calibrate(); // defined in Gyro.h
-      accel.calibrate(); // defined in Accel.h
+      accel->calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
-      //accel.setOneG(accel.getFlightData(ZAXIS));
       zeroIntegralError();
       motors.pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
       //#if defined(BattMonitor) && defined(ArduCopter)
       //  ledCW(); ledCW(); ledCW();
       //#endif
-   }   
+    }   
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
@@ -75,9 +74,9 @@ void readPilotCommands() {
     //receiver.setZero(YAW, receiver.getRaw(YAW));
   }
   
-  //#ifdef AeroQuad_Mini
-  //  flightMode = ACRO;
-  //#else
+  #ifdef AeroQuad_Mini
+    flightMode = ACRO;
+  #else
     // Check Mode switch for Acro or Stable
     if (receiver.getRaw(MODE) > 1500) {
       if (flightMode == ACRO) {
@@ -95,7 +94,7 @@ void readPilotCommands() {
       #endif
       flightMode = ACRO;
     }
-  //#endif
+  #endif
   
    #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       if (flightMode == ACRO) {
@@ -116,7 +115,6 @@ void readPilotCommands() {
          holdThrottle = receiver.getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
-         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
          storeAltitude = OFF;
        }
        altitudeHold = ON;
