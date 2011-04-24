@@ -48,13 +48,13 @@ void Gyroscope_IDG_IDZ500::initialize(void) {
 }
     
 void Gyroscope_IDG_IDZ500::measure(void) {
-  int gyroADC[3];
+  int gyroADC;
   for (byte axis = ROLL; axis < LASTAXIS; axis++) {
     if (axis == PITCH)
-      gyroADC[axis] = analogRead(gyroChannel[axis]) - zero[axis];
+      gyroADC = analogRead(gyroChannel[axis]) - zero[axis];
     else
-      gyroADC[axis] = zero[axis] - analogRead(gyroChannel[axis]);
-    rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor);
+      gyroADC = zero[axis] - analogRead(gyroChannel[axis]);
+    rate[axis] = filterSmooth(gyroADC * gyroScaleFactor, rate[axis], smoothFactor);
   }
  
   // Measure gyro heading

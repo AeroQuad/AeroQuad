@@ -26,8 +26,8 @@
 // Flight Software Version
 #define VERSION 3.0
 
-//#define BAUD 115200
-#define BAUD 111111 // use this to be compatible with USB and XBee connections
+#define BAUD 115200
+//#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -300,9 +300,9 @@ byte testSignal = LOW;
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
-#define LEVELPITCHCAL_ADR 60
-#define LEVELROLLCAL_ADR 64
-#define LEVELZCAL_ADR 68
+#define ACCEL_XAXIS_ZERO_ADR 60
+#define ACCEL_YAXIS_ZERO_ADR 64
+#define ACCEL_ZAXIS_ZERO_ADR 68
 #define FILTERTERM_ADR 72
 #define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
 #define PITCH_PID_GAIN_ADR 172
@@ -315,7 +315,7 @@ byte testSignal = LOW;
 #define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
-#define ACCEL1G_ADR 256
+#define ACCEL_ONE_G_ADR 256
 #define ALTITUDE_PGAIN_ADR 260
 #define ALTITUDE_IGAIN_ADR 264
 #define ALTITUDE_DGAIN_ADR 268

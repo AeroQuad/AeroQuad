@@ -85,7 +85,7 @@ void readSerialCommand() {
       break;
     case 'K': // Receive data filtering values
       gyro->setSmoothFactor(readFloatSerial());
-      accel.setSmoothFactor(readFloatSerial());
+      accel->setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
       storeSensorsZeroToEEPROM();
       break;
@@ -108,7 +108,7 @@ void readSerialCommand() {
     case 'Y': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
       gyro->calibrate();
-      accel.calibrate();
+      accel->calibrate();
       storeSensorsZeroToEEPROM();
       zeroIntegralError();
 #ifdef HeadingMagHold
@@ -153,11 +153,7 @@ void readSerialCommand() {
       storeSensorsZeroToEEPROM();
       break;
     case 'c': // calibrate accels
-      accel.calibrate();
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      flightAngle->calibrate();
-      accel.setOneG(accel.getFlightData(ZAXIS));
-#endif
+      accel->calibrate();
       break;
     case 'd': // send aref
       aref = readFloatSerial();
@@ -287,7 +283,7 @@ void sendSerialTelemetry() {
     break;
   case 'L': // Send data filtering values
     PrintValueComma(gyro->getSmoothFactor());
-    PrintValueComma(accel.getSmoothFactor());
+    PrintValueComma(accel->getSmoothFactor());
     Serial.println(timeConstant);
     // comma();
     // Serial.println(flightMode, DEC);
@@ -315,7 +311,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyro->getRadPerSec(axis));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel.getData(axis));
+      PrintValueComma(accel->getMeterPerSec(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
@@ -372,11 +368,11 @@ void sendSerialTelemetry() {
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       if (axis == ROLL)
-        PrintValueComma(accel.getFlightData(YAXIS));
+        PrintValueComma(accel->getMeterPerSec(YAXIS));  // was getFlightData from the old Accel API Should no be used anymore @see Kenny
       else if (axis == PITCH)
-        PrintValueComma(accel.getFlightData(XAXIS));
+        PrintValueComma(accel->getMeterPerSec(XAXIS));  // was getFlightData from the old Accel API Should no be used anymore @see Kenny
       else
-        PrintValueComma(accel.getFlightData(ZAXIS));
+        PrintValueComma(accel->getMeterPerSec(ZAXIS));  // was getFlightData from the old Accel API Should no be used anymore @see Kenny
     }  
     Serial.print(armed, BIN);
     comma();
@@ -607,27 +603,21 @@ void fastTelemetry(void)
     #ifdef OpenlogBinaryWrite
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
-//        printInt((int)flightMode);
        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-//        sendBinaryFloat(accel.accelOneG);
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
        #ifdef HeadingMagHold
-//          sendBinaryFloat(compass.hdgX);
-//          sendBinaryFloat(compass.hdgY);
            sendBinaryFloat(compass.getRawData(XAXIS));
            sendBinaryFloat(compass.getRawData(YAXIS));
            sendBinaryFloat(compass.getRawData(ZAXIS));
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
-//          sendBinaryFloat(0.0);
        #endif
-//        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
          sendBinaryFloat(compass.getRawData(axis));

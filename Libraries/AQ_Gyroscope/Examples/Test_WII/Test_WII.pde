@@ -40,6 +40,7 @@ void setup()
 
   Wire.begin();
   
+  platformWii.initialize();
   gyro.setPlatformWii(&platformWii);
   gyro.initialize();
   gyro.calibrate();

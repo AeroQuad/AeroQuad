@@ -26,9 +26,6 @@
 //#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 
 class Gyroscope_APM : public Gyroscope {
-private:
-  int gyroADC[3];
-  
 public:
   Gyroscope_APM();
   

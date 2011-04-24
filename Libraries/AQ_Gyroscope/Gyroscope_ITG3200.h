@@ -36,7 +36,6 @@
 
 class Gyroscope_ITG3200 : public Gyroscope {
 private:
-  int gyroADC[3];
   int gyroAddress;
   
 public:

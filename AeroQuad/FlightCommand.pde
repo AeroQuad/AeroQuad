@@ -39,9 +39,8 @@ void readPilotCommands() {
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
       gyro->calibrate(); // defined in Gyro.h
-      accel.calibrate(); // defined in Accel.h
+      accel->calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
-      //accel.setOneG(accel.getFlightData(ZAXIS));
       zeroIntegralError();
       motors.pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
@@ -116,7 +115,6 @@ void readPilotCommands() {
          holdThrottle = receiver.getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
-         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
          storeAltitude = OFF;
        }
        altitudeHold = ON;

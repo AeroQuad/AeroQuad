@@ -37,8 +37,8 @@ void Gyroscope_Wii::measure() {
   // Replace code below with sensor measurement methodology
   platformWii->measure();
   for (byte axis = ROLL; axis <= YAW; axis++) {
-    gyroADC[axis] = platformWii->getGyroADC(axis) - zero[axis];
-    rate[axis] = filterSmooth(gyroADC[axis] * scaleFactor, rate[axis], smoothFactor);
+    int gyroADC = platformWii->getGyroADC(axis) - zero[axis];
+    rate[axis] = filterSmooth(gyroADC * scaleFactor, rate[axis], smoothFactor);
   }
   
   // Measure gyro heading

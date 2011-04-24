@@ -47,6 +47,7 @@ void Gyroscope_ITG3200::measure(void) {
   // in the correct order and phase to suit the standard shield installation
   // orientation.  See TBD for details.  If your shield is not installed in this
   // orientation, this is where you make the changes.
+  int gyroADC[3];
   gyroADC[ROLL]  = ((Wire.receive() << 8) | Wire.receive())  - zero[ROLL];
   gyroADC[PITCH] = zero[PITCH] - ((Wire.receive() << 8) | Wire.receive());
   gyroADC[YAW]   = zero[YAW] - ((Wire.receive() << 8) | Wire.receive());

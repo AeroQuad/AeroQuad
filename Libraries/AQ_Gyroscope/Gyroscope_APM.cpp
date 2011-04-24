@@ -30,14 +30,15 @@ Gyroscope_APM::Gyroscope_APM() {
 }
   
 void Gyroscope_APM::measure(void) {
+  int gyroADC;
   for (byte axis = ROLL; axis <= YAW; axis++) {
     float rawADC = readADC(axis);
     if (rawADC > 500) // Check if good measurement
       if (axis == ROLL)
-        gyroADC[axis] =  rawADC - zero[axis];
+        gyroADC =  rawADC - zero[axis];
       else
-        gyroADC[axis] =  zero[axis] - rawADC;
-    rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor);
+        gyroADC =  zero[axis] - rawADC;
+    rate[axis] = filterSmooth(gyroADC * gyroScaleFactor, rate[axis], smoothFactor);
   }
   
     // Measure gyro heading
