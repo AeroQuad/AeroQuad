@@ -126,7 +126,7 @@ float aref; // Read in from EEPROM
 byte flightMode;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-#define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
+
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
@@ -175,25 +175,8 @@ float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
-#define LASTCHANNEL 6
+//// Receiver variables
 int delta;
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float timeConstant;
@@ -354,6 +337,7 @@ void writeFloat(float value, int address);
 void readEEPROM(void); 
 void initSensorsZeroFromEEPROM(void);
 void storeSensorsZeroToEEPROM(void);
+void initReceiverFromEEPROM(void);
 
 // defined in FlightCommand.pde
 void readPilotCommands(void); 

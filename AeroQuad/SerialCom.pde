@@ -90,15 +90,15 @@ void readSerialCommand() {
       storeSensorsZeroToEEPROM();
       break;
     case 'M': // Receive transmitter smoothing values
-      receiver.setXmitFactor(readFloatSerial());
+      receiver->setXmitFactor(readFloatSerial());
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver.setSmoothFactor(channel, readFloatSerial());
+        receiver->setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver.setTransmitterSlope(channel, readFloatSerial());
-        receiver.setTransmitterOffset(channel, readFloatSerial());
+        receiver->setTransmitterSlope(channel, readFloatSerial());
+        receiver->setTransmitterOffset(channel, readFloatSerial());
       }
       break;
     case 'W': // Write all user configurable values to EEPROM
@@ -231,7 +231,7 @@ void sendSerialTelemetry() {
     //PrintValueComma(gyro->getFlightData(PITCH));
     //PrintValueComma(flightAngle->getData(PITCH));
     //PrintValueComma(flightAngle->getGyroUnbias(PITCH));
-    //PrintValueComma(receiver.getZero(ROLL));
+    //PrintValueComma(receiver->getZero(ROLL));
     //PrintValueComma(flightAngle->getData(ROLL));
     //Serial.print(degrees(flightAngle->getData(YAW)));
     //Serial.println();
@@ -290,20 +290,20 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
-    PrintValueComma(receiver.getXmitFactor());
+    PrintValueComma(receiver->getXmitFactor());
     for (byte axis = ROLL; axis < AUX; axis++) {
-      PrintValueComma(receiver.getSmoothFactor(axis));
+      PrintValueComma(receiver->getSmoothFactor(axis));
     }
-    Serial.println(receiver.getSmoothFactor(AUX));
+    Serial.println(receiver->getSmoothFactor(AUX));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
     for (byte axis = ROLL; axis < AUX; axis++) {
-      PrintValueComma(receiver.getTransmitterSlope(axis));
-      PrintValueComma(receiver.getTransmitterOffset(axis));
+      PrintValueComma(receiver->getTransmitterSlope(axis));
+      PrintValueComma(receiver->getTransmitterOffset(axis));
     }
-    PrintValueComma(receiver.getTransmitterSlope(AUX));
-    Serial.println(receiver.getTransmitterOffset(AUX));
+    PrintValueComma(receiver->getTransmitterSlope(AUX));
+    Serial.println(receiver->getTransmitterOffset(AUX));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -396,9 +396,9 @@ void sendSerialTelemetry() {
     Serial.println();    
     break;
   case 'T': // Send processed transmitter values
-    PrintValueComma(receiver.getXmitFactor());
+    PrintValueComma(receiver->getXmitFactor());
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(receiver.getData(axis));
+      PrintValueComma(receiver->getData(axis));
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
@@ -409,20 +409,20 @@ void sendSerialTelemetry() {
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < AUX; channel++) {
-      PrintValueComma(receiver.getData(channel));
+      PrintValueComma(receiver->getData(channel));
     }
-    Serial.println(receiver.getData(AUX));
+    Serial.println(receiver->getData(AUX));
     break;
   case 'V': // Send receiver status
     for (byte channel = ROLL; channel < AUX; channel++) {
-      PrintValueComma(receiver.getRaw(channel));
+      PrintValueComma(receiver->getRaw(channel));
     }
-    Serial.println(receiver.getRaw(AUX));
+    Serial.println(receiver->getRaw(AUX));
     break;
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
-    PrintValueComma(receiver.getData(YAW));
+    PrintValueComma(receiver->getData(YAW));
     PrintValueComma(headingHold);
     PrintValueComma(setHeading);
     // AKA - Configurator wants -180/180 for headings,

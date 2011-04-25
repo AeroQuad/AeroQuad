@@ -1,34 +1,36 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#include "ReceiverForAPM.h"
+#include "Receiver_APM.h"
 #include <AQMath.h>
+#include <Axis.h>
 
 #include <avr/interrupt.h>
 volatile unsigned int Start_Pulse = 0;
 volatile unsigned int Stop_Pulse = 0;
 volatile unsigned int Pulse_Width = 0;
 volatile byte PPM_Counter=0;
-volatile int PWM_RAW[8] = {2400,2400,2400,2400,2400,2400,2400,2400};
+volatile int PWM_RAW[8] = {
+  2400,2400,2400,2400,2400,2400,2400,2400};
 
 /****************************************************
  * Interrupt Vector
@@ -49,7 +51,8 @@ ISR(TIMER4_CAPT_vect)//interrupt.
     }
     else
     {
-      PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      //PWM_RAW[PPM_Counter]=Pulse_Width; //Saving pulse.
+      PWM_RAW[PPM_Counter & 0x07]=Pulse_Width; //Saving pulse.
       PPM_Counter++;
     }
     Start_Pulse=ICR4;
@@ -63,10 +66,9 @@ ISR(TIMER4_CAPT_vect)//interrupt.
   }
   //Counter++;
 }
-//#endif
 
-ReceiverForAPM::ReceiverForAPM()
-{
+Receiver_APM::Receiver_APM() {
+
   receiverPin[ROLL] = 0;
   receiverPin[PITCH] = 1;
   receiverPin[YAW] = 3;
@@ -75,9 +77,7 @@ ReceiverForAPM::ReceiverForAPM()
   receiverPin[AUX] = 5;
 }
 
-void ReceiverForAPM::initialize() 
-{
-  this->_initialize(); // load in calibration and xmitFactor from EEPROM
+void Receiver_APM::initialize(void) {
   /*Note that timer4 is configured to used the Input capture for PPM decoding and to pulse two servos
    OCR4A is used as the top counter*/
   pinMode(49, INPUT);
@@ -95,28 +95,32 @@ void ReceiverForAPM::initialize()
   sei();
 }
 
-void ReceiverForAPM::read() 
-{
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) 
-  {
-    _currentTime = micros();
+void Receiver_APM::read(void) {
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    //currentTime = micros();
     // Apply transmitter calibration adjustment
-    _receiverData[channel] = (_mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + _bTransmitter[channel];
+    receiverData[channel] = (mTransmitter[channel] * ((PWM_RAW[receiverPin[channel]]+600)/2)) + bTransmitter[channel];
     // Smooth the flight control transmitter inputs
-    _transmitterCommandSmooth[channel] = filterSmooth(_receiverData[channel], _transmitterCommandSmooth[channel], _transmitterSmooth[channel]);
-    _previousTime = _currentTime;
+    transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
+    //previousTime = currentTime;
   }
 
   // Reduce transmitter commands using xmitFactor and center around 1500
   for (byte channel = ROLL; channel < THROTTLE; channel++)
-  {
-    _transmitterCommand[channel] = ((_transmitterCommandSmooth[channel] - _transmitterZero[channel]) * _xmitFactor) + _transmitterZero[channel];
-  }
+    transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
   // No xmitFactor reduction applied for throttle, mode and
   for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-  {
-    _transmitterCommand[channel] = _transmitterCommandSmooth[channel];
-  }
+    transmitterCommand[channel] = transmitterCommandSmooth[channel];
 }
 
-#endif
+
+#endif  // #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+
+
+
+
+
+
+
+

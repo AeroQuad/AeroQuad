@@ -1,5 +1,5 @@
-/*
-  AeroQuad v3.0 - March 2011
+	/*
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,16 +18,29 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include "Accelerometer_Null.h"
+#ifndef _AEROQUAD_RECEIVER_MEGA_H_
+#define _AEROQUAD_RECEIVER_MEGA_H_
 
-Accelerometer_Null::Accelerometer_Null() {
-}
+#include <WProgram.h>
+#include "Receiver.h"
 
-void Accelerometer_Null::initialize() {
-}
 
-void Accelerometer_Null::measure() {
-}
+#define RISING_EDGE 1
+#define FALLING_EDGE 0
+#define MINONWIDTH 950
+#define MAXONWIDTH 2075
+#define MINOFFWIDTH 12000
+#define MAXOFFWIDTH 24000
 
-void Accelerometer_Null::calibrate() {
-}
+class Receiver_MEGA : public Receiver {
+public:  
+  Receiver_MEGA();
+
+  void initialize(void);
+  void read(void);
+  
+};
+#endif
+
+
+

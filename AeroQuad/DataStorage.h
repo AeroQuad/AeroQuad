@@ -124,7 +124,7 @@ void initializeEEPROM(void) {
         PID[i].typePID = NOTYPE;
   }
     
-  receiver.setXmitFactor(1.0);
+  receiver->setXmitFactor(1.0);
   levelLimit = 500.0;
   levelOff = 150.0;
   gyro->setSmoothFactor(1.0);
@@ -133,11 +133,11 @@ void initializeEEPROM(void) {
   accel->setOneG(9.80665); // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver.setTransmitterSlope(channel, 1.0);
-    receiver.setTransmitterOffset(channel, 0.0);
-    receiver.setSmoothFactor(channel, 1.0);
+    receiver->setTransmitterSlope(channel, 1.0);
+    receiver->setTransmitterOffset(channel, 0.0);
+    receiver->setSmoothFactor(channel, 1.0);
   }
-  receiver.setSmoothFactor(YAW, 0.5);
+  receiver->setSmoothFactor(YAW, 0.5);
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -251,16 +251,16 @@ void writeEEPROM(void){
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(levelLimit, LEVELLIMIT_ADR);
   writeFloat(levelOff, LEVELOFF_ADR);
-  writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
+  writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    writeFloat(receiver.getTransmitterSlope(channel),  offset+0);
-    writeFloat(receiver.getTransmitterOffset(channel), offset+4);
-    writeFloat(receiver.getSmoothFactor(channel),      offset+8);
+    writeFloat(receiver->getTransmitterSlope(channel),  offset+0);
+    writeFloat(receiver->getTransmitterOffset(channel), offset+4);
+    writeFloat(receiver->getSmoothFactor(channel),      offset+8);
   }
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
@@ -316,5 +316,16 @@ void storeSensorsZeroToEEPROM(void) {
   writeFloat(accel->getZero(YAXIS), ACCEL_YAXIS_ZERO_ADR);
   writeFloat(accel->getZero(ZAXIS), ACCEL_ZAXIS_ZERO_ADR);
   writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
+}
+
+void initReceiverFromEEPROM(void) {
+  receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
+
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
+    receiver->setTransmitterSlope(channel,readFloat(offset+0));
+    receiver->setTransmitterOffset(channel,readFloat(offset+4));
+    receiver->setSmoothFactor(channel,readFloat(offset+8));
+  }
 }
 

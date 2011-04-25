@@ -58,7 +58,7 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,7 +110,6 @@
 #include "PID.h"
 #include <AQMath.h>
 #include <APM_ADC.h>
-#include "Receiver.h"
 #include "Motors.h"
 
 // Create objects defined from Configuration Section above
@@ -128,7 +127,11 @@
   Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
-  Receiver_AeroQuad receiver;
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motor declaration
   Motors_PWM motors;
   
@@ -172,7 +175,11 @@
   Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
-  Receiver_AeroQuad receiver;
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motor declaration
   Motors_PWM motors;
   
@@ -216,7 +223,11 @@
   Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
-  Receiver_AeroQuad receiver;
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+  
   // Motors declaration
   Motors_PWMtimer motors;
   
@@ -276,8 +287,13 @@
   #include <Accelerometer_ADXL345.h>
   Accelerometer_ADXL345 accelSpecific;
   Accelerometer *accel = &accelSpecific;
+  
   // Receiver declaration
-  Receiver_AeroQuad receiver;
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motors declaration
   Motors_PWMtimer motors;
   
@@ -329,7 +345,11 @@
   Accelerometer *accel = &accelSpecific;
 
   // Reveiver declaration
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver.h>
+  #include <Receiver_MEGA.h>
+  Receiver_MEGA receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+  
   // Motor declaration
   Motors_PWM motors;
   
@@ -372,7 +392,11 @@
   Accelerometer *accel = &accelSpecific;
 
   // Receiver Declaration
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver.h>
+  #include <Receiver_MEGA.h>
+  Receiver_MEGA receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motors declaration
   Motors_PWMtimer motors;
 
@@ -431,7 +455,12 @@
   Accelerometer *accel = &accelSpecific;
 
   // Receiver Declaration
-  Receiver_ArduCopter receiver;
+  #include <Receiver.h>
+  #include <Receiver_APM.h>
+  Receiver_APM receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
+  
   // Motor Declaration
   Motors_ArduCopter motors;
   
@@ -489,7 +518,11 @@
   Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
-  Receiver_AeroQuad receiver;
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motor declaration
   Motors_PWM motors;
   
@@ -540,7 +573,11 @@
   Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver.h>
+  #include <Receiver_MEGA.h>
+  Receiver_MEGA receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motors declaration
   Motors_PWM motors;
   
@@ -587,7 +624,11 @@
   Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
-  Receiver_AeroQuadMega receiver;
+  #include <Receiver.h>
+  #include <Receiver_MEGA.h>
+  Receiver_MEGA receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motors declaration
   Motors_PWM motors;
   
@@ -647,7 +688,11 @@
   Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
-  Receiver_ArduCopter receiver;
+  #include <Receiver.h>
+  #include <Receiver_APM.h>
+  Receiver_APM receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+
   // Motors declaration
   Motors_ArduCopter motors;
   
@@ -766,7 +811,10 @@ void setup() {
   motors.initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON) receiver.initialize(); // defined in Received.h
+  if (receiverLoop == ON) {
+    receiver->initialize();
+    initReceiverFromEEPROM();
+  }
        
   // Initialize sensors
   // If sensors have a common initialization routine

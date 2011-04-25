@@ -22,14 +22,14 @@
 // for setting up AeroQuad modes such as motor arming and disarming
 
 void readPilotCommands() {
-  receiver.read();
+  receiver->read();
   // Read quad configuration commands from transmitter when throttle down
-  if (receiver.getRaw(THROTTLE) < MINCHECK) {
+  if (receiver->getRaw(THROTTLE) < MINCHECK) {
     zeroIntegralError();
     throttleAdjust = 0;
-    //receiver.adjustThrottle(throttleAdjust);
+    //receiver->adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
-    if (receiver.getRaw(YAW) < MINCHECK && armed == ON) {
+    if (receiver->getRaw(YAW) < MINCHECK && armed == ON) {
       armed = OFF;
       motors.commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -37,7 +37,7 @@ void readPilotCommands() {
       #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((receiver.getRaw(YAW) < MINCHECK) && (receiver.getRaw(ROLL) > MAXCHECK) && (receiver.getRaw(PITCH) < MINCHECK)) {
+    if ((receiver->getRaw(YAW) < MINCHECK) && (receiver->getRaw(ROLL) > MAXCHECK) && (receiver->getRaw(PITCH) < MINCHECK)) {
       gyro->calibrate(); // defined in Gyro.h
       accel->calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
@@ -49,7 +49,7 @@ void readPilotCommands() {
       //#endif
     }   
     // Arm motors (left stick lower right corner)
-    if (receiver.getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
+    if (receiver->getRaw(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -61,24 +61,24 @@ void readPilotCommands() {
       //altitude.measureGround();
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiver.getRaw(YAW) > MINCHECK) safetyCheck = ON; 
+    if (receiver->getRaw(YAW) > MINCHECK) safetyCheck = ON; 
   }
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
-  if (receiver.getRaw(THROTTLE) < 1300) {
-    receiver.setTransmitterTrim(ROLL, receiver.getRaw(ROLL));
-    receiver.setTransmitterTrim(PITCH, receiver.getRaw(PITCH));
-    receiver.setTransmitterTrim(YAW, receiver.getRaw(YAW));
-    //receiver.setZero(ROLL, receiver.getRaw(ROLL));
-    //receiver.setZero(PITCH, receiver.getRaw(PITCH));
-    //receiver.setZero(YAW, receiver.getRaw(YAW));
+  if (receiver->getRaw(THROTTLE) < 1300) {
+    receiver->setTransmitterTrim(ROLL, receiver->getRaw(ROLL));
+    receiver->setTransmitterTrim(PITCH, receiver->getRaw(PITCH));
+    receiver->setTransmitterTrim(YAW, receiver->getRaw(YAW));
+    //receiver->setZero(ROLL, receiver->getRaw(ROLL));
+    //receiver->setZero(PITCH, receiver->getRaw(PITCH));
+    //receiver->setZero(YAW, receiver->getRaw(YAW));
   }
   
   #ifdef AeroQuad_Mini
     flightMode = ACRO;
   #else
     // Check Mode switch for Acro or Stable
-    if (receiver.getRaw(MODE) > 1500) {
+    if (receiver->getRaw(MODE) > 1500) {
       if (flightMode == ACRO) {
         #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
           digitalWrite(LED2PIN, HIGH);
@@ -108,11 +108,11 @@ void readPilotCommands() {
    #endif
   
   #ifdef AltitudeHold
-   if (receiver.getRaw(AUX) < 1750) {
+   if (receiver->getRaw(AUX) < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
          holdAltitude = altitude.getData();
-         holdThrottle = receiver.getData(THROTTLE);
+         holdThrottle = receiver->getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
          storeAltitude = OFF;

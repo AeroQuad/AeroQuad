@@ -27,13 +27,13 @@
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motors.setMotorAxisCommand(ROLL, updatePID(receiver.getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
-    motors.setMotorAxisCommand(PITCH, updatePID(receiver.getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
+    motors.setMotorAxisCommand(ROLL, updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
+    motors.setMotorAxisCommand(PITCH, updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
   }
   else {
     
-  float rollAttitudeCmd = updatePID((receiver.getData(ROLL) - receiver.getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
 //  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
@@ -92,8 +92,8 @@ void processHeading(void)
     if (heading >= (setHeading + 180)) relativeHeading -= 360;
 
     // Apply heading hold only when throttle high enough to start flight
-    if (receiver.getData(THROTTLE) > MINCHECK ) { 
-      if ((receiver.getData(YAW) > (MIDCOMMAND + 25)) || (receiver.getData(YAW) < (MIDCOMMAND - 25))) {
+    if (receiver->getData(THROTTLE) > MINCHECK ) { 
+      if ((receiver->getData(YAW) > (MIDCOMMAND + 25)) || (receiver->getData(YAW) < (MIDCOMMAND - 25))) {
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
         headingHold = 0;
@@ -130,7 +130,7 @@ void processHeading(void)
     }
   }
   // NEW SI Version
-  commandedYaw = constrain(receiver.getSIData(YAW) + radians(headingHold), -PI, PI);
+  commandedYaw = constrain(receiver->getSIData(YAW) + radians(headingHold), -PI, PI);
   motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]));
   // uses flightAngle unbias rate
   //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
@@ -151,27 +151,27 @@ void processAltitudeHold(void)
     throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
-    if (abs(holdThrottle - receiver.getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
+    if (abs(holdThrottle - receiver->getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
       altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
-      if (receiver.getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+      if (receiver->getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
         holdAltitude += 0.01;
       }
-      if (receiver.getData(THROTTLE) < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+      if (receiver->getData(THROTTLE) < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
         holdAltitude -= 0.01;
       }
     }
   }
   else {
     // Altitude hold is off, get throttle from receiver
-    holdThrottle = receiver.getData(THROTTLE);
+    holdThrottle = receiver->getData(THROTTLE);
     throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
   }
   // holdThrottle set in FlightCommand.pde if altitude hold is on
   throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-  throttle = receiver.getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
+  throttle = receiver->getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
 }
 
@@ -183,14 +183,14 @@ void processMinMaxMotorCommand(void)
   // Prevents too little power applied to motors during hard manuevers
   // Also provides even motor power on both sides if limit encountered
   if ((motors.getMotorCommand(FRONT) <= MINTHROTTLE) || (motors.getMotorCommand(REAR) <= MINTHROTTLE)){
-    delta = receiver.getData(THROTTLE) - MINTHROTTLE;
-    motors.setMaxCommand(RIGHT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
-    motors.setMaxCommand(LEFT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
+    motors.setMaxCommand(RIGHT, constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    motors.setMaxCommand(LEFT, constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
   }
   else if ((motors.getMotorCommand(FRONT) >= MAXCOMMAND) || (motors.getMotorCommand(REAR) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver.getData(THROTTLE);
-    motors.setMinCommand(RIGHT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
-    motors.setMinCommand(LEFT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    delta = MAXCOMMAND - receiver->getData(THROTTLE);
+    motors.setMinCommand(RIGHT, constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    motors.setMinCommand(LEFT, constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
   }     
   else {
     motors.setMaxCommand(RIGHT, MAXCOMMAND);
@@ -200,14 +200,14 @@ void processMinMaxMotorCommand(void)
   }
 
   if ((motors.getMotorCommand(LEFT) <= MINTHROTTLE) || (motors.getMotorCommand(RIGHT) <= MINTHROTTLE)){
-    delta = receiver.getData(THROTTLE) - MINTHROTTLE;
-    motors.setMaxCommand(FRONT, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
-    motors.setMaxCommand(REAR, constrain(receiver.getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
+    motors.setMaxCommand(FRONT, constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
+    motors.setMaxCommand(REAR, constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK));
   }
   else if ((motors.getMotorCommand(LEFT) >= MAXCOMMAND) || (motors.getMotorCommand(RIGHT) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver.getData(THROTTLE);
-    motors.setMinCommand(FRONT, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
-    motors.setMinCommand(REAR, constrain(receiver.getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    delta = MAXCOMMAND - receiver->getData(THROTTLE);
+    motors.setMinCommand(FRONT, constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
+    motors.setMinCommand(REAR, constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND));
   }     
   else {
     motors.setMaxCommand(FRONT, MAXCOMMAND);
@@ -223,25 +223,25 @@ void processMinMaxMotorCommand(void)
 void processHardManuevers()
 {
 #ifdef XConfig    // Fix for + mode hardmanuevers
-  if (receiver.getRaw(ROLL) < MINCHECK) {
+  if (receiver->getRaw(ROLL) < MINCHECK) {
     motors.setMaxCommand(FRONT, minAcro);
     motors.setMaxCommand(REAR, MAXCOMMAND);
     motors.setMaxCommand(LEFT, minAcro);
     motors.setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {
+  else if (receiver->getRaw(ROLL) > MAXCHECK) {
     motors.setMaxCommand(FRONT, MAXCOMMAND);
     motors.setMaxCommand(REAR, minAcro);
     motors.setMaxCommand(LEFT, MAXCOMMAND);
     motors.setMaxCommand(RIGHT, minAcro);
   }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {
+  else if (receiver->getRaw(PITCH) < MINCHECK) {
     motors.setMaxCommand(FRONT, MAXCOMMAND);
     motors.setMaxCommand(REAR, minAcro);
     motors.setMaxCommand(LEFT, minAcro);
     motors.setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {
+  else if (receiver->getRaw(PITCH) > MAXCHECK) {
     motors.setMaxCommand(FRONT, minAcro);
     motors.setMaxCommand(REAR, MAXCOMMAND);
     motors.setMaxCommand(LEFT, MAXCOMMAND);
@@ -249,19 +249,19 @@ void processHardManuevers()
   }
 #endif
 #ifdef plusConfig
-  if (receiver.getRaw(ROLL) < MINCHECK) {
+  if (receiver->getRaw(ROLL) < MINCHECK) {
     motors.setMinCommand(LEFT, minAcro);
     motors.setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {
+  else if (receiver->getRaw(ROLL) > MAXCHECK) {
     motors.setMaxCommand(LEFT, MAXCOMMAND);
     motors.setMinCommand(RIGHT, minAcro);
   }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {
+  else if (receiver->getRaw(PITCH) < MINCHECK) {
     motors.setMaxCommand(FRONT, MAXCOMMAND);
     motors.setMinCommand(REAR, minAcro);
   }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {
+  else if (receiver->getRaw(PITCH) > MAXCHECK) {
     motors.setMinCommand(FRONT, minAcro);
     motors.setMaxCommand(REAR, MAXCOMMAND);
   }
@@ -305,7 +305,7 @@ void processFlightControlXMode(void) {
   }
 
   // If throttle in minimum position, don't apply yaw
-  if (receiver.getData(THROTTLE) < MINCHECK) {
+  if (receiver->getData(THROTTLE) < MINCHECK) {
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       motors.setMotorCommand(motor, MINTHROTTLE);
     }
@@ -358,7 +358,7 @@ void processFlightControlPlusMode(void) {
   }
 
   // If throttle in minimum position, don't apply yaw
-  if (receiver.getData(THROTTLE) < MINCHECK) {
+  if (receiver->getData(THROTTLE) < MINCHECK) {
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       motors.setMotorCommand(motor, MINTHROTTLE);
     }
