@@ -92,24 +92,24 @@ float smoothHeading;
 
 
 // Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-#if defined(plusConfig) || defined(XConfig)
-  #define LASTMOTOR 4
-#endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#endif
+//#define FRONT 0
+//#define REAR 1
+//#define RIGHT 2
+//#define LEFT 3
+//#define MOTORID1 0		
+//#define MOTORID2 1		
+//#define MOTORID3 2		
+//#define MOTORID4 3		
+//#define MOTORID5 4		
+//#define MOTORID6 5
+//#define MINCOMMAND 1000
+//#define MAXCOMMAND 2000
+//#if defined(plusConfig) || defined(XConfig)
+//  #define LASTMOTOR 4
+//#endif
+//#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+//  #define LASTMOTOR 6
+//#endif
 
 // Analog Reference Value
 // This value provided from Configurator

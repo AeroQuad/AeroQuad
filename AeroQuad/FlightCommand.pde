@@ -31,7 +31,7 @@ void readPilotCommands() {
     // Disarm motors (left stick lower left corner)
     if (receiver->getRaw(YAW) < MINCHECK && armed == ON) {
       armed = OFF;
-      motors.commandAllMotors(MINCOMMAND);
+      motors->commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       digitalWrite(LED_Red, LOW);
       #endif
@@ -42,7 +42,7 @@ void readPilotCommands() {
       accel->calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
       zeroIntegralError();
-      motors.pulseMotors(3);
+      motors->pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
       //#if defined(BattMonitor) && defined(ArduCopter)
       //  ledCW(); ledCW(); ledCW();
@@ -56,7 +56,7 @@ void readPilotCommands() {
       digitalWrite(LED_Red, HIGH);
       #endif
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setMinCommand(motor, MINTHROTTLE);
+        motors->setMinCommand(motor, MINTHROTTLE);
       //   delay(100);
       //altitude.measureGround();
     }

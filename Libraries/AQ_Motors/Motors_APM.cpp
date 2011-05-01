@@ -1,33 +1,31 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
-  www.AeroQuad.com
+  AeroQuad v3.0 - April 2011
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
+ 
+  This program is free software: you can redistribute it and/or modify 
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version. 
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  This program is distributed in the hope that it will be useful, 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+  GNU General Public License for more details. 
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License 
+  along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#include "APMMotors.h"
+#include "Motors_APM.h"
 
-APMMotors::APMMotors()
-{
+Motors_APM::Motors_APM() {
 }
 
-void APMMotors::initialize() 
-{
+void Motors_APM::initialize() {
   // Init PWM Timer 1
   //pinMode(11,OUTPUT); //     (PB5/OC1A)
   pinMode(12,OUTPUT); //OUT2 (PB6/OC1B)
@@ -85,20 +83,18 @@ void APMMotors::initialize()
   commandAllMotors(1000);
 }
 
-void APMMotors::write() 
-{
-  OCR1B = _motorCommand[FRONT] * 2;
-  OCR1C = _motorCommand[REAR] * 2;
-  OCR5B = _motorCommand[RIGHT] * 2;
-  OCR5C = _motorCommand[LEFT] * 2;
+void Motors_APM::write() {
+  OCR1B = motorCommand[FRONT] * 2;
+  OCR1C = motorCommand[REAR] * 2;
+  OCR5B = motorCommand[RIGHT] * 2;
+  OCR5C = motorCommand[LEFT] * 2;
 }
 
-void APMMotors::commandAllMotors(int motorCommand) 
-{   // Sends commands to all motors
-  OCR1B = motorCommand * 2;
-  OCR1C = motorCommand * 2;
-  OCR5B = motorCommand * 2;
-  OCR5C = motorCommand * 2;
+void Motors_APM::commandAllMotors(int command) {
+  OCR1B = command * 2;
+  OCR1C = command * 2;
+  OCR5B = command * 2;
+  OCR5C = command * 2;
 }
 
 #endif

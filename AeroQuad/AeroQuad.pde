@@ -33,12 +33,12 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -58,7 +58,7 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,7 +110,6 @@
 #include "PID.h"
 #include <AQMath.h>
 #include <APM_ADC.h>
-#include "Motors.h"
 
 // Create objects defined from Configuration Section above
 #ifdef AeroQuad_v1
@@ -133,7 +132,10 @@
   Receiver *receiver = &receiverSpecific;
 
   // Motor declaration
-  Motors_PWM motors;
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -181,7 +183,10 @@
   Receiver *receiver = &receiverSpecific;
 
   // Motor declaration
-  Motors_PWM motors;
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -228,8 +233,11 @@
   Receiver_328p receiverSpecific;
   Receiver *receiver = &receiverSpecific;
   
-  // Motors declaration
-  Motors_PWMtimer motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_PWM_Timer.h>
+  Motors_PWM_Timer motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -294,8 +302,11 @@
   Receiver_328p receiverSpecific;
   Receiver *receiver = &receiverSpecific;
 
-  // Motors declaration
-  Motors_PWMtimer motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_PWM_Timer.h>
+  Motors_PWM_Timer motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -351,7 +362,10 @@
   Receiver *receiver = &receiverSpecific;
   
   // Motor declaration
-  Motors_PWM motors;
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -397,8 +411,11 @@
   Receiver_MEGA receiverSpecific;
   Receiver *receiver = &receiverSpecific;
 
-  // Motors declaration
-  Motors_PWMtimer motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_PWM_Timer.h>
+  Motors_PWM_Timer motorsSpecific;
+  Motors *motors = &motorsSpecific;
 
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -462,7 +479,10 @@
 
   
   // Motor Declaration
-  Motors_ArduCopter motors;
+  #include <Motors.h>
+  #include <Motors_APM.h>
+  Motors_APM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -524,7 +544,10 @@
   Receiver *receiver = &receiverSpecific;
 
   // Motor declaration
-  Motors_PWM motors;
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -578,8 +601,11 @@
   Receiver_MEGA receiverSpecific;
   Receiver *receiver = &receiverSpecific;
 
-  // Motors declaration
-  Motors_PWM motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -629,8 +655,11 @@
   Receiver_MEGA receiverSpecific;
   Receiver *receiver = &receiverSpecific;
 
-  // Motors declaration
-  Motors_PWM motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -693,8 +722,11 @@
   Receiver_APM receiverSpecific;
   Receiver *receiver = &receiverSpecific;
 
-  // Motors declaration
-  Motors_ArduCopter motors;
+  // Motor declaration
+  #include <Motors.h>
+  #include <Motors_APM.h>
+  Motors_APM motorsSpecific;
+  Motors *motors = &motorsSpecific;
   
   // Kinematics declaration
   #include "FlightAngle.h"
@@ -808,7 +840,7 @@ void setup() {
   initPlatform();
   
   // Configure motors
-  motors.initialize(); // defined in Motors.h
+  motors->initialize(); // defined in Motors.h
 
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON) {

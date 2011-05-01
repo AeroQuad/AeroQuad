@@ -140,7 +140,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 5;
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setRemoteCommand(motor, readFloatSerial());
+        motors->setRemoteCommand(motor, readFloatSerial());
       break;
     case 'a': // fast telemetry transfer
       if (readFloatSerial() == 1.0)
@@ -361,10 +361,10 @@ void sendSerialTelemetry() {
       PrintValueComma(0);
     #endif
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motors.getMotorAxisCommand(axis));
+      PrintValueComma(motors->getMotorAxisCommand(axis));
     }
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-      PrintValueComma(motors.getMotorCommand(motor));
+      PrintValueComma(motors->getMotorCommand(motor));
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       if (axis == ROLL)
@@ -403,9 +403,9 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
-    PrintValueComma(motors.getMotorAxisCommand(ROLL));
-    PrintValueComma(motors.getMotorAxisCommand(PITCH));
-    Serial.println(motors.getMotorAxisCommand(YAW));
+    PrintValueComma(motors->getMotorAxisCommand(ROLL));
+    PrintValueComma(motors->getMotorAxisCommand(PITCH));
+    Serial.println(motors->getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < AUX; channel++) {
@@ -435,9 +435,9 @@ void sendSerialTelemetry() {
     break;
   case '6': // Report remote commands
     for (byte motor = FRONT; motor < LEFT; motor++) {
-      PrintValueComma(motors.getRemoteCommand(motor));
+      PrintValueComma(motors->getRemoteCommand(motor));
     }
-    Serial.println(motors.getRemoteCommand(LEFT));
+    Serial.println(motors->getRemoteCommand(LEFT));
     break;
   case '!': // Send flight software version
     Serial.println(VERSION, 1);
