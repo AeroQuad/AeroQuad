@@ -74,27 +74,23 @@ void readPilotCommands() {
     //receiver->setZero(YAW, receiver->getRaw(YAW));
   }
   
-  #ifdef AeroQuad_Mini
-    flightMode = ACRO;
-  #else
-    // Check Mode switch for Acro or Stable
-    if (receiver->getRaw(MODE) > 1500) {
-      if (flightMode == ACRO) {
-        #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-          digitalWrite(LED2PIN, HIGH);
-        #endif
-        zeroIntegralError();
-      }
-      flightMode = STABLE;
-   }
-    else {
+  // Check Mode switch for Acro or Stable
+  if (receiver->getRaw(MODE) > 1500) {
+    if (flightMode == ACRO) {
       #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-        if (flightMode == STABLE)
-          digitalWrite(LED2PIN, LOW);
+        digitalWrite(LED2PIN, HIGH);
       #endif
-      flightMode = ACRO;
+      zeroIntegralError();
     }
-  #endif
+    flightMode = STABLE;
+ }
+  else {
+    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+      if (flightMode == STABLE)
+        digitalWrite(LED2PIN, LOW);
+    #endif
+    flightMode = ACRO;
+  }
   
    #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       if (flightMode == ACRO) {

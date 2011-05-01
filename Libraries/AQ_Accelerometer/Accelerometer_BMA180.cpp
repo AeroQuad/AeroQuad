@@ -35,16 +35,16 @@ void Accelerometer_BMA180::initialize(void) {
   if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) // page 52 of datasheet
     Serial.println("Accelerometer not found!");
 	
-  updateRegisterI2C(ACCEL_ADDRESS, 0x10, 0xB6); //reset device
-  delay(10);  //sleep 10 ms after reset (page 25)
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_RESET_REGISTER, ACCEL_TRIGER_RESET_VALUE); 					//reset device
+  delay(10);  																							//sleep 10 ms after reset (page 25)
 
   // In datasheet, summary register map is page 21
   // Low pass filter settings is page 27
   // Range settings is page 28
-  updateRegisterI2C(ACCEL_ADDRESS, 0x0D, 0x10); //enable writing to control registers
-  sendByteI2C(ACCEL_ADDRESS, 0x20); // register bw_tcs (bits 4-7)
-  byte data = readByteI2C(ACCEL_ADDRESS); // get current register value
-  updateRegisterI2C(ACCEL_ADDRESS, 0x20, data & 0x0F); // set low pass filter to 10Hz (value = 0000xxxx)
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_ENABLE_WRITE_CONTROL_REGISTER, ACCEL_CONTROL_REGISTER); 		//enable writing to control registers
+  sendByteI2C(ACCEL_ADDRESS, ACCEL_BW_TCS); 															// register bw_tcs (bits 4-7)
+  const byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_10HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
 
   // From page 27 of BMA180 Datasheet
   //  1.0g = 0.13 mg/LSB
@@ -54,17 +54,17 @@ void Accelerometer_BMA180::initialize(void) {
   //  4.0g = 0.50 mg/LSB
   //  8.0g = 0.99 mg/LSB
   // 16.0g = 1.98 mg/LSB
-  sendByteI2C(ACCEL_ADDRESS, 0x35); // register offset_lsb1 (bits 1-3)
+  sendByteI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER); 													// register offset_lsb1 (bits 1-3)
   data = readByteI2C(ACCEL_ADDRESS);
   data &= 0xF1;
   data |= 0x04; // Set range select bits for +/-2g
-  updateRegisterI2C(ACCEL_ADDRESS, 0x35, data);	
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER, data);	
 }
 
   
 void Accelerometer_BMA180::measure(void) {
   Wire.beginTransmission(ACCEL_ADDRESS);
-  Wire.send(0x02);
+  Wire.send(ACCEL_READ_ROLL_ADDRESS);
   Wire.endTransmission();
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
@@ -83,9 +83,9 @@ void Accelerometer_BMA180::calibrate(void) {
   int dataAddress;
     
   for (byte calAxis = XAXIS; calAxis < ZAXIS; calAxis++) {
-    if (calAxis == XAXIS) dataAddress = 0x02;
-    if (calAxis == YAXIS) dataAddress = 0x04;
-    if (calAxis == ZAXIS) dataAddress = 0x06;
+    if (calAxis == XAXIS) dataAddress = ACCEL_READ_ROLL_ADDRESS;
+    if (calAxis == YAXIS) dataAddress = ACCEL_READ_PITCH_ADDRESS;
+    if (calAxis == ZAXIS) dataAddress = ACCEL_READ_YAW_ADDRESS;
     for (int i=0; i<FINDZERO; i++) {
       sendByteI2C(ACCEL_ADDRESS, dataAddress);
       findZero[i] = readReverseWordI2C(ACCEL_ADDRESS) >> 2; // last two bits are not part of measurement

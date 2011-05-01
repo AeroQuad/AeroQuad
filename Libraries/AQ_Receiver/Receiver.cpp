@@ -34,11 +34,12 @@ Receiver::Receiver() {
     transmitterCommandSmooth[channel] = 1.0;
   for (byte channel = ROLL; channel < THROTTLE; channel++)
     transmitterZero[channel] = 1500;
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
+	
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
     mTransmitter[channel] = 1;
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
     bTransmitter[channel] = 1;
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
     transmitterSmooth[channel] = 1;
 }
 
