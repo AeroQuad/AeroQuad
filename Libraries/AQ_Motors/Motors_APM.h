@@ -32,7 +32,7 @@ public:
 
   Motors_APM();
 	
-  void initialize();
+  void initialize(NB_Motors numbers = FOUR_Motors);
   void write();
   void commandAllMotors(int command);
   

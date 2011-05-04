@@ -23,22 +23,31 @@
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
+int motorAxisCommandRoll = 0;
+int motorAxisCommandPitch = 0;
+int motorAxisCommandYaw = 0;
+
+
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motors->setMotorAxisCommand(ROLL, updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
-    motors->setMotorAxisCommand(PITCH, updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
+//    motors->setMotorAxisCommand(ROLL, updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
+//    motors->setMotorAxisCommand(PITCH, updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
+    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]);
   }
   else {
     
   float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
   float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
-  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
+//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
+//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
 //  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
 //  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
-
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
   }
 }
 
@@ -58,7 +67,7 @@ void processCalibrateESC(void)
     break;
   case 5:
     for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, constrain(motors->getRemoteCommand(motor), 1000, 1200));
+      motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), 1000, 1200));
     safetyCheck = ON;
     break;
   default:
@@ -131,7 +140,8 @@ void processHeading(void)
   }
   // NEW SI Version
   commandedYaw = constrain(receiver->getSIData(YAW) + radians(headingHold), -PI, PI);
-  motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]));
+//  motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]));
+  motorAxisCommandYaw = updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]);
   // uses flightAngle unbias rate
   //motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }
@@ -285,10 +295,10 @@ void processFlightControlXMode(void) {
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-    motors->setMotorCommand(FRONT, throttle - motors->getMotorAxisCommand(PITCH) + motors->getMotorAxisCommand(ROLL) - motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(RIGHT, throttle - motors->getMotorAxisCommand(PITCH) - motors->getMotorAxisCommand(ROLL) + motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(LEFT, throttle + motors->getMotorAxisCommand(PITCH) + motors->getMotorAxisCommand(ROLL) + motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(REAR, throttle + motors->getMotorAxisCommand(PITCH) - motors->getMotorAxisCommand(ROLL) - motors->getMotorAxisCommand(YAW));
+    motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
+    motors->setMotorCommand(RIGHT, throttle - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
+    motors->setMotorCommand(LEFT, throttle + motorAxisCommandPitch + motorAxisCommandRoll + motorAxisCommandYaw);
+    motors->setMotorCommand(REAR, throttle + motorAxisCommandPitch - motorAxisCommandRoll - motorAxisCommandYaw);
   } 
 
   // *********************** process min max motor command *******************
@@ -338,10 +348,10 @@ void processFlightControlPlusMode(void) {
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
-    motors->setMotorCommand(FRONT, throttle - motors->getMotorAxisCommand(PITCH) - motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(REAR, throttle + motors->getMotorAxisCommand(PITCH) - motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(RIGHT, throttle - motors->getMotorAxisCommand(ROLL) + motors->getMotorAxisCommand(YAW));
-    motors->setMotorCommand(LEFT, throttle + motors->getMotorAxisCommand(ROLL) + motors->getMotorAxisCommand(YAW));
+    motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - motorAxisCommandYaw);
+    motors->setMotorCommand(REAR, throttle + motorAxisCommandPitch - motorAxisCommandYaw);
+    motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll + motorAxisCommandYaw);
+    motors->setMotorCommand(LEFT, throttle + motorAxisCommandRoll + motorAxisCommandYaw);
   } 
 
   // *********************** process min max motor command *******************

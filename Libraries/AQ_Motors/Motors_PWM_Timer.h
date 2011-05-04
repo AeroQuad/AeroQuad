@@ -28,13 +28,11 @@
 
 
 class Motors_PWM_Timer : public Motors {
-private:
-  NB_Motors nbMotors;
 public:
 
-  Motors_PWM_Timer(NB_Motors nbMotors = FOUR_Motors);
+  Motors_PWM_Timer();
 	
-  void initialize();
+  void initialize(NB_Motors nbMotors = FOUR_Motors);
   void write();
   void commandAllMotors(int command);
   

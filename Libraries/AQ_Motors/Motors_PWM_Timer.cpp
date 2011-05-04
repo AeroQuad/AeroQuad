@@ -55,15 +55,14 @@
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
-Motors_PWM_Timer::Motors_PWM_Timer(NB_Motors nbMotors) {
-  this->nbMotors = nbMotors;
+Motors_PWM_Timer::Motors_PWM_Timer() {
 }
 
-void Motors_PWM_Timer::initialize() {
+void Motors_PWM_Timer::initialize(NB_Motors numbers) {
 
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
-    if (nbMotors == FOUR_Motors) { 
+    if (numbers == FOUR_Motors) { 
       DDRH = DDRH | B00001000;                                  // Set port to output PH3
 	} 
     else {  // for 6 or 8 motors
@@ -81,7 +80,7 @@ void Motors_PWM_Timer::initialize() {
     TCCR3A = (1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1);  // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us
     ICR3 = PWM_COUNTER_PERIOD;                               // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
-    if (nbMotors == FOUR_Motors) {
+    if (numbers == FOUR_Motors) {
       // Init PWM Timer 4
       TCCR4A = (1<<WGM41)|(1<<COM4A1);
       TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);

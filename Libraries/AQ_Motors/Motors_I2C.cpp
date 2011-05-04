@@ -31,7 +31,7 @@ Motors_I2C::Motors_I2C() {
   bMotorCommand = -255.0;
 }
 
-void Motors_I2C::initialize() {
+void Motors_I2C::initialize(NB_Motors numbers) {
   sendByteI2C(FRONTMOTORID, 0);
   sendByteI2C(REARMOTORID,  0);
   sendByteI2C(RIGHTMOTORID, 0);

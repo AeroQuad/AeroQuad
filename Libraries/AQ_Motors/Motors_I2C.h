@@ -41,7 +41,7 @@ public:
 
   Motors_I2C();
 	
-  void initialize();
+  void initialize(NB_Motors numbers = FOUR_Motors);
   void write();
   void commandAllMotors(int command);
   

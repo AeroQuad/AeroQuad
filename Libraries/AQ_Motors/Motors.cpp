@@ -50,14 +50,6 @@ int Motors::getMaxCommand(byte motor) {
   return maxCommand[motor];
 }
 
-void Motors::setMotorAxisCommand(byte axis, int command) {
-  motorAxisCommand[axis] = command;
-}
-
-int Motors::getMotorAxisCommand(byte axis) {
-  return motorAxisCommand[axis];
-}
-
 void Motors::setMotorCommand(byte motor, int command) {
   motorCommand[motor] = command;
 }
@@ -66,13 +58,6 @@ int Motors::getMotorCommand(byte motor) {
   return motorCommand[motor];
 }
 
-void Motors::setRemoteCommand(byte motor, int command) {
-  remoteCommand[motor] = command;
-}
-
-int Motors::getRemoteCommand(byte motor) {
-  return remoteCommand[motor];
-}
 
 
 

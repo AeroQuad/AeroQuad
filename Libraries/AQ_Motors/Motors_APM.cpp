@@ -25,7 +25,7 @@
 Motors_APM::Motors_APM() {
 }
 
-void Motors_APM::initialize() {
+void Motors_APM::initialize(NB_Motors numbers) {
   // Init PWM Timer 1
   //pinMode(11,OUTPUT); //     (PB5/OC1A)
   pinMode(12,OUTPUT); //OUT2 (PB6/OC1B)

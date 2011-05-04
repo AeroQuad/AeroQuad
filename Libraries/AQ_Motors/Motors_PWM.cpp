@@ -25,7 +25,7 @@
 Motors_PWM::Motors_PWM() {
 }
 
-void Motors_PWM::initialize() {
+void Motors_PWM::initialize(NB_Motors numbers) {
   commandAllMotors(1000);
 }
 

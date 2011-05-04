@@ -51,10 +51,8 @@ enum NB_Motors{
 
 class Motors {
 private:
-  int motorAxisCommand[3];
   int minCommand[LASTMOTOR];
   int maxCommand[LASTMOTOR];
-  int remoteCommand[LASTMOTOR];
 
 protected:
   int motorCommand[LASTMOTOR];
@@ -63,7 +61,7 @@ public:
 
   Motors();
 	
-  virtual void initialize() {}
+  virtual void initialize(NB_Motors numbers = FOUR_Motors) {}
   virtual void write() {}
   virtual void commandAllMotors(int command) {}
   
@@ -72,12 +70,8 @@ public:
   int getMinCommand(byte motor);
   void setMaxCommand(byte motor, int command);
   int getMaxCommand(byte motor);
-  void setMotorAxisCommand(byte axis, int command);
-  int getMotorAxisCommand(byte axis);
   void setMotorCommand(byte motor, int command);
   int getMotorCommand(byte motor);
-  void setRemoteCommand(byte motor, int command);
-  int getRemoteCommand(byte motor);
 };
 
 
