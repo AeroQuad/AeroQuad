@@ -29,6 +29,8 @@
 #define REAR 1
 #define RIGHT 2
 #define LEFT 3
+#define RIGHT2 4
+#define LEFT2 5
 #define MOTORID1 0		
 #define MOTORID2 1		
 #define MOTORID3 2		
@@ -38,7 +40,13 @@
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 
-#define LASTMOTOR 4
+#define LASTMOTOR 4  // 6 or 8 motors are not supported yet
+
+enum NB_Motors{
+  FOUR_Motors,
+  SIX_Motors,
+  HEIGHT_Motors
+};
 
 
 class Motors {

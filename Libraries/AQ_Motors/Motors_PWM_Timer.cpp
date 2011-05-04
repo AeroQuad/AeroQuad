@@ -55,53 +55,54 @@
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
-Motors_PWM_Timer::Motors_PWM_Timer() {
+Motors_PWM_Timer::Motors_PWM_Timer(NB_Motors nbMotors) {
+  this->nbMotors = nbMotors;
 }
 
 void Motors_PWM_Timer::initialize() {
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
-  #if defined(plusConfig) || defined(XConfig)
-    DDRH = DDRH | B00001000;                                  // Set port to output PH3
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
+    if (nbMotors == FOUR_Motors) { 
+      DDRH = DDRH | B00001000;                                  // Set port to output PH3
+	} 
+    else {  // for 6 or 8 motors
+      DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5
+    }
+  #else
+    DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3
+    DDRD = DDRD | B00001000;                                  // Set port to output PD3
   #endif
-  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5
-  #endif
-#else
-  DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3
-  DDRD = DDRD | B00001000;                                  // Set port to output PD3
-#endif
 
   commandAllMotors(1000);                                   // Initialise motors to 1000us (stopped)
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM
-  TCCR3A = (1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1);  // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
-  TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us
-  ICR3 = PWM_COUNTER_PERIOD;                               // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
-  #if defined(plusConfig) || defined(XConfig)
-    // Init PWM Timer 4
-    TCCR4A = (1<<WGM41)|(1<<COM4A1);
-    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    ICR4 = PWM_COUNTER_PERIOD;
+    TCCR3A = (1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1);  // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
+    TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us
+    ICR3 = PWM_COUNTER_PERIOD;                               // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
+    if (nbMotors == FOUR_Motors) {
+      // Init PWM Timer 4
+      TCCR4A = (1<<WGM41)|(1<<COM4A1);
+      TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+      ICR4 = PWM_COUNTER_PERIOD;
+    }
+    else {  // for 6 or 8 motors
+     // Init PWM Timer 4
+      TCCR4A = (1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1);
+      TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+      ICR4 = PWM_COUNTER_PERIOD;
+    }
+  #else
+    // Init PWM Timer 1  16 bit
+    TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
+    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);
+    ICR1 = PWM_COUNTER_PERIOD;
+    // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
+    TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
+    TCCR2B = (1<<CS22)|(1<<CS21);                            // Prescaler set to 256, that gives us a resolution of 16us
+    // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
   #endif
-  #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-    // Init PWM Timer 4
-    TCCR4A = (1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1);
-    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    ICR4 = PWM_COUNTER_PERIOD;
-  #endif
-#else
-  // Init PWM Timer 1  16 bit
-  TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
-  TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);
-  ICR1 = PWM_COUNTER_PERIOD;
-  // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
-  TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
-  TCCR2B = (1<<CS22)|(1<<CS21);                            // Prescaler set to 256, that gives us a resolution of 16us
-  // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
-#endif
 }
 
 void Motors_PWM_Timer::write() {
@@ -110,10 +111,10 @@ void Motors_PWM_Timer::write() {
     OCR3C = motorCommand[REAR]  * 2 ;
     OCR3A = motorCommand[RIGHT] * 2 ;
     OCR4A = motorCommand[LEFT]  * 2 ;
-    #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+    if (nbMotors == SIX_Motors || nbMotors == HEIGHT_Motors) {
       OCR4B = motorCommand[RIGHT2] * 2 ;
       OCR4C = motorCommand[LEFT2]  * 2 ;
-    #endif
+    }
   #else
     OCR2B = motorCommand[FRONT] / 16 ;                       // 1000-2000 to 128-256
     OCR1A = motorCommand[REAR]  * 2 ;
@@ -128,10 +129,10 @@ void Motors_PWM_Timer::commandAllMotors(int command) {
     OCR3C = command * 2 ;
     OCR3A = command * 2 ;
     OCR4A = command * 2 ;
-    #if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-      OCR4B = command * 2 ;
-      OCR4C = command * 2 ;
-    #endif
+  if (nbMotors == SIX_Motors || nbMotors == HEIGHT_Motors) {
+    OCR4B = command * 2 ;
+    OCR4C = command * 2 ;
+  }
   #else
     OCR2B = command / 16 ;
     OCR1A = command * 2 ;
