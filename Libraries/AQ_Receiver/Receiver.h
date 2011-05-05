@@ -65,7 +65,6 @@ public:
   void setTransmitterOffset(byte channel, float value);
   const float getSmoothFactor(byte channel);
   void setSmoothFactor(byte channel, float value);  
-  const int getRaw(byte channel);
   const int getTransmitterTrim(byte channel);
   void setTransmitterTrim(byte channel, int value);
   const float getSIData(byte channel);

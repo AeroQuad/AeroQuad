@@ -233,25 +233,25 @@ void processMinMaxMotorCommand(void)
 void processHardManuevers()
 {
 #ifdef XConfig    // Fix for + mode hardmanuevers
-  if (receiver->getRaw(ROLL) < MINCHECK) {
+  if (receiver->getData(ROLL) < MINCHECK) {
     motors->setMaxCommand(FRONT, minAcro);
     motors->setMaxCommand(REAR, MAXCOMMAND);
     motors->setMaxCommand(LEFT, minAcro);
     motors->setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver->getRaw(ROLL) > MAXCHECK) {
+  else if (receiver->getData(ROLL) > MAXCHECK) {
     motors->setMaxCommand(FRONT, MAXCOMMAND);
     motors->setMaxCommand(REAR, minAcro);
     motors->setMaxCommand(LEFT, MAXCOMMAND);
     motors->setMaxCommand(RIGHT, minAcro);
   }
-  else if (receiver->getRaw(PITCH) < MINCHECK) {
+  else if (receiver->getData(PITCH) < MINCHECK) {
     motors->setMaxCommand(FRONT, MAXCOMMAND);
     motors->setMaxCommand(REAR, minAcro);
     motors->setMaxCommand(LEFT, minAcro);
     motors->setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver->getRaw(PITCH) > MAXCHECK) {
+  else if (receiver->getData(PITCH) > MAXCHECK) {
     motors->setMaxCommand(FRONT, minAcro);
     motors->setMaxCommand(REAR, MAXCOMMAND);
     motors->setMaxCommand(LEFT, MAXCOMMAND);
@@ -259,19 +259,19 @@ void processHardManuevers()
   }
 #endif
 #ifdef plusConfig
-  if (receiver->getRaw(ROLL) < MINCHECK) {
+  if (receiver->getData(ROLL) < MINCHECK) {
     motors->setMinCommand(LEFT, minAcro);
     motors->setMaxCommand(RIGHT, MAXCOMMAND);
   }
-  else if (receiver->getRaw(ROLL) > MAXCHECK) {
+  else if (receiver->getData(ROLL) > MAXCHECK) {
     motors->setMaxCommand(LEFT, MAXCOMMAND);
     motors->setMinCommand(RIGHT, minAcro);
   }
-  else if (receiver->getRaw(PITCH) < MINCHECK) {
+  else if (receiver->getData(PITCH) < MINCHECK) {
     motors->setMaxCommand(FRONT, MAXCOMMAND);
     motors->setMinCommand(REAR, minAcro);
   }
-  else if (receiver->getRaw(PITCH) > MAXCHECK) {
+  else if (receiver->getData(PITCH) > MAXCHECK) {
     motors->setMinCommand(FRONT, minAcro);
     motors->setMaxCommand(REAR, MAXCOMMAND);
   }

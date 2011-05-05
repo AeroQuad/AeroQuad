@@ -28,6 +28,8 @@
 
 
 class Motors_PWM_Timer : public Motors {
+private:
+  NB_Motors numberOfMotors;
 public:
 
   Motors_PWM_Timer();

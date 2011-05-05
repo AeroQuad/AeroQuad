@@ -75,11 +75,6 @@ void Receiver::setSmoothFactor(byte channel, float value) {
   transmitterSmooth[channel] = value;
 }
 
-// returns non-smoothed non-scaled ADC data in PWM full range 1000-2000 values
-const int Receiver::getRaw(byte channel) {
-  return receiverData[channel];
-}
-
 const int Receiver::getTransmitterTrim(byte channel) {
   return transmitterTrim[channel];
 }

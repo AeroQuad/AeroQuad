@@ -415,9 +415,9 @@ void sendSerialTelemetry() {
     break;
   case 'V': // Send receiver status
     for (byte channel = ROLL; channel < AUX; channel++) {
-      PrintValueComma(receiver->getRaw(channel));
+      PrintValueComma(receiver->getData(channel));
     }
-    Serial.println(receiver->getRaw(AUX));
+    Serial.println(receiver->getData(AUX));
     break;
   case 'X': // Stop sending messages
     break;
