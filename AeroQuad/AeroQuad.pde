@@ -57,7 +57,7 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
@@ -254,8 +254,10 @@
   
   // Heading hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #include <Compass.h>
+    Compass compassSpecific;
+    Compass *compass = &compassSpecific;
+//    Magnetometer_HMC5843 compass;
   #endif
   
   // Altitude declaration
@@ -866,9 +868,9 @@ void setup() {
   
   // Flight angle estimation
   #ifdef HeadingMagHold
-    compass.initialize();
-    //setHeading = compass.getHeading();
-    flightAngle->initialize(compass.getHdgXY(XAXIS), compass.getHdgXY(YAXIS));
+    compass->initialize();
+    //setHeading = compass->getHeading();
+    flightAngle->initialize(compass->getHdgXY(XAXIS), compass->getHdgXY(YAXIS));
   #else
     flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
@@ -974,9 +976,9 @@ void loop () {
                                  accel->getMeterPerSec(XAXIS),                   \
                                  accel->getMeterPerSec(YAXIS),                   \
                                  accel->getMeterPerSec(ZAXIS),                   \
-                                 compass.getRawData(XAXIS),                      \
-                                 compass.getRawData(YAXIS),                      \
-                                 compass.getRawData(ZAXIS));
+                                 compass->getRawData(XAXIS),                      \
+                                 compass->getRawData(YAXIS),                      \
+                                 compass->getRawData(ZAXIS));
         #endif
       
         #if defined FlightAngleARG
@@ -999,8 +1001,8 @@ void loop () {
                                  accel->getMeterPerSec(YAXIS),                   \
                                  accel->getMeterPerSec(ZAXIS),                   \
                                  accel->getOneG(),                               \
-                                 compass.getHdgXY(XAXIS),                        \
-                                 compass.getHdgXY(YAXIS));
+                                 compass->getHdgXY(XAXIS),                        \
+                                 compass->getHdgXY(YAXIS));
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
@@ -1089,7 +1091,7 @@ void loop () {
 
       if (sensorLoop == ON) {
         #if defined(HeadingMagHold)
-          compass.measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
+          compass->measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
         #endif
         #if defined(BattMonitor)
           batteryMonitor.measure(armed);

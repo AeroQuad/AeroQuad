@@ -107,9 +107,9 @@ void initializeEEPROM(void) {
     altitude.setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
-    compass.setMagCal(XAXIS, 1, 0);
-    compass.setMagCal(YAXIS, 1, 0);
-    compass.setMagCal(ZAXIS, 1, 0);
+    compass->setMagCal(XAXIS, 1, 0);
+    compass->setMagCal(YAXIS, 1, 0);
+    compass->setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
 
@@ -183,9 +183,9 @@ void readEEPROM(void) {
   #endif
 
   #ifdef HeadingMagHold
-    compass.setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
-    compass.setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
-    compass.setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
+    compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -241,12 +241,12 @@ void writeEEPROM(void){
     writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
   #endif
   #ifdef HeadingMagHold
-    writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
-    writeFloat(compass.getMagMin(XAXIS), MAGXMIN_ADR);
-    writeFloat(compass.getMagMax(YAXIS), MAGYMAX_ADR);
-    writeFloat(compass.getMagMin(YAXIS), MAGYMIN_ADR);
-    writeFloat(compass.getMagMax(ZAXIS), MAGZMAX_ADR);
-    writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
+    writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
+    writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
+    writeFloat(compass->getMagMax(YAXIS), MAGYMAX_ADR);
+    writeFloat(compass->getMagMin(YAXIS), MAGYMIN_ADR);
+    writeFloat(compass->getMagMax(ZAXIS), MAGZMAX_ADR);
+    writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(levelLimit, LEVELLIMIT_ADR);

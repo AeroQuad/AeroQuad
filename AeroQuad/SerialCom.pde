@@ -112,7 +112,7 @@ void readSerialCommand() {
       storeSensorsZeroToEEPROM();
       zeroIntegralError();
 #ifdef HeadingMagHold
-      compass.initialize();
+      compass->initialize();
 #endif
 #ifdef AltitudeHold
       altitude.initialize();
@@ -160,9 +160,9 @@ void readSerialCommand() {
       break;
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
-      compass.setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
+      compass->setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
+      compass->setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
+      compass->setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
 #endif
       break;
     case '~': //  read Camera values 
@@ -319,7 +319,7 @@ void sendSerialTelemetry() {
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      //PrintValueComma(compass.getAbsoluteHeading());
+      //PrintValueComma(compass->getAbsoluteHeading());
       PrintValueComma(flightAngle->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
@@ -338,9 +338,9 @@ void sendSerialTelemetry() {
     break;
   case 'R': // Raw magnetometer data
 #if defined(HeadingMagHold)
-    PrintValueComma(compass.getRawData(XAXIS));
-    PrintValueComma(compass.getRawData(YAXIS));
-    Serial.println(compass.getRawData(ZAXIS));
+    PrintValueComma(compass->getRawData(XAXIS));
+    PrintValueComma(compass->getRawData(YAXIS));
+    Serial.println(compass->getRawData(ZAXIS));
 #else
     PrintValueComma(0);
     PrintValueComma(0);
@@ -381,7 +381,7 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       PrintValueComma(1000);
     #ifdef HeadingMagHold
-      //PrintValueComma(compass.getAbsoluteHeading());
+      //PrintValueComma(compass->getAbsoluteHeading());
       PrintValueComma(flightAngle->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
@@ -485,17 +485,17 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
-    Serial.print(compass.getMagMax(XAXIS), 2);
+    Serial.print(compass->getMagMax(XAXIS), 2);
     comma();
-    Serial.print(compass.getMagMin(XAXIS), 2);
+    Serial.print(compass->getMagMin(XAXIS), 2);
     comma();
-    Serial.print(compass.getMagMax(YAXIS), 2);
+    Serial.print(compass->getMagMax(YAXIS), 2);
     comma();
-    Serial.print(compass.getMagMin(YAXIS), 2);
+    Serial.print(compass->getMagMin(YAXIS), 2);
     comma();
-    Serial.print(compass.getMagMax(ZAXIS), 2);
+    Serial.print(compass->getMagMax(ZAXIS), 2);
     comma();
-    Serial.println(compass.getMagMin(ZAXIS), 2);
+    Serial.println(compass->getMagMin(ZAXIS), 2);
 #endif
     queryType = 'X';
     break;
@@ -606,9 +606,9 @@ void fastTelemetry(void)
        for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
        #ifdef HeadingMagHold
-           sendBinaryFloat(compass.getRawData(XAXIS));
-           sendBinaryFloat(compass.getRawData(YAXIS));
-           sendBinaryFloat(compass.getRawData(ZAXIS));
+           sendBinaryFloat(compass->getRawData(XAXIS));
+           sendBinaryFloat(compass->getRawData(YAXIS));
+           sendBinaryFloat(compass->getRawData(ZAXIS));
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
@@ -620,7 +620,7 @@ void fastTelemetry(void)
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
-         sendBinaryFloat(compass.getRawData(axis));
+         sendBinaryFloat(compass->getRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif

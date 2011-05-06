@@ -1,6 +1,6 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
-  www.AeroQuad.com
+  AeroQuad v3.0 - April 2011
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
@@ -18,54 +18,47 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+
 #include "Compass.h"
 
-Compass::Compass() {}
+#include <Axis.h>
 
-// **********************************************************************
-// The following function calls must be defined inside any new subclasses
-// **********************************************************************
-void Compass::initialize() {}
-void Compass::measure(const float rollAngle, const float pitchAngle) {}
-const int Compass::getRawData(byte) {}
-  
-// *********************************************************
-// The following functions are common between all subclasses
-// *********************************************************
-const float Compass::getData() 
-{
-  return _compass;
+Compass::Compass() {
 }
-  
-const float Compass::getHeading() 
-{
-  return _heading;
-}
-  
-const float Compass::getAbsoluteHeading() 
-{
-  return _absoluteHeading;
-}
-  
-void Compass::setMagCal(byte axis, float maxValue, float minValue) 
-{
-  _magMax[axis] = maxValue;
-  _magMin[axis] = minValue;
+
+
+void Compass::setMagCal(byte axis, float maxValue, float minValue) {
+  magMax[axis] = maxValue;
+  magMin[axis] = minValue;
   // Assume max/min is scaled to +1 and -1
   // y2 = 1, x2 = max; y1 = -1, x1 = min
   // m = (y2 - y1) / (x2 - x1)
   // m = 2 / (max - min)
-  _magScale[axis] = 2.0 / (_magMax[axis] - _magMin[axis]);
+  magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
   // b = y1 - mx1; b = -1 - (m * min)
-  _magOffset[axis] = -(_magScale[axis] * _magMin[axis]) - 1;
+  magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
 }
-  
-const float Compass::getMagMax(byte axis) 
-{
-  return _magMax[axis];
+
+const float Compass::getMagMax(byte axis) {
+  return magMax[axis];
 }
-  
-const float Compass::getMagMin(byte axis) 
-{
-  return _magMin[axis];
+
+const float Compass::getMagMin(byte axis) {
+  return magMin[axis];
 }
+
+const float Compass::getHdgXY(byte axis) {
+  if (axis == XAXIS) return hdgX;
+  if (axis == YAXIS) return hdgY;
+}
+
+const int Compass::getRawData(byte axis) {
+  if (axis == XAXIS) return measuredMagX;
+  if (axis == YAXIS) return measuredMagY;
+  if (axis == ZAXIS) return measuredMagZ;
+}
+
+
+
+
+

@@ -1,6 +1,6 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
-  www.AeroQuad.com
+  AeroQuad v3.0 - April 2011
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
@@ -18,51 +18,40 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_COMPASS_H_
-#define _AQ_COMPASS_H_
 
-#include "WProgram.h"
+#ifndef _AEROQUAD_COMPASS_H_
+#define _AEROQUAD_COMPASS_H_
 
-// Class to define sensors that can determine absolute heading
+#include <WProgram.h>
 
-// ***********************************************************************
-// ************************** Compass Class ******************************
-// ***********************************************************************
-class Compass 
-{
-private:  
-  float _magMax[3];
-  float _magMin[3];
+class Compass {
+private:
+  float hdgX;
+  float hdgY;
+  float measuredMagX;
+  float measuredMagY;
+  float measuredMagZ;
   
-protected:  
-  float _absoluteHeading; 
-  float _heading; 
-  float _compass;
-  int _compassAddress;
-  float _gyroStartHeading;
-  float _magScale[3];
-  float _magOffset[3];
+  float magMax[3];
+  float magMin[3];
+  float magScale[3];
+  float magOffset[3];
   
-public: 
+public:
 
   Compass();
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(); 
-  virtual void measure(const float rollAngle, const float pitchAngle);
-  virtual const int getRawData(byte);
   
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData();
-  const float getHeading();
-  const float getAbsoluteHeading();
+  virtual void initialize() {}
+  virtual void measure(float roll, float pitch) {}
+  
   void setMagCal(byte axis, float maxValue, float minValue);
   const float getMagMax(byte axis);
   const float getMagMin(byte axis);
+  const float getHdgXY(byte axis);
+  const int getRawData(byte axis);
+	
 };
+
+
 
 #endif
