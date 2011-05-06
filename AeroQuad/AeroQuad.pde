@@ -32,13 +32,13 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -48,8 +48,8 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define HEXACOAXIAL
-//#define HEXARADIAL
+//#define HEXACOAXIAL  // Not used yet
+//#define HEXARADIAL   // Not used yet
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -101,7 +101,9 @@
  * @todo : extract barometers, magnetometers, kinematics, camera, flush GPS to use new Alan one!
  * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
  * @todo : try to remove some useless member "Like main axis" to motor class, keep them in flight control processor
+ * 28142
  */
+ 
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -774,10 +776,11 @@
 // Generalization of the specific init platform
 void (*initPlatform)() = &initPlatformSpecific;
 
-#ifdef XConfig
+#if defined XConfig
+  #include "FlightControlXMode.h"
   void (*processFlightControl)() = &processFlightControlXMode;
-#endif
-#ifdef plusConfig
+#elif defined plusConfig
+  #include "FlightControlPlusMode.h"
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
 
@@ -969,59 +972,47 @@ void loop () {
           flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
                                  gyro->getRadPerSec(PITCH),                      \
                                  gyro->getRadPerSec(YAW),                        \
-                                 accel->getMeterPerSec(XAXIS),                    \
-                                 accel->getMeterPerSec(YAXIS),                    \
-                                 accel->getMeterPerSec(ZAXIS),                    \
+                                 accel->getMeterPerSec(XAXIS),                   \
+                                 accel->getMeterPerSec(YAXIS),                   \
+                                 accel->getMeterPerSec(ZAXIS),                   \
                                  compass.getRawData(XAXIS),                      \
                                  compass.getRawData(YAXIS),                      \
                                  compass.getRawData(ZAXIS));
         #endif
       
-        #if defined HeadingMagHold && defined FlightAngleARG
+        #if defined FlightAngleARG
           flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
                                  gyro->getRadPerSec(PITCH),                      \
                                  gyro->getRadPerSec(YAW),                        \
-                                 accel->getMeterPerSec(XAXIS),                    \
-                                 accel->getMeterPerSec(YAXIS),                    \
-                                 accel->getMeterPerSec(ZAXIS),                    \
+                                 accel->getMeterPerSec(XAXIS),                   \
+                                 accel->getMeterPerSec(YAXIS),                   \
+                                 accel->getMeterPerSec(ZAXIS),                   \
                                  0.0,                                            \
                                  0.0,                                            \
                                  0.0);
         #endif
 
-        #if !defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
-                                 gyro->getRadPerSec(PITCH),                      \
-                                 gyro->getRadPerSec(YAW),                        \
-                                 accel->getMeterPerSec(XAXIS),                    \
-                                 accel->getMeterPerSec(YAXIS),                    \
-                                 accel->getMeterPerSec(ZAXIS),                    \
-                                 0.0,                                            \
-                                 0.0,                                            \
-                                 0.0);
-        #endif
-      
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
           flightAngle->calculate(gyro->getRadPerSec(ROLL),                       \
                                  gyro->getRadPerSec(PITCH),                      \
                                  gyro->getRadPerSec(YAW),                        \
-                                 accel->getMeterPerSec(XAXIS),                     \
-                                 accel->getMeterPerSec(YAXIS),                     \
-                                 accel->getMeterPerSec(ZAXIS),                     \
-                                 accel->getOneG(),                          \
-                                 compass.getHdgXY(XAXIS),                  \
+                                 accel->getMeterPerSec(XAXIS),                   \
+                                 accel->getMeterPerSec(YAXIS),                   \
+                                 accel->getMeterPerSec(ZAXIS),                   \
+                                 accel->getOneG(),                               \
+                                 compass.getHdgXY(XAXIS),                        \
                                  compass.getHdgXY(YAXIS));
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          flightAngle->calculate(gyro->getRadPerSec(ROLL),  \
-                                 gyro->getRadPerSec(PITCH),                      \
-                                 gyro->getRadPerSec(YAW),                        \
-                                 accel->getMeterPerSec(XAXIS),                     \
-                                 accel->getMeterPerSec(YAXIS),                     \
-                                 accel->getMeterPerSec(ZAXIS),                     \
-                                 accel->getOneG(),                          \
-                                 0.0,                                      \
+          flightAngle->calculate(gyro->getRadPerSec(ROLL),                        \
+                                 gyro->getRadPerSec(PITCH),                       \
+                                 gyro->getRadPerSec(YAW),                         \
+                                 accel->getMeterPerSec(XAXIS),                    \
+                                 accel->getMeterPerSec(YAXIS),                    \
+                                 accel->getMeterPerSec(ZAXIS),                    \
+                                 accel->getOneG(),                                \
+                                 0.0,                                             \
                                  0.0);
         #endif
       }
@@ -1118,8 +1109,9 @@ void loop () {
 
     previousTime = currentTime;
   }
-  if (frameCounter >= 100) 
+  if (frameCounter >= 100) {
       frameCounter = 0;
+  }
 }
 
 

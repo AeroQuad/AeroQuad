@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,28 +24,21 @@
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-int motorAxisCommandRoll = 0;
-int motorAxisCommandPitch = 0;
-int motorAxisCommandYaw = 0;
-
+#ifndef _AQ_PROCESS_FLIGHT_CONTROL_H_
+#define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
+
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-//    motors->setMotorAxisCommand(ROLL, updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]));
-//    motors->setMotorAxisCommand(PITCH, updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]));
     motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]);
     motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]);
   }
   else {
     
-  float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-  float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]));
-//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]));
-//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
+    float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+    float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
     motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
     motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
   }
@@ -140,7 +133,6 @@ void processHeading(void)
   }
   // NEW SI Version
   commandedYaw = constrain(receiver->getSIData(YAW) + radians(headingHold), -PI, PI);
-//  motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]));
   motorAxisCommandYaw = updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]);
   // uses flightAngle unbias rate
   //motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
@@ -227,162 +219,5 @@ void processMinMaxMotorCommand(void)
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// processHardManuevers ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processHardManuevers()
-{
-#ifdef XConfig    // Fix for + mode hardmanuevers
-  if (receiver->getData(ROLL) < MINCHECK) {
-    motors->setMaxCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
-    motors->setMaxCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
-  }
-  else if (receiver->getData(ROLL) > MAXCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMaxCommand(REAR, minAcro);
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMaxCommand(RIGHT, minAcro);
-  }
-  else if (receiver->getData(PITCH) < MINCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMaxCommand(REAR, minAcro);
-    motors->setMaxCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
-  }
-  else if (receiver->getData(PITCH) > MAXCHECK) {
-    motors->setMaxCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMaxCommand(RIGHT, minAcro);
-  }
-#endif
-#ifdef plusConfig
-  if (receiver->getData(ROLL) < MINCHECK) {
-    motors->setMinCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
-  }
-  else if (receiver->getData(ROLL) > MAXCHECK) {
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMinCommand(RIGHT, minAcro);
-  }
-  else if (receiver->getData(PITCH) < MINCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMinCommand(REAR, minAcro);
-  }
-  else if (receiver->getData(PITCH) > MAXCHECK) {
-    motors->setMinCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
-  }
-#endif  
-}
-
-#ifdef XConfig
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// X MODE //////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processFlightControlXMode(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-    motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
-    motors->setMotorCommand(RIGHT, throttle - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
-    motors->setMotorCommand(LEFT, throttle + motorAxisCommandPitch + motorAxisCommandRoll + motorAxisCommandYaw);
-    motors->setMotorCommand(REAR, throttle + motorAxisCommandPitch - motorAxisCommandRoll - motorAxisCommandYaw);
-  } 
-
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motors->getMinCommand(motor), motors->getMaxCommand(motor)));
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiver->getData(THROTTLE) < MINCHECK) {
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-      motors->setMotorCommand(motor, MINTHROTTLE);
-    }
-  }
-
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    motors->write(); // Defined in Motors.h
-  }
-}
-#endif
-#ifdef plusConfig
-//////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// PLUS MODE //////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processFlightControlPlusMode(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - motorAxisCommandYaw);
-    motors->setMotorCommand(REAR, throttle + motorAxisCommandPitch - motorAxisCommandYaw);
-    motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll + motorAxisCommandYaw);
-    motors->setMotorCommand(LEFT, throttle + motorAxisCommandRoll + motorAxisCommandYaw);
-  } 
-
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motors->getMinCommand(motor), motors->getMaxCommand(motor)));
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiver->getData(THROTTLE) < MINCHECK) {
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-      motors->setMotorCommand(motor, MINTHROTTLE);
-    }
-  }
-
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    motors->write(); // Defined in Motors.h
-  }
-}
-#endif
+#endif //#define _AQ_PROCESS_FLIGHT_CONTROL_H_
 

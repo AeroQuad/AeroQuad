@@ -338,13 +338,23 @@ void readEEPROM(void);
 void initSensorsZeroFromEEPROM(void);
 void storeSensorsZeroToEEPROM(void);
 void initReceiverFromEEPROM(void);
+//////////////////////////////////////////////////////
 
 // defined in FlightCommand.pde
 void readPilotCommands(void); 
+//////////////////////////////////////////////////////
 
-// defined in FlightControl.pde
-void processFlightControlXMode(void); 
-void processFlightControlPlusMode(void);
+// defined in FlightControl.pde Flight control needed
+int motorAxisCommandRoll = 0;
+int motorAxisCommandPitch = 0;
+int motorAxisCommandYaw = 0;
+
+void calculateFlightError();
+void processHeading();
+void processAltitudeHold();
+void processMinMaxMotorCommand();
+void processCalibrateESC();
+//////////////////////////////////////////////////////
 
 //defined in SerialCom.pde
 void readSerialCommand(void);
@@ -355,22 +365,23 @@ void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry(void);
 void comma(void);
+//////////////////////////////////////////////////////
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
+  float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
+ int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
-extern int  __bss_end; // used by freemem 
-extern int  *__brkval; // used by freemem
-int freemem(){
-    int free_memory;
-    if((int)__brkval == 0)
-        free_memory = ((int)&free_memory) - ((int)&__bss_end);
-    else
-        free_memory = ((int)&free_memory) - ((int)__brkval);
-    return free_memory;
-}
+//extern int  __bss_end; // used by freemem 
+//extern int  *__brkval; // used by freemem
+//int freemem(){
+//    int free_memory;
+//    if((int)__brkval == 0)
+//        free_memory = ((int)&free_memory) - ((int)&__bss_end);
+//    else
+//        free_memory = ((int)&free_memory) - ((int)__brkval);
+//    return free_memory;
+//}
 
