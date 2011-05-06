@@ -34,22 +34,6 @@ void Motors::pulseMotors(byte nbPulse) {
   }
 }
 
-void Motors::setMinCommand(byte motor, int command) {
-  minCommand[motor] = command;
-}
-
-int Motors::getMinCommand(byte motor) {
-  return minCommand[motor];
-}
-
-void Motors::setMaxCommand(byte motor, int command) {
-  maxCommand[motor] = command;
-}
-
-int Motors::getMaxCommand(byte motor) {
-  return maxCommand[motor];
-}
-
 void Motors::setMotorCommand(byte motor, int command) {
   motorCommand[motor] = command;
 }

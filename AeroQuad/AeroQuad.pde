@@ -100,8 +100,7 @@
  * Kenny todo.
  * @todo : extract barometers, magnetometers, kinematics, camera, flush GPS to use new Alan one!
  * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
- * @todo : try to remove some useless member "Like main axis" to motor class, keep them in flight control processor
- * 28142
+ * 28142 -> 27778
  */
  
 

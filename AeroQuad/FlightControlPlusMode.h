@@ -26,20 +26,20 @@
 //////////////////////////////////////////////////////////////////////////////
 void processHardManueversPlusMode() {
   if (receiver->getData(ROLL) < MINCHECK) {
-    motors->setMinCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
+    motorMinCommand[LEFT] = minAcro;
+    motorMaxCommand[RIGHT] = MAXCOMMAND;
   }
   else if (receiver->getData(ROLL) > MAXCHECK) {
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMinCommand(RIGHT, minAcro);
+    motorMaxCommand[LEFT] = MAXCOMMAND;
+    motorMinCommand[RIGHT] = minAcro;
   }
   else if (receiver->getData(PITCH) < MINCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMinCommand(REAR, minAcro);
+    motorMaxCommand[FRONT] = MAXCOMMAND;
+    motorMinCommand[REAR] = minAcro;
   }
   else if (receiver->getData(PITCH) > MAXCHECK) {
-    motors->setMinCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
+    motorMinCommand[FRONT] = minAcro;
+    motorMaxCommand[REAR] = MAXCOMMAND;
   }
 }
 
@@ -74,7 +74,7 @@ void processFlightControlPlusMode(void) {
 
   // Apply limits to motor commands
   for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motors->getMinCommand(motor), motors->getMaxCommand(motor)));
+    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
   }
 
   // If throttle in minimum position, don't apply yaw

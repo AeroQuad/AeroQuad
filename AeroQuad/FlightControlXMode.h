@@ -27,28 +27,28 @@
 void processHardManueversXMode()
 {
   if (receiver->getData(ROLL) < MINCHECK) {
-    motors->setMaxCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
-    motors->setMaxCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
+    motorMaxCommand[FRONT] = minAcro;
+    motorMaxCommand[REAR] = MAXCOMMAND;
+    motorMaxCommand[LEFT] = minAcro;
+    motorMaxCommand[RIGHT] = MAXCOMMAND;
   }
   else if (receiver->getData(ROLL) > MAXCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMaxCommand(REAR, minAcro);
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMaxCommand(RIGHT, minAcro);
+    motorMaxCommand[FRONT] = MAXCOMMAND;
+    motorMaxCommand[REAR] = minAcro;
+    motorMaxCommand[LEFT] = MAXCOMMAND;
+    motorMaxCommand[RIGHT] = minAcro;
   }
   else if (receiver->getData(PITCH) < MINCHECK) {
-    motors->setMaxCommand(FRONT, MAXCOMMAND);
-    motors->setMaxCommand(REAR, minAcro);
-    motors->setMaxCommand(LEFT, minAcro);
-    motors->setMaxCommand(RIGHT, MAXCOMMAND);
+    motorMaxCommand[FRONT] = MAXCOMMAND;
+    motorMaxCommand[REAR] = minAcro;
+    motorMaxCommand[LEFT] = minAcro;
+    motorMaxCommand[RIGHT] = MAXCOMMAND;
   }
   else if (receiver->getData(PITCH) > MAXCHECK) {
-    motors->setMaxCommand(FRONT, minAcro);
-    motors->setMaxCommand(REAR, MAXCOMMAND);
-    motors->setMaxCommand(LEFT, MAXCOMMAND);
-    motors->setMaxCommand(RIGHT, minAcro);
+    motorMaxCommand[FRONT] =  minAcro;
+    motorMaxCommand[REAR] = MAXCOMMAND;
+    motorMaxCommand[LEFT] = MAXCOMMAND;
+    motorMaxCommand[RIGHT] = minAcro;
   }
 }
 
@@ -84,7 +84,7 @@ void processFlightControlXMode(void) {
 
   // Apply limits to motor commands
   for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motors->getMinCommand(motor), motors->getMaxCommand(motor)));
+    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
   }
 
   // If throttle in minimum position, don't apply yaw

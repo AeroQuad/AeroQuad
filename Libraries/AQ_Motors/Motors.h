@@ -50,9 +50,9 @@ enum NB_Motors{
 
 
 class Motors {
-private:
-  int minCommand[LASTMOTOR];
-  int maxCommand[LASTMOTOR];
+//private:
+//  int minCommand[LASTMOTOR];
+//  int maxCommand[LASTMOTOR];
 
 protected:
   int motorCommand[LASTMOTOR];
@@ -66,10 +66,6 @@ public:
   virtual void commandAllMotors(int command) {}
   
   void pulseMotors(byte nbPulse);
-  void setMinCommand(byte motor, int command);
-  int getMinCommand(byte motor);
-  void setMaxCommand(byte motor, int command);
-  int getMaxCommand(byte motor);
   void setMotorCommand(byte motor, int command);
   int getMotorCommand(byte motor);
 };

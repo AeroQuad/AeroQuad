@@ -56,7 +56,7 @@ void readPilotCommands() {
       digitalWrite(LED_Red, HIGH);
       #endif
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors->setMinCommand(motor, MINTHROTTLE);
+        motorMinCommand[motor] = MINTHROTTLE;
       //   delay(100);
       //altitude.measureGround();
     }
