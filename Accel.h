@@ -463,10 +463,10 @@ public:
   void measure(void) {
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
-    // Depending on how your accel is mounted, you can change X/Y axis to pitch/roll mapping here
-    accelADC[XAXIS] =  NWMP_acc[PITCH] - accelZero[PITCH];
-    accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
-    accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
+    accelADC[XAXIS] =  NWMP_acc[XAXIS] - accelZero[XAXIS];  // Configured for Paris MultiWii Board
+    accelADC[YAXIS] =  accelZero[YAXIS] - NWMP_acc[YAXIS];  // Configured for Paris MultiWii Board
+    accelADC[ZAXIS] =  accelZero[ZAXIS] - NWMP_acc[ZAXIS];  // Configured for Paris MultiWii Board
+    
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);

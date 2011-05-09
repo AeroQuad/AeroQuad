@@ -35,6 +35,7 @@
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -293,7 +294,7 @@
   Accel_Wii accel;
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
-  Motors_PWM motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
   #ifdef FlightAngleARG
@@ -304,6 +305,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Magnetometer_HMC5843 compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -314,7 +327,7 @@
   Accel_Wii accel;
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
-  Motors_PWM motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -324,6 +337,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Magnetometer_HMC5843 compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
