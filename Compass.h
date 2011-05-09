@@ -188,4 +188,33 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ***********************************************************************
+// ************************* CHR6DM Subclass *****************************
+// ***********************************************************************
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+class Compass_CHR6DM : public Compass {
+public:
+  Compass_CHR6DM() : Compass() {}
+  void initialize(void) {}
+  const int getRawData(byte) {}
+  void measure(void) {
+    heading = chr6dm.data.yaw; //this hardly needs any filtering :)
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+  }
+};
 
+class Compass_CHR6DM_Fake : public Compass {
+public:
+  Compass_CHR6DM_Fake() : Compass() {}
+  void initialize(void) {}
+  const int getRawData(byte) {}
+  void measure(void) {
+    heading = 0;
+    // Change from +/-180 to 0-360
+    if (heading < 0) absoluteHeading = 360 + heading;
+    else absoluteHeading = heading;
+  }
+};
+#endif
