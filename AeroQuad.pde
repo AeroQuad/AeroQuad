@@ -691,6 +691,13 @@ void loop () {
         readPilotCommands(); // defined in FlightCommand.pde
       }
 
+      #if defined(CameraControl)
+        camera.setPitch(degrees(flightAngle->getData(PITCH)));
+        camera.setRoll(degrees(flightAngle->getData(ROLL)));
+        camera.setYaw(degrees(flightAngle->getData(YAW)));
+        camera.move();
+      #endif 
+
       #ifdef DEBUG_LOOP
         digitalWrite(10, LOW);
       #endif
