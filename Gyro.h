@@ -32,21 +32,22 @@ public:
   #endif
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
-  int sign[3];
+//  int sign[3];
   float rawHeading, gyroHeading;
   long int previousGyroTime;
   //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
 
   Gyro(void){
-    sign[ROLL] = 1;
-    sign[PITCH] = 1;
-    sign[YAW] = 1;
+//    sign[ROLL] = 1;
+//    sign[PITCH] = 1;
+//    sign[YAW] = 1;
   }
   
   // The following function calls must be defined in any new subclasses
-  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
-    this->_initialize(rollChannel, pitchChannel, yawChannel);
-  }
+  virtual void initialize(void);
+//  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+//    this->_initialize(rollChannel, pitchChannel, yawChannel);
+//  }
   virtual void measure(void);
   virtual void calibrate(void);
   virtual void autoZero(void);
@@ -66,20 +67,20 @@ public:
 
   // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
   const int getRaw(byte axis) {
-    return gyroADC[axis] * sign[axis];
+    return gyroADC[axis]; // * sign[axis];
   }
   
   // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
   // centered on zero radians +/-
   const float getData(byte axis) {
-    return gyroData[axis] * sign[axis];
+    return gyroData[axis]; // * sign[axis];
   }
   
   //  inverts, if needed the sign on the specific axis
-  const int invert(byte axis) {
-    sign[axis] = -sign[axis];
-    return sign[axis];
-  }
+//  const int invert(byte axis) {
+//    sign[axis] = -sign[axis];
+//    return sign[axis];
+//  }
   
   const int getZero(byte axis) {
     return gyroZero[axis];
@@ -208,7 +209,11 @@ public:
   }
   
   void initialize(void) {
-    this->_initialize(0,1,2);
+//    this->_initialize(0,1,2);
+    gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
     
     //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
     
@@ -508,3 +513,4 @@ public:
   }
 };
 #endif
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
