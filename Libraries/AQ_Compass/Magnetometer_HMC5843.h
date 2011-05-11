@@ -1,6 +1,6 @@
 /*
-  AeroQuad v2.2 - Feburary 2011
-  www.AeroQuad.com
+  AeroQuad v3.0 - April 2011
+  www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
@@ -18,17 +18,25 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_CAMERA_STABILIZER_ON_PIN_44_45_46_H_
-#define _AQ_CAMERA_STABILIZER_ON_PIN_44_45_46_H_
 
-#include "CameraStabilizer.h"
+#ifndef _AEROQUAD_MAGNETOMETER_HMC5843_H_
+#define _AEROQUAD_MAGNETOMETER_HMC5843_H_
 
-class CameraStabilizerOnPins_44_45_46 : public CameraStabilizer 
-{
+#include "Compass.h"
+
+class Magnetometer_HMC5843 : public Compass{
+private:
+  int compassAddress;
+  float magCalibration[3];
+  
 public:
-  CameraStabilizerOnPins_44_45_46();
-  void _initialize();
-  void move();
+  Magnetometer_HMC5843();	
+  
+  void initialize();
+  void measure(float roll, float pitch);
+  
 };
+
+
 
 #endif

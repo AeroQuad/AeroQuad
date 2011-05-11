@@ -43,7 +43,7 @@ void Accelerometer_BMA180::initialize(void) {
   // Range settings is page 28
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_ENABLE_WRITE_CONTROL_REGISTER, ACCEL_CONTROL_REGISTER); 		//enable writing to control registers
   sendByteI2C(ACCEL_ADDRESS, ACCEL_BW_TCS); 															// register bw_tcs (bits 4-7)
-  const byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
+  byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_10HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
 
   // From page 27 of BMA180 Datasheet

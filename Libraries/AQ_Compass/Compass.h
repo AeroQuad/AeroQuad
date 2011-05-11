@@ -26,17 +26,19 @@
 
 class Compass {
 private:
+  float magMax[3];
+  float magMin[3];
+  
+protected:  
   float hdgX;
   float hdgY;
+
   float measuredMagX;
   float measuredMagY;
   float measuredMagZ;
-  
-  float magMax[3];
-  float magMin[3];
   float magScale[3];
   float magOffset[3];
-  
+
 public:
 
   Compass();

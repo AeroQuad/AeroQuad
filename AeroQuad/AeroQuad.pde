@@ -57,7 +57,7 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 
@@ -98,11 +98,17 @@
 
 /**
  * Kenny todo.
- * @todo : extract barometers, magnetometers, kinematics, camera, flush GPS to use new Alan one!
+ * @todo : flight test mag and add example test!
+ * @todo : extract barometers, kinematics, camera, 
  * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
  * @todo : import alamo work for OSD here http://aeroquad.com/showthread.php?2942-OSD-implementation-using-MAX7456
- * @todo : FIRST PRIORITY, FIX THE BUG INTRODUCED ON THE MOTOR COMMAND FROM THE CONFIGURATOR
+ * @todo : do alan request on the #define for eeprom address
+ * @todo : fix wireless telemetry
  * 28142 -> 27778
+ *
+ * Ted todo
+ * @todo : FIRST PRIORITY, FIX THE BUG INTRODUCED ON THE MOTOR COMMAND FROM THE CONFIGURATOR
+ *
  */
  
 
@@ -257,9 +263,9 @@
   // Heading hold declaration
   #ifdef HeadingMagHold
     #include <Compass.h>
-    Compass compassSpecific;
+    #include <Magnetometer_HMC5843.h>
+    Magnetometer_HMC5843 compassSpecific;
     Compass *compass = &compassSpecific;
-//    Magnetometer_HMC5843 compass;
   #endif
   
   // Altitude declaration
@@ -436,8 +442,10 @@
   
   // Heading Hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #include <Compass.h>
+    #include <Magnetometer_HMC5843.h>
+    Magnetometer_HMC5843 compassSpecific;
+    Compass *compass = &compassSpecific;
   #endif
   // Altitude hold declaration
   #ifdef AltitudeHold
@@ -503,8 +511,10 @@
   
   // Heading hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #include <Compass.h>
+    #include <Magnetometer_HMC5843.h>
+    Magnetometer_HMC5843 compassSpecific;
+    Compass *compass = &compassSpecific;
   #endif
   // Altitude Hold declaration
   #ifdef AltitudeHold
