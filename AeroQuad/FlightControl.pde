@@ -28,7 +28,6 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
-
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
@@ -37,10 +36,13 @@ void calculateFlightError(void)
   }
   else {
     
-    float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-    float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
+  float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, flightAngle->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
+  motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
+  motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
+//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
+//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
+
   }
 }
 
@@ -51,20 +53,21 @@ void processCalibrateESC(void)
 {
   switch (calibrateESC) { // used for calibrating ESC's
   case 1:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, MAXCOMMAND);
     break;
   case 3:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, constrain(testCommand, 1000, 1200));
     break;
   case 5:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), 1000, 1200));
+//    for (byte motor = 0; motor < LASTMOTOR; motor++)
+//      motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), 1000, 1200));
+      // @todo : Ted, check this about remote command with the configurator
     safetyCheck = ON;
     break;
   default:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, MINCOMMAND);
   }
   // Send calibration commands to motors
@@ -175,48 +178,6 @@ void processAltitudeHold(void)
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver->getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processMinMaxMotorCommand ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processMinMaxMotorCommand(void)
-{
-  // Prevents too little power applied to motors during hard manuevers
-  // Also provides even motor power on both sides if limit encountered
-  if ((motors->getMotorCommand(FRONT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR) <= MINTHROTTLE)){
-    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[RIGHT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[LEFT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if ((motors->getMotorCommand(FRONT) >= MAXCOMMAND) || (motors->getMotorCommand(REAR) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[RIGHT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[LEFT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[RIGHT] = MAXCOMMAND;
-    motorMaxCommand[LEFT] = MAXCOMMAND;
-    motorMinCommand[RIGHT] = MINTHROTTLE;
-    motorMinCommand[LEFT] = MINTHROTTLE;
-  }
-
-  if ((motors->getMotorCommand(LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(RIGHT) <= MINTHROTTLE)){
-    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[FRONT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[REAR] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if ((motors->getMotorCommand(LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(RIGHT) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[FRONT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[REAR] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[FRONT] = MAXCOMMAND;
-    motorMaxCommand[REAR] = MAXCOMMAND;
-    motorMinCommand[FRONT] = MINTHROTTLE;
-    motorMinCommand[REAR] = MINTHROTTLE;
-  }
 }
 
 #endif //#define _AQ_PROCESS_FLIGHT_CONTROL_H_

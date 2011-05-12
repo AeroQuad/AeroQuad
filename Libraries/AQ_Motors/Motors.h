@@ -24,38 +24,19 @@
 
 #include <WProgram.h>
 
-
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define RIGHT2 4
-#define LEFT2 5
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 
-#define LASTMOTOR 4  // 6 or 8 motors are not supported yet
-
 enum NB_Motors{
-  FOUR_Motors,
-  SIX_Motors,
-  HEIGHT_Motors
+  FOUR_Motors = 4,
+  SIX_Motors = 6,
+  HEIGHT_Motors = 8
 };
 
 
 class Motors {
-//private:
-//  int minCommand[LASTMOTOR];
-//  int maxCommand[LASTMOTOR];
-
 protected:
-  int motorCommand[LASTMOTOR];
+  int motorCommand[6];  // LASTMOTOR not know here, so, default at 6 @todo : Kenny, find a better way
   
 public:
 

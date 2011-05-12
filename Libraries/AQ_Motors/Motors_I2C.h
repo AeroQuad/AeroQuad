@@ -26,16 +26,11 @@
 
 #include "Motors.h"
 
-#define MOTORBASE 0x28              // I2C controller base address
-#define FRONTMOTORID MOTORBASE + 1  // define I2C controller addresses per your configuration
-#define REARMOTORID  MOTORBASE + 3  // these addresses are for Phifun controllers
-#define RIGHTMOTORID MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
-#define LEFTMOTORID  MOTORBASE + 4  // inspired frame
 
 class Motors_I2C : public Motors {
 private:
-  float mMotorCommand;
-  float bMotorCommand;
+  byte motorAddress[6];
+  byte lastMotor;
   
 public:
 

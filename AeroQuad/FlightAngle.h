@@ -21,22 +21,14 @@
 // This class is responsible for calculating vehicle attitude
 class FlightAngle {
 public:
-  #define CF 0
-  #define KF 1
-  #define DCM 2
-  #define ARG 3
-  #define MARG 4
-  byte type;
   float angle[3];
-  float gyroAngle[2];
   float correctedRateVector[3];
+  float dcmMatrix[9];
   float earthAccel[3];
   
   FlightAngle(void) {
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       angle[axis] = 0.0;
-    gyroAngle[ROLL] = 0;
-    gyroAngle[PITCH] = 0;
   }
   
   virtual void initialize(float hdgX, float hdgY);
@@ -44,12 +36,17 @@ public:
                          float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
                          float oneG,               float magX,          float magY);
   virtual float getGyroUnbias(byte axis);
-  virtual void calibrate();
  
   // returns the angle of a specific axis in SI units (radians)
   const float getData(byte axis) {
     return angle[axis];
   }
+  
+  // returns a pointer to the direction cosine matrix
+  float * getDCMmatrixPtr() {
+    return &dcmMatrix[0];
+  }
+  
   // return heading as +PI/-PI
   const float getHeading(byte axis) {
     return(angle[axis]);
@@ -68,10 +65,6 @@ public:
       return (tDegrees);
   }
   
-  const byte getType(void) {
-    // This is set in each subclass to identify which algorithm used
-    return type;
-  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +79,6 @@ public:
 
 class FlightAngle_DCM : public FlightAngle {
 private:
-  float dcmMatrix[9];
   float omegaP[3];
   float omegaI[3];
   float omega[3];
@@ -183,13 +175,16 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
                          accelVector[YAXIS] * accelVector[YAXIS] + \
                          accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
                          
-  // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
-  
-  // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
-  
-  vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
+  // Weight for accelerometer info (<0.9G = 0.0, 1G = 1.0 , >1.1G = 0.0)
+  accelWeight = constrain(1 - 10*abs(1 - accelMagnitude),0,1);
+  #ifdef AeroQuadMega_v2
+    if (accelWeight>0.5)
+      digitalWrite(LED3PIN, LOW);
+    else
+      digitalWrite(LED3PIN, HIGH);
+  #endif
+
+vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
   vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
   
   vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
@@ -277,25 +272,11 @@ public:
     dcmMatrix[7] =  0;
     dcmMatrix[8] =  1;
 
-    // Original from John
-//    kpRollPitch = 1.6;
-//    kiRollPitch = 0.005;
+    kpRollPitch = 2.0;
+    kiRollPitch = 0.005;
     
-//    kpYaw = -1.6;
-//    kiYaw = -0.005;
-/*    
-    // released in 2.2
-    kpRollPitch = 1.0;
-    kiRollPitch = 0.002;
-    
-    kpYaw = -1.0;
-    kiYaw = -0.002;
-*/
-    kpRollPitch = 0.1;        // alternate 0.05;
-    kiRollPitch = 0.0002;     // alternate 0.0001;
-    
-    kpYaw = -0.1;             // alternate -0.05;
-    kiYaw = -0.0002;          // alternate -0.0001;
+    kpYaw = -2.0;
+    kiYaw = -0.005;
     
   }
   
@@ -317,9 +298,6 @@ public:
   float getGyroUnbias(byte axis) {
     return correctedRateVector[axis];
   }
-  
-  void calibrate() {};
-  
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -369,9 +347,11 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
   void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+    float accelVector[3];
+    float accelWeight;
     float norm;
     float hx, hy, hz, bx, bz;
-    float vx, vy, vz, wx, wy, wz;
+    float vx, vy, vz, wx, wy; //, wz;
     float q0i, q1i, q2i, q3i;
     float exAcc, eyAcc, ezAcc;
     float exMag, eyMag, ezMag;
@@ -395,6 +375,16 @@ private:
     ax = ax / norm;
     ay = ay / norm;
     az = az / norm;
+    
+    // Weight for accelerometer info (<0.9G = 0.0, 1G = 1.0 , >1.1G = 0.0)
+    accelWeight = constrain(1 - 10*abs(1 - norm/9.8065),0,1);
+    #ifdef AeroQuadMega_v2
+      if (accelWeight>0.5)
+        digitalWrite(LED3PIN, LOW);
+      else
+        digitalWrite(LED3PIN, HIGH);
+    #endif
+      
     norm = sqrt(mx*mx + my*my + mz*mz);          
     mx = mx / norm;
     my = my / norm;
@@ -415,30 +405,30 @@ private:
     
     wx = bx * 2*(0.5 - q2q2 - q3q3) + bz * 2*(q1q3 - q0q2);
     wy = bx * 2*(q1q2 - q0q3)       + bz * 2*(q0q1 + q2q3);
-    wz = bx * 2*(q0q2 + q1q3)       + bz * 2*(0.5 - q1q1 - q2q2);
+    //wz = bx * 2*(q0q2 + q1q3)       + bz * 2*(0.5 - q1q1 - q2q2);
     	
     // error is sum of cross product between reference direction of fields and direction measured by sensors
     exAcc = (vy*az - vz*ay);
     eyAcc = (vz*ax - vx*az);
-    ezAcc = (vx*ay - vy*ax);
+    //ezAcc = (vx*ay - vy*ax);
     
-    exMag = (my*wz - mz*wy);
-    eyMag = (mz*wx - mx*wz);
+    //exMag = (my*wz - mz*wy);
+    //eyMag = (mz*wx - mx*wz);
     ezMag = (mx*wy - my*wx);
     
-  //  ex = (ay*vz - az*vy) + (my*wz - mz*wy);
-  //  ey = (az*vx - ax*vz) + (mz*wx - mx*wz);
-  //  ez = (ax*vy - ay*vx) + (mx*wy - my*wx);
+    //ex = (ay*vz - az*vy) + (my*wz - mz*wy);
+    //ey = (az*vx - ax*vz) + (mz*wx - mx*wz);
+    //ez = (ax*vy - ay*vx) + (mx*wy - my*wx);
     	
     // integral error scaled integral gain
-    exInt = exInt + exAcc*kiAcc + exMag*kiMag;
-    eyInt = eyInt + eyAcc*kiAcc + eyMag*kiMag;
-    ezInt = ezInt + ezAcc*kiAcc + ezMag*kiMag;
+    exInt = exInt + exAcc*kiAcc*accelWeight;  // + exMag*kiMag;
+    eyInt = eyInt + eyAcc*kiAcc*accelWeight;  // + eyMag*kiMag;
+    ezInt = ezInt + ezMag*kiMag;              // + ezAcc*kiAcc*accelWeight;
     	
     // adjusted gyroscope measurements
-    gx = gx + exAcc*kpAcc + exMag*kpMag + exInt;
-    gy = gy + eyAcc*kpAcc + eyMag*kpMag + eyInt;
-    gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
+    gx = gx + exInt + exAcc*kpAcc*accelWeight;  // + exMag*kpMag;
+    gy = gy + eyInt + eyAcc*kpAcc*accelWeight;  // + eyMag*kpMag;
+    gz = gz + ezInt + ezMag*kpMag;              // + ezAcc*kpAcc*accelWeight;
     	
     // integrate quaternion rate and normalise
     q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -450,15 +440,6 @@ private:
     q2 += q2i;
     q3 += q3i;
 
-/*
-    // Original code found to hold a bug
-    // integrate quaternion rate and normalise
-    q0 = q0 + (-q1*gx - q2*gy - q3*gz) * halfT;
-    q1 = q1 + ( q0*gx + q2*gz - q3*gy) * halfT;
-    q2 = q2 + ( q0*gy - q1*gz + q3*gx) * halfT;
-    q3 = q3 + ( q0*gz + q1*gy - q2*gx) * halfT;  
-*/    
-    	
     // normalise quaternion
     norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
     q0 = q0 / norm;
@@ -467,18 +448,44 @@ private:
     q3 = q3 / norm;
     
     // save the adjusted gyroscope measurements
-    correctedRateVector[ROLL] = gx;
+    correctedRateVector[ROLL]  = gx;
     correctedRateVector[PITCH] = gy;
-    correctedRateVector[YAW] = gz;
+    correctedRateVector[YAW]   = gz;
+    
+    q0q0 = q0*q0;
+    q0q1 = q0*q1;
+    q0q2 = q0*q2;
+    q0q3 = q0*q3;
+    q1q1 = q1*q1;
+    q1q2 = q1*q2;
+    q1q3 = q1*q3;
+    q2q2 = q2*q2;   
+    q2q3 = q2*q3;
+    q3q3 = q3*q3;          
+    
+    angle[ROLL]  =  atan2(2 * (q0q1 + q2q3), 1 - 2 *(q1q1 + q2q2));
+    angle[PITCH] =   asin(2 * (q0q2 - q1q3));
+    angle[YAW]   =  atan2(2 * (q0q3 + q1q2), 1 - 2 *(q2q2 + q3q3));
+    
+    dcmMatrix[0] = q0q0 + q1q1 - q2q2 - q3q3;
+    dcmMatrix[1] = 2 * (q1q2 - q0q3);
+    dcmMatrix[2] = 2 * (q0q2 + q1q3);
+    dcmMatrix[3] = 2 * (q1q2 + q0q3);
+    dcmMatrix[4] = q0q0 - q1q1 + q2q2 - q3q3;
+    dcmMatrix[5] = 2 * (q2q3 - q0q1);
+    dcmMatrix[6] = 2 * (q1q3 - q0q2);
+    dcmMatrix[7] = 2 * (q0q1 + q2q3);
+    dcmMatrix[8] = q0q0 - q1q1 - q2q2 + q3q3;
+    
+    accelVector[XAXIS] = ax;
+    accelVector[YAXIS] = ay;
+    accelVector[ZAXIS] = az;
+    
+    earthAccel[XAXIS] = vectorDotProduct(3, &dcmMatrix[0], &accelVector[0]);
+    earthAccel[YAXIS] = vectorDotProduct(3, &dcmMatrix[3], &accelVector[0]);
+    earthAccel[ZAXIS] = vectorDotProduct(3, &dcmMatrix[6], &accelVector[0]) + 1.0;
   }
   
-  void eulerAngles(void)
-  {
-    angle[ROLL]  =  atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
-    angle[PITCH] =   asin(2 * (q0*q2 - q1*q3));
-    angle[YAW]   =  atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
-  }
-
 public:
   FlightAngle_MARG():FlightAngle() {}
   
@@ -498,8 +505,8 @@ public:
     eyInt = 0.0;
     ezInt = 0.0;
 
-    kpAcc = 0.2;
-    kiAcc = 0.0005;
+    kpAcc = 2.0;
+    kiAcc = 0.005;
     
     kpMag = 2.0;
     kiMag = 0.005;
@@ -516,14 +523,11 @@ public:
     margUpdate(rollRate,          pitchRate,    yawRate, \
                longitudinalAccel, lateralAccel, verticalAccel,  \
                measuredMagX,      measuredMagY, measuredMagZ);
-    eulerAngles();
   }
   
   float getGyroUnbias(byte axis) {
     return correctedRateVector[axis];
   }
-  
-  void calibrate() {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -563,12 +567,14 @@ private:
   float halfT;                // half the sample period
   float q0, q1, q2, q3;       // quaternion elements representing the estimated orientation
   float exInt, eyInt, ezInt;  // scaled integral error
-
+   
   ////////////////////////////////////////////////////////////////////////////////
   // argUpdate
   ////////////////////////////////////////////////////////////////////////////////
   
   void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+    float accelMagnitude;
+    float accelWeight;
     float norm;
     float vx, vy, vz, wx, wy, wz;
     float q0i, q1i, q2i, q3i;
@@ -577,12 +583,21 @@ private:
     halfT = G_Dt/2;
   
     // normalise the measurements
-    norm = sqrt(ax*ax + ay*ay + az*az);       
-    ax = ax / norm;
-    ay = ay / norm;
-    az = az / norm;
-     	
-    // estimated direction of gravity and flux (v and w)
+    accelMagnitude = sqrt(ax*ax + ay*ay + az*az);       
+    ax = ax / accelMagnitude;
+    ay = ay / accelMagnitude;
+    az = az / accelMagnitude;
+    
+    // Weight for accelerometer info (<0.9G = 0.0, 1G = 1.0 , >1.1G = 0.0)
+    accelWeight = constrain(1 - 10*abs(1 - accelMagnitude/9.8065),0,1);
+    #ifdef AeroQuadMega_v2
+      if (accelWeight>0.5)
+        digitalWrite(LED3PIN, LOW);
+      else
+        digitalWrite(LED3PIN, HIGH);
+    #endif
+
+    // estimated direction of gravity 
     vx = 2*(q1*q3 - q0*q2);
     vy = 2*(q0*q1 + q2*q3);
     vz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
@@ -597,15 +612,14 @@ private:
   //  ez = (ax*vy - ay*vx);
     	
     // integral error scaled integral gain
-    exInt = exInt + ex*Ki;
-    eyInt = eyInt + ey*Ki;
-    ezInt = ezInt + ez*Ki;
+    exInt = exInt + ex*Ki*accelWeight;
+    eyInt = eyInt + ey*Ki*accelWeight;
+    ezInt = ezInt + ez*Ki*accelWeight;
     	
-    // adjusted gyroscope measurements
-    gx = gx + Kp*ex + exInt;
-    gy = gy + Kp*ey + eyInt;
-    gz = gz + Kp*ez + ezInt;
-    
+    gx = gx + ex*Kp*accelWeight + exInt;
+    gy = gy + ey*Kp*accelWeight + eyInt;
+    gz = gz + ez*Kp*accelWeight + ezInt;
+
     // integrate quaternion rate and normalise
     q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
     q1i = ( q0*gx + q2*gz - q3*gy) * halfT;
@@ -661,9 +675,9 @@ public:
     eyInt = 0.0;
     ezInt = 0.0;
 
-    Kp = 0.2; // 2.0;
-    Ki = 0.0005; //0.005;
-  }
+    Kp = 2.0;
+    Ki = 0.005;
+ }
   
 ////////////////////////////////////////////////////////////////////////////////
 // Calculate ARG
@@ -676,56 +690,14 @@ public:
     argUpdate(rollRate,          pitchRate,    yawRate, \
               longitudinalAccel, lateralAccel, verticalAccel,  \
               measuredMagX,      measuredMagY, measuredMagZ);
+    
     eulerAngles();
   }
   
   float getGyroUnbias(byte axis) {
     return correctedRateVector[axis];
   }
-  
-  void calibrate() {}
 };
-
-
-// ***********************************************************************
-// ********************* CHR6DM variable loading *************************
-// ***********************************************************************
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-class FlightAngle_CHR6DM : public FlightAngle {
-private:
-
-float zeroRoll;
-float zeroPitch;
-
-public:
-  FlightAngle_CHR6DM() : FlightAngle() {}
-
-  void initialize(float hdgX, float hdgY) {
-    // do nothing, already done in gyro class
-  }
-
-  void calculate(float rollRate,           float pitchRate,     float yawRate,       \
-                 float longitudinalAccel,  float lateralAccel,  float verticalAccel, \
-                 float oneG,               float magX,          float magY) {
-    angle[ROLL]  = chr6dm.data.roll - zeroRoll;
-    angle[PITCH] = chr6dm.data.pitch - zeroPitch;
-    angle[YAW]   = chr6dm.data.yaw; 
-  }
-  
-   void calibrate(void) {
-    chr6dm.EKFReset();
-    zeroRoll = chr6dm.data.roll;
-    zeroPitch = chr6dm.data.pitch;
-  }
-  
-  float getGyroUnbias(byte axis) {
-    if(axis == ROLL) return gyro->getRadPerSec(ROLL);
-    if(axis == PITCH) return gyro->getRadPerSec(PITCH);
-    if(axis == YAW) return gyro->getRadPerSec(YAW);
-  }
-
-};
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

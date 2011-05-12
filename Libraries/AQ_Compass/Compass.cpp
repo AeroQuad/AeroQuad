@@ -26,17 +26,26 @@
 Compass::Compass() {
 }
 
+const float Compass::getHdgXY(byte axis) {
+  if (axis == XAXIS) return hdgX;
+  if (axis == YAXIS) return hdgY;
+}
+
+const int Compass::getRawData(byte axis) {
+  return magFieldBodyRaw[axis];
+}
+
 
 void Compass::setMagCal(byte axis, float maxValue, float minValue) {
-  magMax[axis] = maxValue;
-  magMin[axis] = minValue;
-  // Assume max/min is scaled to +1 and -1
-  // y2 = 1, x2 = max; y1 = -1, x1 = min
-  // m = (y2 - y1) / (x2 - x1)
-  // m = 2 / (max - min)
-  magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
-  // b = y1 - mx1; b = -1 - (m * min)
-  magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
+      magMax[axis] = maxValue;
+    magMin[axis] = minValue;
+    // Assume max/min is scaled to +1 and -1
+    // y2 = 1, x2 = max; y1 = -1, x1 = min
+    // m = (y2 - y1) / (x2 - x1)
+    // m = 2 / (max - min)
+    magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
+    // b = y1 - mx1; b = -1 - (m * min)
+    magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
 }
 
 const float Compass::getMagMax(byte axis) {
@@ -47,16 +56,7 @@ const float Compass::getMagMin(byte axis) {
   return magMin[axis];
 }
 
-const float Compass::getHdgXY(byte axis) {
-  if (axis == XAXIS) return hdgX;
-  if (axis == YAXIS) return hdgY;
-}
 
-const int Compass::getRawData(byte axis) {
-  if (axis == XAXIS) return measuredMagX;
-  if (axis == YAXIS) return measuredMagY;
-  if (axis == ZAXIS) return measuredMagZ;
-}
 
 
 

@@ -26,20 +26,6 @@
 
 #include "Motors.h"
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  #define FRONTMOTORPIN  2
-  #define REARMOTORPIN   3
-  #define RIGHTMOTORPIN  5
-  #define LEFTMOTORPIN   6
-  #define LASTMOTORPIN   7
-#else
-  #define FRONTMOTORPIN  3
-  #define REARMOTORPIN   9
-  #define RIGHTMOTORPIN 10
-  #define LEFTMOTORPIN  11
-  #define LASTMOTORPIN  12
-#endif
-
 class Motors_PWM : public Motors {
 public:
 

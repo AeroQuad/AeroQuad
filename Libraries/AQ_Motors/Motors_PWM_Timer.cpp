@@ -107,19 +107,19 @@ void Motors_PWM_Timer::initialize(NB_Motors numbers) {
 
 void Motors_PWM_Timer::write() {
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    OCR3B = motorCommand[FRONT] * 2 ;
-    OCR3C = motorCommand[REAR]  * 2 ;
-    OCR3A = motorCommand[RIGHT] * 2 ;
-    OCR4A = motorCommand[LEFT]  * 2 ;
+    OCR3B = motorCommand[0] * 2 ;
+    OCR3C = motorCommand[1]  * 2 ;
+    OCR3A = motorCommand[2] * 2 ;
+    OCR4A = motorCommand[3]  * 2 ;
     if (numberOfMotors == SIX_Motors || numberOfMotors == HEIGHT_Motors) {
-      OCR4B = motorCommand[RIGHT2] * 2 ;
-      OCR4C = motorCommand[LEFT2]  * 2 ;
+      OCR4B = motorCommand[4] * 2 ;
+      OCR4C = motorCommand[5]  * 2 ;
     }
   #else
-    OCR2B = motorCommand[FRONT] / 16 ;                       // 1000-2000 to 128-256
-    OCR1A = motorCommand[REAR]  * 2 ;
-    OCR1B = motorCommand[RIGHT] * 2 ;
-    OCR2A = motorCommand[LEFT]  / 16 ;
+    OCR2B = motorCommand[1] / 16 ;                       // 1000-2000 to 128-256
+    OCR1A = motorCommand[2]  * 2 ;
+    OCR1B = motorCommand[3] * 2 ;
+    OCR2A = motorCommand[4]  / 16 ;
   #endif
 }
 

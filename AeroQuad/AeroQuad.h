@@ -349,17 +349,20 @@ int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
 
-#if defined XConfig || defined plusConfig 
+#if defined quadXConfig || defined quadPlusConfig 
   int motorMinCommand[4];
   int motorMaxCommand[4];
-#endif  
+#elif defined hexXConfig || defined hexPlusConfig
+  int motorMinCommand[6];
+  int motorMaxCommand[6];
+#endif
 
 
 void calculateFlightError();
 void processHeading();
 void processAltitudeHold();
-void processMinMaxMotorCommand();
 void processCalibrateESC();
+void processFlightControl();
 //////////////////////////////////////////////////////
 
 //defined in SerialCom.pde
