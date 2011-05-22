@@ -32,24 +32,25 @@ public:
   #endif
   int gyroADC[3];
   byte rollChannel, pitchChannel, yawChannel;
-  int sign[3];
+//  int sign[3];
   float rawHeading, gyroHeading;
   long int previousGyroTime;
   //unsigned long currentTime, previousTime; // AKA - Changed to remove HONKS time smoothing
 
   Gyro(void){
-    sign[ROLL] = 1;
-    sign[PITCH] = 1;
-    sign[YAW] = 1;
+//    sign[ROLL] = 1;
+//    sign[PITCH] = 1;
+//    sign[YAW] = 1;
   }
   
   // The following function calls must be defined in any new subclasses
-  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
-    this->_initialize(rollChannel, pitchChannel, yawChannel);
-  }
+  virtual void initialize(void);
+//  virtual void initialize(byte rollChannel, byte pitchChannel, byte yawChannel) {
+//    this->_initialize(rollChannel, pitchChannel, yawChannel);
+//  }
   virtual void measure(void);
   virtual void calibrate(void);
-  virtual void autoZero(void){};
+  virtual void autoZero(void);
   virtual const int getFlightData(byte);
 
   // The following functions are common between all Gyro subclasses
@@ -66,20 +67,20 @@ public:
 
   // returns the raw ADC value from the gyro, with sign change if needed, not smoothed or scaled to SI units    
   const int getRaw(byte axis) {
-    return gyroADC[axis] * sign[axis];
+    return gyroADC[axis]; // * sign[axis];
   }
   
   // returns the smoothed and scaled to SI units value of the Gyro with sign change if needed
   // centered on zero radians +/-
   const float getData(byte axis) {
-    return gyroData[axis] * sign[axis];
+    return gyroData[axis]; // * sign[axis];
   }
   
   //  inverts, if needed the sign on the specific axis
-  const int invert(byte axis) {
-    sign[axis] = -sign[axis];
-    return sign[axis];
-  }
+//  const int invert(byte axis) {
+//    sign[axis] = -sign[axis];
+//    return sign[axis];
+//  }
   
   const int getZero(byte axis) {
     return gyroZero[axis];
@@ -208,7 +209,11 @@ public:
   }
   
   void initialize(void) {
-    this->_initialize(0,1,2);
+//    this->_initialize(0,1,2);
+    gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
     
     //gyroLastData = 0.0;  // initalize for rawHeading, may be able to be removed in the future
     
@@ -361,14 +366,31 @@ public:
 #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
 class Gyro_Wii : public Gyro {
 private:
+  #if defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii)
+    float wmpLowRangeToRadPerSec;
+    float wmpHighRangeToRadPerSec;
+  #endif
 
 public:
   Gyro_Wii() : Gyro() {
-    // 0.5mV/Ã‚Âº/s, 0.2mV/ADC step => 0.2/3.33 = around 0.069565217391304
-    // @see http://invensense.com/mems/gyro/documents/PS-IDG-0650B-00-05.pdf and
-    // @see http://invensense.com/mems/gyro/documents/ps-isz-0650b-00-05.pdf
-    gyroFullScaleOutput = 2000;
-    gyroScaleFactor = radians(0.06201166);
+    // Wii Motion+ has a low range and high range. Scaling is thought to be as follows:
+    //
+    // Vref = 1.35 volts
+    // At 0 rate, reading is approximately 8063 bits
+    // Scaling is then 1.35/8063, or 0.00016743 volts/bit
+    //
+    // Low Range
+    //    440 degrees per second at 2.7 millivolts/degree (from datasheet)
+    //    degrees per bit = 0.00016743 / 2.7 mVolts = 0.06201166 degrees per second per bit
+    //                                              = 0.00108231 radians per second per bit
+    // High Range
+    //   2000 degrees per second at 0.5 millivolts/degree (from datasheet)
+    //    degrees per bit = 0.00016743 / 0.5 mVolts = 0.33486295 degrees per second per bit
+    //                                              = 0.00584446 radians per second per bit
+    wmpLowRangeToRadPerSec  = 0.001082308;
+    wmpHighRangeToRadPerSec = 0.005844461;
+
+    previousGyroTime = micros();
   }
   
   void initialize(void) {
@@ -382,36 +404,47 @@ public:
   void measure(void) {
     updateControls(); // defined in DataAcquisition.h
     
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      gyroADC[axis] = NWMP_gyro[axis] - gyroZero[axis];
-      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-      //gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];
-      //gyroData[PITCH] = filterSmooth(gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
-      //gyroADC[YAW] =  NWMP_gyro[YAW] - gyroZero[YAW];
-      //gyroData[YAW] = filterSmooth(gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor); //expect 5ms = 5000Ã‚Âµs = (current-previous) / 5000.0 to get around 1
+    gyroADC[ROLL] =  gyroZero[ROLL]   - NWMP_gyro[ROLL];  // Configured for Paris MultiWii Board
+    gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];  // Configured for Paris MultiWii Board
+    gyroADC[YAW] =   gyroZero[YAW]    - NWMP_gyro[YAW];   // Configured for Paris MultiWii Board
+    
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
+      gyroScaleFactor = wmpSlow[axis] ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
+      gyroData[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor); 
     }
+    // gyroLastADC can maybe replaced with Zero, but will leave as is for now
+    // this provides a small guard band for the gyro on Yaw before it increments or decrements the rawHeading 
+    long int currentGyroTime = micros();
+    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+    }
+    previousGyroTime = currentGyroTime;
   }
 
   const int getFlightData(byte axis) {
     if (axis == PITCH)
-      return -getRaw(PITCH);
+      return -getRaw(PITCH) / 18;
     else
-      return getRaw(axis);
+      return getRaw(axis) / 18;
   }
 
   void calibrate() {
+    autoZero();
+    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  }
+
+  void autoZero() {
     int findZero[FINDZERO];
   
-	  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         updateControls();
         findZero[i] = NWMP_gyro[calAxis];
       }
       gyroZero[calAxis] = findMedian(findZero, FINDZERO);
     }
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
   }
 };
 #endif
@@ -480,4 +513,4 @@ public:
   }
 };
 #endif
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

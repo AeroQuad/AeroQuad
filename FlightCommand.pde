@@ -80,7 +80,7 @@ void readPilotCommands() {
     //receiver.setZero(YAW, receiver.getRaw(YAW));
   }
   
-  #ifdef AeroQuad_Mini
+  #ifdef RateModeOnly
     flightMode = ACRO;
   #else
     // Check Mode switch for Acro or Stable

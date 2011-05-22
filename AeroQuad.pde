@@ -35,6 +35,7 @@
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -60,7 +61,7 @@
 #define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-
+//#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
@@ -293,7 +294,7 @@
   Accel_Wii accel;
   Gyro_Wii gyro;
   Receiver_AeroQuad receiver;
-  Motors_PWM motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
 //  FlightAngle_CompFilter tempFlightAngle;
   #ifdef FlightAngleARG
@@ -304,6 +305,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Magnetometer_HMC5843 compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -314,7 +327,7 @@
   Accel_Wii accel;
   Gyro_Wii gyro;
   Receiver_AeroQuadMega receiver;
-  Motors_PWM motors;
+  Motors_PWMtimer motors;
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -324,6 +337,18 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #include "Compass.h"
+    Magnetometer_HMC5843 compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
@@ -466,8 +491,8 @@ void setup() {
   // Calibrate sensors
   gyro.autoZero(); // defined in Gyro.h
   zeroIntegralError();
-  levelAdjust[ROLL] = 0;
-  levelAdjust[PITCH] = 0;
+ // levelAdjust[ROLL] = 0;
+ // levelAdjust[PITCH] = 0;
   
   // Flight angle estimation
   #ifdef HeadingMagHold
@@ -665,6 +690,13 @@ void loop () {
       if (receiverLoop == ON) { 
         readPilotCommands(); // defined in FlightCommand.pde
       }
+
+      #if defined(CameraControl)
+        camera.setPitch(degrees(flightAngle->getData(PITCH)));
+        camera.setRoll(degrees(flightAngle->getData(ROLL)));
+        camera.setYaw(degrees(flightAngle->getData(YAW)));
+        camera.move();
+      #endif 
 
       #ifdef DEBUG_LOOP
         digitalWrite(10, LOW);

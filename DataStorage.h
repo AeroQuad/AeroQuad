@@ -125,8 +125,8 @@ void initializeEEPROM(void) {
   }
     
   receiver.setXmitFactor(1.0);
-  levelLimit = 500.0;
-  levelOff = 150.0;
+//  levelLimit = 500.0;
+//  levelOff = 150.0;
   gyro.setSmoothFactor(1.0);
   accel.setSmoothFactor(1.0);
   // AKA - old setOneG not in SI - accel.setOneG(500);
@@ -196,8 +196,8 @@ void readEEPROM(void) {
         PID[i].windupGuard = windupGuard;
   }
     
-  levelLimit = readFloat(LEVELLIMIT_ADR);
-  levelOff = readFloat(LEVELOFF_ADR);
+//  levelLimit = readFloat(LEVELLIMIT_ADR);
+//  levelOff = readFloat(LEVELOFF_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
@@ -249,8 +249,8 @@ void writeEEPROM(void){
     writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(levelLimit, LEVELLIMIT_ADR);
-  writeFloat(levelOff, LEVELOFF_ADR);
+//  writeFloat(levelLimit, LEVELLIMIT_ADR);
+//  writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);

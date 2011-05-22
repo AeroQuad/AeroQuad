@@ -26,8 +26,8 @@
 // Flight Software Version
 #define VERSION 2.4
 
-//#define BAUD 115200
-#define BAUD 111111 // use this to be compatible with USB and XBee connections
+#define BAUD 115200
+//#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -151,10 +151,10 @@ int minAcro; // Read in from EEPROM, defines min throttle during flips
 #define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
 
 // Auto level setup
-float levelAdjust[2] = {0.0,0.0};
+//float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
-int levelLimit; // Read in from EEPROM
-int levelOff; // Read in from EEPROM
+//int levelLimit; // Read in from EEPROM
+//int levelOff; // Read in from EEPROM
 // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
@@ -171,7 +171,9 @@ float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-//float absoluteHeading = 0;;
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+float absoluteHeading = 0;;
+#endif
 float setHeading = 0;
 unsigned long headingTime = micros();
 byte headingHoldState = OFF;
@@ -235,13 +237,14 @@ HardwareSerial *binaryPort;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-#define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
+/*#define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
 #define COMPASSLOOPTIME 103000   // 103ms, ~10Hz
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz
 #define CAMERALOOPTIME 20000     // 20ms, 50Hz
 #define FASTTELEMETRYTIME 15000  // 15ms, 67Hz
 #define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
+*/
 
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
@@ -250,7 +253,7 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop times
-unsigned long oneHZpreviousTime;
+//unsigned long oneHZpreviousTime;
 unsigned long tenHZpreviousTime;
 unsigned long twentyFiveHZpreviousTime;
 unsigned long fiftyHZpreviousTime;
@@ -317,8 +320,8 @@ byte testSignal = LOW;
 #define LEVELROLL_PID_GAIN_ADR 12
 #define YAW_PID_GAIN_ADR 24
 #define WINDUPGUARD_ADR 36
-#define LEVELLIMIT_ADR 40
-#define LEVELOFF_ADR 44
+//#define LEVELLIMIT_ADR 40
+//#define LEVELOFF_ADR 44
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
@@ -370,7 +373,7 @@ byte testSignal = LOW;
 #define GYRO_PITCH_ZERO_ADR 376
 #define GYRO_YAW_ZERO_ADR 380
 
-float arctan2(float y, float x); // defined in Sensors.pde
+float arctan2(float y, float x); // defined in AQMath.h
 float readFloat(int address); // defined in DataStorage.h
 void writeFloat(float value, int address); // defined in DataStorage.h
 void readEEPROM(void); // defined in DataStorage.h
