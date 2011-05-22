@@ -144,15 +144,23 @@ void zero_ArduCopter_ADC(void) {
 //#ifndef AeroQuad_v18
 short NWMP_acc[3];
 short NWMP_gyro[3];
+byte  wmpSlow[3];
 
 void Init_Gyro_acc();
 void updateControls();
 
 void Init_Gyro_Acc(void) {
-  //Init WM+ and Nunchuk
-  updateRegisterI2C(0x53, 0xFE, 0x05);
+#ifdef AeroQuad_Paris_v3  
+   pinMode(12, OUTPUT);
+  digitalWrite(12, LOW);
+  delay(200);
+  digitalWrite(12, HIGH);
   delay(100);
+#endif  
+  //Init WM+ and Nunchuk
   updateRegisterI2C(0x53, 0xF0, 0x55);
+  delay(100);
+  updateRegisterI2C(0x53, 0xFE, 0x05);
   delay(100);
 };
 
@@ -165,19 +173,24 @@ void updateControls() {
     Wire.requestFrom(0x52,6);
     for(byte i = 0; i < 6; i++) 
       buffer[i] = Wire.receive();
-    if (buffer[5] & 0x02) { //If WiiMP
-      NWMP_gyro[0]= (((buffer[4]>>2)<<8) +  buffer[1])/16;  //hji
-      NWMP_gyro[1]= (((buffer[5]>>2)<<8) +  buffer[2])/16;  //hji
-      NWMP_gyro[2]=-(((buffer[3]>>2)<<8) +  buffer[0])/16;  //hji
+    if ((buffer[5] & 0x02) == 0x02 && (buffer[5]&0x01) == 0) { //If WiiMP
+      NWMP_gyro[ROLL]  = (((buffer[5]>>2)<<8) +  buffer[2]);  // Configured for Paris MultiWii Board
+      NWMP_gyro[PITCH] = (((buffer[4]>>2)<<8) +  buffer[1]);  // Configured for Paris MultiWii Board
+      NWMP_gyro[YAW]   = (((buffer[3]>>2)<<8) +  buffer[0]);  // Configured for Paris MultiWii Board
+      
+      wmpSlow[ROLL]  = (buffer[4] & 0x02) >> 1 ;
+      wmpSlow[PITCH] = (buffer[3] & 0x01) >> 0 ;
+      wmpSlow[YAW]   = (buffer[3] & 0x02) >> 1 ;
     }
-    else {//If Nunchuk
-      NWMP_acc[0]=(buffer[2]<<1)|((buffer[5]>>4)&0x01);  //hji
-      NWMP_acc[1]=(buffer[3]<<1)|((buffer[5]>>5)&0x01);  //hji
-      NWMP_acc[2]=buffer[4];                             //hji
-      NWMP_acc[2]=NWMP_acc[2]<<1;                        //hji
-      NWMP_acc[2]=NWMP_acc[2] & 0xFFFC;                  //hji
-      NWMP_acc[2]=NWMP_acc[2]|((buffer[5]>>6)&0x03);     //hji
+    else if ((buffer[5]&0x02) == 0 && (buffer[5]&0x01) == 0) {//If Nunchuk
+      NWMP_acc[XAXIS] = (buffer[2]<<1)|((buffer[5]>>4)&0x01);  // Configured for Paris MultiWii Board
+      NWMP_acc[YAXIS] = (buffer[3]<<1)|((buffer[5]>>5)&0x01);  // Configured for Paris MultiWii Board
+      NWMP_acc[ZAXIS] = buffer[4];                           
+      NWMP_acc[ZAXIS] = NWMP_acc[2]<<1;                    
+      NWMP_acc[ZAXIS] = NWMP_acc[2] & 0xFFFC;                
+      NWMP_acc[ZAXIS] = NWMP_acc[2]|((buffer[5]>>6)&0x03);     // Configured for Paris MultiWii Board   
     }
+    if (j == 0) delay(3);
   }
 }
 //#endif

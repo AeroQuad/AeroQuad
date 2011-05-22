@@ -31,29 +31,30 @@ public:
   #endif
   float accelData[3];
   int accelADC[3];
-  int sign[3];
+//  int sign[3];
   float accelOneG, zAxis;
   byte rollChannel, pitchChannel, zAxisChannel;
   
   Accel(void) {
-    sign[ROLL] = 1;
-    sign[PITCH] = 1;
-    sign[YAW] = 1;
+//    sign[ROLL] = 1;
+//    sign[PITCH] = 1;
+//    sign[YAW] = 1;
     zAxis = 0;
   }
 
   // ******************************************************************
   // The following function calls must be defined in any new subclasses
   // ******************************************************************
-  virtual void initialize(void) {
-    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
-  }
+  virtual void initialize(void);
+//  virtual void initialize(void) {
+//    this->_initialize(rollChannel, pitchChannel, zAxisChannel);
+//  }
   virtual void measure(void);
   virtual void calibrate(void);
   virtual const int getFlightData(byte);
 
   // **************************************************************
-  // The following functions are common between all Gyro subclasses
+  // The following functions are common between all Accel subclasses
   // **************************************************************
   void _initialize(byte rollChannel, byte pitchChannel, byte zAxisChannel) {
     accelChannel[ROLL] = rollChannel;
@@ -67,19 +68,19 @@ public:
   
   // return the raw ADC value from the accel, with sign change if need, not smoothed or scaled to SI units
   const int getRaw(byte axis) {
-    return accelADC[axis] * sign[axis];
+    return accelADC[axis];// * sign[axis];
   }
   
   // return the smoothed and scaled to SI units value of the accel with sign change if needed
   const float getData(byte axis) {
-    return accelData[axis] * sign[axis];
+    return accelData[axis];// * sign[axis];
   }
   
   // invert the sign for a specifica accel axis
-  const int invert(byte axis) {
-    sign[axis] = -sign[axis];
-    return sign[axis];
-  }
+//  const int invert(byte axis) {
+//    sign[axis] = -sign[axis];
+//    return sign[axis];
+//  }
   
   const int getZero(byte axis) {
     return accelZero[axis];
@@ -193,7 +194,7 @@ public:
   void initialize(void) {
     byte data;
     
-    this->_initialize(0,1,2);  // AKA added for consistency
+//    this->_initialize(0,1,2);  // AKA added for consistency
   
     accelOneG        = readFloat(ACCEL1G_ADR);
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
@@ -300,9 +301,9 @@ public:
   }
   
   void initialize(void) {
-    byte data;
+//    byte data;
     
-    this->_initialize(0,1,2);  // AKA added for consistency
+//    this->_initialize(0,1,2);  // AKA added for consistency
   
     accelOneG        = readFloat(ACCEL1G_ADR);
     accelZero[XAXIS] = readFloat(LEVELPITCHCAL_ADR);
@@ -348,7 +349,7 @@ public:
       if (calAxis == XAXIS) dataAddress = 0x32;
       if (calAxis == YAXIS) dataAddress = 0x34;
       if (calAxis == ZAXIS) dataAddress = 0x36;
-      for (int i=0; i<FINDZERO; i++) {
+      for (byte i=0; i<FINDZERO; i++) {
         sendByteI2C(accelAddress, dataAddress);
         findZero[i] = readReverseWordI2C(accelAddress);
         delay(10);
@@ -463,10 +464,10 @@ public:
   void measure(void) {
     // Actual measurement performed in gyro class
     // We just update the appropriate variables here
-    // Depending on how your accel is mounted, you can change X/Y axis to pitch/roll mapping here
-    accelADC[XAXIS] =  NWMP_acc[PITCH] - accelZero[PITCH];
-    accelADC[YAXIS] = NWMP_acc[ROLL] - accelZero[ROLL];
-    accelADC[ZAXIS] = accelZero[ZAXIS] - NWMP_acc[ZAXIS];
+    accelADC[XAXIS] =  NWMP_acc[XAXIS] - accelZero[XAXIS];  // Configured for Paris MultiWii Board
+    accelADC[YAXIS] =  accelZero[YAXIS] - NWMP_acc[YAXIS];  // Configured for Paris MultiWii Board
+    accelADC[ZAXIS] =  accelZero[ZAXIS] - NWMP_acc[ZAXIS];  // Configured for Paris MultiWii Board
+    
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
@@ -482,7 +483,7 @@ public:
     int findZero[FINDZERO];
 
     for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
+      for (byte i=0; i<FINDZERO; i++) {
         updateControls();
         findZero[i] = NWMP_acc[calAxis];
       }

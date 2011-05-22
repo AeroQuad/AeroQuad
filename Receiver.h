@@ -243,8 +243,13 @@ SIGNAL(PCINT2_vect) {
   measurePulseWidthISR(2, 0); // PORT D
 }
 
+#ifdef AeroQuad_Paris_v3
+// defines arduino pins used for receiver in arduino pin numbering schema
+static byte receiverPin[6] = {4, 5, 6, 2, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+#else
 // defines arduino pins used for receiver in arduino pin numbering schema
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+#endif
 
 class Receiver_AeroQuad : public Receiver {
 public:
