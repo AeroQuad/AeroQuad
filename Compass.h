@@ -113,12 +113,14 @@ public:
       
       numAttempts++;
    
-      updateRegisterI2C(compassAddress, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton      delay(50);
+      updateRegisterI2C(compassAddress, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      delay(50);
    
       updateRegisterI2C(compassAddress, 0x01, 0x20); // Set +/- 1G gain
       delay(10);
 
-      updateRegisterI2C(compassAddress, 0x02, 0x01);  // Perform single conversion      delay(10);
+      updateRegisterI2C(compassAddress, 0x02, 0x01);  // Perform single conversion
+      delay(10);
    
       measure(0.0, 0.0);                    // Read calibration data
       delay(10);
@@ -195,7 +197,7 @@ public:
   Compass_CHR6DM() : Compass() {}
   void initialize(void) {}
   const int getRawData(byte) {}
-  void measure(void) {
+  void measure(float roll, float pitch) {
     heading = chr6dm.data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
@@ -208,7 +210,7 @@ public:
   Compass_CHR6DM_Fake() : Compass() {}
   void initialize(void) {}
   const int getRawData(byte) {}
-  void measure(void) {
+  void measure(float roll, float pitch) {
     heading = 0;
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;

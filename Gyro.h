@@ -491,6 +491,13 @@ public:
   }
 
   void calibrate() {
+    autoZero();
+    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  }
+
+  void autoZero() {
 
     float zeroXreads[FINDZERO];
     float zeroYreads[FINDZERO];
@@ -507,9 +514,7 @@ public:
     gyroZero[YAXIS] = findMedian(zeroYreads, FINDZERO);
     gyroZero[ZAXIS] = findMedian(zeroZreads, FINDZERO);
 
-    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+
   }
 };
 #endif
