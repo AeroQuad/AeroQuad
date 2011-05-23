@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April2011
+  AeroQuad v2.4.1 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -237,7 +237,8 @@ HardwareSerial *binaryPort;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-/*#define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
+/*
+#define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
 #define COMPASSLOOPTIME 103000   // 103ms, ~10Hz
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz

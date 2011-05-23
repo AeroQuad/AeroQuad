@@ -1,8 +1,13 @@
-AeroQuad Flight Software Source Code 2.4
+AeroQuad Flight Software Source Code 2.4.1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.4 Release Notes (4/2/2011)
+Version 2.4.1 Release Notes (5/22/2011)
+----------------------------------------
+ * Wii bug fixes (thanks aadamson)
+ * Video On Screen Display support (thanks Alamo)
+
+ Version 2.4 Release Notes (4/2/2011)
 ----------------------------------------
  * Added ARG/MARG flight angle estimation routines
  * Improved timing executive, reduced main flight loop to 100Hz

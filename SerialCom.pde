@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.4.1 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -261,8 +261,10 @@ void sendSerialTelemetry() {
     break;
   case 'H': // Send auto level configuration values
 //		PrintValueComma(levelLimit);
-    PrintValueComma(0);//    Serial.println(levelOff);
-    Serial.println(0);    queryType = 'X';
+    PrintValueComma(0);
+//    Serial.println(levelOff);
+    Serial.println(0);
+    queryType = 'X';
     break;
   case 'J': // Altitude Hold
 #ifdef AltitudeHold
@@ -316,7 +318,8 @@ void sendSerialTelemetry() {
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
 //      PrintValueComma(levelAdjust[axis]);
-      PrintValueComma(0);    }
+      PrintValueComma(0);
+    }
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -403,7 +406,8 @@ void sendSerialTelemetry() {
     }
     for (byte axis = ROLL; axis < YAW; axis++) {
 //      PrintValueComma(levelAdjust[axis]);
-      PrintValueComma(0);    }
+      PrintValueComma(0);
+    }
     PrintValueComma(motors.getMotorAxisCommand(ROLL));
     PrintValueComma(motors.getMotorAxisCommand(PITCH));
     Serial.println(motors.getMotorAxisCommand(YAW));

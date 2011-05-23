@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.4.1 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -113,12 +113,14 @@ public:
       
       numAttempts++;
    
-      updateRegisterI2C(compassAddress, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton      delay(50);
+      updateRegisterI2C(compassAddress, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      delay(50);
    
       updateRegisterI2C(compassAddress, 0x01, 0x20); // Set +/- 1G gain
       delay(10);
 
-      updateRegisterI2C(compassAddress, 0x02, 0x01);  // Perform single conversion      delay(10);
+      updateRegisterI2C(compassAddress, 0x02, 0x01);  // Perform single conversion
+      delay(10);
    
       measure(0.0, 0.0);                    // Read calibration data
       delay(10);
