@@ -22,7 +22,7 @@
 // http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13359&viewfull=1#post13359
 
 // Utilities for writing and reading from the EEPROM
-float readFloat(int address) {
+float nvrReadFloat(int address) {
   union floatStore {
     byte floatByte[4];
     float floatVal;
@@ -33,7 +33,7 @@ float readFloat(int address) {
   return floatOut.floatVal;
 }
 
-void writeFloat(float value, int address) {
+void nvrWriteFloat(float value, int address) {
   union floatStore {
     byte floatByte[4];
     float floatVal;
@@ -44,11 +44,11 @@ void writeFloat(float value, int address) {
     EEPROM.write(address + i, floatIn.floatByte[i]);
 }
 
-void readPID(unsigned char IDPid, unsigned int IDEeprom) {
+void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   struct PIDdata* pid = &PID[IDPid];
-  pid->P = readFloat(IDEeprom);
-  pid->I = readFloat(IDEeprom+4);
-  pid->D = readFloat(IDEeprom+8);
+  pid->P = nvrReadFloat(IDEeprom);
+  pid->I = nvrReadFloat(IDEeprom+4);
+  pid->D = nvrReadFloat(IDEeprom+8);
   pid->lastPosition = 0;
   pid->integratedError = 0;
   // AKA experiements with PIDS
@@ -59,11 +59,11 @@ void readPID(unsigned char IDPid, unsigned int IDEeprom) {
     pid->typePID = NOTYPE;
 }
 
-void writePID(unsigned char IDPid, unsigned int IDEeprom) {
+void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
   struct PIDdata* pid = &PID[IDPid];
-  writeFloat(pid->P, IDEeprom);
-  writeFloat(pid->I, IDEeprom+4);
-  writeFloat(pid->D, IDEeprom+8);
+  nvrWriteFloat(pid->P, IDEeprom);
+  nvrWriteFloat(pid->I, IDEeprom+4);
+  nvrWriteFloat(pid->D, IDEeprom+8);
 }
 
 // contains all default values when re-writing EEPROM
@@ -256,12 +256,25 @@ void writeEEPROM(void){
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    byte offset = 12*channel + NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH;
-    writeFloat(receiver.getTransmitterSlope(channel),  offset+0);
-    writeFloat(receiver.getTransmitterOffset(channel), offset+4);
-    writeFloat(receiver.getSmoothFactor(channel),      offset+8);
-  }
+
+  writeFloat(receiver.getTransmitterSlope(0),  RECEIVER_CHANNEL_0_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(0), RECEIVER_CHANNEL_0_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(0),      RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(1),  RECEIVER_CHANNEL_1_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(1), RECEIVER_CHANNEL_1_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(1),      RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(2),  RECEIVER_CHANNEL_2_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(2), RECEIVER_CHANNEL_2_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(2),      RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(3),  RECEIVER_CHANNEL_3_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(3), RECEIVER_CHANNEL_3_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(3),      RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(4),  RECEIVER_CHANNEL_4_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(4), RECEIVER_CHANNEL_4_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(4),      RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(5),  RECEIVER_CHANNEL_5_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(5), RECEIVER_CHANNEL_5_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(5),      RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR);
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
