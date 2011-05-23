@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v2.4.1 - May 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -85,6 +85,9 @@
 // *******************************************************************************************************************************
 //#define CameraControl
 
+// On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
+//#define MAX7456_OSD
+
 /****************************************************************************
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
@@ -94,6 +97,9 @@
 #endif
 #if defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
 #undef FlightAngleARG
+#endif
+#if defined(MAX7456_OSD) && !defined(AeroQuadMega_v2) && !defined(AeroQuadMega_Wii)
+#undef MAX7456_OSD
 #endif
 
 #include <EEPROM.h>
@@ -260,6 +266,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
+  #endif
 #endif
 
 #ifdef ArduCopter
@@ -320,6 +330,10 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
+  #endif
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
   #endif
 #endif
 
@@ -526,6 +540,11 @@ void setup() {
     camera.setCenterRoll(1500); // Need to figure out nice way to set center position
     camera.setmCameraPitch(11.11);
     camera.setCenterPitch(1300);
+  #endif
+  
+  //initialising OSD
+  #if defined(MAX7456_OSD)
+    osd.initialize();
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
@@ -753,7 +772,11 @@ void loop () {
       #ifdef DEBUG_LOOP
         digitalWrite(8, LOW);
       #endif
-    }
+      
+      #ifdef MAX7456_OSD
+        osd.update();
+      #endif
+	}
 
     previousTime = currentTime;
   }
