@@ -197,7 +197,7 @@ public:
   Compass_CHR6DM() : Compass() {}
   void initialize(void) {}
   const int getRawData(byte) {}
-  void measure(void) {
+  void measure(float roll, float pitch) {
     heading = chr6dm.data.yaw; //this hardly needs any filtering :)
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
@@ -210,7 +210,7 @@ public:
   Compass_CHR6DM_Fake() : Compass() {}
   void initialize(void) {}
   const int getRawData(byte) {}
-  void measure(void) {
+  void measure(float roll, float pitch) {
     heading = 0;
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
