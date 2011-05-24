@@ -6,6 +6,7 @@ Version 2.4.1 Release Notes (5/22/2011)
 ----------------------------------------
  * Wii bug fixes (thanks aadamson)
  * Video On Screen Display support (thanks Alamo)
+ * CHR6DM compilation bug fixes (thanks lokling)
 
  Version 2.4 Release Notes (4/2/2011)
 ----------------------------------------
