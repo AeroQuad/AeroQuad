@@ -86,7 +86,7 @@
 //#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
-#define MAX7456_OSD
+//#define MAX7456_OSD
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
@@ -431,7 +431,7 @@
 // ********************** Setup AeroQuad **********************
 // ************************************************************
 void setup() {
-  Serial.begin(BAUD);
+  SERIAL_BEGIN(BAUD);
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
 
