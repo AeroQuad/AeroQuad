@@ -35,17 +35,36 @@ protected:
   unsigned long lastMesuredTime;
   
 public:  
-  Gyroscope();
+  Gyroscope() {}
 
   virtual void initialize() {}
   virtual void measure() {}
   virtual void calibrate() {}
 
-  void setZero(byte axis, float value);
-  const float getZero(byte axis);
-  const float getSmoothFactor();
-  void setSmoothFactor(float value);
-  const float getRadPerSec(byte axis);
-  const float getHeading();
+
+
+  void setZero(byte axis,float value) {
+    zero[axis] = value;
+  }
+
+  const float getZero(byte axis) {
+    return zero[axis];
+  }
+  
+  const float getSmoothFactor() {
+    return smoothFactor;
+  }
+
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
+  }
+
+  const float getRadPerSec(byte axis) {
+    return rate[axis];
+  }
+
+  const float getHeading() {
+    return heading;
+  }
 };
 #endif

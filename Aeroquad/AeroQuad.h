@@ -91,26 +91,6 @@ float smoothHeading;
 #define YAWRATEPIN 5
 
 
-// Motor control variables
-//#define FRONT 0
-//#define REAR 1
-//#define RIGHT 2
-//#define LEFT 3
-//#define MOTORID1 0		
-//#define MOTORID2 1		
-//#define MOTORID3 2		
-//#define MOTORID4 3		
-//#define MOTORID5 4		
-//#define MOTORID6 5
-//#define MINCOMMAND 1000
-//#define MAXCOMMAND 2000
-//#if defined(plusConfig) || defined(XConfig)
-//  #define LASTMOTOR 4
-//#endif
-//#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-//  #define LASTMOTOR 6
-//#endif
-
 // Analog Reference Value
 // This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
@@ -131,9 +111,7 @@ int minAcro; // Read in from EEPROM, defines min throttle during flips
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
-int levelLimit; // Read in from EEPROM
-int levelOff; // Read in from EEPROM
-// Scale to convert 1000-2000 PWM to +/- 45 degrees
+  // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
@@ -238,7 +216,6 @@ unsigned long fastTelemetryTime = 0;
                                   defined(ArduCopter)          || \
                                   defined(AeroQuadMega_CHR6DM) || \
                                   defined(APM_OP_CHR6DM))
-  #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial3.print
   #define SERIAL_PRINTLN    Serial3.println
   #define SERIAL_AVAILABLE  Serial3.available
@@ -246,7 +223,6 @@ unsigned long fastTelemetryTime = 0;
   #define SERIAL_FLUSH      Serial3.flush
   #define SERIAL_BEGIN      Serial3.begin
 #else
-  #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial.print
   #define SERIAL_PRINTLN    Serial.println
   #define SERIAL_AVAILABLE  Serial.available
@@ -274,66 +250,87 @@ byte testSignal = LOW;
 // *************************** EEPROM ***************************
 // **************************************************************
 // EEPROM storage addresses
-#define ROLL_PID_GAIN_ADR 0
-#define LEVELROLL_PID_GAIN_ADR 12
-#define YAW_PID_GAIN_ADR 24
-#define WINDUPGUARD_ADR 36
-#define LEVELLIMIT_ADR 40
-#define LEVELOFF_ADR 44
-#define XMITFACTOR_ADR 48
-#define GYROSMOOTH_ADR 52
-#define ACCSMOOTH_ADR 56
-#define ACCEL_XAXIS_ZERO_ADR 60
-#define ACCEL_YAXIS_ZERO_ADR 64
-#define ACCEL_ZAXIS_ZERO_ADR 68
-#define FILTERTERM_ADR 72
-#define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
-#define PITCH_PID_GAIN_ADR 172
-#define LEVELPITCH_PID_GAIN_ADR 184
-#define HEADINGSMOOTH_ADR 200
-#define HEADING_PID_GAIN_ADR 204
-#define AREF_ADR 216
-#define FLIGHTMODE_ADR 220
-#define LEVEL_GYRO_ROLL_PID_GAIN_ADR 224
-#define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
-#define HEADINGHOLD_ADR 248
-#define MINACRO_ADR 252
-#define ACCEL_ONE_G_ADR 256
-#define ALTITUDE_PGAIN_ADR 260
-#define ALTITUDE_IGAIN_ADR 264
-#define ALTITUDE_DGAIN_ADR 268
-#define ALTITUDE_MAX_THROTTLE_ADR 272
-#define ALTITUDE_MIN_THROTTLE_ADR 276
-#define ALTITUDE_SMOOTH_ADR 280
-#define ZDAMP_PGAIN_ADR 284
-#define ZDAMP_IGAIN_ADR 288
-#define ZDAMP_DGAIN_ADR 292
-#define ALTITUDE_WINDUP_ADR 296
-#define MAGXMAX_ADR 300
-#define MAGXMIN_ADR 304
-#define MAGYMAX_ADR 308
-#define MAGYMIN_ADR 312
-#define MAGZMAX_ADR 316
-#define MAGZMIN_ADR 320
-#define MCAMERAPITCH_ADR 324
-#define MCAMERAROLL_ADR 328
-#define MCAMERAYAW_ADR 332
-#define CENTERPITCH_ADR 336
-#define CENTERROLL_ADR 340
-#define CENTERYAW_ADR 344
-#define SERVOMINPITCH_ADR 348
-#define SERVOMINROLL_ADR 352
-#define SERVOMINYAW_ADR 356
-#define SERVOMAXPITCH_ADR 360
-#define SERVOMAXROLL_ADR 364
-#define SERVOMAXYAW_ADR 368
-#define GYRO_ROLL_ZERO_ADR 372
-#define GYRO_PITCH_ZERO_ADR 376
-#define GYRO_YAW_ZERO_ADR 380
+typedef struct {
+  float p;
+  float i;
+  float d;
+} t_NVR_PID;
+
+typedef struct {
+    
+  t_NVR_PID ROLL_PID_GAIN_ADR;
+  t_NVR_PID LEVELROLL_PID_GAIN_ADR;
+  t_NVR_PID YAW_PID_GAIN_ADR;
+  t_NVR_PID PITCH_PID_GAIN_ADR;
+  t_NVR_PID LEVELPITCH_PID_GAIN_ADR;
+  t_NVR_PID HEADING_PID_GAIN_ADR;
+  t_NVR_PID LEVEL_GYRO_ROLL_PID_GAIN_ADR;
+  t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
+  
+  float WINDUPGUARD_ADR;
+  float XMITFACTOR_ADR;
+  float GYROSMOOTH_ADR;
+  float ACCSMOOTH_ADR;
+  float ACCEL_XAXIS_ZERO_ADR;
+  float ACCEL_YAXIS_ZERO_ADR;
+  float ACCEL_ZAXIS_ZERO_ADR;
+  float ACCEL_1G_ADR;
+  float FILTERTERM_ADR;
+  float HEADINGSMOOTH_ADR;
+  float AREF_ADR;
+  float FLIGHTMODE_ADR;
+  float HEADINGHOLD_ADR;
+  float MINACRO_ADR;
+  float ALTITUDE_PGAIN_ADR;
+  float ALTITUDE_MAX_THROTTLE_ADR;
+  float ALTITUDE_MIN_THROTTLE_ADR;
+  float ALTITUDE_SMOOTH_ADR;
+  float ZDAMP_PGAIN_ADR;
+  float ALTITUDE_WINDUP_ADR;
+  float MAGXMAX_ADR;
+  float MAGXMIN_ADR;
+  float MAGYMAX_ADR;
+  float MAGYMIN_ADR;
+  float MAGZMAX_ADR;
+  float MAGZMIN_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float GYRO_ROLL_ZERO_ADR;
+  float GYRO_PITCH_ZERO_ADR;
+  float GYRO_YAW_ZERO_ADR;
+
+  float RECEIVER_CHANNEL_0_SLOPE_ADR;
+  float RECEIVER_CHANNEL_0_OFFSET_ADR;
+  float RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_1_SLOPE_ADR;
+  float RECEIVER_CHANNEL_1_OFFSET_ADR;
+  float RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_2_SLOPE_ADR;
+  float RECEIVER_CHANNEL_2_OFFSET_ADR;
+  float RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_3_SLOPE_ADR;
+  float RECEIVER_CHANNEL_3_OFFSET_ADR;
+  float RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_4_SLOPE_ADR;
+  float RECEIVER_CHANNEL_4_OFFSET_ADR;
+  float RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_5_SLOPE_ADR;
+  float RECEIVER_CHANNEL_5_OFFSET_ADR;
+  float RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR;
+} t_NVR_Data;  
+
+float nvrReadFloat(int address); // defined in DataStorage.h
+void nvrWriteFloat(float value, int address); // defined in DataStorage.h
+void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
+void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
+
+#define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
+#define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
+#define writeFloat(value, addr) nvrWriteFloat(value, GET_NVR_OFFSET(addr))
+#define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
+#define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
 // defined in DataStorage.h
-float readFloat(int address); 
-void writeFloat(float value, int address); 
 void readEEPROM(void); 
 void initSensorsZeroFromEEPROM(void);
 void storeSensorsZeroToEEPROM(void);
@@ -352,9 +349,11 @@ int motorAxisCommandYaw = 0;
 #if defined quadXConfig || defined quadPlusConfig 
   int motorMinCommand[4];
   int motorMaxCommand[4];
+  int motorConfiguratorCommand[4];
 #elif defined hexXConfig || defined hexPlusConfig
   int motorMinCommand[6];
   int motorMaxCommand[6];
+  int motorConfiguratorCommand[6];
 #endif
 
 

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,81 +18,19 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Class to define sensors that can determine altitude
+#ifndef _AQ_BAROMETRIC_SENSOR_BMP085_
+#define _AQ_BAROMETRIC_SENSOR_BMP085_
 
-// ***********************************************************************
-// ************************** Altitude Class *****************************
-// ***********************************************************************
+#include "BarometricSensor.h"
+#include "Device_I2C.h"
 
-class Altitude {
-public:
-  double altitude, rawAltitude;
-  float groundTemperature; // remove later
-  float groundPressure; // remove later
-  float groundAltitude;
-  float smoothFactor;
-  
-  Altitude (void) { 
-    altitude = 0;
-    smoothFactor = 0.02;
-  }
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getData(void) {
-    return altitude - groundAltitude;
-  }
-  
-  const float getRawData(void) {
-    return rawAltitude;
-  }
-  
-  void setStartAltitude(float value) {
-    altitude = value;
-  }
-  
-  void measureGround(void) {
-    // measure initial ground pressure (multiple samples)
-    groundAltitude = 0;
-    for (int i=0; i < 25; i++) {
-      measure();
-      delay(26);
-      groundAltitude += rawAltitude;
-    }
-    groundAltitude = groundAltitude / 25.0;
-  }
-  
-  void setGroundAltitude(float value) {
-    groundAltitude = value;
-  }
-  
-  const float getGroundAltitude(void) {
-    return groundAltitude;
-  }
-  
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
-  
-  const float getSmoothFactor(void) {
-    return smoothFactor;
-  }
-};
-
-// ***********************************************************************
-// ************************* BMP085 Subclass *****************************
-// ***********************************************************************
-class Altitude_AeroQuad_v2 : public Altitude {
 // This sets up the BMP085 from Sparkfun
 // Code from http://wiring.org.co/learning/libraries/bmp085.html
 // Also made bug fixes based on BMP085 library from Jordi Munoz and Jose Julio
+
+#define BMP085_I2C_ADDRESS 0x77
+
+class BarometricSensor_BMP085 : public BarometricSensor {
 private:
   byte overSamplingSetting;
   int ac1, ac2, ac3;
@@ -100,19 +38,19 @@ private:
   int b1, b2, mb, mc, md;
   long pressure;
   long temperature;
-  int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
+  double rawAltitude;
   float pressureFactor;
   
   void requestRawPressure(void) {
-    updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
+    updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x34+(overSamplingSetting<<6));
   }
   
   long readRawPressure(void) {
     unsigned char msb, lsb, xlsb;
-    sendByteI2C(altitudeAddress, 0xF6);
-    Wire.requestFrom(altitudeAddress, 3); // request three bytes
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
+    Wire.requestFrom(BMP085_I2C_ADDRESS, 3); // request three bytes
     while(!Wire.available()); // wait until data available
     msb = Wire.receive();
     while(!Wire.available()); // wait until data available
@@ -120,20 +58,20 @@ private:
     while(!Wire.available()); // wait until data available
     xlsb = Wire.receive();
     return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
+	return 0;
   }
 
   void requestRawTemperature(void) {
-    updateRegisterI2C(altitudeAddress, 0xF4, 0x2E);
+    updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x2E);
   }
   
   unsigned int readRawTemperature(void) {
-    sendByteI2C(altitudeAddress, 0xF6);
-    return readWordWaitI2C(altitudeAddress);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
+    return readWordWaitI2C(BMP085_I2C_ADDRESS);
   }
 
 public: 
-  Altitude_AeroQuad_v2() : Altitude(){
-    altitudeAddress = 0x77;
+  BarometricSensor_BMP085() : BarometricSensor(){
     // oversampling setting
     // 0 = ultra low power
     // 1 = standard
@@ -141,9 +79,7 @@ public:
     // 3 = ultra high resolution
     overSamplingSetting = 3;
     pressure = 0;
-    groundPressure = 0;
     temperature = 0;
-    groundTemperature = 0;
     groundAltitude = 0;
     pressureFactor = 1/5.255;
   }
@@ -154,28 +90,28 @@ public:
   void initialize(void) {
 //    float verifyGroundAltitude;
     
-    sendByteI2C(altitudeAddress, 0xAA);
-    ac1 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xAC);
-    ac2 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xAE);
-    ac3 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB0);
-    ac4 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB2);
-    ac5 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB4);
-    ac6 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB6);
-    b1 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB8);
-    b2 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBA);
-    mb = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBC);
-    mc = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBE);
-    md = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAA);
+    ac1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAC);
+    ac2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAE);
+    ac3 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB0);
+    ac4 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB2);
+    ac5 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB4);
+    ac6 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB6);
+    b1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB8);
+    b2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBA);
+    mb = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBC);
+    mc = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBE);
+    md = readWordWaitI2C(BMP085_I2C_ADDRESS);
     requestRawTemperature(); // setup up next measure() for temperature
     select = TEMPERATURE;
     pressureCount = 0;
@@ -250,6 +186,29 @@ public:
     //rawAltitude = (101325.0-pressure)/4096*346;
     altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
   }
+  
+  void measureGround() {
+    // measure initial ground pressure (multiple samples)
+    groundAltitude = 0;
+    for (int i=0; i < 25; i++) {
+      measure();
+      delay(26);
+      groundAltitude += rawAltitude;
+    }
+    groundAltitude = groundAltitude / 25.0;
+  }
+
+  const float getRawData() {
+    return rawAltitude;
+  }
+  
+  const float getGroundAltitude() {
+    return groundAltitude;
+  }
+
+  void setStartAltitude(float value) {
+    altitude = value;
+  }
 };
 
-
+#endif

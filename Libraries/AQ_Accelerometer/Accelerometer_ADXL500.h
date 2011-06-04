@@ -28,11 +28,59 @@ private:
   float aref;
   
 public:
-  Accelerometer_ADXL500();
+  Accelerometer_ADXL500() {
+    accelScaleFactor = G_2_MPS2((3.0/1024.0) / 0.300);  // force aref to 3.0 for v1.7 shield
+    smoothFactor     = 1.0;
+  }
+
+  void setAref(float aref) {
+	this->aref = aref;
+	accelScaleFactor = G_2_MPS2((aref/1024.0) / 0.300);
+  }
   
-  void setAref(float aref);
+  void measure(void) {
+    // rollChannel = 1
+    // pitchChannel = 0
+    // zAxisChannel = 2
   
-  void measure(void);
-  void calibrate(void);
+    int accelADC[3];
+    accelADC[XAXIS] = analogRead(1) - zero[PITCH];
+    accelADC[YAXIS] = analogRead(0) - zero[ROLL];
+    accelADC[ZAXIS] = zero[ZAXIS] - analogRead(2);
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+      meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], smoothFactor);
+    }
+  }
+
+  void calibrate() {
+    // rollChannel = 1
+    // pitchChannel = 0
+    // zAxisChannel = 2
+
+    int findZero[FINDZERO];
+
+    for (int i=0; i<FINDZERO; i++) {
+      findZero[i] = analogRead(1);
+	  delay(2);
+    }
+    zero[XAXIS] = findMedianInt(findZero, FINDZERO);
+    for (int i=0; i<FINDZERO; i++) {
+	  findZero[i] = analogRead(0);
+	  delay(2);
+    }
+    zero[YAXIS] = findMedianInt(findZero, FINDZERO);
+    for (int i=0; i<FINDZERO; i++) {
+	  findZero[i] = analogRead(2);
+	  delay(2);
+    }
+    zero[ZAXIS] = findMedianInt(findZero, FINDZERO);
+	
+    // store accel value that represents 1g
+    measure();
+    oneG = -meterPerSec[ZAXIS];
+    // replace with estimated Z axis 0g value
+    zero[ZAXIS] = (zero[XAXIS] + zero[YAXIS]) / 2;
+  }
+
 };
 #endif

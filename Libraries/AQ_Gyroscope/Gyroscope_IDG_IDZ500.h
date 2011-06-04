@@ -31,12 +31,59 @@ private:
   float aref;
   
 public:
-  Gyroscope_IDG_IDZ500();
-  
-  void setAref(float _aref);
-  
-  void initialize(void);
-  void measure(void);
-  void calibrate(void);
+  Gyroscope_IDG_IDZ500() {
+  }
+
+  void setAref(float _aref) {
+    aref = _aref;
+    gyroScaleFactor = radians((aref/1024.0) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+  } 
+
+  void initialize(void) {
+    analogReference(EXTERNAL);
+    // Configure gyro auto zero pins
+    pinMode (AZPIN, OUTPUT);
+    digitalWrite(AZPIN, LOW);
+    delay(1);
+
+    // rollChannel = 4
+    // pitchChannel = 3
+    // yawChannel = 5
+    gyroChannel[0] = 4;
+    gyroChannel[1] = 3;
+    gyroChannel[2] = 5;
+  }
+    
+  void measure(void) {
+    int gyroADC;
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+      if (axis == PITCH)
+        gyroADC = analogRead(gyroChannel[axis]) - zero[axis];
+      else
+        gyroADC = zero[axis] - analogRead(gyroChannel[axis]);
+      rate[axis] = filterSmooth(gyroADC * gyroScaleFactor, rate[axis], smoothFactor);
+    }
+ 
+    // Measure gyro heading
+    long int currentTime = micros();
+    if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
+      heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
+    }
+    lastMesuredTime = currentTime;
+  }
+
+  void calibrate() {
+    int findZero[FINDZERO];
+    digitalWrite(AZPIN, HIGH);
+    delayMicroseconds(750);
+    digitalWrite(AZPIN, LOW);
+    delay(8);
+
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++)
+        findZero[i] = analogRead(gyroChannel[calAxis]);
+      zero[calAxis] = findMedianInt(findZero, FINDZERO);
+    }
+  }
 };
 #endif

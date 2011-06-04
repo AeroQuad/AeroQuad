@@ -21,11 +21,11 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_
 
-#define FRONT 0
-#define REAR  1
-#define RIGHT 2
-#define LEFT  3
-#define LASTMOTOR 4
+#define FRONT MOTOR1
+#define REAR  MOTOR2
+#define RIGHT MOTOR3
+#define LEFT  MOTOR4
+#define LASTMOTOR MOTOR4+1
 
 void processFlightControl() {
   // ********************** Calculate Flight Error ***************************

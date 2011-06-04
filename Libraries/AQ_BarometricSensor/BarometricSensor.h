@@ -18,53 +18,43 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_ACCELEROMETER_H_
-#define _AEROQUAD_ACCELEROMETER_H_
+#ifndef _AQ_BAROMETRIC_SENSOR_
+#define _AQ_BAROMETRIC_SENSOR_
 
-#include <WProgram.h>
-#include <Axis.h>
 
-class Accelerometer {
+class BarometricSensor {
 protected:
-  float accelScaleFactor;
+  double altitude;
   float smoothFactor;
-  float oneG;
-  float meterPerSec[3];
-  float zero[3];
+  float groundAltitude;
   
-public:  
-  Accelerometer() {};
+public:
+  
+  BarometricSensor() { 
+    altitude = 0;
+    smoothFactor = 0.02;
+  }
 
-  virtual void initialize() {}
-  virtual void calibrate() {}
-  virtual void measure() {}
+  // **********************************************************************
+  // The following function calls must be defined inside any new subclasses
+  // **********************************************************************
+  virtual void initialize(); 
+  virtual void measure();
+  
+  // *********************************************************
+  // The following functions are common between all subclasses
+  // *********************************************************
+  const float getAltitude() {
+    return altitude - groundAltitude;
+  }
+ 
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
+  }
   
   const float getSmoothFactor() {
     return smoothFactor;
   }
-
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
-
-  void setOneG(float oneG) {
-    this->oneG = oneG;
-  }
-
-  float getOneG() {
-    return oneG;
-  }
-
-  float getMeterPerSec(byte axis) {
-    return meterPerSec[axis];
-  }
-
-  float getZero(byte axis) {
-    return zero[axis];
-  }
-
-  void setZero(byte axis, float zero) {
-    this->zero[axis] = zero;
-  }
 };
+
 #endif

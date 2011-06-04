@@ -26,15 +26,43 @@
 
 #include "Motors.h"
 
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #define MOTORPIN0    2
+  #define MOTORPIN1    3
+  #define MOTORPIN2    5
+  #define MOTORPIN3    6
+  #define MOTORPIN4    7
+  #define MOTORPIN5    8
+#else
+  #define MOTORPIN0    3
+  #define MOTORPIN1    9
+  #define MOTORPIN2   10
+  #define MOTORPIN3   11
+#endif
+
 class Motors_PWM : public Motors {
 public:
 
-  Motors_PWM();
-	
-  void initialize(NB_Motors numbers = FOUR_Motors);
-  void write();
-  void commandAllMotors(int command);
-  
+  Motors_PWM() {
+  }
+
+  void initialize(NB_Motors numbers) {
+    commandAllMotors(1000);
+  }
+
+  void write() {
+    analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
+    analogWrite(MOTORPIN1, motorCommand[MOTOR2]  / 8);
+    analogWrite(MOTORPIN2, motorCommand[MOTOR3] / 8);
+    analogWrite(MOTORPIN3, motorCommand[MOTOR4]  / 8); 
+  }
+
+  void commandAllMotors(int command) {
+    analogWrite(MOTORPIN0, command / 8);
+    analogWrite(MOTORPIN1, command / 8);
+    analogWrite(MOTORPIN2, command / 8);
+    analogWrite(MOTORPIN3, command / 8);
+  }  
 };
 
 #endif

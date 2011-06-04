@@ -169,4 +169,6 @@ float arctan2(float y, float x);
 float findMedianFloat(float *data, int arraySize);
 int findMedianInt(int *data, int arraySize); 
 
+boolean isSwitched(float previousError, float currentError);
+
 #endif

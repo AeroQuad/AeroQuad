@@ -407,3 +407,13 @@ int findMedianInt(int *data, int arraySize)
   
   return data[arraySize/2]; // return the median value
 }
+
+
+
+boolean isSwitched(float previousError, float currentError) {
+  if ( (previousError > 0 &&  currentError < 0) ||
+	   (previousError < 0 &&  currentError > 0)) {
+    return true;
+  }
+  return false;
+}

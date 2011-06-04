@@ -50,9 +50,6 @@ void readPilotCommands() {
       //#if defined(BattMonitor) && defined(ArduCopter)
       //  ledCW(); ledCW(); ledCW();
       //#endif
-      #ifdef ArduCopter
-        zero_ArduCopter_ADC();
-      #endif
     }   
     // Arm motors (left stick lower right corner)
     if (receiver->getData(YAW) > MAXCHECK && armed == OFF && safetyCheck == ON) {
@@ -114,7 +111,7 @@ void readPilotCommands() {
    if (receiver->getData(AUX) < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
-         holdAltitude = altitude.getData();
+         holdAltitude = barometricSensor->getAltitude();
          holdThrottle = receiver->getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.

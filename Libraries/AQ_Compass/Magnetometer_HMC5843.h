@@ -26,23 +26,93 @@
 
 #include <WProgram.h>
 
+#define COMPASS_ADDRESS 0x1E
+
 class Magnetometer_HMC5843 : public Compass{
 private:
   float magCalibration[3];
-  byte  firstPassMagBias;
-  float dcmMatrixPrevious[9];
-  float magFieldBodyPrevious[3];
-  float magFieldEarthPrevious[3];
-  float magBias[3];
-  float magFieldEarth[3];
   
 public:
-  Magnetometer_HMC5843();	
-  
-  void initialize(float dcm[]);
-  void measure(float roll, float pitch, float dcm[], byte useMagBias);
-  void magBiasCalculation(float dcmMatrix[], float magFieldBody[]);
-  void setPastValues(float dcmMatrix[], float magFieldBody[]);
+  Magnetometer_HMC5843() : Compass() {
+  }
+
+  void initialize() {
+
+    byte numAttempts = 0;
+    bool success = false;
+    delay(10);                             // Power up delay **
+   
+    magCalibration[XAXIS] = 1.0;
+    magCalibration[YAXIS] = 1.0;
+    magCalibration[ZAXIS] = 1.0;
+    
+    while (success == false && numAttempts < 5 ) {
+      
+      numAttempts++;
+   
+      updateRegisterI2C(0x1E, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      delay(50);
+   
+      updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
+      delay(10);
+
+      updateRegisterI2C(0x1E, 0x02, 0x01);  // Perform single conversion
+      delay(10);
+   
+      measure(0.0, 0.0);                    // Read calibration data
+      delay(10);
+   
+      if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1000.0 \
+          && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1000.0 \
+          && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1000.0) {
+        magCalibration[XAXIS] = fabs(715.0 / measuredMagX);
+        magCalibration[YAXIS] = fabs(715.0 / measuredMagY);
+        magCalibration[ZAXIS] = fabs(715.0 / measuredMagZ);
+    
+        success = true;
+      }
+   
+      updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x10);  // Set 10hz update rate and normal operaiton
+      delay(50);
+
+      updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x00); // Continuous Update mode
+      delay(50);                           // Mode change delay (1/Update Rate) **
+    }
+
+    measure(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+  }
+
+  void measure(float roll, float pitch) {
+    float magX;
+    float magY;
+    float tmp;
+    
+    sendByteI2C(COMPASS_ADDRESS, 0x03);
+    Wire.requestFrom(COMPASS_ADDRESS, 6);
+
+    measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+
+    Wire.endTransmission();
+
+    float cosRoll =  cos(roll);
+    float sinRoll =  sin(roll);
+    float cosPitch = cos(pitch);
+    float sinPitch = sin(pitch);
+
+    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + \
+           ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+           
+    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
+
+    tmp  = sqrt(magX * magX + magY * magY);
+   
+    hdgX = magX / tmp;
+    hdgY = -magY / tmp;
+  }
 };
 
 

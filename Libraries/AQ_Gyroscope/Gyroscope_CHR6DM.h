@@ -30,11 +30,34 @@ private:
   CHR6DM *chr6dm;
   
 public:
-  Gyroscope_CHR6DM();
+  Gyroscope_CHR6DM() {
+  }
+
+  void setChr6dm(CHR6DM *chr6dm) {
+    this->chr6dm = chr6dm;
+  }
   
-  void setChr6dm(CHR6DM *chr6dm);
-  void measure(void);
-  void calibrate(void);
+  void measure(void) {
+    chr6dm->read();
+    gyroADC[ROLL] = chr6dm->data.rollRate; //gx
+    gyroADC[PITCH] = chr6dm->data.pitchRate; //gy
+    gyroADC[YAW] = chr6dm->data.yawRate; //gz
+
+    rate[ROLL] = filterSmooth(gyroADC[ROLL], rate[ROLL], smoothFactor); 
+    rate[PITCH] = filterSmooth(gyroADC[PITCH], rate[PITCH], smoothFactor); 
+    rate[YAW] = filterSmooth(gyroADC[YAW], rate[YAW], smoothFactor); 
+
+    // Measure gyro heading
+    long int currentTime = micros();
+    if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
+      heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
+    }
+    lastMesuredTime = currentTime;
+  }
+
+  void calibrate() {
+    chr6dm->zeroRateGyros();
+  }
 };
 
 #endif  // #ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_

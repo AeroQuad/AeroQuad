@@ -24,6 +24,14 @@
 
 #include <WProgram.h>
 
+#define MOTOR1 0
+#define MOTOR2 1
+#define MOTOR3 2
+#define MOTOR4 3
+#define MOTOR5 4
+#define MOTOR6 5
+#define MOTOR7 6
+#define MOTOR8 7
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 
@@ -40,15 +48,29 @@ protected:
   
 public:
 
-  Motors();
+  Motors() {
+  }
 	
   virtual void initialize(NB_Motors numbers = FOUR_Motors) {}
   virtual void write() {}
   virtual void commandAllMotors(int command) {}
-  
-  void pulseMotors(byte nbPulse);
-  void setMotorCommand(byte motor, int command);
-  int getMotorCommand(byte motor);
+
+  void pulseMotors(byte nbPulse) {
+    for (byte i = 0; i < nbPulse; i++) {
+      commandAllMotors(MINCOMMAND + 100);
+      delay(250);
+      commandAllMotors(MINCOMMAND);
+      delay(250);
+    }
+  }
+
+  void setMotorCommand(byte motor, int command) {
+    motorCommand[motor] = command;
+  }
+
+  int getMotorCommand(byte motor) {
+    return motorCommand[motor];
+  }
 };
 
 

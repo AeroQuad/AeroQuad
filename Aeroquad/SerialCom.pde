@@ -70,8 +70,8 @@ void readSerialCommand() {
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
     case 'G': // Receive auto level configuration
-      levelLimit = readFloatSerial();
-      levelOff = readFloatSerial();
+      readFloatSerial();
+      readFloatSerial();
       break;
     case 'I': // Receiver altitude hold PID
 #ifdef AltitudeHold
@@ -79,7 +79,7 @@ void readSerialCommand() {
       PID[ALTITUDE].windupGuard = readFloatSerial();
       minThrottleAdjust = readFloatSerial();
       maxThrottleAdjust = readFloatSerial();
-      altitude.setSmoothFactor(readFloatSerial());
+      barometricSensor->setSmoothFactor(readFloatSerial());
       readSerialPID(ZDAMPENING);
 #endif
       break;
@@ -110,10 +110,10 @@ void readSerialCommand() {
       accel->calibrate();
       zeroIntegralError();
 #ifdef HeadingMagHold
-      compass->initialize(flightAngle->getDCMmatrixPtr());
+      compass->initialize();
 #endif
 #ifdef AltitudeHold
-      altitude.initialize();
+      barometricSensor->initialize();
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
@@ -138,7 +138,7 @@ void readSerialCommand() {
       armed = 0;
       calibrateESC = 5;
       for (byte motor = 0; motor < LASTMOTOR; motor++)
-        motors->setMotorCommand(motor, readFloatSerial());
+        motorConfiguratorCommand[motor] = (int)readFloatSerial();
       break;
     case 'a': // fast telemetry transfer
       if (readFloatSerial() == 1.0)
@@ -260,8 +260,8 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'H': // Send auto level configuration values
-		PrintValueComma(levelLimit);
-    SERIAL_PRINTLN(levelOff);
+    PrintValueComma(0);
+    Serial.println(0);
     queryType = 'X';
     break;
   case 'J': // Altitude Hold
@@ -270,7 +270,7 @@ void sendSerialTelemetry() {
     PrintValueComma(PID[ALTITUDE].windupGuard);
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
-    PrintValueComma(altitude.getSmoothFactor());
+    PrintValueComma(barometricSensor->getSmoothFactor());
     PrintValueComma(PID[ZDAMPENING].P);
     PrintValueComma(PID[ZDAMPENING].I);
     SERIAL_PRINTLN(PID[ZDAMPENING].D);
@@ -317,21 +317,21 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < YAW; axis++) {
       PrintValueComma(levelAdjust[axis]);
     }
-    PrintValueComma(degrees(flightAngle->getData(ROLL)));
-    PrintValueComma(degrees(flightAngle->getData(PITCH)));
+    PrintValueComma(degrees(kinematics->getData(ROLL)));
+    PrintValueComma(degrees(kinematics->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       //PrintValueComma(compass->getAbsoluteHeading());
-      PrintValueComma(flightAngle->getDegreesHeading(YAW));
+      PrintValueComma(kinematics->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
+      PrintValueComma(barometricSensor->getAltitude());
     #else
       PrintValueComma(0);
     #endif
     #ifdef BattMonitor
-      SERIAL_PRINT(batteryMonitor.getData());
+      SERIAL_PRINT(batteryMonitor->getBatteryVoltage());
     #else
       SERIAL_PRINT(0);
     #endif
@@ -357,7 +357,7 @@ void sendSerialTelemetry() {
         PrintValueComma(gyro->getRadPerSec(axis));
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryMonitor.getData());
+      PrintValueComma(batteryMonitor->getBatteryVoltage());
     #else
       PrintValueComma(0);
     #endif
@@ -383,12 +383,12 @@ void sendSerialTelemetry() {
       PrintValueComma(1000);
     #ifdef HeadingMagHold
       //PrintValueComma(compass->getAbsoluteHeading());
-      PrintValueComma(flightAngle->getDegreesHeading(YAW));
+      PrintValueComma(kinematics->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
     #endif
     #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
+      PrintValueComma(barometricSensor->getAltitude());
       SERIAL_PRINT(altitudeHold, DEC);
     #else
       PrintValueComma(0);

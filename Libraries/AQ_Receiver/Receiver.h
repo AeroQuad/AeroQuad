@@ -52,25 +52,92 @@ protected:
   float transmitterSmooth[LASTCHANNEL];
   
 public:  
-  Receiver();
+  Receiver() {
+
+    transmitterCommand[ROLL] = 1500;
+    transmitterCommand[PITCH] = 1500;
+    transmitterCommand[YAW] = 1500;
+    transmitterCommand[THROTTLE] = 1000;
+    transmitterCommand[MODE] = 1000;
+    transmitterCommand[AUX] = 1000;
+
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      transmitterCommandSmooth[channel] = 1.0;
+    for (byte channel = ROLL; channel < THROTTLE; channel++)
+      transmitterZero[channel] = 1500;
+	
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      mTransmitter[channel] = 1;
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      bTransmitter[channel] = 1;
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      transmitterSmooth[channel] = 1;
+  }
+
 
   virtual void initialize(void) {}
   virtual void read(void) {}
   
-  const float getXmitFactor(void);
-  void setXmitFactor(float xmitFactor);
-  const float getTransmitterSlope(byte channel);
-  void setTransmitterSlope(byte channel, float value);
-  const float getTransmitterOffset(byte channel);
-  void setTransmitterOffset(byte channel, float value);
-  const float getSmoothFactor(byte channel);
-  void setSmoothFactor(byte channel, float value);  
-  const int getTransmitterTrim(byte channel);
-  void setTransmitterTrim(byte channel, int value);
-  const float getSIData(byte channel);
-  const int getZero(byte channel);  
-  void setZero(byte channel, int value);
-  const int getData(byte channel);
+
+  const float getXmitFactor(void) {
+    return xmitFactor;
+  }
+
+  void setXmitFactor(float value) {
+    xmitFactor = value;
+  }
+
+  const float getTransmitterSlope(byte channel) {
+    return mTransmitter[channel];
+  }
+
+  void setTransmitterSlope(byte channel, float value) {
+    mTransmitter[channel] = value;
+  }
+
+  const float getTransmitterOffset(byte channel) {
+    return bTransmitter[channel];
+  }
+
+  void setTransmitterOffset(byte channel, float value) {
+    bTransmitter[channel] = value;
+  }
+
+  const float getSmoothFactor(byte channel) {
+    return transmitterSmooth[channel];
+  }
+
+  void setSmoothFactor(byte channel, float value) {
+    transmitterSmooth[channel] = value;
+  }
+
+  const int getTransmitterTrim(byte channel) {
+    return transmitterTrim[channel];
+  }
+
+  void setTransmitterTrim(byte channel, int value) {
+    transmitterTrim[channel] = value;
+  }
+
+  // return the smoothed & scaled number of radians/sec in stick movement - zero centered
+  const float getSIData(byte channel) {
+    return ((transmitterCommand[channel] - transmitterZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
+  }
+
+  // returns Zero value of channel in PWM
+  const int getZero(byte channel) {
+    return transmitterZero[channel];
+  }
+  
+  // sets zero value of channel in PWM  
+  void setZero(byte channel, int value) {
+    transmitterZero[channel] = value;
+  }
+
+  // returns smoothed & scaled receiver(channel) in PWM values, zero centered
+  const int getData(byte channel) {
+    return transmitterCommand[channel];
+  }
 };
 #endif
 
