@@ -404,6 +404,11 @@ public:
   void measure(void) {
     updateControls(); // defined in DataAcquisition.h
     
+    // Original Wii sensor orientation
+    //gyroADC[ROLL] =  NWMP_gyro[1]  - gyroZero[1];
+    //gyroADC[PITCH] = NWMP_gyro[0] - gyroZero[0];
+    //gyroADC[YAW] =   gyroZero[YAW] - NWMP_gyro[YAW];
+
     gyroADC[ROLL] =  gyroZero[ROLL]   - NWMP_gyro[ROLL];  // Configured for Paris MultiWii Board
     gyroADC[PITCH] = NWMP_gyro[PITCH] - gyroZero[PITCH];  // Configured for Paris MultiWii Board
     gyroADC[YAW] =   gyroZero[YAW]    - NWMP_gyro[YAW];   // Configured for Paris MultiWii Board
