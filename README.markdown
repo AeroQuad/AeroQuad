@@ -2,9 +2,9 @@ AeroQuad Flight Software Source Code 2.4.1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.4.1 Release Notes (5/22/2011)
+Version 2.4.1 Release Notes (6/5/2011)
 ----------------------------------------
- * Wii bug fixes (thanks aadamson)
+ * Wii bug fixes (thanks aadamson/jihlein) - please note that the Wii sensor orientations now follow the MultiWii convention
  * Video On Screen Display support (thanks Alamo)
  * CHR6DM compilation bug fixes (thanks lokling)
 
