@@ -235,6 +235,7 @@ void sendSerialTelemetry() {
     //PrintValueComma(receiver.getZero(ROLL));
     //PrintValueComma(flightAngle->getData(ROLL));
     //SERIAL_PRINT(degrees(flightAngle->getData(YAW)));
+    SERIAL_PRINTLN(batteryMonitor.getData());
     //SERIAL_PRINTLN();
     //printFreeMemory();
     //queryType = 'X';

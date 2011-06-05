@@ -197,7 +197,7 @@ public:
     float Aref =     5.0;
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
 #ifdef AeroQuad_Mini
-    diode = 0.0;
+    diode = 0.53; // measured with DMM
 #else    
     diode = 0.9; // measured with DMM
 #endif    
