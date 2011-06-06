@@ -30,28 +30,16 @@
 #define LASTMOTOR   MOTOR6+1
 
 
-void processFlightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
+void applyMotorCommand() {
+  motors->setMotorCommand(FRONT_LEFT,  throttle - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
+  motors->setMotorCommand(REAR_RIGHT,  throttle + motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
+  motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
+  motors->setMotorCommand(REAR_LEFT,   throttle + motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
+  motors->setMotorCommand(RIGHT,       throttle                         - motorAxisCommandRoll - motorAxisCommandYaw);
+  motors->setMotorCommand(LEFT,        throttle                         + motorAxisCommandRoll + motorAxisCommandYaw);
+}
 
-  // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motors->setMotorCommand(FRONT_LEFT,  throttle - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
-    motors->setMotorCommand(REAR_RIGHT,  throttle + motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
-    motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
-    motors->setMotorCommand(REAR_LEFT,   throttle + motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
-    motors->setMotorCommand(RIGHT,       throttle                         - motorAxisCommandRoll - motorAxisCommandYaw);
-    motors->setMotorCommand(LEFT,        throttle                         + motorAxisCommandRoll + motorAxisCommandYaw);
-  }
-  
-  // *********************** process min max motor command *******************
-
+void processMinMaxCommand() {
   if ((motors->getMotorCommand(FRONT_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(RIGHT) <= MINTHROTTLE)) {
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
     motorMaxCommand[REAR_RIGHT] =  constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
@@ -93,8 +81,9 @@ void processFlightControl(void) {
     motorMinCommand[REAR_LEFT] =  MINTHROTTLE;
     motorMinCommand[RIGHT] =      MINTHROTTLE;
   }
+}
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
+void processHardManuevers() {
   if (flightMode == ACRO) {
     if (receiver->getData(ROLL) < MINCHECK) {        // Maximum Left Roll Rate
       motorMinCommand[RIGHT] =       MAXCOMMAND;
@@ -125,28 +114,6 @@ void processFlightControl(void) {
       motorMaxCommand[FRONT_RIGHT] = minAcro;
     }
   }
-
-  // Apply limits to motor commands
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiver->getData(THROTTLE) < MINCHECK) {
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motors->setMotorCommand(motor, MINTHROTTLE);
-    }
-  }
-
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    motors->write(); // Defined in Motors.h
-  }
-} 
+}
 
 #endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_X_MODE_H_

@@ -27,26 +27,15 @@
 #define LEFT  MOTOR4
 #define LASTMOTOR MOTOR4+1
 
-void processFlightControl() {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
 
-  // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
+void applyMotorCommand() {
+  motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - motorAxisCommandYaw);
+  motors->setMotorCommand(REAR,  throttle + motorAxisCommandPitch - motorAxisCommandYaw);
+  motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll  + motorAxisCommandYaw);
+  motors->setMotorCommand(LEFT,  throttle + motorAxisCommandRoll  + motorAxisCommandYaw);
+}
 
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - motorAxisCommandYaw);
-    motors->setMotorCommand(REAR,  throttle + motorAxisCommandPitch - motorAxisCommandYaw);
-    motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll  + motorAxisCommandYaw);
-    motors->setMotorCommand(LEFT,  throttle + motorAxisCommandRoll  + motorAxisCommandYaw);
-  } 
-
-  // *********************** process min max motor command *******************
-  
+void processMinMaxCommand() {
   if ((motors->getMotorCommand(FRONT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR) <= MINTHROTTLE)){
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
     motorMaxCommand[RIGHT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
@@ -80,9 +69,9 @@ void processFlightControl() {
     motorMinCommand[FRONT] = MINTHROTTLE;
     motorMinCommand[REAR]  = MINTHROTTLE;
   }
+}
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  
+void processHardManuevers() {
   if (flightMode == ACRO) {
     if (receiver->getData(ROLL) < MINCHECK) {        // Maximum Left Roll Rate
       motorMinCommand[RIGHT] = MAXCOMMAND;
@@ -101,30 +90,6 @@ void processFlightControl() {
       motorMaxCommand[FRONT] = minAcro;
     }
   }
-
-  // Apply limits to motor commands
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiver->getData(THROTTLE) < MINCHECK) {
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motors->setMotorCommand(motor, MINTHROTTLE);
-    }
-  }
-
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    motors->write(); // Defined in Motors.h
-  }
 }
-
-
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_

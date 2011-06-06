@@ -179,5 +179,54 @@ void processAltitudeHold(void)
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////// processFlightControl main function ///////////////
+//////////////////////////////////////////////////////////////////////////////
+void processFlightControl() {
+  // ********************** Calculate Flight Error ***************************
+  calculateFlightError();
+  
+  // ********************** Update Yaw ***************************************
+  processHeading();
+
+  // ********************** Altitude Adjust **********************************
+  processAltitudeHold();
+
+  // ********************** Calculate Motor Commands *************************
+  if (armed && safetyCheck) {
+    applyMotorCommand();
+  } 
+
+  // *********************** process min max motor command *******************
+  processMinMaxCommand();
+
+
+  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
+  processHardManuevers();
+
+  
+  // Apply limits to motor commands
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
+  }
+
+  // If throttle in minimum position, don't apply yaw
+  if (receiver->getData(THROTTLE) < MINCHECK) {
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+      motors->setMotorCommand(motor, MINTHROTTLE);
+    }
+  }
+
+  // ESC Calibration
+  if (armed == OFF) {
+    processCalibrateESC();
+  }
+
+  // *********************** Command Motors **********************
+  if (armed == ON && safetyCheck == ON) {
+    motors->write(); // Defined in Motors.h
+  }
+}
+
 #endif //#define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
