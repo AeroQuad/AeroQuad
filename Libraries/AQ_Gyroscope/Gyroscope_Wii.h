@@ -59,9 +59,6 @@ public:
   }
 
   void measure() {
-    // Replace code below with sensor measurement methodology
-    platformWii->measure();
-    
 	int gyroADC[3];
     gyroADC[ROLL] = zero[ROLL] - platformWii->getGyroADC(ROLL);
 	gyroADC[PITCH] = platformWii->getGyroADC(PITCH) - zero[PITCH];
