@@ -40,6 +40,7 @@ void readPilotCommands() {
     if ((receiver->getData(YAW) < MINCHECK) && (receiver->getData(ROLL) > MAXCHECK) && (receiver->getData(PITCH) < MINCHECK)) {
       gyro->calibrate(); // defined in Gyro.h
       accel->calibrate(); // defined in Accel.h
+      storeSensorsZeroToEEPROM();
       //accel.setOneG(accel.getFlightData(ZAXIS));
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
         _flightAngle->calibrate();

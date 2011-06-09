@@ -148,12 +148,14 @@ void readSerialCommand() {
       break;
     case 'b': // calibrate gyros
       gyro->calibrate();
+      storeSensorsZeroToEEPROM();
       break;
     case 'c': // calibrate accels
       accel->calibrate();
+      storeSensorsZeroToEEPROM();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       flightAngle->calibrate();
-      accel->setOneG(accel->getFlightData(ZAXIS));
+      accel->setOneG(accel->getOneG(ZAXIS));
 #endif
       break;
     case 'd': // send aref

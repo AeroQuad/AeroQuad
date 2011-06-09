@@ -305,11 +305,12 @@ void initSensorsZeroFromEEPROM(void) {
   // Gyro initialization from EEPROM
   gyro->setZero(ROLL,readFloat(GYRO_ROLL_ZERO_ADR));
   gyro->setZero(PITCH,readFloat(GYRO_PITCH_ZERO_ADR));
-  gyro->setZero(ZAXIS,readFloat(GYRO_YAW_ZERO_ADR));
+  gyro->setZero(YAW,readFloat(GYRO_YAW_ZERO_ADR));
   gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
   
   // Accel initialization from EEPROM
   accel->setOneG(readFloat(ACCEL_1G_ADR));
+//  Serial.print("read zero : ");  Serial.println(readFloat(ACCEL_XAXIS_ZERO_ADR));
   accel->setZero(XAXIS,readFloat(ACCEL_XAXIS_ZERO_ADR));
   accel->setZero(YAXIS,readFloat(ACCEL_YAXIS_ZERO_ADR));
   accel->setZero(ZAXIS,readFloat(ACCEL_ZAXIS_ZERO_ADR));
@@ -325,6 +326,7 @@ void storeSensorsZeroToEEPROM(void) {
   
   // Store accel data to EEPROM
   writeFloat(accel->getOneG(), ACCEL_1G_ADR);
+//  Serial.print("write zero : ");  Serial.println(readFloat(ACCEL_XAXIS_ZERO_ADR));
   writeFloat(accel->getZero(XAXIS), ACCEL_XAXIS_ZERO_ADR);
   writeFloat(accel->getZero(YAXIS), ACCEL_YAXIS_ZERO_ADR);
   writeFloat(accel->getZero(ZAXIS), ACCEL_ZAXIS_ZERO_ADR);

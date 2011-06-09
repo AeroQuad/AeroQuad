@@ -39,8 +39,8 @@ public:
   
   void measure(void) {
     int accelADC[3];
-    accelADC[XAXIS] =  platformWii->getAccelADC(PITCH) - zero[PITCH];
-    accelADC[YAXIS] = platformWii->getAccelADC(ROLL) - zero[ROLL];
+    accelADC[XAXIS] = platformWii->getAccelADC(XAXIS) - zero[XAXIS];
+    accelADC[YAXIS] = zero[YAXIS] - platformWii->getAccelADC(YAXIS);
     accelADC[ZAXIS] = zero[ZAXIS] - platformWii->getAccelADC(ZAXIS);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], smoothFactor);
