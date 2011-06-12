@@ -202,7 +202,9 @@ void processFlightControl() {
 
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  processHardManuevers();
+  if (flightMode == ACRO) {
+    processHardManuevers();
+  }
 
   
   // Apply limits to motor commands
