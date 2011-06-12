@@ -28,7 +28,7 @@ class Gyroscope {
 protected:
   float scaleFactor;
   float rate[3];
-  int zero[3];
+  float zero[3];
   float smoothFactor;
   float gyroScaleFactor;
   float heading;

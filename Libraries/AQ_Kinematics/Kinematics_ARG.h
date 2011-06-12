@@ -96,6 +96,7 @@ private:
   //  ez = (ax*vy - ay*vx);
     	
     // integral error scaled integral gain
+	
     exInt = exInt + ex*Ki;
 	if (isSwitched(previousEx,ex)) {
 	  exInt = 0.0;

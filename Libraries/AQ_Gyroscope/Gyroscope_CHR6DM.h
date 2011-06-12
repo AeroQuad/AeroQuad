@@ -23,6 +23,7 @@
 
 #include <Gyroscope.h>
 #include <Platform_CHR6DM.h>
+#include <AQMath.h>
 
 class Gyroscope_CHR6DM : public Gyroscope {
 private:
@@ -38,14 +39,14 @@ public:
   }
   
   void measure(void) {
-    chr6dm->read();
-    gyroADC[ROLL] = chr6dm->data.rollRate; //gx
-    gyroADC[PITCH] = chr6dm->data.pitchRate; //gy
-    gyroADC[YAW] = chr6dm->data.yawRate; //gz
+  
+    gyroADC[ROLL] = chr6dm->data.rollRate - zero[ROLL]; //gx yawRate
+    gyroADC[PITCH] = zero[PITCH] - chr6dm->data.pitchRate; //gy pitchRate
+    gyroADC[YAW] = chr6dm->data.yawRate - zero[ZAXIS]; //gz rollRate
 
-    rate[ROLL] = filterSmooth(gyroADC[ROLL], rate[ROLL], smoothFactor); 
-    rate[PITCH] = filterSmooth(gyroADC[PITCH], rate[PITCH], smoothFactor); 
-    rate[YAW] = filterSmooth(gyroADC[YAW], rate[YAW], smoothFactor); 
+    rate[ROLL] = filterSmooth(gyroADC[ROLL], rate[ROLL], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+    rate[PITCH] = filterSmooth(gyroADC[PITCH], rate[PITCH], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+    rate[YAW] = filterSmooth(gyroADC[YAW], rate[YAW], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
 
     // Measure gyro heading
     long int currentTime = micros();
@@ -56,7 +57,20 @@ public:
   }
 
   void calibrate() {
-    chr6dm->zeroRateGyros();
+    float zeroXreads[FINDZERO];
+    float zeroYreads[FINDZERO];
+    float zeroZreads[FINDZERO];
+
+    for (int i=0; i<FINDZERO; i++) {
+        chr6dm->read();
+        zeroXreads[i] = chr6dm->data.rollRate;
+        zeroYreads[i] = chr6dm->data.pitchRate;
+        zeroZreads[i] = chr6dm->data.yawRate;
+    }
+
+    zero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
+    zero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
+    zero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
   }
 };
 

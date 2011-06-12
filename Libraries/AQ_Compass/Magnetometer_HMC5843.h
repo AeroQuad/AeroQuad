@@ -50,13 +50,13 @@ public:
       
       numAttempts++;
    
-      updateRegisterI2C(0x1E, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
       delay(50);
    
       updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
       delay(10);
 
-      updateRegisterI2C(0x1E, 0x02, 0x01);  // Perform single conversion
+      updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01);  // Perform single conversion
       delay(10);
    
       measure(0.0, 0.0);                    // Read calibration data
