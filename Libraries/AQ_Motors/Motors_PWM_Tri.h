@@ -56,7 +56,7 @@ public:
   void write() {
     unsigned long time = millis();
 	if ((time - previousServoTime) > 50) {
-      analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
+      analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);  // update servo at 20hz only
 	  previousServoTime = time;
 	}
     analogWrite(MOTORPIN1, motorCommand[MOTOR2]  / 8);
@@ -67,7 +67,7 @@ public:
   void commandAllMotors(int command) {
     unsigned long time = millis();
 	if ((time - previousServoTime) > 50) {
-      analogWrite(MOTORPIN0, command / 8);
+      analogWrite(MOTORPIN0, command / 8);	// update servo at 20hz only
 	  previousServoTime = time;
 	}
     analogWrite(MOTORPIN1, command / 8);
