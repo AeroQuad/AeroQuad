@@ -30,14 +30,17 @@
 #define TRI_YAW_CONSTRAINT_MIN 1020
 #define TRI_YAW_CONSTRAINT_MAX 2000
 #define TRI_YAW_MIDDLE 1500
-//#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-#define YAW_DIRECTION -1
+#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
+//#define YAW_DIRECTION -1
+
+//unsigned long previousServoTime = 0;
 
 void applyMotorCommand() {
   motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3);
   motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3);
   motors->setMotorCommand(REAR,   throttle + motorAxisCommandPitch*4/3);
-  motors->setMotorCommand(SERVO,  constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX));
+//  motors->setMotorCommand(SERVO,  constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX));
+  motors->setMotorCommand(SERVO,  filterSmooth(constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX),motors->getMotorCommand(SERVO),0.5));
 }
 
 void processMinMaxCommand() {

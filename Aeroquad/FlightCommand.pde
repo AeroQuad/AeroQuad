@@ -42,9 +42,7 @@ void readPilotCommands() {
       accel->calibrate(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
       //accel.setOneG(accel.getFlightData(ZAXIS));
-      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        _flightAngle->calibrate();
-      #endif
+      kinematics->calibrate();
       zeroIntegralError();
       motors->pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
@@ -79,34 +77,38 @@ void readPilotCommands() {
     //receiver->setZero(YAW, receiver->getData(YAW));
   }
   
-  // Check Mode switch for Acro or Stable
-  if (receiver->getData(MODE) > 1500) {
-    if (flightMode == ACRO) {
-      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-        digitalWrite(LED2PIN, HIGH);
-      #endif
-      zeroIntegralError();
-    }
-    flightMode = STABLE;
- }
-  else {
-    #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
-      if (flightMode == STABLE)
-        digitalWrite(LED2PIN, LOW);
-    #endif
+  #ifdef RateModeOnly
     flightMode = ACRO;
-  }
-  
-   #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+  #else
+    // Check Mode switch for Acro or Stable
+    if (receiver->getData(MODE) > 1500) {
       if (flightMode == ACRO) {
-        digitalWrite(LED_Yellow, HIGH);
-        digitalWrite(LED_Green, LOW);
-       }
-     else if (flightMode == STABLE) {
-        digitalWrite(LED_Green, HIGH);
-        digitalWrite(LED_Yellow, LOW); 
-     }
-   #endif
+        #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+          digitalWrite(LED2PIN, HIGH);
+        #endif
+        zeroIntegralError();
+      }
+      flightMode = STABLE;
+   }
+    else {
+      #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
+        if (flightMode == STABLE)
+          digitalWrite(LED2PIN, LOW);
+      #endif
+      flightMode = ACRO;
+    }
+  #endif  
+  
+  #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+    if (flightMode == ACRO) {
+      digitalWrite(LED_Yellow, HIGH);
+      digitalWrite(LED_Green, LOW);
+    }
+   else if (flightMode == STABLE) {
+      digitalWrite(LED_Green, HIGH);
+      digitalWrite(LED_Yellow, LOW); 
+   }
+  #endif
   
   #ifdef AltitudeHold
    if (receiver->getData(AUX) < 1750) {

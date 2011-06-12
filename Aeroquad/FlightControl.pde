@@ -80,7 +80,7 @@ void processHeading(void)
 {
   if (headingHoldConfig == ON) {
 
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+    #if defined(HeadingMagHold)
       heading = degrees(kinematics->getHeading(YAW));
     #else
       heading = degrees(gyro->getHeading());
