@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ArtificialHorizonDrawer">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/lib/ArtificialHorizon-AH-3+/src" />
+    </SOURCES>
+  </library>
+</component>

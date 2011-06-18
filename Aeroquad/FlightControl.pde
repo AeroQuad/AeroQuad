@@ -206,7 +206,6 @@ void processFlightControl() {
     processHardManuevers();
   }
 
-  
   // Apply limits to motor commands
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));

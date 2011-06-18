@@ -33,7 +33,7 @@ void readPilotCommands() {
       armed = OFF;
       motors->commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-      digitalWrite(LED_Red, LOW);
+        digitalWrite(LED_Red, LOW);
       #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)

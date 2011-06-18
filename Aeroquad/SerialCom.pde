@@ -182,6 +182,12 @@ void readSerialCommand() {
       camera.setServoMaxYaw(readFloatSerial());
 #endif
       break;
+    case '>':
+      for(byte channel = ROLL; channel<MODE; channel++) {
+        receiver->setChannelValue(channel, (int)readFloatSerial());
+      }
+      queryType = 'Q';
+      break;
     }
     digitalWrite(LEDPIN, HIGH);
   }
@@ -260,7 +266,7 @@ void sendSerialTelemetry() {
     break;
   case 'H': // Send auto level configuration values
     PrintValueComma(0);
-    Serial.println(0);
+    SERIAL_PRINTLN(0);
     queryType = 'X';
     break;
   case 'J': // Altitude Hold

@@ -23,12 +23,17 @@
 
 #include "BarometricSensor.h"
 #include "Device_I2C.h"
+#include <AQMath.h>
 
 // This sets up the BMP085 from Sparkfun
 // Code from http://wiring.org.co/learning/libraries/bmp085.html
 // Also made bug fixes based on BMP085 library from Jordi Munoz and Jose Julio
 
 #define BMP085_I2C_ADDRESS 0x77
+
+#define TEMPERATURE 0
+#define PRESSURE 1
+
 
 class BarometricSensor_BMP085 : public BarometricSensor {
 private:
@@ -58,7 +63,6 @@ private:
     while(!Wire.available()); // wait until data available
     xlsb = Wire.receive();
     return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
-	return 0;
   }
 
   void requestRawTemperature(void) {

@@ -27,45 +27,28 @@
 #define FRONT_LEFT  MOTOR4
 #define LASTMOTOR   MOTOR4+1
 
-#define TRI_YAW_CONSTRAINT_MIN 1020
+#define TRI_YAW_CONSTRAINT_MIN 1000
 #define TRI_YAW_CONSTRAINT_MAX 2000
 #define TRI_YAW_MIDDLE 1500
 #define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
 //#define YAW_DIRECTION -1
 
-//unsigned long previousServoTime = 0;
+unsigned long previousServoTime = 0;
 
 void applyMotorCommand() {
   motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3);
   motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3);
   motors->setMotorCommand(REAR,   throttle + motorAxisCommandPitch*4/3);
-  motors->setMotorCommand(SERVO,  constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX));
-//  motors->setMotorCommand(SERVO,  filterSmooth(constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX),motors->getMotorCommand(SERVO),0.5));
+  motors->setMotorCommand(SERVO,  YAW_DIRECTION * constrain(TRI_YAW_MIDDLE + motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX));
 }
-
-void processMinMaxCommandPerMotor(byte motor) {  
-  if (motors->getMotorCommand(motor) <= MINTHROTTLE) {
-    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[motor] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if (motors->getMotorCommand(motor) >= MAXCOMMAND) {
-    delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[motor] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[motor] = MAXCOMMAND;
-    motorMinCommand[motor] = MINTHROTTLE;
-  }
-}
-
 
 void processMinMaxCommand() {
-  processMinMaxCommandPerMotor(FRONT_LEFT);
-  processMinMaxCommandPerMotor(FRONT_RIGHT);
-  processMinMaxCommandPerMotor(REAR);
-  processMinMaxCommandPerMotor(SERVO);
-}
 
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    motorMaxCommand[motor] = MAXCOMMAND;
+    motorMinCommand[motor] = MINCOMMAND;
+  }
+}
 
 void processHardManuevers() {
   if (receiver->getData(ROLL) < MINCHECK) {        // Maximum Left Roll Rate

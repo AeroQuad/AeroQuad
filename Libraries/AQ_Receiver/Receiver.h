@@ -77,6 +77,7 @@ public:
 
   virtual void initialize(void) {}
   virtual void read(void) {}
+  virtual void setChannelValue(byte channel,int value) {}
   
 
   const float getXmitFactor(void) {

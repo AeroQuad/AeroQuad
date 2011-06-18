@@ -21,6 +21,7 @@
 #ifndef _AQ_BAROMETRIC_SENSOR_
 #define _AQ_BAROMETRIC_SENSOR_
 
+#include "WProgram.h"
 
 class BarometricSensor {
 protected:
