@@ -39,6 +39,7 @@
 #define ShowReticle            //Displays a reticle in the centre of the screen. 
 #define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
 #define ShowAttitudeIndicator
+#define ShowCallSign
 #define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 //Choose your video standard:
@@ -64,6 +65,12 @@
 //Flight timer - 6 characters long
 #define TIMER_ROW 0
 #define TIMER_COL 23
+//Callsign
+#define CALLSIGN_ROW 2
+#define CALLSIGN_COL 21
+#ifdef ShowCallSign
+byte *callsign = (byte*)"AeroQuad";
+#endif
 /********************** End of user configuration section ********************************/
 
 //OSD pins on AQ v2 shield:
@@ -217,7 +224,11 @@ private:
       buf[1] = 0x02;
       writeChars( buf, 2, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     #endif
-    
+
+    #ifdef ShowCallSign
+      writeChars( callsign, strlen((char*)callsign), CALLSIGN_ROW, CALLSIGN_COL );
+    #endif
+
     #ifdef ShowFlightTimer
     updateTimer();
     #endif
