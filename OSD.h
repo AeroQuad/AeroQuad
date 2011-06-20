@@ -54,13 +54,13 @@
 // columns remaining on the row you specify.
 
 //Battery voltage - 5 characters long
-#define VOLTAGE_ROW 0
+#define VOLTAGE_ROW 1
 #define VOLTAGE_COL 0
 //Compass reading - 5 characters long
 #define COMPASS_ROW 0
 #define COMPASS_COL 13
 //Altitude reading - up to 8 characters long (32768 max)
-#define ALTITUDE_ROW 2
+#define ALTITUDE_ROW 0
 #define ALTITUDE_COL 0
 //Flight timer - 6 characters long
 #define TIMER_ROW 0
@@ -71,6 +71,13 @@
 #ifdef ShowCallSign
 byte *callsign = (byte*)"AeroQuad";
 #endif
+
+//Juice monitor, two battery config
+#define JUICE_ROW 1
+#define JUICE_COL 0
+#define JUICE_ROWS 2
+#define JUICE_SYMBOL(x) (((x)==0)?0x04:0x0a)
+
 /********************** End of user configuration section ********************************/
 
 //OSD pins on AQ v2 shield:
@@ -244,6 +251,10 @@ private:
     #ifdef BatteryMonitor
     updateVoltage();
     #endif
+    
+    #ifdef JuicMonitor
+    updateJuice();
+    #endif
   }
   
   
@@ -353,6 +364,23 @@ private:
     
     writeChars( buf, 5, VOLTAGE_ROW, VOLTAGE_COL );    
   }
+#endif
+
+#ifdef JuicMonitor
+  void updateJuice(void) {
+     byte buf[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
+     for (byte i=0; i<JUICE_ROWS; i++) {
+       if (juiceMonitor.isI(i)) {
+         unsigned _u = 10.0 * juiceMonitor.getU(i);
+         unsigned _i = 10.0 * juiceMonitor.getI(i);
+         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4umAh",JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
+       } else {
+         unsigned _u = 10.0 * juiceMonitor.getU(i);
+         snprintf((char*)buf,20,"%c%2u.%1uV",JUICE_SYMBOL(i),_u/10,_u%10);
+       }
+       writeChars( buf, 19, JUICE_ROW+i, JUICE_COL );
+     }
+   }
 #endif
 
 #ifdef AltitudeHold
@@ -482,6 +510,10 @@ public:
       if( (unsigned)(batteryMonitor.getData()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
         updateVoltage();
       }
+    #endif
+    
+    #ifdef JuicMonitor
+        updateJuice();
     #endif
     
     #ifdef AltitudeHold

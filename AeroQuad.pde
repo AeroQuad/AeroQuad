@@ -61,6 +61,7 @@
 #define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define JuicMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
@@ -261,6 +262,10 @@
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
+  #ifdef JuicMonitor
+    #include "JuiceMonitor.h"
+    JuiceMonitor_AeroQuad juiceMonitor;
   #endif
   #ifdef CameraControl
     #include "Camera.h"
@@ -532,6 +537,11 @@ void setup() {
   #ifdef BattMonitor
     batteryMonitor.initialize();
   #endif
+
+  // Juice Monitor
+  #ifdef JuicMonitor
+    juiceMonitor.initialize();
+  #endif
   
   // Camera stabilization setup
   #ifdef CameraControl
@@ -762,6 +772,9 @@ void loop () {
         #if defined(BattMonitor)
           batteryMonitor.measure(armed);
         #endif
+        #if defined(JuicMonitor)
+          juiceMonitor.measure(armed);
+        #endif      
       }
       // Listen for configuration commands and reports telemetry
       if (telemetryLoop == ON) {
