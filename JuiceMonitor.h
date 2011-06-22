@@ -122,7 +122,7 @@ public:
   void initialize(void) {
     float Aref =     5.0;
     voltageScaleFactor[0] = ((Aref / 1024.0) * ((15000 + 7500) / 7500));
-    voltageDiode[0] = 0.9; // voltage drop on Arduino vin diode
+    voltageDiode[0] = 0.82; // voltage drop on Arduino vin diode
     currentScaleFactor[0] = 0; // No sensor 
 
     voltageScaleFactor[1] = ((Aref / 1024.0) * ((15000 + 10000) / 10000));
