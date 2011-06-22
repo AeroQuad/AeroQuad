@@ -98,6 +98,14 @@ public:
   const float getC(byte channel) {
     return batterymAh[channel];
   }
+  const byte getA(byte channel) {
+    if (batteryVoltage[channel]<lowVoltageAlarm[channel])
+      return ALARM;
+    else if (batteryVoltage[channel]<lowVoltageWarning[channel])
+      return WARNING;
+    else
+      return OK;
+  }
   const float batteries(void) {
     return BATTERIES;
   }
