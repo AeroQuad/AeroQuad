@@ -229,11 +229,11 @@ private:
       byte buf[2];
       buf[0] = 0x01;
       buf[1] = 0x02;
-      writeChars( buf, 2, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+      writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     #endif
 
     #ifdef ShowCallSign
-      writeChars( callsign, strlen((char*)callsign), CALLSIGN_ROW, CALLSIGN_COL );
+      writeChars( callsign, strlen((char*)callsign), 0, CALLSIGN_ROW, CALLSIGN_COL );
     #endif
 
     #ifdef ShowFlightTimer
@@ -281,12 +281,12 @@ private:
   //Writes 'len' character address bytes to the display memory corresponding to row y, column x
   //Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
   //columns in row y
-  void writeChars( byte* buf, unsigned len, unsigned y, unsigned x ) {
+  void writeChars( byte* buf, unsigned len, byte blink, unsigned y, unsigned x ) {
     digitalWrite( CS, LOW );
     
     //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
     spi_transfer( DMM );
-    spi_transfer( 0x01 ); //16bit transfer, transparent BG, autoincrement mode
+    spi_transfer( (blink) ? 0x11 : 0x01 ); //16bit transfer, transparent BG, autoincrement mode
     //send starting display memory address (position of text)
     spi_transfer( DMAH );
     spi_transfer( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
@@ -362,7 +362,7 @@ private:
       buf[4] = voltAscii[1];
     }
     
-    writeChars( buf, 5, VOLTAGE_ROW, VOLTAGE_COL );    
+    writeChars( buf, 5, 0, VOLTAGE_ROW, VOLTAGE_COL );    
   }
 #endif
 
@@ -378,7 +378,7 @@ private:
          unsigned _u = 10.0 * juiceMonitor.getU(i);
          snprintf((char*)buf,20,"%c%2u.%1uV",JUICE_SYMBOL(i),_u/10,_u%10);
        }
-       writeChars( buf, 19, JUICE_ROW+i, JUICE_COL );
+       writeChars( buf, 19, (juiceMonitor.getA(i) != OK), JUICE_ROW+i, JUICE_COL );
      }
    }
 #endif
@@ -400,7 +400,7 @@ private:
       buf[i] = altAscii[i-1];
     }
     
-    writeChars( buf, strlen((char*)buf)+1, ALTITUDE_ROW, ALTITUDE_COL );
+    writeChars( buf, strlen((char*)buf)+1, 0, ALTITUDE_ROW, ALTITUDE_COL );
     //write the null terminator - this will clear extra columns, so 10->9 doesn't become 90 on screen
   }
 #endif
@@ -429,7 +429,7 @@ private:
       buf[3] = hdgAscii[2];
     }
     
-    writeChars( buf, 5, COMPASS_ROW, COMPASS_COL );
+    writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
   }
 #endif
 
@@ -455,7 +455,7 @@ void updateTimer(void) {
   timerAscii[0] = 0x05; //clock symbol
   timerAscii[3] = ':';
   
-  writeChars( (byte*) timerAscii, 6, TIMER_ROW, TIMER_COL );
+  writeChars( (byte*) timerAscii, 6, 0, TIMER_ROW, TIMER_COL );
 }
 #endif
 
@@ -472,9 +472,9 @@ void updateAI( void ) {
   
   //write pitch lines, clear spaces above/below pitch line so that old lines don't remain
   clearCol( PITCH_L_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_L_COL );
+  writeChars( &pitchLine, 1, 0, pitchPixelRow/18, PITCH_L_COL );
   clearCol( PITCH_R_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_R_COL );
+  writeChars( &pitchLine, 1, 0, pitchPixelRow/18, PITCH_R_COL );
   
   //calculating which row (in pixels) each roll line should be on. We know the desired angle between the 'line' displayed by the two
   //  roll lines, plus the distance between the centre of reticle and centre of each roll line. so we can take tan(roll) to find the vertical offset
@@ -493,13 +493,13 @@ void updateAI( void ) {
   
   //clearing old lines, writing new ones to screen
   clearCol( ROLL_L1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farLeftRollLine, 1, farLeftRow/18, ROLL_L1_COL );
+  writeChars( &farLeftRollLine, 1, 0, farLeftRow/18, ROLL_L1_COL );
   clearCol( ROLL_L2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearLeftRollLine, 1, nearLeftRow/18, ROLL_L2_COL );
+  writeChars( &nearLeftRollLine, 1, 0, nearLeftRow/18, ROLL_L2_COL );
   clearCol( ROLL_R1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearRightRollLine, 1, nearRightRow/18, ROLL_R1_COL );
+  writeChars( &nearRightRollLine, 1, 0, nearRightRow/18, ROLL_R1_COL );
   clearCol( ROLL_R2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farRightRollLine, 1, farRightRow/18, ROLL_R2_COL );
+  writeChars( &farRightRollLine, 1, 0, farRightRow/18, ROLL_R2_COL );
 }
 #endif
 
