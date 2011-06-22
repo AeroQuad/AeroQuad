@@ -128,12 +128,12 @@ public:
   JuiceMonitor_AeroQuad() : JuiceMonitor(){}
 
   void initialize(void) {
-    float Aref =     5.0;
-    voltageScaleFactor[0] = ((Aref / 1024.0) * ((15000 + 7500) / 7500));
-    voltageDiode[0] = 0.82; // voltage drop on Arduino vin diode
+    #define Aref 5.0
+    voltageScaleFactor[0] = ((Aref / 1024.0) * ((15000.0 + 7500.0) / 7500.0));
+    voltageDiode[0] = 0.82; // voltage drop on Arduino vin
     currentScaleFactor[0] = 0; // No sensor 
 
-    voltageScaleFactor[1] = ((Aref / 1024.0) * ((15000 + 10000) / 10000));
+    voltageScaleFactor[1] = ((Aref / 1024.0) * ((15000.0 + 10000.0) / 10000.0));
     voltageDiode[1] = 0.0; // no diode here just resistors
     currentScaleFactor[1] = (100.0/1024.0); // Aref @ 100A
 
