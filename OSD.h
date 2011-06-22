@@ -371,8 +371,8 @@ private:
      byte buf[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
      for (byte i=0; i<JUICE_ROWS; i++) {
        if (juiceMonitor.isI(i)) {
-         unsigned _u = 10.0 * juiceMonitor.getU(i);
-         unsigned _i = 10.0 * juiceMonitor.getI(i);
+         unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(i));
+	 unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(i));
          snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4umAh",JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
        } else {
          unsigned _u = 10.0 * juiceMonitor.getU(i);

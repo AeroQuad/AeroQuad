@@ -189,11 +189,14 @@ public:
     return ((float)analogRead(voltagePin[channel]) * voltageScaleFactor[channel]) + voltageDiode[channel];
   }
   const float readBatteryCurrent(byte channel) {
-    return ((float)analogRead(currentPin[channel]) * currentScaleFactor[channel]);
+    if (isI(channel)) {
+      return ((float)analogRead(currentPin[channel]) * currentScaleFactor[channel]);
+    } else {
+      return 0.0;
+    }
   }
   const byte isI(byte channel) { // return 1 if current sensor is present (scale != 0)
-    return currentScaleFactor[channel]!=0;
+    return currentScaleFactor[channel]!=0.0;
   }
 
 };
-
