@@ -140,7 +140,7 @@ public:
   
   void measure(void) {
     accelADC[XAXIS] = analogRead(accelChannel[PITCH]) - accelZero[PITCH];
-    accelADC[YAXIS] = analogRead(accelChannel[ROLL]) - accelZero[ROLL];
+    accelADC[YAXIS] = accelZero[ROLL] - analogRead(accelChannel[ROLL]);
     accelADC[ZAXIS] = accelZero[ZAXIS] - analogRead(accelChannel[ZAXIS]);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
