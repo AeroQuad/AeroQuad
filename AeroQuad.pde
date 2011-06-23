@@ -98,7 +98,7 @@
 #if defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
 #undef FlightAngleARG
 #endif
-#if defined(MAX7456_OSD) && !defined(AeroQuadMega_v2) && !defined(AeroQuadMega_Wii)
+#if defined(MAX7456_OSD) && !defined(AeroQuadMega_v2) && !defined(AeroQuadMega_Wii) && !defined(AeroQuadMega_CHR6DM)
 #undef MAX7456_OSD
 #endif
 
@@ -331,10 +331,6 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
-  #endif
 #endif
 
 #ifdef AeroQuadMega_Wii
@@ -367,6 +363,10 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
+  #endif
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
@@ -390,6 +390,10 @@
   #ifdef CameraControl
     #include "Camera.h"
     Camera_AeroQuad camera;
+  #endif
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
   #endif
 #endif
 
