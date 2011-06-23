@@ -174,12 +174,12 @@ void readEEPROM(void) {
   #ifdef AltitudeHold
     // Leaving separate PID reads as commented for now
     // Previously had issue where EEPROM was not reading right data
-    readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
+    readPID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
-    readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
+    readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
   #endif
 
   #ifdef HeadingMagHold
@@ -233,12 +233,12 @@ void writeEEPROM(void){
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   #ifdef AltitudeHold
-    writePID(ALTITUDE, ALTITUDE_PGAIN_ADR);
+    writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
     writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
     writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
-    writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
+    writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
   #endif
   #ifdef HeadingMagHold
     writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
