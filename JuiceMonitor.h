@@ -85,7 +85,7 @@ public:
       // G_Dt is seconds , batteryCurrent in amps need to convert to mAh it divide by 3.6
 
     }
-    if (juiceStatus=3) juiceStatus=ALARM; // fixup if both active
+    if (juiceStatus==3) juiceStatus=ALARM; // fixup if both active
     lowBatteryEvent(juiceStatus);
   }  
 
