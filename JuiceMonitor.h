@@ -28,34 +28,41 @@
 #error JuiceMonitor is not compatible with BatteryMonitor
 #endif
 
+  struct batteryconfig {
+    byte vpin,cpin;         // A/D pins for voltage and current sensors (255 == no sensor)
+    float vwarning,valarm;  // Warning and Alarm voltage level
+    float vscale,vbias;     // voltage polynom V = vbias + (Aref*Ain(vpin))*vscale;
+    float cscale,cbias;     // current polynom C = cbias + (Aref*Ain(cpin))*cscale;
+  };
+
+// USER CONFIGURATION BELOW
+#define AREF 5.0    // 
+
+  // below defines two batteries
+  // battery 1 - this only has voltage sensor and it is at AIN0 (input voltage divided on v2.0 shield)
+ const struct batteryconfig batconfig[] = {
+   { 0, 255,  7.2, 7.0,   ((AREF / 1024.0) * ((15.0 + 7.5) / 7.5)), 0.82,          0.0, 0.0 },
+   { 1,   2, 10.2, 9.5, ((AREF / 1024.0) * ((15.0 + 10.0) / 10.0)),  0.0, 100.0/1024.0, 0.0 }
+};
+
+// USER CONFIGURATION END
+
+#define BATTERIES ( sizeof(batconfig) / sizeof(struct batteryconfig) )       // number of batteries to monitor, normally 1-3
+
 class JuiceMonitor {
 public:
-
-  #define BATTERIES 2       // number of batteries to monitor, normally 1-3
-  byte voltagePin[BATTERIES]; // AIN0,AIN1
-  byte currentPin[BATTERIES]; // AIN2,AIN3
   #define OK 0
   #define WARNING 1
   #define ALARM 2
   byte batteryStatus[BATTERIES];
   byte juiceStatus; // all batteries combined
-  float lowVoltageWarning[BATTERIES];  // Pack voltage at which to trigger alarm (first alarm)
-  float lowVoltageAlarm[BATTERIES];    // Pack voltage at which to trigger alarm (critical alarm)
   float batteryVoltage[BATTERIES];
   float batteryCurrent[BATTERIES];
   float batterymAh[BATTERIES];
 
   JuiceMonitor(void) {
-    voltagePin[0] = 0; // AIN0
-    voltagePin[1] = 1; // AIN1
-    currentPin[0] = 0; // N/A not connected
-    currentPin[1] = 2; // AIN2
-    lowVoltageWarning[0] = 7.0; //
-    lowVoltageWarning[1] = 10.2; //
-    lowVoltageAlarm[0] = 6.8; //
-    lowVoltageAlarm[1] = 9.5; //
     for (byte i; i<BATTERIES; i++) {
-      batteryVoltage[i] = lowVoltageWarning[i] + 1.0;
+      batteryVoltage[i] = batconfig[i].vwarning + 1.0;
       batteryStatus[i] = OK;
       batterymAh[i] = 0.0;
     }
@@ -72,8 +79,8 @@ public:
     for (byte i=0; i<BATTERIES;i++) {
       batteryVoltage[i] = filterSmooth(readBatteryVoltage(i), batteryVoltage[i], 0.1);
       if (armed == ON) {
-        if (batteryVoltage[i] < lowVoltageWarning[i]) batteryStatus[i] = WARNING;
-        if (batteryVoltage[i] < lowVoltageAlarm[i]) batteryStatus[i] = ALARM;
+        if (batteryVoltage[i] < batconfig[i].vwarning) batteryStatus[i] = WARNING;
+        if (batteryVoltage[i] < batconfig[i].valarm) batteryStatus[i] = ALARM;
       } else {
         batteryStatus[i] = OK;
       }
@@ -85,7 +92,7 @@ public:
       // G_Dt is seconds , batteryCurrent in amps need to convert to mAh it divide by 3.6
 
     }
-    if (juiceStatus==3) juiceStatus=ALARM; // fixup if both active
+    if (3==juiceStatus) juiceStatus=ALARM; // fixup if both active
     lowBatteryEvent(juiceStatus);
   }  
 
@@ -99,12 +106,7 @@ public:
     return batterymAh[channel];
   }
   const byte getA(byte channel) {
-    if (batteryVoltage[channel]<lowVoltageAlarm[channel])
-      return ALARM;
-    else if (batteryVoltage[channel]<lowVoltageWarning[channel])
-      return WARNING;
-    else
-      return OK;
+    return batteryStatus[channel];
   }
   const float batteries(void) {
     return BATTERIES;
@@ -119,24 +121,12 @@ private:
   #define BUZZERPIN 49
 
   byte state, firstAlarm;
-  float voltageDiode[BATTERIES]; // raw voltage goes through diode on Arduino
-  float voltageScaleFactor[BATTERIES];
-  float currentScaleFactor[BATTERIES];
   long currentBatteryTime, previousBatteryTime;
 
 public:
   JuiceMonitor_AeroQuad() : JuiceMonitor(){}
 
   void initialize(void) {
-    #define Aref 5.0
-    voltageScaleFactor[0] = ((Aref / 1024.0) * ((15000.0 + 7500.0) / 7500.0));
-    voltageDiode[0] = 0.82; // voltage drop on Arduino vin
-    currentScaleFactor[0] = 0; // No sensor 
-
-    voltageScaleFactor[1] = ((Aref / 1024.0) * ((15000.0 + 10000.0) / 10000.0));
-    voltageDiode[1] = 0.0; // no diode here just resistors
-    currentScaleFactor[1] = (100.0/1024.0); // Aref @ 100A
-
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
     digitalWrite(BUZZERPIN, LOW);
@@ -186,17 +176,17 @@ public:
   }
 
   const float readBatteryVoltage(byte channel) {
-    return ((float)analogRead(voltagePin[channel]) * voltageScaleFactor[channel]) + voltageDiode[channel];
+    return ((float)analogRead(batconfig[channel].vpin) * batconfig[channel].vscale) + batconfig[channel].vbias;
   }
   const float readBatteryCurrent(byte channel) {
     if (isI(channel)) {
-      return ((float)analogRead(currentPin[channel]) * currentScaleFactor[channel]);
+      return ((float)analogRead(batconfig[channel].cpin) * batconfig[channel].cscale) + batconfig[channel].cbias;
     } else {
       return 0.0;
     }
   }
   const byte isI(byte channel) { // return 1 if current sensor is present (scale != 0)
-    return currentScaleFactor[channel]!=0.0;
+    return (255!=batconfig[channel].cpin);
   }
 
 };
