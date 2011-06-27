@@ -64,6 +64,11 @@
    { 1,  2, 11.1, 10.5, ((AREF / 1024.0) * (15.0 + 10.0) / 10.0),  0.0, 100.0/1024.0, 0.0 }
 };
 
+// Threshold for resetting mAh counter, if the motors are not armed and voltage on pack drops under this mAh counter is zeroed.
+// This is to make it easy to swap battery while keeping electronics powered up (to keep GPS fix for example)
+// Comment this out to disable the functionality
+#define MAH_RESET_THRESHOLD 1.0
+
 // USER CONFIGURATION END
 
 #define BATTERIES ( sizeof(batconfig) / sizeof(struct batteryconfig) )       // number of batteries to monitor, normally 1-3
@@ -108,6 +113,10 @@ public:
 
       batterymAh[i] += G_Dt * batteryCurrent[i] / 3.6;
       // G_Dt is seconds , batteryCurrent in amps need to convert to mAh it divide by 3.6
+#if defined MAH_RESET_THRESHOLD
+      if ((!armed) && (batteryVoltage[i]<MAH_RESET_THRESHOLD))
+        batterymAh[i] = 0.0;
+#endif
 
     }
     if (3==juiceStatus) juiceStatus=ALARM; // fixup if both active
