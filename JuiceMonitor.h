@@ -34,15 +34,34 @@
     float vscale,vbias;     // voltage polynom V = vbias + (Aref*Ain(vpin))*vscale;
     float cscale,cbias;     // current polynom C = cbias + (Aref*Ain(cpin))*cscale;
   };
+#define NC 255              // NotConnected - use this in place of missing (current) sensor
 
 // USER CONFIGURATION BELOW
-#define AREF 5.0    // 
+#define AREF 5.0
 
-  // below defines two batteries
-  // battery 1 - this only has voltage sensor and it is at AIN0 (input voltage divided on v2.0 shield)
+  // below defines two batteries, ALWAYS modify this for your own configuration !!! 
+  // battery 1 
+  //   (vpin)     = 0   - voltage divider on v2.0 shield
+  //   (cpin)     = NC  - no current sensor
+  //   (vwarning) = 7.4 - warning voltage (for 2S LiPo)
+  //   (valarm)   = 7.2 - alarm voltage
+  //   (vscale)   = ((AREF / 1024.0) * (15.0+7.5)/7.5) - voltage divider on AQ v2.0 shield ( in - 15kOhm - out - 7.5kOhm - GND )
+  //   (vbias)    = 0.82 - voltage drop on the diode on ArduinoMega VIN
+  //   (cscale)   = 0.0 - N/A due to no sensor
+  //   (cbias)    = 0.0 - N/A due to no sensor
+  // battery 2
+  //   (vpin)     = 1   - AIN1 on v2.0 shield
+  //   (cpin)     = 2   - AIN2 on v2.0 shield
+  //   (vwarning) = 11.1 - warning voltage (for 3S LiPo)
+  //   (valarm)   = 10.5 - alarm voltage
+  //   (vscale)   = ((AREF / 1024.0) * (15.0+10.0)/10.0) - voltage divider ( in - 15kOhm - out - 10kOhm - GND )
+  //   (vbias)    = 0.0 - no diode
+  //   (cscale)   = 100.0/1024.0 - a flytron 100A sensor giving 5V (=AREF) at 100A
+  //   (cbias)    = 0.0 - no bias on this sensor
+  
  const struct batteryconfig batconfig[] = {
-   { 0, 255,  7.2, 7.0,   ((AREF / 1024.0) * ((15.0 + 7.5) / 7.5)), 0.82,          0.0, 0.0 },
-   { 1,   2, 10.2, 9.5, ((AREF / 1024.0) * ((15.0 + 10.0) / 10.0)),  0.0, 100.0/1024.0, 0.0 }
+   { 0, NC,  7.4, 7.2,   ((AREF / 1024.0) * (15.0 + 7.5) / 7.5), 0.82,          0.0, 0.0 },
+   { 1,  2, 11.1, 10.5, ((AREF / 1024.0) * (15.0 + 10.0) / 10.0),  0.0, 100.0/1024.0, 0.0 }
 };
 
 // USER CONFIGURATION END
@@ -72,7 +91,6 @@ public:
   virtual const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual const float readBatteryCurrent(byte); // defined as virtual in case future hardware has custom way to read battery voltage
   virtual void lowBatteryEvent(byte);
-  virtual const byte isI(byte channel);
 
   void measure(byte armed) {
     juiceStatus=OK;
@@ -107,6 +125,9 @@ public:
   }
   const byte getA(byte channel) {
     return batteryStatus[channel];
+  }
+  const byte isI(byte channel) { // return 1 if current sensor is present (scale != 0)
+    return (NC!=batconfig[channel].cpin);
   }
   const float batteries(void) {
     return BATTERIES;
@@ -185,8 +206,4 @@ public:
       return 0.0;
     }
   }
-  const byte isI(byte channel) { // return 1 if current sensor is present (scale != 0)
-    return (255!=batconfig[channel].cpin);
-  }
-
 };
