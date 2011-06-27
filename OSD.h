@@ -54,16 +54,16 @@
 // columns remaining on the row you specify.
 
 //Battery voltage - 5 characters long
-#define VOLTAGE_ROW 1
-#define VOLTAGE_COL 0
+#define VOLTAGE_ROW 2
+#define VOLTAGE_COL 1
 //Compass reading - 5 characters long
-#define COMPASS_ROW 0
+#define COMPASS_ROW 1
 #define COMPASS_COL 13
 //Altitude reading - up to 8 characters long (32768 max)
-#define ALTITUDE_ROW 0
-#define ALTITUDE_COL 0
+#define ALTITUDE_ROW 1
+#define ALTITUDE_COL 1
 //Flight timer - 6 characters long
-#define TIMER_ROW 0
+#define TIMER_ROW 1
 #define TIMER_COL 23
 //Callsign
 #define CALLSIGN_ROW 2
@@ -73,10 +73,10 @@ byte *callsign = (byte*)"OH2FXR";
 #endif
 
 //Juice monitor, two battery config
-#define JUICE_ROW 1
-#define JUICE_COL 0
+#define JUICE_ROW 2
+#define JUICE_COL 1
 #define JUICE_ROWS 2
-#define JUICE_SYMBOL(x) (((x)==0)?0x04:0x0a)
+#define JUICE_SYMBOL(x) (((x)==0)?0x0a:0x04)
 
 /********************** End of user configuration section ********************************/
 
@@ -153,6 +153,7 @@ private:
   unsigned long prevUpdate; //armed time when last update occurred
   unsigned long prevTime; //previous time since start when OSD.update() ran
   unsigned long armedTime; //time motors have spent armed
+  byte          prevFlightMode; // previous flightmode for reticle update
   
 #if defined(AUTO_VIDEO_STANDARD)
   unsigned MAX_screen_size;
@@ -230,6 +231,7 @@ private:
       buf[0] = 0x01;
       buf[1] = 0x02;
       writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+      prevFlightMode=ACRO;
     #endif
 
     #ifdef ShowCallSign
@@ -373,7 +375,7 @@ private:
        if (juiceMonitor.isI(i)) {
          unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(i));
 	 unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(i));
-         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4umAh",JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
+         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
        } else {
          unsigned _u = 10.0 * juiceMonitor.getU(i);
          snprintf((char*)buf,20,"%c%2u.%1uV",JUICE_SYMBOL(i),_u/10,_u%10);
@@ -390,16 +392,8 @@ private:
     #ifdef feet
     currentAltitude = currentAltitude/0.3048;
     #endif
-    int altPrint = (int)currentAltitude;
-    char altAscii[7]; //32768, plus null terminator and possible -
-    itoa( altPrint, altAscii, 10 );
-    
     byte buf[8];
-    buf[0] = 0x08; //altitude symbol
-    for( int i = 1; i < 8; i++ ) {
-      buf[i] = altAscii[i-1];
-    }
-    
+    snprintf((char*)buf,8,"%c%d",(ON==altitudeHold)?0x09:0x08,(int)currentAltitude);
     writeChars( buf, strlen((char*)buf)+1, 0, ALTITUDE_ROW, ALTITUDE_COL );
     //write the null terminator - this will clear extra columns, so 10->9 doesn't become 90 on screen
   }
@@ -506,6 +500,17 @@ void updateAI( void ) {
 public:
   //updates to display memory can make text flicker - we want to minimise # updates
   void update(void) {
+
+    #ifdef ShowReticle
+      if (prevFlightMode!=flightMode) {
+        byte buf[2];
+        buf[0] = (ACRO==flightMode)?0x01:0x11;
+        buf[1] = (ACRO==flightMode)?0x02:0x12;
+        writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+        prevFlightMode=flightMode;
+      }
+    #endif
+
     #ifdef BattMonitor
       if( (unsigned)(batteryMonitor.getData()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
         updateVoltage();
