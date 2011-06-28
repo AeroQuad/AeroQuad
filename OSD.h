@@ -344,27 +344,15 @@ private:
 #endif
 
 #ifdef BattMonitor
-  float currentVoltage;
+  int prevVoltage;
   void updateVoltage(void) {
-    currentVoltage = batteryMonitor.getData();
-    unsigned voltPrint = (unsigned)(currentVoltage*10); //1 decimal place
-    char voltAscii[6]; //max 65536, plus null terminator
-    utoa( voltPrint, voltAscii, 10 );
-    
-    byte buf[5];
-    buf[0] = 0x04; //battery icon
-    buf[3] = '.';
-    if( voltPrint >= 100 ) {
-      buf[1] = voltAscii[0];
-      buf[2] = voltAscii[1];
-      buf[4] = voltAscii[2];
-    } else {
-      buf[1] = '0';
-      buf[2] = voltAscii[0];
-      buf[4] = voltAscii[1];
+    int currentVoltage = batteryMonitor.getData()*10;
+    if (currentVoltage!=prevVoltage) {
+      char buf[6];
+      snprintf(buf,6,"\004%2d.%1d",
+        currentVoltage/10,currentVoltage%10);
+      writeChars( buf, 5, 0, VOLTAGE_ROW, VOLTAGE_COL );
     }
-    
-    writeChars( buf, 5, 0, VOLTAGE_ROW, VOLTAGE_COL );    
   }
 #endif
 
@@ -375,7 +363,8 @@ private:
        if (juiceMonitor.isI(i)) {
          unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(i));
 	 unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(i));
-         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
+         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",
+                  JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
        } else {
          unsigned _u = 10.0 * juiceMonitor.getU(i);
          snprintf((char*)buf,20,"%c%2u.%1uV",JUICE_SYMBOL(i),_u/10,_u%10);
@@ -386,70 +375,63 @@ private:
 #endif
 
 #ifdef AltitudeHold
-  float currentAltitude;
+  int lastAltitude;
   void updateAltitude(void) {
-    currentAltitude = altitude.getData();
     #ifdef feet
-    currentAltitude = currentAltitude/0.3048;
+    int currentAltitude = (int)(altitude.getData()/0.3048);
+    #else
+    int currentAltitude = (int)altitude.getData();
     #endif
-    byte buf[8];
-    snprintf((char*)buf,8,"%c%d",(ON==altitudeHold)?0x09:0x08,(int)currentAltitude);
-    writeChars( buf, strlen((char*)buf)+1, 0, ALTITUDE_ROW, ALTITUDE_COL );
-    //write the null terminator - this will clear extra columns, so 10->9 doesn't become 90 on screen
+    if (currentAltitude != lastAltitude) {
+      byte buf[8];
+      snprintf((char*)buf,8,"%c%d",(ON==altitudeHold)?0x09:0x08,(int)currentAltitude);
+      writeChars( buf, strlen((char*)buf)+1, 0, ALTITUDE_ROW, ALTITUDE_COL );
+      //write the null terminator - this will clear extra columns, so 10->9 doesn't become 90 on screen
+      lastAltitude=currentAltitude;
+    }
   }
 #endif
 
 #ifdef HeadingMagHold
-  float currentHdg;
+  unsigned lastHdg;
   void updateHdg(void) {
-    currentHdg = flightAngle->getDegreesHeading(YAW);
-    unsigned hdgPrint = (unsigned)currentHdg;
-    char hdgAscii[6]; //max 65536, plus null terminator
-    utoa( hdgPrint, hdgAscii, 10 );
-    
-    byte buf[5];
-    buf[0] = 0x06; //compass icon
-    buf[4] = 0x07; //degree icon
-    buf[1] = '0';
-    buf[2] = '0';
-    if( hdgPrint < 10 ) {
-      buf[3] = hdgAscii[0];
-    } else if ( (hdgPrint >= 10) && (hdgPrint < 100) ) {
-      buf[2] = hdgAscii[0];
-      buf[3] = hdgAscii[1];
-    } else {
-      buf[1] = hdgAscii[0];
-      buf[2] = hdgAscii[1];
-      buf[3] = hdgAscii[2];
+    unsigned currentHdg = (unsigned) flightAngle->getDegreesHeading(YAW);
+    if (currentHdg!=lastHdg) {
+      lastHdg=currentHdg;
+      byte buf[6];
+      snprintf((char*)buf,6,"\006%03u\007",currentHdg);
+      writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
     }
-    
-    writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
   }
 #endif
 
 #ifdef ShowFlightTimer
 void updateTimer(void) {
+  if( (armed == true) ) {
+    armedTime += ( currentTime-prevTime );
+  }
+  prevTime = currentTime;
   unsigned armedTimeSecs = armedTime/1000000 ;
-  char timerAscii[7]; //clock symbol, two chars for mins, colon, two chars for secs, null terminator
-  
-  //seconds
-  utoa( armedTimeSecs % 60, timerAscii + 4, 10);
-  if( timerAscii[5] == '\0' ) { //0-9 secs
-    timerAscii[5] = timerAscii[4];
-    timerAscii[4] = '0';
+  if (armedTimeSecs!=prevUpdate) {
+    prevUpdate=armedTimeSecs;
+    char timerAscii[7]; //clock symbol, two chars for mins, colon, two chars for secs, null terminator
+    snprintf(timerAscii,7,"\005%02u:%02u",
+      armedTimeSecs % 60,
+      (armedTimeSecs / 60) % 100);
+    writeChars( (byte*) timerAscii, 6, 0, TIMER_ROW, TIMER_COL );
   }
-  
-  //minutes - wrap around if > 100
-  utoa( (armedTimeSecs/60) % 100 , timerAscii + 1, 10 );
-  if( timerAscii[2] == '\0' ) { //0-9 mins
-    timerAscii[2] = timerAscii[1];
-    timerAscii[1] = '0';
+}
+#endif
+
+#ifdef ShowReticle
+void updateReticle(void) {
+  if (prevFlightMode!=flightMode) {
+    byte buf[2];
+    buf[0] = (ACRO==flightMode)?0x01:0x11;
+    buf[1] = (ACRO==flightMode)?0x02:0x12;
+    writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+    prevFlightMode=flightMode;
   }
-  
-  timerAscii[0] = 0x05; //clock symbol
-  timerAscii[3] = ':';
-  
-  writeChars( (byte*) timerAscii, 6, 0, TIMER_ROW, TIMER_COL );
 }
 #endif
 
@@ -502,19 +484,11 @@ public:
   void update(void) {
 
     #ifdef ShowReticle
-      if (prevFlightMode!=flightMode) {
-        byte buf[2];
-        buf[0] = (ACRO==flightMode)?0x01:0x11;
-        buf[1] = (ACRO==flightMode)?0x02:0x12;
-        writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
-        prevFlightMode=flightMode;
-      }
+      updateReticle();
     #endif
 
     #ifdef BattMonitor
-      if( (unsigned)(batteryMonitor.getData()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
-        updateVoltage();
-      }
+      updateVoltage();
     #endif
     
     #ifdef JuicMonitor
@@ -522,26 +496,15 @@ public:
     #endif
     
     #ifdef AltitudeHold
-      if( (unsigned)(altitude.getData()) != (unsigned)(currentAltitude) ) {
-        updateAltitude();
-      }
+      updateAltitude();
     #endif
     
     #ifdef HeadingMagHold
-      if( (unsigned)(flightAngle->getDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
-        updateHdg();
-      }
+      updateHdg();
     #endif
     
     #ifdef ShowFlightTimer
-      if( (armed == true) ) {
-        armedTime += ( currentTime-prevTime );
-      }
-      if( (armedTime - prevUpdate) >= 1000000 ) { //if more than 1 second since update
-        updateTimer();
-        prevUpdate = armedTime;
-      }
-      prevTime = currentTime;
+      updateTimer();
     #endif
     
     #ifdef ShowAttitudeIndicator
