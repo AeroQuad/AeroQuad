@@ -143,6 +143,10 @@ byte *callsign = (byte*)"OH2FXR";
 #define AI_TOP_PIXEL ((RETICLE_ROW - AI_DISPLAY_RECT_HEIGHT/2)*18)
 #define AI_BOTTOM_PIXEL ((RETICLE_ROW + AI_DISPLAY_RECT_HEIGHT/2)*18)
 
+// OSD profiling
+#define OSD_PROFILE
+
+
 #ifdef MAX7456_OSD
 
 byte clear;
@@ -154,6 +158,17 @@ private:
   unsigned long prevTime; //previous time since start when OSD.update() ran
   unsigned long armedTime; //time motors have spent armed
   byte          prevFlightMode; // previous flightmode for reticle update
+
+#ifdef OSD_PROFILE
+  unsigned long prof_min,prof_max,prof_this,prof_start;
+  unsigned long pt_start,pt_this,pt_min[8],pt_max[8];
+  byte pt_task, prof_cnt;
+  #define PROF_TASK_START { pt_start=micros(); }
+  #define PROF_TASK_END { pt_this=micros()-pt_start; if (pt_this<pt_min[pt_task]) pt_min[pt_task]=pt_this; if (pt_this>pt_max[pt_task]) pt_max[pt_task]=pt_this; pt_task++; }
+#else
+  #define PROF_TASK_START
+  #define PROF_TASK_END
+#endif
   
 #if defined(AUTO_VIDEO_STANDARD)
   unsigned MAX_screen_size;
@@ -169,7 +184,17 @@ public:
     prevUpdate = 0;
     armedTime = 0;
     prevTime = currentTime;
+#ifdef OSD_PROFILE
+    prof_min=999999;
+    prof_max=0;
+    prof_cnt=0;
+    for (int i=0; i<8; i++) { 
+      pt_min[i]=999999;
+      pt_max[i]=0;
+    }
+#endif
   }
+
 
   void initialize( void ) {
     int i;
@@ -482,34 +507,68 @@ void updateAI( void ) {
 public:
   //updates to display memory can make text flicker - we want to minimise # updates
   void update(void) {
-
+#ifdef OSD_PROFILE
+    prof_start=micros();
+    pt_task=0;
+#endif
     #ifdef ShowReticle
-      updateReticle();
+    PROF_TASK_START
+    updateReticle();
+    PROF_TASK_END
     #endif
 
     #ifdef BattMonitor
-      updateVoltage();
+    PROF_TASK_START
+    updateVoltage();
+    PROF_TASK_END
     #endif
     
     #ifdef JuicMonitor
-        updateJuice();
+    PROF_TASK_START
+    updateJuice();
+    PROF_TASK_END
     #endif
     
     #ifdef AltitudeHold
-      updateAltitude();
+    PROF_TASK_START
+    updateAltitude();
+    PROF_TASK_END
     #endif
     
     #ifdef HeadingMagHold
-      updateHdg();
+    PROF_TASK_START
+    updateHdg();
+    PROF_TASK_END
     #endif
     
     #ifdef ShowFlightTimer
-      updateTimer();
+    PROF_TASK_START
+    updateTimer();
+    PROF_TASK_END
     #endif
     
     #ifdef ShowAttitudeIndicator
+    PROF_TASK_START
     updateAI();
+    PROF_TASK_END
     #endif
+#ifdef OSD_PROFILE
+    prof_this=micros()-prof_start;
+    if (prof_this<prof_min) prof_min=prof_this;
+    if (prof_this>prof_max) prof_max=prof_this;
+    if ((prof_cnt&15)==15) {
+      char buf[20];
+      snprintf(buf,20,"%u:%u:%u   ",(unsigned)prof_min,(unsigned)prof_this,(unsigned)prof_max);
+      writeChars( (byte*)buf, strlen(buf), 0, 13, 1 );
+    }
+    if (prof_cnt%15==7) {
+      pt_task=(prof_cnt>>4)&7;
+      char buf[20];
+      snprintf(buf,20,"T%u:%u:%u   ",(unsigned)pt_task,(unsigned)pt_min[pt_task],(unsigned)pt_max[pt_task]);
+      writeChars( (byte*)buf, strlen(buf), 0, 14, 1 );
+    }
+    prof_cnt++;    
+#endif
   }
 
 };
