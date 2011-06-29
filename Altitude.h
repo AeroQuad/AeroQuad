@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.4.2 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -239,7 +239,7 @@ public:
     x3 = ((x1 + x2) + 2) >> 2;
     b4 = (ac4 * (uint32_t) (x3 + 32768)) >> 15;
     b7 = ((uint32_t) rawPressure - b3) * (50000 >> overSamplingSetting);
-    p = b7 < 0x80000000 ? (b7 << 1) / b4 : (b7 / b4) >> 1;
+    p = b7 < 0x80000000 ? (b7 << 1) / b4 : (b7 / b4) << 1;
     
     x1 = (p >> 8) * (p >> 8);
     x1 = (x1 * 3038) >> 16;

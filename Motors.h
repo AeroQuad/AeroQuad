@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.4.2 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -202,6 +202,7 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
  tick every 0.5us. If the prescaler was changed, the OCRxy register value would
  be different.
 */
+#if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 class Motors_PWMtimer : public Motors {
 private:
 /*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port
@@ -306,6 +307,7 @@ public:
 #endif
   }
 };
+#endif
 
 /******************************************************/
 /********************* Fake PWM Motors ****************/

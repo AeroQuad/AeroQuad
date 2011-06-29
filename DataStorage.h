@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.4.2 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -94,16 +94,17 @@ void initializeEEPROM(void) {
   PID[LEVELGYROPITCH].P = 100.0;
   PID[LEVELGYROPITCH].I = 0.0;
   PID[LEVELGYROPITCH].D = -300.0;
-  #ifdef AltitudeHold
-    PID[ALTITUDE].P = 25.0;
-    PID[ALTITUDE].I = 0.1;
-    PID[ALTITUDE].D = 0.0;
-    PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-    PID[ZDAMPENING].P = 0.0;
-    PID[ZDAMPENING].I = 0.0;
-    PID[ZDAMPENING].D = 0.0;
-    minThrottleAdjust = -50.0;
-    maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
+//  #ifdef AltitudeHold
+  PID[ALTITUDE].P = 10.0;
+  PID[ALTITUDE].I = 0.2;
+  PID[ALTITUDE].D = -400.0;
+  PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  PID[ZDAMPENING].P = 0.0;
+  PID[ZDAMPENING].I = 0.0;
+  PID[ZDAMPENING].D = 0.0;
+  minThrottleAdjust = -50.0;
+  maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
+  #ifdef AltitudeHold    
     altitude.setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
@@ -171,16 +172,18 @@ void readEEPROM(void) {
   readPID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   readPID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
-  #ifdef AltitudeHold
+//  #ifdef AltitudeHold
     // Leaving separate PID reads as commented for now
     // Previously had issue where EEPROM was not reading right data
     readPID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
     PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+#ifdef AltitudeHold    
     altitude.setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+#endif
     readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
-  #endif
+//  #endif
 
   #ifdef HeadingMagHold
     compass.setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
@@ -232,14 +235,18 @@ void writeEEPROM(void){
   writePID(HEADING, HEADING_PID_GAIN_ADR);
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  #ifdef AltitudeHold
-    writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
-    writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
-    writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
-    writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+//  #ifdef AltitudeHold
+  writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
+  writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
+  writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
+  writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+  #ifdef AltitudeHold    
     writeFloat(altitude.getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
-    writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
-  #endif
+  #else
+    writeFloat(0.1F, ALTITUDE_SMOOTH_ADR);
+  #endif    
+  writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
+
   #ifdef HeadingMagHold
     writeFloat(compass.getMagMax(XAXIS), MAGXMAX_ADR);
     writeFloat(compass.getMagMin(XAXIS), MAGXMIN_ADR);
@@ -247,6 +254,13 @@ void writeEEPROM(void){
     writeFloat(compass.getMagMin(YAXIS), MAGYMIN_ADR);
     writeFloat(compass.getMagMax(ZAXIS), MAGZMAX_ADR);
     writeFloat(compass.getMagMin(ZAXIS), MAGZMIN_ADR);
+  #else	
+    writeFloat(1.0F, MAGXMAX_ADR);
+    writeFloat(0.0F, MAGXMIN_ADR);
+    writeFloat(1.0F, MAGYMAX_ADR);
+    writeFloat(0.0F, MAGYMIN_ADR);
+    writeFloat(1.0F, MAGZMAX_ADR);
+    writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
 //  writeFloat(levelLimit, LEVELLIMIT_ADR);

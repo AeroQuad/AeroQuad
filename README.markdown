@@ -1,6 +1,13 @@
-AeroQuad Flight Software Source Code 2.4.1
+AeroQuad Flight Software Source Code 2.4.2
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
+
+Version 2.4.2 Release Notes (6/29/2011)
+----------------------------------------
+ * Fixed EEPROM issue that affects altitude hold (thanks Aadamson)
+ * Greatly improved altitude hold algorithm (thanks Aadamson)
+ * Updated incorrect sign issue with v1.7 shield
+ * Fixed Issue 114:	Processor specific Motors_PWMtimer class is not surrounded by ifdef
 
 Version 2.4.1 Release Notes (6/5/2011)
 ----------------------------------------

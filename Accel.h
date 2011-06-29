@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.4.2 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -140,7 +140,7 @@ public:
   
   void measure(void) {
     accelADC[XAXIS] = analogRead(accelChannel[PITCH]) - accelZero[PITCH];
-    accelADC[YAXIS] = analogRead(accelChannel[ROLL]) - accelZero[ROLL];
+    accelADC[YAXIS] = accelZero[ROLL] - analogRead(accelChannel[ROLL]);
     accelADC[ZAXIS] = accelZero[ZAXIS] - analogRead(accelChannel[ZAXIS]);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);

@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.4.2 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -336,7 +336,7 @@ typedef struct {
   t_NVR_PID LEVEL_GYRO_ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
-  t_NVR_PID ZDAMP_PID_GAIN_ADR;  
+  t_NVR_PID ZDAMP_PID_GAIN_ADR;
 
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
@@ -352,11 +352,11 @@ typedef struct {
   float HEADINGHOLD_ADR;
   float MINACRO_ADR;
   float ACCEL1G_ADR;
-  //  float ALTITUDE_PGAIN_ADR;
+//  float ALTITUDE_PGAIN_ADR;
   float ALTITUDE_MAX_THROTTLE_ADR;
   float ALTITUDE_MIN_THROTTLE_ADR;
   float ALTITUDE_SMOOTH_ADR;
-  //float ZDAMP_PGAIN_ADR;
+//  float ZDAMP_PGAIN_ADR;
   float ALTITUDE_WINDUP_ADR;
   float MAGXMAX_ADR;
   float MAGXMIN_ADR;
@@ -418,6 +418,7 @@ void sendBinaryFloat(float); // defined in SerialCom.pde
 void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
 void fastTelemetry(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
+void processAltitudeHold(void); // defined in FlightControl.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize); // defined in Sensors.pde
