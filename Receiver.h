@@ -297,9 +297,9 @@ public:
       if (channel < THROTTLE)
         transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
       else
-    // No xmitFactor reduction applied for throttle, mode and
-    //for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-        transmitterCommand[channel] = (transmitterCommandSmooth[channel] * 0.8) + 200; // Limit max throttle to still allow for motor control
+        // No xmitFactor reduction applied for throttle, mode and AUX
+        transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    //transmitterCommand[THROTTLE] = (transmitterCommand[THROTTLE] * 0.8) + 200; // lower max throttle to allow for motor control
   }
 };
 #endif
@@ -411,11 +411,13 @@ public:
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    // No xmitFactor reduction applied for throttle, mode and AUX
-    for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = (transmitterCommandSmooth[channel] * 0.8) + 200;
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      if (channel < THROTTLE)
+        transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+      else
+        // No xmitFactor reduction applied for throttle, mode and AUX
+        transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    //transmitterCommand[THROTTLE] = (transmitterCommand[THROTTLE] * 0.8) + 200; // lower max throttle to allow for motor control
   }
 };
 #endif
@@ -512,11 +514,13 @@ public:
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    // No xmitFactor reduction applied for throttle, mode and
-    for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = (transmitterCommandSmooth[channel] * 0.8) + 200;
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+      if (channel < THROTTLE)
+        transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
+      else
+        // No xmitFactor reduction applied for throttle, mode and AUX
+        transmitterCommand[channel] = transmitterCommandSmooth[channel];
+    //transmitterCommand[THROTTLE] = (transmitterCommand[THROTTLE] * 0.8) + 200; // lower max throttle to allow for motor control
   }
 };
 #endif
