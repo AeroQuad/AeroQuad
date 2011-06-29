@@ -141,7 +141,7 @@ byte *callsign = (byte*)"OH2FXR";
 
 #define AI_TOP_PIXEL ((RETICLE_ROW - AI_DISPLAY_RECT_HEIGHT/2)*18)
 #define AI_BOTTOM_PIXEL ((RETICLE_ROW + AI_DISPLAY_RECT_HEIGHT/2)*18)
-
+#define AI_CENTRE (RETICLE_ROW*18+10)    //row, in pixels, corresponding to zero pitch/roll.
 // OSD profiling
 #define OSD_PROFILE
 
@@ -157,6 +157,7 @@ private:
   unsigned long prevUpdate; //armed time when last update occurred
   unsigned long prevTime; //previous time since start when OSD.update() ran
   unsigned long armedTime; //time motors have spent armed
+  short         AIrows[5];  //Holds the row, in pixels, of AI elements: pitch then roll from left to right.
   byte          prevFlightMode; // previous flightmode for reticle update
 
   byte ctask; ; // Current task
@@ -490,46 +491,40 @@ void updateReticle(void) {
 #endif
 
 #ifdef ShowAttitudeIndicator
-void updateAI( void ) {
-  float roll = flightAngle->getData(ROLL);
-  float pitch = flightAngle->getData(PITCH);
-
-  unsigned centreRow = RETICLE_ROW*18 + 10;  //pixel row which corresponds to an angle of zero pitch - same row as centre reticle
-  int pitchPixelRow = constrain( (int)centreRow + (int)( (pitch/AI_MAX_PITCH_ANGLE)*(centreRow-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
-  
-  byte pitchLine = LINE_ROW_0 + (pitchPixelRow % 18);
-  byte empty = 0x00;
-  
-  //write pitch lines, clear spaces above/below pitch line so that old lines don't remain
-  clearCol( PITCH_L_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, 0, pitchPixelRow/18, PITCH_L_COL );
-  clearCol( PITCH_R_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, 0, pitchPixelRow/18, PITCH_R_COL );
-  
-  //calculating which row (in pixels) each roll line should be on. We know the desired angle between the 'line' displayed by the two
-  //  roll lines, plus the distance between the centre of reticle and centre of each roll line. so we can take tan(roll) to find the vertical offset
+void updateAI( void ) {  
+ //Remove old pitch lines
+  writeChars( (byte*)"\0", 1, 0, AIrows[0]/18, PITCH_L_COL );
+  writeChars( (byte*)"\0", 1, 0, AIrows[0]/18, PITCH_R_COL );
+  //Calculate row of new pitch lines
+  AIrows[0] = constrain( (int)AI_CENTRE + (int)( ((flightAngle->getData(PITCH))/AI_MAX_PITCH_ANGLE)*(AI_CENTRE-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
+  byte pitchLine = LINE_ROW_0 + (AIrows[0] % 18);
+  //Write new pitch lines
+  writeChars( &pitchLine, 1, 0, AIrows[0]/18, PITCH_L_COL );
+  writeChars( &pitchLine, 1, 0, AIrows[0]/18, PITCH_R_COL );
+    
+  //remove old roll lines
+  writeChars( (byte*)"\0", 1, 0, AIrows[1]/18, ROLL_L1_COL );
+  writeChars( (byte*)"\0", 1, 0, AIrows[2]/18, ROLL_L2_COL );
+  writeChars( (byte*)"\0", 1, 0, AIrows[3]/18, ROLL_R1_COL );
+  writeChars( (byte*)"\0", 1, 0, AIrows[4]/18, ROLL_R2_COL );
+  //Calculate row (in pixels) of new roll lines
   int distFar = (ROLL_R2_COL - (RETICLE_COL + 1))*12 + 6; //horizontal pixels between centre of reticle and centre of far angle line
   int distNear = (ROLL_R1_COL- (RETICLE_COL + 1))*12 + 6;
-  int farRightRow = constrain( centreRow - (int)(((float)distFar)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL ); //row of far right angle line, in pixels from top
-  int nearRightRow = constrain( centreRow - (int)(((float)distNear)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  int farLeftRow = constrain( centreRow - (farRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  int nearLeftRow = constrain( centreRow - (nearRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  
-  //converting pixel offsets to character addresses
-  byte nearRightRollLine = LINE_ROW_0 + (nearRightRow % 18);
-  byte farRightRollLine = LINE_ROW_0 + (farRightRow % 18);
-  byte nearLeftRollLine = LINE_ROW_0 + (nearLeftRow % 18);
-  byte farLeftRollLine = LINE_ROW_0 + (farLeftRow % 18);
-  
-  //clearing old lines, writing new ones to screen
-  clearCol( ROLL_L1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farLeftRollLine, 1, 0, farLeftRow/18, ROLL_L1_COL );
-  clearCol( ROLL_L2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearLeftRollLine, 1, 0, nearLeftRow/18, ROLL_L2_COL );
-  clearCol( ROLL_R1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearRightRollLine, 1, 0, nearRightRow/18, ROLL_R1_COL );
-  clearCol( ROLL_R2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farRightRollLine, 1, 0, farRightRow/18, ROLL_R2_COL );
+  float gradient = tan(flightAngle->getData(ROLL));
+  AIrows[4] = constrain( AI_CENTRE - (int)(((float)distFar)*gradient), AI_TOP_PIXEL, AI_BOTTOM_PIXEL ); //row of far right angle line, in pixels from top
+  AIrows[3] = constrain( AI_CENTRE - (int)(((float)distNear)*gradient), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+  AIrows[1] = constrain( 2*AI_CENTRE - AIrows[4], AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+  AIrows[2] = constrain( 2*AI_CENTRE - AIrows[3], AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+  //converting rows (in pixels) to character addresses
+  byte nearRightRollLine = LINE_ROW_0 + (AIrows[3] % 18);
+  byte farRightRollLine = LINE_ROW_0 + (AIrows[4] % 18);
+  byte nearLeftRollLine = LINE_ROW_0 + (AIrows[2] % 18);
+  byte farLeftRollLine = LINE_ROW_0 + (AIrows[1] % 18);
+  //writing new roll lines to screen
+  writeChars( &farLeftRollLine, 1, 0, AIrows[1]/18, ROLL_L1_COL );
+  writeChars( &nearLeftRollLine, 1, 0, AIrows[2]/18, ROLL_L2_COL );
+  writeChars( &nearRightRollLine, 1, 0, AIrows[3]/18, ROLL_R1_COL );
+  writeChars( &farRightRollLine, 1, 0, AIrows[4]/18, ROLL_R2_COL );
 }
 #endif
 
