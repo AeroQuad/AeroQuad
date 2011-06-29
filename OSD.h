@@ -309,26 +309,6 @@ private:
     #endif
   }
   
-  
-  //Clears (ie sets to be transparent) a column 'col' of some characters - clears centreRow+-offset
-  void clearCol(unsigned col, unsigned centreRow, unsigned offset) {
-    int i = 0;
-    spi_select();
-    spi_write( DMM );
-    spi_write( 0x00 ); //16bit transfer, transparent BG
-    
-    for( i = ((centreRow-offset >= 0) ? centreRow-offset : 0) ; (i <= (centreRow + offset)) && (i <= MAX_screen_rows); i++ ) {
-      spi_write( DMAH );
-      spi_write( ( (i*30+col) > 0xff ) ? 0x01 :0x00 );
-      spi_write( DMAL );
-      spi_write( ( (i*30+col) > 0xff ) ? (byte)(i*30+col-0xff-1) : (byte)(i*30+col) );
-      spi_write( DMDI );
-      spi_write( 0x00 );
-    }
-    spi_deselect();
-  }
-  
-  
   //Writes 'len' character address bytes to the display memory corresponding to row y, column x
   //Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
   //columns in row y
