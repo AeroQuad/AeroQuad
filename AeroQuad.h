@@ -418,6 +418,7 @@ void sendBinaryFloat(float); // defined in SerialCom.pde
 void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
 void fastTelemetry(void); // defined in SerialCom.pde
 void comma(void); // defined in SerialCom.pde
+void processAltitudeHold(void); // defined in FlightControl.pde
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
 float findMode(float *data, int arraySize); // defined in Sensors.pde
