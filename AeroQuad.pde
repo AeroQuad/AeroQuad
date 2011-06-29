@@ -714,6 +714,12 @@ void loop () {
         readPilotCommands(); // defined in FlightCommand.pde
       }
 
+      if (sensorLoop == ON) {
+        #ifdef AltitudeHold
+          altitude.measure(); // defined in altitude.h
+        #endif
+      }
+
       #if defined(CameraControl)
         camera.setPitch(degrees(flightAngle->getData(PITCH)));
         camera.setRoll(degrees(flightAngle->getData(ROLL)));
@@ -737,12 +743,6 @@ void loop () {
       G_Dt = (currentTime - twentyFiveHZpreviousTime) / 1000000.0;
       twentyFiveHZpreviousTime = currentTime;
       
-      if (sensorLoop == ON) {
-        #if defined(AltitudeHold)
-          altitude.measure(); // defined in altitude.h
-        #endif
-      }
-      
       #ifdef DEBUG_LOOP
         digitalWrite(9, LOW);
       #endif
@@ -760,12 +760,13 @@ void loop () {
       tenHZpreviousTime = currentTime;
 
       if (sensorLoop == ON) {
-        #if defined(HeadingMagHold)
+        #ifdef HeadingMagHold
           compass.measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
         #endif
-        #if defined(BattMonitor)
+        #ifdef BattMonitor
           batteryMonitor.measure(armed);
         #endif
+        processAltitudeHold();
       }
       // Listen for configuration commands and reports telemetry
       if (telemetryLoop == ON) {
