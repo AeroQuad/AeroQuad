@@ -75,8 +75,7 @@ byte *callsign = (byte*)"OH2FXR";
 //Juice monitor, two battery config
 #define JUICE_ROW 2
 #define JUICE_COL 1
-#define JUICE_ROWS 2
-#define JUICE_SYMBOL(x) (((x)==0)?0x0a:0x04)
+#define JUICE_MAXROWS 3 // limit the number of batteries shown....
 
 /********************** End of user configuration section ********************************/
 
@@ -219,37 +218,61 @@ public:
     #endif
 
     //Soft reset the MAX7456 - clear display memory
-    digitalWrite( CS, LOW );
-    spi_transfer( VM0 ); //Writing to VM0 register
-    spi_transfer( MAX7456_reset ); //...reset bit
-    digitalWrite( CS, HIGH );
+    spi_select();
+    spi_write_nowait( VM0 ); //Writing to VM0 register, 1st write must not wait data ready!!!
+    spi_write( MAX7456_reset ); //...reset bit
+    spi_deselect();
     delay( 1 ); //Only takes ~100us typically
 
     //Set white level to 90% for all rows
-    digitalWrite( CS, LOW );
+    spi_select();
     for( i = 0; i < MAX_screen_rows; i++ ) {
-      spi_transfer( RB0 + i );
-      spi_transfer( WHITE_level_90 );
+      spi_write( RB0 + i );
+      spi_write( WHITE_level_90 );
     }
 
     //ensure device is enabled
-    spi_transfer( VM0 );
-    spi_transfer( ENABLE_display );
+    spi_write( VM0 );
+    spi_write( ENABLE_display );
     delay(100);
     //finished writing
-    digitalWrite( CS, HIGH );  
+    spi_deselect();  
     
     initDisplays(); //Print initial values to screen
   }
 
 private:
   //Performs an 8-bit SPI transfer operation
-  char spi_transfer( volatile char data ) {
-    SPDR = data; //transfer data with hardware SPI
+  void spi_wait() {
     while ( !(SPSR & (1 << SPIF)) ) { }; //Wait until transmission done
+  }
+
+  void spi_select() {
+//    spi_wait();
+    digitalWrite(CS, LOW);
+  }
+
+  void spi_deselect() {
+    spi_wait();
+    digitalWrite(CS, HIGH);
+  }
+
+  //Performs an 8-bit SPI transfer operation
+  void spi_write( char data ) {
+    spi_wait();
+    SPDR = data; //transfer data with hardware SPI
+  }
+
+  void spi_write_nowait( char data ) {
+    SPDR = data; //transfer data with hardware SPI
+  }
+
+  char spi_read( char data ) {
+    spi_write(data);
+    spi_wait();
     return SPDR;
-  }  
-  
+  }
+    
   void initDisplays() {
     #ifdef ShowReticle
       byte buf[2];
@@ -288,20 +311,19 @@ private:
   //Clears (ie sets to be transparent) a column 'col' of some characters - clears centreRow+-offset
   void clearCol(unsigned col, unsigned centreRow, unsigned offset) {
     int i = 0;
-    digitalWrite( CS, LOW );    
-    spi_transfer( DMM );
-    spi_transfer( 0x00 ); //16bit transfer, transparent BG
+    spi_select();
+    spi_write( DMM );
+    spi_write( 0x00 ); //16bit transfer, transparent BG
     
     for( i = ((centreRow-offset >= 0) ? centreRow-offset : 0) ; (i <= (centreRow + offset)) && (i <= MAX_screen_rows); i++ ) {
-      spi_transfer( DMAH );
-      spi_transfer( ( (i*30+col) > 0xff ) ? 0x01 :0x00 );
-      spi_transfer( DMAL );
-      spi_transfer( ( (i*30+col) > 0xff ) ? (byte)(i*30+col-0xff-1) : (byte)(i*30+col) );
-      spi_transfer( DMDI );
-      spi_transfer( 0x00 );
+      spi_write( DMAH );
+      spi_write( ( (i*30+col) > 0xff ) ? 0x01 :0x00 );
+      spi_write( DMAL );
+      spi_write( ( (i*30+col) > 0xff ) ? (byte)(i*30+col-0xff-1) : (byte)(i*30+col) );
+      spi_write( DMDI );
+      spi_write( 0x00 );
     }
-    
-    digitalWrite( CS, HIGH );
+    spi_deselect();
   }
   
   
@@ -309,29 +331,29 @@ private:
   //Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
   //columns in row y
   void writeChars( byte* buf, unsigned len, byte blink, unsigned y, unsigned x ) {
-    digitalWrite( CS, LOW );
+    spi_select();
     
     //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
-    spi_transfer( DMM );
-    spi_transfer( (blink) ? 0x11 : 0x01 ); //16bit transfer, transparent BG, autoincrement mode
+    spi_write( DMM );
+    spi_write( (blink) ? 0x11 : 0x01 ); //16bit transfer, transparent BG, autoincrement mode
     //send starting display memory address (position of text)
-    spi_transfer( DMAH );
-    spi_transfer( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
-    spi_transfer( DMAL );
-    spi_transfer( ( (y*30+x) > 0xff ) ? (byte)(y*30+x-0xff-1) : (byte)(y*30+x) );
+    spi_write( DMAH );
+    spi_write( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
+    spi_write( DMAL );
+    spi_write( ( (y*30+x) > 0xff ) ? (byte)(y*30+x-0xff-1) : (byte)(y*30+x) );
     
     //write out data
     for ( int i = 0; i < len; i++ ) {
-      spi_transfer( DMDI );
-      spi_transfer( buf[i] );
+      spi_write( DMDI );
+      spi_write( buf[i] );
     }
     
     //Send escape 11111111 to exit autoincrement mode
-    spi_transfer( DMDI );
-    spi_transfer( END_string );
+    spi_write( DMDI );
+    spi_write( END_string );
 
     //finished writing
-    digitalWrite( CS, HIGH );
+    spi_deselect();
   }
   
 #if defined(AUTO_VIDEO_STANDARD)
@@ -340,10 +362,10 @@ private:
     
     //this section isn't working yet - trying to get contents of STAT returns 0x00, when it should be 0x01 for PAL or 0x02 for NTSC
     Serial.println("Polling STAT");
-    digitalWrite( CS, LOW );
-    result = spi_transfer( STAT );
-//    result = spi_transfer(0x00); //need to send dummy bits in order for uC to clock in bits from slave device?
-    digitalWrite( CS, HIGH );
+    spi_select();
+    spi_write( STAT );
+    result = spi_read();
+    spi_deselect();
     Serial.print("STAT= ");
     Serial.println((unsigned)result);
     
@@ -382,21 +404,24 @@ private:
 #endif
 
 #ifdef JuicMonitor
+  byte current_battery;
   void updateJuice(void) {
-     byte buf[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
-     for (byte i=0; i<JUICE_ROWS; i++) {
-       if (juiceMonitor.isI(i)) {
-         unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(i));
-	 unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(i));
-         snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",
-                  JUICE_SYMBOL(i),_u/10,_u%10,_i/10,_i%10,(unsigned)juiceMonitor.getC(i));
-       } else {
-         unsigned _u = 10.0 * juiceMonitor.getU(i);
-         snprintf((char*)buf,20,"%c%2u.%1uV",JUICE_SYMBOL(i),_u/10,_u%10);
-       }
-       writeChars( buf, 19, (juiceMonitor.getA(i) != OK), JUICE_ROW+i, JUICE_COL );
-     }
-   }
+    byte buf[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
+    current_battery = (current_battery+1) % min(JUICE_MAXROWS,juiceMonitor.getNB());     
+    if (juiceMonitor.isI(current_battery)) {
+      unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(current_battery));
+      unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(current_battery));
+      snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",
+               juiceMonitor.getOSDsym(current_battery),
+               _u/10,_u%10,_i/10,_i%10,
+               (unsigned)juiceMonitor.getC(current_battery));
+    } else {
+      unsigned _u = 10.0 * juiceMonitor.getU(current_battery);
+      snprintf((char*)buf,20,"%c%2u.%1uV",
+               juiceMonitor.getOSDsym(current_battery),_u/10,_u%10);
+    }
+    writeChars( buf, 19, (juiceMonitor.getA(current_battery) != OK), JUICE_ROW+current_battery, JUICE_COL );
+  }
 #endif
 
 #ifdef AltitudeHold
@@ -441,8 +466,8 @@ void updateTimer(void) {
     prevUpdate=armedTimeSecs;
     char timerAscii[7]; //clock symbol, two chars for mins, colon, two chars for secs, null terminator
     snprintf(timerAscii,7,"\005%02u:%02u",
-      armedTimeSecs % 60,
-      (armedTimeSecs / 60) % 100);
+      (armedTimeSecs / 60) % 100,
+      armedTimeSecs % 60);
     writeChars( (byte*) timerAscii, 6, 0, TIMER_ROW, TIMER_COL );
   }
 }

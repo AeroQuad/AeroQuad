@@ -33,6 +33,7 @@
     float vwarning,valarm;  // Warning and Alarm voltage level
     float vscale,vbias;     // voltage polynom V = vbias + (Aref*Ain(vpin))*vscale;
     float cscale,cbias;     // current polynom C = cbias + (Aref*Ain(cpin))*cscale;
+    byte  symbol;
   };
 #define NC 255              // NotConnected - use this in place of missing (current) sensor
 
@@ -49,6 +50,7 @@
   //   (vbias)    = 0.82 - voltage drop on the diode on ArduinoMega VIN
   //   (cscale)   = 0.0 - N/A due to no sensor
   //   (cbias)    = 0.0 - N/A due to no sensor
+  //   (symbol)   = 0x0a - symbol on OSD [CPU]
   // battery 2
   //   (vpin)     = 1   - AIN1 on v2.0 shield
   //   (cpin)     = 2   - AIN2 on v2.0 shield
@@ -58,10 +60,10 @@
   //   (vbias)    = 0.0 - no diode
   //   (cscale)   = 100.0/1024.0 - a flytron 100A sensor giving 5V (=AREF) at 100A
   //   (cbias)    = 0.0 - no bias on this sensor
-  
+  //   (symbol)   = 0x04 - symbol on OSD [ENG]
  const struct batteryconfig batconfig[] = {
-   { 0, NC,  7.4, 7.2,   ((AREF / 1024.0) * (15.0 + 7.5) / 7.5), 0.82,          0.0, 0.0 },
-   { 1,  2, 11.1, 10.5, ((AREF / 1024.0) * (15.0 + 10.0) / 10.0),  0.0, 100.0/1024.0, 0.0 }
+   { 0, NC,  7.4, 7.2,    ((AREF / 1024.0) * (15.0 + 7.5) / 7.5), 0.82,          0.0, 0.0, 0x0a},
+   { 1,  2, 11.1, 10.5, ((AREF / 1024.0) * (15.0 + 10.0) / 10.0),  0.0, 100.0/1024.0, 0.0, 0x04 }
 };
 
 // Threshold for resetting mAh counter, if the motors are not armed and voltage on pack drops under this mAh counter is zeroed.
@@ -123,6 +125,12 @@ public:
     lowBatteryEvent(juiceStatus);
   }  
 
+  const byte getNB() { //return number of measured batteries
+    return BATTERIES;
+  }    
+  const byte getOSDsym(byte channel) {
+    return batconfig[channel].symbol;
+  }
   const float getU(byte channel) {
     return batteryVoltage[channel];
   }
