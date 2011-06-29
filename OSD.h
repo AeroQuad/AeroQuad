@@ -151,6 +151,7 @@ byte *callsign = (byte*)"OH2FXR";
 byte clear;
 
 class OSD {
+  
 private:
 
   unsigned long prevUpdate; //armed time when last update occurred
@@ -158,12 +159,14 @@ private:
   unsigned long armedTime; //time motors have spent armed
   byte          prevFlightMode; // previous flightmode for reticle update
 
+  byte ctask; ; // Current task
+
 #ifdef OSD_PROFILE
   unsigned long prof_min,prof_max,prof_this,prof_start;
   unsigned long pt_start,pt_this,pt_min[8],pt_max[8];
-  byte pt_task, prof_cnt;
+  byte prof_cnt;
   #define PROF_TASK_START { pt_start=micros(); }
-  #define PROF_TASK_END { pt_this=micros()-pt_start; if (pt_this<pt_min[pt_task]) pt_min[pt_task]=pt_this; if (pt_this>pt_max[pt_task]) pt_max[pt_task]=pt_this; pt_task++; }
+  #define PROF_TASK_END(n) { pt_this=micros()-pt_start; if (pt_this<pt_min[n]) pt_min[n]=pt_this; if (pt_this>pt_max[n]) pt_max[n]=pt_this; }
 #else
   #define PROF_TASK_START
   #define PROF_TASK_END
@@ -274,16 +277,15 @@ private:
   }
     
   void initDisplays() {
+    ctask=0;
     #ifdef ShowReticle
-      byte buf[2];
-      buf[0] = 0x01;
-      buf[1] = 0x02;
-      writeChars( buf, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
-      prevFlightMode=ACRO;
+    prevFlightMode=99; 
+    updateReticle();
+
     #endif
 
     #ifdef ShowCallSign
-      writeChars( callsign, strlen((char*)callsign), 0, CALLSIGN_ROW, CALLSIGN_COL );
+    writeChars( callsign, strlen((char*)callsign), 0, CALLSIGN_ROW, CALLSIGN_COL );
     #endif
 
     #ifdef ShowFlightTimer
@@ -291,10 +293,12 @@ private:
     #endif
     
     #ifdef AltitudeHold
+    lastAltitude=9999; //force update
     updateAltitude();
     #endif
     
     #ifdef HeadingMagHold
+    lastHdg=361; // force update
     updateHdg();
     #endif
     
@@ -534,49 +538,49 @@ public:
   void update(void) {
 #ifdef OSD_PROFILE
     prof_start=micros();
-    pt_task=0;
 #endif
-    #ifdef ShowReticle
-    PROF_TASK_START
-    updateReticle();
-    PROF_TASK_END
-    #endif
+    if ((ctask & 1) == 0) { // even updates go for attitude
+      PROF_TASK_START
+      #ifdef ShowAttitudeIndicator
+      updateAI();
+      #endif
+      ctask++;
+      PROF_TASK_END(0);
+    } else {
+      PROF_TASK_START
+      int taskn=0;
 
-    #ifdef BattMonitor
-    PROF_TASK_START
-    updateVoltage();
-    PROF_TASK_END
-    #endif
+      #ifdef ShowReticle
+      if (taskn++ == (ctask>>1)) updateReticle();
+      #endif
+ 
+      #ifdef BattMonitor
+      if (taskn++ == (ctask>>1)) updateVoltage();
+      #endif
     
-    #ifdef JuicMonitor
-    PROF_TASK_START
-    updateJuice();
-    PROF_TASK_END
-    #endif
+      #ifdef JuicMonitor
+      if (taskn++ == (ctask>>1)) updateJuice();
+      #endif
     
-    #ifdef AltitudeHold
-    PROF_TASK_START
-    updateAltitude();
-    PROF_TASK_END
-    #endif
+      #ifdef AltitudeHold
+      if (taskn++ == (ctask>>1)) updateAltitude();
+      #endif
+
+      #ifdef HeadingMagHold
+      if (taskn++ == (ctask>>1)) updateHdg();
+      #endif
     
-    #ifdef HeadingMagHold
-    PROF_TASK_START
-    updateHdg();
-    PROF_TASK_END
-    #endif
-    
-    #ifdef ShowFlightTimer
-    PROF_TASK_START
-    updateTimer();
-    PROF_TASK_END
-    #endif
-    
-    #ifdef ShowAttitudeIndicator
-    PROF_TASK_START
-    updateAI();
-    PROF_TASK_END
-    #endif
+      #ifdef ShowFlightTimer
+      if (taskn++ == (ctask>>1)) updateTimer();
+      #endif
+
+      PROF_TASK_END((ctask>>1)+1)
+      if ((taskn-1) == (ctask>>1)) {
+        ctask=0;
+      } else {
+        ctask++;
+      } 
+    }
 #ifdef OSD_PROFILE
     prof_this=micros()-prof_start;
     if (prof_this<prof_min) prof_min=prof_this;
@@ -587,9 +591,8 @@ public:
       writeChars( (byte*)buf, strlen(buf), 0, 13, 1 );
     }
     if (prof_cnt%15==7) {
-      pt_task=(prof_cnt>>4)&7;
       char buf[20];
-      snprintf(buf,20,"T%u:%u:%u   ",(unsigned)pt_task,(unsigned)pt_min[pt_task],(unsigned)pt_max[pt_task]);
+      snprintf(buf,20,"T%u:%u:%u   ",(unsigned)(prof_cnt>>4)&7,(unsigned)pt_min[(prof_cnt>>4)&7],(unsigned)pt_max[(prof_cnt>>4)&7]);
       writeChars( (byte*)buf, strlen(buf), 0, 14, 1 );
     }
     prof_cnt++;    
