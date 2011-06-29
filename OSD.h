@@ -181,7 +181,7 @@ private:
 
 public:
   OSD (void) {
-    prevUpdate = 0;
+    prevUpdate = 100; // this will force time update
     armedTime = 0;
     prevTime = currentTime;
 #ifdef OSD_PROFILE
@@ -336,7 +336,7 @@ private:
     spi_select();    
     //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
     spi_write( DMM );
-    spi_write( ((blink) ? 0x10 : 0x00) | ((len!=1)?0x01:0x00 ); //16bit transfer, transparent BG, autoincrement mode (if len!=1)
+    spi_write( ((blink) ? 0x10 : 0x00) | ((len!=1)?0x01:0x00) ); //16bit transfer, transparent BG, autoincrement mode (if len!=1)
     //send starting display memory address (position of text)
     spi_write( DMAH );
     spi_write( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
