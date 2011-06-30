@@ -75,7 +75,7 @@ byte *callsign = (byte*)"OH2FXR";
 //Juice monitor, two battery config
 #define JUICE_ROW 2
 #define JUICE_COL 1
-#define JUICE_MAXROWS 3 // limit the number of batteries shown....
+#define JUICE_MAXROWS 2 // limit the number of batteries shown....
 
 /********************** End of user configuration section ********************************/
 
@@ -140,7 +140,7 @@ static const byte ROLL_COLUMNS[4] = {10,12,17,19}; // columns where the roll lin
 #define AI_BOTTOM_PIXEL ((RETICLE_ROW + AI_DISPLAY_RECT_HEIGHT/2)*18)
 #define AI_CENTRE (RETICLE_ROW*18+10)    //row, in pixels, corresponding to zero pitch/roll.
 // OSD profiling
-#define OSD_PROFILE
+//#define OSD_PROFILE
 
 
 #ifdef MAX7456_OSD
@@ -167,7 +167,7 @@ private:
   #define PROF_TASK_END(n) { pt_this=micros()-pt_start; if (pt_this<pt_min[n]) pt_min[n]=pt_this; if (pt_this>pt_max[n]) pt_max[n]=pt_this; }
 #else
   #define PROF_TASK_START
-  #define PROF_TASK_END
+  #define PROF_TASK_END(n)
 #endif
   
 #if defined(AUTO_VIDEO_STANDARD)
@@ -389,21 +389,24 @@ private:
 #ifdef JuicMonitor
   byte current_battery;
   void updateJuice(void) {
-    byte buf[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
-    current_battery = (current_battery+1) % min(JUICE_MAXROWS,juiceMonitor.getNB());     
+    byte buf[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // Sxx.xVxxx.xA
+    // Sxx.xVyyy.yAzzzz#
+    // 12345678901234567
+    current_battery = (current_battery+1) % min(juiceMonitor.getNB(),JUICE_MAXROWS);
+    // use maximum of JUICE_ROWS, last line will cycle thru rest
     if (juiceMonitor.isI(current_battery)) {
       unsigned _u = (unsigned)(10.0 * juiceMonitor.getU(current_battery));
       unsigned _i = (unsigned)(10.0 * juiceMonitor.getI(current_battery));
-      snprintf((char*)buf,20,"%c%2u.%1uV%3u.%1uA%4u\020",
+      snprintf((char*)buf,18,"%c%2u.%1uV%3u.%1uA%4u\020",
                juiceMonitor.getOSDsym(current_battery),
                _u/10,_u%10,_i/10,_i%10,
                (unsigned)juiceMonitor.getC(current_battery));
     } else {
       unsigned _u = 10.0 * juiceMonitor.getU(current_battery);
-      snprintf((char*)buf,20,"%c%2u.%1uV",
+      snprintf((char*)buf,18,"%c%2u.%1uV",
                juiceMonitor.getOSDsym(current_battery),_u/10,_u%10);
     }
-    writeChars( buf, 19, (juiceMonitor.getA(current_battery) != OK), JUICE_ROW+current_battery, JUICE_COL );
+    writeChars( buf, 17, (juiceMonitor.getA(current_battery) != OK), JUICE_ROW + current_battery, JUICE_COL );
   }
 #endif
 
@@ -521,9 +524,21 @@ public:
       PROF_TASK_START
       int taskn=0;
 
-      #ifdef ShowReticle
-      if (taskn++ == (ctask>>1)) updateReticle();
-      #endif
+      if (taskn++ == (ctask>>1)) {
+        // short tasks grouped here
+        #ifdef ShowReticle
+          updateReticle();
+        #endif
+        #ifdef AltitudeHold
+          updateAltitude();
+        #endif
+        #ifdef HeadingMagHold
+          updateHdg();
+        #endif
+        #ifdef ShowFlightTimer
+          updateTimer();
+        #endif
+      }
  
       #ifdef BattMonitor
       if (taskn++ == (ctask>>1)) updateVoltage();
@@ -533,17 +548,7 @@ public:
       if (taskn++ == (ctask>>1)) updateJuice();
       #endif
     
-      #ifdef AltitudeHold
-      if (taskn++ == (ctask>>1)) updateAltitude();
-      #endif
 
-      #ifdef HeadingMagHold
-      if (taskn++ == (ctask>>1)) updateHdg();
-      #endif
-    
-      #ifdef ShowFlightTimer
-      if (taskn++ == (ctask>>1)) updateTimer();
-      #endif
 
       PROF_TASK_END((ctask>>1)+1)
       if ((taskn-1) == (ctask>>1)) {
