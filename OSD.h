@@ -312,16 +312,17 @@ private:
   //Writes 'len' character address bytes to the display memory corresponding to row y, column x
   //Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
   //columns in row y
-  void writeChars( byte* buf, unsigned len, byte blink, unsigned y, unsigned x ) {
+  void writeChars( byte* buf, byte len, byte blink, byte y, byte x ) {
+    unsigned offset = y*30 + x; 
     spi_select();    
     //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
     spi_write( DMM );
     spi_write( ((blink) ? 0x10 : 0x00) | ((len!=1)?0x01:0x00) ); //16bit transfer, transparent BG, autoincrement mode (if len!=1)
     //send starting display memory address (position of text)
     spi_write( DMAH );
-    spi_write( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
+    spi_write( offset >> 8 );
     spi_write( DMAL );
-    spi_write( ( (y*30+x) > 0xff ) ? (byte)(y*30+x-0xff-1) : (byte)(y*30+x) );
+    spi_write( offset & 0xff );
     
     //write out data
     for ( int i = 0; i < len; i++ ) {
