@@ -489,7 +489,7 @@ void updateAI( void ) {
   //Calculate row (in pixels) of new roll lines
   int distFar = (ROLL_COLUMNS[3] - (RETICLE_COL + 1))*12 + 6; //horizontal pixels between centre of reticle and centre of far angle line
   int distNear = (ROLL_COLUMNS[2] - (RETICLE_COL + 1))*12 + 6;
-  float gradient = tan(flightAngle->getData(ROLL));
+  float gradient = 1.4 * flightAngle->getData(ROLL); // tan(flightAngle->getData(ROLL));
   AIrows[4] = constrain( AI_CENTRE - (int)(((float)distFar)*gradient), AI_TOP_PIXEL, AI_BOTTOM_PIXEL ); //row of far right angle line, in pixels from top
   AIrows[3] = constrain( AI_CENTRE - (int)(((float)distNear)*gradient), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
   AIrows[1] = constrain( 2*AI_CENTRE - AIrows[4], AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
