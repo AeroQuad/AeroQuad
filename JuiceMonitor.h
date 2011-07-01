@@ -85,12 +85,14 @@ public:
   float batteryVoltage[BATTERIES];
   float batteryCurrent[BATTERIES];
   float batterymAh[BATTERIES];
+  byte  battery_zero_state[BATTERIES];
 
   JuiceMonitor(void) {
     for (byte i; i<BATTERIES; i++) {
       batteryVoltage[i] = batconfig[i].vwarning + 1.0;
       batteryStatus[i] = OK;
       batterymAh[i] = 0.0;
+      battery_zero_state[i]=0;
     }
   }
 
@@ -116,10 +118,19 @@ public:
       batterymAh[i] += G_Dt * batteryCurrent[i] / 3.6;
       // G_Dt is seconds , batteryCurrent in amps need to convert to mAh it divide by 3.6
 #if defined MAH_RESET_THRESHOLD
-      if ((!armed) && (batteryVoltage[i]<MAH_RESET_THRESHOLD))
-        batterymAh[i] = 0.0;
+      switch (battery_zero_state[i]) {
+        case 0:
+          if ((!armed) && (batteryVoltage[i]<MAH_RESET_THRESHOLD))
+            battery_zero_state[i]=1;
+          break;
+        case 1:
+          if (batteryVoltage[i]>MAH_RESET_THRESHOLD)
+            battery_zero_state[i]=0;
+          else if (armed) 
+            batterymAh[i] = 0.0;
+          break;
+      }
 #endif
-
     }
     if (3==juiceStatus) juiceStatus=ALARM; // fixup if both active
     lowBatteryEvent(juiceStatus);
