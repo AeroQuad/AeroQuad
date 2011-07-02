@@ -66,7 +66,8 @@
    { 1,  2, 11.1, 10.5, ((AREF / 1024.0) * (15.0 + 10.0) / 10.0),  0.0, 100.0/1024.0, 0.0, 0x04 }
 };
 
-// Threshold for resetting mAh counter, if the motors are not armed and voltage on pack drops under this mAh counter is zeroed.
+// Threshold for resetting mAh counter, if voltage is below this and motors are armed up, counter is reset
+//
 // This is to make it easy to swap battery while keeping electronics powered up (to keep GPS fix for example)
 // Comment this out to disable the functionality
 #define MAH_RESET_THRESHOLD 1.0
@@ -85,14 +86,17 @@ public:
   float batteryVoltage[BATTERIES];
   float batteryCurrent[BATTERIES];
   float batterymAh[BATTERIES];
+#ifdef MAH_RESET_THRESHOLD
   byte  battery_zero_state[BATTERIES];
-
+#endif
   JuiceMonitor(void) {
     for (byte i; i<BATTERIES; i++) {
       batteryVoltage[i] = batconfig[i].vwarning + 1.0;
       batteryStatus[i] = OK;
       batterymAh[i] = 0.0;
+#ifdef MAH_RESET_THRESHOLD
       battery_zero_state[i]=0;
+#endif
     }
   }
 
