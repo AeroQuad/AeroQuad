@@ -40,6 +40,7 @@
 #define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
 #define ShowAttitudeIndicator
 #define ShowCallSign
+#define ShowRSSI
 //#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 //Choose your video standard:
@@ -76,6 +77,15 @@ byte *callsign = (byte*)"OH2FXR";
 #define JUICE_ROW 2
 #define JUICE_COL 1
 #define JUICE_MAXROWS 2 // limit the number of batteries shown....
+
+// RSSI monitor
+#define RSSI_ROW 3
+#define RSSI_COL 23
+#define RSSI_PIN A6     // analog pin to read
+#define RSSI_100P 1023 // A/D value for 100%
+#define RSSI_0P 0      // A/D value for 0%
+#define RSSI_WARN 20   // show alarm at %
+#define RSSI_SYMBOL 0xFA
 
 /********************** End of user configuration section ********************************/
 
@@ -307,6 +317,11 @@ private:
     #ifdef JuicMonitor
     updateJuice();
     #endif
+
+    #ifdef ShowRSSI
+    lastRSSI=101; // force update
+    updateRSSI();
+    #endif
   }
   
   //Writes 'len' character address bytes to the display memory corresponding to row y, column x
@@ -471,6 +486,21 @@ void updateReticle(void) {
 }
 #endif
 
+#ifdef ShowRSSI
+  byte lastRSSI;
+  void updateRSSI( void ) {
+    int val = analogRead(RSSI_PIN);
+    val = (val-RSSI_0P)*100/(RSSI_100P-RSSI_0P);
+    if (val<0) val=0;
+    if (val>100) val=100;
+    if (val!=lastRSSI) {
+      byte buf[6];
+      snprintf((char *)buf,6,"%c%3u%%",RSSI_SYMBOL,val);
+      writeChars(buf,5,(RSSI_WARN>val)?1:0,RSSI_ROW,RSSI_COL);
+    }
+  }
+
+#endif
 #ifdef ShowAttitudeIndicator
 void updateAI( void ) {
   short         AIrows[5];  //Holds the row, in pixels, of AI elements: pitch then roll from left to right.
@@ -537,6 +567,9 @@ public:
         #endif
         #ifdef ShowFlightTimer
           updateTimer();
+        #endif
+        #ifdef ShowRSSI
+          updateRSSI();
         #endif
       }
  
