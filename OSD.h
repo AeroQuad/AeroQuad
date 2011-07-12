@@ -396,7 +396,7 @@ private:
       char buf[6];
       snprintf(buf,6,"\004%2d.%1d",
         currentVoltage/10,currentVoltage%10);
-      writeChars( buf, 5, 0, VOLTAGE_ROW, VOLTAGE_COL );
+      writeChars( (byte*)buf, 5, 0, VOLTAGE_ROW, VOLTAGE_COL );
     }
   }
 #endif
