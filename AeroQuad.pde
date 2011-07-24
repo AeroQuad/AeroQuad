@@ -74,6 +74,15 @@
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Define how many channels have have connected from your R/C receiver
+// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
+// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#define LASTCHANNEL 6
+// #define LASTCHANNEL 8
+
+
 // *******************************************************************************************************************************
 // Camera Stabilization
 // Servo output goes to D11(pitch), D12(roll), D13(yaw) on AeroQuad v1.8 shield

@@ -294,19 +294,19 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(receiver.getXmitFactor());
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getSmoothFactor(axis));
     }
-    SERIAL_PRINTLN(receiver.getSmoothFactor(AUX));
+    SERIAL_PRINTLN(receiver.getSmoothFactor(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
-    PrintValueComma(receiver.getTransmitterSlope(AUX));
-    SERIAL_PRINTLN(receiver.getTransmitterOffset(AUX));
+    PrintValueComma(receiver.getTransmitterSlope(LASTCHANNEL-1));
+    SERIAL_PRINTLN(receiver.getTransmitterOffset(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
