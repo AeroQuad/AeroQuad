@@ -439,10 +439,11 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(relativeHeading);
     break;
   case '6': // Report remote commands
-    for (byte motor = FRONT; motor < LEFT; motor++) {
+    for (byte motor = FRONT; motor < (LASTMOTOR-1); motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
-    SERIAL_PRINTLN(motors.getRemoteCommand(LEFT));
+    SERIAL_PRINTLN(motors.getRemoteCommand(LASTMOTOR-1));
+    queryType = 'X';
     break;
   case '!': // Send flight software version
     SERIAL_PRINTLN(VERSION, 1);
@@ -473,14 +474,16 @@ void sendSerialTelemetry() {
 #endif    
     // Determine which motor flight configuration for Configurator GUI
 #if defined(plusConfig)
-    SERIAL_PRINT('0');
+    PrintValueComma('0');
 #elif defined(XConfig)
-    SERIAL_PRINT('1');
+    PrintValueComma('1');
 #elif defined(HEXACOAXIAL)
-    SERIAL_PRINT('2');
+    PrintValueComma('2');
 #elif defined(HEXARADIAL)
-    SERIAL_PRINT('3');
+    PrintValueComma('3');
 #endif
+    PrintValueComma(LASTCHANNEL);
+    SERIAL_PRINT(LASTMOTOR);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;  
