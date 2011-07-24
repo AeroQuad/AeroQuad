@@ -90,12 +90,12 @@ void readSerialCommand() {
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<6; channel++) {
         receiver.setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<6; channel++) {
         receiver.setTransmitterSlope(channel, readFloatSerial());
         receiver.setTransmitterOffset(channel, readFloatSerial());
       }
@@ -424,6 +424,10 @@ void sendSerialTelemetry() {
     }
     SERIAL_PRINTLN(receiver.getRaw(AUX));
     break;
+  case '8': // moeffe 8 channels Send receiver status     AUX2+AUX3
+    PrintValueComma(receiver.getRaw(AUX2));
+    SERIAL_PRINTLN(receiver.getRaw(AUX3));
+    break;  
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
