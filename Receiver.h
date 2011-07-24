@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.2 - June 2011
+  AeroQuad v2.4.3 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -383,11 +383,7 @@ SIGNAL(PCINT2_vect) {
   static byte receiverPin[6] = {5, 3, 2, 4, 1, 0}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #else
  //arduino pins 63, 64, 65, 62, 66, 67
-<<<<<<< HEAD
   static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
-=======
-  static byte receiverPin[6] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
->>>>>>> 747c620fc9fd389c0ed0a207154a3fb1d2402d6b
 #endif
 
 class Receiver_AeroQuadMega : public Receiver {
