@@ -69,7 +69,7 @@ void readSerialCommand() {
       readSerialPID(LEVELGYROPITCH);
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
-    case 'G': // Spare
+    case 'G': // *** Spare ***
       // Spare command
       break;
     case 'I': // Receiver altitude hold PID
@@ -86,6 +86,7 @@ void readSerialCommand() {
       gyro.setSmoothFactor(readFloatSerial());
       accel.setSmoothFactor(readFloatSerial());
       timeConstant = readFloatSerial();
+      aref = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
@@ -158,8 +159,8 @@ void readSerialCommand() {
       accel.setOneG(accel.getFlightData(ZAXIS));
 #endif
       break;
-    case 'd': // send aref
-      aref = readFloatSerial();
+    case 'd': // *** Spare ***
+      // Spare command
       break;
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
@@ -257,7 +258,8 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN(windupGuard);
     queryType = 'X';
     break;
-  case 'H': // Spare telemetry
+  case 'H': // *** Spare ***
+    // Spare telemetry
     //PrintValueComma(0);
     //SERIAL_PRINTLN(0);
     //queryType = 'X';
@@ -283,7 +285,8 @@ void sendSerialTelemetry() {
   case 'L': // Send data filtering values
     PrintValueComma(gyro.getSmoothFactor());
     PrintValueComma(accel.getSmoothFactor());
-    SERIAL_PRINTLN(timeConstant);
+    PrintValueComma(timeConstant);
+    SERIAL_PRINTLN(aref);
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
@@ -309,35 +312,39 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
-    #if defined(HeadingMagHold)
+#if defined(HeadingMagHold)
       PrintValueComma(compass.getRawData(XAXIS));
       PrintValueComma(compass.getRawData(YAXIS));
       SERIAL_PRINTLN(compass.getRawData(ZAXIS));
-    #else
+#else
       PrintValueComma(0);
       PrintValueComma(0);
       SERIAL_PRINTLN('0');
-    #endif
+#endif
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
-    #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+#if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
       SERIAL_PRINTLN(degrees(flightAngle->getDegreesHeading(YAW)));
-    #else
+#else
       SERIAL_PRINTLN(degrees(gyro.getHeading()));
-    #endif
+#endif
     break;
-  case 'R': // Spare
+  case 'R': // *** Spare ***
+    // Spare telemetry
+    //PrintValueComma(0);
+    //SERIAL_PRINTLN(0);
+    //queryType = 'X';
     break;
   case 'S': // Send all flight data  *** UPDATE ***
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
         PrintValueComma(gyro.getFlightData(axis));
     }
-    #ifdef BattMonitor
+#ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
-    #else
+#else
       PrintValueComma(0);
-    #endif
+#endif
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(motors.getMotorAxisCommand(axis));
     }
@@ -358,18 +365,18 @@ void sendSerialTelemetry() {
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
-    #ifdef HeadingMagHold
+#ifdef HeadingMagHold
       PrintValueComma(flightAngle->getDegreesHeading(YAW));
-    #else
+#else
       PrintValueComma(0);
-    #endif
-    #ifdef AltitudeHold
+#endif
+#ifdef AltitudeHold
       PrintValueComma(altitude.getData());
       SERIAL_PRINT(altitudeHold, DEC);
-    #else
+#else
       PrintValueComma(0);
       SERIAL_PRINT('0');
-    #endif
+#endif
     SERIAL_PRINTLN();    
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
@@ -395,17 +402,11 @@ void sendSerialTelemetry() {
     break;
   case 'X': // Stop sending messages
     break;
-  case 'Z': // Send heading *** UPDATE ***
-    PrintValueComma(receiver.getData(YAW));
-    PrintValueComma(headingHold);
-    PrintValueComma(setHeading);
-    // AKA - Configurator wants -180/180 for headings,
-    // when heading hold active, the relative heading can be > 180 due to the way it's calculated
-    // this corrects it just for the configurator.
-    if ((setHeading + relativeHeading) > 180)
-      SERIAL_PRINTLN(-360 + relativeHeading);
-    else
-      SERIAL_PRINTLN(relativeHeading);
+  case 'Z': // *** Spare ***
+    // Spare telemetry
+    //PrintValueComma(0);
+    //SERIAL_PRINTLN(0);
+    //queryType = 'X';
     break;
   case '6': // Report remote commands
     for (byte motor = FRONT; motor < (LASTMOTOR); motor++) {
@@ -456,9 +457,11 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;  
-  case 'e': // Send AREF value
-    SERIAL_PRINTLN(aref);
-    queryType = 'X';
+  case 'e': // *** Spare ***
+    // Spare telemetry
+    //PrintValueComma(0);
+    //SERIAL_PRINTLN(0);
+    //queryType = 'X';
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
