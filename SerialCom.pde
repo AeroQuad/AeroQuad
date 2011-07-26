@@ -69,9 +69,8 @@ void readSerialCommand() {
       readSerialPID(LEVELGYROPITCH);
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
-    case 'G': // Receive auto level configuration
-//      levelLimit = readFloatSerial();
-//      levelOff = readFloatSerial();
+    case 'G': // Spare
+      // Spare command
       break;
     case 'I': // Receiver altitude hold PID
 #ifdef AltitudeHold
@@ -90,12 +89,12 @@ void readSerialCommand() {
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
-      for(byte channel = ROLL; channel<6; channel++) {
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
         receiver.setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<6; channel++) {
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
         receiver.setTransmitterSlope(channel, readFloatSerial());
         receiver.setTransmitterOffset(channel, readFloatSerial());
       }
@@ -117,25 +116,28 @@ void readSerialCommand() {
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
-      armed = 0;
-      calibrateESC = 1;
+      armed = OFF;
+      if (readFloatSerial() == 123.45) // use a specific float value to validate full throttle call is being sent
+        calibrateESC = 1;
+      else
+        calibrateESC = 0;
       break;
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-      armed = 0;
+      armed = OFF;
       calibrateESC = 2;
       break;
     case '3': // Test ESC calibration
-      armed = 0;
+      armed = OFF;
       testCommand = readFloatSerial();
       calibrateESC = 3;
       break;
     case '4': // Turn off ESC calibration
-      armed = 0;
+      armed = OFF;
       calibrateESC = 0;
       testCommand = 1000;
       break;
     case '5': // Send individual motor commands (motor, command)
-      armed = 0;
+      armed = OFF;
       calibrateESC = 5;
       for (byte motor = FRONT; motor < LASTMOTOR; motor++)
         motors.setRemoteCommand(motor, readFloatSerial());
@@ -229,10 +231,6 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(gyro.getFlightData(PITCH));
-    //PrintValueComma(flightAngle->getData(PITCH));
-    //PrintValueComma(flightAngle->getGyroUnbias(PITCH));
-    //PrintValueComma(receiver.getZero(ROLL));
     //PrintValueComma(flightAngle->getData(ROLL));
     //SERIAL_PRINT(degrees(flightAngle->getData(YAW)));
     //SERIAL_PRINTLN();
@@ -248,7 +246,7 @@ void sendSerialTelemetry() {
   case 'D': // Send yaw PID values
     PrintPID(YAW);
     PrintPID(HEADING);
-    SERIAL_PRINTLN(headingHoldConfig, BIN);
+    SERIAL_PRINTLN((int)headingHoldConfig);
     queryType = 'X';
     break;
   case 'F': // Send roll and pitch auto level PID values
@@ -259,12 +257,10 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN(windupGuard);
     queryType = 'X';
     break;
-  case 'H': // Send auto level configuration values
-//		PrintValueComma(levelLimit);
-    PrintValueComma(0);
-//    SERIAL_PRINTLN(levelOff);
-    SERIAL_PRINTLN(0);
-    queryType = 'X';
+  case 'H': // Spare telemetry
+    //PrintValueComma(0);
+    //SERIAL_PRINTLN(0);
+    //queryType = 'X';
     break;
   case 'J': // Altitude Hold
 #ifdef AltitudeHold
@@ -280,7 +276,7 @@ void sendSerialTelemetry() {
     for(byte i=0; i<9; i++) {
      PrintValueComma(0);
     }
-    SERIAL_PRINTLN('0');
+    SERIAL_PRINTLN();
 #endif
     queryType = 'X';
     break;
@@ -288,25 +284,22 @@ void sendSerialTelemetry() {
     PrintValueComma(gyro.getSmoothFactor());
     PrintValueComma(accel.getSmoothFactor());
     SERIAL_PRINTLN(timeConstant);
-    // comma();
-    // SERIAL_PRINTLN(flightMode, DEC);
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(receiver.getXmitFactor());
-    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiver.getSmoothFactor(axis));
     }
-    SERIAL_PRINTLN(receiver.getSmoothFactor(LASTCHANNEL-1));
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
-    PrintValueComma(receiver.getTransmitterSlope(LASTCHANNEL-1));
-    SERIAL_PRINTLN(receiver.getTransmitterOffset(LASTCHANNEL-1));
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -316,47 +309,28 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
-    for (byte axis = ROLL; axis < YAW; axis++) {
-//      PrintValueComma(levelAdjust[axis]);
+    #if defined(HeadingMagHold)
+      PrintValueComma(compass.getRawData(XAXIS));
+      PrintValueComma(compass.getRawData(YAXIS));
+      SERIAL_PRINTLN(compass.getRawData(ZAXIS));
+    #else
       PrintValueComma(0);
-    }
+      PrintValueComma(0);
+      SERIAL_PRINTLN('0');
+    #endif
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      //PrintValueComma(compass.getAbsoluteHeading());
-      PrintValueComma(flightAngle->getDegreesHeading(YAW));
+      SERIAL_PRINTLN(degrees(flightAngle->getDegreesHeading(YAW)));
     #else
-      PrintValueComma(0);
+      SERIAL_PRINTLN(degrees(gyro.getHeading()));
     #endif
-    #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
-    #else
-      PrintValueComma(0);
-    #endif
-    #ifdef BattMonitor
-      SERIAL_PRINT(batteryMonitor.getData());
-    #else
-      SERIAL_PRINT(0);
-    #endif
-    SERIAL_PRINTLN();
     break;
-  case 'R': // Raw magnetometer data
-#if defined(HeadingMagHold)
-    PrintValueComma(compass.getRawData(XAXIS));
-    PrintValueComma(compass.getRawData(YAXIS));
-    SERIAL_PRINTLN(compass.getRawData(ZAXIS));
-#else
-    PrintValueComma(0);
-    PrintValueComma(0);
-    SERIAL_PRINTLN('0');
-#endif
+  case 'R': // Spare
     break;
-  case 'S': // Send all flight data
+  case 'S': // Send all flight data  *** UPDATE ***
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      if (axis == PITCH)
-        PrintValueComma(-gyro.getFlightData(axis));
-      else
         PrintValueComma(gyro.getFlightData(axis));
     }
     #ifdef BattMonitor
@@ -377,15 +351,14 @@ void sendSerialTelemetry() {
         PrintValueComma(accel.getFlightData(XAXIS));
       else
         PrintValueComma(accel.getFlightData(ZAXIS));
-    }  
-    SERIAL_PRINT(armed, BIN);
+    }
+    PrintValueComma((int)armed);
     comma();
     if (flightMode == STABLE)
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
     #ifdef HeadingMagHold
-      //PrintValueComma(compass.getAbsoluteHeading());
       PrintValueComma(flightAngle->getDegreesHeading(YAW));
     #else
       PrintValueComma(0);
@@ -399,38 +372,30 @@ void sendSerialTelemetry() {
     #endif
     SERIAL_PRINTLN();    
     break;
-  case 'T': // Send processed transmitter values
+  case 'T': // Send processed transmitter values *** UPDATE ***
     PrintValueComma(receiver.getXmitFactor());
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(receiver.getData(axis));
-    }
-    for (byte axis = ROLL; axis < YAW; axis++) {
-//      PrintValueComma(levelAdjust[axis]);
-      PrintValueComma(0);
     }
     PrintValueComma(motors.getMotorAxisCommand(ROLL));
     PrintValueComma(motors.getMotorAxisCommand(PITCH));
     SERIAL_PRINTLN(motors.getMotorAxisCommand(YAW));
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
-    for (byte channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
       PrintValueComma(receiver.getData(channel));
     }
-    SERIAL_PRINTLN(receiver.getData(AUX));
+    SERIAL_PRINTLN();
     break;
   case 'V': // Send receiver status
-    for (byte channel = ROLL; channel < AUX; channel++) {
+    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
       PrintValueComma(receiver.getRaw(channel));
     }
-    SERIAL_PRINTLN(receiver.getRaw(AUX));
+    SERIAL_PRINTLN();
     break;
-  case '8': // moeffe 8 channels Send receiver status     AUX2+AUX3
-    PrintValueComma(receiver.getRaw(AUX2));
-    SERIAL_PRINTLN(receiver.getRaw(AUX3));
-    break;  
   case 'X': // Stop sending messages
     break;
-  case 'Z': // Send heading
+  case 'Z': // Send heading *** UPDATE ***
     PrintValueComma(receiver.getData(YAW));
     PrintValueComma(headingHold);
     PrintValueComma(setHeading);
@@ -443,10 +408,10 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(relativeHeading);
     break;
   case '6': // Report remote commands
-    for (byte motor = FRONT; motor < (LASTMOTOR-1); motor++) {
+    for (byte motor = FRONT; motor < (LASTMOTOR); motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
-    SERIAL_PRINTLN(motors.getRemoteCommand(LASTMOTOR-1));
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case '!': // Send flight software version

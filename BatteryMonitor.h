@@ -61,6 +61,9 @@ public:
   }
 };
 
+// Definition below requested by Ala42 to make code compilable for non-AVR platforms
+#if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 // ***********************************************************************************
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
 // ***********************************************************************************
@@ -254,3 +257,4 @@ public:
   }
 };
 
+#endif
