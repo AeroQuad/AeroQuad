@@ -18,10 +18,11 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Written by Kari: http://aeroquad.com/showthread.php?
+// Written by Kari Hautio: http://aeroquad.com/showthread.php?3275-Refactored-BatteryMonitor-multiple-batteries-amp-current-sensor-support
+// Based on BatteryMonitor by Honk
 
 // *************************************************************************
-// ************************** Battery Monitor ******************************
+// ************************** Juice Monitor ******************************
 // *************************************************************************
 
 #ifdef BattMonitor
