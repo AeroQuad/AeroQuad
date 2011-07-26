@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.2 - June 2011
+  AeroQuad v2.4.3 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -209,7 +209,6 @@ byte altitudeHold = OFF;
 #define MAXCHECK MAXCOMMAND - 100
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
-#define LASTCHANNEL 6
 int delta;
 
 #define RISING_EDGE 1
@@ -388,6 +387,12 @@ typedef struct {
   float RECEIVER_CHANNEL_5_SLOPE_ADR;
   float RECEIVER_CHANNEL_5_OFFSET_ADR;
   float RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_6_SLOPE_ADR;
+  float RECEIVER_CHANNEL_6_OFFSET_ADR;
+  float RECEIVER_CHANNEL_6_SMOOTH_FACTOR_ADR;
+  float RECEIVER_CHANNEL_7_SLOPE_ADR;
+  float RECEIVER_CHANNEL_7_OFFSET_ADR;
+  float RECEIVER_CHANNEL_7_SMOOTH_FACTOR_ADR;
 } t_NVR_Data;  
 
 float nvrReadFloat(int address); // defined in DataStorage.h

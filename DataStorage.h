@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.2 - June 2011
+  AeroQuad v2.4.3 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -289,6 +289,12 @@ void writeEEPROM(void){
   writeFloat(receiver.getTransmitterSlope(5),  RECEIVER_CHANNEL_5_SLOPE_ADR);
   writeFloat(receiver.getTransmitterOffset(5), RECEIVER_CHANNEL_5_OFFSET_ADR);
   writeFloat(receiver.getSmoothFactor(5),      RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(6),  RECEIVER_CHANNEL_6_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(6), RECEIVER_CHANNEL_6_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(6),      RECEIVER_CHANNEL_6_SMOOTH_FACTOR_ADR);
+  writeFloat(receiver.getTransmitterSlope(7),  RECEIVER_CHANNEL_7_SLOPE_ADR);
+  writeFloat(receiver.getTransmitterOffset(7), RECEIVER_CHANNEL_7_OFFSET_ADR);
+  writeFloat(receiver.getSmoothFactor(7),      RECEIVER_CHANNEL_7_SMOOTH_FACTOR_ADR);
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);

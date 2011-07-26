@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.2 - June 2011
+  AeroQuad v2.4.3 - July 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -74,6 +74,15 @@
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Define how many channels have have connected from your R/C receiver
+// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
+// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#define LASTCHANNEL 6
+// #define LASTCHANNEL 8
+
 
 // *******************************************************************************************************************************
 // Camera Stabilization

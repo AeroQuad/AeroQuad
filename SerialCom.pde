@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.2 - June 2011
+  AeroQuad v2.4.3 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -90,12 +90,12 @@ void readSerialCommand() {
       break;
     case 'M': // Receive transmitter smoothing values
       receiver.setXmitFactor(readFloatSerial());
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<6; channel++) {
         receiver.setSmoothFactor(channel, readFloatSerial());
       }
       break;
     case 'O': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<6; channel++) {
         receiver.setTransmitterSlope(channel, readFloatSerial());
         receiver.setTransmitterOffset(channel, readFloatSerial());
       }
@@ -294,19 +294,19 @@ void sendSerialTelemetry() {
     break;
   case 'N': // Send transmitter smoothing values
     PrintValueComma(receiver.getXmitFactor());
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getSmoothFactor(axis));
     }
-    SERIAL_PRINTLN(receiver.getSmoothFactor(AUX));
+    SERIAL_PRINTLN(receiver.getSmoothFactor(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < AUX; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
-    PrintValueComma(receiver.getTransmitterSlope(AUX));
-    SERIAL_PRINTLN(receiver.getTransmitterOffset(AUX));
+    PrintValueComma(receiver.getTransmitterSlope(LASTCHANNEL-1));
+    SERIAL_PRINTLN(receiver.getTransmitterOffset(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -424,6 +424,10 @@ void sendSerialTelemetry() {
     }
     SERIAL_PRINTLN(receiver.getRaw(AUX));
     break;
+  case '8': // moeffe 8 channels Send receiver status     AUX2+AUX3
+    PrintValueComma(receiver.getRaw(AUX2));
+    SERIAL_PRINTLN(receiver.getRaw(AUX3));
+    break;  
   case 'X': // Stop sending messages
     break;
   case 'Z': // Send heading
@@ -439,10 +443,11 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(relativeHeading);
     break;
   case '6': // Report remote commands
-    for (byte motor = FRONT; motor < LEFT; motor++) {
+    for (byte motor = FRONT; motor < (LASTMOTOR-1); motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
-    SERIAL_PRINTLN(motors.getRemoteCommand(LEFT));
+    SERIAL_PRINTLN(motors.getRemoteCommand(LASTMOTOR-1));
+    queryType = 'X';
     break;
   case '!': // Send flight software version
     SERIAL_PRINTLN(VERSION, 1);
@@ -473,14 +478,16 @@ void sendSerialTelemetry() {
 #endif    
     // Determine which motor flight configuration for Configurator GUI
 #if defined(plusConfig)
-    SERIAL_PRINT('0');
+    PrintValueComma('0');
 #elif defined(XConfig)
-    SERIAL_PRINT('1');
+    PrintValueComma('1');
 #elif defined(HEXACOAXIAL)
-    SERIAL_PRINT('2');
+    PrintValueComma('2');
 #elif defined(HEXARADIAL)
-    SERIAL_PRINT('3');
+    PrintValueComma('3');
 #endif
+    PrintValueComma(LASTCHANNEL);
+    SERIAL_PRINT(LASTMOTOR);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;  
