@@ -117,20 +117,35 @@ void readSerialCommand() {
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
-      armed = OFF;
-      if (readFloatSerial() == 123.45) // use a specific float value to validate full throttle call is being sent
+      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+        armed = OFF;
         calibrateESC = 1;
-      else
+      }
+      else {
         calibrateESC = 0;
+        testCommand = 1000;
+      }
       break;
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-      armed = OFF;
-      calibrateESC = 2;
+      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+        armed = OFF;
+        calibrateESC = 2;
+      }
+      else {
+        calibrateESC = 0;
+        testCommand = 1000;
+      }
       break;
     case '3': // Test ESC calibration
-      armed = OFF;
-      testCommand = readFloatSerial();
-      calibrateESC = 3;
+      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+        armed = OFF;
+        testCommand = readFloatSerial();
+        calibrateESC = 3;
+      }
+      else {
+        calibrateESC = 0;
+        testCommand = 1000;
+      }
       break;
     case '4': // Turn off ESC calibration
       armed = OFF;
@@ -138,10 +153,17 @@ void readSerialCommand() {
       testCommand = 1000;
       break;
     case '5': // Send individual motor commands (motor, command)
-      armed = OFF;
       calibrateESC = 5;
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-        motors.setRemoteCommand(motor, readFloatSerial());
+      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+        armed = OFF;
+        for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+          motors.setRemoteCommand(motor, readFloatSerial());
+        calibrateESC = 5;
+      }
+      else {
+        calibrateESC = 0;
+        testCommand = 1000;
+      }
       break;
     case 'a': // fast telemetry transfer
       if (readFloatSerial() == 1.0)
@@ -315,16 +337,16 @@ void sendSerialTelemetry() {
 #if defined(HeadingMagHold)
       PrintValueComma(compass.getRawData(XAXIS));
       PrintValueComma(compass.getRawData(YAXIS));
-      SERIAL_PRINTLN(compass.getRawData(ZAXIS));
+      PrintValueComma(compass.getRawData(ZAXIS));
 #else
       PrintValueComma(0);
       PrintValueComma(0);
-      SERIAL_PRINTLN('0');
+      PrintValueComma('0');
 #endif
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN(degrees(flightAngle->getDegreesHeading(YAW)));
+      SERIAL_PRINTLN((flightAngle->getDegreesHeading(YAW)));
 #else
       SERIAL_PRINTLN(degrees(gyro.getHeading()));
 #endif
@@ -335,32 +357,20 @@ void sendSerialTelemetry() {
     //SERIAL_PRINTLN(0);
     //queryType = 'X';
     break;
-  case 'S': // Send all flight data  *** UPDATE ***
+  case 'S': // Send all flight data
     PrintValueComma(deltaTime);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
         PrintValueComma(gyro.getFlightData(axis));
-    }
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+      PrintValueComma(accel.getFlightData(axis));
 #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
 #else
       PrintValueComma(0);
 #endif
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motors.getMotorAxisCommand(axis));
-    }
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       PrintValueComma(motors.getMotorCommand(motor));
-    }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      if (axis == ROLL)
-        PrintValueComma(accel.getFlightData(YAXIS));
-      else if (axis == PITCH)
-        PrintValueComma(accel.getFlightData(XAXIS));
-      else
-        PrintValueComma(accel.getFlightData(ZAXIS));
-    }
     PrintValueComma((int)armed);
-    comma();
     if (flightMode == STABLE)
       PrintValueComma(2000);
     if (flightMode == ACRO)
@@ -368,16 +378,15 @@ void sendSerialTelemetry() {
 #ifdef HeadingMagHold
       PrintValueComma(flightAngle->getDegreesHeading(YAW));
 #else
-      PrintValueComma(0);
+      PrintValueComma(gyro.getHeading());
 #endif
 #ifdef AltitudeHold
       PrintValueComma(altitude.getData());
-      SERIAL_PRINT(altitudeHold, DEC);
+      SERIAL_PRINTLN(altitudeHold, DEC);
 #else
       PrintValueComma(0);
-      SERIAL_PRINT('0');
+      SERIAL_PRINTLN('0');
 #endif
-    SERIAL_PRINTLN();    
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
     PrintValueComma(receiver.getXmitFactor());
@@ -485,19 +494,19 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getCenterPitch());
     PrintValueComma(camera.getCenterRoll());
     PrintValueComma(camera.getCenterYaw());
-
-    SERIAL_PRINT(camera.getmCameraPitch() , 2);
-    comma();
-    SERIAL_PRINT(camera.getmCameraRoll() , 2);
-    comma();
-    SERIAL_PRINT(camera.getmCameraYaw() , 2);
-    comma();
+    PrintValueComma(camera.getmCameraPitch() , 2);
+    PrintValueComma(camera.getmCameraRoll() , 2);
+    PrintValueComma(camera.getmCameraYaw() , 2);
     PrintValueComma(camera.getServoMinPitch());
     PrintValueComma(camera.getServoMinRoll());
     PrintValueComma(camera.getServoMinYaw());
     PrintValueComma(camera.getServoMaxPitch());
     PrintValueComma(camera.getServoMaxRoll());
     SERIAL_PRINTLN(camera.getServoMaxYaw());
+#else
+    for (byte index; index < 13; index++)
+      PrintValueComma(0);
+    SERIAL_PRINTLN();
 #endif
     break;
   }
