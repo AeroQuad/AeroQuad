@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
- 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
- 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // SerialCom.pde is responsible for the serial communication for commands and telemetry from the AeroQuad
@@ -29,6 +29,19 @@
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
+bool validateCalibrateCommand(char command)
+{
+  if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+    armed = OFF;
+    calibrateESC = command - '0';
+    return true;
+  } else {
+    calibrateESC = 0;
+    testCommand = 1000;
+    return false;
+  }
+}
+
 void readSerialPID(unsigned char PIDid) {
   struct PIDdata* pid = &PID[PIDid];
   pid->P = readFloatSerial();
@@ -117,52 +130,24 @@ void readSerialCommand() {
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
-      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
-        armed = OFF;
-        calibrateESC = 1;
-      }
-      else {
-        calibrateESC = 0;
-        testCommand = 1000;
-      }
-      break;
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
-        armed = OFF;
-        calibrateESC = 2;
-      }
-      else {
-        calibrateESC = 0;
-        testCommand = 1000;
-      }
+    	validateCalibrateCommand(queryType);
       break;
     case '3': // Test ESC calibration
-      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
-        armed = OFF;
+      if (validateCalibrateCommand(queryType)) {
         testCommand = readFloatSerial();
-        calibrateESC = 3;
-      }
-      else {
-        calibrateESC = 0;
-        testCommand = 1000;
       }
       break;
     case '4': // Turn off ESC calibration
-      armed = OFF;
-      calibrateESC = 0;
-      testCommand = 1000;
+      if (validateCalibrateCommand(queryType)) {
+	      calibrateESC = 0;
+	      testCommand = 1000;
+      }
       break;
     case '5': // Send individual motor commands (motor, command)
-      calibrateESC = 5;
-      if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
-        armed = OFF;
+      if (validateCalibrateCommand(queryType)) {
         for (byte motor = FRONT; motor < LASTMOTOR; motor++)
           motors.setRemoteCommand(motor, readFloatSerial());
-        calibrateESC = 5;
-      }
-      else {
-        calibrateESC = 0;
-        testCommand = 1000;
       }
       break;
     case 'a': // fast telemetry transfer
@@ -186,12 +171,12 @@ void readSerialCommand() {
       break;
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
-      compass.setMagCal(XAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(YAXIS, readFloatSerial(), readFloatSerial());
-      compass.setMagCal(ZAXIS, readFloatSerial(), readFloatSerial());
+      for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+        compass.setMagCal(axis, readFloatSerial(), readFloatSerial());
+      }
 #endif
       break;
-    case '~': //  read Camera values 
+    case '~': //  read Camera values
 #ifdef Camera
       camera.setMode(readFloatSerial());
       camera.setCenterPitch(readFloatSerial());
@@ -293,12 +278,10 @@ void sendSerialTelemetry() {
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
     PrintValueComma(altitude.getSmoothFactor());
-    PrintValueComma(PID[ZDAMPENING].P);
-    PrintValueComma(PID[ZDAMPENING].I);
-    SERIAL_PRINTLN(PID[ZDAMPENING].D);
+    PrintPID(ZDAMPENING);
 #else
-    for(byte i=0; i<9; i++) {
-     PrintValueComma(0);
+    for(byte i=0; i<10; i++) {
+      PrintValueComma(0);
     }
     SERIAL_PRINTLN();
 #endif
@@ -334,21 +317,20 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
 #if defined(HeadingMagHold)
-      PrintValueComma(compass.getRawData(XAXIS));
-      PrintValueComma(compass.getRawData(YAXIS));
-      PrintValueComma(compass.getRawData(ZAXIS));
+      PrintValueComma(compass.getRawData(axis));
 #else
       PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma('0');
 #endif
+    }
+
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN((flightAngle->getDegreesHeading(YAW)));
+    SERIAL_PRINTLN((flightAngle->getDegreesHeading(YAW)));
 #else
-      SERIAL_PRINTLN(degrees(gyro.getHeading()));
+    SERIAL_PRINTLN(degrees(gyro.getHeading()));
 #endif
     break;
   case 'R': // *** Spare ***
@@ -360,13 +342,13 @@ void sendSerialTelemetry() {
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
-        PrintValueComma(gyro.getFlightData(axis));
+      PrintValueComma(gyro.getFlightData(axis));
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(accel.getFlightData(axis));
 #ifdef BattMonitor
-      PrintValueComma(batteryMonitor.getData());
+    PrintValueComma(batteryMonitor.getData());
 #else
-      PrintValueComma(0);
+    PrintValueComma(0);
 #endif
     for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       PrintValueComma(motors.getMotorCommand(motor));
@@ -376,16 +358,16 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       PrintValueComma(1000);
 #ifdef HeadingMagHold
-      PrintValueComma(flightAngle->getDegreesHeading(YAW));
+    PrintValueComma(flightAngle->getDegreesHeading(YAW));
 #else
-      PrintValueComma(gyro.getHeading());
+    PrintValueComma(gyro.getHeading());
 #endif
 #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
-      SERIAL_PRINTLN(altitudeHold, DEC);
+    PrintValueComma(altitude.getData());
+    SERIAL_PRINTLN((int)altitudeHold);
 #else
-      PrintValueComma(0);
-      SERIAL_PRINTLN('0');
+    PrintValueComma(0);
+    SERIAL_PRINTLN('0');
 #endif
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
@@ -393,9 +375,10 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(receiver.getData(axis));
     }
-    PrintValueComma(motors.getMotorAxisCommand(ROLL));
-    PrintValueComma(motors.getMotorAxisCommand(PITCH));
-    SERIAL_PRINTLN(motors.getMotorAxisCommand(YAW));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+      PrintValueComma(motors.getMotorAxisCommand(axis));
+    }
+    SERIAL_PRINTLN();
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
@@ -418,7 +401,7 @@ void sendSerialTelemetry() {
     //queryType = 'X';
     break;
   case '6': // Report remote commands
-    for (byte motor = FRONT; motor < (LASTMOTOR); motor++) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
       PrintValueComma(motors.getRemoteCommand(motor));
     }
     SERIAL_PRINTLN();
@@ -450,7 +433,7 @@ void sendSerialTelemetry() {
     PrintValueComma(6);
 #elif defined(AeroQuad_Mini)
     PrintValueComma(2);
-#endif    
+#endif
     // Determine which motor flight configuration for Configurator GUI
 #if defined(plusConfig)
     PrintValueComma('0');
@@ -465,7 +448,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINT(LASTMOTOR);
     SERIAL_PRINTLN();
     queryType = 'X';
-    break;  
+    break;
   case 'e': // *** Spare ***
     // Spare telemetry
     //PrintValueComma(0);
@@ -474,29 +457,27 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
-    SERIAL_PRINT(compass.getMagMax(XAXIS), 2);
-    comma();
-    SERIAL_PRINT(compass.getMagMin(XAXIS), 2);
-    comma();
-    SERIAL_PRINT(compass.getMagMax(YAXIS), 2);
-    comma();
-    SERIAL_PRINT(compass.getMagMin(YAXIS), 2);
-    comma();
-    SERIAL_PRINT(compass.getMagMax(ZAXIS), 2);
-    comma();
-    SERIAL_PRINTLN(compass.getMagMin(ZAXIS), 2);
+    // dirty trick to disable compiler loop unrolling
+    //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis < 99; axis++) {
+      if(axis == LASTAXIS)
+        break;
+      PrintValueComma(compass.getMagMax(axis));
+      PrintValueComma(compass.getMagMin(axis));
+    }
+    SERIAL_PRINTLN();
 #endif
     queryType = 'X';
     break;
-  case '`': // Send Camera values 
+  case '`': // Send Camera values
 #ifdef Camera
     PrintValueComma(camera.getMode());
     PrintValueComma(camera.getCenterPitch());
     PrintValueComma(camera.getCenterRoll());
     PrintValueComma(camera.getCenterYaw());
-    PrintValueComma(camera.getmCameraPitch() , 2);
-    PrintValueComma(camera.getmCameraRoll() , 2);
-    PrintValueComma(camera.getmCameraYaw() , 2);
+    PrintValueComma(camera.getmCameraPitch(), 2);
+    PrintValueComma(camera.getmCameraRoll(), 2);
+    PrintValueComma(camera.getmCameraYaw(), 2);
     PrintValueComma(camera.getServoMinPitch());
     PrintValueComma(camera.getServoMinRoll());
     PrintValueComma(camera.getServoMinYaw());
@@ -504,7 +485,7 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getServoMaxRoll());
     SERIAL_PRINTLN(camera.getServoMaxYaw());
 #else
-    for (byte index; index < 13; index++)
+    for (byte index=0; index < 13; index++)
       PrintValueComma(0);
     SERIAL_PRINTLN();
 #endif
@@ -529,9 +510,9 @@ float readFloatSerial() {
       timeout = 0;
       index++;
     }
-  }  
-  while ((index == 0 || data[index-1] != ';') && (timeout < 5) && (index < sizeof(data)-1));
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 5) && (index < sizeof(data)-1));
   data[index] = '\0';
+
   return atof(data);
 }
 
@@ -554,7 +535,7 @@ void sendBinaryFloat(float data) {
     byte floatByte[4];
     float floatVal;
   } binaryFloat;
-  
+
   binaryFloat.floatVal = data;
   binaryPort->print(binaryFloat.floatByte[3], BYTE);
   binaryPort->print(binaryFloat.floatByte[2], BYTE);
@@ -567,7 +548,7 @@ void sendBinaryuslong(unsigned long data) {
     byte uslongByte[4];
     unsigned long uslongVal;
   } binaryuslong;
-  
+
   binaryuslong.uslongVal = data;
   binaryPort->print(binaryuslong.uslongByte[3], BYTE);
   binaryPort->print(binaryuslong.uslongByte[2], BYTE);
@@ -625,4 +606,4 @@ void fastTelemetry(void)
     #endif
   }
 }
-#endif    
+#endif
