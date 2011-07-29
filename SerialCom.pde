@@ -335,6 +335,8 @@ void sendSerialTelemetry() {
     #endif
     #ifdef BattMonitor
       SERIAL_PRINT(batteryMonitor.getData());
+    #elseif JuicMonitor
+      SERIAL_PRINT(juiceMonitor.getU(0));
     #else
       SERIAL_PRINT(0);
     #endif
@@ -361,6 +363,8 @@ void sendSerialTelemetry() {
     }
     #ifdef BattMonitor
       PrintValueComma(batteryMonitor.getData());
+    #elseif JuicMonitor
+      PrintValueComma(juiceMonitor.getU(0));
     #else
       PrintValueComma(0);
     #endif
