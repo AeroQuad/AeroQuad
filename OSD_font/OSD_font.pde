@@ -120,7 +120,11 @@ void reset_max7456()
 }
 
 void transfer_fontdata()
-{    
+{
+  if (sizeof(fontdata)!=16384) {
+    Serial.println("ERROR: fontdata with invalid size, aborting!!!");
+    return;
+  }
   Serial.println("Downloading font to MAX7456 NVM, this may take a while...");
   for (byte i=0;i<255;i++) {
     write_NVM(i,fontdata+64*i); // one char is 64 bytes on data (54 used)
