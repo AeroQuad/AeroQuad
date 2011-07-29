@@ -29,11 +29,11 @@
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
-bool validateCalibrateCommand(char command)
+bool validateCalibrateCommand(byte command)
 {
   if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
     armed = OFF;
-    calibrateESC = command - '0';
+    calibrateESC = command;
     return true;
   } else {
     calibrateESC = 0;
@@ -130,22 +130,24 @@ void readSerialCommand() {
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
+    	validateCalibrateCommand(1);
+      break;
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-    	validateCalibrateCommand(queryType);
+    	validateCalibrateCommand(2);
       break;
     case '3': // Test ESC calibration
-      if (validateCalibrateCommand(queryType)) {
+      if (validateCalibrateCommand(3)) {
         testCommand = readFloatSerial();
       }
       break;
     case '4': // Turn off ESC calibration
-      if (validateCalibrateCommand(queryType)) {
+      if (validateCalibrateCommand(4)) {
 	      calibrateESC = 0;
 	      testCommand = 1000;
       }
       break;
     case '5': // Send individual motor commands (motor, command)
-      if (validateCalibrateCommand(queryType)) {
+      if (validateCalibrateCommand(5)) {
         for (byte motor = FRONT; motor < LASTMOTOR; motor++)
           motors.setRemoteCommand(motor, readFloatSerial());
       }
@@ -283,8 +285,8 @@ void sendSerialTelemetry() {
     for(byte i=0; i<10; i++) {
       PrintValueComma(0);
     }
-    SERIAL_PRINTLN();
 #endif
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
