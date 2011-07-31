@@ -25,7 +25,7 @@
 // *************************************************************************
 class BatteryMonitor {
 public:
-  #define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
+  #define BATTERYPIN A0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
   #define OK 0
   #define WARNING 1
   #define ALARM 2
@@ -204,6 +204,17 @@ public:
 #else    
     diode = 0.9; // measured with DMM
 #endif    
+#ifdef SNORQUAD_AQAPM
+    R1   = 30.48; //10050; //the SMD 10k resistor measured with DMM
+    R2   =  15.24; //3260; //3k3 user mounted resistor measured with DMM
+    Aref = 4.98F; 
+    diode = 0.306F;
+    #define BUZZERPIN 35
+    #define BUZZERGND 40
+    pinMode(BUZZERGND, OUTPUT);
+    digitalWrite(BUZZERGND, LOW);  
+    batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
+ #endif
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
     digitalWrite(BUZZERPIN, LOW);
