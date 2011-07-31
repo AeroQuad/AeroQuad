@@ -160,6 +160,38 @@ void initializeEEPROM(void) {
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
   #endif*/
+  
+  #ifdef SNORQUAD_AQAPM
+  PID[ROLL].P = 40.0;
+  PID[ROLL].I = 0.0;
+  PID[ROLL].D = -6*PID[ROLL].P;
+  PID[PITCH].P = PID[ROLL].P;
+  PID[PITCH].I = PID[ROLL].I;
+  PID[PITCH].D = PID[ROLL].D;
+  PID[YAW].P = 2*PID[ROLL].P;
+  PID[YAW].I = 5.0;
+  PID[YAW].D = -4*PID[ROLL].P;
+  PID[LEVELROLL].P = 4.0;
+  PID[LEVELROLL].I = 0*0.6;
+  PID[LEVELROLL].D = 0.0;
+  PID[LEVELPITCH].P = PID[LEVELROLL].P;
+  PID[LEVELPITCH].I = PID[LEVELROLL].I;
+  PID[LEVELPITCH].D = PID[LEVELROLL].D;
+  PID[HEADING].P = 3.0;
+  PID[HEADING].I = 0*0.1;
+  PID[HEADING].D = 0.0;  
+  PID[LEVELGYROROLL].P = PID[ROLL].P;
+  PID[LEVELGYROROLL].I = PID[ROLL].I;
+  PID[LEVELGYROROLL].D = PID[ROLL].D;
+  PID[LEVELGYROPITCH].P = PID[ROLL].P;
+  PID[LEVELGYROPITCH].I = PID[ROLL].I;
+  PID[LEVELGYROPITCH].D = PID[ROLL].D;
+  headingHoldConfig = ON;
+  aref = 5.0;
+  receiver.setTransmitterSlope(THROTTLE, 0.5);
+  receiver.setTransmitterOffset(THROTTLE, 500);
+  #endif
+  
 }
 
 void readEEPROM(void) {
