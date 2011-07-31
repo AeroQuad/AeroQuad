@@ -378,7 +378,7 @@ private:
 /******************************************************/
 /***************** ArduCopter Motors ******************/
 /******************************************************/
-#if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+#if defined(ArduCopter) || defined(APM_OP_CHR6DM) || defined(SNORQUAD_AQAPM)
 class Motors_ArduCopter : public Motors {
 public:
   Motors_ArduCopter() : Motors() {}
