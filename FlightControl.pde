@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -36,9 +36,6 @@ void calculateFlightError(void)
   float pitchAttitudeCmd = updatePID((receiver.getData(PITCH) - receiver.getZero(PITCH)) * ATTITUDE_SCALING, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
   motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, gyro.getData(ROLL), &PID[LEVELGYROROLL]));
   motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -gyro.getData(PITCH), &PID[LEVELGYROPITCH]));
-//  motors.setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors.setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
-
   }
 }
 
@@ -280,7 +277,7 @@ void processFlightControlXMode(void) {
   processHeading();
 
   // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
+  //processAltitudeHold();
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
@@ -334,7 +331,7 @@ void processFlightControlPlusMode(void) {
   processHeading();
 
   // ********************** Altitude Adjust **********************************
-  processAltitudeHold();
+  //processAltitudeHold();
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {

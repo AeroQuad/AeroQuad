@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -235,7 +235,6 @@ void writeEEPROM(void){
   writePID(HEADING, HEADING_PID_GAIN_ADR);
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-//  #ifdef AltitudeHold
   writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
   writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
@@ -263,39 +262,16 @@ void writeEEPROM(void){
     writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-//  writeFloat(levelLimit, LEVELLIMIT_ADR);
-//  writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver.getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro.getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel.getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-
-  writeFloat(receiver.getTransmitterSlope(0),  RECEIVER_CHANNEL_0_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(0), RECEIVER_CHANNEL_0_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(0),      RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(1),  RECEIVER_CHANNEL_1_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(1), RECEIVER_CHANNEL_1_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(1),      RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(2),  RECEIVER_CHANNEL_2_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(2), RECEIVER_CHANNEL_2_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(2),      RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(3),  RECEIVER_CHANNEL_3_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(3), RECEIVER_CHANNEL_3_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(3),      RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(4),  RECEIVER_CHANNEL_4_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(4), RECEIVER_CHANNEL_4_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(4),      RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(5),  RECEIVER_CHANNEL_5_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(5), RECEIVER_CHANNEL_5_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(5),      RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(6),  RECEIVER_CHANNEL_6_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(6), RECEIVER_CHANNEL_6_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(6),      RECEIVER_CHANNEL_6_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver.getTransmitterSlope(7),  RECEIVER_CHANNEL_7_SLOPE_ADR);
-  writeFloat(receiver.getTransmitterOffset(7), RECEIVER_CHANNEL_7_OFFSET_ADR);
-  writeFloat(receiver.getSmoothFactor(7),      RECEIVER_CHANNEL_7_SMOOTH_FACTOR_ADR);
-
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    writeFloat(receiver.getTransmitterSlope(channel),  RECEIVER_DATA[channel].slope);
+    writeFloat(receiver.getTransmitterOffset(channel), RECEIVER_DATA[channel].offset);
+    writeFloat(receiver.getSmoothFactor(channel),      RECEIVER_DATA[channel].smooth_factor);
+  }
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);

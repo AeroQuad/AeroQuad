@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -60,6 +60,9 @@ public:
     return batteryVoltage;
   }
 };
+
+// Definition below requested by Ala42 to make code compilable for non-AVR platforms
+#if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 // ***********************************************************************************
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
@@ -254,3 +257,4 @@ public:
   }
 };
 
+#endif

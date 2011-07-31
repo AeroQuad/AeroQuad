@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,21 +25,22 @@
 // ***********************************************************************
 // *********************** Camera Control ***************************
 // ***********************************************************************
-/*Some basics about the 16 bit timer:
+/*
+Some basics about the 16 bit timer:
 - The timer counts clock ticks derived from the CPU clock. Using 16MHz CPU clock
-  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5�s. This
+  and a prescaler of 8 gives a timer clock of 2MHz, one tick every 0.5us. This
   is also called timer resolution.
-- The timer is used as cyclic upwards counter, the counter periode is set in the
-  ICRx register. IIRC periode-1 has to be set in the ICRx register.
+- The timer is used as cyclic upwards counter, the counter period is set in the
+  ICRx register. IIRC period-1 has to be set in the ICRx register.
 - When the counter reaches 0, the outputs are set
 - When the counter reaches OCRxy, the corresponding output is cleared.
-In the code below, the periode shall be 20ms, so the ICRx register is set to 
- 40000 ticks of 0.5�s/tick. It probably should be 39999, but who cares about
- this 0.5�s for the periode.
-The high time shall be 1500�s, so the OCRxy register is set to 3000. A change of
- the timer periode does not change this setting, as the clock rate is still one
- tick every 0.5�s. If the prescaler was changed, the OCRxy register value would
- be different. 
+In the code below, the periode shall be 20ms, so the ICRx register is set to
+ 40000 ticks of 0.5us/tick. It probably should be 39999, but who cares about
+ this 0.5us for the period.
+The high time shall be 1500us, so the OCRxy register is set to 3000. A change of
+ the timer period does not change this setting, as the clock rate is still one
+ tick every 0.5us. If the prescaler was changed, the OCRxy register value would
+ be different.
 */
 class Camera {
 public:
@@ -218,6 +219,8 @@ public:
   }
 };
 
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 class Camera_AeroQuad : public Camera {
 public:
   Camera_AeroQuad() : Camera() {}
@@ -299,3 +302,4 @@ public:
   }
 };
 
+#endif

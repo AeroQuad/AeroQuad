@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,7 +24,7 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.4
+#define VERSION 2.5
 
 #define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
@@ -325,7 +325,11 @@ typedef struct {
 } t_NVR_PID;
 
 typedef struct {
-    
+  float slope;
+  float offset;
+  float smooth_factor;
+} t_NVR_Receiver;
+typedef struct {    
   t_NVR_PID ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVELROLL_PID_GAIN_ADR;
   t_NVR_PID YAW_PID_GAIN_ADR;
@@ -336,7 +340,7 @@ typedef struct {
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
-
+  t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float GYROSMOOTH_ADR;
@@ -368,31 +372,6 @@ typedef struct {
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
-
-  float RECEIVER_CHANNEL_0_SLOPE_ADR;
-  float RECEIVER_CHANNEL_0_OFFSET_ADR;
-  float RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_1_SLOPE_ADR;
-  float RECEIVER_CHANNEL_1_OFFSET_ADR;
-  float RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_2_SLOPE_ADR;
-  float RECEIVER_CHANNEL_2_OFFSET_ADR;
-  float RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_3_SLOPE_ADR;
-  float RECEIVER_CHANNEL_3_OFFSET_ADR;
-  float RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_4_SLOPE_ADR;
-  float RECEIVER_CHANNEL_4_OFFSET_ADR;
-  float RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_5_SLOPE_ADR;
-  float RECEIVER_CHANNEL_5_OFFSET_ADR;
-  float RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_6_SLOPE_ADR;
-  float RECEIVER_CHANNEL_6_OFFSET_ADR;
-  float RECEIVER_CHANNEL_6_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_7_SLOPE_ADR;
-  float RECEIVER_CHANNEL_7_OFFSET_ADR;
-  float RECEIVER_CHANNEL_7_SMOOTH_FACTOR_ADR;
 } t_NVR_Data;  
 
 float nvrReadFloat(int address); // defined in DataStorage.h
