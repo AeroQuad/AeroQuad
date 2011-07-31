@@ -379,9 +379,21 @@ private:
 /***************** ArduCopter Motors ******************/
 /******************************************************/
 #if defined(ArduCopter) || defined(APM_OP_CHR6DM) || defined(SNORQUAD_AQAPM)
+
+#define PWM_FREQUENCY 300   // in Hz
+#define PWM_FREQUENCY50HZ 50   // in Hz
+#define PWM_PRESCALER 8
+#define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
+
+
 class Motors_ArduCopter : public Motors {
 public:
   Motors_ArduCopter() : Motors() {}
+
+// Timer1: OUTX  OUT2  OUT3   // 300 Hz
+// Timer5: OUT1  OUT0  OUTX   // 300 Hz
+// Timer3: OUT7  OUT6  OUTX   // 300 Hz
+// Timer4: INPP  OUT5  OUT4   // 50 Hz
 
   void initialize(void) {
     // Init PWM Timer 1
@@ -395,7 +407,7 @@ public:
     //OCR1A = 3000; //PB5, none
     OCR1B = 2000; //PB6, OUT2
     OCR1C = 2000; //PB7  OUT3
-    ICR1 = 6600; //300hz freq...
+    ICR1 = F_CPU/PWM_PRESCALER/PWM_FREQUENCY; //300hz freq...
 
     // Init PWM Timer 3
     pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
@@ -406,8 +418,8 @@ public:
     //OCR3A = 3000; //PE3, NONE
     OCR3B = 2000; //PE4, OUT7
     OCR3C = 2000; //PE5, OUT6
-    ICR3 = 40000; //50hz freq (standard servos)
-
+    ICR3 = F_CPU/PWM_PRESCALER/PWM_FREQUENCY; //300hz freq
+    
     // Init PWM Timer 5
     pinMode(44,OUTPUT);  //OUT1 (PL5/OC5C)
     pinMode(45,OUTPUT);  //OUT0 (PL4/OC5B)
@@ -418,7 +430,7 @@ public:
     //OCR5A = 3000; //PL3,
     OCR5B = 2000; //PL4, OUT0
     OCR5C = 2000; //PL5, OUT1
-    ICR5 = 6600; //300hz freq
+    ICR5 = F_CPU/PWM_PRESCALER/PWM_FREQUENCY; //300hz freq
 
     // Init PPM input and PWM Timer 4
     pinMode(49, INPUT);  // ICP4 pin (PL0) (PPM input)
@@ -429,10 +441,9 @@ public:
     //Prescaler set to 8, that give us a resolution of 0.5us
     // Input Capture rising edge
     TCCR4B = ((1<<WGM43)|(1<<WGM42)|(1<<CS41)|(1<<ICES4));
-
-    OCR4A = 40000; ///50hz freq. (standard servos)
     OCR4B = 2000; //PH4, OUT5
     OCR4C = 2000; //PH5, OUT4
+    OCR4A = F_CPU/PWM_PRESCALER/PWM_FREQUENCY50HZ; ///50hz freq. (standard servos)
 
     //TCCR4B |=(1<<ICES4); //Changing edge detector (rising edge).
     //TCCR4B &=(~(1<<ICES4)); //Changing edge detector. (falling edge)
