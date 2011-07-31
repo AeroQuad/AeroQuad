@@ -432,10 +432,25 @@
 #endif
 
 #ifdef SNORQUAD_AQAPM
-  Accel_AeroQuadMega_v2 accel;
+  /* ArduPilot Mega with ITG3200/BMA180/HMC5843 (orientation as AeroQuad shield v2.0)
+     Mattias Welponer <mattias@welponer.net>
+     Current consumption of APM is around 240 mA (+ LEDs about 33 mA; + Xbee about 80 mA)
+     Source at github.com/SnorQuad/AeroQuad
+  */
+  
+  // Gyroscope declaration
   Gyro_AeroQuadMega_v2 gyro;
+
+  // Accelerometer declaration
+  Accel_AeroQuadMega_v2 accel;
+  
+  // Receiver Declaration
   Receiver_ArduCopter receiver;
+  
+  // Motor declaration
   Motors_ArduCopter motors;
+  
+  // Kinematics declaration
   #include "FlightAngle.h"
   #ifdef FlightAngleARG
     FlightAngle_ARG tempFlightAngle;
@@ -445,14 +460,20 @@
     FlightAngle_DCM tempFlightAngle;
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
+  
+  
   #ifdef HeadingMagHold
     #include "Compass.h"
     Magnetometer_HMC5843 compass;
   #endif
+  
+  // Altitude hold declaration
   #ifdef AltitudeHold
     #include "Altitude.h"
     Altitude_AeroQuad_v2 altitude;
   #endif
+  
+  // Battery Monitor declaration
   #ifdef BattMonitor
     #include "BatteryMonitor.h"
     BatteryMonitor_AeroQuad batteryMonitor;
@@ -461,9 +482,8 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
-  /**
-   * Put SnorQuad specific intialization need here
-   */
+  
+  // Put SnorQuad specific intialization need here
   void initPlatformSpecific() {
     // init I2C bus
     Wire.begin();
