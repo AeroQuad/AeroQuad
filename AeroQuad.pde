@@ -461,8 +461,20 @@
     #include "Camera.h"
     Camera_AeroQuad camera;
   #endif
+  /**
+   * Put SnorQuad specific intialization need here
+   */
+  void initPlatformSpecific() {
+    // init I2C bus
+    Wire.begin();
+    TWBR = 12;
+    // init GPS serial port
+    Serial1.begin(4800);
+  }
 #endif
 
+// Generalization of the specific init platform
+void (*initPlatform)() = &initPlatformSpecific;
 
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
@@ -536,6 +548,8 @@ void setup() {
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
+  
+  initPlatform();
   
   // Configure motors
   motors.initialize(); // defined in Motors.h
