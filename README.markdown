@@ -1,7 +1,14 @@
-AeroQuad Flight Software Source Code 2.4.3
+AeroQuad Flight Software Source Code 2.5 Beta 1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
+Version 2.5 Beta 1 Release Notes (7/31/2011)
+----------------------------------------
+ * Fixed various 8 channel transmitter channel bugs (special thanks to Ala42!)
+ * Added safety procedure for ESC calibration (prevent random full throttles during PID updates)
+   * Please keep common sense safety practices in place, remove props or remove battery power when necessary
+ * Optmized SerialCom.pde (removed unused commands)
+ 
 Version 2.4.3 Release Notes (7/24/2011)
 ----------------------------------------
  * Fixed duplicate altitude hold call in timing executive
