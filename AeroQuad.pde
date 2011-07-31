@@ -483,13 +483,22 @@
     Camera_AeroQuad camera;
   #endif
   
+  #ifdef APM_GPS
+    #include <TinyGPS.h>
+    TinyGPS gps;
+ /*   #include "MavLink.h"
+    MavLink mavlink;  */
+  #endif
+  
   // Put SnorQuad specific intialization need here
   void initPlatformSpecific() {
     // init I2C bus
     Wire.begin();
     TWBR = 12;
+    #ifdef APM_GPS
     // init GPS serial port
     Serial1.begin(4800);
+    #endif
   }
 #endif
 
