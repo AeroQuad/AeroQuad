@@ -412,7 +412,7 @@ public:
 /*********************************************/
 /********** ArduCopter PPM Input *************/
 /*********************************************/
-#if defined(ArduCopter) || defined(APM_OP_CHR6DM)
+#if defined(ArduCopter) || defined(APM_OP_CHR6DM) || defined(SNORQUAD_AQAPM)
 #include <avr/interrupt.h>
 volatile unsigned int Start_Pulse = 0;
 volatile unsigned int Stop_Pulse = 0;
@@ -455,10 +455,11 @@ ISR(TIMER4_CAPT_vect)//interrupt.
   }
   //Counter++;
 }
-//#endif
+
 class Receiver_ArduCopter : public Receiver {
 private:
-  int receiverPin[6];
+  //int receiverPin[6]; 
+  int receiverPin[8];   // MW: support for 8 channel
 
 public:
   Receiver_ArduCopter() :
@@ -469,6 +470,8 @@ public:
     receiverPin[THROTTLE] = 2;
     receiverPin[MODE] = 4;
     receiverPin[AUX] = 5;
+    receiverPin[AUX2] = 6;
+    receiverPin[AUX3] = 7;       // MW: switch for failsafe (> 1750) on APM platform 
   }
 
   void initialize(void) {
