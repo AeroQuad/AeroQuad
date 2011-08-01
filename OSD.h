@@ -40,12 +40,12 @@
 #define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
 #define ShowAttitudeIndicator
 #define ShowCallSign
-#define ShowRSSI
-//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
+//#define ShowRSSI
+#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 //Choose your video standard:
-//#define NTSC
-#define PAL
+#define NTSC
+//#define PAL
 
 //You can configure positioning of various display elements below. #defines for elements which will not be displayed, can be ignored.
 //The MAX7456 overlays characters in a grid 30 characters wide, 16/13 high (PAL/NTSC respectively). The row/column defines below
@@ -70,7 +70,8 @@
 #define CALLSIGN_ROW 2
 #define CALLSIGN_COL 23
 #ifdef ShowCallSign
-byte *callsign = (byte*)"OH2FXR";
+//byte *callsign = (byte*)"OH2FXR";
+byte *callsign = (byte*)"AEROQD";
 #endif
 
 //Juice monitor, two battery config
