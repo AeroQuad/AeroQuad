@@ -3,7 +3,7 @@
 open(MYINPUTFILE, "<font.mcm");
 open(MYOUTPUTFILE, ">font.h");
 my $count = -1;
-print MYOUTPUTFILE "#include <avr/pgmspace.h>"
+print MYOUTPUTFILE "#include <avr/pgmspace.h>\n";
 print MYOUTPUTFILE "PROGMEM const byte fontdata[16384] = {\n  ";
 while(<MYINPUTFILE>)
 {
