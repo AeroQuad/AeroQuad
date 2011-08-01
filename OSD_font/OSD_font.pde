@@ -4,9 +4,8 @@
 //
 // http://www.maxim-ic.com/tools/evkit/index.cfm?EVKit=558
 // max7456 evaluation kit software
-
-#define DATAOUT 51 //MOSI
-#define DATAIN  50 //MISO 
+#define SPI_DATAOUT 51 //MOSI
+#define SPI_DATAIN  50 //MISO 
 #define SPICLOCK  52 //SCLK
 #define MAX7456SELECT 22 //22-SS
 
@@ -21,7 +20,7 @@
 #define CMAH_reg  0x09
 #define CMAL_reg  0x0A
 #define CMDI_reg  0x0B
-#define STAT_reg  0xA0
+#define STAT_reg  0xA2
 
 //MAX7456 commands
 #define CLEAR_display 0x04
@@ -55,25 +54,24 @@
 
 // with PAL
 //#define MAX_screen_rows 0x10 //16
-
 volatile int  incomingByte;
 
+#include <avr/pgmspace.h>
 #include "font.h"
+
 
 //////////////////////////////////////////////////////////////
 void setup()
 {
-  byte spi_junk;
-  int x;
+  volatile byte spi_junk;
   Serial.begin(9600);
   Serial.flush();
-
   pinMode( 53, OUTPUT );
   pinMode(MAX7456SELECT,OUTPUT);
   digitalWrite(MAX7456SELECT,HIGH); //disable device
 
-  pinMode(DATAOUT, OUTPUT);
-  pinMode(DATAIN, INPUT);
+  pinMode(SPI_DATAOUT, OUTPUT);
+  pinMode(SPI_DATAIN, INPUT);
   pinMode(SPICLOCK,OUTPUT);
 
   // SPCR = 01010000
@@ -87,21 +85,21 @@ void setup()
   reset_max7456();
 
   incomingByte = 0;
-
   //display all 256 internal MAX7456 characters
   show_font();  
-
   Serial.println("Ready for commands: D - download font");
+  Serial.print("Embedded font is ");
+  Serial.print(sizeof(fontdata));
+  Serial.println("bytes long.");
   Serial.println("MAX7456>");
-  delay(100);  
 }
 
 void reset_max7456()
 {
   // force soft reset on Max7456
   digitalWrite(MAX7456SELECT,LOW);
-  spi_write(VM0_reg);
-  spi_write(MAX7456_reset);
+  spi_transfer(VM0_reg);
+  spi_transfer(MAX7456_reset);
   digitalWrite(MAX7456SELECT,HIGH);
   delay(500);
 
@@ -109,51 +107,23 @@ void reset_max7456()
   digitalWrite(MAX7456SELECT,LOW);
   for (byte x = 0; x < MAX_screen_rows; x++)
   {
-    spi_write(x + 0x10);
-    spi_write(WHITE_level_90);
+    spi_transfer(x + 0x10);
+    spi_transfer(WHITE_level_90);
   }
 
   // make sure the Max7456 is enabled
-  spi_write(VM0_reg);
-  spi_write(ENABLE_display);
+  spi_transfer(VM0_reg);
+  spi_transfer(ENABLE_display);
   digitalWrite(MAX7456SELECT,HIGH);
 }
 
-void transfer_fontdata()
-{
-  if (sizeof(fontdata)!=16384) {
-    Serial.println("ERROR: fontdata with invalid size, aborting!!!");
-    return;
-  }
-  Serial.println("Downloading font to MAX7456 NVM, this may take a while...");
-  for (byte i=0;i<255;i++) {
-    write_NVM(i,fontdata+64*i); // one char is 64 bytes on data (54 used)
-    Serial.print("\r ");
-    Serial.print(i+1);
-    Serial.print("/256 written  ");
-  }
-
-  // force soft reset on Max7456
-  digitalWrite(MAX7456SELECT,LOW);
-  spi_write(VM0_reg);
-  spi_write(MAX7456_reset);
-  digitalWrite(MAX7456SELECT,HIGH);
-  delay(500);
-
-  Serial.println("");
-  Serial.println("Done with font download");
-  Serial.println("MAX7456>");
-}
 //////////////////////////////////////////////////////////////
 void loop()
 {
-  byte x;
-  
   if (Serial.available() > 0)
   {
     // read the incoming byte:
     incomingByte = Serial.read();
-
     switch(incomingByte) // wait for commands
     {
       case 'D': // download font
@@ -165,33 +135,24 @@ void loop()
       case 's': // show charset
         show_font();
       break;
+      case '?': // read status
+        digitalWrite(MAX7456SELECT,LOW);
+        Serial.print((int)spi_transfer(STAT_reg));
+        digitalWrite(MAX7456SELECT,HIGH);
+      break;
       default:
         Serial.println("invalid command");
       break;
     }
     Serial.println("MAX7456>");
   }
-  
 }
 
 //////////////////////////////////////////////////////////////
 //Performs an 8-bit SPI transfer operation
-void spi_wait() {
-  while ( !(SPSR & (1 << SPIF)) ) { }; //Wait until transmission done
-}
-
-void spi_write( char data ) {
-  spi_wait();
+byte spi_transfer( byte data ) {
   SPDR = data; //transfer data with hardware SPI
-}
-
-void spi_write_nowait( char data ) {
-  SPDR = data; //transfer data with hardware SPI
-}
-
-char spi_read( char data ) {
-  spi_write(data);
-  spi_wait();
+  while ( !(SPSR & _BV(SPIF)) ) ;
   return SPDR;
 }
 
@@ -199,76 +160,89 @@ char spi_read( char data ) {
 void show_font() //show all chars on 24 wide grid
 {
   int x;
-  byte char_address_hi, char_address_lo;
-
-  char_address_hi = 0;
-  char_address_lo = 60; // start on third line
- //Serial.println("write_new_screen");   
 
   // clear the screen
   digitalWrite(MAX7456SELECT,LOW);
-  spi_write(DMM_reg);
-  spi_write(CLEAR_display);
+  spi_transfer(DMM_reg);
+  spi_transfer(CLEAR_display);
   digitalWrite(MAX7456SELECT,HIGH);
 
   // disable display
   digitalWrite(MAX7456SELECT,LOW);
-  spi_write(VM0_reg); 
-  spi_write(DISABLE_display);
+  spi_transfer(VM0_reg); 
+  spi_transfer(DISABLE_display);
 
-  spi_write(DMM_reg); //dmm
-  spi_write(0x01); //16 bit trans w/o background, autoincrement
+  spi_transfer(DMM_reg); //dmm
+  spi_transfer(0x01); //16 bit trans w/o background, autoincrement
 
-  spi_write(DMAH_reg); // set start address high
-  spi_write(char_address_hi);
+  spi_transfer(DMAH_reg); // set start address high
+  spi_transfer(0);
 
-  spi_write(DMAL_reg); // set start address low
-  spi_write(char_address_lo);
+  spi_transfer(DMAL_reg); // set start address low
+  spi_transfer(60);
 
   // show all characters on screen
-  for (x = 0;x<254;x++) {
-    spi_write(DMDI_reg);
-    spi_write(x);
+  for (x = 0;x<255;x++) {
+    spi_transfer(DMDI_reg);
+    spi_transfer(x);
   }
 
-  spi_write(DMDI_reg);
-  spi_write(END_string);
+  spi_transfer(DMDI_reg);
+  spi_transfer(END_string);
 
-  spi_write(VM0_reg); // turn on screen next vertical
-  spi_write(ENABLE_display_vert);
+  spi_transfer(VM0_reg); // turn on screen next vertical
+  spi_transfer(ENABLE_display_vert);
   digitalWrite(MAX7456SELECT,HIGH);
 }
 
-//////////////////////////////////////////////////////////////
-void write_NVM(byte ch, const byte *data)
+void transfer_fontdata()
 {
-  byte x;
-  byte char_address_hi, char_address_lo;
-
-  // disable display
-  digitalWrite(MAX7456SELECT,LOW);
-  spi_write(VM0_reg); 
-  spi_write(DISABLE_display);
-
-  spi_write(CMAH_reg); // set start address high
-  spi_write(ch);
-
-  for(x = 0; x < NVM_ram_size; x++) // write out 54 (out of 64) bytes of character to shadow ram
-  {
-    spi_write(CMAL_reg); // set start address low
-    spi_write(x);
-    spi_write(CMDI_reg);
-    spi_write(data[x]);
+  if (sizeof(fontdata)!=16384) {
+    Serial.println("ERROR: fontdata with invalid size, aborting!!!");
+    return;
   }
 
-  // transfer a 54 bytes from shadow ram to NVM
-  // spi_write(CMM_reg);
-  // spi_write(WRITE_nvr);
-  
-  // wait until bit 5 in the status register returns to 0 (12ms)
-  while ((spi_read(STAT_reg) & STATUS_reg_nvr_busy) != 0x00);
+  Serial.println("Downloading font to MAX7456 NVM, this may take a while...");
+  write_NVM();
 
-  spi_write(VM0_reg); // turn on screen next vertical
-  spi_write(ENABLE_display_vert);
+  // force soft reset on Max7456
+  reset_max7456();
+  show_font();
+  Serial.println("");
+  Serial.println("Done with font download");
+  Serial.println("MAX7456>");
+}
+
+void write_NVM()
+{
+  unsigned short ch,x;
+  for (ch=0;ch<256;ch++) {
+    Serial.print((int)ch);
+    // disable display
+    digitalWrite(MAX7456SELECT,LOW);
+    spi_transfer(VM0_reg); 
+    spi_transfer(DISABLE_display);
+    spi_transfer(CMAH_reg); // set start address high
+    spi_transfer((byte)ch);
+    for(x = 0; x < NVM_ram_size; x++) // write out 54 (out of 64) bytes of character to shadow ram
+    {
+      spi_transfer(CMAL_reg); // set start address low
+      spi_transfer((byte)x);
+      spi_transfer(CMDI_reg);
+      spi_transfer(pgm_read_byte_near(fontdata+ch*64+x));
+    }
+    // transfer a 54 bytes from shadow ram to NVM
+    spi_transfer(CMM_reg);
+    spi_transfer(WRITE_nvr);
+    delay(20); // NVM should be busy around 12ms .... lets wait a little more
+    spi_transfer(VM0_reg); // turn on screen next vertical
+    spi_transfer(ENABLE_display_vert);
+    digitalWrite(MAX7456SELECT,HIGH);  
+    Serial.println("- OK ");
+    delay(300);
+  }
+
   digitalWrite(MAX7456SELECT,HIGH);  
 }
+
+
