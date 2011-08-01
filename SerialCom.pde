@@ -347,9 +347,9 @@ void sendSerialTelemetry() {
       PrintValueComma(gyro.getFlightData(axis));
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(accel.getFlightData(axis));
-#ifdef BattMonitor
+#if defined(BattMonitor)
     PrintValueComma(batteryMonitor.getData());
-#elifdef JuicMonitor
+#elif defined(JuicMonitor)
       PrintValueComma(juiceMonitor.getU(0));
 #else
     PrintValueComma(0);
