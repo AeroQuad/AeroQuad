@@ -22,6 +22,8 @@
 #define CMDI_reg  0x0B
 #define STAT_reg  0xA0
 
+#define READ_REG  0x80
+
 //MAX7456 commands
 #define CLEAR_display 0x04
 #define CLEAR_display_vert 0x06
@@ -169,13 +171,13 @@ byte spi_readreg(byte r) {
 //////////////////////////////////////////////////////////////
 void show_font() //show all chars on 24 wide grid
 {
-  int x;
+  unsigned short x;
 
   // clear the screen
   digitalWrite(MAX7456SELECT,LOW);
   spi_writereg(DMM_reg,CLEAR_display);
   digitalWrite(MAX7456SELECT,HIGH);
-
+  delay(1); // clearing display takes 20uS so wait some...
   // disable display
   digitalWrite(MAX7456SELECT,LOW);
   // spi_writereg(VM0_reg,DISABLE_display); 
@@ -187,9 +189,9 @@ void show_font() //show all chars on 24 wide grid
   // show all characters on screen (actually 0-254)
   for (x = 0;x<255;x++) {
     if ((x%24)==23) {
-      for (byte i=0;i<6;i++) spi_writereg(DMDI_reg,0x00);
+      for (byte i=0;i<6;i++) spi_writereg(DMDI_reg,0);
     }
-    spi_writereg(DMDI_reg,x);
+    spi_writereg(DMDI_reg,(byte)x);
   }
 
   spi_writereg(DMDI_reg,END_string);
