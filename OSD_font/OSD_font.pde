@@ -20,7 +20,7 @@
 #define CMAH_reg  0x09
 #define CMAL_reg  0x0A
 #define CMDI_reg  0x0B
-#define STAT_reg  0xA2
+#define STAT_reg  0xA0
 
 //MAX7456 commands
 #define CLEAR_display 0x04
@@ -55,6 +55,8 @@
 // with PAL
 //#define MAX_screen_rows 0x10 //16
 volatile int  incomingByte;
+
+byte charbuf[54]; // for NVM_read
 
 #include <avr/pgmspace.h>
 #include "font.h"
@@ -98,8 +100,7 @@ void reset_max7456()
 {
   // force soft reset on Max7456
   digitalWrite(MAX7456SELECT,LOW);
-  spi_transfer(VM0_reg);
-  spi_transfer(MAX7456_reset);
+  spi_writereg(VM0_reg,MAX7456_reset);
   digitalWrite(MAX7456SELECT,HIGH);
   delay(500);
 
@@ -107,13 +108,11 @@ void reset_max7456()
   digitalWrite(MAX7456SELECT,LOW);
   for (byte x = 0; x < MAX_screen_rows; x++)
   {
-    spi_transfer(x + 0x10);
-    spi_transfer(WHITE_level_90);
+    spi_writereg(x + 0x10,WHITE_level_90);
   }
 
   // make sure the Max7456 is enabled
-  spi_transfer(VM0_reg);
-  spi_transfer(ENABLE_display);
+  spi_writereg(VM0_reg,ENABLE_display);
   digitalWrite(MAX7456SELECT,HIGH);
 }
 
@@ -137,7 +136,8 @@ void loop()
       break;
       case '?': // read status
         digitalWrite(MAX7456SELECT,LOW);
-        Serial.print((int)spi_transfer(STAT_reg));
+        Serial.print("STAT=");
+        Serial.println((int)spi_readreg(STAT_reg));
         digitalWrite(MAX7456SELECT,HIGH);
       break;
       default:
@@ -156,6 +156,16 @@ byte spi_transfer( byte data ) {
   return SPDR;
 }
 
+void spi_writereg(byte r, byte d) {
+  spi_transfer(r);
+  spi_transfer(d);
+}  
+
+byte spi_readreg(byte r) {
+  spi_transfer(r);
+  return spi_transfer(0);
+}  
+
 //////////////////////////////////////////////////////////////
 void show_font() //show all chars on 24 wide grid
 {
@@ -163,35 +173,28 @@ void show_font() //show all chars on 24 wide grid
 
   // clear the screen
   digitalWrite(MAX7456SELECT,LOW);
-  spi_transfer(DMM_reg);
-  spi_transfer(CLEAR_display);
+  spi_writereg(DMM_reg,CLEAR_display);
   digitalWrite(MAX7456SELECT,HIGH);
 
   // disable display
   digitalWrite(MAX7456SELECT,LOW);
-  spi_transfer(VM0_reg); 
-  spi_transfer(DISABLE_display);
+  // spi_writereg(VM0_reg,DISABLE_display); 
 
-  spi_transfer(DMM_reg); //dmm
-  spi_transfer(0x01); //16 bit trans w/o background, autoincrement
+  spi_writereg(DMM_reg,0x01); //16 bit trans w/o background, autoincrement
+  spi_writereg(DMAH_reg,0); // set start address high
+  spi_writereg(DMAL_reg,33); // set start address low (line 1 col 3 (0 based)
 
-  spi_transfer(DMAH_reg); // set start address high
-  spi_transfer(0);
-
-  spi_transfer(DMAL_reg); // set start address low
-  spi_transfer(60);
-
-  // show all characters on screen
+  // show all characters on screen (actually 0-254)
   for (x = 0;x<255;x++) {
-    spi_transfer(DMDI_reg);
-    spi_transfer(x);
+    if ((x%24)==23) {
+      for (byte i=0;i<6;i++) spi_writereg(DMDI_reg,0x00);
+    }
+    spi_writereg(DMDI_reg,x);
   }
 
-  spi_transfer(DMDI_reg);
-  spi_transfer(END_string);
+  spi_writereg(DMDI_reg,END_string);
 
-  spi_transfer(VM0_reg); // turn on screen next vertical
-  spi_transfer(ENABLE_display_vert);
+  // spi_writereg(VM0_reg,ENABLE_display_vert);  // turn on screen next vertical
   digitalWrite(MAX7456SELECT,HIGH);
 }
 
@@ -201,47 +204,46 @@ void transfer_fontdata()
     Serial.println("ERROR: fontdata with invalid size, aborting!!!");
     return;
   }
-
   Serial.println("Downloading font to MAX7456 NVM, this may take a while...");
-  write_NVM();
-
+  for (int ch=0; ch<256; ch++) {
+    Serial.print((int)ch);
+    write_NVM_character(ch,fontdata+64*ch,1);
+    Serial.println(" OK");
+    delay(30);
+  }
   // force soft reset on Max7456
   reset_max7456();
   show_font();
+  
   Serial.println("");
   Serial.println("Done with font download");
   Serial.println("MAX7456>");
 }
 
-void write_NVM()
-{
-  unsigned short ch,x;
-  for (ch=0;ch<256;ch++) {
-    Serial.print((int)ch);
-    // disable display
-    digitalWrite(MAX7456SELECT,LOW);
-    spi_transfer(VM0_reg); 
-    spi_transfer(DISABLE_display);
-    spi_transfer(CMAH_reg); // set start address high
-    spi_transfer((byte)ch);
-    for(x = 0; x < NVM_ram_size; x++) // write out 54 (out of 64) bytes of character to shadow ram
-    {
-      spi_transfer(CMAL_reg); // set start address low
-      spi_transfer((byte)x);
-      spi_transfer(CMDI_reg);
-      spi_transfer(pgm_read_byte_near(fontdata+ch*64+x));
-    }
-    // transfer a 54 bytes from shadow ram to NVM
-    spi_transfer(CMM_reg);
-    spi_transfer(WRITE_nvr);
-    delay(20); // NVM should be busy around 12ms .... lets wait a little more
-    spi_transfer(VM0_reg); // turn on screen next vertical
-    spi_transfer(ENABLE_display_vert);
-    digitalWrite(MAX7456SELECT,HIGH);  
-    Serial.println("- OK ");
-    delay(300);
-  }
+void wait_NVM() {
+  while (spi_readreg(STAT_reg)&STATUS_reg_nvr_busy) ;
+}
 
+void write_NVM_character(byte ch, const byte* addr, byte progmem)
+{
+  byte x;
+  // disable display
+  digitalWrite(MAX7456SELECT,LOW);
+  spi_writereg(VM0_reg,DISABLE_display);
+  spi_writereg(CMAH_reg,ch);  // set start address high
+  for(x = 0; x < NVM_ram_size; x++) // write out 54 (out of 64) bytes of character to shadow ram
+  {
+    spi_writereg(CMAL_reg,x); // set start address low
+    if (progmem) {
+      spi_writereg(CMDI_reg,pgm_read_byte_near(addr+x));
+    } else { 
+      spi_writereg(CMDI_reg,*(addr+x));
+    }      
+  }
+  // transfer a 54 bytes from shadow ram to NVM
+  spi_writereg(CMM_reg,WRITE_nvr);
+  wait_NVM(); // NVM should be busy around 12ms
+  spi_writereg(VM0_reg,ENABLE_display_vert);
   digitalWrite(MAX7456SELECT,HIGH);  
 }
 
