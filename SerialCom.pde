@@ -349,6 +349,8 @@ void sendSerialTelemetry() {
       PrintValueComma(accel.getFlightData(axis));
 #ifdef BattMonitor
     PrintValueComma(batteryMonitor.getData());
+#elif JuicMonitor
+      PrintValueComma(juiceMonitor.getU(0));
 #else
     PrintValueComma(0);
 #endif
