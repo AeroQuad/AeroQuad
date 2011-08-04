@@ -82,6 +82,7 @@ byte *callsign = (byte*)"OH2FXR";
 #define RSSI_ROW 3
 #define RSSI_COL 23
 #define RSSI_PIN A6     // analog pin to read
+#define RSSI_RAWVAL     // show raw A/D value instead of percents (for tuning)
 #define RSSI_100P 1023 // A/D value for 100%
 #define RSSI_0P 0      // A/D value for 0%
 #define RSSI_WARN 20   // show alarm at %
@@ -487,15 +488,24 @@ void updateReticle(void) {
 #endif
 
 #ifdef ShowRSSI
+#ifdef RSSI_RAWVAL
   byte lastRSSI;
+#else
+  short lastRSSI;
+#endif
   void updateRSSI( void ) {
     int val = analogRead(RSSI_PIN);
     val = (val-RSSI_0P)*100/(RSSI_100P-RSSI_0P);
     if (val<0) val=0;
     if (val>100) val=100;
     if (val!=lastRSSI) {
+      lastRSSI=val;
       byte buf[6];
+#ifdef RSSI_RAWVAL
       snprintf((char *)buf,6,"%c%3u%%",RSSI_SYMBOL,val);
+#else
+      snprintf((char *)buf,6,"%4u",RSSI_SYMBOL,val);
+#endif
       writeChars(buf,5,(RSSI_WARN>val)?1:0,RSSI_ROW,RSSI_COL);
     }
   }
