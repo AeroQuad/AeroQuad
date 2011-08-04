@@ -489,22 +489,24 @@ void updateReticle(void) {
 
 #ifdef ShowRSSI
 #ifdef RSSI_RAWVAL
-  byte lastRSSI;
-#else
   short lastRSSI;
+#else
+  byte lastRSSI;
 #endif
   void updateRSSI( void ) {
     int val = analogRead(RSSI_PIN);
+#ifndef RSSI_RAWVAL
     val = (val-RSSI_0P)*100/(RSSI_100P-RSSI_0P);
     if (val<0) val=0;
     if (val>100) val=100;
+#endif
     if (val!=lastRSSI) {
       lastRSSI=val;
       byte buf[6];
 #ifdef RSSI_RAWVAL
-      snprintf((char *)buf,6,"%c%3u%%",RSSI_SYMBOL,val);
-#else
       snprintf((char *)buf,6,"%4u",RSSI_SYMBOL,val);
+#else
+      snprintf((char *)buf,6,"%c%3u%%",RSSI_SYMBOL,val);
 #endif
       writeChars(buf,5,(RSSI_WARN>val)?1:0,RSSI_ROW,RSSI_COL);
     }
