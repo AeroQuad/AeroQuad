@@ -504,11 +504,12 @@ void updateReticle(void) {
       lastRSSI=val;
       byte buf[6];
 #ifdef RSSI_RAWVAL
-      snprintf((char *)buf,6,"%4u",RSSI_SYMBOL,val);
+      snprintf((char *)buf,6,"%c%4u",RSSI_SYMBOL,val);
+      writeChars(buf,5,0,RSSI_ROW,RSSI_COL);
 #else
       snprintf((char *)buf,6,"%c%3u%%",RSSI_SYMBOL,val);
-#endif
       writeChars(buf,5,(RSSI_WARN>val)?1:0,RSSI_ROW,RSSI_COL);
+#endif
     }
   }
 
