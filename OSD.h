@@ -432,11 +432,19 @@ private:
     #ifdef feet
     int currentAltitude = (int)(altitude.getData()/0.3048);
     #else
-    int currentAltitude = (int)altitude.getData();
+    int currentAltitude = (int)(10.0*altitude.getData());
     #endif
     if (currentAltitude != lastAltitude) {
       byte buf[8];
-      snprintf((char*)buf,8,"%c%d",(ON==altitudeHold)?0x09:0x08,(int)currentAltitude);
+#ifdef feet
+      snprintf((char*)buf,8,"%c%df",(ON==altitudeHold)?0x09:0x08,currentAltitude);
+#else
+      if (abs(currentAltitude)<100) {
+        snprintf((char*)buf,8,"%c%c%d.%1dm",(ON==altitudeHold)?0x09:0x08,currentAltitude<0?'-':' ',abs(currentAltitude/10),(abs(currentAltitude%10)));
+      } else {
+        snprintf((char*)buf,8,"%c%dm",(ON==altitudeHold)?0x09:0x08,currentAltitude/10);
+      }
+#endif
       writeChars( buf, strlen((char*)buf)+1, 0, ALTITUDE_ROW, ALTITUDE_COL );
       //write the null terminator - this will clear extra columns, so 10->9 doesn't become 90 on screen
       lastAltitude=currentAltitude;
