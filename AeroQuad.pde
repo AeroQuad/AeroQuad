@@ -56,7 +56,7 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
@@ -78,7 +78,7 @@
 // Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
 // *******************************************************************************************************************************
-#define LASTCHANNEL 6
+#define LASTCHANNEL 7
 //#define LASTCHANNEL 8
 
 // *******************************************************************************************************************************
@@ -90,7 +90,7 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
@@ -549,10 +549,10 @@ void setup() {
   // Camera stabilization setup
   #ifdef CameraControl
     camera.initialize();
-    camera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    camera.setmCameraRoll(6.66); // Need to figure out nice way to reverse servos
     camera.setCenterRoll(1500); // Need to figure out nice way to set center position
-    camera.setmCameraPitch(11.11);
-    camera.setCenterPitch(1300);
+    camera.setmCameraPitch(-11.11);
+    camera.setCenterPitch(1500);
   #endif
   
   //initialising OSD

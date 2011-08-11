@@ -195,14 +195,14 @@ public:
   BatteryMonitor_AeroQuad() : BatteryMonitor(){}
 
   void initialize(void) {
-    float R1   = 15000;
-    float R2   =  7500;
-    float Aref =     5.0;
+    float R1   = 14600;
+    float R2   =  7470;
+    float Aref =     4.99;
     batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
 #ifdef AeroQuad_Mini
     diode = 0.53; // measured with DMM
 #else    
-    diode = 0.9; // measured with DMM
+    diode = 0.85; // measured with DMM
 #endif    
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
@@ -210,6 +210,16 @@ public:
     previousBatteryTime = millis();
     state = LOW;
     firstAlarm = OFF;
+    pinMode(43, OUTPUT);
+    digitalWrite(43, HIGH);
+    pinMode(44, OUTPUT);
+    digitalWrite(44, HIGH);
+    pinMode(45, OUTPUT);
+    digitalWrite(45, HIGH);
+    pinMode(46, OUTPUT);
+    digitalWrite(46, HIGH);
+    pinMode(47, OUTPUT);
+    digitalWrite(47, HIGH);
   }
 
   void lowBatteryEvent(byte level) {
@@ -226,12 +236,20 @@ public:
         //autoDescent = 50;
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
+        digitalWrite(43, HIGH);
+        digitalWrite(44, HIGH);
+        digitalWrite(45, HIGH);
+        digitalWrite(46, HIGH);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
         //autoDescent = 0;
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
+        digitalWrite(43, LOW);
+        digitalWrite(44, LOW);
+        digitalWrite(45, LOW);
+        digitalWrite(46, LOW);
       }
     }
     if (level == ALARM) {
@@ -239,6 +257,10 @@ public:
       firstAlarm = ON;
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       digitalWrite(LED3PIN, HIGH);
+      digitalWrite(43, HIGH);
+      digitalWrite(44, HIGH);
+      digitalWrite(45, HIGH);
+      digitalWrite(46, HIGH);
       if ((currentBatteryTime > 500) && (throttle > 1400)) {
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
