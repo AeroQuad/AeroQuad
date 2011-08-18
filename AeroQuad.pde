@@ -90,7 +90,7 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
