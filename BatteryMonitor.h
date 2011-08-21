@@ -218,8 +218,8 @@ public:
     digitalWrite(45, HIGH);
     pinMode(46, OUTPUT);
     digitalWrite(46, HIGH);
-    pinMode(47, OUTPUT);
-    digitalWrite(47, HIGH);
+    pinMode(48, OUTPUT);
+    digitalWrite(48, HIGH);
   }
 
   void lowBatteryEvent(byte level) {
