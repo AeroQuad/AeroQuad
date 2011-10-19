@@ -401,6 +401,15 @@ public:
                 if (data.ayEnabled           ){ data.ay           = SCALE_ACCEL_Y       * bytesToSignedShort(packet[index++],packet[index++]); }
                 if (data.azEnabled           ){ data.az           = SCALE_ACCEL_Z       * bytesToSignedShort(packet[index++],packet[index++]); }
 
+                // convert the yaw, roll, and pitch angles to rads
+                //data.yaw = data.yaw * DEG_TO_RAD;
+                data.roll = data.roll * DEG_TO_RAD;
+                data.pitch = data.pitch * DEG_TO_RAD; 
+
+                data.yawRate = data.yawRate * DEG_TO_RAD;
+                data.rollRate = data.rollRate * DEG_TO_RAD;
+                data.pitchRate = data.pitchRate * DEG_TO_RAD;
+
                 if (index!=packet_length){
                     //Serial.println("Recevied bad length packet!");
                     return false;
