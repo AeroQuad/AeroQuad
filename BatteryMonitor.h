@@ -210,14 +210,14 @@ public:
     previousBatteryTime = millis();
     state = LOW;
     firstAlarm = OFF;
-    pinMode(43, OUTPUT);
-    digitalWrite(43, HIGH);
     pinMode(44, OUTPUT);
     digitalWrite(44, HIGH);
     pinMode(45, OUTPUT);
     digitalWrite(45, HIGH);
     pinMode(46, OUTPUT);
     digitalWrite(46, HIGH);
+    pinMode(47, OUTPUT);
+    digitalWrite(47, HIGH);
     pinMode(48, OUTPUT);
     digitalWrite(48, HIGH);
   }
