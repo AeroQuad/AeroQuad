@@ -33,10 +33,6 @@
 #define ON 1
 #define OFF 0
 
-// Development Log Settings
-#define  LOG_LEVEL INFO_LEVEL
-#include "Log.h"
-
 #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
   #define LED_Red 35
   #define LED_Yellow 36
