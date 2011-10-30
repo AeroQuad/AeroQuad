@@ -84,13 +84,28 @@ public:
 // Magnetometer (HMC5843)
 ////////////////////////////////////////////////////////////////////////////////
 
+enum {
+  typeHMC5843,
+  typeHMC5883L,
+  typeUnknown,
+};
+
+// The chip may be mounted with inverted axis
+//#define INVERTED_XY_COMPASS_BREAKOUT_BOARD
+   
+// See HMC58x3 datasheet for more information on these values
+#define NormalOperation             0x10
+// Default DataOutputRate is 10hz on HMC5843 , 15hz on HMC5883L
+#define DataOutputRate_Default      ( 0x04 << 2 )
+#define HMC5883L_SampleAveraging_8  ( 0x03 << 5 )
+
 class Magnetometer_HMC5843 : public Compass {
 private:
   float cosRoll;
   float sinRoll;
   float cosPitch;
   float sinPitch;
-
+  byte type;
 public: 
   Magnetometer_HMC5843() : Compass() {
     compassAddress = 0x1E;
@@ -103,8 +118,27 @@ public:
   void initialize(void) {
     byte numAttempts = 0;
     bool success = false;
+    float expected_xy, expected_z;
     delay(10);                             // Power up delay **
    
+    // determine if we are using 5843 or 5883L
+    updateRegisterI2C(compassAddress, 0x00, HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation);
+    sendByteI2C(compassAddress, 0x00);
+    byte base_config = readByteI2C(compassAddress);
+    if ( base_config == (HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation) ) {
+        // HMC5883L supports the sample averaging config
+        type = typeHMC5883L;
+        expected_xy = 1264.4f; // xy - Gain 2 (0x20): 1090 LSB/Ga * 1.16 Ga - see HMC5883L specs
+        expected_z  = 1177.2f; // z - Gain 2 (0x20): 1090 LSB/Ga * 1.08 Ga        
+    } else if ( base_config == (DataOutputRate_Default | NormalOperation) ) {
+        type = typeHMC5843;
+        expected_xy = expected_z = 715.0;
+    } else {
+        // not behaving like either supported compass type
+        type = typeUnknown;
+        return;
+    }
+
     magCalibration[XAXIS] = 1.0;
     magCalibration[YAXIS] = 1.0;
     magCalibration[ZAXIS] = 1.0;
@@ -125,17 +159,17 @@ public:
       measure(0.0, 0.0);                    // Read calibration data
       delay(10);
    
-      if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1000.0 \
-          && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1000.0 \
-          && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1000.0) {
-        magCalibration[XAXIS] = fabs(715.0 / measuredMagX);
-        magCalibration[YAXIS] = fabs(715.0 / measuredMagY);
-        magCalibration[ZAXIS] = fabs(715.0 / measuredMagZ);
+      if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < (expected_xy + 300) \
+          && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < (expected_xy + 300) \
+          && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < (expected_z + 300)) {
+        magCalibration[XAXIS] = fabs(expected_xy / measuredMagX);
+        magCalibration[YAXIS] = fabs(expected_xy / measuredMagY);
+        magCalibration[ZAXIS] = fabs(expected_z / measuredMagZ);
     
         success = true;
       }
    
-      updateRegisterI2C(compassAddress, 0x00, 0x10);  // Set 10hz update rate and normal operaiton
+      updateRegisterI2C(compassAddress, 0x00, base_config);  // Set default update rate (10hz/15hz) and normal operation
       delay(50);
 
       updateRegisterI2C(compassAddress, 0x02, 0x00); // Continuous Update mode
@@ -158,10 +192,21 @@ public:
     Wire.requestFrom(compassAddress, 6);
 
     measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-    measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-
+    if(type == typeHMC5883L) {
+        // the Z registers comes before the Y registers in the HMC5883L
+      measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+      measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    } else {   
+      measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+      measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+    }
+    
     Wire.endTransmission();
+
+#ifdef INVERTED_XY_COMPASS_BREAKOUT_BOARD
+    measuredMagX = -measuredMagX; 
+    measuredMagY = -measuredMagY;
+#endif
 
     cosRoll =  cos(roll);
     sinRoll =  sin(roll);
