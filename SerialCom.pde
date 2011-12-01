@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -31,15 +31,15 @@
 //***************************************************************************************************
 bool validateCalibrateCommand(byte command)
 {
-  if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
+  //if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
     armed = OFF;
     calibrateESC = command;
     return true;
-  } else {
-    calibrateESC = 0;
-    testCommand = 1000;
-    return false;
-  }
+  //} else {
+  //  calibrateESC = 0;
+  //  testCommand = 1000;
+  //  return false;
+  //}
 }
 
 void readSerialPID(unsigned char PIDid) {
@@ -269,9 +269,9 @@ void sendSerialTelemetry() {
     break;
   case 'H': // *** Spare ***
     // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
+    PrintValueComma(0);  // Needed for v2.7 Configurator compatibility
+    SERIAL_PRINTLN(0);   // Needed for v2.7 Configurator compatibility
+    queryType = 'X';
     break;
   case 'J': // Altitude Hold
 #ifdef AltitudeHold
@@ -280,20 +280,21 @@ void sendSerialTelemetry() {
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
     PrintValueComma(altitude.getSmoothFactor());
-    PrintPID(ZDAMPENING);
+    PrintValueComma(PID[ZDAMPENING].P);
+    PrintValueComma(PID[ZDAMPENING].I);
+    SERIAL_PRINTLN(PID[ZDAMPENING].D);
 #else
-    for(byte i=0; i<10; i++) {
-      PrintValueComma(0);
+    for(byte i=0; i<9; i++) {
+     PrintValueComma(0);
     }
+    SERIAL_PRINTLN('0');
 #endif
-    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
     PrintValueComma(gyro.getSmoothFactor());
     PrintValueComma(accel.getSmoothFactor());
-    PrintValueComma(timeConstant);
-    SERIAL_PRINTLN(aref);
+    SERIAL_PRINTLN(timeConstant);
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
@@ -305,11 +306,12 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
-    SERIAL_PRINTLN();
+    PrintValueComma(receiver.getTransmitterSlope(LASTCHANNEL-1));
+    SERIAL_PRINTLN(receiver.getTransmitterOffset(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -319,41 +321,53 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(accel.getData(axis));
     }
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-#if defined(HeadingMagHold)
-      PrintValueComma(compass.getRawData(axis));
-#else
+    for (byte axis = ROLL; axis < YAW; axis++)
       PrintValueComma(0);
-#endif
-    }
-
     PrintValueComma(degrees(flightAngle->getData(ROLL)));
     PrintValueComma(degrees(flightAngle->getData(PITCH)));
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    SERIAL_PRINTLN((flightAngle->getDegreesHeading(YAW)));
+    PrintValueComma((flightAngle->getDegreesHeading(YAW)));
 #else
-    SERIAL_PRINTLN(degrees(gyro.getHeading()));
+    PrintValueComma(degrees(gyro.getHeading()));
 #endif
+#ifdef AltitudeHold
+      PrintValueComma(altitude.getData());
+#else
+      PrintValueComma(0);
+ #endif
+ #ifdef BattMonitor
+      SERIAL_PRINT(batteryMonitor.getData());
+ #else
+      SERIAL_PRINT(0);
+ #endif
+    SERIAL_PRINTLN();
     break;
-  case 'R': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
+  case 'R': // Mag Calibration
+#if defined(HeadingMagHold)
+    PrintValueComma(compass.getRawData(XAXIS));
+    PrintValueComma(compass.getRawData(YAXIS));
+    SERIAL_PRINTLN(compass.getRawData(ZAXIS));
+#else
+    PrintValueComma(0);
+    PrintValueComma(0);
+    SERIAL_PRINTLN('0');
+#endif
     break;
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(gyro.getFlightData(axis));
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      PrintValueComma(accel.getFlightData(axis));
 #ifdef BattMonitor
     PrintValueComma(batteryMonitor.getData());
 #else
     PrintValueComma(0);
 #endif
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+      PrintValueComma(motors.getMotorAxisCommand(axis));
     for (byte motor = FRONT; motor < LASTMOTOR; motor++)
       PrintValueComma(motors.getMotorCommand(motor));
+    for (byte axis = ROLL; axis < LASTAXIS; axis++)
+      PrintValueComma(accel.getFlightData(axis));
     PrintValueComma((int)armed);
     if (flightMode == STABLE)
       PrintValueComma(2000);
@@ -369,7 +383,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN((int)altitudeHold);
 #else
     PrintValueComma(0);
-    SERIAL_PRINTLN('0');
+    SERIAL_PRINTLN(0);
 #endif
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
@@ -396,11 +410,14 @@ void sendSerialTelemetry() {
     break;
   case 'X': // Stop sending messages
     break;
-  case 'Z': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
+  case 'Z': // Heading Data
+    PrintValueComma(receiver.getData(YAW));
+    PrintValueComma(headingHold);
+    PrintValueComma(setHeading);
+    if ((setHeading + relativeHeading) > 180)
+      SERIAL_PRINTLN(-360 + relativeHeading);
+    else
+      SERIAL_PRINTLN(relativeHeading);
     break;
   case '6': // Report remote commands
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
@@ -421,7 +438,7 @@ void sendSerialTelemetry() {
     PrintValueComma(1);
 #elif defined(AeroQuad_v18)
     PrintValueComma(2);
-#elif defined(AeroQuadMega_v2)
+#elif defined(AeroQuadMega_v2) || defined(AeroQuadMega_v21)
     PrintValueComma(3);
 #elif defined(AeroQuad_Wii)
     PrintValueComma(4);
@@ -454,20 +471,22 @@ void sendSerialTelemetry() {
   case 'e': // *** Spare ***
     // Spare telemetry
     //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
+    SERIAL_PRINTLN(0); // Needed for v2.7 Configurator compatibility
+    queryType = 'X';
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
-    // dirty trick to disable compiler loop unrolling
-    //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    for (byte axis = XAXIS; axis < 99; axis++) {
-      if(axis == LASTAXIS)
-        break;
-      PrintValueComma(compass.getMagMax(axis));
-      PrintValueComma(compass.getMagMin(axis));
-    }
-    SERIAL_PRINTLN();
+    SERIAL_PRINT(compass.getMagMax(XAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMin(XAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMax(YAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMin(YAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMax(ZAXIS), 2);
+    comma();
+    SERIAL_PRINTLN(compass.getMagMin(ZAXIS), 2);
 #endif
     queryType = 'X';
     break;

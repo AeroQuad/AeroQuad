@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -37,7 +37,8 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -49,16 +50,18 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define HEXACOAXIAL
-//#define HEXARADIAL
+//#define OCTOX_CONFIG
+//#define X8PLUS_CONFIG
+//#define X8X_CONFIG
 
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse like a heart beat to show batteries are low
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -78,8 +81,8 @@
 // Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
 // *******************************************************************************************************************************
-#define LASTCHANNEL 7
-//#define LASTCHANNEL 8
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -88,7 +91,11 @@
 // D12 to D33 for roll, connect servo to SERVO1
 // D11 to D34 for pitch, connect servo to SERVO2
 // D13 to D35 for yaw, connect servo to SERVO3
-// Please note that you will need to have battery connected to power on servos with v2.0 shield
+// if using v2.1 Shield
+// Connect pitch servo to Camera 1 input
+// Connect roll servo to Camera 2 input
+// Connect yaw servo to Camera 3 input
+// Please note that you will need to have a battery connected to power on servos with the v2.0/v2.1 shields
 // *******************************************************************************************************************************
 //#define CameraControl
 
@@ -260,8 +267,12 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define SPARKFUN_5843_BOB       // JI - 11/26/11 - Use this line with 5843 Breakout Board
+    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    //#define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    //#include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    //Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -430,12 +441,59 @@
   #endif
 #endif
 
+#ifdef AeroQuadMega_v21
+  Receiver_AeroQuadMega receiver;
+  Motors_PWMtimer motors;
+  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
+  Accel_AeroQuadMega_v21 accel;
+  Gyro_AeroQuadMega_v21 gyro;
+  #include "FlightAngle.h"
+  #ifdef FlightAngleARG
+    FlightAngle_ARG tempFlightAngle;
+  #elif defined FlightAngleMARG
+    FlightAngle_MARG tempFlightAngle;
+  #else
+    FlightAngle_DCM tempFlightAngle;
+  #endif
+  FlightAngle *flightAngle = &tempFlightAngle;
+  #ifdef HeadingMagHold
+    #define SPARKFUN_9DOF  // JI - 11/24/11 - Defines 5883L Orientation
+    #include "Compass.h"
+    Magnetometer_HMC5883L compass;
+  #endif
+  #ifdef AltitudeHold
+    #include "Altitude.h"
+    Altitude_AeroQuad_v2 altitude;
+  #endif
+  #ifdef BattMonitor
+    #include "BatteryMonitor.h"
+    BatteryMonitor_AeroQuad batteryMonitor;
+  #endif
+  #ifdef CameraControl
+    #include "Camera.h"
+    Camera_AeroQuad camera;
+  #endif
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
+  #endif
+#endif
+
 #ifdef XConfig
   void (*processFlightControl)() = &processFlightControlXMode;
 #endif
 #ifdef plusConfig
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
+#ifdef OCTOX_CONFIG                                              // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlOctoX;   // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
+#ifdef X8PLUS_CONFIG                                             // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8Plus;  // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
+#ifdef X8X_CONFIG                                                // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8X;     // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
@@ -465,13 +523,13 @@ void setup() {
     Serial1.begin(BAUD);
     PORTD = B00000100;
   #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuadMega_v21)
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
     digitalWrite(LED3PIN, LOW);
   #endif
-  #ifdef AeroQuadMega_v2
+  #if defined(AeroQuadMega_v2) || defined(AeroQuadMega_v21)
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
     pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
@@ -491,10 +549,10 @@ void setup() {
     pinMode(LED_Green, OUTPUT);
   #endif
   
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter) || defined (AeroQuadMega_v21)
     Wire.begin();
   #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
+  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuadMega_v21)
     // Recommendation from Mgros to increase I2C speed to 400kHz
     // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
     TWBR = 12;
@@ -549,10 +607,10 @@ void setup() {
   // Camera stabilization setup
   #ifdef CameraControl
     camera.initialize();
-    camera.setmCameraRoll(6.66); // Need to figure out nice way to reverse servos
+    camera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
     camera.setCenterRoll(1500); // Need to figure out nice way to set center position
-    camera.setmCameraPitch(-11.11);
-    camera.setCenterPitch(1500);
+    camera.setmCameraPitch(11.11);
+    camera.setCenterPitch(1300);
   #endif
   
   //initialising OSD

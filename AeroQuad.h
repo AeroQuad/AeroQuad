@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -26,9 +26,9 @@
 // Flight Software Version
 #define VERSION 2.5
 
-//#define BAUD 115200
+#define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
-#define BAUD 57600
+//#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
 #define OFF 0
@@ -44,7 +44,7 @@
   #define PIANO_SW1 42
   #define PIANO_SW2 43
 #endif
-#ifdef AeroQuadMega_v2  
+#if defined(AeroQuadMega_v2) || defined(AeroQuadMega_v21)  
   #define LED2PIN 4
   #define LED3PIN 31
 #else
@@ -114,24 +114,24 @@ float smoothHeading;
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 // Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
+#define FRONT    0
+#define REAR     1
+#define RIGHT    2
+#define LEFT     3
+#define FRONT2   4                                                          // JI - 11/25/11
+#define REAR2    5                                                          // JI - 11/25/11
+#define RIGHT2   6                                                          // JI - 11/25/11
+#define LEFT2    7                                                          // JI - 11/25/11
+
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
+#define FIRSTMOTOR 0                                                        // JI - 11/25/11
 #if defined(plusConfig) || defined(XConfig)
   #define LASTMOTOR 4
 #endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#endif
+#if defined(OCTOX_CONFIG) || defined(X8PLUS_CONFIG) || defined(X8X_CONFIG)  // JI - 11/25/11
+  #define LASTMOTOR 8                                                       // JI - 11/25/11
+#endif                                                                      // JI - 11/25/11
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -393,8 +393,11 @@ float arctan2(float y, float x); // defined in AQMath.h
 void readEEPROM(void); // defined in DataStorage.h
 void readPilotCommands(void); // defined in FlightCommand.pde
 void readSensors(void); // defined in Sensors.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
+void processFlightControlXMode(void);     // defined in FlightControl.pde
+void processFlightControlPlusMode(void);  // defined in FlightControl.pde
+void processFlightControlOctoX(void);     // defined in FlightControl.pde
+void processFlightControlX8Plus(void);    // defined in FlightControl.pde
+void processFlightControlX8X(void);       // defined in FLightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde

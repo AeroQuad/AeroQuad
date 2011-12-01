@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -17,12 +17,6 @@
   You should have received a copy of the GNU General Public License 
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This class updated by jihlein
 
@@ -74,12 +68,6 @@ public:
   }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ////////////////////////////////////////////////////////////////////////////////
 // Magnetometer (HMC5843)
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +85,7 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Initialize AeroQuad Mega v2.0 Magnetometer
+  // Initialize HMC5843 Magnetometer
   ////////////////////////////////////////////////////////////////////////////////
 
   void initialize(void) {
@@ -146,7 +134,7 @@ public:
   }
   
   ////////////////////////////////////////////////////////////////////////////////
-  // Measure AeroQuad Mega v2.0 Magnetometer
+  // Measure HMC5843 Magnetometer
   ////////////////////////////////////////////////////////////////////////////////
 
   void measure(float roll, float pitch) {
@@ -183,11 +171,129 @@ public:
   }
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if !defined(SPARKFUN_5843_BOB)  // JI - 11/26/11
+////////////////////////////////////////////////////////////////////////////////
+// Magnetometer (HMC5883L)
+////////////////////////////////////////////////////////////////////////////////
+
+// See HMC58x3 datasheet for more information on these values
+#define NormalOperation             0x10
+// Default DataOutputRate is 10hz on HMC5843 , 15hz on HMC5883L
+#define DataOutputRate_Default      ( 0x04 << 2 )
+#define HMC5883L_SampleAveraging_8  ( 0x03 << 5 )
+
+class Magnetometer_HMC5883L : public Compass {
+private:
+  float cosRoll;
+  float sinRoll;
+  float cosPitch;
+  float sinPitch;
+
+public: 
+  Magnetometer_HMC5883L() : Compass() {
+    compassAddress = 0x1E;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Initialize HMC5883L Magnetometer
+  ////////////////////////////////////////////////////////////////////////////////
+
+  void initialize(void) {
+    byte numAttempts = 0;
+    bool success = false;
+    delay(10);                             // Power up delay **
+   
+    magCalibration[XAXIS] = 1.0;
+    magCalibration[YAXIS] = 1.0;
+    magCalibration[ZAXIS] = 1.0;
+    
+    while (success == false && numAttempts < 5 ) {
+      
+      numAttempts++;
+   
+      updateRegisterI2C(compassAddress, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
+      delay(50);
+   
+      updateRegisterI2C(compassAddress, 0x01, 0x20); // Set +/- 1G gain
+      delay(10);
+
+      updateRegisterI2C(compassAddress, 0x02, 0x01);  // Perform single conversion
+      delay(10);
+   
+      measure(0.0, 0.0);                    // Read calibration data
+      delay(10);
+   
+      if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1564.4f \
+          && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1564.4f \
+          && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1477.2f) {
+        magCalibration[XAXIS] = fabs(1264.4f / measuredMagX);
+        magCalibration[YAXIS] = fabs(1264.4f / measuredMagY);
+        magCalibration[ZAXIS] = fabs(1177.2f / measuredMagZ); 
+        success = true;
+      }
+   
+      updateRegisterI2C(compassAddress, 0x00, HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation);
+      delay(50);
+
+      updateRegisterI2C(compassAddress, 0x02, 0x00); // Continuous Update mode
+      delay(50);                           // Mode change delay (1/Update Rate) **
+    }
+
+    measure(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+  }
+  
+  ////////////////////////////////////////////////////////////////////////////////
+  // Measure HMC5883L Magnetometer
+  ////////////////////////////////////////////////////////////////////////////////
+
+  void measure(float roll, float pitch) {
+    float magX;
+    float magY;
+    float tmp;
+    
+    sendByteI2C(compassAddress, 0x03);
+    Wire.requestFrom(compassAddress, 6);
+
+    #if defined(SPARKFUN_9DOF)
+      // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
+      // JI - 11/24/11 - 5883L X axis points aft
+      // JI - 11/24/11 - 5883L Sensor Orientation 3
+      measuredMagX = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+      measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+      measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    #elif defined(SPARKFUN_5883L_BOB)
+      // JI - 11/24/11 - Sparkfun 5883L Breakout Board Upside Down on v2p0 shield
+      // JI - 11/24/11 - 5883L is upside down, X axis points forward
+      // JI - 11/24/11 - 5883L Sensor Orientation 5
+      measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+      measuredMagZ =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+      measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    #else
+      !! Define 5883L Orientation !!
+    #endif
+    
+    Wire.endTransmission();
+
+    cosRoll =  cos(roll);
+    sinRoll =  sin(roll);
+    cosPitch = cos(pitch);
+    sinPitch = sin(pitch);
+
+    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + \
+           ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+           
+    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - \
+           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
+
+    tmp  = sqrt(magX * magX + magY * magY);
+    
+    hdgX = magX / tmp;
+    hdgY = -magY / tmp;
+  }
+};
+#endif  // JI - 11/26/11
+
 // ***********************************************************************
 // ************************* CHR6DM Subclass *****************************
 // ***********************************************************************
@@ -218,3 +324,5 @@ public:
   }
 };
 #endif
+
+

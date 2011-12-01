@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -36,7 +36,7 @@ public:
 
   BatteryMonitor(void) {
     lowVoltageWarning = 10.2; //10.8;
-    lowVoltageAlarm = 9.5; //10.2;
+    lowVoltageAlarm = 9.9; //10.2;
     batteryVoltage = lowVoltageWarning + 2;
     batteryStatus = OK;
   }
@@ -207,19 +207,15 @@ public:
     analogReference(DEFAULT);
     pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
     digitalWrite(BUZZERPIN, LOW);
-    previousBatteryTime = millis();
-    state = LOW;
-    firstAlarm = OFF;
-    pinMode(44, OUTPUT);
-    digitalWrite(44, HIGH);
     pinMode(45, OUTPUT);
     digitalWrite(45, HIGH);
     pinMode(46, OUTPUT);
     digitalWrite(46, HIGH);
-    pinMode(47, OUTPUT);
-    digitalWrite(47, HIGH);
     pinMode(48, OUTPUT);
     digitalWrite(48, HIGH);
+    previousBatteryTime = millis();
+    state = LOW;
+    firstAlarm = OFF;
   }
 
   void lowBatteryEvent(byte level) {
@@ -229,27 +225,29 @@ public:
       autoDescent = 0;
     }
     if (level == WARNING) {
-      //if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
-      //  autoDescent = -50;
-      //}
+#ifdef HeartBeatMode
+      if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
+        autoDescent = -100;
+      }
+#endif
       if (currentBatteryTime > 1100) {
-        //autoDescent = 50;
+#ifdef HeartBeatMode
+        autoDescent = 100;
+#endif
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
-        digitalWrite(43, HIGH);
-        digitalWrite(44, HIGH);
-        digitalWrite(45, HIGH);
-        digitalWrite(46, HIGH);
+        digitalWrite(45, LOW);
+        digitalWrite(46, LOW);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
-        //autoDescent = 0;
+#ifdef HeartBeatMode
+        autoDescent = 0;
+#endif
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
-        digitalWrite(43, LOW);
-        digitalWrite(44, LOW);
-        digitalWrite(45, LOW);
-        digitalWrite(46, LOW);
+        digitalWrite(45, HIGH);
+        digitalWrite(46, HIGH);
       }
     }
     if (level == ALARM) {
@@ -257,19 +255,19 @@ public:
       firstAlarm = ON;
       digitalWrite(BUZZERPIN, HIGH); // enable buzzer
       digitalWrite(LED3PIN, HIGH);
-      digitalWrite(43, HIGH);
-      digitalWrite(44, HIGH);
-      digitalWrite(45, HIGH);
-      digitalWrite(46, HIGH);
+      digitalWrite(45, LOW);
+      digitalWrite(46, LOW);
       if ((currentBatteryTime > 500) && (throttle > 1400)) {
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
         previousBatteryTime = millis();
-        //if (state == LOW) state = HIGH;
-        //else state = LOW;
-        //digitalWrite(LEDPIN, state);
-        //digitalWrite(LED2PIN, state);
-        //digitalWrite(LED3PIN, state);
+#ifdef HeartBeatMode
+        if (state == LOW) state = HIGH;
+        else state = LOW;
+        digitalWrite(LEDPIN, state);
+        digitalWrite(LED2PIN, state);
+        digitalWrite(LED3PIN, state);
+#endif
       }
     }
   }

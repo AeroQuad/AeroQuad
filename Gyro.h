@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v2.5 - November 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -106,13 +106,9 @@ public:
 
   // returns gyro based heading as +/- PI in radians
   const float getHeading(void) {
-    //div_t integerDivide;
-    
-    //integerDivide = div(rawHeading, 2*PI);
-    gyroHeading = rawHeading; // + (integerDivide.quot * -(2*PI));
+    gyroHeading = rawHeading;
     if (gyroHeading > PI) gyroHeading -= (2*PI);
     if (gyroHeading < -PI) gyroHeading += (2*PI);
-    //Serial.print(integerDivide.quot);Serial.print(",");Serial.print(integerDivide.rem);Serial.println();
     return gyroHeading;
   }
 };
@@ -524,3 +520,96 @@ public:
 };
 #endif
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+/******************************************************/
+/****************** AeroQuad_v21 Gyro ******************/
+/******************************************************/
+#if defined(AeroQuadMega_v21)
+/*
+  10kOhm pull-ups on I2C lines.
+  VDD & VIO = 3.3V
+  SDA -> A4 (PC4)
+  SCL -> A5 (PC5)
+  INT -> D2 (PB2) (or no connection, not used here)
+  CLK -> GND
+*/
+class Gyro_AeroQuadMega_v21 : public Gyro {
+private:
+  int gyroAddress;
+  //float gyroLastData;
+  
+public:
+  Gyro_AeroQuadMega_v21() : Gyro() {
+    gyroAddress = 0x68;
+    gyroFullScaleOutput = 2000.0;   // ITG3200 full scale output = +/- 2000 deg/sec
+    gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
+    
+    previousGyroTime = micros();
+  }
+  
+  void initialize(void) {
+    gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
+    gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
+    gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+    smoothFactor = readFloat(GYROSMOOTH_ADR);
+    
+    // Check if gyro is connected
+    if (readWhoI2C(gyroAddress) != gyroAddress +1)  // hardcoded for +1 of address specific to sparkfun 6dof imu
+      Serial.println("Gyro not found!");
+        
+    // Thanks to SwiftingSpeed for updates on these settings
+    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11207&viewfull=1#post11207
+    updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
+    updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
+    updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
+  }
+  
+  void measure(void) {
+    sendByteI2C(gyroAddress, 0x1D);
+    Wire.requestFrom(gyroAddress, 6);
+
+    gyroADC[PITCH] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[PITCH];
+    gyroADC[ROLL] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[ROLL];
+    gyroADC[YAW] = gyroZero[YAW] - ((Wire.receive() << 8) | Wire.receive());
+ 
+    gyroData[ROLL] = filterSmooth((float)gyroADC[ROLL] * gyroScaleFactor, gyroData[ROLL], smoothFactor);
+    gyroData[PITCH] = filterSmooth((float)gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor);
+    gyroData[YAW] = filterSmooth((float)gyroADC[YAW] * gyroScaleFactor, gyroData[YAW], smoothFactor);
+
+    long int currentGyroTime = micros();
+    if (gyroData[YAW] > radians(1.0) || gyroData[YAW] < radians(-1.0)) {
+      rawHeading += gyroData[YAW] * ((currentGyroTime - previousGyroTime) / 1000000.0);
+    }
+    previousGyroTime = currentGyroTime;
+
+  }
+  
+  // returns raw ADC data from the Gyro centered on zero +/- values
+  const int getFlightData(byte axis) {
+    return (getRaw(axis) >> 3);
+  }
+
+  void calibrate() {
+    autoZero();
+    writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+    writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+    writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  }
+  
+  void autoZero() {
+    int findZero[FINDZERO];
+    for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+        findZero[i] = readWordI2C(gyroAddress);
+        delay(10);
+      }
+      if (calAxis == ROLL)
+        gyroZero[PITCH] = findMedian(findZero, FINDZERO);
+      else if (calAxis == PITCH)
+        gyroZero[ROLL] = findMedian(findZero, FINDZERO);
+      else
+        gyroZero[YAW] = findMedian(findZero, FINDZERO);
+    }
+  }
+};
+#endif
