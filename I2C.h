@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -22,51 +22,51 @@
 
 void sendByteI2C(int deviceAddress, byte dataValue) {
   Wire.beginTransmission(deviceAddress);
-  Wire.send(dataValue);
+  Wire.write(dataValue);
   Wire.endTransmission();
 }
 
 byte readByteI2C(int deviceAddress) {
     Wire.requestFrom(deviceAddress, 1);
-    return Wire.receive();
+    return Wire.read();
 }
 
 int readWordI2C(int deviceAddress) {
   Wire.requestFrom(deviceAddress, 2);
-  return (Wire.receive() << 8) | Wire.receive();
+  return (Wire.read() << 8) | Wire.read();
 }
 
 int readWordWaitI2C(int deviceAddress) {
   unsigned char msb, lsb;
   Wire.requestFrom(deviceAddress, 2); // request two bytes
   while(!Wire.available()); // wait until data available
-  msb = Wire.receive();
+  msb = Wire.read();
   while(!Wire.available()); // wait until data available
-  lsb = Wire.receive();
+  lsb = Wire.read();
   return (((int)msb<<8) | ((int)lsb));
 }
 
 int readReverseWordI2C(int deviceAddress) {
   byte lowerByte;
   Wire.requestFrom(deviceAddress, 2);
-  lowerByte = Wire.receive();
-  return (Wire.receive() << 8) | lowerByte;
+  lowerByte = Wire.read();
+  return (Wire.read() << 8) | lowerByte;
 }
 
 byte readWhoI2C(int deviceAddress) {
   // read the ID of the I2C device
   Wire.beginTransmission(deviceAddress);
-  Wire.send(0x00);
+  Wire.write((byte)0x00);
   Wire.endTransmission();
   delay(100);
   Wire.requestFrom(deviceAddress, 1);
-  return Wire.receive();
+  return Wire.read();
 }
 
 void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) {
   Wire.beginTransmission(deviceAddress);
-  Wire.send(dataAddress);
-  Wire.send(dataValue);
+  Wire.write(dataAddress);
+  Wire.write(dataValue);
   Wire.endTransmission();
 }  
 

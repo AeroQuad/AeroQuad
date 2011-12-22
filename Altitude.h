@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -114,11 +114,11 @@ private:
     sendByteI2C(altitudeAddress, 0xF6);
     Wire.requestFrom(altitudeAddress, 3); // request three bytes
     while(!Wire.available()); // wait until data available
-    msb = Wire.receive();
+    msb = Wire.read();
     while(!Wire.available()); // wait until data available
-    lsb = Wire.receive();
+    lsb = Wire.read();
     while(!Wire.available()); // wait until data available
-    xlsb = Wire.receive();
+    xlsb = Wire.read();
     return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
   }
 
@@ -176,6 +176,19 @@ public:
     mc = readWordWaitI2C(altitudeAddress);
     sendByteI2C(altitudeAddress, 0xBE);
     md = readWordWaitI2C(altitudeAddress);
+    
+//    Serial.print("ac1: "); Serial.println(ac1);
+//    Serial.print("ac2: "); Serial.println(ac2);
+//    Serial.print("ac3: "); Serial.println(ac3);
+//    Serial.print("ac4: "); Serial.println(ac4);
+//    Serial.print("ac5: "); Serial.println(ac5);
+//    Serial.print("ac6: "); Serial.println(ac6);
+//    Serial.print(" b1: "); Serial.println(b1);
+//    Serial.print(" b2: "); Serial.println(b2);
+//    Serial.print(" mb: "); Serial.println(mb);
+//    Serial.print(" mc: "); Serial.println(mc);
+//    Serial.print(" md: "); Serial.println(md);
+    
     requestRawTemperature(); // setup up next measure() for temperature
     select = TEMPERATURE;
     pressureCount = 0;

@@ -1,26 +1,27 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
 #include <math.h>
-#include "WProgram.h"
+
+#include "Arduino.h"
 #include "pins_arduino.h"
 
 // Flight Software Version
@@ -33,7 +34,7 @@
 #define ON 1
 #define OFF 0
 
-#if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
+#if defined(APM_OP_CHR6DM) || defined(ArduCopter)
   #define LED_Red 35
   #define LED_Yellow 36
   #define LED_Green 37
@@ -44,7 +45,7 @@
   #define PIANO_SW1 42
   #define PIANO_SW2 43
 #endif
-#if defined(AeroQuadMega_v2) || defined(AeroQuadMega_v21)  
+#if defined(AeroQuadMega_v2) || defined(AeroQuadMega_v21)
   #define LED2PIN 4
   #define LED3PIN 31
 #else
@@ -113,25 +114,47 @@ float smoothHeading;
 #define YAWRATEPIN 5
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
-// Motor control variables
-#define FRONT    0
-#define REAR     1
-#define RIGHT    2
-#define LEFT     3
-#define FRONT2   4                                                          // JI - 11/25/11
-#define REAR2    5                                                          // JI - 11/25/11
-#define RIGHT2   6                                                          // JI - 11/25/11
-#define LEFT2    7                                                          // JI - 11/25/11
-
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 #define FIRSTMOTOR 0                                                        // JI - 11/25/11
+
 #if defined(plusConfig) || defined(XConfig)
   #define LASTMOTOR 4
 #endif
+#if defined(HEX_PLUS_CONFIG) || defined(HEX_X_CONFIG)                       // JI - 12/13/11
+  #define LASTMOTOR 6                                                       // JI - 12/13/11
+#endif                                                                      // JI - 12/13/11
 #if defined(OCTOX_CONFIG) || defined(X8PLUS_CONFIG) || defined(X8X_CONFIG)  // JI - 11/25/11
   #define LASTMOTOR 8                                                       // JI - 11/25/11
 #endif                                                                      // JI - 11/25/11
+
+// Motor control variables
+#if (LASTMOTOR == 4) || (LASTMOTOR == 8)                                    // JI - 11/25/11
+  #define FRONT    0
+  #define REAR     1
+  #define RIGHT    2
+  #define LEFT     3
+  #define FRONT2   4                                                        // JI - 11/25/11
+  #define REAR2    5                                                        // JI - 11/25/11
+  #define RIGHT2   6                                                        // JI - 11/25/11
+  #define LEFT2    7                                                        // JI - 11/25/11
+#endif                                                                      // JI - 12/13/11
+#if defined(HEX_PLUS_CONFIG)                                                // JI - 12/13/11
+  #define FRONT       0                                                     // JI - 12/13/11
+  #define RIGHT       1                                                     // JI - 12/13/11
+  #define RIGHT2      2                                                     // JI - 12/13/11
+  #define REAR        3                                                     // JI - 12/13/11
+  #define LEFT        4                                                     // JI - 12/13/11
+  #define LEFT2       5                                                     // JI - 12/13/11
+#endif                                                                      // JI - 12/13/11
+#if defined(HEX_X_CONFIG)                                                   // JI - 12/13/11
+  #define FRONT       0                                                     // JI - 12/13/11
+  #define FRONT2      1                                                     // JI - 12/13/11
+  #define RIGHT       2                                                     // JI - 12/13/11
+  #define REAR        3                                                     // JI - 12/13/11
+  #define REAR2       4                                                     // JI - 12/13/11
+  #define LEFT        5                                                     // JI - 12/13/11
+#endif                                                                      // JI - 12/13/11
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -287,6 +310,7 @@ unsigned long fastTelemetryTime = 0;
   #define SERIAL_READ       Serial3.read
   #define SERIAL_FLUSH      Serial3.flush
   #define SERIAL_BEGIN      Serial3.begin
+  #define SERIAL_WRITE      Serial3.write
 #else
   #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial.print
@@ -295,6 +319,7 @@ unsigned long fastTelemetryTime = 0;
   #define SERIAL_READ       Serial.read
   #define SERIAL_FLUSH      Serial.flush
   #define SERIAL_BEGIN      Serial.begin
+  #define SERIAL_WRITE      Serial.write
 #endif
 
 /**************************************************************/
@@ -329,7 +354,7 @@ typedef struct {
   float offset;
   float smooth_factor;
 } t_NVR_Receiver;
-typedef struct {    
+typedef struct {
   t_NVR_PID ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVELROLL_PID_GAIN_ADR;
   t_NVR_PID YAW_PID_GAIN_ADR;
@@ -341,7 +366,7 @@ typedef struct {
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
-  
+
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float GYROSMOOTH_ADR;
@@ -373,7 +398,7 @@ typedef struct {
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
-} t_NVR_Data;  
+} t_NVR_Data;
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
@@ -395,9 +420,11 @@ void readPilotCommands(void); // defined in FlightCommand.pde
 void readSensors(void); // defined in Sensors.pde
 void processFlightControlXMode(void);     // defined in FlightControl.pde
 void processFlightControlPlusMode(void);  // defined in FlightControl.pde
+void processFlightControlHexPlus(void);   // JI - 12/13/11 - defined in FlightControl.pde
+void processFlightControlHexX(void);      // JI - 12/13/11 - defined in FlightControl.pde
 void processFlightControlOctoX(void);     // defined in FlightControl.pde
 void processFlightControlX8Plus(void);    // defined in FlightControl.pde
-void processFlightControlX8X(void);       // defined in FLightControl.pde
+void processFlightControlX8X(void);       // defined in FlightControl.pde
 void readSerialCommand(void);  //defined in SerialCom.pde
 void sendSerialTelemetry(void); // defined in SerialCom.pde
 void printInt(int data); // defined in SerialCom.pde
@@ -414,8 +441,8 @@ float findMode(float *data, int arraySize); // defined in Sensors.pde
 int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
 
-// FUNCTION: return the number of bytes currently free in RAM      
-extern int  __bss_end; // used by freemem 
+// FUNCTION: return the number of bytes currently free in RAM
+extern int  __bss_end; // used by freemem
 extern int  *__brkval; // used by freemem
 int freemem(){
     int free_memory;

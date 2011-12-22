@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -36,7 +36,7 @@ public:
 
   BatteryMonitor(void) {
     lowVoltageWarning = 10.2; //10.8;
-    lowVoltageAlarm = 9.9; //10.2;
+    lowVoltageAlarm = 9.5; //10.2;
     batteryVoltage = lowVoltageWarning + 2;
     batteryStatus = OK;
   }
@@ -225,15 +225,11 @@ public:
       autoDescent = 0;
     }
     if (level == WARNING) {
-#ifdef HeartBeatMode
-      if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
-        autoDescent = -100;
-      }
-#endif
+      //if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
+      //  autoDescent = -50;
+      //}
       if (currentBatteryTime > 1100) {
-#ifdef HeartBeatMode
-        autoDescent = 100;
-#endif
+        //autoDescent = 50;
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
         digitalWrite(45, LOW);
@@ -241,9 +237,7 @@ public:
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
-#ifdef HeartBeatMode
-        autoDescent = 0;
-#endif
+        //autoDescent = 0;
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
         digitalWrite(45, HIGH);
@@ -261,13 +255,11 @@ public:
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
         previousBatteryTime = millis();
-#ifdef HeartBeatMode
-        if (state == LOW) state = HIGH;
-        else state = LOW;
-        digitalWrite(LEDPIN, state);
-        digitalWrite(LED2PIN, state);
-        digitalWrite(LED3PIN, state);
-#endif
+        //if (state == LOW) state = HIGH;
+        //else state = LOW;
+        //digitalWrite(LEDPIN, state);
+        //digitalWrite(LED2PIN, state);
+        //digitalWrite(LED3PIN, state);
       }
     }
   }

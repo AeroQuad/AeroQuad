@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -234,9 +234,9 @@ public:
 
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       if (axis == ROLL)
-        gyroADC[axis] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[axis];
+        gyroADC[axis] = ((Wire.read() << 8) | Wire.read()) - gyroZero[axis];
       else
-        gyroADC[axis] = gyroZero[axis] - ((Wire.receive() << 8) | Wire.receive());
+        gyroADC[axis] = gyroZero[axis] - ((Wire.read() << 8) | Wire.read());
       gyroData[axis] = filterSmooth((float)gyroADC[axis] * gyroScaleFactor, gyroData[axis], smoothFactor);
     }
 
@@ -567,9 +567,9 @@ public:
     sendByteI2C(gyroAddress, 0x1D);
     Wire.requestFrom(gyroAddress, 6);
 
-    gyroADC[PITCH] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[PITCH];
-    gyroADC[ROLL] = ((Wire.receive() << 8) | Wire.receive()) - gyroZero[ROLL];
-    gyroADC[YAW] = gyroZero[YAW] - ((Wire.receive() << 8) | Wire.receive());
+    gyroADC[PITCH] = ((Wire.read() << 8) | Wire.read()) - gyroZero[PITCH];
+    gyroADC[ROLL] = ((Wire.read() << 8) | Wire.read()) - gyroZero[ROLL];
+    gyroADC[YAW] = gyroZero[YAW] - ((Wire.read() << 8) | Wire.read());
  
     gyroData[ROLL] = filterSmooth((float)gyroADC[ROLL] * gyroScaleFactor, gyroData[ROLL], smoothFactor);
     gyroData[PITCH] = filterSmooth((float)gyroADC[PITCH] * gyroScaleFactor, gyroData[PITCH], smoothFactor);

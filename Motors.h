@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -131,7 +131,6 @@ public:
   }
 };
 
-
 /******************************************************/
 /********************* PWM Motors *********************/
 /******************************************************/
@@ -205,11 +204,15 @@ The high time shall be 1000us, so the OCRxy register is set to 2000. In the code
 #if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 class Motors_PWMtimer : public Motors {
 private:
-/*  Motor   Mega Pin Port        Uno Pin Port          HEXA Mega Pin Port
-    FRONT         2  PE4              3  PD3
-    REAR          3  PE5              9  PB1
-    RIGHT         5  PE3             10  PB2                      7  PH4
-    LEFT          6  PH3             11  PB3                      8  PH5
+/*  Motor(4)  Motor(6+)    Motor(6X)  Motor(8)  Mega Pin Port  Uno Pin Port  ESC#  
+    FRONT     FRONT        FRONT      FRONT       2  PE4         3  PD3       1                           // JI - 12/13/11
+    REAR      RIGHT        FRONT2     REAR        3  PE5         9  PB1       2                           // JI - 12/13/11
+    RIGHT     RIGHT2       RIGHT      RIGHT       5  PE3        10  PB2       3                           // JI - 12/13/11
+    LEFT      REAR         REAR       LEFT        6  PH3        11  PB3       4                           // JI - 12/13/11
+              LEFT         REAR2      FRONT2      7  PH4                      5                           // JI - 12/13/11
+              LEFT2        LEFT       REAR2       8  PH5                      6                           // JI - 12/13/11
+                                      RIGHT2     11  PB5                      9 (Camera3 on v2.1 shield)  // JI - 12/13/11
+                                      LEFT2      12  PB6                     10 (Camera2 on v2.1 shield)  // JI - 12/13/11
 */
 
 #define PWM_FREQUENCY 300   // in Hz
@@ -278,20 +281,38 @@ public:
   void write(void) 
   {
     #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-      OCR3B = motorCommand[FRONT] * 2;
-      OCR3C = motorCommand[REAR]  * 2;
-      OCR3A = motorCommand[RIGHT] * 2;
-      OCR4A = motorCommand[LEFT]  * 2;
-      #if (LASTMOTOR == 6)                                     // JI - 11/25/11
-        OCR4B = motorCommand[RIGHT2] * 2;
-        OCR4C = motorCommand[LEFT2]  * 2;
-      #endif
-      #if (LASTMOTOR == 8)                                     // JI - 11/25/11
-        OCR4B = motorCommand[FRONT2] * 2;                      // JI - 11/25/11
-        OCR4C = motorCommand[REAR2]  * 2;                      // JI - 11/25/11
-        OCR1A = motorCommand[RIGHT2] * 2;                      // JI - 11/25/11
-        OCR1B = motorCommand[LEFT2]  * 2;                      // JI - 11/25/11
-      #endif        // JI - 11/25/11
+      #if defined(XConfig) || defined(plusConfig)                                 // JI - 12/13/11
+        OCR3B = motorCommand[FRONT] * 2;                                          // JI - 12/13/11
+        OCR3C = motorCommand[REAR]  * 2;                                          // JI - 12/13/11
+        OCR3A = motorCommand[RIGHT] * 2;                                          // JI - 12/13/11
+        OCR4A = motorCommand[LEFT]  * 2;                                          // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(HEX_PLUS_CONFIG)                                                // JI - 12/13/11
+        OCR3B = motorCommand[FRONT]  * 2;                                         // JI - 12/13/11
+        OCR3C = motorCommand[RIGHT]  * 2;                                         // JI - 12/13/11
+        OCR3A = motorCommand[RIGHT2] * 2;                                         // JI - 12/13/11
+        OCR4A = motorCommand[REAR]   * 2;                                         // JI - 12/13/11
+        OCR4B = motorCommand[LEFT]   * 2;                                         // JI - 12/13/11
+        OCR4C = motorCommand[LEFT2]  * 2;                                         // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(HEX_X_CONFIG)                                                   // JI - 12/13/11
+        OCR3B = motorCommand[FRONT]  * 2;                                         // JI - 12/13/11
+        OCR3C = motorCommand[FRONT2] * 2;                                         // JI - 12/13/11
+        OCR3A = motorCommand[RIGHT]  * 2;                                         // JI - 12/13/11
+        OCR4A = motorCommand[REAR]   * 2;                                         // JI - 12/13/11
+        OCR4B = motorCommand[REAR2]  * 2;                                         // JI - 12/13/11
+        OCR4C = motorCommand[LEFT]   * 2;                                         // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(OCTOX_CONFIG) || defined(X8PLUS_CONFIG) || defined(X8X_CONFIG)  // JI - 12/13/11
+        OCR3B = motorCommand[FRONT]  * 2;                                         // JI - 12/13/11
+        OCR3C = motorCommand[REAR]   * 2;                                         // JI - 12/13/11
+        OCR3A = motorCommand[RIGHT]  * 2;                                         // JI - 12/13/11
+        OCR4A = motorCommand[LEFT]   * 2;                                         // JI - 12/13/11
+        OCR4B = motorCommand[FRONT2] * 2;                                         // JI - 12/13/11
+        OCR4C = motorCommand[REAR2]  * 2;                                         // JI - 12/13/11
+        OCR1A = motorCommand[RIGHT2] * 2;                                         // JI - 12/13/11
+        OCR1B = motorCommand[LEFT2]  * 2;                                         // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
     #else
       OCR2B = motorCommand[FRONT] / 16;                        // 1000-2000 to 128-256
       OCR1A = motorCommand[REAR]  * 2;
@@ -303,20 +324,38 @@ public:
   void commandAllMotors(int _motorCommand) 
   {
     #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-      OCR3B = _motorCommand * 2;
-      OCR3C = _motorCommand * 2;
-      OCR3A = _motorCommand * 2;
-      OCR4A = _motorCommand * 2;
-      #if (LASTMOTOR == 6)                                     // JI - 11/25/11
-        OCR4B = _motorCommand * 2;
-        OCR4C = _motorCommand * 2;
-      #endif
-      #if (LASTMOTOR == 8)                                     // JI - 11/25/11
-        OCR4B = _motorCommand * 2;                             // JI - 11/25/11
-        OCR4C = _motorCommand * 2;                             // JI - 11/25/11
-        OCR1A = _motorCommand * 2;                             // JI - 11/25/11
-        OCR1B = _motorCommand * 2;                             // JI - 11/25/11
-      #endif                                                   // JI - 11/25/11
+      #if defined(XConfig) || defined(plusConfig)                                 // JI - 12/13/11
+        OCR3B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3C = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4A = _motorCommand * 2;                                                // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(HEX_PLUS_CONFIG)                                                // JI - 12/13/11
+        OCR3B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3C = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4C = _motorCommand * 2;                                                // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(HEX_X_CONFIG)                                                   // JI - 12/13/11
+        OCR3B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3C = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4C = _motorCommand * 2;                                                // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
+      #if defined(OCTOX_CONFIG) || defined(X8PLUS_CONFIG) || defined(X8X_CONFIG)  // JI - 12/13/11
+        OCR3B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3C = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR3A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4B = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR4C = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR1A = _motorCommand * 2;                                                // JI - 12/13/11
+        OCR1B = _motorCommand * 2;                                                // JI - 12/13/11
+      #endif                                                                      // JI - 12/13/11
     #else
       OCR2B = _motorCommand / 16;
       OCR1A = _motorCommand * 2;

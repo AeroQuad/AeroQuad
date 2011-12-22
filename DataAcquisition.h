@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -28,7 +28,7 @@
 #if defined(ArduCopter)
 #include <inttypes.h>
 #include <avr/interrupt.h>
-#include "WConstants.h"
+// JI - 12/13/11 - #include "WConstants.h"
 
 #define bit_set(p,m) ((p) |= (1<<m)) 
 #define bit_clear(p,m) ((p) &= ~(1<<m))
@@ -172,7 +172,7 @@ void updateControls() {
     sendByteI2C(0x52, 0x00);
     Wire.requestFrom(0x52,6);
     for(byte i = 0; i < 6; i++) 
-      buffer[i] = Wire.receive();
+      buffer[i] = Wire.read();
     if ((buffer[5] & 0x02) == 0x02 && (buffer[5]&0x01) == 0) { //If WiiMP
       NWMP_gyro[ROLL]  = (((buffer[5]>>2)<<8) +  buffer[2]);  // Configured for Paris MultiWii Board
       NWMP_gyro[PITCH] = (((buffer[4]>>2)<<8) +  buffer[1]);  // Configured for Paris MultiWii Board

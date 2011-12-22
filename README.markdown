@@ -1,8 +1,27 @@
-AeroQuad Flight Software Source Code 2.5 Beta 1
+AeroQuad Flight Software Source Code 2.5.1
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
 
-Version 2.5 Beta 1 Release Notes (7/31/2011)
+Version 2.5.1 Release Notes (12/22/2011)
+----------------------------------------
+* Supports the new Arduino 1.0 IDE
+* Fixed magnetometer issue where mag output intermittently output zero's
+* Fixed calibration bug where X & Y axis were swapped
+* Added support for hexa configurations
+ * Look at the file Motors.h to view how to connect the motors
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+ * Please note support for > 4 motors not directly supported within v2.7.1 Configurator
+ * To view motor data, use Serial Monitor to send '=' command
+* Special thanks to Jihlein for producing this version and to ala42 for his bug fixes!
+
+Version 2.5 Release Notes (11/30/2011)
+----------------------------------------
+* Added support for the new v2.1 AeroQuad Shield with HMC5883L
+* Added support for mounting an HMC5883L upside down on v2.0 AeroQuad Shield
+* Added support for octo configurations (thanks Jihlein!)
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+
+ Version 2.5 Beta 1 Release Notes (7/31/2011)
 ----------------------------------------
  * Fixed various 8 channel transmitter channel bugs (special thanks to Ala42!)
  * Added safety procedure for ESC calibration (prevent random full throttles during PID updates)

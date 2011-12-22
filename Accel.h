@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -238,14 +238,14 @@ public:
     //int rawData[3];
 
     Wire.beginTransmission(accelAddress);
-    Wire.send(0x02);
+    Wire.write(0x02);
     Wire.endTransmission();
     Wire.requestFrom(accelAddress, 6);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       if (axis == XAXIS)
-        accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis];
+        accelADC[axis] = ((Wire.read()|(Wire.read() << 8)) >> 2) - accelZero[axis];
       else
-        accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
+        accelADC[axis] = accelZero[axis] - ((Wire.read()|(Wire.read() << 8)) >> 2);
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
@@ -328,9 +328,9 @@ public:
     Wire.requestFrom(accelAddress, 6);
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       if (axis == XAXIS)
-        accelADC[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
+        accelADC[axis] = ((Wire.read()|(Wire.read() << 8))) - accelZero[axis];
       else
-        accelADC[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
+        accelADC[axis] = accelZero[axis] - ((Wire.read()|(Wire.read() << 8)));
       //accelData[axis] = computeFirstOrder(accelADC[axis] * accelScaleFactor, &firstOrder[axis]);
       accelData[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, accelData[axis], smoothFactor);
     }
@@ -629,9 +629,9 @@ public:
     sendByteI2C(accelAddress, 0x32);
     Wire.requestFrom(accelAddress, 6);
 
-    accelADC[YAXIS] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[YAXIS];
-    accelADC[XAXIS] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[XAXIS];
-    accelADC[ZAXIS] = accelZero[ZAXIS] - ((Wire.receive()|(Wire.receive() << 8)));
+    accelADC[YAXIS] = ((Wire.read()|(Wire.read() << 8))) - accelZero[YAXIS];
+    accelADC[XAXIS] = ((Wire.read()|(Wire.read() << 8))) - accelZero[XAXIS];
+    accelADC[ZAXIS] = accelZero[ZAXIS] - ((Wire.read()|(Wire.read() << 8)));
 
     accelData[XAXIS] = filterSmooth(accelADC[XAXIS] * accelScaleFactor, accelData[XAXIS], smoothFactor);
     accelData[YAXIS] = filterSmooth(accelADC[YAXIS] * accelScaleFactor, accelData[YAXIS], smoothFactor);
