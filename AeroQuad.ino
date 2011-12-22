@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -50,9 +50,11 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define OCTOX_CONFIG
-//#define X8PLUS_CONFIG
-//#define X8X_CONFIG
+//#define HEX_PLUS_CONFIG  // JI - 12/13/11
+//#define HEX_X_CONFIG     // JI - 12/13/11
+//#define OCTOX_CONFIG     // JI - 11/25/11
+//#define X8PLUS_CONFIG    // JI - 11/25/11
+//#define X8X_CONFIG       // JI - 11/25/11
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -61,7 +63,6 @@
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse like a heart beat to show batteries are low
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -81,8 +82,8 @@
 // Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
 // *******************************************************************************************************************************
-//#define LASTCHANNEL 6
-#define LASTCHANNEL 8
+#define LASTCHANNEL 6
+//#define LASTCHANNEL 8
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -91,11 +92,7 @@
 // D12 to D33 for roll, connect servo to SERVO1
 // D11 to D34 for pitch, connect servo to SERVO2
 // D13 to D35 for yaw, connect servo to SERVO3
-// if using v2.1 Shield
-// Connect pitch servo to Camera 1 input
-// Connect roll servo to Camera 2 input
-// Connect yaw servo to Camera 3 input
-// Please note that you will need to have a battery connected to power on servos with the v2.0/v2.1 shields
+// Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
 //#define CameraControl
 
@@ -485,15 +482,21 @@
 #ifdef plusConfig
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
-#ifdef OCTOX_CONFIG                                              // JI - 11/25/11
-  void (*processFlightControl)() = &processFlightControlOctoX;   // JI - 11/25/11
-#endif                                                           // JI - 11/25/11
-#ifdef X8PLUS_CONFIG                                             // JI - 11/25/11
-  void (*processFlightControl)() = &processFlightControlX8Plus;  // JI - 11/25/11
-#endif                                                           // JI - 11/25/11
-#ifdef X8X_CONFIG                                                // JI - 11/25/11
-  void (*processFlightControl)() = &processFlightControlX8X;     // JI - 11/25/11
-#endif                                                           // JI - 11/25/11
+#ifdef HEX_PLUS_CONFIG                                            // JI - 12/13/11
+  void (*processFlightControl)() = &processFlightControlHexPlus;  // JI - 12/13/11
+#endif                                                            // JI - 12/13/11
+#ifdef HEX_X_CONFIG                                               // JI - 12/13/11
+  void (*processFlightControl)() = &processFlightControlHexX;     // JI - 12/13/11
+#endif                                                            // JI - 12/13/11
+#ifdef OCTOX_CONFIG                                               // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlOctoX;    // JI - 11/25/11
+#endif                                                            // JI - 11/25/11
+#ifdef X8PLUS_CONFIG                                              // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8Plus;   // JI - 11/25/11
+#endif                                                            // JI - 11/25/11
+#ifdef X8X_CONFIG                                                 // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8X;      // JI - 11/25/11
+#endif                                                            // JI - 11/25/11
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
@@ -694,9 +697,9 @@ void loop () {
                                  accel.getData(XAXIS),                     \
                                  accel.getData(YAXIS),                     \
                                  accel.getData(ZAXIS),                     \
-                                 compass.getRawData(XAXIS),                \
-                                 compass.getRawData(YAXIS),                \
-                                 compass.getRawData(ZAXIS));
+                                 compass.getData(XAXIS),                   \
+                                 compass.getData(YAXIS),                   \
+                                 compass.getData(ZAXIS));
         #endif
       
         #if defined HeadingMagHold && defined FlightAngleARG

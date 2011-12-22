@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -241,11 +241,21 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(flightAngle->getData(ROLL));
-    //SERIAL_PRINT(degrees(flightAngle->getData(YAW)));
-    //SERIAL_PRINTLN();
-    //printFreeMemory();
-    //queryType = 'X';
+    #if (LASTMOTOR == 6)                                      // JI - 12/14/11
+      for (byte motor = 0; motor < LASTMOTOR - 1; motor++)    // JI - 12/14/11
+        PrintValueComma(motors.getMotorCommand(motor));       // JI - 12/14/11
+      SERIAL_PRINTLN (motors.getMotorCommand(LASTMOTOR - 1)); // JI - 12/14/11
+    #endif                                                    // JI - 12/14/11
+    #if (LASTMOTOR == 8)                                      // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(FRONT));         // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(FRONT2));        // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(RIGHT));         // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(RIGHT2));        // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(REAR));          // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(REAR2));         // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(LEFT));          // JI - 12/14/11
+      SERIAL_PRINTLN (motors.getMotorCommand(LEFT2));         // JI - 12/14/11
+    #endif                                                    // JI - 12/14/11
     break;
   case 'B': // Send roll and pitch gyro PID values
     PrintPID(ROLL);
@@ -364,8 +374,22 @@ void sendSerialTelemetry() {
 #endif
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(motors.getMotorAxisCommand(axis));
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-      PrintValueComma(motors.getMotorCommand(motor));
+    #if (LASTMOTOR == 4) || (LASTMOTOR == 8)             // JI - 12/14/11
+      for (byte motor = FRONT; motor < 4; motor++)       // JI - 12/14/11
+        PrintValueComma(motors.getMotorCommand(motor));  // JI - 12/14/11
+    #endif                                               // JI - 12/14/11
+    #if defined(HEX_PLUS_CONFIG)                         // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(FRONT));    // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(REAR));     // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(RIGHT));    // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(LEFT));     // JI - 12/14/11
+    #endif                                               // JI - 12/14/11
+    #if defined(HEX_X_CONFIG)                            // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(FRONT));    // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(REAR));     // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(RIGHT));    // JI - 12/14/11
+      PrintValueComma(motors.getMotorCommand(LEFT));     // JI - 12/14/11
+    #endif                                               // JI - 12/14/11
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(accel.getFlightData(axis));
     PrintValueComma((int)armed);
@@ -454,14 +478,16 @@ void sendSerialTelemetry() {
     PrintValueComma(2);
 #endif
     // Determine which motor flight configuration for Configurator GUI
-#if defined(plusConfig)
+#if defined(plusConfig)  || defined(X8PLUS_CONFIG)
     PrintValueComma('0');
-#elif defined(XConfig)
+#elif defined(XConfig) || defined(X8X_CONFIG)
     PrintValueComma('1');
-#elif defined(HEXACOAXIAL)
-    PrintValueComma('2');
-#elif defined(HEXARADIAL)
-    PrintValueComma('3');
+#elif defined(HEX_PLUS_CONFIG)
+    PrintValueComma('0');
+#elif defined(HEX_X_CONFIG)
+    PrintValueComma('1');
+#elif defined(OCTOX_CONFIG)
+    PrintValueComma('1');
 #endif
     PrintValueComma(LASTCHANNEL);
     SERIAL_PRINT(LASTMOTOR);
@@ -547,8 +573,8 @@ void printInt(int data) {
   msb = data >> 8;
   lsb = data & 0xff;
 
-  binaryPort->print(msb, BYTE);
-  binaryPort->print(lsb, BYTE);
+  binaryPort->write(msb);
+  binaryPort->write(lsb);
 }
 
 void sendBinaryFloat(float data) {
@@ -558,10 +584,10 @@ void sendBinaryFloat(float data) {
   } binaryFloat;
 
   binaryFloat.floatVal = data;
-  binaryPort->print(binaryFloat.floatByte[3], BYTE);
-  binaryPort->print(binaryFloat.floatByte[2], BYTE);
-  binaryPort->print(binaryFloat.floatByte[1], BYTE);
-  binaryPort->print(binaryFloat.floatByte[0], BYTE);
+  binaryPort->write(binaryFloat.floatByte[3]);
+  binaryPort->write(binaryFloat.floatByte[2]);
+  binaryPort->write(binaryFloat.floatByte[1]);
+  binaryPort->write(binaryFloat.floatByte[0]);
 }
 
 void sendBinaryuslong(unsigned long data) {
@@ -571,10 +597,10 @@ void sendBinaryuslong(unsigned long data) {
   } binaryuslong;
 
   binaryuslong.uslongVal = data;
-  binaryPort->print(binaryuslong.uslongByte[3], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[2], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[1], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[0], BYTE);
+  binaryPort->write(binaryuslong.uslongByte[3]);
+  binaryPort->write(binaryuslong.uslongByte[2]);
+  binaryPort->write(binaryuslong.uslongByte[1]);
+  binaryPort->write(binaryuslong.uslongByte[0]);
 }
 
 #ifdef BinaryWrite

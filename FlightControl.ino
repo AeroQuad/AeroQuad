@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 - November 2011
+  AeroQuad v2.5.1 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -182,11 +182,14 @@ void processMinMaxMotorCommand(void)
 {
   int maxMotor;
   
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-  {
-    motors.setMinCommand(motor, MINTHROTTLE);
-    motors.setMaxCommand(motor, MAXCOMMAND);
-  }
+  // JI - 11/29/11 - Commented out the following lines as they are no longer necessary with the removal of 
+  // JI - 11/29/11 - processHardManeuvers().  In flight motor command limits are now static at MINTHROTTLE
+  // JI - 11/29/11 - and MAXCOMMAND
+  //for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+  //{
+  //  motors.setMinCommand(motor, MINTHROTTLE);
+  //  motors.setMaxCommand(motor, MAXCOMMAND);
+  //}
 
   maxMotor = motors.getMotorCommand(FIRSTMOTOR);
   
@@ -198,169 +201,15 @@ void processMinMaxMotorCommand(void)
     if (maxMotor > MAXCHECK)  
       motors.setMotorCommand(motor, (motors.getMotorCommand(motor) - (maxMotor - MAXCHECK)));
   }
-}
+  
+  // JI - 11/29/11 - Moved the following 4 lines out of the individual configurations and moved them here for ease of maintenance
+  // JI - 11/29/11 - Removed calls to motors.getMinCommand(motor) and motors.getMaxCommand(motor) since the maximum and minimum
+  // JI - 11/29/11 - commands are no longer modified by processHardManeuvers
+  // Apply limits to motor commands
+  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), MINTHROTTLE, MAXCOMMAND));
+  }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// processHardManuevers ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processHardManuevers()
-// JI - 11/25/11
-// Slightly reordered, added 8 motor configurations
-{
-#ifdef pluConfig
-  if (receiver.getRaw(ROLL) < MINCHECK) {       // Maximum left roll rate
-    motors.setMaxCommand(LEFT, minAcro);
-    motors.setMaxCommand(RIGHT, MAXCOMMAND);
-  }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {  // Maximum right roll rate
-    motors.setMaxCommand(LEFT, MAXCOMMAND);
-    motors.setMaxCommand(RIGHT, minAcro);
-  }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {  // Maximum nose up pitch rate
-    motors.setMaxCommand(FRONT, MAXCOMMAND);
-    motors.setMaxCommand(REAR, minAcro);
-  }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {  // Maximum nose down pitch rate
-    motors.setMaxCommand(FRONT, minAcro);
-    motors.setMaxCommand(REAR, MAXCOMMAND);
-  }
-#endif  
-#ifdef XConfig    
-  if (receiver.getRaw(ROLL) < MINCHECK) {       // Maximum left roll rate
-    motors.setMaxCommand(FRONT, minAcro);
-    motors.setMaxCommand(LEFT,  minAcro);
-    motors.setMaxCommand(RIGHT, MAXCOMMAND);
-    motors.setMaxCommand(REAR,  MAXCOMMAND);
-  }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {  // Maximum right roll rate
-    motors.setMaxCommand(FRONT, MAXCOMMAND);
-    motors.setMaxCommand(LEFT,  MAXCOMMAND);
-    motors.setMaxCommand(REAR,  minAcro);
-    motors.setMaxCommand(RIGHT, minAcro);
-  }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {  // Maximum nose up pitch rate
-    motors.setMaxCommand(FRONT, MAXCOMMAND);
-    motors.setMaxCommand(RIGHT, MAXCOMMAND);
-    motors.setMaxCommand(REAR,  minAcro);
-    motors.setMaxCommand(LEFT,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {  // Maximum nose down pitch rate
-    motors.setMaxCommand(FRONT, minAcro);
-    motors.setMaxCommand(RIGHT, minAcro);
-    motors.setMaxCommand(REAR, MAXCOMMAND);
-    motors.setMaxCommand(LEFT, MAXCOMMAND);
-  }
-#endif
-#ifdef OCTOX_CONFIG   
-  if (receiver.getRaw(ROLL) < MINCHECK) {       // Maximum left roll rate
-    motors.setMaxCommand(FRONT,  minAcro);
-    motors.setMaxCommand(FRONT2, minAcro);
-    motors.setMaxCommand(LEFT,   minAcro);
-    motors.setMaxCommand(LEFT2,  minAcro);
-    motors.setMaxCommand(RIGHT,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT2, MAXCOMMAND);
-    motors.setMaxCommand(REAR,   MAXCOMMAND);
-    motors.setMaxCommand(REAR2,  MAXCOMMAND);
-  }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {  // Maximum right roll rate
-    motors.setMaxCommand(FRONT,  MAXCOMMAND);
-    motors.setMaxCommand(FRONT2, MAXCOMMAND);
-    motors.setMaxCommand(LEFT,   MAXCOMMAND);
-    motors.setMaxCommand(LEFT2,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT,  minAcro);
-    motors.setMaxCommand(RIGHT2, minAcro);
-    motors.setMaxCommand(REAR,   minAcro);
-    motors.setMaxCommand(REAR2,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {  // Maximum nose up pitch rate
-    motors.setMaxCommand(FRONT,  MAXCOMMAND);
-    motors.setMaxCommand(FRONT2, MAXCOMMAND);
-    motors.setMaxCommand(RIGHT,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT2, MAXCOMMAND);
-    motors.setMaxCommand(LEFT,   minAcro);
-    motors.setMaxCommand(LEFT2,  minAcro);
-    motors.setMaxCommand(REAR,   minAcro);
-    motors.setMaxCommand(REAR2,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {  // Maximum nose down pitch rate
-    motors.setMaxCommand(FRONT,  minAcro);
-    motors.setMaxCommand(FRONT2, minAcro);
-    motors.setMaxCommand(RIGHT,  minAcro);
-    motors.setMaxCommand(RIGHT2, minAcro);
-    motors.setMaxCommand(LEFT,   MAXCOMMAND);
-    motors.setMaxCommand(LEFT2,  MAXCOMMAND);
-    motors.setMaxCommand(REAR,   MAXCOMMAND);
-    motors.setMaxCommand(REAR2,  MAXCOMMAND);
-  }
-#endif
-#ifdef X8PLUS_CONFIG   // Fix for + mode hardmanuevers
-  if (receiver.getRaw(ROLL) < MINCHECK) {       // Maximum left roll rate
-    motors.setMaxCommand(LEFT,   minAcro);
-    motors.setMaxCommand(LEFT2,  minAcro);
-    motors.setMaxCommand(RIGHT,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT2, MAXCOMMAND);
-  }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {  // Maximum right roll rate
-    motors.setMaxCommand(LEFT,   MAXCOMMAND);
-    motors.setMaxCommand(LEFT2,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT,  minAcro);
-    motors.setMaxCommand(RIGHT2, minAcro);
-  }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {  // Maximum nose up pitch rate
-    motors.setMaxCommand(FRONT,  MAXCOMMAND);
-    motors.setMaxCommand(FRONT2, MAXCOMMAND);
-    motors.setMaxCommand(REAR,   minAcro);
-    motors.setMaxCommand(REAR2,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {  // Maximum nose down pitch rate
-    motors.setMaxCommand(FRONT,  minAcro);
-    motors.setMaxCommand(FRONT2, minAcro);
-    motors.setMaxCommand(REAR,   MAXCOMMAND);
-    motors.setMaxCommand(REAR2,  MAXCOMMAND);
-  }
-#endif
-#ifdef X8X_CONFIG   // Fix for + mode hardmanuevers
-  if (receiver.getRaw(ROLL) < MINCHECK) {       // Maximum left roll rate
-    motors.setMaxCommand(FRONT,  minAcro);
-    motors.setMaxCommand(FRONT2, minAcro);
-    motors.setMaxCommand(LEFT,   minAcro);
-    motors.setMaxCommand(LEFT2,  minAcro);
-    motors.setMaxCommand(RIGHT,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT2, MAXCOMMAND);
-    motors.setMaxCommand(REAR,   MAXCOMMAND);
-    motors.setMaxCommand(REAR2,  MAXCOMMAND);
-  }
-  else if (receiver.getRaw(ROLL) > MAXCHECK) {  // Maximum right roll rate
-    motors.setMaxCommand(FRONT,  MAXCOMMAND);
-    motors.setMaxCommand(FRONT2, MAXCOMMAND);
-    motors.setMaxCommand(LEFT,   MAXCOMMAND);
-    motors.setMaxCommand(LEFT2,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT,  minAcro);
-    motors.setMaxCommand(RIGHT2, minAcro);
-    motors.setMaxCommand(REAR,   minAcro);
-    motors.setMaxCommand(REAR2,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) < MINCHECK) {  // Maximum nose up pitch rate
-    motors.setMaxCommand(FRONT,  MAXCOMMAND);
-    motors.setMaxCommand(FRONT2, MAXCOMMAND);
-    motors.setMaxCommand(RIGHT,  MAXCOMMAND);
-    motors.setMaxCommand(RIGHT2, MAXCOMMAND);
-    motors.setMaxCommand(REAR,   minAcro);
-    motors.setMaxCommand(REAR2,  minAcro);
-    motors.setMaxCommand(LEFT,   minAcro);
-    motors.setMaxCommand(LEFT2,  minAcro);
-  }
-  else if (receiver.getRaw(PITCH) > MAXCHECK) {  // Maximum nose down pitch rate
-    motors.setMaxCommand(FRONT,  minAcro);
-    motors.setMaxCommand(FRONT2, minAcro);
-    motors.setMaxCommand(RIGHT,  minAcro);
-    motors.setMaxCommand(RIGHT2, minAcro);
-    motors.setMaxCommand(REAR,   MAXCOMMAND);
-    motors.setMaxCommand(REAR2,  MAXCOMMAND);
-    motors.setMaxCommand(LEFT,   MAXCOMMAND);
-    motors.setMaxCommand(LEFT2,  MAXCOMMAND);
-  }
-#endif
 }
 
 #ifdef XConfig
@@ -389,16 +238,6 @@ void processFlightControlXMode(void) {
   // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
-  }
-
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
@@ -417,6 +256,7 @@ void processFlightControlXMode(void) {
   }
 }
 #endif
+
 #ifdef plusConfig
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// PLUS MODE //////////////////////////////////
@@ -441,16 +281,6 @@ void processFlightControlPlusMode(void) {
 
   // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
-  }
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
@@ -505,16 +335,6 @@ void processFlightControlOctoX(void) {
   // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
-  }
-
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
@@ -533,6 +353,7 @@ void processFlightControlOctoX(void) {
   }
 }
 #endif
+
 #ifdef X8PLUS_CONFIG
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// X8 PLUS CONFIG ////////////////////////////////
@@ -563,16 +384,6 @@ void processFlightControlX8Plus(void) {
   // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
-  }
-
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
     for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
@@ -591,6 +402,7 @@ void processFlightControlX8Plus(void) {
   }
 }
 #endif
+
 #ifdef X8X_CONFIG
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// X8 X CONFIG ///////////////////////////////////
@@ -623,15 +435,54 @@ void processFlightControlX8X(void) {
   // *********************** process min max motor command *******************
   processMinMaxMotorCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    processHardManuevers();
+  // If throttle in minimum position, don't apply yaw
+  if (receiver.getData(THROTTLE) < MINCHECK) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+      motors.setMotorCommand(motor, MINTHROTTLE);
+    }
   }
 
-  // Apply limits to motor commands
-  for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
-    motors.setMotorCommand(motor, constrain(motors.getMotorCommand(motor), motors.getMinCommand(motor), motors.getMaxCommand(motor)));
+  // ESC Calibration
+  if (armed == OFF) {
+    processCalibrateESC();
   }
+
+  // *********************** Command Motors **********************
+  if (armed == ON && safetyCheck == ON) {
+    motors.write(); // Defined in Motors.h
+  }
+}
+#endif
+
+// JI - 12/13/11
+// From this point down, new 6 motor motor mixes
+
+#ifdef HEX_PLUS_CONFIG
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////HEX PLUS MODE //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processFlightControlHexPlus(void) {
+  // ********************** Calculate Flight Error ***************************
+  calculateFlightError();
+  
+  // ********************** Update Yaw ***************************************
+  processHeading();
+
+  // ********************** Altitude Adjust **********************************
+  //processAltitudeHold();
+
+  // ********************** Calculate Motor Commands *************************
+  if (armed && safetyCheck) {
+    motors.setMotorCommand(FRONT,  throttle                                    - 0.866025 * motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(RIGHT,  throttle - motors.getMotorAxisCommand(ROLL) - 0.866025 * motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(RIGHT2, throttle - motors.getMotorAxisCommand(ROLL) + 0.866025 * motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(REAR,   throttle                                    + 0.866025 * motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(LEFT,   throttle + motors.getMotorAxisCommand(ROLL) + 0.866025 * motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(LEFT2,  throttle + motors.getMotorAxisCommand(ROLL) - 0.866025 * motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(YAW));
+} 
+
+  // *********************** process min max motor command *******************
+  processMinMaxMotorCommand();
 
   // If throttle in minimum position, don't apply yaw
   if (receiver.getData(THROTTLE) < MINCHECK) {
@@ -652,3 +503,48 @@ void processFlightControlX8X(void) {
 }
 #endif
 
+#ifdef HEX_X_CONFIG
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////////// HEX PLUS MODE //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processFlightControlHexX(void) {
+  // ********************** Calculate Flight Error ***************************
+  calculateFlightError();
+  
+  // ********************** Update Yaw ***************************************
+  processHeading();
+
+  // ********************** Altitude Adjust **********************************
+  //processAltitudeHold();
+
+  // ********************** Calculate Motor Commands *************************
+  if (armed && safetyCheck) {
+    motors.setMotorCommand(FRONT,  throttle + 0.866025 * motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(FRONT2, throttle - 0.866025 * motors.getMotorAxisCommand(ROLL) - motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(RIGHT,  throttle - 0.866025 * motors.getMotorAxisCommand(ROLL)                                     - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(REAR,   throttle - 0.866025 * motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(PITCH) + motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(REAR2,  throttle + 0.866025 * motors.getMotorAxisCommand(ROLL) + motors.getMotorAxisCommand(PITCH) - motors.getMotorAxisCommand(YAW));
+    motors.setMotorCommand(LEFT,   throttle + 0.866025 * motors.getMotorAxisCommand(ROLL)                                     + motors.getMotorAxisCommand(YAW));
+  } 
+
+  // *********************** process min max motor command *******************
+  processMinMaxMotorCommand();
+
+  // If throttle in minimum position, don't apply yaw
+  if (receiver.getData(THROTTLE) < MINCHECK) {
+    for (byte motor = FRONT; motor < LASTMOTOR; motor++) {
+      motors.setMotorCommand(motor, MINTHROTTLE);
+    }
+  }
+
+  // ESC Calibration
+  if (armed == OFF) {
+    processCalibrateESC();
+  }
+
+  // *********************** Command Motors **********************
+  if (armed == ON && safetyCheck == ON) {
+    motors.write(); // Defined in Motors.h
+  }
+}
+#endif
