@@ -1,0 +1,14 @@
+Version 3.0 of the AeroQuad Flight Software takes advantage of the use of libraries within the Arduino IDE environment.  There are two install methods to use to make sure the AeroQuad libraries are properly deteced by the Arduino IDE.
+
+Method 1:
+- Save the AeroQuad folder into your location of choice.
+- In the Arduino IDE, go to File->Preferences->Sketchbook location:
+- Select Browse and navigate to the folder where you saved the AeroQuad Flight Software
+- To verify that the libraries can be found, restart the Arduino IDE
+- Go to File->Sketchbook->Libraries
+- You should see multiple libraries prefaced with "AQ_"
+
+Method 2 (Use if you have other custom Arduino libraries you still want access to):
+- Copy the Libraries folder from the AeroQuad Flight Software to ./arduino-1.0/libraries (basically the libary path of the Arduino IDE itself)
+
+Important note:  This version of the AeroQuad Flight Software is only compatible with the Arduino v1.0 IDE or greater.
