@@ -132,26 +132,30 @@
      const int  CHANNEL_AZ_MASK            = 1<<1;
      const int  CHANNEL_ALL_MASK           = 65535;
 
-
-    // Scale factors
-     const double SCALE_YAW        = 0.0109863; // �/LSB
-     const double SCALE_PITCH      = 0.0109863;
-     const double SCALE_ROLL       = 0.0109863;
-     const double SCALE_YAW_RATE   = 0.0137329; // �/s/LSB
-     const double SCALE_PITCH_RATE = 0.0137329;
-     const double SCALE_ROLL_RATE  = 0.0137329;
-     const double SCALE_MAG_X      = 0.061035; // mGauss/LSB
-     const double SCALE_MAG_Y      = 0.061035;
-     const double SCALE_MAG_Z      = 0.061035;
-     const double SCALE_GYRO_X     = 0.01812; // �/s/LSB
-     const double SCALE_GYRO_Y     = 0.01812;
-     const double SCALE_GYRO_Z     = 0.01812;
-     const double SCALE_ACCEL_X    = 0.106812; // mg/LSB
-     const double SCALE_ACCEL_Y    = 0.106812;
-     const double SCALE_ACCEL_Z    = 0.106812;
-
-    const char PACKET_HEADER[] = {'s','n','p'};
-    const int HEADER_CHECKSUM = 's'+'n'+'p';
+     /**
+       * Takes the scale factors from the CHR6DM spec sheet
+       * and then converts them to the appropriate unit
+       * we are using.
+       * http://www.chrobotics.com/docs/chr6dm_datasheet.pdf
+       */
+     const double SCALE_YAW         = 0.0109863 * DEG_TO_RAD;       // All angles are in radians
+     const double SCALE_PITCH       = 0.0109863 * DEG_TO_RAD;
+     const double SCALE_ROLL        = 0.0109863 * DEG_TO_RAD;
+     const double SCALE_YAW_RATE    = 0.0137329 * DEG_TO_RAD;       // All angle rates are in radians
+     const double SCALE_PITCH_RATE  = 0.0137329 * DEG_TO_RAD;
+     const double SCALE_ROLL_RATE   = 0.0137329 * DEG_TO_RAD;
+     const double SCALE_MAG_X       = 0.061035;                     // mGauss/LSB
+     const double SCALE_MAG_Y       = 0.061035;
+     const double SCALE_MAG_Z       = 0.061035;
+     const double SCALE_GYRO_X      = 0.01812;                      // degrees/s/LSB
+     const double SCALE_GYRO_Y      = 0.01812;
+     const double SCALE_GYRO_Z      = 0.01812;
+     const double SCALE_ACCEL_X     = (0.106812 * 9.8065) / 1000;   // converts millie G-Forces to meters/s^2
+     const double SCALE_ACCEL_Y     = (0.106812 * 9.8065) / 1000;
+     const double SCALE_ACCEL_Z     = (0.106812 * 9.8065) / 1000; 
+    
+     const char PACKET_HEADER[] = {'s','n','p'};
+     const int HEADER_CHECKSUM = 's'+'n'+'p';
 
 
 #include <Wire.h>
