@@ -1,8 +1,32 @@
-AeroQuad Flight Software Source Code 2.5 Beta 1
+AeroQuad Flight Software Source Code 3.0
 ========================================
-[http://www.aeroquad.com](http://www.aeroquad.com)
+[http://www.AeroQuad.com](http://www.AeroQuad.com)
 
-Version 2.5 Beta 1 Release Notes (7/31/2011)
+Version 3.0 Release Notes (x/x/xxxx)
+----------------------------------------
+  * under construction
+  * new libraries
+
+Version 2.5.1 Release Notes (12/22/2011)
+----------------------------------------
+* Supports the new Arduino 1.0 IDE
+* Fixed magnetometer issue where mag output intermittently output zero's
+* Fixed calibration bug where X & Y axis were swapped
+* Added support for hexa configurations
+ * Look at the file Motors.h to view how to connect the motors
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+ * Please note support for > 4 motors not directly supported within v2.7.1 Configurator
+ * To view motor data, use Serial Monitor to send '=' command
+* Special thanks to Jihlein for producing this version and to ala42 for his bug fixes!
+
+Version 2.5 Release Notes (11/30/2011)
+----------------------------------------
+* Added support for the new v2.1 AeroQuad Shield with HMC5883L
+* Added support for mounting an HMC5883L upside down on v2.0 AeroQuad Shield
+* Added support for octo configurations (thanks Jihlein!)
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+
+ Version 2.5 Beta 1 Release Notes (7/31/2011)
 ----------------------------------------
  * Fixed various 8 channel transmitter channel bugs (special thanks to Ala42!)
  * Added safety procedure for ESC calibration (prevent random full throttles during PID updates)
@@ -35,7 +59,7 @@ Version 2.4 Release Notes (4/2/2011)
  * Stable/Attitude Mode has highly improved auto level capability
  * All these changes have been made by jihlein and aadamson, THANKS!
  
-Version 2.3 Release Notes (3/17/2011)
+ Version 2.3 Release Notes (3/17/2011)
 ----------------------------------------
  * Implemented common SI units for sensors
  * Implemented common DCM gains for all hardware platforms
