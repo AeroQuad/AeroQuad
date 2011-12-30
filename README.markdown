@@ -1,6 +1,11 @@
-AeroQuad Flight Software Source Code 2.5.1
+AeroQuad Flight Software Source Code 3.0
 ========================================
-[http://www.aeroquad.com](http://www.aeroquad.com)
+[http://www.AeroQuad.com](http://www.AeroQuad.com)
+
+Version 3.0 Release Notes (x/x/xxxx)
+----------------------------------------
+  * under construction
+  * new libraries
 
 Version 2.5.1 Release Notes (12/22/2011)
 ----------------------------------------
@@ -54,7 +59,7 @@ Version 2.4 Release Notes (4/2/2011)
  * Stable/Attitude Mode has highly improved auto level capability
  * All these changes have been made by jihlein and aadamson, THANKS!
  
-Version 2.3 Release Notes (3/17/2011)
+ Version 2.3 Release Notes (3/17/2011)
 ----------------------------------------
  * Implemented common SI units for sensors
  * Implemented common DCM gains for all hardware platforms
