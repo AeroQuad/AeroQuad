@@ -86,7 +86,7 @@ void readPilotCommands() {
   }
   
   #ifdef RateModeOnly
-    flightMode = ACRO;
+    flightMode = RATE_FLIGHT_MODE;
   #else
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {
