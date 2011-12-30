@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - December 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -69,13 +69,13 @@
 // Define minimum speed for your motors to run.  this also defines minimum throttle during flips
 // Some motors or ESC setups may need more or less define here to start all the montors evenly.
 // ******************************************************************************************************************************
-#define MIN_ARMED_THROTTLE 1150
+#define MIN_ARMED_THROTTLE 1180
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
 // Please refer to the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
+// Also check the http://aeroquad.com/showwiki.php?title=Flight+Configurations for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
@@ -87,15 +87,15 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
@@ -104,9 +104,9 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-#define BattMonitor            // Enable Battery monitor
-#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+//#define BattMonitor            // Enable Battery monitor
+//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
 //#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //

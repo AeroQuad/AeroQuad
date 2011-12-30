@@ -750,7 +750,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X8");
   #elif defined(octoXConfig)
     SERIAL_PRINTLN("Octo X");
-  #elif defined(octoXPlusConfig)
+  // *** For next rev, updat OctoPlus config name here and in Configurator
+  #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo X+");
   #endif
   SERIAL_PRINT("Receiver Ch's: ");
