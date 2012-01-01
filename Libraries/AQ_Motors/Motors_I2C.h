@@ -33,9 +33,10 @@
 #define MOTOR_ADDR_3  MOTORBASE + 4  // inspired frame
 #define MOTOR_ADDR_4  MOTORBASE + 5
 #define MOTOR_ADDR_5  MOTORBASE + 6
+#define MOTOR_ADDR_6  MOTORBASE + 7
+#define MOTOR_ADDR_7  MOTORBASE + 8
 
-
-byte motorAddress[6];
+byte motorAddress[8];
   
 void initializeMotors(NB_Motors numbers) {
   motorAddress[MOTOR1] = MOTOR_ADDR_0;
@@ -44,6 +45,8 @@ void initializeMotors(NB_Motors numbers) {
   motorAddress[MOTOR4] = MOTOR_ADDR_3;
   motorAddress[MOTOR5] = MOTOR_ADDR_4;
   motorAddress[MOTOR6] = MOTOR_ADDR_5;
+  motorAddress[MOTOR7] = MOTOR_ADDR_6;
+  motorAddress[MOTOR8] = MOTOR_ADDR_7;
 
   numberOfMotors = numbers;
   for (byte motor = MOTOR1; motor < numberOfMotors; motor++)

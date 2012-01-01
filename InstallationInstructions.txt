@@ -10,5 +10,6 @@ Method 1:
 
 Method 2 (Use if you have other custom Arduino libraries you still want access to):
 - Copy the Libraries folder from the AeroQuad Flight Software to ./arduino-1.0/libraries (basically the libary path of the Arduino IDE itself)
+- Restart the Arduino IDE
 
 Important note:  This version of the AeroQuad Flight Software is only compatible with the Arduino v1.0 IDE or greater.
