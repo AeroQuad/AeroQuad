@@ -411,7 +411,7 @@ void menuSensorInfo(byte mode, byte action){
       switch (mode) {
         case 0: // Accel
           notifyOSD(OSD_NOCLEAR,"Acc: X%c%d.%02d Y%c%d.%02d Z%c%d.%02d",
-                    PRFLOAT(meterPerSec[XAXIS]),PRFLOAT(meterPerSec[YAXIS]),PRFLOAT(meterPerSec[ZAXIS]));
+                    PRFLOAT(meterPerSecSec[XAXIS]),PRFLOAT(meterPerSecSec[YAXIS]),PRFLOAT(meterPerSecSec[ZAXIS]));
           break;
         case 1: // Gyro
           notifyOSD(OSD_NOCLEAR,"Gyr: X%c%d.%02d Y%c%d.%02dZ %c%d.%02d",

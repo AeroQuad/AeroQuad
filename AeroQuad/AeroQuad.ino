@@ -107,7 +107,7 @@
 #define BattMonitor            // Enable Battery monitor
 #define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 #define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -157,19 +157,19 @@
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-//#define OSD
+#define OSD
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
-//#define PAL
+#define PAL
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define ShowReticle            // Displays a reticle in the centre of the screen.
-//#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
-//#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
-//#define ShowCallSign           // Show AQ string 
+#define ShowReticle            // Displays a reticle in the centre of the screen.
+#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
+#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
+#define ShowCallSign           // Show AQ string 
 //#define ShowRSSI               // Show Receiver RSSI
 //#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 // Menu system, currently only usable with OSD
-//#define OSD_SYSTEM_MENU
+#define OSD_SYSTEM_MENU
 
 
 
