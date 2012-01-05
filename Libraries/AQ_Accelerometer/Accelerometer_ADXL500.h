@@ -29,9 +29,9 @@ void initializeAccel() {
 
 void measureAccel() {
 
-  meterPerSec[XAXIS] = analogRead(1) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
-  meterPerSec[YAXIS] = analogRead(0) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
-  meterPerSec[ZAXIS] = analogRead(2) * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
+  meterPerSecSec[XAXIS] = analogRead(1) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSecSec[YAXIS] = analogRead(0) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSecSec[ZAXIS] = analogRead(2) * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
 }
 
 void measureAccelSum() {
@@ -54,16 +54,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 #endif

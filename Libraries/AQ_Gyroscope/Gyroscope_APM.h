@@ -24,8 +24,6 @@
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 
-//#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-
 void initializeGyro() {
   gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 	vehicleState |= GYRO_DETECTED;
@@ -52,11 +50,33 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-  // do nothing here since it's already oversample in the APM_ADC class
+  
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+    gyroSample[axis] += readADC(axis);
+  }
+  gyroSampleCount++;
 }
 
 void evaluateGyroRate() {
-  // do nothing here since it's already oversample in the APM_ADC class
+  int gyroADC;
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+    if (axis == XAXIS)
+      gyroADC = (gyroSample[axis] / gyroSampleCount) - gyroZero[axis];
+    else
+      gyroADC = gyroZero[axis] - (gyroSample[axis] / gyroSampleCount);
+    gyroRate[axis] = filterSmooth(gyroADC * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+  }
+  gyroSample[0] = 0;
+  gyroSample[1] = 0;
+  gyroSample[2] = 0;
+  gyroSampleCount = 0;
+  
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
 }
 
 void calibrateGyro() {
@@ -64,6 +84,7 @@ void calibrateGyro() {
    
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
+	  evaluateADC();
       findZero[i] = readADC(axis);
       delay(10);
     }

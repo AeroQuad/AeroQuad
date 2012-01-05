@@ -45,8 +45,6 @@ const unsigned char adc_cmd[9] = { 0xC7,  0x97,  0x87,  0xA7,  0xE7,  0xB7,  0xD
 // ADC channel mapping             Ch0   Ch1   Ch2   Ch3   Ch4   Ch5   Ch6   Ch7 
 //const unsigned char adc_cmd[9]=  { 0x87, 0xC7, 0x97, 0xD7, 0xA7, 0xE7, 0xB7, 0xF7, 0x00 };
 volatile long adc_value[8] = { 0,0,0,0,0,0,0,0 };
-volatile unsigned char adc_counter[8]= { 0,0,0,0,0,0,0,0 };
-//volatile unsigned int adc_counter[8]= { 0,0,0,0,0,0,0,0 };
 
 unsigned char adcSpiTransfer(unsigned char data) {
   /* Wait for empty transmit buffer */
@@ -59,27 +57,6 @@ unsigned char adcSpiTransfer(unsigned char data) {
   return UDR2;
 }
 
-ISR (TIMER2_OVF_vect) {
-  //uint8_t ch;
-  unsigned int adc_tmp;
-  
-  //bit_set(PORTL,6); // To test performance
-  bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
-  adcSpiTransfer(adc_cmd[0]);       // Command to read the first channel
-  for (uint8_t ch = 0; ch < 8; ch++) {
-    if (adc_counter[ch] >= 16) {
-        adc_value[ch] /=2;
-        adc_counter[ch] /=2;
-    }
-    adc_tmp = adcSpiTransfer(0) << 8;    // Read first byte
-    adc_tmp |= adcSpiTransfer(adc_cmd[ch+1]);  // Read second byte and send next command
-    adc_value[ch] += adc_tmp >> 3;     // Shift to 12 bits
-    adc_counter[ch]++;               // Number of samples
-  }
-  bit_set(PORTC,4);                // Disable Chip Select (PIN PC4)
-  //bit_clear(PORTL,6); // To test performance
-  TCNT2 = 104;        // 400 Hz
-}
 
 void initializeADC() {
   unsigned char tmp;
@@ -97,31 +74,25 @@ void initializeADC() {
   UCSR2B = (1<<RXEN2)|(1<<TXEN2);
   // Set Baud rate
   UBRR2 = 2; // SPI clock running at 2.6MHz
+}
 
+void evaluateADC() {
 
-  // Enable Timer2 Overflow interrupt to capture ADC data
-  TIMSK2 = 0;  // Disable interrupts 
-  TCCR2A = 0;  // normal counting mode 
-  TCCR2B = _BV(CS21)|_BV(CS22);     // Set prescaler of 256
-  TCNT2 = 0;
-  TIFR2 = _BV(TOV2);  // clear pending interrupts; 
-  TIMSK2 =  _BV(TOIE2) ; // enable the overflow interrupt
+  unsigned int adc_tmp;
+  
+  bit_clear(PORTC,4);             // Enable Chip Select (PIN PC4)
+  adcSpiTransfer(adc_cmd[0]);       // Command to read the first channel
+  for (uint8_t ch = 0; ch < 8; ch++) {
+    adc_tmp = adcSpiTransfer(0) << 8;    // Read first byte
+    adc_tmp |= adcSpiTransfer(adc_cmd[ch+1]);  // Read second byte and send next command
+    adc_value[ch] = adc_tmp >> 3;     // Shift to 12 bits
+  }
+  bit_set(PORTC,4);                // Disable Chip Select (PIN PC4)
 }
 
 int readADC(unsigned char ch_num) {
-  int result;
   
-  //while(adc_counter[ch_num] < 2) { }
-  
-  cli();  // We stop interrupts to read the variables
-  if (adc_counter[ch_num]>0)
-          result = adc_value[ch_num]/adc_counter[ch_num];
-  else
-          result = 0;
-  adc_value[ch_num] = 0;    // Initialize for next reading
-  adc_counter[ch_num] = 0;
-  sei();
-  return(result);
+  return adc_value[ch_num];
 }
   
 #endif // #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)

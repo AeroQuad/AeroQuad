@@ -44,7 +44,7 @@ void initializeAccel() {
   
   //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
   
-  if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) {// page 52 of datasheet
+  if (readWhoI2C(ACCEL_ADDRESS) == ACCEL_IDENTITY) {// page 52 of datasheet
     vehicleState |= ACCEL_DETECTED;
   }
 	
@@ -83,7 +83,7 @@ void measureAccel() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = (readReverseShortI2C() >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = (readReverseShortI2C() >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }  
 }
 
@@ -103,7 +103,7 @@ void measureAccelSum() {
 void evaluateMetersPerSec() {
 
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
 	accelSample[axis] = 0;
   }
   accelSampleCount = 0;
@@ -117,16 +117,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 #endif

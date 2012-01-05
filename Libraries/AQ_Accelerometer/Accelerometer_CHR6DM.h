@@ -30,7 +30,7 @@ float accelScaleFactor[3] = {0.0,0.0,0.0};
 float runTimeAccelBias[3] = {0, 0, 0};
 float accelSmoothFactor = 1.0; // can we remove if we go with 4th order filter?
 float accelOneG = 0.0;
-float meterPerSec[3] = {0.0,0.0,0.0};
+float meterPerSecSec[3] = {0.0,0.0,0.0};
 
 float accelSample[3] = {0,0,0};
 byte accelSampleCount = 0;
@@ -50,9 +50,9 @@ void initializeAccel() {
 
 void measureAccel() {
 
-  meterPerSec[XAXIS] = accelChr6dm->data.ax * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
-  meterPerSec[YAXIS] = accelChr6dm->data.ay * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
-  meterPerSec[ZAXIS] = accelChr6dm->data.az * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
+  meterPerSecSec[XAXIS] = accelChr6dm->data.ax * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSecSec[YAXIS] = accelChr6dm->data.ay * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSecSec[ZAXIS] = accelChr6dm->data.az * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
 }
 
 void measureAccelSum() {
@@ -75,16 +75,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 #endif

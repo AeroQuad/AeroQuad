@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - April 2011
+  AeroQuad v3.0 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -40,8 +40,8 @@
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -69,16 +69,16 @@
 // Define minimum speed for your motors to run.  this also defines minimum throttle during flips
 // Some motors or ESC setups may need more or less define here to start all the montors evenly.
 // ******************************************************************************************************************************
-#define MIN_ARMED_THROTTLE 1180
+#define MIN_ARMED_THROTTLE 1150
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
 // Please refer to the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// Also check the http://aeroquad.com/showwiki.php?title=Flight+Configurations for more detail on the 3.0 motor changes 
+// Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
+//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -87,7 +87,7 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
@@ -96,7 +96,7 @@
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
+#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -104,10 +104,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor            // Enable Battery monitor
+#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -478,7 +478,6 @@
   // heading mag hold declaration
   #ifdef HeadingMagHold
 //    #define SPARKFUN_5883L_BOB
-//    #define HMC5883L
     #define HMC5843
   #endif
 
@@ -547,8 +546,6 @@
   #define LED_Red 4
   #define LED_Yellow 31
 
-  #define SPARKFUN_9DOF
-  
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -565,7 +562,7 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
-    #define HMC5883L
+    #define SPARKFUN_9DOF_5883L
   #endif
 
   // Altitude declaration
@@ -633,11 +630,7 @@
   #define LED_Red 35
   #define LED_Yellow 36
 
-  #if defined (HeadingMagHold) || defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    #include <APM_ADC.h>
-  #else
-    #include <APM_ADC_Optimized.h>
-  #endif
+  #include <APM_ADC.h>
   #include <APM_RC.h>
   #include <Device_I2C.h>
 
@@ -696,10 +689,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    evaluateADC();
+    measureAccelSum();
+    measureGyroSum();
   }
 #endif
 
@@ -994,14 +986,16 @@
 //********************************************************
 //********************************************************
 
+#ifdef AeroQuadSTM32
+  #include "AeroQuad_STM32.h"
+#endif
+
 //********************************************************
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#elif defined FlightAngleNewARG
-  #include "Kinematics_NewMARG.h"
 #elif defined FlightAngleARG
   #include "Kinematics_ARG.h"
 #elif defined FlightAngleMARG
@@ -1027,6 +1021,8 @@
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32
+  #include <Receiver_STM32.h>  
 #endif
 
 
@@ -1043,6 +1039,8 @@
   #include <Motors_APM.h>
 #elif defined MOTOR_I2C
   #include <Motors_I2C.h>
+#elif defined MOTOR_STM32
+  #include <Motors_STM32.h>    
 #endif
 
 //********************************************************
@@ -1050,7 +1048,7 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-#elif defined (HMC5883L)  
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
@@ -1191,6 +1189,7 @@ void setup() {
 
   // Flight angle estimation
   #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
     initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
   #else
@@ -1206,9 +1205,11 @@ void setup() {
   // Optional Sensors
   #ifdef AltitudeHoldBaro
     initializeBaro();
+    vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
   #ifdef AltitudeHoldRangeFinder
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+    vehicleState |= RANGE_ENABLED;
   #endif
 
 
@@ -1293,9 +1294,9 @@ void loop () {
       evaluateMetersPerSec();
       evaluateGyroRate();
 
-      float filteredAccelRoll = computeFourthOrder(meterPerSec[XAXIS], &fourthOrder[AX_FILTER]);
-      float filteredAccelPitch = computeFourthOrder(meterPerSec[YAXIS], &fourthOrder[AY_FILTER]);
-      float filteredAccelYaw = computeFourthOrder(meterPerSec[ZAXIS], &fourthOrder[AZ_FILTER]);
+      const float filteredAccelRoll = computeFourthOrder(meterPerSecSec[XAXIS], &fourthOrder[AX_FILTER]);
+      const float filteredAccelPitch = computeFourthOrder(meterPerSecSec[YAXIS], &fourthOrder[AY_FILTER]);
+      const float filteredAccelYaw = computeFourthOrder(meterPerSecSec[ZAXIS], &fourthOrder[AZ_FILTER]);
       
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
