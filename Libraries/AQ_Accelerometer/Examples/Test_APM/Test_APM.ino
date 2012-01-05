@@ -48,11 +48,11 @@ void loop() {
     measureAccel();
     
     Serial.print("Roll: ");
-    Serial.print(meterPerSec[XAXIS]);
+    Serial.print(meterPerSecSec[XAXIS]);
     Serial.print(" Pitch: ");
-    Serial.print(meterPerSec[YAXIS]);
+    Serial.print(meterPerSecSec[YAXIS]);
     Serial.print(" Yaw: ");
-    Serial.print(meterPerSec[ZAXIS]);
+    Serial.print(meterPerSecSec[ZAXIS]);
     Serial.println();
   }
 }

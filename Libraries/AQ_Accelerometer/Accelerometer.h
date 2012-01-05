@@ -28,10 +28,8 @@
 
 float accelScaleFactor[3] = {0.0,0.0,0.0};
 float runTimeAccelBias[3] = {0, 0, 0};
-float accelSmoothFactor = 1.0; // can we remove if we go with 4th order filter?
 float accelOneG = 0.0;
-float meterPerSec[3] = {0.0,0.0,0.0};
-
+float meterPerSecSec[3] = {0.0,0.0,0.0};
 long accelSample[3] = {0,0,0};
 byte accelSampleCount = 0;
   

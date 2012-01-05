@@ -1,21 +1,21 @@
 /*
   AeroQuad v3.0 - April 2011
-  www.AeroQuad.com 
+  www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -36,44 +36,44 @@
 
 
 float magCalibration[3] = {0.0,0.0,0.0};
-  
+
 void initializeMagnetometer() {
 
   byte numAttempts = 0;
   bool success = false;
   delay(10);                             // Power up delay **
-   
+
   magCalibration[XAXIS] = 1.0;
   magCalibration[YAXIS] = 1.0;
   magCalibration[ZAXIS] = 1.0;
 
   if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
 	  vehicleState |= MAG_DETECTED;
-  }    
+  }
 
   while (success == false && numAttempts < 5 ) {
-     
+
     numAttempts++;
-  
+
     updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
     delay(50);
     updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
     delay(10);
     updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01);  // Perform single conversion
     delay(10);
-   
+
     measureMagnetometer(0.0, 0.0);                    // Read calibration data
     delay(10);
-   
-    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1564.4f 
-        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1564.4f 
+
+    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1564.4f
+        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1564.4f
         && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1477.2f) {
       magCalibration[XAXIS] = fabs(1264.4f / measuredMagX);
       magCalibration[YAXIS] = fabs(1264.4f / measuredMagY);
-      magCalibration[ZAXIS] = fabs(1177.2f / measuredMagZ); 
+      magCalibration[ZAXIS] = fabs(1177.2f / measuredMagZ);
       success = true;
     }
-   
+
     updateRegisterI2C(COMPASS_ADDRESS, 0x00, HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation);
     delay(50);
 
@@ -82,15 +82,15 @@ void initializeMagnetometer() {
   }
 
   measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
-  
+
 }
 
 void measureMagnetometer(float roll, float pitch) {
-   
+
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
-  #if defined(SPARKFUN_9DOF)
+  #if defined(SPARKFUN_9DOF_5883L)  // JI - 1/4/12 - Add _5883L to define
     // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
     // JI - 11/24/11 - 5883L X axis points aft
     // JI - 11/24/11 - 5883L Sensor Orientation 3
@@ -107,7 +107,7 @@ void measureMagnetometer(float roll, float pitch) {
   #else
     //!! Define 5883L Orientation !!
   #endif
-  
+
   measuredMagX = rawMag[XAXIS] + magBias[XAXIS];
   measuredMagY = rawMag[YAXIS] + magBias[YAXIS];
   measuredMagZ = rawMag[ZAXIS] + magBias[ZAXIS];
@@ -118,15 +118,15 @@ void measureMagnetometer(float roll, float pitch) {
   float cosPitch = cos(pitch);
   float sinPitch = sin(pitch);
 
-  float magX = (float)measuredMagX * cosPitch + 
-         (float)measuredMagY * sinRoll * sinPitch + 
+  float magX = (float)measuredMagX * cosPitch +
+         (float)measuredMagY * sinRoll * sinPitch +
          (float)measuredMagZ * cosRoll * sinPitch;
-           
-  float magY = (float)measuredMagY * cosRoll - 
+
+  float magY = (float)measuredMagY * cosRoll -
          (float)measuredMagZ * sinRoll;
-		 
+
   float tmp = sqrt(magX * magX + magY * magY);
-    
+
   hdgX = magX / tmp;
   hdgY = -magY / tmp;
 }

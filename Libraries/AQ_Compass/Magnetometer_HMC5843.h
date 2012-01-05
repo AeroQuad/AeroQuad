@@ -27,6 +27,7 @@
 #include "Arduino.h"
 
 #define COMPASS_ADDRESS 0x1E
+#define COMPASS_IDENTITY 0x10
 //#define SENSOR_GAIN 0x00  // +/- 0.7 Ga
 #define SENSOR_GAIN 0x20  // +/- 1.0 Ga (default)
 //#define SENSOR_GAIN 0x40  // +/- 1.5 Ga
@@ -40,7 +41,7 @@ void initializeMagnetometer() {
 
   delay(10);                             // Power up delay **
    
-  if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
+  if (readWhoI2C(COMPASS_ADDRESS) == COMPASS_IDENTITY) {
 	  vehicleState |= MAG_DETECTED;
   }    
 

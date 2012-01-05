@@ -31,7 +31,7 @@ int gyroAddress = ITG3200_ADDRESS;
   
 void initializeGyro() {
 
-  if (readWhoI2C(gyroAddress) != gyroAddress) {
+  if (readWhoI2C(gyroAddress) == ITG3200_ADDRESS+1) {
 	  vehicleState |= GYRO_DETECTED;
   }
 	

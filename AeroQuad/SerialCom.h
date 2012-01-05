@@ -82,10 +82,6 @@ void readSerialCommand() {
       heading = 0;
       relativeHeading = 0;
       headingHold = 0;
-      if (headingHoldConfig)
-        vehicleState |= HEADINGHOLD_ENABLED;
-      else
-        vehicleState &= ~HEADINGHOLD_ENABLED;
       break;
       
     case 'D': // Altitude hold PID
@@ -107,7 +103,7 @@ void readSerialCommand() {
       
     case 'E': // Receive sensor filtering values
       gyroSmoothFactor = readFloatSerial();
-      accelSmoothFactor = readFloatSerial();
+      readFloatSerial(); //accelSmoothFactor = readFloatSerial();
       readFloatSerial(); // timeConstant was not used anymore, removed! Mikro, clean this!
       aref = readFloatSerial();
       break;
@@ -164,7 +160,7 @@ void readSerialCommand() {
       computeAccelBias();
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
         calibrateKinematics();
-        accelOneG = meterPerSec[ZAXIS];
+        accelOneG = meterPerSecSec[ZAXIS];
       #endif
       storeSensorsZeroToEEPROM();
       break;
@@ -347,7 +343,7 @@ void sendSerialTelemetry() {
     
   case 'e': // Send sensor filtering values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(accelSmoothFactor);
+    PrintValueComma(0);  //PrintValueComma(accelSmoothFactor);
     PrintValueComma(0);
     SERIAL_PRINTLN(aref);
     queryType = 'X';
@@ -383,7 +379,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSec[axis]);
+      PrintValueComma(meterPerSecSec[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
@@ -420,12 +416,12 @@ void sendSerialTelemetry() {
     
   case 'l': // Send raw accel values
     measureAccelSum();
-    PrintValueComma((float)(accelSample[XAXIS]/accelSampleCount));
-    accelSample[XAXIS] = 0.0;
-    PrintValueComma((float)(accelSample[YAXIS]/accelSampleCount));
-    accelSample[YAXIS] = 0.0;
-    SERIAL_PRINTLN ((float)(accelSample[ZAXIS]/accelSampleCount));
-    accelSample[ZAXIS] = 0.0;
+    PrintValueComma((int)(accelSample[XAXIS]/accelSampleCount));
+    accelSample[XAXIS] = 0;
+    PrintValueComma((int)(accelSample[YAXIS]/accelSampleCount));
+    accelSample[YAXIS] = 0;
+    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]/accelSampleCount));
+    accelSample[ZAXIS] = 0;
     accelSampleCount = 0;
     break;
     

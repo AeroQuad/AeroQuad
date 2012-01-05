@@ -82,7 +82,7 @@ void initializeBaro() {
   baroGroundAltitude = 0;
   pressureFactor = 1/5.255;
     
-  if (readWhoI2C(BMP085_I2C_ADDRESS) != BMP085_I2C_ADDRESS) {
+  if (readWhoI2C(BMP085_I2C_ADDRESS) == 0) {
 	  vehicleState |= BARO_DETECTED;
   }
   
