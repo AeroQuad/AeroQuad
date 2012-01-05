@@ -26,10 +26,10 @@
 //#define MENU_GOPRO // enable GoPro controls... not usable atm.
 
 struct MenuItem {
-  const byte level;                  // menu level the item is on
-  const char *text;                  // text to show
+  const byte level;            // menu level the item is on
+  const char *text;            // text to show
   void (*function)(byte,byte); // handler func on leaf level
-  const byte mode;                   // data to give for handler function
+  const byte mode;             // data to give for handler function
 };
 
 extern const struct MenuItem menuData[];
@@ -60,6 +60,118 @@ byte  stickWaitNeutral = 1; // wait for stick to center
 // DATA that menu functions can freely use to store state
 byte  menuFuncData[10];  // 10 bytes of data for funcs to use as they wish...
 float menuFuncDataFloat; // float for menufuncs use
+
+// menuHandleSimple - handle trivial menu actions launched from menu
+//
+//    This function will do action on MENU_INIT and optionally display a message.
+//
+//    To display message add following two lines after doing the action
+//      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "message");
+//      menuInFunc = 10; // display time in 100ms increments
+
+void menuHandleSimple(byte mode, byte action) {
+
+  menuInFunc = 0; // default to no callback
+  if (action == MENU_INIT) {
+    switch (mode) {
+    case 0:
+      armedTime = 0;
+      break;
+#ifdef BattMonitor
+    case 1:
+      for (int i=0; i<numberOfBatteries; i++) {
+        resetBattery(i);
+      }
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "Battery state reset!");
+      menuInFunc = 10;
+      break;
+#endif
+/* TEMPLATE CODE FOR NEW ACTION:
+    case XX: // Choose a free number here (0-255)
+      doTask();
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "TASK done"); // optional message
+      menuInFunc = 10;                                // optional message
+      break;
+*/
+    }
+  }
+}
+
+void writeEEPROM();
+void initializeEEPROM();
+
+// menuHandleConfirm - handle confirmed menu actions launched from menu
+//
+//    This function will ask confirmation before executing action and optionally display a message.
+//
+//    To display message add following two lines after doing the action
+//      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "message");
+//      menuInFunc = 10; // display time in 100ms increments
+
+void menuHandleConfirm(byte mode, byte action) {
+
+  switch (action) {
+  case MENU_ABORT:
+  case MENU_EXIT:
+  case MENU_CALLBACK:
+    menuInFunc=0; // exit to menu
+    break;
+
+  case MENU_INIT:
+  case MENU_UP:
+  case MENU_DOWN:
+    {
+      menuFuncData[0] = 0;
+      if (action == MENU_UP) {
+        menuFuncData[0] = 1;
+      }
+      byte cpos = strlen(menuData[menuEntry].text) + 4;
+      notifyOSDmenu(OSD_CURSOR|OSD_NOCLEAR, cpos, cpos, "%c%s? %c",
+        menuFuncData[0] ? MENU_SYM_DOWN : MENU_SYM_UP,
+        menuData[menuEntry].text,menuFuncData[0] ? 'Y' : 'N');
+    }
+    break;
+
+  case MENU_SELECT:
+    menuInFunc = 0;
+    if (menuFuncData[0] == 1) {
+      switch (mode) {
+      case 0:
+        writeEEPROM(); // defined in DataStorage.h
+        zeroIntegralError();
+        notifyOSD(OSD_NOCLEAR|OSD_CENTER, "EEPROM data saved");
+        menuInFunc = 10;
+        break;
+
+      case 1:
+        // Initialize EEPROM with default values
+        notifyOSD(OSD_NOCLEAR|OSD_CENTER, "initializing EEPROM");
+        initializeEEPROM(); // defined in DataStorage.h
+        calibrateGyro();
+        computeAccelBias();
+        zeroIntegralError();
+#ifdef HeadingMagHold
+        initializeMagnetometer();
+#endif
+#if defined AltitudeHoldBaro
+        initializeBaro();
+#endif
+        notifyOSD(OSD_NOCLEAR|OSD_CENTER, "EEPROM reinitialized");
+        menuInFunc = 10; // callback after 1s
+        break;
+
+/* TEMPLATE CODE FOR NEW ACTION:
+      case XX: // Choose a free number here (0-255)
+        doTask();
+        notifyOSD(OSD_NOCLEAR|OSD_CENTER, "TASK done"); // optional message
+        menuInFunc = 10;                                // optional message
+        break;
+*/
+      }
+    }
+    break;
+  }
+}
 
 #ifdef CameraControl
 void menuHandleCam(byte mode, byte action) {
@@ -138,37 +250,7 @@ void menuHandleCam(byte mode, byte action) {
 }
 #endif
 
-// menuHandleSimple - handle trivial menu actions launched from menu
-//
-//    This function will do action on MENU_INIT and optionally display a message.
-//
-//    To display message add following two lines after doing the action
-//      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "message");
-//      menuInFunc = 10; // display time in 100ms increments
-
-void menuHandleSimple(byte mode, byte action) {
-
-  menuInFunc = 0; // default to no callback 
-  if (action == MENU_INIT) {
-    switch (mode) {
-    case 0:
-      armedTime = 0;
-      break;
-#ifdef BattMonitor
-    case 1:
-      for (int i=0; i<numberOfBatteries; i++) {
-        resetBattery(i);
-      }
-      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "Battery state reset!");
-      menuInFunc = 10;
-      break;
-#endif
-    }
-  }
-}
-
-
-
+// GoPro handling skeleton, not complete...
 #ifdef MENU_GOPRO
 const char *gopro_b_txt[3] = { "Shutter", "Mode", "Power" };
 
@@ -182,9 +264,7 @@ void menuHandleGoPro(byte mode, byte action) {
     break;
   case MENU_INIT:
     // activate I/O
-    memset(buf, 0, MENU_BUFSIZE);
-    snprintf(buf, MENU_BUFSIZE, "%s pressed", gopro_b_txt[mode]);
-    menuRefresh();
+    notifyOSD(OSD_NOCLEAR|OSD_CENTER, "%s pressed", gopro_b_txt[mode]);
     if (mode == 2) {
       menuInFunc = 35; //3.5 sec
     }
@@ -340,97 +420,52 @@ void menuHandlePidTune(byte mode, byte action) {
   }
 }
 
-void writeEEPROM();
-void initializeEEPROM();
 
-void menuHandleConfirm(byte mode, byte action) {
-
-  switch (action) {
-    case MENU_ABORT:
-    case MENU_EXIT:
-    case MENU_CALLBACK:
-      menuInFunc=0; // exit to menu
-      break;
-    case MENU_INIT:
-    case MENU_UP:
-    case MENU_DOWN:
-      {
-        menuFuncData[0] = 0;
-        if (action == MENU_UP) {
-          menuFuncData[0] = 1;
-        }
-        byte cpos = strlen(menuData[menuEntry].text) + 4;
-        notifyOSDmenu(OSD_CURSOR|OSD_NOCLEAR, cpos, cpos, "%c%s? %c",
-          menuFuncData[0] ? MENU_SYM_DOWN : MENU_SYM_UP,
-          menuData[menuEntry].text,menuFuncData[0] ? 'Y' : 'N');
-      }
-      break;
-
-    case MENU_SELECT:
-      if (menuFuncData[0] == 1) {
-        switch (mode) {
-          case 0:
-            writeEEPROM(); // defined in DataStorage.h
-            zeroIntegralError();
-            notifyOSD(OSD_NOCLEAR, "EEPROM data saved");
-            break;
-          case 1:
-            // Initialize EEPROM with default values
-            initializeEEPROM(); // defined in DataStorage.h
-            calibrateGyro();
-            computeAccelBias();
-            zeroIntegralError();
-#ifdef HeadingMagHold
-            initializeMagnetometer();
-#endif
-#if defined AltitudeHoldBaro
-            initializeBaro();
-#endif
-            notifyOSD(OSD_NOCLEAR, "EEPROM reinitialized");
-            break;
-        }
-        menuInFunc = 10; // callback after 1s
-      }
-      else {
-        menuInFunc = 0;
-      }
-      break;
-  }
-}
-
+// this define is used to convert a float into (char) sign, (int) integerpart, (int) per100parts
 #define PRFLOAT(x) ((x<0.0)?'-':' '),((int)abs(x)),(((int)(100*abs(x)))%100)
 
 void menuSensorInfo(byte mode, byte action){
   switch (action) {
-    case MENU_EXIT:
-      menuInFunc=0;
-      break;
-    case MENU_CALLBACK:
-      // fallthru
-    case MENU_INIT:
-      switch (mode) {
-        case 0: // Accel
-          notifyOSD(OSD_NOCLEAR,"Acc: X%c%d.%02d Y%c%d.%02d Z%c%d.%02d",
-                    PRFLOAT(meterPerSecSec[XAXIS]),PRFLOAT(meterPerSecSec[YAXIS]),PRFLOAT(meterPerSecSec[ZAXIS]));
+  case MENU_EXIT:
+  case MENU_ABORT:
+    menuInFunc=0;
+    break;
+  case MENU_CALLBACK:
+  case MENU_INIT:
+    switch (mode) {
+      case 0: // Accel
+        notifyOSD(OSD_NOCLEAR,"Acc: X%c%d.%02d Y%c%d.%02d Z%c%d.%02d",
+                  PRFLOAT(meterPerSecSec[XAXIS]),PRFLOAT(meterPerSecSec[YAXIS]),PRFLOAT(meterPerSecSec[ZAXIS]));
+        break;
+      case 1: // Gyro
+        notifyOSD(OSD_NOCLEAR,"Gyr: X%c%d.%02d Y%c%d.%02dZ %c%d.%02d",
+                  PRFLOAT(gyroRate[XAXIS]),PRFLOAT(gyroRate[YAXIS]),PRFLOAT(gyroRate[ZAXIS]));
+        break;
+      #if defined(HeadingMagHold)
+        case 2: // Mag
+          notifyOSD(OSD_NOCLEAR,"Mag: X%5d Y%5d Z%5d",
+                  getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
           break;
-        case 1: // Gyro
-          notifyOSD(OSD_NOCLEAR,"Gyr: X%c%d.%02d Y%c%d.%02dZ %c%d.%02d",
-                    PRFLOAT(gyroRate[XAXIS]),PRFLOAT(gyroRate[YAXIS]),PRFLOAT(gyroRate[ZAXIS]));
-          break;
-        #if defined(HeadingMagHold)
-          case 2: // Mag
-            notifyOSD(OSD_NOCLEAR,"Mag: X%5d Y%5d Z%5d",
-                    getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
-            break;
-        #endif
-      }
-      menuInFunc=3;
-      break;
-    default:
-      menuInFunc=3;
+      #endif
+    }
+    menuInFunc=3;
+    break;
+  default:
+    menuInFunc=3;
   }
 }
-                    
+
+// MENU STRUCTURE TABLE
+//
+// One line in this table corresponds to one entry on the menu.
+//
+// Entry format:
+//  { LEVEL, TEXT, HANDLER, MODE},
+// Where
+//  LEVEL   - this defines the tree structure 0 == root level 
+//  TEXT    - displayed text should be no more than ~16 characters
+//  HADNLER - handler function to be called for this item (or MENU_NOFUNC for submenu)
+//  MODE    - data passed to handler function to allow sharing them 
 
 const struct MenuItem menuData[] = {
 #if 0
@@ -465,7 +500,7 @@ const struct MenuItem menuData[] = {
   {2,     "Accel Data",       menuSensorInfo,    0},
   {2,     "Gyro Data",        menuSensorInfo,    1},
 #if defined(HeadingMagHold)
-  {2,     "Mag Data",         menuSensorInfo,    2}, 
+  {2,     "Mag Data",         menuSensorInfo,    2},
 #endif
   };
 
@@ -487,7 +522,6 @@ byte  menuIsLast(byte entry) {
   // bottom of the whole menu structure
   return 1;
 }
-
 
 #define MENU_STICK_CENTER  1500  // center value
 #define MENU_STICK_NEUTRAL 100   // less than this from center is neutral
@@ -563,6 +597,7 @@ void menuDown() {
 }
 
 void menuSelect() {
+
   if (255==menuEntry) {
     // enable menu
     menuAtExit=0;
