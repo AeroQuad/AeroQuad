@@ -1,21 +1,21 @@
 /*
   AeroQuad v3.0 - April 2011
-  www.AeroQuad.com 
+  www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -27,70 +27,41 @@
 #include "Arduino.h"
 
 #define COMPASS_ADDRESS 0x1E
+#define COMPASS_IDENTITY 0x10
 
-// See HMC58x3 datasheet for more information on these values
-#define NormalOperation             0x10
-// Default DataOutputRate is 10hz on HMC5843 , 15hz on HMC5883L
-#define DataOutputRate_Default      ( 0x04 << 2 )
-#define HMC5883L_SampleAveraging_8  ( 0x03 << 5 )
+#define COMPASS_ADDRESS 0x1E
+#define COMPASS_IDENTITY 0x10
+//#define SENSOR_GAIN 0x00  // +/- 0.7 Ga
+#define SENSOR_GAIN 0x20  // +/- 1.0 Ga (default)
+//#define SENSOR_GAIN 0x40  // +/- 1.5 Ga
+//#define SENSOR_GAIN 0x60  // +/- 2.0 Ga
+//#define SENSOR_GAIN 0x80  // +/- 3.2 Ga
+//#define SENSOR_GAIN 0xA0  // +/- 3.8 Ga
+//#define SENSOR_GAIN 0xC0  // +/- 4.5 Ga
+//#define SENSOR_GAIN 0xE0  // +/- 6.5 Ga (not recommended)
 
-
-float magCalibration[3] = {0.0,0.0,0.0};
-  
 void initializeMagnetometer() {
 
-  byte numAttempts = 0;
-  bool success = false;
   delay(10);                             // Power up delay **
-   
-  magCalibration[XAXIS] = 1.0;
-  magCalibration[YAXIS] = 1.0;
-  magCalibration[ZAXIS] = 1.0;
 
-  if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
+  if (readWhoI2C(COMPASS_ADDRESS) == COMPASS_IDENTITY) {
 	  vehicleState |= MAG_DETECTED;
-  }    
-
-  while (success == false && numAttempts < 5 ) {
-     
-    numAttempts++;
-  
-    updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
-    delay(50);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
-    delay(10);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01);  // Perform single conversion
-    delay(10);
-   
-    measureMagnetometer(0.0, 0.0);                    // Read calibration data
-    delay(10);
-   
-    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1564.4f 
-        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1564.4f 
-        && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1477.2f) {
-      magCalibration[XAXIS] = fabs(1264.4f / measuredMagX);
-      magCalibration[YAXIS] = fabs(1264.4f / measuredMagY);
-      magCalibration[ZAXIS] = fabs(1177.2f / measuredMagZ); 
-      success = true;
-    }
-   
-    updateRegisterI2C(COMPASS_ADDRESS, 0x00, HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation);
-    delay(50);
-
-    updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x00); // Continuous Update mode
-    delay(50);                           // Mode change delay (1/Update Rate) **
   }
 
-  measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+  updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
+  delay(20);
+  updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
+  delay(20);
   
+  measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
 }
 
 void measureMagnetometer(float roll, float pitch) {
-   
+
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
-  #if defined(SPARKFUN_9DOF)
+  #if defined(SPARKFUN_9DOF_5883L)  // JI - 1/4/12 - Add _5883L to define
     // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
     // JI - 11/24/11 - 5883L X axis points aft
     // JI - 11/24/11 - 5883L Sensor Orientation 3
@@ -108,25 +79,26 @@ void measureMagnetometer(float roll, float pitch) {
     //!! Define 5883L Orientation !!
   #endif
   
+  updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
+
   measuredMagX = rawMag[XAXIS] + magBias[XAXIS];
   measuredMagY = rawMag[YAXIS] + magBias[YAXIS];
   measuredMagZ = rawMag[ZAXIS] + magBias[ZAXIS];
 
+  const float cosRoll =  cos(roll);
+  const float sinRoll =  sin(roll);
+  const float cosPitch = cos(pitch);
+  const float sinPitch = sin(pitch);
 
-  float cosRoll =  cos(roll);
-  float sinRoll =  sin(roll);
-  float cosPitch = cos(pitch);
-  float sinPitch = sin(pitch);
+  const float magX = (float)measuredMagX * cosPitch +
+                     (float)measuredMagY * sinRoll * sinPitch +
+                     (float)measuredMagZ * cosRoll * sinPitch;
 
-  float magX = (float)measuredMagX * cosPitch + 
-         (float)measuredMagY * sinRoll * sinPitch + 
-         (float)measuredMagZ * cosRoll * sinPitch;
-           
-  float magY = (float)measuredMagY * cosRoll - 
-         (float)measuredMagZ * sinRoll;
-		 
-  float tmp = sqrt(magX * magX + magY * magY);
-    
+  const float magY = (float)measuredMagY * cosRoll -
+                     (float)measuredMagZ * sinRoll;
+
+  const float tmp = sqrt(magX * magX + magY * magY);
+
   hdgX = magX / tmp;
   hdgY = -magY / tmp;
 }
