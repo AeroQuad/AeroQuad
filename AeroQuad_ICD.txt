@@ -1,0 +1,82 @@
+Aeroquad ground station interface definitions
+
+This file is justified by spaces, use monospaced font when editing.
+
+1. Serial commands:
+
+NOTE: As a convention uppercase letters are used to set something and lowercase for queries.
+
+Value   CommandValue                    Value   Telemetry
+A       roll/pitch rate mode PID        a       read roll/pitch rate mode PID
+B       roll/pitch attitude mode PID    b       read roll/pitch attitude mode PID
+C       yaw PID                         c       read yaw PID
+D       altitude hold PID               d       read altitude hold PID
+E       sensor filtering                e       read sensor filtering
+F       transmitter smoothing           f       read transmitter smoothing
+G       transmitter slope cal           g       read transmitter slope values
+H       transmitter offset cal          h       read transmitter offset values
+I       initialize EEPROM               i       read sensor data
+J       calibrate gyros                 j       read raw magnetometer values
+K       calibrate accels                k       read accel calibration values
+L       generate accel bias             l       read raw accel values
+M       calibrate magnetometer          m       read magnetometer cal values
+N       battery monitor                 n       read battery monitor settings
+O       waypoints                       o       read waypoints
+P       camera values                   p       read camera values
+Q                                       q       read vehicle state variable
+R                                       r       vehicle attitude
+S                                       s       read flight data
+T                                       t       read processed transmitter data
+U       range finder                    u       read range finder
+V                                       v
+W       write EEPROM values             w
+X       stop telemetry                  x       stop telemetry
+Y                                       y
+Z                                       z
+
+1       ESC cal high                    =       custom debug messages
+2       ESC cal low                     !       read flight software version
+3       ESC cal test                    #       read software configuration
+4       ESC cal off
+5       send motor commands
+6       read remote motor command
+7
+8
+9
+0
+
+2. Vehicle state values
+
+Bitno(s)  Hex mask  Name
+0         00000001  GYRO_DETECTED
+1         00000002  ACCEL_DETECTED
+2         00000004  MAG_DETECTED
+3         00000008  BARO_DETECTED
+4         00000010  HEADINGHOLD_ENABLED
+5         00000020  ALTITUDEHOLD_ENABLED
+6         00000040  BATTMONITOR_ENABLED
+7         00000080  CAMERASTABLE_ENABLED
+8         00000100  RANGE_ENABLED
+9         00000200
+10        00000400
+11        00000800
+12        00001000
+13        00002000
+14        00004000
+15        00008000
+16        00010000
+17        00020000
+18        00040000
+19        00080000
+20        00100000
+21        00200000
+22        00400000
+23        00800000
+24        01000000
+25        02000000
+26        04000000
+27        08000000
+28        10000000
+29        20000000
+30        40000000
+31        80000000
