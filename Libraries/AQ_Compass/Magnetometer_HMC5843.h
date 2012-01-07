@@ -54,9 +54,6 @@ void initializeMagnetometer() {
 }
 
 void measureMagnetometer(float roll, float pitch) {
-  float magX;
-  float magY;
-  float tmp;
     
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
@@ -71,19 +68,19 @@ void measureMagnetometer(float roll, float pitch) {
   measuredMagY = rawMag[YAXIS] + magBias[YAXIS];
   measuredMagZ = rawMag[ZAXIS] + magBias[ZAXIS];
 
-  float cosRoll =  cos(roll);
-  float sinRoll =  sin(roll);
-  float cosPitch = cos(pitch);
-  float sinPitch = sin(pitch);
+  const float cosRoll =  cos(roll);
+  const float sinRoll =  sin(roll);
+  const float cosPitch = cos(pitch);
+  const float sinPitch = sin(pitch);
 
-  magX = (float)measuredMagX * cosPitch + 
-         (float)measuredMagY * sinRoll * sinPitch + 
-         (float)measuredMagZ * cosRoll * sinPitch;
+  const float magX = (float)measuredMagX * cosPitch + 
+                     (float)measuredMagY * sinRoll * sinPitch + 
+                     (float)measuredMagZ * cosRoll * sinPitch;
            
-  magY = (float)measuredMagY * cosRoll - 
-         (float)measuredMagZ * sinRoll;
+  const float magY = (float)measuredMagY * cosRoll - 
+                     (float)measuredMagZ * sinRoll;
 
-  tmp  = sqrt(magX * magX + magY * magY);
+  const float tmp  = sqrt(magX * magX + magY * magY);
    
   hdgX = magX / tmp;
   hdgY = -magY / tmp;

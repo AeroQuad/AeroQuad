@@ -65,12 +65,6 @@
 
 //#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
-// ******************************************************************************************************************************
-// Define minimum speed for your motors to run.  this also defines minimum throttle during flips
-// Some motors or ESC setups may need more or less define here to start all the montors evenly.
-// ******************************************************************************************************************************
-#define MIN_ARMED_THROTTLE 1150
-
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
