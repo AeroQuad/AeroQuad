@@ -103,9 +103,8 @@ void readSerialCommand() {
       
     case 'E': // Receive sensor filtering values
       gyroSmoothFactor = readFloatSerial();
-      readFloatSerial(); //accelSmoothFactor = readFloatSerial();
-      readFloatSerial(); // timeConstant was not used anymore, removed! Mikro, clean this!
       aref = readFloatSerial();
+      minArmedThrottle = readFloatSerial();
       break;
       
     case 'F': // Receive transmitter smoothing values
@@ -207,6 +206,11 @@ void readSerialCommand() {
       #endif
       break;
       
+    case 'U': // Range Finder
+      maxRangeFinderRange = readFloatSerial();
+      minRangeFinderRange = readFloatSerial();
+      break;
+
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
@@ -341,11 +345,10 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
-  case 'e': // Send sensor filtering values
+  case 'e': // miscellaneous config values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(0);  //PrintValueComma(accelSmoothFactor);
-    PrintValueComma(0);
-    SERIAL_PRINTLN(aref);
+    PrintValueComma(aref);
+    SERIAL_PRINTLN(minArmedThrottle);
     queryType = 'X';
     break;
     
@@ -531,7 +534,13 @@ void sendSerialTelemetry() {
     }
     SERIAL_PRINTLN();
     break;
-    
+
+  case 'u': // Send range finder values
+    PrintValueComma(maxRangeFinderRange);
+    SERIAL_PRINTLN(minRangeFinderRange);
+    queryType = 'X';
+    break;
+
   case 'x': // Stop sending messages
     break;
     
