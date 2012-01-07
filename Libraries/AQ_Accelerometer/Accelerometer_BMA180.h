@@ -57,7 +57,7 @@ void initializeAccel() {
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_ENABLE_WRITE_CONTROL_REGISTER, ACCEL_CONTROL_REGISTER); 		//enable writing to control registers
   sendByteI2C(ACCEL_ADDRESS, ACCEL_BW_TCS); 															// register bw_tcs (bits 4-7)
   byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_1200HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_1200HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 1.2kHz (value = 0000xxxx)
 
   // From page 27 of BMA180 Datasheet
   //  1.0g = 0.13 mg/LSB
@@ -71,7 +71,7 @@ void initializeAccel() {
   data = readByteI2C(ACCEL_ADDRESS);
   data &= 0xF1;
   //data |= 0x04; // Set range select bits for +/-2g
-  data |= 0x08;
+  data |= 0x08; // set range select bits for +/-4g
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER, data);	
 }
   
