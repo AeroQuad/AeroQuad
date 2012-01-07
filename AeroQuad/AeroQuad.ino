@@ -531,7 +531,6 @@
   void measureCriticalSensors() {
     measureAccelSum();
     measureGyroSum();
-    
   }
 #endif
 
@@ -1361,6 +1360,9 @@ void loop () {
         }
       #endif
       
+      #if defined AltitudeHoldBaro
+        measureBaro(); 
+      #endif
       #ifdef AltitudeHoldRangeFinder
         readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
       #endif
@@ -1377,9 +1379,6 @@ void loop () {
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); // defined in FlightCommand.pde
 
-      #if defined AltitudeHoldBaro
-        measureBaro(); // defined in altitude.h
-      #endif
       #ifdef AltitudeHoldRangeFinder
         evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
       #endif
@@ -1406,7 +1405,6 @@ void loop () {
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt);
       #endif
-      
 
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde

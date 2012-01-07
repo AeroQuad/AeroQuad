@@ -212,16 +212,14 @@ void processFlightControl() {
   // ********************** Update Yaw ***************************************
   processHeading();
   
-  if (frameCounter %  10 == 0) {  //   10 Hz tasks
-    // ********************** Process Altitude hold **************************
-    processAltitudeHold();
-    // ********************** Process Battery monitor hold **************************
-    #if defined BattMonitor && defined BattMonitorAutoDescent
-      processBatteryMonitorThrottleAdjustment();
-    #endif
-    // ********************** Process throttle correction ********************
-    processThrottleCorrection();
-  }
+  // ********************** Process Altitude hold **************************
+  processAltitudeHold();
+  // ********************** Process Battery monitor hold **************************
+  #if defined BattMonitor && defined BattMonitorAutoDescent
+    processBatteryMonitorThrottleAdjustment();
+  #endif
+  // ********************** Process throttle correction ********************
+  processThrottleCorrection();
 
   // ********************** Calculate Motor Commands *************************
   if (motorArmed && safetyCheck) {
