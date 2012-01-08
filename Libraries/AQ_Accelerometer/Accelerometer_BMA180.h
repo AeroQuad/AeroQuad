@@ -25,10 +25,10 @@
 #include <Device_I2C.h>
 #include <SensorsStatus.h>
 
-#ifndef BMA180_ADDRESS_ALTERNATE
-  #define BMA180_ADDRESS 0x40
-#else
+#ifdef BMA180_ADDRESS_ALTERNATE
   #define BMA180_ADDRESS 0x41   // Alternate address 41h
+#else
+  #define BMA180_ADDRESS 0x40
 #endif
 #define BMA180_IDENTITY 0x03
 #define BMA180_RESET_REGISTER 0x10
@@ -46,8 +46,6 @@
 #define BMA180_BUFFER_SIZE 6
 
 void initializeAccel() {
-  
-  //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
   
   if (readWhoI2C(BMA180_ADDRESS) == BMA180_IDENTITY) {// page 52 of datasheet
     vehicleState |= ACCEL_DETECTED;
