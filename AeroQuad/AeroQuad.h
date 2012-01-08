@@ -85,6 +85,12 @@ int testCommand = 1000;
  */
 #define RATE_FLIGHT_MODE 0
 #define ATTITUDE_FLIGHT_MODE 1
+
+#define TASK_100HZ 1
+#define TASK_50HZ 2
+#define TASK_10HZ 10
+#define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
+
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle = 1150;
@@ -93,10 +99,7 @@ float G_Dt = 0.002;
 int throttle = 1000;
 byte motorArmed = OFF;
 byte safetyCheck = OFF;
-
-float filteredAccelRoll = 0.0;
-float filteredAccelPitch = 0.0;
-float filteredAccelYaw = 0.0;
+float filteredAccel[3] = {0.0,0.0,0.0};
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -128,11 +131,6 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-  
-//  float estimatedAltitude = 0.0;
-//  float estimatedZVelocity = 0.0;
-//  float altitudeIntegratedError = 0.0;
-//  float currentSensorAltitude = 0.0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
