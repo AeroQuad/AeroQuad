@@ -98,10 +98,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor            // Enable Battery monitor
+#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -1286,7 +1286,7 @@ void loop () {
     // ================================================================
     // 100hz task loop
     // ================================================================
-    if (frameCounter %   1 == 0) {  //  100 Hz tasks
+    if (frameCounter % TASK_100HZ == 0) {  //  100 Hz tasks
   
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
@@ -1294,18 +1294,18 @@ void loop () {
       evaluateMetersPerSec();
       evaluateGyroRate();
 
-      filteredAccelRoll = computeFourthOrder(meterPerSecSec[XAXIS], &fourthOrder[AX_FILTER]);
-      filteredAccelPitch = computeFourthOrder(meterPerSecSec[YAXIS], &fourthOrder[AY_FILTER]);
-      filteredAccelYaw = computeFourthOrder(meterPerSecSec[ZAXIS], &fourthOrder[AZ_FILTER]);
+      for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+        filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+      }
       
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1315,9 +1315,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             getMagnetometerRawData(XAXIS),
                             getMagnetometerRawData(YAXIS),
                             getMagnetometerRawData(ZAXIS),
@@ -1326,9 +1326,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1337,9 +1337,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             accelOneG,
                             getHdgXY(XAXIS),
                             getHdgXY(YAXIS),
@@ -1348,9 +1348,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             accelOneG,
                             0.0,
                             0.0,
@@ -1358,15 +1358,16 @@ void loop () {
       #endif
 
 
+      // Evaluate are here because we want it to be synchronized with the processFlightControl
       #if defined AltitudeHoldBaro
         measureBaroSum(); 
-        if (frameCounter %   2 == 0) {  //  50 Hz tasks
+        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
           evaluateBaroAltitude();
         }
       #endif
       #ifdef AltitudeHoldRangeFinder
         readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-        if (frameCounter %   2 == 0) {  //  50 Hz tasks
+        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
           evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
         }
       #endif
@@ -1387,7 +1388,7 @@ void loop () {
     // ================================================================
     // 50hz task loop
     // ================================================================
-    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+    if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
 
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
@@ -1406,7 +1407,7 @@ void loop () {
     // ================================================================
     // 10hz task loop
     // ================================================================
-    if (frameCounter %  10 == 0) {  //   10 Hz tasks
+    if (frameCounter % TASK_10HZ == 0) {  //   10 Hz tasks
 
       G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
       tenHZpreviousTime = currentTime;

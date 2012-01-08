@@ -212,7 +212,7 @@ void processFlightControl() {
   // ********************** Update Yaw ***************************************
   processHeading();
   
-  if (frameCounter %   2 == 0) {  // 50hz task
+  if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
     // ********************** Process Altitude hold **************************
     processAltitudeHold();
     // ********************** Process Battery monitor hold **************************

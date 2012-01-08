@@ -26,15 +26,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <GlobalDefined.h>
+
+
 struct fourthOrderData
 {
   float  inputTm1,  inputTm2,  inputTm3,  inputTm4;
   float outputTm1, outputTm2, outputTm3, outputTm4;
 } fourthOrder[3];
-
-#define AX_FILTER 0
-#define AY_FILTER 1
-#define AZ_FILTER 2
 
 float computeFourthOrder(float currentInput, struct fourthOrderData *filterParameters)
 {
@@ -77,39 +76,39 @@ float computeFourthOrder(float currentInput, struct fourthOrderData *filterParam
 
 void setupFourthOrder(void)
 {
-  fourthOrder[AX_FILTER].inputTm1 = 0.0;
-  fourthOrder[AX_FILTER].inputTm2 = 0.0;
-  fourthOrder[AX_FILTER].inputTm3 = 0.0;
-  fourthOrder[AX_FILTER].inputTm4 = 0.0;
+  fourthOrder[XAXIS].inputTm1 = 0.0;
+  fourthOrder[XAXIS].inputTm2 = 0.0;
+  fourthOrder[XAXIS].inputTm3 = 0.0;
+  fourthOrder[XAXIS].inputTm4 = 0.0;
   
-  fourthOrder[AX_FILTER].outputTm1 = 0.0;
-  fourthOrder[AX_FILTER].outputTm2 = 0.0;
-  fourthOrder[AX_FILTER].outputTm3 = 0.0;
-  fourthOrder[AX_FILTER].outputTm4 = 0.0;
-  
-  //////////
-  
-  fourthOrder[AY_FILTER].inputTm1 = 0.0;
-  fourthOrder[AY_FILTER].inputTm2 = 0.0;
-  fourthOrder[AY_FILTER].inputTm3 = 0.0;
-  fourthOrder[AY_FILTER].inputTm4 = 0.0;
-  
-  fourthOrder[AY_FILTER].outputTm1 = 0.0;
-  fourthOrder[AY_FILTER].outputTm2 = 0.0;
-  fourthOrder[AY_FILTER].outputTm3 = 0.0;
-  fourthOrder[AY_FILTER].outputTm4 = 0.0;
+  fourthOrder[XAXIS].outputTm1 = 0.0;
+  fourthOrder[XAXIS].outputTm2 = 0.0;
+  fourthOrder[XAXIS].outputTm3 = 0.0;
+  fourthOrder[XAXIS].outputTm4 = 0.0;
   
   //////////
   
-  fourthOrder[AZ_FILTER].inputTm1 = -9.8065;
-  fourthOrder[AZ_FILTER].inputTm2 = -9.8065;
-  fourthOrder[AZ_FILTER].inputTm3 = -9.8065;
-  fourthOrder[AZ_FILTER].inputTm4 = -9.8065;
+  fourthOrder[YAXIS].inputTm1 = 0.0;
+  fourthOrder[YAXIS].inputTm2 = 0.0;
+  fourthOrder[YAXIS].inputTm3 = 0.0;
+  fourthOrder[YAXIS].inputTm4 = 0.0;
   
-  fourthOrder[AZ_FILTER].outputTm1 = -9.8065;
-  fourthOrder[AZ_FILTER].outputTm2 = -9.8065;
-  fourthOrder[AZ_FILTER].outputTm3 = -9.8065;
-  fourthOrder[AZ_FILTER].outputTm4 = -9.8065;
+  fourthOrder[YAXIS].outputTm1 = 0.0;
+  fourthOrder[YAXIS].outputTm2 = 0.0;
+  fourthOrder[YAXIS].outputTm3 = 0.0;
+  fourthOrder[YAXIS].outputTm4 = 0.0;
+  
+  //////////
+  
+  fourthOrder[ZAXIS].inputTm1 = -9.8065;
+  fourthOrder[ZAXIS].inputTm2 = -9.8065;
+  fourthOrder[ZAXIS].inputTm3 = -9.8065;
+  fourthOrder[ZAXIS].inputTm4 = -9.8065;
+  
+  fourthOrder[ZAXIS].outputTm1 = -9.8065;
+  fourthOrder[ZAXIS].outputTm2 = -9.8065;
+  fourthOrder[ZAXIS].outputTm3 = -9.8065;
+  fourthOrder[ZAXIS].outputTm4 = -9.8065;
   }
 
 ////////////////////////////////////////////////////////////////////////////////
