@@ -129,10 +129,10 @@ void processAltitudeHold();
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   
-  float estimatedAltitude = 0.0;
-  float estimatedZVelocity = 0.0;
-  float altitudeIntegratedError = 0.0;
-  float currentSensorAltitude = 0.0;
+//  float estimatedAltitude = 0.0;
+//  float estimatedZVelocity = 0.0;
+//  float altitudeIntegratedError = 0.0;
+//  float currentSensorAltitude = 0.0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;

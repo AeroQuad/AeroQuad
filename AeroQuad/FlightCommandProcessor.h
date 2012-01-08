@@ -106,7 +106,10 @@ void readPilotCommands() {
          PID[ALTITUDE_HOLD_PID_IDX].integratedError = 0;
          PID[ALTITUDE_HOLD_PID_IDX].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
          isStoreAltitudeNeeded = false;
-         estimatedAltitude = altitudeToHoldTarget;
+         
+//         estimatedAltitude = altitudeToHoldTarget;
+//         estimatedZVelocity = 0;
+//         altitudeIntegratedError = 0;
        }
        altitudeHoldState = ON;
      }
