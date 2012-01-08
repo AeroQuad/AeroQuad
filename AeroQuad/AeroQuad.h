@@ -93,6 +93,11 @@ float G_Dt = 0.002;
 int throttle = 1000;
 byte motorArmed = OFF;
 byte safetyCheck = OFF;
+
+float filteredAccelRoll = 0.0;
+float filteredAccelPitch = 0.0;
+float filteredAccelYaw = 0.0;
+
 // main loop time variable
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
@@ -123,6 +128,11 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  
+//  float estimatedAltitude = 0.0;
+//  float estimatedZVelocity = 0.0;
+//  float altitudeIntegratedError = 0.0;
+//  float currentSensorAltitude = 0.0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;

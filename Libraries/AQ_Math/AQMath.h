@@ -171,4 +171,7 @@ int findMedianInt(int *data, int arraySize);
 
 boolean isSwitched(float previousError, float currentError);
 
+float invSqrt(float x);
+int isq(int32_t x);
+
 #endif

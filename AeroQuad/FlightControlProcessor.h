@@ -212,7 +212,7 @@ void processFlightControl() {
   // ********************** Update Yaw ***************************************
   processHeading();
   
-  if (frameCounter %  10 == 0) {  //   10 Hz tasks
+  if (frameCounter %   2 == 0) {  // 50hz task
     // ********************** Process Altitude hold **************************
     processAltitudeHold();
     // ********************** Process Battery monitor hold **************************
