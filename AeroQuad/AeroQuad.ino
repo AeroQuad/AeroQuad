@@ -1120,7 +1120,13 @@
     #define SERIAL_PORT Serial
   #endif
 #else  
-  #define SERIAL_PORT Serial
+  #if defined(SERIAL_USES_USB)   // STM32 Maple
+    #define SERIAL_PORT SerialUSB
+    #undef BAUD
+    #define BAUD
+  #else
+    #define SERIAL_PORT Serial
+  #endif
 #endif  
 
 // Include this last as it contains objects from above declarations
@@ -1427,5 +1433,6 @@ void loop () {
       frameCounter = 0;
   }
 }
+
 
 
