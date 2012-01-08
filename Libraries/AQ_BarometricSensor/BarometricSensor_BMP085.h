@@ -33,9 +33,9 @@
 
 #define TEMPERATURE 0
 #define PRESSURE 1
+#define OVER_SAMPLING_SETTING 1 // use to be 3
 
-
-byte overSamplingSetting = 3;
+byte overSamplingSetting = OVER_SAMPLING_SETTING;
 int ac1 = 0, ac2 = 0, ac3 = 0;
 unsigned int ac4 = 0, ac5 = 0, ac6 = 0;
 int b1 = 0, b2 = 0, mb = 0, mc = 0, md = 0;
@@ -76,7 +76,7 @@ void initializeBaro() {
   // 1 = standard
   // 2 = high
   // 3 = ultra high resolution
-  overSamplingSetting = 3;
+  overSamplingSetting = OVER_SAMPLING_SETTING;
   pressure = 0;
   temperature = 0;
   baroGroundAltitude = 0;
@@ -129,8 +129,9 @@ void measureBaro() {
       pressureCount = 0;
       select = TEMPERATURE;
     }
-    else
+    else {
       requestRawPressure();
+	}
     pressureCount++;
   }
   else { // select must equal TEMPERATURE
