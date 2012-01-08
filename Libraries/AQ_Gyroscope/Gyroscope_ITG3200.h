@@ -25,25 +25,28 @@
 #include <SensorsStatus.h>
 #include <Gyroscope_ITG3200Defines.h>
 
-#define ITG3200_ADDRESS					0x69
+#ifndef ITG3200_ADDRESS_ALTERNATE
+  #define ITG3200_ADDRESS					0x69
+#else
+  #define ITG3200_ADDRESS					0x68
+#endif
+#define ITG3200_IDENTITY 0x69
 
-int gyroAddress = ITG3200_ADDRESS;
-  
 void initializeGyro() {
 
-  if (readWhoI2C(gyroAddress) == ITG3200_ADDRESS) {
+  if (readWhoI2C(ITG3200_ADDRESS) == ITG3200_IDENTITY) {
 	  vehicleState |= GYRO_DETECTED;
   }
 	
   gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
-  updateRegisterI2C(gyroAddress, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
-  updateRegisterI2C(gyroAddress, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE); // 10Hz low pass filter
-  updateRegisterI2C(gyroAddress, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE); // 10Hz low pass filter
+  updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
     
 void measureGyro() {
-  sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
-  Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
+  sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
     
   // The following 3 lines read the gyro and assign it's data to gyroADC
   // in the correct order and phase to suit the standard shield installation
@@ -67,8 +70,8 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-  sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
-  Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
+  sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     gyroSample[axis] += readShortI2C();
@@ -103,8 +106,8 @@ void calibrateGyro() {
     
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
-      sendByteI2C(gyroAddress, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
-      findZero[i] = readShortI2C(gyroAddress);
+      sendByteI2C(ITG3200_ADDRESS, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
+      findZero[i] = readShortI2C(ITG3200_ADDRESS);
       delay(10);
     }
     gyroZero[axis] = findMedianInt(findZero, FINDZERO);
