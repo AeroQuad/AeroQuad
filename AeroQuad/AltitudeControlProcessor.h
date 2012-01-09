@@ -64,7 +64,7 @@
   float getAltitudeFromSensors() {
     
     if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+      baroGroundAltitude = oversampledBaroAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
       return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
     }
     else {
@@ -115,6 +115,9 @@ void processAltitudeHold()
 
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+      if (altitudeHoldThrottleCorrection < 0) {
+        altitudeHoldThrottleCorrection /= 2;  // going down 2 time slower than when we climb!
+      }
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
