@@ -48,7 +48,7 @@ void calibrateGyro() {
   int findZero[FINDZERO];
     for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
-        sendByteI2C(ITG3200_ADDRESS, (calAxis * 2) + 0x1D);
+        sendByteI2C(ITG3200_ADDRESS, (calAxis * 2) + ITG3200_MEMORY_ADDRESS);
         findZero[i] = readShortI2C(ITG3200_ADDRESS);
         delay(10);
       }
