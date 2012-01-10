@@ -38,25 +38,20 @@ void updateOSD() {
 
   #ifdef ShowAttitudeIndicator
     if ((OSDsched&0x01) || (OSDsched&0x04)) {
-      displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
+      displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], flightMode);
     }
   #endif
 
   if (OSDsched&0x02) {
+    displayFlightTime(motorArmed);
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       displayAltitude(getAltitudeFromSensors(), altitudeToHoldTarget, altitudeHoldState);
     #endif
     #ifdef HeadingMagHold
       displayHeading(kinematicsGetDegreesHeading(ZAXIS));
     #endif
-    #ifdef ShowFlightTimer
-      displayFlightTime(motorArmed);
-    #endif
     #ifdef ShowRSSI
       displayRSSI();
-    #endif
-    #ifdef ShowReticle
-      displayReticle(flightMode);
     #endif
   }
 
@@ -65,6 +60,7 @@ void updateOSD() {
       displayVoltage(motorArmed);
     #endif
   }
+
   OSDsched <<= 1;
   if (OSDsched & 0x10) {
     OSDsched = 0x01;
