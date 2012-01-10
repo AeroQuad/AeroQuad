@@ -37,15 +37,16 @@
  The user must connect a MAX7456 OSD chip to the appropriate header pins on
  the Arduino. These pins are marked 'OSD' on the AeroQuad Shield v2.
 
- If the chip is not connected properly, this code may hang.
+ If the chip is not connected properly, this code should not hang (according 
+ to my best knowledge).
 
  If using the SparkFun MAX7456 breakout board, the reset pin should be wired
  high (+5V) either directly or with 10kOhm resistor.
 
  As the MAX7456 may draw up to 100mA it is a good idea to power it using
  separate regulator (or power it from one of the BEC:s on ESCs). It is known
- that powering from arduino and using 3S battery will overheat the regulator
- which will lead to crash.
+ that powering from arduino and using >=3S battery will overheat the regulator
+ which will lead to Arduino crash.
 
  Special thanks to Alamo for contributing this capability!
 
@@ -59,6 +60,21 @@
 
 #include "OSD.h"
 #include "GlobalDefined.h"
+
+//*******************************************************************
+//******************* OSD CONFIGURATION *****************************
+//*******************************************************************
+
+// Optional OSD items
+
+//#define ShowRSSI               // Show Receiver RSSI
+#ifdef ShowRSSI
+  #define RSSI_PIN     A6     // analog pin to read
+  #define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
+  #define RSSI_100P    1023   // A/D value for 100%
+  #define RSSI_0P      0      // A/D value for 0%
+  #define RSSI_WARN    20     // show alarm at %
+#endif
 
 // You can configure positioning of various display elements below.
 // '#defines' for elements which will not be displayed, can be ignored.
@@ -93,20 +109,15 @@
 #define TIMER_COL 23
 
 //Callsign
-#define CALLSIGN_ROW 2
-#define CALLSIGN_COL 23
-#ifdef ShowCallSign
-const char *callsign = "AeroQD";
+#if defined CALLSIGN
+  const char *callsign = CALLSIGN;
+  #define CALLSIGN_ROW 2
+  #define CALLSIGN_COL (29-strlen(callsign))
 #endif
 
 // RSSI monitor
 #define RSSI_ROW     3
 #define RSSI_COL     23
-#define RSSI_PIN     A6     // analog pin to read
-#define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
-#define RSSI_100P    1023   // A/D value for 100%
-#define RSSI_0P      0      // A/D value for 0%
-#define RSSI_WARN    20     // show alarm at %
 
 // Notify
 #define NOTIFY_ROW MAX_screen_rows-3
@@ -298,6 +309,29 @@ void detectVideoStandard() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+/////////////////////////// Flight time Display //////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+unsigned long prevTime = 0;           // previous time since start when OSD.update() ran
+unsigned int prevArmedTimeSecs = 111; // bogus to force update
+unsigned long armedTime = 0;          // time motors have spent armed
+
+void displayFlightTime(byte areMotorsArmed) {
+  if (areMotorsArmed == ON) {
+    armedTime += ( currentTime-prevTime );
+  }
+
+  prevTime = currentTime;
+  unsigned int armedTimeSecs = armedTime / 1000000;
+  if (armedTimeSecs != prevArmedTimeSecs) {
+    prevArmedTimeSecs = armedTimeSecs;
+    char buf[7];
+    snprintf(buf,7,"\5%02u:%02u",armedTimeSecs/60,armedTimeSecs%60);
+    writeChars(buf, 6, 0, TIMER_ROW, TIMER_COL );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Battery voltage Display //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -313,8 +347,8 @@ void displayVoltage(byte areMotorsArmed) {
   byte    osdBatNo     = osdBatCounter % numberOfBatteries;
   boolean osdBatMinMax = osdBatCounter / numberOfBatteries / 4;
 
-  // only show min/max values when not armed
-  if (areMotorsArmed == true) {
+  // don't show min/max when armed or we have not flown yet
+  if ((areMotorsArmed == true) || (armedTime == 0)){
     osdBatMinMax = false;
   }
 
@@ -468,31 +502,6 @@ void displayHeading(int currentHeading) {
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-/////////////////////////// Flight time Display //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-#ifdef ShowFlightTimer
-
-unsigned long prevTime = 0;           // previous time since start when OSD.update() ran
-unsigned int prevArmedTimeSecs = 111; // bogus to force update
-unsigned long armedTime = 0;          // time motors have spent armed
-
-void displayFlightTime(byte areMotorsArmed) {
-  if (areMotorsArmed == ON) {
-    armedTime += ( currentTime-prevTime );
-  }
-
-  prevTime = currentTime;
-  unsigned int armedTimeSecs = armedTime / 1000000;
-  if (armedTimeSecs != prevArmedTimeSecs) {
-    prevArmedTimeSecs = armedTimeSecs;
-    char buf[7];
-    snprintf(buf,7,"\5%02u:%02u",armedTimeSecs/60,armedTimeSecs%60);
-    writeChars(buf, 6, 0, TIMER_ROW, TIMER_COL );
-  }
-}
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
 /////////////////////////// RSSI Display /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Show RSSI information (analog input value optionally mapped to percents.)
@@ -532,8 +541,9 @@ void displayRSSI() {
 #ifdef ShowAttitudeIndicator
 
 byte AIoldline[5] = {0,0,0,0,0};
+byte lastFlightMode = 9;
 
-void displayArtificialHorizon(float roll, float pitch) {
+void displayArtificialHorizon(float roll, float pitch, byte flightMode) {
 
   short AIrows[5]   = {0,0,0,0,0};  //Holds the row, in pixels, of AI elements: pitch then roll from left to right.
   //Calculate row of new pitch lines
@@ -571,20 +581,9 @@ void displayArtificialHorizon(float roll, float pitch) {
     char RollLine = LINE_ROW_0 + (AIrows[i] % 18);
     writeChars( &RollLine, 1, 0, AIoldline[i], ROLL_COLUMNS[i-1] );
   }
-}
-#endif
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// Reticle Display //////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// Reticle on the center of the screen
-// We have two reticles empty one for RATE_FLIGHT_MODE and one with (s) for 'ATTITUDE_FLIGHT_MODE' mode
-#ifdef ShowReticle
-
-byte lastFlightMode = 9;
-
-void displayReticle(byte flightMode) {
-
+  // Reticle on the center of the screen
+  // We have two reticles empty one for RATE_FLIGHT_MODE and one with (s) for 'ATTITUDE_FLIGHT_MODE' mode
   if (lastFlightMode != flightMode) {
     writeChars( (flightMode == 0) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     lastFlightMode = flightMode;
@@ -667,7 +666,7 @@ void initializeOSD() {
   OSDsched = 0xff; // This will make everything to be updated next round
   updateOSD();     // Make first update now
 
-  #ifdef ShowCallSign
+  #if defined CALLSIGN
     writeChars(callsign,strlen(callsign),0,CALLSIGN_ROW,CALLSIGN_COL);
   #endif
 
