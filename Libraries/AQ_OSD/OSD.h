@@ -32,21 +32,16 @@ byte OSDsched = 0;
 #ifdef HeadingMagHold
   void displayHeading(int currentHeading);
 #endif
-#ifdef ShowFlightTimer
-  void displayFlightTime(byte areMotorsArmed);
-#endif
 #ifdef ShowRSSI
   void displayRSSI();
 #endif
 #ifdef ShowAttitudeIndicator
-  void displayArtificialHorizon(float roll, float pitch);
-#endif
-#ifdef ShowReticle
-  void displayReticle(byte flightMode);
+  void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
 
 void initializeOSD();
 void updateOSD();
+void displayFlightTime(byte areMotorsArmed);
 byte displayNotify();
 byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fmt, ...);
 
