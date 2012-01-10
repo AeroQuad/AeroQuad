@@ -155,10 +155,9 @@
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
 //#define PAL
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
-//#define ShowCallSign           // Show AQ string 
-//#define ShowRSSI               // Show Receiver RSSI
-//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
+//#define CALLSIGN "AeroQD"         // Show (optional) callsign
+//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//#define feet                      // Leave commented for altitude measured in metres, uncomment for feet
 
 // Menu system, currently only usable with OSD
 //#define OSD_SYSTEM_MENU
