@@ -68,7 +68,7 @@
       return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
     }
     else {
-      return oversampledBaroAltitude;    
+      return getBaroAltitude();    
     }
   }
   
@@ -78,7 +78,7 @@
    * @return the baro altitude
    */
   float getAltitudeFromSensors() {
-    return oversampledBaroAltitude;
+    return getBaroAltitude();
   }
   
 #elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)

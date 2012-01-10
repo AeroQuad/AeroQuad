@@ -40,8 +40,8 @@
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -52,13 +52,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -94,7 +94,7 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
@@ -157,15 +157,15 @@
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-//#define OSD
+#define OSD
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
 //#define PAL
-//#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define ShowReticle            // Displays a reticle in the centre of the screen.
-//#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
-//#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
-//#define ShowCallSign           // Show AQ string 
-//#define ShowRSSI               // Show Receiver RSSI
+#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+#define ShowReticle            // Displays a reticle in the centre of the screen.
+#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
+#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
+#define ShowCallSign           // Show AQ string 
+#define ShowRSSI               // Show Receiver RSSI
 //#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 // Menu system, currently only usable with OSD
