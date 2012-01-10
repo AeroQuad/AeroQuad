@@ -28,16 +28,14 @@ float baroAltitude      = 0.0;
 float baroRawAltitude   = 0.0;
 float baroGroundAltitude = 0.0;
 float baroSmoothFactor   = 0.02;
-
-float baroAltitudeSampleSum = 0.0;
-byte baroAltitudeSampleSumCount = 0;
-float oversampledBaroAltitude = 0.0;
   
 // **********************************************************************
 // The following function calls must be defined inside any new subclasses
 // **********************************************************************
 void initializeBaro(); 
 void measureBaro();
+void measureBaroSum();
+void evaluateBaroAltitude();
   
 // *********************************************************
 // The following functions are common between all subclasses
@@ -57,17 +55,7 @@ void measureGroundBaro() {
   baroGroundAltitude = baroGroundAltitude / 25.0;
 }
 
-void measureBaroSum() {
-  measureBaro();
-  baroAltitudeSampleSum += getBaroAltitude();
-  baroAltitudeSampleSumCount++;
-}
 
-void evaluateBaroAltitude() {
-  oversampledBaroAltitude = baroAltitudeSampleSum/baroAltitudeSampleSumCount;
-  baroAltitudeSampleSum = 0;
-  baroAltitudeSampleSumCount = 0;
-}
 
 
 #endif

@@ -40,16 +40,18 @@ int ac1 = 0, ac2 = 0, ac3 = 0;
 unsigned int ac4 = 0, ac5 = 0, ac6 = 0;
 int b1 = 0, b2 = 0, mb = 0, mc = 0, md = 0;
 long pressure = 0;
-long temperature = 0;
 long rawPressure = 0, rawTemperature = 0;
-byte select = 0, pressureCount = 0;
+byte pressureCount = 0;
 float pressureFactor = 1/5.255;
+boolean isReadPressure = false;
+float rawPressureSum = 0;
+byte rawPressureSumCount = 0;
   
 void requestRawPressure() {
   updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x34+(overSamplingSetting<<6));
 }
   
-long readRawPressure(void) {
+long readRawPressure() {
 
   sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
   Wire.requestFrom(BMP085_I2C_ADDRESS, 3); // request three bytes
@@ -69,7 +71,6 @@ unsigned int readRawTemperature() {
 // Define all the virtual functions declared in the main class
 // ***********************************************************
 void initializeBaro() {
-//    float verifyGroundAltitude;
 
   // oversampling setting
   // 0 = ultra low power
@@ -78,7 +79,6 @@ void initializeBaro() {
   // 3 = ultra high resolution
   overSamplingSetting = OVER_SAMPLING_SETTING;
   pressure = 0;
-  temperature = 0;
   baroGroundAltitude = 0;
   pressureFactor = 1/5.255;
     
@@ -100,7 +100,7 @@ void initializeBaro() {
   mc = readShortI2C();
   md = readShortI2C();
   requestRawTemperature(); // setup up next measure() for temperature
-  select = TEMPERATURE;
+  isReadPressure = false;
   pressureCount = 0;
   measureBaro();
   delay(5); // delay for temperature
@@ -116,18 +116,20 @@ void initializeBaro() {
 }
   
 void measureBaro() {
-  long x1, x2, x3, b3, b5, b6, p;
-  unsigned long b4, b7;
-  int32_t tmp;
+  measureBaroSum();
+  evaluateBaroAltitude();
+}
 
+void measureBaroSum() {
   // switch between pressure and tempature measurements
   // each loop, since it's slow to measure pressure
-  if (select == PRESSURE) {
-    rawPressure = readRawPressure();
+  if (isReadPressure) {
+    rawPressureSum += readRawPressure();
+	rawPressureSumCount++;
     if (pressureCount == 4) {
       requestRawTemperature();
       pressureCount = 0;
-      select = TEMPERATURE;
+      isReadPressure = false;
     }
     else {
       requestRawPressure();
@@ -137,14 +139,26 @@ void measureBaro() {
   else { // select must equal TEMPERATURE
     rawTemperature = (long)readRawTemperature();
     requestRawPressure();
-    select = PRESSURE;
+    isReadPressure = true;
   }
-    
+}
+
+void evaluateBaroAltitude() {
+  long x1, x2, x3, b3, b5, b6, p;
+  unsigned long b4, b7;
+  int32_t tmp;
+
   //calculate true temperature
   x1 = ((long)rawTemperature - ac6) * ac5 >> 15;
   x2 = ((long) mc << 11) / (x1 + md);
   b5 = x1 + x2;
-  temperature = ((b5 + 8) >> 4);
+
+  if (rawPressureSumCount == 0) { // may occure at init time that no pressure have been read yet!
+    return;
+  }
+  rawPressure = rawPressureSum / rawPressureSumCount;
+  rawPressureSum = 0.0;
+  rawPressureSumCount = 0;
   
   //calculate true pressure
   b6 = b5 - 4000;
@@ -171,9 +185,9 @@ void measureBaro() {
   pressure = (p + ((x1 + x2 + 3791) >> 4));
     
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
-  //baroRawAltitude = (101325.0-pressure)/4096*346;
   baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
 }
+
 
 
 #endif
