@@ -152,8 +152,7 @@
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
 //#define OSD
-//Choose your (default in case autodetect enabled) video standard: default=NTSC
-//#define PAL
+//#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "AeroQD"         // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
