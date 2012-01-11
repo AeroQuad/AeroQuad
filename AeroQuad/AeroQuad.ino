@@ -28,6 +28,13 @@
 
 #include "UserConfiguration.h" // Edit this file first before uploading to the AeroQuad
 
+// Checks to make sure we have the right combinations defined
+#if defined(FlightAngleMARG) && !defined(HeadingMagHold)
+  #undef FlightAngleMARG
+#elif defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
+  #undef FlightAngleARG
+#endif
+
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
