@@ -657,46 +657,46 @@ void fastTelemetry()
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
         printInt((int)flightMode);
-       for (byte axis = XAXIS; axis <= YAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
-       for (byte axis = XAXIS; axis <= YAXIS; axis++) {
-         sendBinaryFloat(meterPerSec[axis]);
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
        }
        sendBinaryFloat(accelOneG);
        #ifdef HeadingMagHold
           sendBinaryFloat(hdgX);
           sendBinaryFloat(hdgY);
-          sendBinaryFloat(getMagnetometerRawData(XAXIS));
-          sendBinaryFloat(getMagnetometerRawData(YAXIS));
-          sendBinaryFloat(getMagnetometerRawData(ZAXIS));
+		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+            sendBinaryFloat(getMagnetometerRawData(axis));
+          }  
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
        #endif
-        for (byte axis = XAXIS; axis < ZAXIS; axis++) {
+        for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
           sendBinaryFloat(kinematicsAngle[axis]);
         }
-       printInt(32767); // Stop word of 0x7FFF
+        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-         sendBinaryFloat(meterPerSec[axis]);
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++)
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++)
        #ifdef HeadingMagHold
          sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(getGyroUnbias(axis));
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(kinematicsAngle[axis]);
        }
        printInt(32767); // Stop word of 0x7FFF
