@@ -28,12 +28,12 @@
 
 void initializeAccel() {
 
-  if (readWhoI2C(ACCEL_ADDRESS) !=  0xE5) { 			// page 14 of datasheet
+  if (readWhoI2C(ACCEL_ADDRESS) ==  0xE5) { 			// page 14 of datasheet
     vehicleState |= ACCEL_DETECTED;
   }
 	
   updateRegisterI2C(ACCEL_ADDRESS, 0x2D, 1<<3); 	// set device to *measure*
-  updateRegisterI2C(ACCEL_ADDRESS, 0x31, 0x08); 	// set full range and +/- 2G
+  updateRegisterI2C(ACCEL_ADDRESS, 0x31, 0x09);     // set full range and +/- 4G
   updateRegisterI2C(ACCEL_ADDRESS, 0x2C, 8+2+1);    // 200hz sampling
   delay(10); 
 }
@@ -44,7 +44,7 @@ void measureAccel() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
 
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = readReverseShortI2C() * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = readReverseShortI2C() * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }
 }
 
@@ -61,7 +61,7 @@ void measureAccelSum() {
 void evaluateMetersPerSec() {
 	
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
 	accelSample[axis] = 0;
   }
   accelSampleCount = 0;		
@@ -75,16 +75,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 

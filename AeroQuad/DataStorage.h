@@ -145,8 +145,8 @@ void initializeEEPROM() {
   }
     
   receiverXmitFactor = 1.0;
+  minArmedThrottle = 1150;
   gyroSmoothFactor = 1.0;
-  accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
@@ -165,6 +165,12 @@ void initializeEEPROM() {
     batteryMonitorAlarmVoltage = 3.33;
     batteryMonitorThrottleTarget = 1450;
     batteryMonitorGoinDownTime = 60000;
+  #endif
+
+  // Range Finder
+  #if defined (AltitudeHoldRangeFinder)
+    maxRangeFinderRange = 3.0;
+    minRangeFinderRange = 0.25;
   #endif
 }
 
@@ -223,16 +229,17 @@ void readEEPROM() {
     }
   }
     
+  minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
-  if (headingHoldConfig) {
-    vehicleState |= HEADINGHOLD_ENABLED;
-  }
-  else {
-    vehicleState &= ~HEADINGHOLD_ENABLED;
-  }  
+
+  // Range Finder
+  #if defined (AltitudeHoldRangeFinder)
+    maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);
+    minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
+  #endif     
 }
 
 void writeEEPROM(){
@@ -278,7 +285,6 @@ void writeEEPROM(){
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
@@ -286,6 +292,7 @@ void writeEEPROM(){
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
+  writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
@@ -298,7 +305,16 @@ void writeEEPROM(){
     writeFloat(batteryMonitorThrottleTarget, BATT_THROTTLE_TARGET_ADR);
     writeFloat(batteryMonitorGoinDownTime, BATT_DOWN_TIME_ADR);
   #endif
-  
+
+  // Range Finder
+  #if defined (AltitudeHoldRangeFinder)
+    writeFloat(maxRangeFinderRange, RANGE_FINDER_MAX_ADR);
+    writeFloat(minRangeFinderRange, RANGE_FINDER_MIN_ADR);
+  #else
+    writeFloat(0, RANGE_FINDER_MAX_ADR);
+    writeFloat(0, RANGE_FINDER_MIN_ADR);
+  #endif
+
   sei(); // Restart interrupts
 }
 
@@ -311,7 +327,6 @@ void initSensorsZeroFromEEPROM() {
  
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
-  accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
 void storeSensorsZeroToEEPROM() {
@@ -323,7 +338,6 @@ void storeSensorsZeroToEEPROM() {
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 }
 
 void initReceiverFromEEPROM() {

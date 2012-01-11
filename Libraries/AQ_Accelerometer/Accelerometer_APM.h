@@ -32,7 +32,7 @@ void measureAccel() {
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     const float rawADC = readADC(axis+3);
 	if (rawADC > 500) { // Check if measurement good
-	  meterPerSec[axis] = rawADC * accelScaleFactor[axis] + runTimeAccelBias[axis];
+	  meterPerSecSec[axis] = rawADC * accelScaleFactor[axis] + runTimeAccelBias[axis];
 	}
   }
 }
@@ -49,7 +49,12 @@ void measureAccelSum() {
 }
 
 void evaluateMetersPerSec() {
-  // do nothing here
+  
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+    meterPerSecSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+	accelSample[axis] = 0;
+  }
+  accelSampleCount = 0;
 }
 
 void computeAccelBias() {
@@ -60,16 +65,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 #endif

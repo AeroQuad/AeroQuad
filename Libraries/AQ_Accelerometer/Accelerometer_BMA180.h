@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0 - Januar 2012
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -25,39 +25,42 @@
 #include <Device_I2C.h>
 #include <SensorsStatus.h>
 
-#define ACCEL_ADDRESS 0x40
-#define ACCEL_IDENTITY 0x03
-#define ACCEL_RESET_REGISTER 0x10
-#define ACCEL_TRIGER_RESET_VALUE 0xB6
-#define ACCEL_ENABLE_WRITE_CONTROL_REGISTER 0x0D
-#define ACCEL_CONTROL_REGISTER 0x10
-#define ACCEL_BW_TCS 0x20
-#define ACCEL_LOW_PASS_FILTER_REGISTER 0x20
-#define ACCEL_10HZ_LOW_PASS_FILTER_VALUE 0x0F
-#define ACCEL_1200HZ_LOW_PASS_FILTER_VALUE 0X7F
-#define ACCEL_OFFSET_REGISTER 0x35
-#define ACCEL_READ_ROLL_ADDRESS 0x02
-#define ACCEL_READ_PITCH_ADDRESS 0x04
-#define ACCEL_READ_YAW_ADDRESS 0x06
+#ifdef BMA180_ADDRESS_ALTERNATE
+  #define BMA180_ADDRESS 0x41   // Alternate address 41h
+#else
+  #define BMA180_ADDRESS 0x40
+#endif
+#define BMA180_IDENTITY 0x03
+#define BMA180_RESET_REGISTER 0x10
+#define BMA180_TRIGER_RESET_VALUE 0xB6
+#define BMA180_ENABLE_WRITE_CONTROL_REGISTER 0x0D
+#define BMA180_CONTROL_REGISTER 0x10
+#define BMA180_BW_TCS 0x20
+#define BMA180_LOW_PASS_FILTER_REGISTER 0x20
+#define BMA180_10HZ_LOW_PASS_FILTER_VALUE 0x0F
+#define BMA180_1200HZ_LOW_PASS_FILTER_VALUE 0X7F
+#define BMA180_OFFSET_REGISTER 0x35
+#define BMA180_READ_ROLL_ADDRESS 0x02
+#define BMA180_READ_PITCH_ADDRESS 0x04
+#define BMA180_READ_YAW_ADDRESS 0x06
+#define BMA180_BUFFER_SIZE 6
 
 void initializeAccel() {
   
-  //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
-  
-  if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) {// page 52 of datasheet
+  if (readWhoI2C(BMA180_ADDRESS) == BMA180_IDENTITY) {// page 52 of datasheet
     vehicleState |= ACCEL_DETECTED;
   }
 	
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_RESET_REGISTER, ACCEL_TRIGER_RESET_VALUE); 					//reset device
+  updateRegisterI2C(BMA180_ADDRESS, BMA180_RESET_REGISTER, BMA180_TRIGER_RESET_VALUE); 					//reset device
   delay(10);  																							//sleep 10 ms after reset (page 25)
 
   // In datasheet, summary register map is page 21
   // Low pass filter settings is page 27
   // Range settings is page 28
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_ENABLE_WRITE_CONTROL_REGISTER, ACCEL_CONTROL_REGISTER); 		//enable writing to control registers
-  sendByteI2C(ACCEL_ADDRESS, ACCEL_BW_TCS); 															// register bw_tcs (bits 4-7)
-  byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_1200HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
+  updateRegisterI2C(BMA180_ADDRESS, BMA180_ENABLE_WRITE_CONTROL_REGISTER, BMA180_CONTROL_REGISTER); 		//enable writing to control registers
+  sendByteI2C(BMA180_ADDRESS, BMA180_BW_TCS); 															// register bw_tcs (bits 4-7)
+  byte data = readByteI2C(BMA180_ADDRESS); 																// get current register value
+  updateRegisterI2C(BMA180_ADDRESS, BMA180_LOW_PASS_FILTER_REGISTER, data & BMA180_1200HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 1.2kHz (value = 0000xxxx)
 
   // From page 27 of BMA180 Datasheet
   //  1.0g = 0.13 mg/LSB
@@ -67,32 +70,28 @@ void initializeAccel() {
   //  4.0g = 0.50 mg/LSB
   //  8.0g = 0.99 mg/LSB
   // 16.0g = 1.98 mg/LSB
-  sendByteI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER); 													// register offset_lsb1 (bits 1-3)
-  data = readByteI2C(ACCEL_ADDRESS);
+  sendByteI2C(BMA180_ADDRESS, BMA180_OFFSET_REGISTER); 													// register offset_lsb1 (bits 1-3)
+  data = readByteI2C(BMA180_ADDRESS);
   data &= 0xF1;
   //data |= 0x04; // Set range select bits for +/-2g
-  data |= 0x08;
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER, data);	
+  data |= 0x08; // set range select bits for +/-4g
+  updateRegisterI2C(BMA180_ADDRESS, BMA180_OFFSET_REGISTER, data);	
 }
   
 void measureAccel() {
 
-  Wire.beginTransmission(ACCEL_ADDRESS);
-  Wire.write(ACCEL_READ_ROLL_ADDRESS);
-  Wire.endTransmission();
-  Wire.requestFrom(ACCEL_ADDRESS, 6);
+  sendByteI2C(BMA180_ADDRESS, BMA180_READ_ROLL_ADDRESS);
+  Wire.requestFrom(BMA180_ADDRESS, BMA180_BUFFER_SIZE);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = (readReverseShortI2C() >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = (readReverseShortI2C() >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }  
 }
 
 void measureAccelSum() {
 
-  Wire.beginTransmission(ACCEL_ADDRESS);
-  Wire.write(ACCEL_READ_ROLL_ADDRESS);
-  Wire.endTransmission();
-  Wire.requestFrom(ACCEL_ADDRESS, 6);
+  sendByteI2C(BMA180_ADDRESS, BMA180_READ_ROLL_ADDRESS);
+  Wire.requestFrom(BMA180_ADDRESS, BMA180_BUFFER_SIZE);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     accelSample[axis] += (readReverseShortI2C() >> 2);
@@ -103,7 +102,7 @@ void measureAccelSum() {
 void evaluateMetersPerSec() {
 
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSecSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
 	accelSample[axis] = 0;
   }
   accelSampleCount = 0;
@@ -117,16 +116,16 @@ void computeAccelBias() {
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    meterPerSecSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }
   accelSampleCount = 0;
 
-  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
-  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
-  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+  runTimeAccelBias[XAXIS] = -meterPerSecSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSecSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSecSec[ZAXIS];
 
-  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  accelOneG = abs(meterPerSecSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
 }
 
 #endif

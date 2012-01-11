@@ -33,6 +33,23 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
+//void computeEstimatedAltitude(float currentSensorAltitude) {
+//
+//  float altitudeError = currentSensorAltitude - estimatedAltitude;
+//  altitudeIntegratedError += altitudeError;
+//  altitudeIntegratedError = constrain(altitudeIntegratedError,-0.5,0.5);
+//  
+//  // Gravity vector correction and projection to the local Z
+//  float zVelocity = ((filteredAccelYaw * (1 - accelOneG * invSqrt(isq(filteredAccelRoll) + isq(filteredAccelPitch) + isq(filteredAccelYaw)))) / 10) + altitudeIntegratedError;
+//
+//  float altitudeDelta = (zVelocity * G_Dt) + (altitudeError * G_Dt);
+//  estimatedAltitude = ((estimatedZVelocity + altitudeDelta) * G_Dt) +  (altitudeError * G_Dt);
+//  estimatedZVelocity += zVelocity;
+//}
+
+
+
+
 /**
  * getAltitudeFromSensors
  *
@@ -90,12 +107,13 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     if (altitudeHoldState == ON) {
-      float currentAltitude = getAltitudeFromSensors();
-      if (currentAltitude == INVALID_ALTITUDE) {
+      float currentSensorAltitude = getAltitudeFromSensors();
+      if (currentSensorAltitude == INVALID_ALTITUDE) {
         throttle = receiverCommand[THROTTLE];
         return;
       }
-      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
+
+      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD

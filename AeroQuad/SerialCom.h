@@ -82,10 +82,6 @@ void readSerialCommand() {
       heading = 0;
       relativeHeading = 0;
       headingHold = 0;
-      if (headingHoldConfig)
-        vehicleState |= HEADINGHOLD_ENABLED;
-      else
-        vehicleState &= ~HEADINGHOLD_ENABLED;
       break;
       
     case 'D': // Altitude hold PID
@@ -107,9 +103,8 @@ void readSerialCommand() {
       
     case 'E': // Receive sensor filtering values
       gyroSmoothFactor = readFloatSerial();
-      accelSmoothFactor = readFloatSerial();
-      readFloatSerial(); // timeConstant was not used anymore, removed! Mikro, clean this!
       aref = readFloatSerial();
+      minArmedThrottle = readFloatSerial();
       break;
       
     case 'F': // Receive transmitter smoothing values
@@ -164,7 +159,7 @@ void readSerialCommand() {
       computeAccelBias();
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
         calibrateKinematics();
-        accelOneG = meterPerSec[ZAXIS];
+        accelOneG = meterPerSecSec[ZAXIS];
       #endif
       storeSensorsZeroToEEPROM();
       break;
@@ -211,6 +206,16 @@ void readSerialCommand() {
       #endif
       break;
       
+    case 'U': // Range Finder
+      #if defined (AltitudeHoldRangeFinder)
+        maxRangeFinderRange = readFloatSerial();
+        minRangeFinderRange = readFloatSerial();
+      #else
+        readFloatSerial();
+        readFloatSerial();
+      #endif
+      break;
+
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
@@ -345,11 +350,10 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
-  case 'e': // Send sensor filtering values
+  case 'e': // miscellaneous config values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(accelSmoothFactor);
-    PrintValueComma(0);
-    SERIAL_PRINTLN(aref);
+    PrintValueComma(aref);
+    SERIAL_PRINTLN(minArmedThrottle);
     queryType = 'X';
     break;
     
@@ -383,7 +387,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSec[axis]);
+      PrintValueComma(meterPerSecSec[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
@@ -420,12 +424,12 @@ void sendSerialTelemetry() {
     
   case 'l': // Send raw accel values
     measureAccelSum();
-    PrintValueComma((float)(accelSample[XAXIS]/accelSampleCount));
-    accelSample[XAXIS] = 0.0;
-    PrintValueComma((float)(accelSample[YAXIS]/accelSampleCount));
-    accelSample[YAXIS] = 0.0;
-    SERIAL_PRINTLN ((float)(accelSample[ZAXIS]/accelSampleCount));
-    accelSample[ZAXIS] = 0.0;
+    PrintValueComma((int)(accelSample[XAXIS]/accelSampleCount));
+    accelSample[XAXIS] = 0;
+    PrintValueComma((int)(accelSample[YAXIS]/accelSampleCount));
+    accelSample[YAXIS] = 0;
+    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]/accelSampleCount));
+    accelSample[ZAXIS] = 0;
     accelSampleCount = 0;
     break;
     
@@ -535,7 +539,18 @@ void sendSerialTelemetry() {
     }
     SERIAL_PRINTLN();
     break;
-    
+
+  case 'u': // Send range finder values
+    #if defined (AltitudeHoldRangeFinder)
+      PrintValueComma(maxRangeFinderRange);
+      SERIAL_PRINTLN(minRangeFinderRange);
+    #else
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
   case 'x': // Stop sending messages
     break;
     
@@ -642,46 +657,46 @@ void fastTelemetry()
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
         printInt((int)flightMode);
-       for (byte axis = XAXIS; axis <= YAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
-       for (byte axis = XAXIS; axis <= YAXIS; axis++) {
-         sendBinaryFloat(meterPerSec[axis]);
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
        }
        sendBinaryFloat(accelOneG);
        #ifdef HeadingMagHold
           sendBinaryFloat(hdgX);
           sendBinaryFloat(hdgY);
-          sendBinaryFloat(getMagnetometerRawData(XAXIS));
-          sendBinaryFloat(getMagnetometerRawData(YAXIS));
-          sendBinaryFloat(getMagnetometerRawData(ZAXIS));
+		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+            sendBinaryFloat(getMagnetometerRawData(axis));
+          }  
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
        #endif
-        for (byte axis = XAXIS; axis < ZAXIS; axis++) {
+        for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
           sendBinaryFloat(kinematicsAngle[axis]);
         }
-       printInt(32767); // Stop word of 0x7FFF
+        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-         sendBinaryFloat(meterPerSec[axis]);
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++)
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++)
        #ifdef HeadingMagHold
          sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(getGyroUnbias(axis));
        }
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
          sendBinaryFloat(kinematicsAngle[axis]);
        }
        printInt(32767); // Stop word of 0x7FFF

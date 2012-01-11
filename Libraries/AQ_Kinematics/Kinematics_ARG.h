@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_KINEMATICS_MARG_
-#define _AQ_KINEMATICS_MARG_
+#ifndef _AQ_KINEMATICS_ARG_
+#define _AQ_KINEMATICS_ARG_
 
 //=====================================================================================================
 // IMU.c

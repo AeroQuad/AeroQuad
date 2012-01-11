@@ -85,14 +85,22 @@ int testCommand = 1000;
  */
 #define RATE_FLIGHT_MODE 0
 #define ATTITUDE_FLIGHT_MODE 1
+
+#define TASK_100HZ 1
+#define TASK_50HZ 2
+#define TASK_10HZ 10
+#define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
+
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
-int minArmedThrottle = MIN_ARMED_THROTTLE; // Read in from EEPROM, defines min throttle during flips
+int minArmedThrottle; // initial value configured by user
 
 float G_Dt = 0.002; 
 int throttle = 1000;
 byte motorArmed = OFF;
 byte safetyCheck = OFF;
+float filteredAccel[3] = {0.0,0.0,0.0};
+
 // main loop time variable
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
@@ -185,8 +193,8 @@ typedef struct {
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
+  float MINARMEDTHROTTLE_ADR;
   float GYROSMOOTH_ADR;
-  float ACCSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
@@ -217,6 +225,9 @@ typedef struct {
   float BATT_ALARM_VOLTAGE_ADR;
   float BATT_THROTTLE_TARGET_ADR;
   float BATT_DOWN_TIME_ADR;
+  // Range Finder
+  float RANGE_FINDER_MAX_ADR;
+  float RANGE_FINDER_MIN_ADR;
 } t_NVR_Data;  
 
 
