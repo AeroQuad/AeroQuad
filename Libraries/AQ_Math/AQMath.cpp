@@ -413,7 +413,7 @@ float invSqrt (float x){
   return 0.5f * conv.f * (3.0f - x * conv.f * conv.f);
 } 
 
-int isq(int x) {
+int32_t isq(int32_t  x) {
   return x * x;
 }
 
