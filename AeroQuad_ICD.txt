@@ -25,7 +25,7 @@ O       waypoints                       o       read waypoints
 P       camera values                   p       read camera values
 Q                                       q       read vehicle state variable
 R                                       r       vehicle attitude
-S                                       s       read flight data
+S                                       s       read vehicle status
 T                                       t       read processed transmitter data
 U       range finder                    u       read range finder
 V                                       v
