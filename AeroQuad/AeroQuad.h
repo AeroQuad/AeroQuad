@@ -85,14 +85,22 @@ int testCommand = 1000;
  */
 #define RATE_FLIGHT_MODE 0
 #define ATTITUDE_FLIGHT_MODE 1
+
+#define TASK_100HZ 1
+#define TASK_50HZ 2
+#define TASK_10HZ 10
+#define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
+
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
-int minArmedThrottle = 1150;
+int minArmedThrottle = MIN_ARMED_THROTTLE;
 
 float G_Dt = 0.002; 
 int throttle = 1000;
 byte motorArmed = OFF;
 byte safetyCheck = OFF;
+float filteredAccel[3] = {0.0,0.0,0.0};
+
 // main loop time variable
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;

@@ -197,6 +197,7 @@
   #include <Device_I2C.h>
 
   // Gyroscope declaration
+  #define ITG3200_ADDRESS_ALTERNATE
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
@@ -229,7 +230,6 @@
    * Put AeroQuad_Mini specific intialization need here
    */
   void initPlatform() {
-    gyroAddress = ITG3200_ADDRESS-1;
 
     pinMode(LED_Red, OUTPUT);
     digitalWrite(LED_Red, LOW);
@@ -376,7 +376,6 @@
   void measureCriticalSensors() {
     measureAccelSum();
     measureGyroSum();
-    
   }
 #endif
 
@@ -388,6 +387,7 @@
   #include <Device_I2C.h>
 
   // Gyroscope declaration
+  #define ITG3200_ADDRESS_ALTERNATE
   #include <Gyroscope_ITG3200_9DOF.h>
 
   // Accelerometer declaration
@@ -965,7 +965,13 @@
     #define SERIAL_PORT Serial
   #endif
 #else  
-  #define SERIAL_PORT Serial
+  #if defined(SERIAL_USES_USB)   // STM32 Maple
+    #define SERIAL_PORT SerialUSB
+    #undef BAUD
+    #define BAUD
+  #else
+    #define SERIAL_PORT Serial
+  #endif
 #endif  
 
 // Include this last as it contains objects from above declarations
@@ -1125,7 +1131,7 @@ void loop () {
     // ================================================================
     // 100hz task loop
     // ================================================================
-    if (frameCounter %   1 == 0) {  //  100 Hz tasks
+    if (frameCounter % TASK_100HZ == 0) {  //  100 Hz tasks
   
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
@@ -1133,18 +1139,18 @@ void loop () {
       evaluateMetersPerSec();
       evaluateGyroRate();
 
-      const float filteredAccelRoll = computeFourthOrder(meterPerSecSec[XAXIS], &fourthOrder[AX_FILTER]);
-      const float filteredAccelPitch = computeFourthOrder(meterPerSecSec[YAXIS], &fourthOrder[AY_FILTER]);
-      const float filteredAccelYaw = computeFourthOrder(meterPerSecSec[ZAXIS], &fourthOrder[AZ_FILTER]);
+      for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+        filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+      }
       
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1154,9 +1160,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             getMagnetometerRawData(XAXIS),
                             getMagnetometerRawData(YAXIS),
                             getMagnetometerRawData(ZAXIS),
@@ -1165,9 +1171,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1176,9 +1182,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             accelOneG,
                             getHdgXY(XAXIS),
                             getHdgXY(YAXIS),
@@ -1187,47 +1193,53 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccelRoll,
-                            filteredAccelPitch,
-                            filteredAccelYaw,
+                            filteredAccel[XAXIS],
+                            filteredAccel[YAXIS],
+                            filteredAccel[ZAXIS],
                             accelOneG,
                             0.0,
                             0.0,
                             G_Dt);
       #endif
 
+
+      // Evaluate are here because we want it to be synchronized with the processFlightControl
+      #if defined AltitudeHoldBaro
+        measureBaroSum(); 
+        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+          evaluateBaroAltitude();
+        }
+      #endif
+      #ifdef AltitudeHoldRangeFinder
+        readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
+        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+          evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
+        }
+      #endif
+            
       // Combines external pilot commands and measured sensor data to generate motor commands
       processFlightControl();
-
+      
       #ifdef BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
       #endif
-      
-      #ifdef AltitudeHoldRangeFinder
-        readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-      #endif
+
+
     }
 
     // ================================================================
     // 50hz task loop
     // ================================================================
-    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+    if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
 
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
 
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); // defined in FlightCommand.pde
-
-      #if defined AltitudeHoldBaro
-        measureBaro(); // defined in altitude.h
-      #endif
-      #ifdef AltitudeHoldRangeFinder
-        evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
-      #endif
 
       #if defined(CameraControl)
         cameraControlSetPitch(kinematicsAngle[YAXIS]);
@@ -1240,7 +1252,7 @@ void loop () {
     // ================================================================
     // 10hz task loop
     // ================================================================
-    if (frameCounter %  10 == 0) {  //   10 Hz tasks
+    if (frameCounter % TASK_10HZ == 0) {  //   10 Hz tasks
 
       G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
       tenHZpreviousTime = currentTime;
@@ -1251,7 +1263,6 @@ void loop () {
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt);
       #endif
-      
 
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
@@ -1272,5 +1283,6 @@ void loop () {
       frameCounter = 0;
   }
 }
+
 
 

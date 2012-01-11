@@ -24,8 +24,8 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
-double baroAltitude      = 0.0; 
-double baroRawAltitude   = 0.0;
+float baroAltitude      = 0.0; 
+float baroRawAltitude   = 0.0;
 float baroGroundAltitude = 0.0;
 float baroSmoothFactor   = 0.02;
   
@@ -34,6 +34,8 @@ float baroSmoothFactor   = 0.02;
 // **********************************************************************
 void initializeBaro(); 
 void measureBaro();
+void measureBaroSum();
+void evaluateBaroAltitude();
   
 // *********************************************************
 // The following functions are common between all subclasses
@@ -52,6 +54,8 @@ void measureGroundBaro() {
   }
   baroGroundAltitude = baroGroundAltitude / 25.0;
 }
+
+
 
 
 #endif

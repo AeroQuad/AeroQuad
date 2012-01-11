@@ -402,3 +402,18 @@ boolean isSwitched(float previousError, float currentError) {
   }
   return false;
 }
+
+float invSqrt (float x){ 
+  union{  
+    int32_t i;  
+    float   f; 
+  } conv; 
+  conv.f = x; 
+  conv.i = 0x5f3759df - (conv.i >> 1); 
+  return 0.5f * conv.f * (3.0f - x * conv.f * conv.f);
+} 
+
+int isq(int x) {
+  return x * x;
+}
+
