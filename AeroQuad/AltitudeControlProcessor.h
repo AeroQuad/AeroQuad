@@ -98,6 +98,22 @@ void processAltitudeHold()
 
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+      
+      #if defined (UseAltHoldZDampening)
+        float zVelocity = ((filteredAccelSum[ZAXIS]/filteredAccelSumCount) * 
+                           (1 - accelOneG * invSqrt(isq(filteredAccelSum[XAXIS]/filteredAccelSumCount) + 
+                                                    isq(filteredAccelSum[YAXIS]/filteredAccelSumCount) + 
+                                                    isq(filteredAccelSum[ZAXIS]/filteredAccelSumCount))));
+        for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+          filteredAccelSum[axis] = 0.0;
+        }
+        filteredAccelSumCount = 0;
+        int throttleVelocityCorrection = -updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
+        throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust/2, maxThrottleAdjust/2);
+      #else
+        int throttleVelocityCorrection = 0;
+      #endif      
+      
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
@@ -108,7 +124,7 @@ void processAltitudeHold()
           altitudeToHoldTarget -= 0.01;
         }
       }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + throttleVelocityCorrection;
     }
     else {
       throttle = receiverCommand[THROTTLE];
