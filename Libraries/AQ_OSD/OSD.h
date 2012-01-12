@@ -43,6 +43,31 @@ void initializeOSD();
 void updateOSD();
 void displayFlightTime(byte areMotorsArmed);
 byte displayNotify();
+
+// OSD notification system
+//
+// void notifyOSD(byte flags, char *fmt, ...)
+//   - display notification string on OSD
+//
+// void notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, char *fmt, ...)
+//   - display notification with blinking region = 'cursor'
+//   - characters between cursorLeft and cursorRight will blink if OSD_CURSOR flag is used
+//
+//   fmt == NULL will clear
+//   flags -- message priority and options i.e. (OSD_CRIT|OSD_BLINK|OSD_CENTER)
+
+#define OSD_INFO    0x00
+#define OSD_WARN    0x40
+#define OSD_ERR     0x80
+#define OSD_CRIT    0xc0
+#define OSD_NOCLEAR 0x20 // do not clear the message after ~5s
+#define OSD_CURSOR  0x10 // enable cursor
+#define OSD_BLINK   0x08 // blinking message
+#define OSD_INVERT  0x04 // inverted message
+#define OSD_NOW     0x02 // show message immediately (do not wait until OSD update)
+#define OSD_CENTER  0x01 // Justify at center
+
+#define notifyOSD(flags,fmt,args...) notifyOSDmenu(flags,255,255,fmt, ## args)
 byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fmt, ...);
 
 #endif
