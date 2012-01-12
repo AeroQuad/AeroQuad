@@ -37,7 +37,7 @@
  The user must connect a MAX7456 OSD chip to the appropriate header pins on
  the Arduino. These pins are marked 'OSD' on the AeroQuad Shield v2.
 
- If the chip is not connected properly, this code should not hang (according 
+ If the chip is not connected properly, this code should not hang (according
  to my best knowledge).
 
  If using the SparkFun MAX7456 breakout board, the reset pin should be wired

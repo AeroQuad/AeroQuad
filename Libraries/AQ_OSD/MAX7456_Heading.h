@@ -28,7 +28,7 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(int currentHeading) {
-  
+
   if (currentHeading != lastHeading) {
     char buf[6];
     snprintf(buf,6,"\6%3d\7",currentHeading); // \6 is compass \7 is degree symbol

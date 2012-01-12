@@ -53,6 +53,4 @@ void displayRSSI() {
   }
 }
 
-#endif  // #define _AQ_OSD_MAX7456_H_
-
-
+#endif  // #define _AQ_OSD_MAX7456_RSSI_H_

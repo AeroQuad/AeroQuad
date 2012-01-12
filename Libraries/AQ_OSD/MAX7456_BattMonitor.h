@@ -63,14 +63,14 @@ void displayVoltage(byte areMotorsArmed) {
     else {
       currentValue = batteryData[osdBatNo].current*10.0;
     }
-    
+
     if (abs(currentValue)>=100) { // > 10A only display whole amps
       snprintf(buf,12,"%4dA%5d\24  ", currentValue/10, (int)batteryData[osdBatNo].usedCapacity);
     }
     else {
       snprintf(buf,12,"%c%1d.%1dA%5d\24  ", currentValue<0?'-':' ',abs(currentValue/10),abs(currentValue%10),(int)batteryData[osdBatNo].usedCapacity);
-    }      
-      
+    }
+
     writeChars( buf, 11, 0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL+6 );
   }
 
@@ -78,7 +78,7 @@ void displayVoltage(byte areMotorsArmed) {
   if (osdBatCounter >= numberOfBatteries * 8) {
     osdBatCounter = 0;
   }
-  
+
   #if defined (BattMonitorAutoDescent)
     if (batteryAlarm && areMotorsArmed) {
       if (!descentWarningShown) {
