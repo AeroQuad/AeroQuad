@@ -6,6 +6,7 @@ Version 3.0 Release Notes (x/x/xxxx)
 ----------------------------------------
   * under construction
   * new libraries
+  
 
 Version 2.5.1 Release Notes (12/22/2011)
 ----------------------------------------
