@@ -342,7 +342,7 @@
         BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
     #else
       struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((4.98 / 1024.0) * (14.71 + 7.56) / 7.56),0.86)}; // v2 shield powered via power jack
+        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((4.98 / 1024.0) * (14.71 + 7.56) / 7.56), 0.86)}; // v2 shield powered via power jack
     #endif
   #endif
 
