@@ -27,6 +27,8 @@
 
 byte    numberOfBatteries = 0; 
 boolean batteryAlarm      = false;
+boolean batteryWarning    = false;
+byte    buzzerState       = 0;
 
 float batteryAlarmCellVoltage   = 3.33; // 10.0V on 3S
 float batteryWarningCellVoltage = 3.66; // 11.0V on 3S
@@ -55,6 +57,10 @@ void initializeBatteryMonitor(byte nb, float alarmVoltage) {
   setBatteryCellVoltageThreshold(alarmVoltage);
   for (int i = 0; i < numberOfBatteries; i++) {
     resetBattery(i);
+  }
+  for (byte i=1; batteryBuzzerPins[i]!=255 ; i++) {
+    pinMode(batteryBuzzerPins[i], OUTPUT);
+    digitalWrite(batteryBuzzerPins[i], LOW);
   }
   measureBatteryVoltage(0.0); // Initial measurement
 }
@@ -90,10 +96,30 @@ boolean batteryIsWarning(byte batNo) {
   return false;
 }
 
+void updateBuzzer() {
+  
+  boolean newState = false;
+
+  buzzerState = 0xf7 & (buzzerState+1); // preserve hi nibble and increase 3 bit counter on low
+
+  if (batteryAlarm) {
+    newState = buzzerState & 2; // fast on/off
+  } else if (batteryWarning) {
+    newState = (buzzerState & 7) == 0; // short pulse once in ~1s
+  }
+
+  if (!(buzzerState&0x10) ^ !newState) { // check if state should be changed
+    for (int i=0; batteryBuzzerPins[i]!=255; i++) {
+      digitalWrite(batteryBuzzerPins[i],newState?HIGH:LOW);
+    }
+    buzzerState^=0x10;
+  }
+}
 
 void measureBatteryVoltage(float deltaTime) {
 
   batteryAlarm = false;  
+  batteryWarning = false;
   for (int i = 0; i < numberOfBatteries; i++) {
     batteryData[i].voltage = (float)analogRead(batteryData[i].vPin) * batteryData[i].vScale + batteryData[i].vBias;
     if (batteryData[i].voltage < batteryData[i].minVoltage) {
@@ -109,6 +135,12 @@ void measureBatteryVoltage(float deltaTime) {
     if (batteryIsAlarm(i)) {
       batteryAlarm = true;
     }
+    if (batteryIsWarning(i)) {
+      batteryWarning = true;
+    }
   }  
+  if (batteryBuzzerPins[0]!=255) {
+    updateBuzzer();
+  }
 }
 #endif

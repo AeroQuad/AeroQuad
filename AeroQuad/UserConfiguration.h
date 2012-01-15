@@ -95,6 +95,14 @@
 #define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 #define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
 //#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattBuzzer             // Enable for low battery buzzer/LED
+//
+// Advanced configuration
+// Custom battery configuration
+//  Following declares battery via power jack with current sensor (5V @ 100A) on analog 1
+//#define BattCustomConfig BM_DEFINE_BATTERY_VC(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82,A1,100.0/1024.0,0.0)
+//#define BattCustomBuzzer 12,49
+
 
 //
 // *******************************************************************************************************************************
