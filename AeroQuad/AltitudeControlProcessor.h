@@ -116,9 +116,10 @@ void processAltitudeHold()
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       
       #if defined (UseAltHoldZDampening)
-        float estimatedZVelocity = currentSensorAltitude - oldSensorAltitude;
+        float sensorZVelocity = currentSensorAltitude - oldSensorAltitude;
+//        estimatedZVelocity = filterSmooth(sensorZVelocity, estimatedZVelocity, 0.7);
         oldSensorAltitude = currentSensorAltitude;
-        int throttleVelocityCorrection = updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+        int throttleVelocityCorrection = updatePID(0.0, sensorZVelocity, &PID[ZDAMPENING_PID_IDX]);
         throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust*0.7, maxThrottleAdjust*0.7);
       #else
         int throttleVelocityCorrection = 0;

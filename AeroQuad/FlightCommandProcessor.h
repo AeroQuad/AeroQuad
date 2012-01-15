@@ -110,7 +110,8 @@ void readPilotCommands() {
          
          #if defined (UseAltHoldZDampening)
            PID[ZDAMPENING_PID_IDX].integratedError = 0;
-             altitudeToHoldTarget = altitudeToHoldTarget;
+           altitudeToHoldTarget = altitudeToHoldTarget;
+           estimatedZVelocity = 0.0;
          #endif
        }
        altitudeHoldState = ON;

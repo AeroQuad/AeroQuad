@@ -133,6 +133,7 @@ void processAltitudeHold();
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   #if defined (UseAltHoldZDampening)
     float oldSensorAltitude = 0.0;
+    float estimatedZVelocity = 0.0; 
   #endif 
 #endif
 int minThrottleAdjust = -50;
