@@ -33,6 +33,22 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
+
+//void computeEstimatedAltitude(float currentSensorAltitude) {
+//
+//  float altitudeError = currentSensorAltitude - estimatedAltitude;
+//  altitudeIntegratedError += altitudeError;
+//  altitudeIntegratedError = constrain(altitudeIntegratedError,-0.5,0.5);
+//  
+//  // Gravity vector correction and projection to the local Z
+//  float zVelocity = ((filteredAccelYaw * (1 - accelOneG * invSqrt(isq(filteredAccelRoll) + isq(filteredAccelPitch) + isq(filteredAccelYaw)))) / 10) + altitudeIntegratedError;
+//
+//  float altitudeDelta = (zVelocity * G_Dt) + (altitudeError * G_Dt);
+//  estimatedAltitude = ((estimatedZVelocity + altitudeDelta) * G_Dt) +  (altitudeError * G_Dt);
+//  estimatedZVelocity += zVelocity;
+//}
+
+
 /**
  * getAltitudeFromSensors
  *
@@ -100,16 +116,10 @@ void processAltitudeHold()
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       
       #if defined (UseAltHoldZDampening)
-        float zVelocity = ((filteredAccelSum[ZAXIS]/filteredAccelSumCount) * 
-                           (1 - accelOneG * invSqrt(isq(filteredAccelSum[XAXIS]/filteredAccelSumCount) + 
-                                                    isq(filteredAccelSum[YAXIS]/filteredAccelSumCount) + 
-                                                    isq(filteredAccelSum[ZAXIS]/filteredAccelSumCount))));
-        for (int axis = XAXIS; axis <= ZAXIS; axis++) {
-          filteredAccelSum[axis] = 0.0;
-        }
-        filteredAccelSumCount = 0;
-        int throttleVelocityCorrection = -updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
-        throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust/2, maxThrottleAdjust/2);
+        float estimatedZVelocity = currentSensorAltitude - oldSensorAltitude;
+        oldSensorAltitude = currentSensorAltitude;
+        int throttleVelocityCorrection = updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+        throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust*0.7, maxThrottleAdjust*0.7);
       #else
         int throttleVelocityCorrection = 0;
       #endif      
