@@ -42,8 +42,8 @@
 #define FRONT       MOTOR1
 #define FRONT_RIGHT MOTOR2
 #define RIGHT       MOTOR3
-#define REAR_RIGHT  MOTOR5
-#define REAR        MOTOR4
+#define REAR_RIGHT  MOTOR4
+#define REAR        MOTOR5
 #define REAR_LEFT   MOTOR6
 #define LEFT        MOTOR7
 #define FRONT_LEFT  MOTOR8
