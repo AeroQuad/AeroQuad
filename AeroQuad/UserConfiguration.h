@@ -97,8 +97,8 @@
 //#define BattBuzzer             // Enable for low battery buzzer/LED
 //
 // Advanced configuration. Please refer to wiki for instructions
-//#define BattCustomConfig BM_DEFINE_BATTERY(...)
-//#define BattCustomBuzzer ...
+//#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
+//#define BattCustomBuzzer pin1[,pin2]...
 
 
 //
