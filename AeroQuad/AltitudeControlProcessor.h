@@ -33,23 +33,6 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-//void computeEstimatedAltitude(float currentSensorAltitude) {
-//
-//  float altitudeError = currentSensorAltitude - estimatedAltitude;
-//  altitudeIntegratedError += altitudeError;
-//  altitudeIntegratedError = constrain(altitudeIntegratedError,-0.5,0.5);
-//  
-//  // Gravity vector correction and projection to the local Z
-//  float zVelocity = ((filteredAccelYaw * (1 - accelOneG * invSqrt(isq(filteredAccelRoll) + isq(filteredAccelPitch) + isq(filteredAccelYaw)))) / 10) + altitudeIntegratedError;
-//
-//  float altitudeDelta = (zVelocity * G_Dt) + (altitudeError * G_Dt);
-//  estimatedAltitude = ((estimatedZVelocity + altitudeDelta) * G_Dt) +  (altitudeError * G_Dt);
-//  estimatedZVelocity += zVelocity;
-//}
-
-
-
-
 /**
  * getAltitudeFromSensors
  *

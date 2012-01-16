@@ -716,7 +716,7 @@ void printVehicleState(const char *sensorName, unsigned long state, const char *
 void reportVehicleState() {
   // Tell Configurator how many vehicle state values to expect
   SERIAL_PRINTLN(14);
-  SERIAL_PRINT("SW Version: ");
+  SERIAL_PRINT("Software Version: ");
   SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
   SERIAL_PRINT("Board Type: ");
   #if defined(AeroQuad_v1)
@@ -769,7 +769,7 @@ void reportVehicleState() {
   #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo X+");
   #endif
-  SERIAL_PRINT("Receiver Ch's: ");
+  SERIAL_PRINT("Receiver Channels: ");
   SERIAL_PRINTLN(LASTCHANNEL);
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);
