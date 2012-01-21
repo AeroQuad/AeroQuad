@@ -33,22 +33,6 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-
-//void computeEstimatedAltitude(float currentSensorAltitude) {
-//
-//  float altitudeError = currentSensorAltitude - estimatedAltitude;
-//  altitudeIntegratedError += altitudeError;
-//  altitudeIntegratedError = constrain(altitudeIntegratedError,-0.5,0.5);
-//  
-//  // Gravity vector correction and projection to the local Z
-//  float zVelocity = ((filteredAccelYaw * (1 - accelOneG * invSqrt(isq(filteredAccelRoll) + isq(filteredAccelPitch) + isq(filteredAccelYaw)))) / 10) + altitudeIntegratedError;
-//
-//  float altitudeDelta = (zVelocity * G_Dt) + (altitudeError * G_Dt);
-//  estimatedAltitude = ((estimatedZVelocity + altitudeDelta) * G_Dt) +  (altitudeError * G_Dt);
-//  estimatedZVelocity += zVelocity;
-//}
-
-
 /**
  * getAltitudeFromSensors
  *
@@ -114,17 +98,6 @@ void processAltitudeHold()
 
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      
-      #if defined (UseAltHoldZDampening)
-        float sensorZVelocity = currentSensorAltitude - oldSensorAltitude;
-//        estimatedZVelocity = filterSmooth(sensorZVelocity, estimatedZVelocity, 0.7);
-        oldSensorAltitude = currentSensorAltitude;
-        int throttleVelocityCorrection = updatePID(0.0, sensorZVelocity, &PID[ZDAMPENING_PID_IDX]);
-        throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust*0.7, maxThrottleAdjust*0.7);
-      #else
-        int throttleVelocityCorrection = 0;
-      #endif      
-      
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
@@ -135,7 +108,7 @@ void processAltitudeHold()
           altitudeToHoldTarget -= 0.01;
         }
       }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + throttleVelocityCorrection;
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
     }
     else {
       throttle = receiverCommand[THROTTLE];

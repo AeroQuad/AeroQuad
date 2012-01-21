@@ -103,16 +103,9 @@ void readPilotCommands() {
        if (isStoreAltitudeNeeded) {
          altitudeToHoldTarget = getAltitudeFromSensors();
          altitudeHoldThrottle = receiverCommand[THROTTLE];
-	 PID[ZDAMPENING_PID_IDX].integratedError = 0;
          PID[ALTITUDE_HOLD_PID_IDX].integratedError = 0;
          PID[ALTITUDE_HOLD_PID_IDX].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
          isStoreAltitudeNeeded = false;
-         
-         #if defined (UseAltHoldZDampening)
-           PID[ZDAMPENING_PID_IDX].integratedError = 0;
-           altitudeToHoldTarget = altitudeToHoldTarget;
-           estimatedZVelocity = 0.0;
-         #endif
        }
        altitudeHoldState = ON;
      }
