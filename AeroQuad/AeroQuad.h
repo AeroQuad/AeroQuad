@@ -131,6 +131,9 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  #if defined (UseAltHoldZDampening)
+    float oldSensorAltitude = 0.0;
+  #endif  
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
