@@ -105,7 +105,7 @@ void initializeBaro() {
   measureBaro();
   delay(5); // delay for temperature
   measureBaro();
-  delay(26); // delay for pressure
+  delay(10); // delay for pressure
   measureGroundBaro();
   // check if measured ground altitude is valid
   while (abs(baroRawAltitude - baroGroundAltitude) > 10) {
@@ -185,7 +185,7 @@ void evaluateBaroAltitude() {
   pressure = (p + ((x1 + x2 + 3791) >> 4));
     
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
-  baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
+  baroAltitude = computeFourthOrder(baroRawAltitude, &fourthOrder[BAROFILTERIDX]);
 }
 
 
