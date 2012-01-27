@@ -33,9 +33,6 @@
 #define AUX2 6
 #define AUX3 7
 
-#define BAROFILTERIDX 3 // for 4 order of filter
-
-
 #define ON 1
 #define OFF 0
 

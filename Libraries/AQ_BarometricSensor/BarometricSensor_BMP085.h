@@ -182,10 +182,10 @@ void evaluateBaroAltitude() {
   x1 = (p >> 8) * (p >> 8);
   x1 = (x1 * 3038) >> 16;
   x2 = (-7357 * p) >> 16;
-  pressure = (p + ((x1 + x2 + 3791) >> 4));
+    pressure = (p + ((x1 + x2 + 3791) >> 4));
     
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
-  baroAltitude = computeFourthOrder(baroRawAltitude, &fourthOrder[BAROFILTERIDX]);
+  baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
 }
 
 

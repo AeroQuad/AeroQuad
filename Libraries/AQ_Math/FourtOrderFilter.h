@@ -107,19 +107,7 @@ void setupFourthOrder(void)
   fourthOrder[ZAXIS].outputTm2 = -9.8065;
   fourthOrder[ZAXIS].outputTm3 = -9.8065;
   fourthOrder[ZAXIS].outputTm4 = -9.8065;
-  
-  //////////
-  fourthOrder[BAROFILTERIDX].inputTm1 = 0.0;
-  fourthOrder[BAROFILTERIDX].inputTm2 = 0.0;
-  fourthOrder[BAROFILTERIDX].inputTm3 = 0.0;
-  fourthOrder[BAROFILTERIDX].inputTm4 = 0.0;
-  
-  fourthOrder[BAROFILTERIDX].outputTm1 = 0.0;
-  fourthOrder[BAROFILTERIDX].outputTm2 = 0.0;
-  fourthOrder[BAROFILTERIDX].outputTm3 = 0.0;
-  fourthOrder[BAROFILTERIDX].outputTm4 = 0.0;
-
-  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
