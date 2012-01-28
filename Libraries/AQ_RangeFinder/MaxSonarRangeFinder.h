@@ -51,8 +51,8 @@ byte rangeFinderPins[5] = {ALTITUDE_RANGE_FINDER_PIN,
 
 void inititalizeRangeFinder(byte idx) {
 
-  maxRangeFinderRange = 6.45;
-  minRangeFinderRange = 0.0;
+  maxRangeFinderRange = 3.0;
+  minRangeFinderRange = 0.25;
   vehicleState |= RANGE_ENABLED;
   
   pinMode(rangeFinderPins[idx], INPUT);
