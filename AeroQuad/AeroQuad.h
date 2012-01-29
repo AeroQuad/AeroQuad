@@ -91,6 +91,7 @@ int testCommand = 1000;
 #define TASK_10HZ 10
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
+boolean process5HzTask = false;
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle; // initial value configured by user
@@ -131,6 +132,7 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  float oldSensorAltitude = 0.0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
