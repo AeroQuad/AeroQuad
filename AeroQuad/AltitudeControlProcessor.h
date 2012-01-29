@@ -33,24 +33,6 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-//void computeEstimatedAltitude(float currentSensorAltitude) {
-//
-//  float altitudeError = currentSensorAltitude - estimatedAltitude;
-//  altitudeIntegratedError += altitudeError;
-//  altitudeIntegratedError = constrain(altitudeIntegratedError,-0.5,0.5);
-//  
-//  // Gravity vector correction and projection to the local Z
-//  float zVelocity = ((filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) / 10) + altitudeIntegratedError;
-//  
-//  float altitudeDelta = (zVelocity * G_Dt) + (altitudeError * G_Dt);
-//  estimatedAltitude = ((estimatedZVelocity + altitudeDelta) * G_Dt) +  (altitudeError * G_Dt);
-//  estimatedZVelocity += zVelocity;
-//}
-
-#define BARO 0
-#define SONAR 1
-byte sensorRead = BARO;
-
 /**
  * getAltitudeFromSensors
  *
@@ -65,12 +47,10 @@ byte sensorRead = BARO;
   float getAltitudeFromSensors() {
     
     if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-      sensorRead = SONAR;
       baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
       return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
     }
     else {
-      sensorRead = BARO;
       return getBaroAltitude();    
     }
   }
@@ -81,7 +61,6 @@ byte sensorRead = BARO;
    * @return the baro altitude
    */
   float getAltitudeFromSensors() {
-    sensorRead = BARO;
     return getBaroAltitude();
   }
   
@@ -90,7 +69,6 @@ byte sensorRead = BARO;
    * @return the sonar altitude
    */
   float getAltitudeFromSensors() {
-    sensorRead = SONAR;
     return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
   }
   
@@ -117,30 +95,9 @@ void processAltitudeHold()
         throttle = receiverCommand[THROTTLE];
         return;
       }
- 
+
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      
-      /////////// try to prevent any movement on the z axis
-      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-      int accelVelocityThrottleCorrection = 0;
-      if (!isSwitched(altitudeHoldThrottleCorrection,zVelocity)) { // only used to slowed down decent or grow up
-        accelVelocityThrottleCorrection = constrain(zVelocity*20, minThrottleAdjust*1.2, maxThrottleAdjust*1.2);  
-//        accelVelocityThrottleCorrection = zVelocity*20;  // 20 is gain, no PID
-      }
-      
-      //////////// use previous altitude to compute a kind of z velocity to stabilize altitude variation
-      float sensorZVelocity = currentSensorAltitude - oldSensorAltitude;
-      float estimatedZVelocity = filterSmooth(sensorZVelocity, estimatedZVelocity, 1);
-      oldSensorAltitude = currentSensorAltitude;
-
-      int throttleVelocityCorrection = updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-      if (sensorRead == SONAR) { // if sonar, we can easily multiply by 2 with the senros precision
-        throttleVelocityCorrection *= 2;
-      }
-      throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
-      ///////////////
-      
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
@@ -151,7 +108,7 @@ void processAltitudeHold()
           altitudeToHoldTarget -= 0.01;
         }
       }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + accelVelocityThrottleCorrection + throttleVelocityCorrection;
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
     }
     else {
       throttle = receiverCommand[THROTTLE];
@@ -160,6 +117,7 @@ void processAltitudeHold()
     throttle = receiverCommand[THROTTLE];
   #endif
 }
+
 
 
 #endif // _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
