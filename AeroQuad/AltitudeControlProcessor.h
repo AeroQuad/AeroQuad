@@ -124,10 +124,10 @@ void processAltitudeHold()
       /////////// try to prevent any movement on the z axis
       float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
       int accelVelocityThrottleCorrection = 0;
-//      if (!isSwitched(altitudeHoldThrottleCorrection,zVelocity)) { // only used to slowed down decent or grow up
-        accelVelocityThrottleCorrection = constrain(zVelocity*10, minThrottleAdjust*1.2, maxThrottleAdjust*1.2);  // 10 is gain, no PID
-//        accelVelocityThrottleCorrection = zVelocity*20;  // 10 is gain, no PID
-//      }
+      if (!isSwitched(altitudeHoldThrottleCorrection,zVelocity)) { // only used to slowed down decent or grow up
+        accelVelocityThrottleCorrection = constrain(zVelocity*20, minThrottleAdjust*1.2, maxThrottleAdjust*1.2);  
+//        accelVelocityThrottleCorrection = zVelocity*20;  // 20 is gain, no PID
+      }
       
       //////////// use previous altitude to compute a kind of z velocity to stabilize altitude variation
       float sensorZVelocity = currentSensorAltitude - oldSensorAltitude;

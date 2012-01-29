@@ -969,6 +969,15 @@
     #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
 #endif
 
+
+//********************************************************
+//****************** GPS DECLARATION *********************
+//********************************************************
+#if defined (UseGPS)
+  #include <TinyGPSWrapper.h>
+#endif
+
+
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
@@ -1079,6 +1088,10 @@ void setup() {
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
+
+  #if defined (UseGPS)
+    initializeGps();
+  #endif 
 
   // Camera stabilization setup
   #if defined (CameraControl)
@@ -1289,6 +1302,11 @@ void loop () {
 
       #ifdef MAX7456_OSD
         updateOSD();
+      #endif
+      
+      #if defined (UseGPS)
+        readGps();
+//          gpsdump();
       #endif
     }
 

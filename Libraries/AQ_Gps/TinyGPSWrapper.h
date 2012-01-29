@@ -44,8 +44,14 @@ boolean readGps()
   return false;
 }
 
+boolean isGpsHaveALock() {
+ return _last_position_fix != GPS_INVALID_FIX_TIME;
+}
 
-void printGpsFloat(double number, int digits = 0)
+
+
+
+/*void printGpsFloat(double number, int digits = 0)
 {
   // Handle negative numbers
   if (number < 0.0)
@@ -121,7 +127,7 @@ void gpsdump()
 
   readGps();
 }
-  
+*/  
 
 
 #endif
