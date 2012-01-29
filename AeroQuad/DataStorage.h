@@ -108,7 +108,7 @@ void initializeEEPROM() {
   PID[ALTITUDE_HOLD_PID_IDX].I = 0.6;
   PID[ALTITUDE_HOLD_PID_IDX].D = 0.0;
   PID[ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-  PID[ZDAMPENING_PID_IDX].P = 175.0;
+  PID[ZDAMPENING_PID_IDX].P = 0.0;
   PID[ZDAMPENING_PID_IDX].I = 0.0;
   PID[ZDAMPENING_PID_IDX].D = 0.0;
   
