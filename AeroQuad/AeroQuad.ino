@@ -1066,19 +1066,6 @@ void setup() {
     initializeBaro();
     vehicleState |= ALTITUDEHOLD_ENABLED;
     
-    // calculate zero for z velocity Kenny test
-    float accelAxis[3] = {0.0,0.0,0.0};
-    for (int i = 0; i < 25;i++) {
-      measureAccel();  // won't work on WII/ardupilot if keeped
-      for (int axis = 0; axis <= ZAXIS;axis++) {
-        accelAxis[axis] += meterPerSecSec[axis];
-      }
-    }
-    for (int axis = 0; axis <= ZAXIS;axis++) {
-      accelAxis[axis] /= 25;
-    }
-    zVelocityZero = accelAxis[ZAXIS] * (1 - accelOneG * invSqrt(isq(accelAxis[XAXIS]) + isq(accelAxis[YAXIS]) + isq(accelAxis[ZAXIS])));
-    ///////////////////////////////
   #endif
   #ifdef AltitudeHoldRangeFinder
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
