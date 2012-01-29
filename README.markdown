@@ -4,7 +4,7 @@ AeroQuad Flight Software Source Code 3.0
 
 Version 3.0 Release Notes (1/29/2012)
 ----------------------------------------
-*Multiple flight configurations are supported
+* Multiple flight configurations are supported
  * Quad X
  * Quad +
  * Quad Y4
