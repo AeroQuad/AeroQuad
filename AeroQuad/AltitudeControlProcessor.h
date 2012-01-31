@@ -118,27 +118,26 @@ void processAltitudeHold()
         return;
       }
  
+      // Altitude error throttle correction
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       
+      // Sensor throttle velocity read and correction, work great on sonar!!!
+      float sensorZVelocity = (currentSensorAltitude - oldSensorAltitude);
+      oldSensorAltitude = currentSensorAltitude;
+      int sensorThrottleVelocityCorrection = updatePID(0.0, sensorZVelocity, &PID[ZDAMPENING_PID_IDX]);
+      if (sensorRead == SONAR) { // if sonar, we can easily multiply by 2 with the senros precision
+        sensorThrottleVelocityCorrection *= 2;
+      }
+      sensorThrottleVelocityCorrection = constrain(sensorThrottleVelocityCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
+
       /////////// try to prevent any movement on the z axis
       float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
       int accelVelocityThrottleCorrection = 0;
-      if (!isSwitched(altitudeHoldThrottleCorrection,zVelocity)) { // only used to slowed down decent or grow up
-        accelVelocityThrottleCorrection = constrain(zVelocity*20, minThrottleAdjust*1.2, maxThrottleAdjust*1.2);  
-//        accelVelocityThrottleCorrection = zVelocity*20;  // 20 is gain, no PID
+      if (!isSwitched(altitudeHoldThrottleCorrection,zVelocity)) {
+         accelVelocityThrottleCorrection = zVelocity * 20;
       }
-      
-      //////////// use previous altitude to compute a kind of z velocity to stabilize altitude variation
-      float sensorZVelocity = currentSensorAltitude - oldSensorAltitude;
-      float estimatedZVelocity = filterSmooth(sensorZVelocity, estimatedZVelocity, 1);
-      oldSensorAltitude = currentSensorAltitude;
-
-      int throttleVelocityCorrection = updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-      if (sensorRead == SONAR) { // if sonar, we can easily multiply by 2 with the senros precision
-        throttleVelocityCorrection *= 2;
-      }
-      throttleVelocityCorrection = constrain(throttleVelocityCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
+      accelVelocityThrottleCorrection = constrain(accelVelocityThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       ///////////////
       
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
@@ -151,7 +150,7 @@ void processAltitudeHold()
           altitudeToHoldTarget -= 0.01;
         }
       }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + accelVelocityThrottleCorrection + throttleVelocityCorrection;
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + sensorThrottleVelocityCorrection + accelVelocityThrottleCorrection;
     }
     else {
       throttle = receiverCommand[THROTTLE];
