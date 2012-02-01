@@ -1342,7 +1342,6 @@ void loop () {
         readGps();
 //        gpsdump();
       #endif
-      
     }
 
     previousTime = currentTime;
