@@ -81,8 +81,7 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-
-#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
@@ -93,7 +92,6 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-<<<<<<< HEAD
 //#define BattMonitor            // Enable Battery monitor
 //#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 //#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
@@ -102,13 +100,6 @@
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
 //#define BattCustomBuzzer pin1[,pin2]...
-
-=======
-#define BattMonitor            // Enable Battery monitor
-#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
->>>>>>> 50b2d6a023f84538abc1129c6733e45d1228d526
 
 //
 // *******************************************************************************************************************************
