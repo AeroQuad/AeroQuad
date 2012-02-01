@@ -49,6 +49,7 @@ int motorMinCommand[4] = {0,0,0,0};
 int motorConfiguratorCommand[4] = {0,0,0,0};
 
 void applyMotorCommand() {
+  // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   motorCommand[FRONT_LEFT]  = throttle - motorAxisCommandPitch + motorAxisCommandRoll - (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[FRONT_RIGHT] = throttle - motorAxisCommandPitch - motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[REAR_LEFT]   = throttle + motorAxisCommandPitch + motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
