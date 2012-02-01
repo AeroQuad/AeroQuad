@@ -2,11 +2,48 @@ AeroQuad Flight Software Source Code 3.0
 ========================================
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
 
-Version 3.0 Release Notes (x/x/xxxx)
+Version 3.0 Release Notes (1/29/2012)
 ----------------------------------------
-  * under construction
-  * new libraries
-  
+* Multiple flight configurations are supported
+ * Quad X
+ * Quad +
+ * Quad Y4
+ * Tri
+ * Hex X
+ * Hex +
+ * Hex Y6
+ * Octo X
+ * Octo +
+ * Octo X8
+* Multiple flight angle estimation algorithms supported
+ * Improved DCM (best with magnetometer)
+ * ARG (best with no magnetometer)
+ * MARG (experimental)
+* Flight options supported
+ * Heading hold with magnetometer or gyro
+ * Altitude hold with barometer
+ * Altitude hold with ultrasonic sensor (best for low altitude hold and terrain following)
+* Enhanced battery monitoring options
+ * Enable auto descent
+ * Specify battery cell count
+ * Integration with On Screen Display (OSD)
+* Multiple receiver options
+ * 6 or 8 channel receivers supported
+ * PWM receivers
+ * PPM receivers
+ * PPM using hardware timer
+  * Specific support for Spektrum, Graupner, Robe, Hitec, Futaba, Hitec, Sanwa & others
+* Telemetry options
+ * Wireless telemetry on dedicated serial port
+ * OpenLog binary write
+* Camera stabilization support
+ * Dedicated servo channels for roll, pitch, yaw
+* Custom OSD support for MAX7456
+ * Specify video standard to use
+ * Specify callsign to display
+ * Built in attitude indicator
+ * Display altitude in feet/meters
+ * OSD system which allows remote PID tuning!  
 
 Version 2.5.1 Release Notes (12/22/2011)
 ----------------------------------------

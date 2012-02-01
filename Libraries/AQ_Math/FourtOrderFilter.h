@@ -33,7 +33,7 @@ struct fourthOrderData
 {
   float  inputTm1,  inputTm2,  inputTm3,  inputTm4;
   float outputTm1, outputTm2, outputTm3, outputTm4;
-} fourthOrder[3];
+} fourthOrder[4];
 
 float computeFourthOrder(float currentInput, struct fourthOrderData *filterParameters)
 {
@@ -87,7 +87,6 @@ void setupFourthOrder(void)
   fourthOrder[XAXIS].outputTm4 = 0.0;
   
   //////////
-  
   fourthOrder[YAXIS].inputTm1 = 0.0;
   fourthOrder[YAXIS].inputTm2 = 0.0;
   fourthOrder[YAXIS].inputTm3 = 0.0;
@@ -99,7 +98,6 @@ void setupFourthOrder(void)
   fourthOrder[YAXIS].outputTm4 = 0.0;
   
   //////////
-  
   fourthOrder[ZAXIS].inputTm1 = -9.8065;
   fourthOrder[ZAXIS].inputTm2 = -9.8065;
   fourthOrder[ZAXIS].inputTm3 = -9.8065;
@@ -109,7 +107,7 @@ void setupFourthOrder(void)
   fourthOrder[ZAXIS].outputTm2 = -9.8065;
   fourthOrder[ZAXIS].outputTm3 = -9.8065;
   fourthOrder[ZAXIS].outputTm4 = -9.8065;
-  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
