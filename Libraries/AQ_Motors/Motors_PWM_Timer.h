@@ -113,7 +113,7 @@ void initializeMotors(NB_Motors numbers) {
   #else
     // Init PWM Timer 1  16 bit
     TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
-    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS12);
+    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);
     ICR1 = PWM_COUNTER_PERIOD_328;
     // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
     TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
@@ -132,14 +132,14 @@ void writeMotors() {
       OCR4B = motorCommand[MOTOR5] * 2 ;
       OCR4C = motorCommand[MOTOR6] * 2 ;
     }
-	  if (numberOfMotors == EIGHT_Motors) {
-	    OCR1A = motorCommand[MOTOR7] * 2 ;
+	if (numberOfMotors == EIGHT_Motors) {
+	  OCR1A = motorCommand[MOTOR7] * 2 ;
       OCR1B = motorCommand[MOTOR8] * 2 ;
-	  }
+	}
   #else
     OCR2B = motorCommand[MOTOR1] / 16 ;                       // 1000-2000 to 128-256
-    OCR1B = motorCommand[MOTOR2] / 16 ;
-    OCR1A = motorCommand[MOTOR3] / 16 ;
+    OCR1A = motorCommand[MOTOR2] * 2 ;
+    OCR1B = motorCommand[MOTOR3] * 2 ;
     OCR2A = motorCommand[MOTOR4] / 16 ;
   #endif
 }
@@ -160,8 +160,8 @@ void commandAllMotors(int command) {
   }
   #else
     OCR2B = command / 16 ;
-    OCR1A = command / 16 ;
-    OCR1B = command / 16 ;
+    OCR1A = command * 2 ;
+    OCR1B = command * 2 ;
     OCR2A = command / 16 ;
   #endif
 }
