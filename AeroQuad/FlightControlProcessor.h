@@ -39,12 +39,12 @@ void calculateFlightError()
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
     float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-    motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-    motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+    motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS]*1.2, &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+    motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS]*1.2, &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*0.8, &PID[RATE_XAXIS_PID_IDX]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*0.8, &PID[RATE_YAXIS_PID_IDX]);
   }
 }
 

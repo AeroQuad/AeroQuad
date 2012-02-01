@@ -993,6 +993,13 @@
 #endif
 
 //********************************************************
+//****************** GPS DECLARATION *********************
+//********************************************************
+#if defined (UseGPS)
+  #include <TinyGPSWrapper.h>
+#endif
+
+//********************************************************
 //****************** OSD DEVICE DECLARATION **************
 //********************************************************
 #ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
@@ -1097,7 +1104,7 @@ void setup() {
   // Rate integral not used for now
   PID[ATTITUDE_XAXIS_PID_IDX].windupGuard = 0.375;
   PID[ATTITUDE_YAXIS_PID_IDX].windupGuard = 0.375;
-
+  
   // Optional Sensors
   #ifdef AltitudeHoldBaro
     initializeBaro();
@@ -1115,6 +1122,10 @@ void setup() {
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
+  
+  #if defined (UseGPS)
+    initializeGps();
+  #endif 
 
   // Camera stabilization setup
   #if defined (CameraControl)
@@ -1325,6 +1336,11 @@ void loop () {
 
       #ifdef MAX7456_OSD
         updateOSD();
+      #endif
+      
+      #if defined (UseGPS)
+        readGps();
+//        gpsdump();
       #endif
     }
 
