@@ -1342,9 +1342,7 @@ void loop () {
         readGps();
 //        gpsdump();
       #endif
-      
     }
-
     previousTime = currentTime;
   }
   if (frameCounter >= 100) {

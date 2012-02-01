@@ -101,9 +101,7 @@
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
 //#define BattCustomBuzzer pin1[,pin2]...
 
-
-//
-// *******************************************************************************************************************************
+//// *******************************************************************************************************************************
 // Optional Receiver
 // *******************************************************************************************************************************
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
