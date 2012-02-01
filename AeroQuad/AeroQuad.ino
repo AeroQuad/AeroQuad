@@ -1097,7 +1097,7 @@ void setup() {
   // Rate integral not used for now
   PID[ATTITUDE_XAXIS_PID_IDX].windupGuard = 0.375;
   PID[ATTITUDE_YAXIS_PID_IDX].windupGuard = 0.375;
-
+  
   // Optional Sensors
   #ifdef AltitudeHoldBaro
     initializeBaro();
