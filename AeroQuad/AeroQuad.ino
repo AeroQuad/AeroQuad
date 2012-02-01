@@ -1073,11 +1073,6 @@ void setup() {
   #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
      initializeMotors(EIGHT_Motors);
   #endif
-  // Initialize max/min values for all motors
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motorMinCommand[motor] = minArmedThrottle;
-    motorMaxCommand[motor] = MAXCOMMAND;
-  }
 
   // Setup receiver pins for pin change interrupts
   initializeReceiver(LASTCHANNEL);
@@ -1347,6 +1342,7 @@ void loop () {
         readGps();
 //        gpsdump();
       #endif
+      
     }
 
     previousTime = currentTime;
