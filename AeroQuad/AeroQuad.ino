@@ -73,6 +73,9 @@
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount   
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -116,6 +119,9 @@
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount       
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -165,6 +171,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 12
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef AltitudeHoldBaro
@@ -225,6 +235,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 12
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   // unsuported in mini
@@ -281,6 +295,9 @@
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -343,7 +360,10 @@
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82, BM_NOPIN, 0.0, 0.0) // v2 shield powered via power jack
     #endif
     #define BattDefaultBuzzer 49,31
-
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -428,6 +448,10 @@
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82, BM_NOPIN, 0.0, 0.0) // v2 shield powered via power jack
     #endif
     #define BattDefaultBuzzer 49,31
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -509,6 +533,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
@@ -568,6 +596,9 @@
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -635,6 +666,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 49,12
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -707,6 +742,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   /**
@@ -783,6 +822,10 @@
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306, BM_NOPIN, 0.0, 0.0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
@@ -956,6 +999,13 @@
 #endif
 
 //********************************************************
+//****************** GPS DECLARATION *********************
+//********************************************************
+#if defined (UseGPS)
+  #include <TinyGPSWrapper.h>
+#endif
+
+//********************************************************
 //****************** OSD DEVICE DECLARATION **************
 //********************************************************
 #ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
@@ -968,15 +1018,6 @@
 #else  
     #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
 #endif
-
-
-//********************************************************
-//****************** GPS DECLARATION *********************
-//********************************************************
-#if defined (UseGPS)
-  #include <TinyGPSWrapper.h>
-#endif
-
 
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
@@ -1074,7 +1115,6 @@ void setup() {
   #ifdef AltitudeHoldBaro
     initializeBaro();
     vehicleState |= ALTITUDEHOLD_ENABLED;
-    
   #endif
   #ifdef AltitudeHoldRangeFinder
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
@@ -1088,7 +1128,7 @@ void setup() {
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
-
+  
   #if defined (UseGPS)
     initializeGps();
   #endif 
@@ -1306,10 +1346,9 @@ void loop () {
       
       #if defined (UseGPS)
         readGps();
-//          gpsdump();
+//        gpsdump();
       #endif
     }
-
     previousTime = currentTime;
   }
   if (frameCounter >= 100) {
