@@ -61,8 +61,14 @@ void updateOSD() {
     #endif
   }
 
+  if (OSDsched&0x10) {
+    #ifdef UseGPS
+      displayGPS();
+    #endif
+  }
+
   OSDsched <<= 1;
-  if (OSDsched & 0x10) {
+  if (OSDsched & 0x20) {
     OSDsched = 0x01;
   }
 }
