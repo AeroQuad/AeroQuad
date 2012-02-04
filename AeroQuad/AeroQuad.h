@@ -134,9 +134,17 @@ void processAltitudeHold();
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
-
 float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
+
+/**
+ * Gps control global variable
+ */
+#if defined (UseGPS)
+  long gpsHomeLatitude = 0;
+  long gpsHomeLongitude = 0;
+  unsigned long gpsGroundAltitude = 0;
+#endif
 
 
 /**
