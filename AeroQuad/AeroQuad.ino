@@ -1131,6 +1131,13 @@ void setup() {
   
   #if defined (UseGPS)
     initializeGps();
+    while (!haveAGpsLock()) {  
+      readGps();
+      delay(1000);
+    }
+    gpsHomeLatitude = getLatitude();
+    gpsHomeLongitude = getLatitude();
+    gpsGroundAltitude = getGpsAltitude();
   #endif 
 
   // Camera stabilization setup
