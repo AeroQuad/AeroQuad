@@ -53,11 +53,26 @@ boolean readGps()
   return false;
 }
 
-boolean isGpsHaveALock() {
+// @todo, kenny, to be tested
+boolean haveAGpsLock() {
  return _last_position_fix != GPS_INVALID_FIX_TIME;
 }
 
+long getLongitude() {
+  return _longitude * 0.649876; //centimiters
+}
 
+long getLatitude() {
+  return _latitude * 1.113195; //centimiters
+}
+
+unsigned long getGpsSpeed() {
+  return _gpsSpeed*1.852*10/36;
+}
+
+unsigned long getGpsAltitude() {
+  return _gpsAltitude;
+}
 
 
 /*void printGpsFloat(double number, int digits = 0)

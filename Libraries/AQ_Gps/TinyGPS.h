@@ -62,9 +62,9 @@ long _latitude = GPS_INVALID_ANGLE;
 long _new_latitude = GPS_INVALID_ANGLE;
 long _longitude = GPS_INVALID_ANGLE; 
 long _new_longitude = GPS_INVALID_ANGLE;
-long _altitude = GPS_INVALID_ALTITUDE;
+long _gpsAltitude = GPS_INVALID_ALTITUDE;
 long _new_altitude = GPS_INVALID_ALTITUDE;
-unsigned long _speed = GPS_INVALID_SPEED;
+unsigned long _gpsSpeed = GPS_INVALID_SPEED;
 unsigned long _new_speed = GPS_INVALID_SPEED;
 unsigned long _course = GPS_INVALID_ANGLE;
 unsigned long _new_course = GPS_INVALID_ANGLE;
@@ -183,14 +183,14 @@ boolean term_complete()
           _date      = _new_date;
           _latitude  = _new_latitude;
           _longitude = _new_longitude;
-          _speed     = _new_speed;
+          _gpsSpeed  = _new_speed;
           _course    = _new_course;
           break;
         case _GPS_SENTENCE_GPGGA:
-          _altitude  = _new_altitude;
-          _time      = _new_time;
-          _latitude  = _new_latitude;
-          _longitude = _new_longitude;
+          _gpsAltitude = _new_altitude;
+          _time        = _new_time;
+          _latitude    = _new_latitude;
+          _longitude   = _new_longitude;
           break;
         }
 
@@ -270,8 +270,6 @@ boolean term_complete()
   return false;
 }
 
-
-
 boolean encode(char c)
 {
   boolean valid_sentence = false;
@@ -342,7 +340,7 @@ inline void get_datetime(unsigned long *date, unsigned long *time, unsigned long
 
 // signed altitude in centimeters (from GPGGA sentence)
 long altitude() { 
-  return _altitude; 
+  return _gpsAltitude; 
 }
 
 // course in last full GPRMC sentence in 100th of a degree
@@ -352,7 +350,7 @@ unsigned long course() {
     
 // speed in last full GPRMC sentence in 100ths of a knot
 unsigned long speed() {
-  return _speed; 
+  return _gpsSpeed; 
 }
 
 void f_get_position(float *latitude, float *longitude, unsigned long *fix_age = 0)
