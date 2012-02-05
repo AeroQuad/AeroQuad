@@ -36,7 +36,6 @@ void readPilotCommands() {
   readReceiver(); 
   if (receiverCommand[THROTTLE] < MINCHECK) {
     zeroIntegralError();
-
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
@@ -66,6 +65,12 @@ void readPilotCommands() {
     
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
+      #if defined (UseGPS) 
+        if (!isHomeBaseInitialized()) {  // if GPS, wait for home position fix!
+          return;
+        }
+      #endif 
+
       zeroIntegralError();
       commandAllMotors(MINTHROTTLE);
       digitalWrite(LED_Red,HIGH);
