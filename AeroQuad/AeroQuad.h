@@ -131,6 +131,8 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  
+  int estimatedZVelocity = 0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
@@ -158,6 +160,15 @@ void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
 void reportVehicleState();
+//////////////////////////////////////////////////////
+
+
+/**
+ * GPS navigation global declaration
+ */
+#if defined (UseGPS)
+  int missionNbPoint = 0;
+#endif
 //////////////////////////////////////////////////////
 
 /**
@@ -226,6 +237,8 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT;
 } t_NVR_Data;  
 
 

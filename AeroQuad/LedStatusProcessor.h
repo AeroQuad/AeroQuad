@@ -22,48 +22,43 @@
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
 
-#ifndef _AQ_GpsUtility_H_
-#define _AQ_GpsUtility_H_
+#ifndef _AQ_LedProcessor_H_
+#define _AQ_LedProcessor_H_
 
+#define TWO_Hz_TIME 500000
+unsigned long lastLedChangeTime = 0;
+byte flashingLedState = LOW;
 
-// home base data
-long gpsHomeLatitude = GPS_INVALID_ANGLE;
-long gpsHomeLongitude = GPS_INVALID_ANGLE;
-unsigned long gpsGroundAltitude = GPS_INVALID_ALTITUDE;
+void processLedStatus() {
 
-boolean isHomeBaseInitialized() {
-  return gpsHomeLatitude != GPS_INVALID_ANGLE;
+  if ( (currentTime - lastLedChangeTime) > TWO_Hz_TIME) {
+    flashingLedState = flashingLedState == LOW ? HIGH : LOW;
+    lastLedChangeTime = currentTime;
+  }
+  
+  //
+  // process ready state light in case we use GPS
+  //
+  #if defined (UseGPS)
+    if (haveAGpsLock()) {
+      digitalWrite(LED_Green, HIGH);
+    }
+    else { 
+      digitalWrite(LED_Green, flashingLedState);
+    }
+  #endif
+  
+  //
+  // process ready state light in case we use Batt monitor
+  //
+  #if defined (BattMonitor)
+    if (batteryAlarm) {
+      digitalWrite(LED_Red, flashingLedState);
+    }
+    else { 
+      digitalWrite(LED_Red, LOW);
+    }
+  #endif  
 }
-
-
-#define NB_HOME_GPS_SAMPLE 25
-byte gpsSumCounter = 0;
-long gpsLatitudeSum = GPS_INVALID_ANGLE;
-long gpsLongitudeSum = GPS_INVALID_ANGLE;
-unsigned long gpsAltitudeSum = GPS_INVALID_ALTITUDE;
-
-void initHomeBase()
-{
-  if (!haveAGpsLock()) {
-    return;
-  }
-  if (isHomeBaseInitialized()) {
-    return;
-  }
-  if (gpsSumCounter < NB_HOME_GPS_SAMPLE) {
-    gpsLatitudeSum  += getLatitude();
-    gpsLongitudeSum += getLongitude();
-    gpsAltitudeSum  += getGpsAltitude();
-    gpsSumCounter++;
-    return;
-  }
-  else {
-    gpsHomeLatitude   = gpsLatitudeSum / gpsSumCounter;
-    gpsHomeLongitude  = gpsLongitudeSum / gpsSumCounter;
-    gpsGroundAltitude = gpsAltitudeSum / gpsSumCounter;
-  }
-}
-
-
 
 #endif
