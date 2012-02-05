@@ -162,6 +162,15 @@ void comma();
 void reportVehicleState();
 //////////////////////////////////////////////////////
 
+
+/**
+ * GPS navigation global declaration
+ */
+#if defined (UseGPS)
+  int missionNbPoint = 0;
+#endif
+//////////////////////////////////////////////////////
+
 /**
  * EEPROM global section
  */
@@ -228,6 +237,8 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT;
 } t_NVR_Data;  
 
 

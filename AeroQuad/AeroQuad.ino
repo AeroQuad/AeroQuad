@@ -1009,6 +1009,7 @@
 #if defined (UseGPS)
   #include <TinyGPSWrapper.h>
   #include "GpsUtility.h"
+  #include "Navigator.h"
 #endif
 
 //********************************************************
@@ -1163,7 +1164,6 @@ void setup() {
   
   #if defined (UseGPS)
     initializeGps();
-    initHomeParameters();
   #endif 
 
   setupFourthOrder();
@@ -1175,12 +1175,12 @@ void setup() {
 
 /*******************************************************************
   // tasks (microseconds of interval)
-  ReadGyro        readGyro      (   5000); // 200hz
-  ReadAccel       readAccel     (   5000); // 200hz
-  RunDCM          runDCM        (  10000); // 100hz
+  ReadGyro        readGyro      (as fast as we can depending of the platform)
+  ReadAccel       readAccel     (as fast as we can depending of the platform)
+  RunDCM          runKinematics (  10000); // 100hz
   FlightControls  flightControls(  10000); // 100hz
+  ReadBaro        readBaro      (  10000); // 100hz
   ReadReceiver    readReceiver  (  20000); //  50hz
-  ReadBaro        readBaro      (  40000); //  25hz
   ReadCompass     readCompass   ( 100000); //  10Hz
   ProcessTelem    processTelem  ( 100000); //  10Hz
   ReadBattery     readBattery   ( 100000); //  10Hz
@@ -1344,6 +1344,13 @@ void loop () {
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
 
+      #if defined (UseGPS)
+        readGps();
+        if (!isHomeBaseInitialized()) {
+          initHomeBase();
+        }
+      #endif
+      
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
       #endif
@@ -1351,14 +1358,7 @@ void loop () {
       #ifdef MAX7456_OSD
         updateOSD();
       #endif
-      
-      #if defined (UseGPS)
-        readGps();
-//        gpsdump();
-      #endif
-      
     }
-
     previousTime = currentTime;
   }
   if (frameCounter >= 100) {
