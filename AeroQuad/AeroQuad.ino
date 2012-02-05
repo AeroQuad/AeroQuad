@@ -1221,6 +1221,10 @@ void loop () {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
       }
       
+      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+         estimatedZVelocity += (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+      #endif         
+      
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
         calculateKinematics(gyroRate[XAXIS],
