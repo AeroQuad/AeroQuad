@@ -122,7 +122,7 @@ void processAltitudeHold();
 /**
  * Altitude control global declaration
  */
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder || defined UseGPS
  // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
@@ -134,10 +134,8 @@ void processAltitudeHold();
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
-
 float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
-
 
 /**
  * Serial communication global declaration

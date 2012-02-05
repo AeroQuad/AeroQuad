@@ -78,6 +78,7 @@
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
 
   /**
    * Put AeroQuad_v1 specific intialization need here
@@ -124,6 +125,7 @@
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
 
   /**
    * Put AeroQuad_v1_IDG specific intialization need here
@@ -181,6 +183,7 @@
   #undef AltitudeHoldRangeFinder
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
 
   /**
    * Put AeroQuad_v18 specific intialization need here
@@ -246,6 +249,7 @@
   #undef AltitudeHoldRangeFinder  
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
 
   /**
    * Put AeroQuad_Mini specific intialization need here
@@ -601,6 +605,7 @@
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
 
   /**
    * Put AeroQuad_Wii specific intialization need here
@@ -1003,6 +1008,7 @@
 //********************************************************
 #if defined (UseGPS)
   #include <TinyGPSWrapper.h>
+  #include "GpsUtility.h"
 #endif
 
 //********************************************************
@@ -1129,9 +1135,6 @@ void setup() {
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
   
-  #if defined (UseGPS)
-    initializeGps();
-  #endif 
 
   // Camera stabilization setup
   #if defined (CameraControl)
@@ -1157,6 +1160,11 @@ void setup() {
      binaryPort = &Serial;
     #endif
   #endif
+  
+  #if defined (UseGPS)
+    initializeGps();
+    initHomeParameters();
+  #endif 
 
   setupFourthOrder();
 

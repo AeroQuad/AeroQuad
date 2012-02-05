@@ -33,12 +33,48 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
+
 /**
  * getAltitudeFromSensors
  *
  * @return the current craft altitude depending of the sensors used
  */
-#if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
+#if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder) && defined (UseGPS)
+
+  /**
+   * @return the most precise altitude, sonar if the reading is ok, otherwise baro merge with GPS
+   * it also correct the baro and GPS ground altitude to have a smoot sensor switch
+   */
+  float getAltitudeFromSensors() {
+  
+    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
+      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+      gpsGroundAltitude = getGpsAltitude() - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
+    }
+    else {
+      return (getBaroAltitude() + getNormalizedGpsAltitude()) / 2;    
+    }
+  }
+  
+#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder) && defined (UseGPS)
+
+  /**
+   * @return the most precise altitude, sonar if the reading is ok, otherwise baro merge with GPS
+   * it also correct the baro and GPS ground altitude to have a smoot sensor switch
+   */
+  float getAltitudeFromSensors() {
+  
+    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
+      gpsGroundAltitude = getGpsAltitude() - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
+    }
+    else {
+      return getNormalizedGpsAltitude();    
+    }
+  }
+
+#elif defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder) && !defined (UseGPS)
 
   /**
    * @return the most precise altitude, sonar if the reading is ok, otherwise baro
@@ -54,8 +90,17 @@
       return getBaroAltitude();    
     }
   }
+
+#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder) && defined (UseGPS)
+
+  /**
+   * @return the the merge of baro and gps altitude
+   */
+  float getAltitudeFromSensors() {
+    return (getBaroAltitude() + getNormalizedGpsAltitude()) / 2;    
+  }
   
-#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder)
+#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder) && !defined (UseGPS)
 
   /**
    * @return the baro altitude
@@ -64,14 +109,24 @@
     return getBaroAltitude();
   }
   
-#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
+#elif !defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder) && defined (UseGPS)
+
+  /**
+   * @return the the gps altitude
+   */
+  float getAltitudeFromSensors() {
+    return getNormalizedGpsAltitude();    
+  }
+
+#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder) && !defined (UseGPS)
+
   /**
    * @return the sonar altitude
    */
   float getAltitudeFromSensors() {
     return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
   }
-  
+
 #endif
 
 
@@ -88,7 +143,7 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder || defined (UseGPS)
     if (altitudeHoldState == ON) {
       float currentSensorAltitude = getAltitudeFromSensors();
       if (currentSensorAltitude == INVALID_ALTITUDE) {
