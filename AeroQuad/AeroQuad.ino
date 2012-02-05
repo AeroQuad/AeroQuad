@@ -1052,7 +1052,9 @@
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
 #include "SerialCom.h"
-
+#if defined (UseGPS) || defined (BattMonitor)
+  #include "LedStatusProcessor.h"
+#endif  
 
 
 /**
@@ -1357,6 +1359,10 @@ void loop () {
 
       #ifdef MAX7456_OSD
         updateOSD();
+      #endif
+      
+      #if defined (UseGPS) || defined (BattMonitor)
+        processLedStatus();
       #endif
     }
     previousTime = currentTime;
