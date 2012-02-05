@@ -44,7 +44,6 @@ unsigned long gpsAltitudeSum = GPS_INVALID_ALTITUDE;
 
 void initHomeBase()
 {
-  digitalRead(LED_Green) == HIGH ? digitalWrite(LED_Green, LOW) : digitalWrite(LED_Green, HIGH);
   if (!haveAGpsLock()) {
     return;
   }
@@ -63,7 +62,6 @@ void initHomeBase()
     gpsHomeLongitude  = gpsLongitudeSum / gpsSumCounter;
     gpsGroundAltitude = gpsAltitudeSum / gpsSumCounter;
   }
-  digitalWrite(LED_Green, HIGH);
 }
 
 
