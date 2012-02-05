@@ -39,7 +39,6 @@ void readPilotCommands() {
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
-      digitalWrite(LED_Red,LOW);
       motorArmed = OFF;
             
       #ifdef OSD
@@ -72,37 +71,35 @@ void readPilotCommands() {
       #endif 
 
       zeroIntegralError();
-      commandAllMotors(MINTHROTTLE);
-      digitalWrite(LED_Red,HIGH);
+      for (byte motor = 0; motor < LASTMOTOR; motor++) {
+        motorCommand[motor] = MINTHROTTLE;
+      }
       motorArmed = ON;
     
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
       #endif  
-        
+      
+      
     }
-
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
-    }
-
-    // If motors armed, and user starts to arm/disarm motors (yaw stick hasn't passed MAXCHECK or MINCHECK yet)
-    // This prevents unwanted spinup of motors
-    if (motorArmed == ON) {
-      commandAllMotors(MINTHROTTLE);
     }
   }
   
   #ifdef RateModeOnly
     flightMode = RATE_FLIGHT_MODE;
+    digitalWrite(LED_Yellow, LOW);
   #else
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {
       flightMode = ATTITUDE_FLIGHT_MODE;
+      digitalWrite(LED_Yellow, HIGH);
    }
     else {
       flightMode = RATE_FLIGHT_MODE;
+      digitalWrite(LED_Yellow, LOW);
     }
   #endif  
   
