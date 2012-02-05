@@ -50,8 +50,6 @@ int motorConfiguratorCommand[4] = {0,0,0,0};
 
 byte maxLimit = OFF;
 byte minLimit = OFF;
-int motorMaxLimitCommand[4] = {0,0,0,0};
-int motorMinLimitCommand[4] = {0,0,0,0};
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
@@ -60,48 +58,6 @@ void applyMotorCommand() {
   motorCommand[FRONT_RIGHT] = correctedThrottle - motorAxisCommandPitch - motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[REAR_LEFT] = correctedThrottle + motorAxisCommandPitch + motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[REAR_RIGHT] = correctedThrottle + motorAxisCommandPitch - motorAxisCommandRoll - (YAW_DIRECTION * motorAxisCommandYaw);
-
-  // Force motors to be equally distant from throttle value for balanced motor output during hard yaw
-  byte motorMaxCheck = OFF;
-  byte motorMinCheck = OFF;
-
-  // Check if everything within motor limits
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motorMaxCheck = motorMaxCheck | (motorCommand[motor] >= MAXCOMMAND);
-    motorMinCheck = motorMinCheck | (motorCommand[motor] <= minArmedThrottle);
-  }
-
-  // If everything within limits, turn flags off
-  if (!motorMaxCheck) {
-    if (maxLimit) {
-      for (byte motor = 0; motor < LASTMOTOR; motor++)
-        motorMinLimitCommand[motor] = minArmedThrottle;
-      maxLimit = OFF;
-    }
-  }
-  if (!motorMinCheck) {
-    if (minLimit) {
-      for (byte motor = 0; motor < LASTMOTOR; motor++)
-        motorMaxLimitCommand[motor] = MAXCOMMAND;
-      minLimit = OFF;
-    }
-  }
-
-  // If any limits reached, freeze current min values and turn limit flag on
-  // In future iterations, if limit still exceeded still use first min values
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    if ((motorCommand[motor] >= MAXCOMMAND) && maxLimit == OFF) {
-      for (byte motorLimit = 0; motorLimit < LASTMOTOR; motorLimit++)
-        motorMinLimitCommand[motorLimit] = motorCommand[motorLimit];
-      maxLimit = ON;
-    }
-    if ((motorCommand[motor] <= minArmedThrottle) && minLimit == OFF) {
-      for (byte motorLimit = 0; motorLimit < LASTMOTOR; motorLimit++)
-        motorMaxLimitCommand[motorLimit] = motorCommand[motorLimit];
-      minLimit = ON;
-    }
-    motorCommand[motor] = constrain(motorCommand[motor], motorMinLimitCommand[motor], motorMaxLimitCommand[motor]);
-  }
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_
