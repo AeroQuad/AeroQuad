@@ -234,7 +234,7 @@ void processFlightControl() {
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   processHardManuevers();    
   
-    // If throttle in minimum position, don't apply yaw
+  // If throttle in minimum position, don't apply yaw
   if (receiverCommand[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minArmedThrottle;
