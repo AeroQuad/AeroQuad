@@ -28,6 +28,12 @@
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 /**
+ * @kenny
+ * New thing to test, cummulate accel data instead to used it directly, 
+ * if i'm not wrong, the cummulation will get to true 0 gravity by itself!
+ */
+
+/**
  * getAltitudeFromSensors
  *
  * @return the current craft altitude depending of the sensors used
