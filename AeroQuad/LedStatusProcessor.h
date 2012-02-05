@@ -25,19 +25,19 @@
 #ifndef _AQ_LedProcessor_H_
 #define _AQ_LedProcessor_H_
 
-#define TWO_Hz_TIME 500
+#define TWO_Hz_TIME 500000
 unsigned long lastLedChangeTime = 0;
 byte flashingLedState = LOW;
 
 void processLedStatus() {
- 
+
   if ( (currentTime - lastLedChangeTime) > TWO_Hz_TIME) {
     flashingLedState = flashingLedState == LOW ? HIGH : LOW;
     lastLedChangeTime = currentTime;
   }
   
   //
-  // process ready state light
+  // process ready state light in case we use GPS
   //
   #if defined (UseGPS)
     if (haveAGpsLock()) {
@@ -48,6 +48,9 @@ void processLedStatus() {
     }
   #endif
   
+  //
+  // process ready state light in case we use Batt monitor
+  //
   #if defined (BattMonitor)
     if (batteryAlarm) {
       digitalWrite(LED_Red, flashingLedState);
