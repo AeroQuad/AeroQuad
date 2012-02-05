@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - December 2011
+  AeroQuad v3.0 - Febuary 2012
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -22,27 +22,50 @@
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 
 
-#ifndef _AQ_GpsUtility_H
-#define _AQ_GpsUtility_H
-
-long gpsHomeLatitude = 0;
-long gpsHomeLongitude = 0;
-unsigned long gpsGroundAltitude = 0;
+#ifndef _AQ_GpsUtility_H_
+#define _AQ_GpsUtility_H_
 
 
-void initHomeParameters()
+// home base data
+long gpsHomeLatitude = GPS_INVALID_ANGLE;
+long gpsHomeLongitude = GPS_INVALID_ANGLE;
+unsigned long gpsGroundAltitude = GPS_INVALID_ALTITUDE;
+
+boolean isHomeBaseInitialized() {
+  return gpsHomeLatitude != GPS_INVALID_ANGLE;
+}
+
+
+#define NB_HOME_GPS_SAMPLE 25
+byte gpsSumCounter = 0;
+long gpsLatitudeSum = GPS_INVALID_ANGLE;
+long gpsLongitudeSum = GPS_INVALID_ANGLE;
+unsigned long gpsAltitudeSum = GPS_INVALID_ALTITUDE;
+
+void initHomeBase()
 {
-  while (!haveAGpsLock()) {  
-    readGps();
-    delay(1000);
-    digitalRead(LED_Green) == HIGH ? digitalWrite(LED_Green, LOW) : digitalWrite(LED_Green, HIGH);
+  digitalRead(LED_Green) == HIGH ? digitalWrite(LED_Green, LOW) : digitalWrite(LED_Green, HIGH);
+  if (!haveAGpsLock()) {
+    return;
   }
-  gpsHomeLatitude = getLatitude();
-  gpsHomeLongitude = getLatitude();
-  gpsGroundAltitude = getGpsAltitude();
+  if (isHomeBaseInitialized()) {
+    return;
+  }
+  if (gpsSumCounter < NB_HOME_GPS_SAMPLE) {
+    gpsLatitudeSum  += getLatitude();
+    gpsLongitudeSum += getLongitude();
+    gpsAltitudeSum  += getGpsAltitude();
+    gpsSumCounter++;
+    return;
+  }
+  else {
+    gpsHomeLatitude   = gpsLatitudeSum / gpsSumCounter;
+    gpsHomeLongitude  = gpsLongitudeSum / gpsSumCounter;
+    gpsGroundAltitude = gpsAltitudeSum / gpsSumCounter;
+  }
+  digitalWrite(LED_Green, HIGH);
 }
 
-unsigned long getNormalizedGpsAltitude() {
-  return getGpsAltitude() - gpsGroundAltitude;
-}
+
+
 #endif
