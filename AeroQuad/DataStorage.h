@@ -172,6 +172,10 @@ void initializeEEPROM() {
     maxRangeFinderRange = 3.0;
     minRangeFinderRange = 0.25;
   #endif
+  
+  #if defined (UseGPS)
+    missionNbPoint = 0;
+  #endif
 }
 
 void readEEPROM() {
@@ -240,6 +244,10 @@ void readEEPROM() {
     maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);
     minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
   #endif     
+  
+  #if defined (UseGPS)
+    missionNbPoint = readFloat(GPS_MISSION_NB_POINT);
+  #endif
 }
 
 void writeEEPROM(){
@@ -313,6 +321,10 @@ void writeEEPROM(){
   #else
     writeFloat(0, RANGE_FINDER_MAX_ADR);
     writeFloat(0, RANGE_FINDER_MIN_ADR);
+  #endif
+  
+  #if defined (UseGPS)
+    writeFloat(missionNbPoint, RANGE_FINDER_MAX_ADR);
   #endif
 
   sei(); // Restart interrupts
