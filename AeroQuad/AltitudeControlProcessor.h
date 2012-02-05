@@ -24,20 +24,8 @@
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-/**
- * Altitude control processor do the premilary treatment on throttle correction
- * to control the altitude of the craft. It then modify directly the 
- * throttle variable use by the motor matrix calculation
- */
-
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
-
-/**
- * @kenny
- * New thing to test, cummulate accel data instead to used it directly, 
- * if i'm not wrong, the cummulation will get to true 0 gravity by itself!
- */
 
 /**
  * getAltitudeFromSensors
@@ -102,8 +90,13 @@ void processAltitudeHold()
         return;
       }
 
+      // computer altitude error!
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+      
+      // compute throttle z dampening
+      int zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+      
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
@@ -114,7 +107,7 @@ void processAltitudeHold()
           altitudeToHoldTarget -= 0.01;
         }
       }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
     }
     else {
       throttle = receiverCommand[THROTTLE];
