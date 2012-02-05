@@ -133,6 +133,8 @@ void processAltitudeHold();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  
+  int estimatedZVelocity = 0;
 #endif
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
