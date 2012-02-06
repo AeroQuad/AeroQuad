@@ -21,6 +21,8 @@
 #ifndef _AQ_OSD_H_
 #define _AQ_OSD_H_
 
+#include <OSD_Config.h>
+
 byte OSDsched = 0;
 
 #ifdef BattMonitor

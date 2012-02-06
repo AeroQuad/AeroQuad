@@ -21,21 +21,6 @@
 #ifndef _AQ_OSD_MAX7456_CONFIG_H_
 #define _AQ_OSD_MAX7456_CONFIG_H_
 
-//*******************************************************************
-//******************* OSD CONFIGURATION *****************************
-//*******************************************************************
-
-// Optional OSD items
-
-//#define ShowRSSI               // Show Receiver RSSI
-#ifdef ShowRSSI
-  #define RSSI_PIN     A6     // analog pin to read
-  #define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
-  #define RSSI_100P    1023   // A/D value for 100%
-  #define RSSI_0P      0      // A/D value for 0%
-  #define RSSI_WARN    20     // show alarm at %
-#endif
-
 // You can configure positioning of various display elements below.
 // '#defines' for elements which will not be displayed, can be ignored.
 //
@@ -97,5 +82,3 @@
 /********************** End of user configuration section ********************************/
 
 #endif  // #define _AQ_OSD_MAX7456_CONFIG_H_
-
-
