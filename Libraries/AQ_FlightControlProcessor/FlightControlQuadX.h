@@ -48,9 +48,6 @@ int motorMaxCommand[4] = {0,0,0,0};
 int motorMinCommand[4] = {0,0,0,0};
 int motorConfiguratorCommand[4] = {0,0,0,0};
 
-byte maxLimit = OFF;
-byte minLimit = OFF;
-
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   const int correctedThrottle = throttle - abs(motorAxisCommandYaw*2/4);

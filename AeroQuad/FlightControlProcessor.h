@@ -278,7 +278,7 @@ void processFlightControl() {
   // If throttle in minimum position, don't apply yaw
   if (receiverCommand[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motorMinCommand[motor] = minArmedThrottle;
+      motorMaxCommand[motor] = minArmedThrottle;
     }
   }
   
