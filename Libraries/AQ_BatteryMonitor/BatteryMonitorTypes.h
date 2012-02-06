@@ -21,18 +21,25 @@
 #ifndef _AQ_BATTERY_MONITOR_TYPES
 #define _AQ_BATTERY_MONITOR_TYPES
 
+#if ! defined (__AVR_ATmega328P__) && ! defined(__AVR_ATmegaUNO__)
+  #define BM_EXTENDED
+#endif
+
 #define BM_NOPIN 255
 
 struct BatteryData {
-  byte  vPin,cPin;        // A/D pins for voltage and current sensors (255 = BM_NOPIN <=> no sensor)
-  byte  cells;            // Number of Cells (used for alarm/warning voltage
-  float vScale,vBias;     // voltage polynom V = vbias + AnalogIn(vpin)*vscale
-  float cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
-  float voltage;          // Current battery voltage
-  float current;          // Current battery current
-  float minVoltage;       // Minimum voltage since reset
-  float maxCurrent;       // Maximum current since reset
-  float usedCapacity;     // Capacity used since reset (in mAh)
+  byte  vPin;                   // A/D pin for voltage sensor
+  byte  cells;                  // Number of Cells (used for alarm/warning voltage
+  short vScale,vBias;  // voltage polynom V = vbias + AnalogIn(vpin)*vscale
+  unsigned short voltage;       // Current battery voltage (in 10mV:s)
+#ifdef BM_EXTENDED
+  unsigned short minVoltage;    // Minimum voltage since reset
+  byte  cPin;             // A/D pin for current sensor (255 = BM_NOPIN <=> no sensor)
+  short cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
+  short current;          // Current battery current (in 10mA:s)
+  short maxCurrent;       // Maximum current since reset
+  long  usedCapacity;     // Capacity used since reset (in uAh)
+#endif
 };
 
 extern struct BatteryData batteryData[];       // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
@@ -44,8 +51,11 @@ extern boolean            batteryWarning;    // any battery in warning state
 // Helper macros to make battery definitions cleaner
 
 // for defining battery with voltage and optional current sensors
-#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,CELLS,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0}
-
+#ifdef BM_EXTENDED
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE),(VBIAS),0,0,(CPIN),(CSCALE),(CBIAS),0,0,0}
+#else
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE),(VBIAS),0,0}
+#endif
 // Function declarations
 
 boolean batteryIsAlarm(byte batteryNo);
@@ -53,5 +63,5 @@ boolean batteryIsWarning(byte batteryNo);
 void resetBattery(byte batteryNo);
 void initializeBatteryMonitor(byte numberOfMonitoredBatteries, float alarmVoltage);
 void setBatteryCellVoltageThreshold(float alarmVoltage);
-void measureBatteryVoltage(float deltaTime);
+void measureBatteryVoltage(unsigned short deltaTime);
 #endif

@@ -27,7 +27,7 @@ void updateOSD() {
 
   // OSD is updated fully in 4 rounds, these are (using bit)
   // 0x01 - Attitude Indicator
-  // 0x02 - Altitude, Heading, Timer, RSSI, Reticle
+  // 0x02 - Altitude, Heading, Timer, RSSI
   // 0x04 - Attitude Indicator
   // 0x08 - Battery info
 
