@@ -115,15 +115,17 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverSlope[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverSlope[channel] = readFloatSerial();
+      //}
+      receiverSlope[readFloatSerial()] = readFloatSerial();
       break;
       
     case 'H': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverOffset[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverOffset[channel] = readFloatSerial();
+      //}
+      receiverOffset[readFloatSerial()] = readFloatSerial();
       break;
       
     case 'I': // Initialize EEPROM with default values
