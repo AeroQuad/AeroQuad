@@ -54,7 +54,7 @@ extern boolean            batteryWarning;    // any battery in warning state
 #ifdef BM_EXTENDED
 #define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE),(VBIAS),0,0,(CPIN),(CSCALE),(CBIAS),0,0,0}
 #else
-#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE),(VBIAS),0,0}
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE),(VBIAS),0}
 #endif
 // Function declarations
 
