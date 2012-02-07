@@ -107,7 +107,11 @@
 /////////////////////////// ATTITUDE Display /////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 #ifdef ShowAttitudeIndicator
-  #include "MAX7456_AI.h"
+  #ifdef ARTIFICIAL_HORIZON
+    #include "MAX7456_AH.h"
+  #else
+    #include "MAX7456_AI.h"
+  #endif
 #endif
 
 #endif  // #define _AQ_OSD_MAX7456_H_

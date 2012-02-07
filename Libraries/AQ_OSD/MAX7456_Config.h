@@ -68,6 +68,9 @@
 #define NOTIFY_ROW MAX_screen_rows-3
 #define NOTIFY_COL 1 // don't change this, it needs a full line
 
+// Artificial horizon mode (default is attitude indicator)
+// #define ARTIFICIAL_HORIZON
+
 /********************** End of user configuration section ********************************/
 
 #endif  // #define _AQ_OSD_MAX7456_CONFIG_H_
