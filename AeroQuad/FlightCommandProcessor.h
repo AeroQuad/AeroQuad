@@ -50,6 +50,9 @@ void readPilotCommands() {
         batteryMonitorStartThrottle = 0;
         batteyMonitorThrottleCorrection = 0.0;
       #endif
+      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+        estimatedZVelocity = 0;
+      #endif
     }    
     
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
