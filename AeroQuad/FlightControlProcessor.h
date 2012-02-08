@@ -36,6 +36,13 @@
  */
 void calculateFlightError()
 {
+//  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+//    if (altitudeHoldState == ON) {
+//      motorAxisCommandRoll = (getReceiverSIData(XAXIS) - estimatedXVelocity) * 25;
+//      motorAxisCommandPitch = (getReceiverSIData(YAXIS) + estimatedYVelocity) * 25;
+//    }
+//    else
+//  #endif  
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
     float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
