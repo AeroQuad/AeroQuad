@@ -129,7 +129,7 @@ void measureBatteryVoltage(unsigned short deltaTime) {
       batteryData[i].minVoltage = batteryData[i].voltage;
     }
     if (batteryData[i].cPin != BM_NOPIN) {
-      batteryData[i].current = (long)analogRead(batteryData[i].cPin) * batteryData[i].cScale / 1024 + batteryData[i].cBias;
+      batteryData[i].current = (long)analogRead(batteryData[i].cPin) * batteryData[i].cScale * 10 / 1024 + batteryData[i].cBias * 10;
       if (batteryData[i].current > batteryData[i].maxCurrent) { 
         batteryData[i].maxCurrent = batteryData[i].current;
       }
