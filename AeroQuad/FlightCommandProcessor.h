@@ -67,21 +67,25 @@ void readPilotCommands() {
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
       zeroIntegralError();
-      for (byte motor = 0; motor < LASTMOTOR; motor++) {
-        motorCommand[motor] = MINTHROTTLE;
-      }
+      commandAllMotors(MINTHROTTLE);
       digitalWrite(LED_Red,HIGH);
       motorArmed = ON;
     
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
       #endif  
-      
-      
+        
     }
+
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
+    }
+
+    // If motors armed, and user starts to arm/disarm motors (yaw stick hasn't passed MAXCHECK or MINCHECK yet)
+    // This prevents unwanted spinup of motors
+    if (motorArmed == ON) {
+      commandAllMotors(MINTHROTTLE);
     }
   }
   
