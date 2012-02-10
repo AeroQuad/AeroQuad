@@ -171,7 +171,7 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 12
   #else
     #undef BattMonitorAutoDescent
@@ -236,7 +236,7 @@
   
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 12
   #else
     #undef BattMonitorAutoDescent
@@ -359,9 +359,9 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0, BM_NOPIN, 0.0, 0.0) // v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82, BM_NOPIN, 0.0, 0.0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
     #define BattDefaultBuzzer 49,31
   #else
@@ -447,9 +447,9 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0, BM_NOPIN, 0.0, 0.0) // v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82, BM_NOPIN, 0.0, 0.0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
     #define BattDefaultBuzzer 49,31
   #else
@@ -535,7 +535,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
@@ -669,7 +669,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 49,12
   #else
     #undef BattMonitorAutoDescent
@@ -745,7 +745,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
@@ -825,7 +825,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306, BM_NOPIN, 0.0, 0.0)
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
     #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
@@ -1088,6 +1088,11 @@ void setup() {
   #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
      initializeMotors(EIGHT_Motors);
   #endif
+  // Initialize max/min values for all motors
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    motorMinCommand[motor] = minArmedThrottle;
+    motorMaxCommand[motor] = MAXCOMMAND;
+  }
 
   // Setup receiver pins for pin change interrupts
   initializeReceiver(LASTCHANNEL);
@@ -1343,7 +1348,7 @@ void loop () {
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
       #endif
       #if defined(BattMonitor)
-        measureBatteryVoltage(G_Dt);
+        measureBatteryVoltage(G_Dt*1000.0);
       #endif
 
       // Listen for configuration commands and reports telemetry

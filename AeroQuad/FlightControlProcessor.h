@@ -178,23 +178,48 @@ void processHardManuevers() {
  */
 void processMinMaxCommand()
 {
-  for (byte motor = 0; motor < LASTMOTOR; motor++)
-  {
-    motorMinCommand[motor] = minArmedThrottle;
-    motorMaxCommand[motor] = MAXCOMMAND;
+  // Force motors to be equally distant from throttle value for balanced motor output during hard yaw
+  byte motorMaxCheck = OFF;
+  byte motorMinCheck = OFF;
+
+  // Check if everything within motor limits
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    motorMaxCheck = motorMaxCheck | (motorCommand[motor] >= MAXCOMMAND);
+    motorMinCheck = motorMinCheck | (motorCommand[motor] <= minArmedThrottle);
   }
 
-  int maxMotor = motorCommand[0];
-  
-  for (byte motor=1; motor < LASTMOTOR; motor++) {
-    if (motorCommand[motor] > maxMotor) {
-      maxMotor = motorCommand[motor];
+  // If everything within limits, turn flags off and reset max/mins to default
+  if (!motorMaxCheck) {
+    if (maxLimit) { // only reset if flag was on
+      for (byte motor = 0; motor < LASTMOTOR; motor++) {
+        motorMinCommand[motor] = minArmedThrottle;
+      }
+      maxLimit = OFF;
     }
   }
-    
+  if (!motorMinCheck) {
+    if (minLimit) { // only reset if flag was on
+      for (byte motor = 0; motor < LASTMOTOR; motor++) {
+        motorMaxCommand[motor] = MAXCOMMAND;
+      }
+      minLimit = OFF;
+    }
+  }
+
+  // If any limits reached, freeze current min/max values and turn limit flag on
+  // In future iterations, if limit still exceeded again, use only first frozen values
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    if (maxMotor > MAXCOMMAND) {
-      motorCommand[motor] =  motorCommand[motor] - (maxMotor - MAXCOMMAND);
+    if ((motorCommand[motor] >= MAXCOMMAND) && maxLimit == OFF) {
+      for (byte motorLimit = 0; motorLimit < LASTMOTOR; motorLimit++) {
+        motorMinCommand[motorLimit] = motorCommand[motorLimit];
+      }
+      maxLimit = ON;
+    }
+    if ((motorCommand[motor] <= minArmedThrottle) && minLimit == OFF) {
+      for (byte motorLimit = 0; motorLimit < LASTMOTOR; motorLimit++) {
+        motorMaxCommand[motorLimit] = motorCommand[motorLimit];
+      }
+      minLimit = ON;
     }
   }
 }
@@ -231,13 +256,10 @@ void processFlightControl() {
   // *********************** process min max motor command *******************
   processMinMaxCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  processHardManuevers();    
-  
-    // If throttle in minimum position, don't apply yaw
+  // If throttle in minimum position, don't apply yaw
   if (receiverCommand[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motorMinCommand[motor] = minArmedThrottle;
+      motorMaxCommand[motor] = minArmedThrottle;
     }
   }
   
