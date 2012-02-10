@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -101,8 +101,7 @@
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
 //#define BattCustomBuzzer pin1[,pin2]...
 
-//
-// *******************************************************************************************************************************
+//// *******************************************************************************************************************************
 // Optional Receiver
 // *******************************************************************************************************************************
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
