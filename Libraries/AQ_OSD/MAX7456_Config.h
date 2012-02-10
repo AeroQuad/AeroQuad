@@ -69,7 +69,7 @@
 #define NOTIFY_COL 1 // don't change this, it needs a full line
 
 // Artificial horizon mode (default is attitude indicator)
-// #define ARTIFICIAL_HORIZON
+#define ARTIFICIAL_HORIZON
 
 /********************** End of user configuration section ********************************/
 
