@@ -531,7 +531,7 @@ void sendSerialTelemetry() {
       PrintValueComma(0); // zero out unused motor channels
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryData[0].voltage);
+      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
     #else
       PrintValueComma(0);
     #endif
