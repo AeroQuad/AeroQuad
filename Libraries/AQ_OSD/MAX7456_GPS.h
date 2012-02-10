@@ -43,13 +43,13 @@ void displayGPS() {
   }
 
   {
-    long lat=-6012345,lon=-2412345;
-//    get_position(&lat,&lon,NULL);
+    long lat,lon;
+    get_position(&lat,&lon,NULL);
     // +xx.xxxxx+xxx.xxxxx
     char buf[20];
     snprintf(buf,20,"%c%2ld.%05ld%c%3ld.%05ld",
-             (lat>=0)?' ':'-',abslong(lat)/100000,abslong(lat)%100000,
-             (lon>=0)?' ':'-',abslong(lon)/100000,abslong(lon)%100000);
+             (lat>=0)?' ':'-',abs(lat)/100000L,abs(lat)%100000L,
+             (lon>=0)?' ':'-',abs(lon)/100000L,abs(lon)%100000L);
     
     writeChars(buf, 20, 0, GPS_ROW, GPS_COL);
   }
