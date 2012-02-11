@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -82,7 +82,7 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 #define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
