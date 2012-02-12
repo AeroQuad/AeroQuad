@@ -115,15 +115,19 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverSlope[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverSlope[channel] = readFloatSerial();
+      //}
+      channelCal = (int)readFloatSerial();
+      receiverSlope[channelCal] = readFloatSerial();
       break;
       
     case 'H': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverOffset[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverOffset[channel] = readFloatSerial();
+      //}
+      channelCal = (int)readFloatSerial();
+      receiverOffset[channelCal] = readFloatSerial();
       break;
       
     case 'I': // Initialize EEPROM with default values
@@ -368,7 +372,8 @@ void sendSerialTelemetry() {
     
   case 'g': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverSlope[axis]);
+      Serial.print(receiverSlope[axis], 6);
+      Serial.print(',');
     }
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -376,7 +381,8 @@ void sendSerialTelemetry() {
     
   case 'h': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverOffset[axis]);
+      Serial.print(receiverOffset[axis], 6);
+      Serial.print(',');
     }
     SERIAL_PRINTLN();
     queryType = 'X';
