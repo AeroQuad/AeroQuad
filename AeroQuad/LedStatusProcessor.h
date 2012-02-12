@@ -18,33 +18,31 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// FlightControl.pde is responsible for combining sensor measurements and
-// transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
+// Led Status Processor controls the LED:s on the shield according to vehicle status
 
 
 #ifndef _AQ_LedProcessor_H_
 #define _AQ_LedProcessor_H_
 
-#define TWO_Hz_TIME 500000
-unsigned long lastLedChangeTime = 0;
-byte flashingLedState = LOW;
+byte flashingLedState = 0; // this counter increments by one at 10Hz
 
 void processLedStatus() {
 
-  if ( (currentTime - lastLedChangeTime) > TWO_Hz_TIME) {
-    flashingLedState = flashingLedState == LOW ? HIGH : LOW;
-    lastLedChangeTime = currentTime;
-  }
   
   //
   // process ready state light in case we use GPS
   //
   #if defined (UseGPS)
     if (haveAGpsLock()) {
-      digitalWrite(LED_Green, HIGH);
+      if (isHomeBaseInitialized()) {
+        digitalWrite(LED_Green, HIGH);
+      }
+      else {
+        digitalWrite(LED_Green, (flashingLedState & 4));
+      }
     }
     else { 
-      digitalWrite(LED_Green, flashingLedState);
+      digitalWrite(LED_Green, (flashingLedState & 2));
     }
   #endif
   
@@ -53,12 +51,16 @@ void processLedStatus() {
   //
   #if defined (BattMonitor)
     if (batteryAlarm) {
-      digitalWrite(LED_Red, flashingLedState);
-    }
-    else { 
+      digitalWrite(LED_Red, flashingLedState & 4);
+    } else if (batteryWarning) {
+      digitalWrite(LED_Red, (flashingLedState & 7)==0);
+    } else { 
       digitalWrite(LED_Red, LOW);
     }
   #endif  
+
+  flashingLedState++;
+
 }
 
 #endif
