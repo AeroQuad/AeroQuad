@@ -449,6 +449,17 @@ float distance_between (float lat1, float long1, float lat2, float long2)
   return delta * 6372795; 
 }
 
+float bearing_to (float lat1, float long1, float lat2, float long2) 
+{
+  // Return the bearing to second pont (in degrees)
+  const float dlong = radians(long2 - long1);
+  lat1 = radians(lat1);
+  lat2 = radians(lat2);
+  const float y = sin(dlong) * cos(lat2);
+  const float x = cos(lat1) * sin(lat2) -
+                  sin(lat1) * cos(lat2) * cos(dLong);
+  return degrees(atan2(y, x));
+}  
 #endif
 
 
