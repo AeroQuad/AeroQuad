@@ -26,9 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Show GPS information
 
-void get_position(long *latitude, long *longitude, unsigned long *fixage);
-
-void displayGPS() {
+void displayGPS(long lat, long lon, long hlat, long hlon) {
 
   /*  {
     char buf[2]={176+foo*2,176+foo*2+1};
@@ -36,8 +34,6 @@ void displayGPS() {
     foo = (foo + 1) & 15;
   }
   */
-  long lat,lon;
-  get_position(&lat,&lon,NULL);
   if (lat == GPS_INVALID_ANGLE) {
     writeChars("Waiting for GPS fix", 20, 0, GPS_ROW, GPS_COL);
   } else {

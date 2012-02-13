@@ -41,7 +41,7 @@ byte OSDsched = 0;
   void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
 #ifdef UseGPS
-  void displayGPS();
+  void displayGPS(long lat, long lon, long hlat, long hlon);
 #endif
 
 void initializeOSD();

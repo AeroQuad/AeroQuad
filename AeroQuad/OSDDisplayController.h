@@ -61,14 +61,10 @@ void updateOSD() {
     #endif
   }
 
-  if (OSDsched&0x20) {
+  if (OSDsched&0xa0) {
     #ifdef UseGPS
-      displayGPS();
+      displayGPS(getLatitude(), getLongitude(), gpsHomeLatitude, gpsHomeLongitude);
     #endif
-  }
-
-  if (OSDsched&0x80) {
-    // reserved for future use
   }
 
   OSDsched <<= 1;
