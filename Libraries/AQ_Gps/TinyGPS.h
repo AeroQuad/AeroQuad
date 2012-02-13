@@ -457,7 +457,7 @@ float bearing_to (float lat1, float long1, float lat2, float long2)
   lat2 = radians(lat2);
   const float y = sin(dlong) * cos(lat2);
   const float x = cos(lat1) * sin(lat2) -
-                  sin(lat1) * cos(lat2) * cos(dLong);
+                  sin(lat1) * cos(lat2) * cos(dlong);
   return degrees(atan2(y, x));
 }  
 #endif
