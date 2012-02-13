@@ -35,7 +35,7 @@ void displayVoltage(byte areMotorsArmed) {
   int currentValue = batteryData[osdBatNo].voltage/10;
 
   char buf[12];
-  snprintf(buf,7,"%c%2d.%1dV",(osdBatMinMax) ? '\23' : '\20', currentValue/10,currentValue%10);
+  snprintf(buf,7,"%c%2d.%1dV",'\20', currentValue/10,currentValue%10);
 
   // Following blink only symbol on warning and all on alarm
   writeChars( buf,   1, batteryIsWarning(osdBatNo)?1:0, VOLTAGE_ROW + osdBatNo, VOLTAGE_COL );
