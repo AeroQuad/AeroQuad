@@ -37,7 +37,7 @@ void updateOSD() {
   }
 
   #ifdef ShowAttitudeIndicator
-    if ((OSDsched&0x01) || (OSDsched&0x04)) {
+    if (OSDsched&0x55) { // every second update -> 5Hz
       displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], flightMode);
     }
   #endif
@@ -61,14 +61,18 @@ void updateOSD() {
     #endif
   }
 
-  if (OSDsched&0x10) {
+  if (OSDsched&0x20) {
     #ifdef UseGPS
       displayGPS();
     #endif
   }
 
+  if (OSDsched&0x80) {
+    // reserved for future use
+  }
+
   OSDsched <<= 1;
-  if (OSDsched & 0x20) {
+  if (!OSDsched) {
     OSDsched = 0x01;
   }
 }

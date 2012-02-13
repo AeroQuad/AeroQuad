@@ -172,7 +172,6 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 12
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -237,7 +236,6 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 12
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -363,7 +361,6 @@
     #else
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
-    #define BattDefaultBuzzer 49,31
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -451,7 +448,6 @@
     #else
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
-    #define BattDefaultBuzzer 49,31
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -536,7 +532,6 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -670,7 +665,6 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 49,12
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -746,7 +740,6 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -826,7 +819,6 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -960,10 +952,6 @@
 //********************************************************
 #ifdef BattMonitor
   #include <BatteryMonitor.h>
-  #ifndef BattCustomBuzzer
-    #define BattCustomBuzzer BattDefaultBuzzer
-  #endif
-  const byte batteryBuzzerPins[]={BattCustomBuzzer,255};
   #ifndef BattCustomConfig
     #define BattCustomConfig BattDefaultConfig
   #endif
