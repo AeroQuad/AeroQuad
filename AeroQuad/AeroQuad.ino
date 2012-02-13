@@ -955,7 +955,7 @@
   #ifndef BattCustomConfig
     #define BattCustomConfig BattDefaultConfig
   #endif
-  struct BatteryData batteryData[] = BattCustomConfig;
+  struct BatteryData batteryData[] = {BattCustomConfig};
 #endif
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
