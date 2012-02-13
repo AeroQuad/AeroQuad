@@ -43,7 +43,6 @@ struct BatteryData {
 };
 
 extern struct BatteryData batteryData[];       // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
-extern const byte         batteryBuzzerPins[]; // Pins for battery alarm buzzer/LED:s (terminated by 255)
 extern byte               numberOfBatteries; // number of batteries monitored, defined by BatteryMonitor
 extern boolean            batteryAlarm;      // any battery in alarm state used for e.g. autodescent
 extern boolean            batteryWarning;    // any battery in warning state

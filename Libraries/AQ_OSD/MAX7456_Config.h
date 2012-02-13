@@ -64,9 +64,20 @@
 #define RSSI_ROW     3
 #define RSSI_COL     23
 
+// GPS info
+#define GPS_ROW     MAX_screen_rows-2
+#define GPS_COL     1
+
+// GPS home arrow -- under the reticle
+#define GPS_HA_ROW  (MAX_screen_rows/2+2)
+#define GPS_HA_COL  14
+
 // Notify
 #define NOTIFY_ROW MAX_screen_rows-3
 #define NOTIFY_COL 1 // don't change this, it needs a full line
+
+// Artificial horizon mode (default is attitude indicator)
+#define ARTIFICIAL_HORIZON
 
 /********************** End of user configuration section ********************************/
 

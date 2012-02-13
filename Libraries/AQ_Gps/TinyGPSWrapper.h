@@ -32,6 +32,15 @@
 
 void initializeGps() {
   GPS_PORT.begin(GPS_SERIAL_BAUD_SPEED);
+  
+  GPS_PORT.print("$PMTK251,115200*1F\r\n"); // set to 115200
+  delay(100);
+  GPS_PORT.end();
+  GPS_PORT.begin(115200);
+  delay(500);
+  GPS_PORT.print("$PMTK300,100,0,0,0,0*2c\r\n$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n"); //then switch to 10Hz and only RMC,GGA
+  GPS_PORT.println("$PMTK301,2*2E");
+  GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
 }
 
 boolean readGps()
@@ -44,11 +53,26 @@ boolean readGps()
   return false;
 }
 
-boolean isGpsHaveALock() {
+// @todo, kenny, to be tested
+boolean haveAGpsLock() {
  return _last_position_fix != GPS_INVALID_FIX_TIME;
 }
 
+long getLongitude() {
+  return _longitude; // degrees * 100000
+}
 
+long getLatitude() {
+  return _latitude; // degrees * 100000
+}
+
+unsigned long getGpsSpeed() {
+  return _gpsSpeed*1.852*10/36;
+}
+
+unsigned long getGpsAltitude() {
+  return _gpsAltitude;
+}
 
 
 /*void printGpsFloat(double number, int digits = 0)
@@ -127,7 +151,7 @@ void gpsdump()
 
   readGps();
 }
-*/  
+*/
 
 
 #endif

@@ -135,7 +135,7 @@ void initializeOSD() {
 
   //Set white level to 90% for all rows
   spi_select();
-  for( int i = 0; i < MAX_screen_rows; i++ ) {
+  for( byte i = 0; i < MAX_screen_rows; i++ ) {
     spi_writereg( RB0 + i, WHITE_level_90 );
   }
 
