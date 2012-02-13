@@ -28,33 +28,25 @@
 
 void get_position(long *latitude, long *longitude, unsigned long *fixage);
 
-byte foo=0;
-
-long abslong(long x) {
-  return (x<0)?-x:x;
-}
-
 void displayGPS() {
 
-  {
+  /*  {
     char buf[2]={176+foo*2,176+foo*2+1};
     writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
     foo = (foo + 1) & 15;
   }
-
-  {
-    long lat,lon;
-    get_position(&lat,&lon,NULL);
-    if (lat == GPS_INVALID_ANGLE) {
-      writeChars("Waiting for GPS fix", 20, 0, GPS_ROW, GPS_COL);
-    } else {
-      char buf[20];
-      snprintf(buf,20,"%c%2ld.%05ld%c%3ld.%05ld",
-               (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
-               (lon>=0)?'E':'w',abs(lon)/100000L,abs(lon)%100000L);
-      writeChars(buf, 20, 0, GPS_ROW, GPS_COL);
-    }
+  */
+  long lat,lon;
+  get_position(&lat,&lon,NULL);
+  if (lat == GPS_INVALID_ANGLE) {
+    writeChars("Waiting for GPS fix", 20, 0, GPS_ROW, GPS_COL);
+  } else {
+    char buf[20];
+    snprintf(buf,20,"%c%02ld.%05ld%c%03ld.%05ld",
+             (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
+             (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L);
+    writeChars(buf, 20, 0, GPS_ROW, GPS_COL);
   }
 }
 
-#endif  // #define _AQ_OSD_MAX7456_RSSI_H_
+#endif  // #define _AQ_OSD_MAX7456_GPS_H_
