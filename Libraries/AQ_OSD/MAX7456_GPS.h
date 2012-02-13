@@ -26,22 +26,47 @@
 //////////////////////////////////////////////////////////////////////////////
 // Show GPS information
 
-void displayGPS(long lat, long lon, long hlat, long hlon) {
+byte osdGPSState=0;
 
-  /*  {
-    char buf[2]={176+foo*2,176+foo*2+1};
+void displayGPS(long lat, long lon, long hlat, long hlon, long speed, short magheading) {
+
+  if (osdGPSState&0x80) {
+    char buf[5];
+    // update 'home arrow' and distance
+    #define GPS2RAD (1/5729577.95)
+    #define RAD2DEG 57.2957795
+    const float x = (float)(hlon-lon) * GPS2RAD * cos((float)(lat+hlat)/2*GPS2RAD);
+    const float y = (float)(hlat-lat) * GPS2RAD;
+    const short distance = (sqrt(x*x+y*y) * 6371009); 
+    short bearing = (short)(RAD2DEG * atan2(x,y)) - magheading;
+    bearing = ((bearing + 11) * 16 / 360 + 16) % 16;
+    buf[0]=176 + bearing * 2;
+    buf[1]=buf[0]+1;
     writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
-    foo = (foo + 1) & 15;
+    if (distance<1000) {
+      snprintf(buf,5,"%3dm",distance);
+    }
+    else {
+      snprintf(buf,5,"%d.%1dk", distance/1000, distance / 100 % 10);
+    }
+    writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
+    osdGPSState&=0x7f;
   }
-  */
-  if (lat == GPS_INVALID_ANGLE) {
-    writeChars("Waiting for GPS fix", 20, 0, GPS_ROW, GPS_COL);
-  } else {
-    char buf[20];
-    snprintf(buf,20,"%c%02ld.%05ld%c%03ld.%05ld",
-             (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
-             (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L);
-    writeChars(buf, 20, 0, GPS_ROW, GPS_COL);
+  else {
+    // update position and speed
+    if ((lat == GPS_INVALID_ANGLE) && (!(osdGPSState&0x40))) {
+      writeChars("Waiting for GPS fix", 28, 0, GPS_ROW, GPS_COL);
+      osdGPSState|=0x40;
+    } else {
+      char buf[29];
+      snprintf(buf,29,"%c%02ld.%05ld% c%03ld.%05ld %3d",
+               (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
+               (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
+	       speed);
+      writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
+    }
+    osdGPSState|=0x80;
+    osdGPSState&=~0x40;
   }
 }
 
