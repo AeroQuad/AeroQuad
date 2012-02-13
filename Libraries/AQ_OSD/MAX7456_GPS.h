@@ -59,7 +59,7 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, short magh
       osdGPSState|=0x40;
     } else {
       char buf[29];
-      snprintf(buf,29,"%c%02ld.%05ld% c%03ld.%05ld %3d",
+      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld",
                (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
                (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
 	       speed);
