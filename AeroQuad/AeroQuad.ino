@@ -171,8 +171,7 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 90, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 12
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -236,8 +235,7 @@
   
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 53, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 12
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -359,11 +357,10 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
-    #define BattDefaultBuzzer 49,31
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -447,11 +444,10 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
-    #define BattDefaultBuzzer 49,31
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -535,8 +531,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1335, 31, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -669,8 +664,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1500, 90, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 49,12
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -745,8 +739,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1335, 90, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -825,8 +818,7 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 1335, 31, BM_NOPIN, 0, 0)
-    #define BattDefaultBuzzer 57,58,59,60 // former BatteryMonitor_APM
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
     #undef BattCellCount
@@ -960,14 +952,10 @@
 //********************************************************
 #ifdef BattMonitor
   #include <BatteryMonitor.h>
-  #ifndef BattCustomBuzzer
-    #define BattCustomBuzzer BattDefaultBuzzer
-  #endif
-  const byte batteryBuzzerPins[]={BattCustomBuzzer,255};
   #ifndef BattCustomConfig
     #define BattCustomConfig BattDefaultConfig
   #endif
-  struct BatteryData batteryData[] = BattCustomConfig;
+  struct BatteryData batteryData[] = {BattCustomConfig};
 #endif
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
@@ -1331,6 +1319,13 @@ void loop () {
         cameraControlSetYaw(kinematicsAngle[ZAXIS]);
         cameraControlMove();
       #endif
+
+      #if defined (UseGPS)
+        readGps();
+        if (!isHomeBaseInitialized()) {
+          initHomeBase();
+        }
+      #endif      
     }
 
     // ================================================================
@@ -1352,13 +1347,6 @@ void loop () {
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
 
-      #if defined (UseGPS)
-        readGps();
-        if (!isHomeBaseInitialized()) {
-          initHomeBase();
-        }
-      #endif
-      
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
       #endif

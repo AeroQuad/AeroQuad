@@ -60,10 +60,6 @@ void initializeBatteryMonitor(byte nb, float alarmVoltage) {
   for (int i = 0; i < numberOfBatteries; i++) {
     resetBattery(i);
   }
-  for (byte i=0; batteryBuzzerPins[i]!=255 ; i++) {
-    pinMode(batteryBuzzerPins[i], OUTPUT);
-    digitalWrite(batteryBuzzerPins[i], LOW);
-  }
   measureBatteryVoltage(0); // Initial measurement
 }
 
@@ -98,26 +94,6 @@ boolean batteryIsWarning(byte batNo) {
   return false;
 }
 
-void updateBuzzer() {
-  
-  boolean newState = false;
-
-  buzzerState = 0x8f & (buzzerState+1); // preserve hi bit and increase 4 bit counter on low nibble
-
-  if (batteryAlarm) {
-    newState = buzzerState & 2; // fast on/off
-  } else if (batteryWarning) {
-    newState = (buzzerState & 0x0f) == 0; // short pulse once in ~1.5s
-  }
-
-  if (!(buzzerState & 0x80) ^ !newState) { // check if state should be changed
-    for (int i=0; batteryBuzzerPins[i] != 255; i++) {
-      digitalWrite(batteryBuzzerPins[i], newState ? HIGH : LOW);
-    }
-    buzzerState ^= 0x80;
-  }
-}
-
 void measureBatteryVoltage(unsigned short deltaTime) {
 
   batteryAlarm = false;  
@@ -144,8 +120,5 @@ void measureBatteryVoltage(unsigned short deltaTime) {
       batteryWarning = true;
     }
   }  
-  if (batteryBuzzerPins[0]!=255) {
-    updateBuzzer();
-  }
 }
 #endif
