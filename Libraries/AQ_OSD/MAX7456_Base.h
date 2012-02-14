@@ -50,7 +50,7 @@ byte DISABLE_display     = 0;
 // Writes 'len' character address bytes to the display memory corresponding to row y, column x
 // - uses autoincrement mode when writing more than one character
 // - will wrap around to next row if 'len' is greater than the remaining cols in row y
-// - buf=NULL can be used to write zeroes (clear)
+// - buf=NULL or len>strlen(buf) can be used to write zeroes (clear)
 // - flags: 0x01 blink, 0x02 invert (can be combined)
 void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
 
@@ -65,7 +65,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
 
   // write out data
   for ( int i = 0; i < len; i++ ) {
-    spi_writereg(DMDI, buf==NULL?0:buf[i] );
+    spi_writereg(DMDI, (!buf || strlen(buf)<i)?0:buf[i] );
   }
 
   // Send escape 11111111 to exit autoincrement mode

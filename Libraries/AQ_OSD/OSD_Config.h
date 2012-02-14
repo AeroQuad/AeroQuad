@@ -27,7 +27,7 @@
 
 // Optional OSD items
 
-#define ShowRSSI               // Show Receiver RSSI
+//#define ShowRSSI               // Show Receiver RSSI
 
 #ifdef ShowRSSI
   #define RSSI_PIN     A6     // analog pin to read
