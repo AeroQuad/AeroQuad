@@ -90,7 +90,7 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       }
     } else {
       char buf[29];
-      speed=speed*36/100; // convert from cm/s to kmh 
+      speed=speed*36/1000; // convert from cm/s to kmh 
       snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld",
                (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
                (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
