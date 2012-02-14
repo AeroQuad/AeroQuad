@@ -455,6 +455,14 @@ void menuSensorInfo(byte mode, byte action){
   }
 }
 
+void menuHideOSD(byte mode, byte action){
+
+  menuInFunc=0;
+  menuEntry=255;
+  notifyOSD(OSD_NOCLEAR,NULL);
+  hideOSD();
+}
+
 // MENU STRUCTURE TABLE
 //
 // One line in this table corresponds to one entry on the menu.
@@ -502,6 +510,7 @@ const struct MenuItem menuData[] = {
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
 #endif
+  {0, "Exit and hide OSD",    menuHideOSD,       0},
   };
 
 #define menuNumEntries (sizeof(menuData) / sizeof(MenuItem))
@@ -600,6 +609,7 @@ void menuSelect() {
 
   if (255==menuEntry) {
     // enable menu
+    unhideOSD(); // make sure OSD is visible 
     menuAtExit=0;
     menuEntry=0;
   }

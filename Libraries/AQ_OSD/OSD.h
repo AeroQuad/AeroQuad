@@ -49,6 +49,9 @@ void updateOSD();
 void displayFlightTime(byte areMotorsArmed);
 byte displayNotify();
 
+void hideOSD();
+void unhideOSD();
+
 // OSD notification system
 //
 // void notifyOSD(byte flags, char *fmt, ...)

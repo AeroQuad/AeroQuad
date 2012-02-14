@@ -45,6 +45,27 @@ byte ENABLE_display_vert = 0;
 byte MAX7456_reset       = 0;
 byte DISABLE_display     = 0;
 
+boolean OSDDisabled=0;
+
+void hideOSD() {
+  
+  if (!OSDDisabled) {
+    spi_select();
+    spi_writereg( VM0, DISABLE_display );
+    spi_deselect();
+    OSDDisabled=true;
+  }
+};
+void unhideOSD() {
+
+  if (OSDDisabled) {
+    spi_select();
+    spi_writereg( VM0, ENABLE_display );
+    spi_deselect();
+    OSDDisabled=false;
+  }
+}
+
 // void writeChars( const char* buf, byte len, byte flags, byte y, byte x )
 //
 // Writes 'len' character address bytes to the display memory corresponding to row y, column x
@@ -55,6 +76,11 @@ byte DISABLE_display     = 0;
 void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
 
   unsigned offset = y * 30 + x;
+
+  if (flags) {
+    unhideOSD(); // make sure OSD is visible in case of alarms etc.
+  }
+  
   spi_select();
   // 16bit transfer, transparent BG, autoincrement mode (if len!=1)
   spi_writereg(DMM, ((flags&1) ? 0x10 : 0x00) | ((flags&2) ? 0x08 : 0x00) | ((len!=1)?0x01:0x00) );
