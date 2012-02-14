@@ -1319,6 +1319,13 @@ void loop () {
         cameraControlSetYaw(kinematicsAngle[ZAXIS]);
         cameraControlMove();
       #endif
+
+      #if defined (UseGPS)
+        readGps();
+        if (!isHomeBaseInitialized()) {
+          initHomeBase();
+        }
+      #endif      
     }
 
     // ================================================================
@@ -1340,13 +1347,6 @@ void loop () {
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
 
-      #if defined (UseGPS)
-        readGps();
-        if (!isHomeBaseInitialized()) {
-          initHomeBase();
-        }
-      #endif
-      
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
       #endif
