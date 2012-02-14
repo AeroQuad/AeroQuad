@@ -59,11 +59,11 @@ boolean haveAGpsLock() {
 }
 
 long getLongitude() {
-  return _longitude * 0.649876; //centimiters
+  return _longitude; // degrees * 100000
 }
 
 long getLatitude() {
-  return _latitude * 1.113195; //centimiters
+  return _latitude; // degrees * 100000
 }
 
 unsigned long getGpsSpeed() {

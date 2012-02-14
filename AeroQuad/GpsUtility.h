@@ -38,9 +38,9 @@ boolean isHomeBaseInitialized() {
 
 #define NB_HOME_GPS_SAMPLE 25
 byte gpsSumCounter = 0;
-long gpsLatitudeSum = GPS_INVALID_ANGLE;
-long gpsLongitudeSum = GPS_INVALID_ANGLE;
-unsigned long gpsAltitudeSum = GPS_INVALID_ALTITUDE;
+long gpsLatitudeSum = 0;
+long gpsLongitudeSum = 0;
+unsigned long gpsAltitudeSum = 0;
 
 void initHomeBase()
 {

@@ -53,7 +53,7 @@ void processLedStatus() {
     if (batteryAlarm) {
       digitalWrite(LED_Red, flashingLedState & 4);
     } else if (batteryWarning) {
-      digitalWrite(LED_Red, (flashingLedState & 7)==0);
+      digitalWrite(LED_Red, (flashingLedState & 15)==0);
     } else { 
       digitalWrite(LED_Red, LOW);
     }

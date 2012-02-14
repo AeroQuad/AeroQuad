@@ -95,13 +95,12 @@
 //#define BattMonitor            // Enable Battery monitor
 //#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 //#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
-//#define BattBuzzer             // Enable for low battery buzzer/LED
 //
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
-//#define BattCustomBuzzer pin1[,pin2]...
 
-//// *******************************************************************************************************************************
+//
+// *******************************************************************************************************************************
 // Optional Receiver
 // *******************************************************************************************************************************
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
