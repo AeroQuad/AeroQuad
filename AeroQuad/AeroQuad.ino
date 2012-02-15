@@ -1125,9 +1125,7 @@ void setup() {
     vehicleState |= RANGE_ENABLED;
   #endif
 
-
-  // Battery Monitor
-  #ifdef BattMonitor
+  // Battery Monitor  #ifdef BattMonitor
     // batteryMonitorAlarmVoltage updated in readEEPROM()
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
