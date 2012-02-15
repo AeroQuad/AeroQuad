@@ -89,9 +89,14 @@ void processAltitudeHold()
         throttle = receiverCommand[THROTTLE];
         return;
       }
+      
+      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
+      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
+      previousSensorAltitude = currentSensorAltitude;
 
       // computer altitude error!
-      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
+      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, estimatedCurrentAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       
       // compute throttle z dampening
