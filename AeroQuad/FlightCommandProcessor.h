@@ -50,9 +50,6 @@ void readPilotCommands() {
         batteryMonitorStartThrottle = 0;
         batteyMonitorThrottleCorrection = 0.0;
       #endif
-//      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-//        estimatedZVelocity = 0;
-//      #endif
     }    
     
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
@@ -111,6 +108,7 @@ void readPilotCommands() {
      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (isStoreAltitudeNeeded) {
          altitudeToHoldTarget = getAltitudeFromSensors();
+         previousSensorAltitude = altitudeToHoldTarget;
          altitudeHoldThrottle = receiverCommand[THROTTLE];
          PID[ALTITUDE_HOLD_PID_IDX].integratedError = 0;
          PID[ALTITUDE_HOLD_PID_IDX].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
@@ -118,7 +116,6 @@ void readPilotCommands() {
        }
        altitudeHoldState = ON;
      }
-     // note, Panic will stay set until Althold is toggled off/on
    } 
    else {
      isStoreAltitudeNeeded = true;
