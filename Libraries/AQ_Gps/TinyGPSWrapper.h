@@ -66,6 +66,9 @@ long getLatitude() {
   return _latitude; // degrees * 100000
 }
 
+long getCourse() {
+  return _course;
+}
 unsigned long getGpsSpeed() {
   return _gpsSpeed*1.852*10/36;
 }
