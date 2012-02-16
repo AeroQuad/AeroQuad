@@ -51,11 +51,10 @@ int motorConfiguratorCommand[4] = {0,0,0,0};
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
-  motorCommand[LEFT]        = (throttle)                    - motorAxisCommandPitch + motorAxisCommandRoll;
-  motorCommand[RIGHT]       = (throttle)                    - motorAxisCommandPitch - motorAxisCommandRoll;
-  motorCommand[REAR_UNDER]  = (throttle-throttleCorrection) + motorAxisCommandPitch + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[REAR]        = (throttle-throttleCorrection) + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[LEFT]        = throttle - motorAxisCommandPitch + motorAxisCommandRoll;
+  motorCommand[RIGHT]       = throttle - motorAxisCommandPitch - motorAxisCommandRoll;
+  motorCommand[REAR_UNDER]  = throttle + motorAxisCommandPitch + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR]        = throttle + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_Y4_MODE_H_

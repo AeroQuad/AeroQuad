@@ -27,7 +27,7 @@ void updateOSD() {
 
   // OSD is updated fully in 4 rounds, these are (using bit)
   // 0x01 - Attitude Indicator
-  // 0x02 - Altitude, Heading, Timer, RSSI, Reticle
+  // 0x02 - Altitude, Heading, Timer, RSSI
   // 0x04 - Attitude Indicator
   // 0x08 - Battery info
 
@@ -37,7 +37,7 @@ void updateOSD() {
   }
 
   #ifdef ShowAttitudeIndicator
-    if ((OSDsched&0x01) || (OSDsched&0x04)) {
+    if (OSDsched&0x55) { // every second update -> 5Hz
       displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], flightMode);
     }
   #endif
@@ -61,8 +61,14 @@ void updateOSD() {
     #endif
   }
 
+  if (OSDsched&0xa0) {
+    #ifdef UseGPS
+      displayGPS(getLatitude(), getLongitude(), gpsHomeLatitude, gpsHomeLongitude);
+    #endif
+  }
+
   OSDsched <<= 1;
-  if (OSDsched & 0x10) {
+  if (!OSDsched) {
     OSDsched = 0x01;
   }
 }

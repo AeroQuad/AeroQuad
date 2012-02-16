@@ -18,30 +18,31 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AQ_OSD_MAX7456_RSSI_H_
-#define _AQ_OSD_MAX7456_RSSI_H_
+#ifndef _AQ_OSD_MAX7456_GPS_H_
+#define _AQ_OSD_MAX7456_GPS_H_
 
 //////////////////////////////////////////////////////////////////////////////
-/////////////////////////// RSSI Display /////////////////////////////////////
+//////////////////////////// GPS Display /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-// Show RSSI information (analog input value optionally mapped to percents.)
-#include <RSSIReader.h>
+// Show GPS information
 
-short lastRSSI = 1234; //forces update at first run
+void displayGPS(long lat, long lon, long hlat, long hlon) {
 
-void displayRSSI() {
-
-  if (rssiRawValue != lastRSSI) {
-    lastRSSI = rssiRawValue;
-    char buf[6];
-    #ifdef RSSI_RAWVAL
-      snprintf(buf, 6, "\372%4u", rssiRawValue);
-      writeChars(buf, 5, 0, RSSI_ROW, RSSI_COL);
-    #else
-      snprintf(buf, 6, "\372%3u%%", rssiRawValue);
-      writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, RSSI_ROW, RSSI_COL);
-    #endif
+  /*  {
+    char buf[2]={176+foo*2,176+foo*2+1};
+    writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
+    foo = (foo + 1) & 15;
+  }
+  */
+  if (lat == GPS_INVALID_ANGLE) {
+    writeChars("Waiting for GPS fix", 20, 0, GPS_ROW, GPS_COL);
+  } else {
+    char buf[20];
+    snprintf(buf,20,"%c%02ld.%05ld%c%03ld.%05ld",
+             (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
+             (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L);
+    writeChars(buf, 20, 0, GPS_ROW, GPS_COL);
   }
 }
 
-#endif  // #define _AQ_OSD_MAX7456_RSSI_H_
+#endif  // #define _AQ_OSD_MAX7456_GPS_H_

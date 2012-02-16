@@ -55,6 +55,14 @@ const int getMagnetometerRawData(byte axis) {
   return rawMag[axis];
 }
 
+const float getAbsoluteHeading() {
+  float heading = atan2(hdgY, hdgX);
+  if (heading < 0) {
+	heading += radians(360);
+  }
+  return heading;
+}
+
 /*
 void setMagCal(byte axis, float maxValue, float minValue) {
   magMax[axis] = maxValue;
