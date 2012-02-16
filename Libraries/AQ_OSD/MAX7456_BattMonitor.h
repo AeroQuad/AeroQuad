@@ -42,10 +42,10 @@ void displayVoltage(byte areMotorsArmed) {
 
   int currentValue;
   if (osdBatMinMax) {
-    currentValue = batteryData[osdBatNo].minVoltage*10.0;
+    currentValue = batteryData[osdBatNo].minVoltage/10.0;
   }
   else {
-    currentValue = batteryData[osdBatNo].voltage*10.0;
+    currentValue = batteryData[osdBatNo].voltage/10.0;
   }
 
   char buf[12];
