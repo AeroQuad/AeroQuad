@@ -99,6 +99,8 @@ float G_Dt = 0.002;
 int throttle = 1000;
 byte motorArmed = OFF;
 byte safetyCheck = OFF;
+byte maxLimit = OFF;
+byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 
 // main loop time variable

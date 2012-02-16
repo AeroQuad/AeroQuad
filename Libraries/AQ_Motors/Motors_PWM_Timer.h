@@ -60,11 +60,6 @@
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
-#define PWM_FREQUENCY_328 244   // in Hz                                        
-#define PWM_PRESCALER_328 256                                                   
-#define PWM_COUNTER_PERIOD_328 (F_CPU/PWM_PRESCALER_328/PWM_FREQUENCY_328 - 1)  
-
-
 void initializeMotors(NB_Motors numbers) {
   numberOfMotors = numbers;
 
@@ -114,11 +109,11 @@ void initializeMotors(NB_Motors numbers) {
     // Init PWM Timer 1  16 bit
     TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);
-    ICR1 = PWM_COUNTER_PERIOD_328;
-    // Init PWM Timer 2   8bit                               // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
-    TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);  // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
-    TCCR2B = (1<<CS22)|(1<<CS21);                            // Prescaler set to 256, that gives us a resolution of 16us
-    // TOP is fixed at 255                                   // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
+    ICR1 = PWM_COUNTER_PERIOD;
+    // Init PWM Timer 2   8bit                                 // WGMn1 WGMn2 = Mode ? Fast PWM, TOP = 0xFF ,Update of OCRnx at BOTTOM
+    TCCR2A = (1<<WGM20)|(1<<WGM21)|(1<<COM2A1)|(1<<COM2B1);    // Clear OCnA/OCnB on compare match, set OCnA/OCnB at BOTTOM (non-inverting mode)
+    TCCR2B = (1<<CS22)|(1<<CS21);                              // Prescaler set to 256, that gives us a resolution of 16us
+    // TOP is fixed at 255                                     // Output_PWM_Frequency = 244hz = 16000000/(256*(1+255)) = Clock_Speed / (Prescaler * (1 + TOP))
   #endif
 }
 
@@ -150,14 +145,14 @@ void commandAllMotors(int command) {
     OCR3C = command * 2 ;
     OCR3A = command * 2 ;
     OCR4A = command * 2 ;
-  if (numberOfMotors == SIX_Motors || numberOfMotors == EIGHT_Motors) {
-    OCR4B = command * 2 ;
-    OCR4C = command * 2 ;
-  }
-  if (numberOfMotors == EIGHT_Motors) {
-    OCR1A = command * 2 ;
-    OCR1B = command * 2 ;
-  }
+    if (numberOfMotors == SIX_Motors || numberOfMotors == EIGHT_Motors) {
+      OCR4B = command * 2 ;
+      OCR4C = command * 2 ;
+    }
+    if (numberOfMotors == EIGHT_Motors) {
+      OCR1A = command * 2 ;
+      OCR1B = command * 2 ;
+    }
   #else
     OCR2B = command / 16 ;
     OCR1A = command * 2 ;
