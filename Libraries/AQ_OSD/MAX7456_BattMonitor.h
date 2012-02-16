@@ -55,24 +55,26 @@ void displayVoltage(byte areMotorsArmed) {
   writeChars( buf,   1, batteryIsWarning(osdBatNo)?1:0, VOLTAGE_ROW + osdBatNo, VOLTAGE_COL );
   writeChars( buf+1, 5, batteryIsAlarm(osdBatNo)?1:0,   VOLTAGE_ROW + osdBatNo, VOLTAGE_COL + 1 );
 
+  #ifdef BM_EXTENDED
   if (batteryData[osdBatNo].cPin != BM_NOPIN) {
     // current sensor installed
     if (osdBatMinMax) {
-      currentValue = batteryData[osdBatNo].maxCurrent*10.0;
+      currentValue = batteryData[osdBatNo].maxCurrent/10.0;
     }
     else {
-      currentValue = batteryData[osdBatNo].current*10.0;
+      currentValue = batteryData[osdBatNo].current/10.0;
     }
 
     if (abs(currentValue)>=100) { // > 10A only display whole amps
       snprintf(buf,12,"%4dA%5d\24  ", currentValue/10, (int)batteryData[osdBatNo].usedCapacity);
     }
     else {
-      snprintf(buf,12,"%c%1d.%1dA%5d\24  ", currentValue<0?'-':' ',abs(currentValue/10),abs(currentValue%10),(int)batteryData[osdBatNo].usedCapacity);
+      snprintf(buf,12,"%c%1d.%1dA%5d\24  ", currentValue<0?'-':' ',abs(currentValue/10),abs(currentValue%10),(int)batteryData[osdBatNo].usedCapacity/1000);
     }
 
     writeChars( buf, 11, 0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL+6 );
   }
+  #endif
 
   osdBatCounter++;
   if (osdBatCounter >= numberOfBatteries * 8) {
