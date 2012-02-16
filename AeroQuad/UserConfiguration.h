@@ -93,7 +93,6 @@
 // *******************************************************************************************************************************
 #define BattMonitor            // Enable Battery monitor
 #define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
 //#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //

@@ -73,6 +73,9 @@
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount   
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -116,6 +119,9 @@
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount       
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -163,8 +169,11 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef AltitudeHoldBaro
@@ -223,8 +232,11 @@
   
   // Battery Monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   // unsuported in mini
@@ -281,6 +293,9 @@
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -338,12 +353,14 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -423,12 +440,14 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
-      struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -508,8 +527,11 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
@@ -569,6 +591,9 @@
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
+  #undef BattMonitorAutoDescent
+  #undef BattCellCount
+  #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
@@ -634,8 +659,11 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
@@ -706,8 +734,11 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   /**
@@ -782,8 +813,11 @@
 
   // Battery monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306)};
+    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
+  #else
+    #undef BattMonitorAutoDescent
+    #undef BattCellCount
+    #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
@@ -913,6 +947,10 @@
 //********************************************************
 #ifdef BattMonitor
   #include <BatteryMonitor.h>
+  #ifndef BattCustomConfig
+    #define BattCustomConfig BattDefaultConfig
+  #endif
+  struct BatteryData batteryData[] = {BattCustomConfig};
 #endif
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
@@ -1268,7 +1306,7 @@ void loop () {
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
       #endif
       #if defined(BattMonitor)
-        measureBatteryVoltage(G_Dt);
+        measureBatteryVoltage(G_Dt*1000.0);
       #endif
 
       // Listen for configuration commands and reports telemetry
