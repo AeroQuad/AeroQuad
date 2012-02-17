@@ -74,7 +74,6 @@
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount   
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
@@ -121,7 +120,6 @@
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount       
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
@@ -174,7 +172,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -238,7 +235,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -298,7 +294,6 @@
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
@@ -363,7 +358,6 @@
     #endif
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -450,7 +444,6 @@
     #endif
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -534,7 +527,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -596,7 +588,6 @@
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
@@ -667,7 +658,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -742,7 +732,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -821,7 +810,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -1125,7 +1113,8 @@ void setup() {
     vehicleState |= RANGE_ENABLED;
   #endif
 
-  // Battery Monitor  #ifdef BattMonitor
+  // Battery Monitor
+  #ifdef BattMonitor
     // batteryMonitorAlarmVoltage updated in readEEPROM()
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;

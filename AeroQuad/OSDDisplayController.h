@@ -23,13 +23,14 @@
 
 #include "OSD.h"
 
-void updateOSD() {
+byte OSDsched = 0;
 
-  // OSD is updated fully in 4 rounds, these are (using bit)
-  // 0x01 - Attitude Indicator
-  // 0x02 - Altitude, Heading, Timer, RSSI
-  // 0x04 - Attitude Indicator
-  // 0x08 - Battery info
+void updateOSD() {
+  // OSD is updated fully in 8 rounds
+  // 1,3,5,7 - Attitude Indicator - updated at 5Hz
+  // 2       - Altitude, Heading, Timer, RSSI - updated at 1.25Hz
+  // 4       - Battery info
+  // 6,8     - GPS (internally 2 phases: Position & Navigation
 
   // Check notify first, if it did something we dont't have time for other stuff
   if (displayNotify()) {
@@ -37,7 +38,7 @@ void updateOSD() {
   }
 
   #ifdef ShowAttitudeIndicator
-    if (OSDsched&0x55) { // every second update -> 5Hz
+    if (OSDsched&0x55) {
       displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], flightMode);
     }
   #endif
