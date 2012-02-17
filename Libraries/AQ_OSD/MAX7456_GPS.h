@@ -53,9 +53,9 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       const float x = (float)(hlon-lon) * GPS2RAD * cos((float)(lat+hlat)/2*GPS2RAD);
       const float y = (float)(hlat-lat) * GPS2RAD;
 #ifdef USUnits
-      const int distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
+      const long distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
 #else //metric
-      const int distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
+      const long distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
 #endif
       short bearing = (short)(RAD2DEG * atan2(x,y));    // bearing to 'home' in degrees -180 - 180
 
@@ -67,20 +67,20 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
 #ifdef USUnits
       if (distance<1000) {
-        snprintf(buf,5,"%3df",distance);
+        snprintf(buf,5,"%3df",(int)distance);
       }
       else if (distance<5280) {
-        snprintf(buf,5,".%02dm", distance * 10 / 528);
+        snprintf(buf,5,".%02dm", (int)(distance * 10 / 528));
       }
       else {
-        snprintf(buf,5,"%d.%1dm", distance/5280, distance / 528 % 10);
+        snprintf(buf,5,"%d.%1dm", (int)(distance/5280), (int)(distance / 528 % 10));
       }
 #else // metric
       if (distance<1000) {
-        snprintf(buf,5,"%3dm",distance);
+        snprintf(buf,5,"%3dm",(int)distance);
       }
       else {
-        snprintf(buf,5,"%d.%1d\032", distance/1000, distance / 100 % 10);
+        snprintf(buf,5,"%d.%1d\032", (int)(distance/1000), (int)(distance / 100 % 10));
       }
 #endif
       writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
