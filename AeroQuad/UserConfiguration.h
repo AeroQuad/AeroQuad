@@ -155,7 +155,7 @@
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "AeroQD"         // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
-//#define feet                      // Leave commented for altitude measured in metres, uncomment for feet
+//#define USUnits                   // Enable for US units (feet,miles,mph)
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
 

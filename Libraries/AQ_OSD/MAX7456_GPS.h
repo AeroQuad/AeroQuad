@@ -52,7 +52,11 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       #define RAD2DEG 57.2957795
       const float x = (float)(hlon-lon) * GPS2RAD * cos((float)(lat+hlat)/2*GPS2RAD);
       const float y = (float)(hlat-lat) * GPS2RAD;
-      const short distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
+#ifdef USUnits
+      const int distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
+#else //metric
+      const int distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
+#endif
       short bearing = (short)(RAD2DEG * atan2(x,y));    // bearing to 'home' in degrees -180 - 180
 
       short homearrow = bearing - magheading; // direction of home vs. craft orientation
@@ -61,12 +65,24 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       buf[0]=176 + homearrow * 2;
       buf[1]=buf[0]+1;
       writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
+#ifdef USUnits
+      if (distance<1000) {
+        snprintf(buf,5,"%3df",distance);
+      }
+      else if (distance<5280) {
+        snprintf(buf,5,".%02dm", distance * 10 / 528);
+      }
+      else {
+        snprintf(buf,5,"%d.%1dm", distance/5280, distance / 528 % 10);
+      }
+#else // metric
       if (distance<1000) {
         snprintf(buf,5,"%3dm",distance);
       }
       else {
-        snprintf(buf,5,"%d.%1dk", distance/1000, distance / 100 % 10);
+        snprintf(buf,5,"%d.%1d\032", distance/1000, distance / 100 % 10);
       }
+#endif
       writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
     
       //  calculate course correction 
@@ -90,11 +106,19 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       }
     } else {
       char buf[29];
-      speed=speed*36/1000; // convert from cm/s to kmh 
-      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld",
+#ifdef USUnits
+      speed=speed*36/1609; // convert from cm/s to mph 
+      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld\031",
                (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
                (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
 	       speed);
+#else
+      speed=speed*36/1000; // convert from cm/s to kmh 
+      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld\030",
+               (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
+               (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
+	       speed);
+#endif
       writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
       osdGPSState&=~GPS_NOFIX;
     }
