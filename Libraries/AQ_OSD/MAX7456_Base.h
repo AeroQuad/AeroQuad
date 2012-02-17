@@ -171,9 +171,6 @@ void initializeOSD() {
   //finished writing
   spi_deselect();
 
-  OSDsched = 0xff; // This will make everything to be updated next round
-  updateOSD();     // Make first update now
-
   #if defined CALLSIGN
     writeChars(callsign,strlen(callsign),0,CALLSIGN_ROW,CALLSIGN_COL);
   #endif

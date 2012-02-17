@@ -21,8 +21,6 @@
 #ifndef _AQ_OSD_H_
 #define _AQ_OSD_H_
 
-byte OSDsched = 0;
-
 #ifdef BattMonitor
   void displayVoltage(byte areMotorsArmed);
 #endif
