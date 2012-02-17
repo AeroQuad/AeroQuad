@@ -910,6 +910,13 @@
   #include <Receiver_STM32.h>  
 #endif
 
+#if defined (ShowRSSI)
+  #define UseRSSIFaileSafe
+#endif
+#if defined (UseRSSIFaileSafe) 
+  #include <RSSIReader.h>
+#endif 
+
 
 //********************************************************
 //********************** MOTORS DECLARATION **************
@@ -1209,11 +1216,11 @@ void loop () {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
       }
       
-      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-         estimatedXVelocity = (filteredAccel[XAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
-         estimatedYVelocity = (filteredAccel[YAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
-         estimatedZVelocity += (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-      #endif         
+//      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+//         estimatedXVelocity = (filteredAccel[XAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
+//         estimatedYVelocity = (filteredAccel[YAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
+//         estimatedZVelocity += (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+//      #endif         
       
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
@@ -1311,7 +1318,10 @@ void loop () {
       fiftyHZpreviousTime = currentTime;
 
       // Reads external pilot commands and performs functions based on stick configuration
-      readPilotCommands(); // defined in FlightCommand.pde
+      readPilotCommands(); 
+      #if defined (UseRSSIFaileSafe) 
+        readRSSI();
+      #endif
 
       #if defined(CameraControl)
         cameraControlSetPitch(kinematicsAngle[YAXIS]);
