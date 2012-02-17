@@ -38,7 +38,7 @@ short rssiRawValue = 0; //forces update at first run
 
 void readRSSI() {
 
-  int rssiRawValue = analogRead(RSSI_PIN);
+  rssiRawValue = analogRead(RSSI_PIN);
   #ifndef RSSI_RAWVAL
     rssiRawValue = (rssiRawValue - RSSI_0P) * 100 / (RSSI_100P - RSSI_0P);
     if (rssiRawValue < 0) {

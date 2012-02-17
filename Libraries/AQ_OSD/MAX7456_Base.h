@@ -90,7 +90,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
   spi_writereg(DMAL, offset & 0xff );
 
   // write out data
-  for ( int i = 0; i < len; i++ ) {
+  for ( byte i = 0; i < len; i++ ) {
     spi_writereg(DMDI, (!buf || strlen(buf)<i)?0:buf[i] );
   }
 
