@@ -23,8 +23,6 @@
 
 #include <OSD_Config.h>
 
-byte OSDsched = 0;
-
 #ifdef BattMonitor
   void displayVoltage(byte areMotorsArmed);
 #endif
