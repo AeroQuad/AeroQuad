@@ -53,9 +53,9 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       const float x = (float)(hlon-lon) * GPS2RAD * cos((float)(lat+hlat)/2*GPS2RAD);
       const float y = (float)(hlat-lat) * GPS2RAD;
 #ifdef USUnits
-      const long distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
+      const unsigned int distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
 #else //metric
-      const long distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
+      const unsigned int distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
 #endif
       short bearing = (short)(RAD2DEG * atan2(x,y));    // bearing to 'home' in degrees -180 - 180
 
