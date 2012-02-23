@@ -86,6 +86,17 @@ void menuHandleSimple(byte mode, byte action) {
       menuInFunc = 10;
       break;
 #endif
+#ifdef UseGPS
+    case 2:
+      gpsLatitudeSum=0;
+      gpsLongitudeSum=0;
+      gpsAltitudeSum=0;
+      gpsSumCounter=0;
+      gpsHomeLatitude   = GPS_INVALID_ANGLE;
+      gpsHomeLongitude  = GPS_INVALID_ANGLE;
+      gpsGroundAltitude = GPS_INVALID_ALTITUDE;
+      break;
+#endif
 /* TEMPLATE CODE FOR NEW ACTION:
     case XX: // Choose a free number here (0-255)
       doTask();
@@ -496,6 +507,9 @@ const struct MenuItem menuData[] = {
 #endif
 #ifdef BattMonitor
   {1,   "Reset battery stats",menuHandleSimple,  1},
+#endif
+#ifdef UseGPS
+  {1,   "Reset Home",         menuHandleSimple,  2},
 #endif
   {1,   "OSD",                MENU_NOFUNC,       0},
   {2,     "Reset flightime",  menuHandleSimple,  0},
