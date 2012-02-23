@@ -39,6 +39,7 @@
 #define ITG3200_OSCILLATOR_ADDR			0x3E
 #define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
 #define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
+#define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
 
@@ -88,6 +89,13 @@ void measureGyroSum() {
   measureSpecificGyroSum();
   
   gyroSampleCount++;
+}
+
+void readGyroTemp() {
+
+  sendByteI2C(ITG3200_ADDRESS, ITG3200_TEMPERATURE_ADDRESS);
+  Wire.requestFrom(ITG3200_ADDRESS, 2);
+  gyroTemperature = (readWordI2C() + 13200) / 280 + 35;
 }
 
 void evaluateGyroRate() {
