@@ -119,7 +119,7 @@ float gyroTemperature2 = 0;
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("====== Start calibration process, wait! ======");
+  
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
     Serial.println("Init EEPROM since it's a different version");
@@ -139,7 +139,7 @@ void setup()
   for (int i = 0; i < numberOfGyroSamples; i++)
   {
     measureGyro();
-    gyroBias1[XAXIS] += gyroADC[XAXIS];
+    gyroBias1[XAXIS] += gyroRate[XAXIS];
     gyroBias1[YAXIS] += gyroRate[YAXIS];
     gyroBias1[ZAXIS] += gyroRate[ZAXIS];
     readGyroTemp();
