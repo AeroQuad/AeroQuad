@@ -1205,7 +1205,6 @@ void loop () {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
       }
       
-//      readGyroTemp();
 //      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
 //         estimatedXVelocity = (filteredAccel[XAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
 //         estimatedYVelocity = (filteredAccel[YAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
