@@ -42,8 +42,9 @@
 #define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
+float gyroTempBias[3] = {0.0,0.0,0.0};
 
-
+void computeGyroTCBias();
 void measureSpecificGyroADC(int *gyroADC);
 void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(int *gyroADC);
@@ -58,6 +59,15 @@ void initializeGyro() {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_LOW_PASS_FILTER_VALUE); // 10Hz low pass filter
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
+}
+
+void computeGyroTCBias()
+{
+  readGyroTemp();
+
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
+    gyroTempBias[axis]  = gyroTempBiasSlope[axis]  * gyroTemperature + gyroTempBiasIntercept[axis];
+  }
 }
 
 

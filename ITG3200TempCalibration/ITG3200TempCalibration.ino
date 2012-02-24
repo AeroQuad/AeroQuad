@@ -119,7 +119,7 @@ float gyroTemperature2 = 0;
 void setup()
 {
   Serial.begin(115200);
-  
+  Serial.println("====== Start calibration process, wait! ======");
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
     Serial.println("Init EEPROM since it's a different version");
