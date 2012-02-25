@@ -78,9 +78,11 @@ void measureGyro() {
 
   int gyroADC[3];
   measureSpecificGyroADC(gyroADC);
+  
+  computeGyroTCBias();
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
   }
  
   // Measure gyro heading
@@ -117,8 +119,10 @@ void evaluateGyroRate() {
   gyroSample[ZAXIS] = 0;
   gyroSampleCount = 0;
 
+  computeGyroTCBias();
+  
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
   }
   
   // Measure gyro heading

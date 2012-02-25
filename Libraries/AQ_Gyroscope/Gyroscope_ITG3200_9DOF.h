@@ -25,9 +25,9 @@
 #include <Gyroscope_ITG3200Common.h>
 
 void measureSpecificGyroADC(int *gyroADC) {
-  gyroADC[YAXIS] = readShortI2C() - gyroZero[YAXIS] - gyroTempBias[YAXIS];
-  gyroADC[XAXIS] = readShortI2C() - gyroZero[XAXIS] - gyroTempBias[XAXIS];
-  gyroADC[ZAXIS] = gyroZero[ZAXIS] - gyroTempBias[ZAXIS] - readShortI2C();
+  gyroADC[YAXIS] = readShortI2C()  - gyroZero[YAXIS];
+  gyroADC[XAXIS] = readShortI2C()  - gyroZero[XAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - readShortI2C();
 }
 
 void measureSpecificGyroSum() {
@@ -38,9 +38,9 @@ void measureSpecificGyroSum() {
 
 void evaluateSpecificGyroRate(int *gyroADC) {
 
-  gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount) - gyroZero[XAXIS] - gyroTempBias[XAXIS];
-  gyroADC[YAXIS] = (gyroSample[YAXIS] / gyroSampleCount) - gyroZero[YAXIS] - gyroTempBias[YAXIS];
-  gyroADC[ZAXIS] = gyroZero[ZAXIS] - gyroTempBias[ZAXIS] - (gyroSample[ZAXIS] / gyroSampleCount);
+  gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount) - gyroZero[XAXIS];
+  gyroADC[YAXIS] = (gyroSample[YAXIS] / gyroSampleCount) - gyroZero[YAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - (gyroSample[ZAXIS] / gyroSampleCount);
 }
 
 void calibrateGyro() {

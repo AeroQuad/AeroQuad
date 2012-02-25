@@ -139,7 +139,7 @@ void setup()
   for (int i = 0; i < numberOfGyroSamples; i++)
   {
     measureGyro();
-    gyroBias1[XAXIS] += gyroRate[XAXIS];
+    gyroBias1[XAXIS] += gyroADC[XAXIS];
     gyroBias1[YAXIS] += gyroRate[YAXIS];
     gyroBias1[ZAXIS] += gyroRate[ZAXIS];
     readGyroTemp();
