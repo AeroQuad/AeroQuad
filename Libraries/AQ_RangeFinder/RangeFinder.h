@@ -42,7 +42,7 @@ float rangeFinderRange[5]      = {0.0,0.0,0.0,0.0,0.0};
 //
 
 // default min max range constrain
-float maxRangeFinderRange = 3.0;
+float maxRangeFinderRange = 4.5;
 float minRangeFinderRange = 0.25;
 
 void inititalizeRangeFinder(byte idx);
