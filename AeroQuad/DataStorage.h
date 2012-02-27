@@ -172,6 +172,26 @@ void initializeEEPROM() {
     maxRangeFinderRange = 3.0;
     minRangeFinderRange = 0.25;
   #endif
+  
+  // Camera Control
+  #ifdef CameraControl
+    cameraMode = 1;
+//    mCameraPitch = 1273.2;    
+//    mCameraRoll = 636.6;    
+//    mCameraYaw = 318.3;
+    mCameraPitch = 1273;     // Configurator not like float at mo   
+    mCameraRoll = 636;      // Configurator not like float at mo   
+    mCameraYaw = 318;       // Configurator not like float at mo   
+    servoCenterPitch = 1500;
+    servoCenterRoll = 1500;
+    servoCenterYaw = 1500;
+    servoMinPitch = 1000;
+    servoMinRoll = 1000;
+    servoMinYaw = 1000;
+    servoMaxPitch = 2000;
+    servoMaxRoll = 2000;
+    servoMaxYaw = 2000;
+  #endif
 }
 
 void readEEPROM() {
@@ -239,7 +259,24 @@ void readEEPROM() {
   #if defined (AltitudeHoldRangeFinder)
     maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);
     minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
-  #endif     
+  #endif
+
+  // Camera Control
+  #ifdef CameraControl
+    cameraMode = readFloat(CAMERAMODE_ADR);
+    mCameraPitch = readFloat(MCAMERAPITCH_ADR);
+    mCameraRoll = readFloat(MCAMERAROLL_ADR);    
+    mCameraYaw = readFloat(MCAMERAYAW_ADR);
+    servoCenterPitch = readFloat(SERVOCENTERPITCH_ADR);
+    servoCenterRoll = readFloat(SERVOCENTERROLL_ADR);
+    servoCenterYaw = readFloat(SERVOCENTERYAW_ADR);
+    servoMinPitch = readFloat(SERVOMINPITCH_ADR);
+    servoMinRoll = readFloat(SERVOMINROLL_ADR);
+    servoMinYaw = readFloat(SERVOMINYAW_ADR);
+    servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
+    servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
+    servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
+  #endif  
 }
 
 void writeEEPROM(){
@@ -314,7 +351,24 @@ void writeEEPROM(){
     writeFloat(0, RANGE_FINDER_MAX_ADR);
     writeFloat(0, RANGE_FINDER_MIN_ADR);
   #endif
-
+  
+    // Camera Control
+  #ifdef CameraControl
+    writeFloat(cameraMode, CAMERAMODE_ADR);
+    writeFloat(mCameraPitch, MCAMERAPITCH_ADR);
+    writeFloat(mCameraRoll, MCAMERAROLL_ADR);    
+    writeFloat(mCameraYaw, MCAMERAYAW_ADR);
+    writeFloat(servoCenterPitch, SERVOCENTERPITCH_ADR);
+    writeFloat(servoCenterRoll, SERVOCENTERROLL_ADR);
+    writeFloat(servoCenterYaw, SERVOCENTERYAW_ADR);
+    writeFloat(servoMinPitch, SERVOMINPITCH_ADR);
+    writeFloat(servoMinRoll, SERVOMINROLL_ADR);
+    writeFloat(servoMinYaw, SERVOMINYAW_ADR);
+    writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
+    writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
+    writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
+  #endif 
+  
   sei(); // Restart interrupts
 }
 
