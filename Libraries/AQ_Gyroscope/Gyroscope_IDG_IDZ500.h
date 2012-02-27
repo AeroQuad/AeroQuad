@@ -91,4 +91,7 @@ void calibrateGyro() {
   }
 }
 
+void readGyroTemp()  {
+}
+
 #endif
