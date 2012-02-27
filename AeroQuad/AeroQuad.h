@@ -207,8 +207,8 @@ typedef struct {
   float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
+  float OLDSERVOMINPITCH_ADR;        //not used?
+  float OLDSERVOMINROLL_ADR;         //not used?
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
@@ -230,6 +230,20 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
+  // Camera Control
+  float CAMERAMODE_ADR;
+  float MCAMERAPITCH_ADR;
+  float MCAMERAROLL_ADR;    
+  float MCAMERAYAW_ADR;
+  float SERVOCENTERPITCH_ADR;
+  float SERVOCENTERROLL_ADR;
+  float SERVOCENTERYAW_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float SERVOMINYAW_ADR;
+  float SERVOMAXPITCH_ADR;
+  float SERVOMAXROLL_ADR;
+  float SERVOMAXYAW_ADR;
 } t_NVR_Data;  
 
 

@@ -377,7 +377,7 @@
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
 
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    // pins set to INPUT to avoid interferance with camera stabilization
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
     pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
     pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
@@ -464,7 +464,7 @@
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
 
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    // pins set to INPUT to avoid interferance with camera stabilization
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
     pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
     pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
@@ -1129,10 +1129,6 @@ void setup() {
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
-    setmCameraRoll(318.3); // Need to figure out nice way to reverse servos
-    setCenterRoll(1500); // Need to figure out nice way to set center position
-    setmCameraPitch(318.3);
-    setCenterPitch(1300);
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
 
@@ -1303,10 +1299,9 @@ void loop () {
       readPilotCommands(); // defined in FlightCommand.pde
 
       #if defined(CameraControl)
-        cameraControlSetPitch(kinematicsAngle[YAXIS]);
-        cameraControlSetRoll(kinematicsAngle[XAXIS]);
-        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
-        cameraControlMove();
+        if (cameraMode > 0) {
+          moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+        }  
       #endif
     }
 
