@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - June 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -38,12 +38,10 @@ void initializeCameraControl() {
   ICR5 = 39999; //50hz freq (standard servos)
 }
   
-void cameraControlMove() {
-  if (mode > 0) {
-    OCR5A = servoPitch * 2;
-    OCR5B = servoRoll * 2;
-    OCR5C = servoYaw * 2;      
-  }
+void cameraControlMove(int servoPitch, int servoRoll, int servoYaw) {
+  OCR5A = servoPitch * 2;
+  OCR5B = servoRoll * 2;
+  OCR5C = servoYaw * 2;      
 }
 
 
