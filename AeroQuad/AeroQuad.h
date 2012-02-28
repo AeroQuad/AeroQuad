@@ -219,8 +219,6 @@ typedef struct {
   float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
   // Gyro calibration
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
