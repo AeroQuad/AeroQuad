@@ -249,6 +249,20 @@ typedef struct {
   float RANGE_FINDER_MIN_ADR;
   // GPS mission storing
   float GPS_MISSION_NB_POINT;
+  // Camera Control
+  float CAMERAMODE_ADR;
+  float MCAMERAPITCH_ADR;
+  float MCAMERAROLL_ADR;    
+  float MCAMERAYAW_ADR;
+  float SERVOCENTERPITCH_ADR;
+  float SERVOCENTERROLL_ADR;
+  float SERVOCENTERYAW_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float SERVOMINYAW_ADR;
+  float SERVOMAXPITCH_ADR;
+  float SERVOMAXROLL_ADR;
+  float SERVOMAXYAW_ADR;
 } t_NVR_Data;  
 
 
