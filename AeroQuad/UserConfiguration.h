@@ -27,13 +27,13 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
@@ -83,9 +83,9 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
-//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
+#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -93,9 +93,9 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // Enable Battery monitor
+#define BattMonitor            // Enable Battery monitor
 //#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
@@ -150,15 +150,15 @@
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-//#define OSD
+#define OSD
 //#define ShowRSSI
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "AeroQD"         // Show (optional) callsign
-//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//#define CALLSIGN "Kenny"         // Show (optional) callsign
+#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph)
 
-//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
+#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
 
 /****************************************************************************
  ****************************************************************************
