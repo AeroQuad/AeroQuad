@@ -61,18 +61,8 @@ void inititalizeRangeFinder(byte idx) {
 /**
  * inches * 2.54 = cm
  */
-void readRangeFinderDistanceSum(byte idx) {
-  rangeFinderRangeSum[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);
-  rangeFinderSampleCount[idx]++;
-}
-
-void evaluateDistanceFromSample(byte idx) {
-  rangeFinderRange[idx] = ((float)rangeFinderRangeSum[idx] / (float)rangeFinderSampleCount[idx]) / 100;
-  if (!isInRangeOfRangeFinder(idx)) {
-    rangeFinderRange[idx] = INVALID_ALTITUDE;
-  }
-  rangeFinderRangeSum[idx] = 0;
-  rangeFinderSampleCount[idx] = 0;
+void readRangeFinder(byte idx) {
+  rangeFinderRange[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);
 }
 
 /**

@@ -1278,12 +1278,6 @@ void loop () {
           evaluateBaroAltitude();
         }
       #endif
-      #ifdef AltitudeHoldRangeFinder
-        readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-          evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
-        }
-      #endif
             
       // Combines external pilot commands and measured sensor data to generate motor commands
       processFlightControl();
@@ -1312,11 +1306,8 @@ void loop () {
         readRSSI();
       #endif
 
-      #if defined(CameraControl)
-        cameraControlSetPitch(kinematicsAngle[YAXIS]);
-        cameraControlSetRoll(kinematicsAngle[XAXIS]);
-        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
-        cameraControlMove();
+      #ifdef AltitudeHoldRangeFinder
+        readRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
       #endif
 
       #if defined (UseGPS)
@@ -1325,6 +1316,15 @@ void loop () {
           initHomeBase();
         }
       #endif      
+      
+      #if defined(CameraControl)
+        cameraControlSetPitch(kinematicsAngle[YAXIS]);
+        cameraControlSetRoll(kinematicsAngle[XAXIS]);
+        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
+        cameraControlMove();
+      #endif
+      
+
     }
 
     // ================================================================
