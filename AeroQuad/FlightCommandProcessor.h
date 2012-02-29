@@ -107,11 +107,17 @@ void readPilotCommands() {
    if (receiverCommand[AUX] < 1750) {
      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (isStoreAltitudeNeeded) {
-         baroAltitudeToHoldTarget = getBaroAltitude();
-         previousSensorAltitude = baroAltitudeToHoldTarget;
+         #if defined AltitudeHoldBaro
+           baroAltitudeToHoldTarget = getBaroAltitude();
+           PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+           PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+         #endif
+         #if defined AltitudeHoldRangeFinder
+            sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+         #endif
          altitudeHoldThrottle = receiverCommand[THROTTLE];
-         PID[ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-         PID[ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;  // add to initialize hold position on switch turn on.
          isStoreAltitudeNeeded = false;
        }
        altitudeHoldState = ON;

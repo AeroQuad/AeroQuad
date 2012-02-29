@@ -27,47 +27,16 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-/**
- * getAltitudeFromSensors
- *
- * @return the current craft altitude depending of the sensors used
- */
-//#if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-//
-//  /**
-//   * @return the most precise altitude, sonar if the reading is ok, otherwise baro
-//   * it also correct the baro ground altitude to have a smoot sensor switch
-//   */
-//  float getAltitudeFromSensors() {
-//    
-//    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-//      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
-//      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
-//    }
-//    else {
-//      return getBaroAltitude();    
-//    }
-//  }
-//  
-//#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder)
-//
-//  /**
-//   * @return the baro altitude
-//   */
-//  float getAltitudeFromSensors() {
-//    return getBaroAltitude();
-//  }
-//  
-//#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-//  /**
-//   * @return the sonar altitude
-//   */
-//  float getAltitudeFromSensors() {
-//    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
-//  }
-//  
-//#endif
 
+//      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+//      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
+//      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
+//      previousSensorAltitude = currentSensorAltitude;
+      // compute throttle z dampening
+//      int zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+//      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
+
+#define INVALID_THROTTLE_CORRECTION -1000
 
 /**
  * processAltitudeHold
@@ -84,33 +53,56 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     if (altitudeHoldState == ON) {
-      float currentSensorAltitude = getBaroAltitude();
-      if (currentSensorAltitude == INVALID_ALTITUDE) {
+
+      int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
+      // computer altitude error!
+      #if defined AltitudeHoldRangeFinder
+        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE) {
+          if (sonarAltitudeToHoldTarget == INVALID_RANGE) {
+            sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
+          }
+          altitudeHoldThrottleCorrection = updatePID(sonarAltitudeToHoldTarget, rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX], &PID[SONAR_ALTITUDE_HOLD_PID_IDX]);
+          altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+        }
+      #endif
+      #if defined AltitudeHoldBaro
+        if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
+          altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, getBaroAltitude(), &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
+          altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+        }
+      #endif        
+      if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
         throttle = receiverCommand[THROTTLE];
         return;
       }
       
-//      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-//      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
-//      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
-//      previousSensorAltitude = currentSensorAltitude;
-
-      // computer altitude error!
-      int altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
-      altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      
-      // compute throttle z dampening
-//      int zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-//      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
-      
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-      } else {
+      } 
+      else {
+        
         if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + altitudeHoldBump)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-          baroAltitudeToHoldTarget += 0.01;
+          #if defined AltitudeHoldBaro
+            baroAltitudeToHoldTarget += 0.01;
+          #endif
+          #if defined AltitudeHoldRangeFinder
+            sonarAltitudeToHoldTarget += 0.01;
+            if (!isInRangeOfRangeFinder(sonarAltitudeToHoldTarget)) {
+              sonarAltitudeToHoldTarget = INVALID_RANGE;
+            }
+          #endif
         }
+        
         if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - altitudeHoldBump)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-          baroAltitudeToHoldTarget -= 0.01;
+          #if defined AltitudeHoldBaro
+            baroAltitudeToHoldTarget -= 0.01;
+          #endif
+          #if defined AltitudeHoldRangeFinder
+            sonarAltitudeToHoldTarget -= 0.01;
+            if (!isInRangeOfRangeFinder(sonarAltitudeToHoldTarget)) {
+              sonarAltitudeToHoldTarget = INVALID_RANGE;
+            }
+          #endif
         }
       }
       throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;// + zDampeningThrottleCorrection;

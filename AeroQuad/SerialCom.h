@@ -86,8 +86,8 @@ void readSerialCommand() {
       
     case 'D': // Altitude hold PID
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        readSerialPID(ALTITUDE_HOLD_PID_IDX);
-        PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
+        readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
+        PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
@@ -333,8 +333,8 @@ void sendSerialTelemetry() {
     
   case 'd': // Altitude Hold
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintPID(ALTITUDE_HOLD_PID_IDX);
-      PrintValueComma(PID[ALTITUDE_HOLD_PID_IDX].windupGuard);
+      PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
+      PrintValueComma(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
@@ -512,7 +512,11 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroHeading);
     #endif
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintValueComma(getBaroAltitude());
+      #if defined AltitudeHoldBaro
+        PrintValueComma(getBaroAltitude());
+      #elif defined AltitudeHoldRangeFinder
+        PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
+      #endif  
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);

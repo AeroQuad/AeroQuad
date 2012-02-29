@@ -126,22 +126,30 @@ void processAltitudeHold();
  */
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
  // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
   int minThrottleAdjust = -50;
   int maxThrottleAdjust = 50;
-
-
-  float baroAltitudeToHoldTarget = 0.0;
-  float sonarAltitudeToHoldTarget = 0.0;
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
-  boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-  float previousSensorAltitude = 0.0;
   
 //  float estimatedXVelocity = 0;
 //  float estimatedYVelocity = 0;
 //  int estimatedZVelocity = 0;
+//  float previousSensorAltitude = 0.0;
+
+  #if defined AltitudeHoldBaro
+    float baroAltitudeToHoldTarget = 0.0;
+  #endif  
+  #if defined AltitudeHoldRangeFinder
+    float sonarAltitudeToHoldTarget = 0.0;
+  #endif
+  
+  
+  
+
+  
 #endif
 // float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
