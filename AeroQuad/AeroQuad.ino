@@ -1113,6 +1113,10 @@ void setup() {
   #ifdef AltitudeHoldRangeFinder
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
     vehicleState |= RANGE_ENABLED;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
   // Battery Monitor
@@ -1323,8 +1327,6 @@ void loop () {
         cameraControlSetYaw(kinematicsAngle[ZAXIS]);
         cameraControlMove();
       #endif
-      
-
     }
 
     // ================================================================

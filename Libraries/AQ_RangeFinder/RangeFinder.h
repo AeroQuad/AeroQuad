@@ -22,7 +22,8 @@
 #define _AEROQUAD_RANGE_FINDER_H_
 
 #include "Arduino.h"
-#include "GlobalDefined.h"
+
+#define INVALID_RANGE -1000.0
 
 #define ALTITUDE_RANGE_FINDER_INDEX 0
 #define FRONT_RANGE_FINDER_INDEX    1
@@ -31,19 +32,19 @@
 #define LEFT_RANGE_FINDER_INDEX     4
 
 
-float rangeFinderRange[5]      = {0.0,0.0,0.0,0.0,0.0};
-
 
 //
 // default unit are centimeter
 //
+
+float rangeFinderRange[5]      = {0.0,0.0,0.0,0.0,0.0};
 
 // default min max range constrain
 float maxRangeFinderRange = 4.5;
 float minRangeFinderRange = 0.25;
 
 void inititalizeRangeFinder(byte idx);
+boolean isInRangeOfRangeFinder(float range);
 void readRangeFinder(byte idx);
-boolean isInRangeOfRangeFinder(byte idx);
 
 #endif //  #ifdef _AEROQUAD_RANGE_FINDER_H_

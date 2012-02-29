@@ -37,7 +37,5 @@
 #define OFF 0
 
 #define ALTPANIC 2
-#define INVALID_ALTITUDE -1000.0
-
 
 #endif
