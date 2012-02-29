@@ -31,9 +31,6 @@
 #define LEFT_RANGE_FINDER_INDEX     4
 
 
-							
-byte rangeFinderSampleCount[5] = {0,0,0,0,0};							
-int rangeFinderRangeSum[5]     = {0,0,0,0,0};								  
 float rangeFinderRange[5]      = {0.0,0.0,0.0,0.0,0.0};
 
 
@@ -46,8 +43,7 @@ float maxRangeFinderRange = 4.5;
 float minRangeFinderRange = 0.25;
 
 void inititalizeRangeFinder(byte idx);
-void readRangeFinderDistanceSum(byte idx);
-void evaluateDistanceFromSample(byte idx);
+void readRangeFinder(byte idx);
 boolean isInRangeOfRangeFinder(byte idx);
 
 #endif //  #ifdef _AEROQUAD_RANGE_FINDER_H_
