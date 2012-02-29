@@ -512,7 +512,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroHeading);
     #endif
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintValueComma(getAltitudeFromSensors() == INVALID_ALTITUDE ? 0 : getAltitudeFromSensors());
+      PrintValueComma(getBaroAltitude());
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);
