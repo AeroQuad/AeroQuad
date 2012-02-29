@@ -204,14 +204,14 @@ void readEEPROM() {
   // Previously had issue where EEPROM was not reading right data
   readPID(ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
   PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
-  minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
-  maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     #if defined AltitudeHoldBaro
       baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
     #endif  
     altitudeHoldBump = readFloat(ALTITUDE_BUMP_ADR);
     altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
+    minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
+    maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #endif
   readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
 
@@ -266,20 +266,20 @@ void writeEEPROM(){
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   writePID(ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
   writeFloat(PID[ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
-  writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
-  writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    #if defined AltitudeHoldBaro
-      writeFloat(baroSmoothFactor, ALTITUDE_SMOOTH_ADR);
-    #else
-      writeFloat(0, ALTITUDE_SMOOTH_ADR);
-    #endif
+    writeFloat(baroSmoothFactor, ALTITUDE_SMOOTH_ADR);
     writeFloat(altitudeHoldBump, ALTITUDE_BUMP_ADR);
     writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
+    writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
+    writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
     writeFloat(90, ALTITUDE_BUMP_ADR);
     writeFloat(250, ALTITUDE_PANIC_ADR);
+    writeFloat(-50, ALTITUDE_MIN_THROTTLE_ADR);
+    writeFloat(50, ALTITUDE_MAX_THROTTLE_ADR);
+    writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
   writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #ifdef HeadingMagHold
