@@ -32,41 +32,41 @@
  *
  * @return the current craft altitude depending of the sensors used
  */
-#if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-
-  /**
-   * @return the most precise altitude, sonar if the reading is ok, otherwise baro
-   * it also correct the baro ground altitude to have a smoot sensor switch
-   */
-  float getAltitudeFromSensors() {
-    
-    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
-      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
-    }
-    else {
-      return getBaroAltitude();    
-    }
-  }
-  
-#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder)
-
-  /**
-   * @return the baro altitude
-   */
-  float getAltitudeFromSensors() {
-    return getBaroAltitude();
-  }
-  
-#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-  /**
-   * @return the sonar altitude
-   */
-  float getAltitudeFromSensors() {
-    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
-  }
-  
-#endif
+//#if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
+//
+//  /**
+//   * @return the most precise altitude, sonar if the reading is ok, otherwise baro
+//   * it also correct the baro ground altitude to have a smoot sensor switch
+//   */
+//  float getAltitudeFromSensors() {
+//    
+//    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
+//      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+//      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
+//    }
+//    else {
+//      return getBaroAltitude();    
+//    }
+//  }
+//  
+//#elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder)
+//
+//  /**
+//   * @return the baro altitude
+//   */
+//  float getAltitudeFromSensors() {
+//    return getBaroAltitude();
+//  }
+//  
+//#elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
+//  /**
+//   * @return the sonar altitude
+//   */
+//  float getAltitudeFromSensors() {
+//    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+//  }
+//  
+//#endif
 
 
 /**
@@ -84,7 +84,7 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     if (altitudeHoldState == ON) {
-      float currentSensorAltitude = getAltitudeFromSensors();
+      float currentSensorAltitude = getBaroAltitude();
       if (currentSensorAltitude == INVALID_ALTITUDE) {
         throttle = receiverCommand[THROTTLE];
         return;
@@ -96,7 +96,7 @@ void processAltitudeHold()
 //      previousSensorAltitude = currentSensorAltitude;
 
       // computer altitude error!
-      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
+      int altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, currentSensorAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       
       // compute throttle z dampening
@@ -107,10 +107,10 @@ void processAltitudeHold()
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
       } else {
         if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + altitudeHoldBump)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-          altitudeToHoldTarget += 0.01;
+          baroAltitudeToHoldTarget += 0.01;
         }
         if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - altitudeHoldBump)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-          altitudeToHoldTarget -= 0.01;
+          baroAltitudeToHoldTarget -= 0.01;
         }
       }
       throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;// + zDampeningThrottleCorrection;
