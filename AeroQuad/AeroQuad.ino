@@ -1130,10 +1130,6 @@ void setup() {
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
-    setmCameraRoll(318.3); // Need to figure out nice way to reverse servos
-    setCenterRoll(1500); // Need to figure out nice way to set center position
-    setmCameraPitch(318.3);
-    setCenterPitch(1300);
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
 
@@ -1322,10 +1318,9 @@ void loop () {
       #endif      
       
       #if defined(CameraControl)
-        cameraControlSetPitch(kinematicsAngle[YAXIS]);
-        cameraControlSetRoll(kinematicsAngle[XAXIS]);
-        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
-        cameraControlMove();
+        if (cameraMode > 0) {
+          moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+        }  
       #endif
     }
 
