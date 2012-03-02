@@ -228,16 +228,16 @@ void menuHandleCam(byte mode, byte action) {
       int val = (action == MENU_UP) ? 10 : -10;
       switch (menuFuncData[1]) {
       case 0:
-        setMode(action==MENU_UP?1:0);
+        cameraMode = (action==MENU_UP)?1:0;
         break;
       case 1:
-        setCenterPitch(constrain(getCenterPitch() + val, getServoMinPitch(), getServoMaxPitch()));
+        servoCenterPitch = constrain(servoCenterPitch + val, servoMinPitch, servoMaxPitch);
         break;
       case 2:
-        setCenterRoll(constrain(getCenterRoll() + val, getServoMinRoll(), getServoMaxRoll()));
+        servoCenterRoll = constrain(servoCenterRoll + val, servoMinRoll, servoMaxRoll);
         break;
       case 3:
-        setCenterYaw(constrain(getCenterYaw() + val, getServoMinYaw(), getServoMaxYaw()));
+        servoCenterYaw = constrain(servoCenterYaw + val, servoMinYaw, servoMaxYaw);
         break;
       }
     }
@@ -245,7 +245,7 @@ void menuHandleCam(byte mode, byte action) {
   }
 
   if (menuFuncData[1] == 0) {
-    notifyOSDmenu(OSD_NOCLEAR | OSD_CURSOR, menuFuncData[0] ? 18 : 1, menuFuncData[0] ? 18 : 16, "%cStabilizer mode: %1d", MENU_SYM_BOTH, getMode());
+    notifyOSDmenu(OSD_NOCLEAR | OSD_CURSOR, menuFuncData[0] ? 18 : 1, menuFuncData[0] ? 18 : 16, "%cStabilizer mode: %1d", MENU_SYM_BOTH, cameraMode);
   }
   else {
     notifyOSDmenu(OSD_NOCLEAR|OSD_CURSOR,
@@ -254,9 +254,9 @@ void menuHandleCam(byte mode, byte action) {
       (menuFuncData[1] == 1)?"Pitch":
       (menuFuncData[1] == 2)?"Roll ":
       "Yaw  ",
-      (menuFuncData[1] == 1) ? getCenterPitch():
-      (menuFuncData[1] == 2) ? getCenterRoll():
-      getCenterYaw());
+      (menuFuncData[1] == 1) ? servoCenterPitch:
+      (menuFuncData[1] == 2) ? servoCenterRoll:
+      servoCenterYaw);
   }
 }
 #endif

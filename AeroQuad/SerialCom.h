@@ -190,20 +190,20 @@ void readSerialCommand() {
       break;
       
     case 'P': //  read Camera values
-      #ifdef Camera
-        camera.setMode(readFloatSerial());
-        camera.setCenterPitch(readFloatSerial());
-        camera.setCenterRoll(readFloatSerial());
-        camera.setCenterYaw(readFloatSerial());
-        camera.setmCameraPitch(readFloatSerial());
-        camera.setmCameraRoll(readFloatSerial());
-        camera.setmCameraYaw(readFloatSerial());
-        camera.setServoMinPitch(readFloatSerial());
-        camera.setServoMinRoll(readFloatSerial());
-        camera.setServoMinYaw(readFloatSerial());
-        camera.setServoMaxPitch(readFloatSerial());
-        camera.setServoMaxRoll(readFloatSerial());
-        camera.setServoMaxYaw(readFloatSerial());
+      #ifdef CameraControl
+        cameraMode = readFloatSerial();
+        servoCenterPitch = readFloatSerial();
+        servoCenterRoll = readFloatSerial();
+        servoCenterYaw = readFloatSerial();
+        mCameraPitch = readFloatSerial();
+        mCameraRoll = readFloatSerial();
+        mCameraYaw = readFloatSerial();
+        servoMinPitch = readFloatSerial();
+        servoMinRoll = readFloatSerial();
+        servoMinYaw = readFloatSerial();
+        servoMaxPitch = readFloatSerial();
+        servoMaxRoll = readFloatSerial();
+        servoMaxYaw = readFloatSerial();
       #else
         for (byte values = 0; values < 13; values++)
           readFloatSerial();
@@ -464,20 +464,20 @@ void sendSerialTelemetry() {
     break;
     
   case 'p': // Send Camera values
-    #ifdef Camera
-      PrintValueComma(camera.getMode());
-      PrintValueComma(camera.getCenterPitch());
-      PrintValueComma(camera.getCenterRoll());
-      PrintValueComma(camera.getCenterYaw());
-      PrintValueComma(camera.getmCameraPitch(), 2);
-      PrintValueComma(camera.getmCameraRoll(), 2);
-      PrintValueComma(camera.getmCameraYaw(), 2);
-      PrintValueComma(camera.getServoMinPitch());
-      PrintValueComma(camera.getServoMinRoll());
-      PrintValueComma(camera.getServoMinYaw());
-      PrintValueComma(camera.getServoMaxPitch());
-      PrintValueComma(camera.getServoMaxRoll());
-      SERIAL_PRINTLN(camera.getServoMaxYaw());
+    #ifdef CameraControl
+      PrintValueComma(cameraMode);
+      PrintValueComma(servoCenterPitch);
+      PrintValueComma(servoCenterRoll);
+      PrintValueComma(servoCenterYaw);
+      PrintValueComma(mCameraPitch);
+      PrintValueComma(mCameraRoll);
+      PrintValueComma(mCameraYaw);
+      PrintValueComma(servoMinPitch);
+      PrintValueComma(servoMinRoll);
+      PrintValueComma(servoMinYaw);
+      PrintValueComma(servoMaxPitch);
+      PrintValueComma(servoMaxRoll);
+      SERIAL_PRINTLN(servoMaxYaw);
     #else
       for (byte index=0; index < 12; index++) {
         PrintValueComma(0);

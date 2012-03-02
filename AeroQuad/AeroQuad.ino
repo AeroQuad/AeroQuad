@@ -1114,8 +1114,8 @@ void setup() {
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
     vehicleState |= RANGE_ENABLED;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I*2;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D*2;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
@@ -1130,10 +1130,6 @@ void setup() {
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
-    setmCameraRoll(318.3); // Need to figure out nice way to reverse servos
-    setCenterRoll(1500); // Need to figure out nice way to set center position
-    setmCameraPitch(318.3);
-    setCenterPitch(1300);
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
 
@@ -1322,10 +1318,9 @@ void loop () {
       #endif      
       
       #if defined(CameraControl)
-        cameraControlSetPitch(kinematicsAngle[YAXIS]);
-        cameraControlSetRoll(kinematicsAngle[XAXIS]);
-        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
-        cameraControlMove();
+        if (cameraMode > 0) {
+          moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+        }  
       #endif
     }
 
