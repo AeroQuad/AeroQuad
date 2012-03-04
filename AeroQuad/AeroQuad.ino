@@ -968,8 +968,6 @@
   #include "FlightControlQuadX.h"
 #elif defined quadPlusConfig
   #include "FlightControlQuadPlus.h"
-#elif defined quadXSpiderConfig  
-  #include "FlightControlQuadXSpider.h"
 #elif defined hexPlusConfig
   #include "FlightControlHexPlus.h"
 #elif defined hexXConfig
@@ -1066,7 +1064,7 @@ void setup() {
   initPlatform();
 
   // Configure motors
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig) || defined (quadXSpiderConfig)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors);
