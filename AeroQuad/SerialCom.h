@@ -763,8 +763,6 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Quad X");
   #elif defined (quadY4Config)
     SERIAL_PRINTLN("Quad Y4");
-  #elif defined(quadXSpiderConfig) 
-    SERIAL_PRINTLN("Quad X Spider");
   #elif defined (triConfig)
     SERIAL_PRINTLN("Tri");
   #elif defined(hexPlusConfig)

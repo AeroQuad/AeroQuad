@@ -47,12 +47,11 @@
 // Use only one of the following definitions
 //#define quadXConfig
 //#define quadPlusConfig
-#define quadXSpiderConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
