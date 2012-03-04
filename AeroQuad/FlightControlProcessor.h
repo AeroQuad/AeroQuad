@@ -149,11 +149,11 @@ void processCalibrateESC()
  */
 void processThrottleCorrection() {
  
-  int throttleAsjust = throttle / ( cos(kinematicsAngle[XAXIS]) * cos(kinematicsAngle[YAXIS]));
-  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 25); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
-  throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
+//  int throttleAsjust = throttle / ( cos(kinematicsAngle[XAXIS]) * cos(kinematicsAngle[YAXIS]));
+//  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 25); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
+//  throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
   
-  throttle = constrain(throttle,MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
+  throttle = constrain(throttle + batteyMonitorThrottleCorrection,MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
 }
 
 
