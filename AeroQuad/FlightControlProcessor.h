@@ -106,7 +106,14 @@ void processCalibrateESC()
     else {
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         if (altitudeHoldState == ON) {
-          altitudeToHoldTarget -= 0.01;
+          #if defined AltitudeHoldBaro
+            baroAltitudeToHoldTarget -= 0.01;
+          #endif
+          #if defined AltitudeHoldRangeFinder
+            if (sonarAltitudeToHoldTarget != INVALID_RANGE) {
+              sonarAltitudeToHoldTarget -= 0.01;
+            }
+          #endif
         }
         else {
       #endif
