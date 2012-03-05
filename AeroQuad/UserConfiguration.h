@@ -84,7 +84,7 @@
 //#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 #define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -93,7 +93,7 @@
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
 #define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 #define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
