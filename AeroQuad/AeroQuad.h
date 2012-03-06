@@ -183,6 +183,14 @@ void reportVehicleState();
  */
 #if defined (UseGPS)
   int missionNbPoint = 0;
+  
+  struct GPS_waypoint {
+    long latitude;
+    long longitude;
+    long altitude;
+  };
+
+  void updateGPSRollPitchSpeedAlg(GPS_waypoint);
 #endif
 //////////////////////////////////////////////////////
 
