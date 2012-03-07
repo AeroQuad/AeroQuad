@@ -1112,8 +1112,8 @@ void setup() {
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
     vehicleState |= RANGE_ENABLED;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I*2;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D*2;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
@@ -1309,9 +1309,8 @@ void loop () {
       #endif
 
       #if defined (UseGPS)
-        readGps();
-        if (!isHomeBaseInitialized()) {
-          initHomeBase();
+        if (readGps()) {
+          mesureGpsPositionSum();
         }
       #endif      
       
@@ -1353,6 +1352,19 @@ void loop () {
         processLedStatus();
       #endif
     }
+    
+    #if defined (UseGPS)
+      if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
+        
+        if (haveAGpsLock()) {
+          evaluateCurrentGpsPositionFromSum();
+          if (!isHomeBaseInitialized()) {
+            initHomeBase();
+          }
+        }
+      }
+    #endif
+    
     previousTime = currentTime;
   }
   if (frameCounter >= 100) {

@@ -29,8 +29,35 @@
 #define GPS_PORT Serial1
 
 
+struct GeodeticPosition {
+  long latitude;
+  long longitude;
+  
+  GeodeticPosition() {
+    latitude = GPS_INVALID_ANGLE;
+    longitude = GPS_INVALID_ANGLE;
+  }
+};
+GeodeticPosition currentPosition;
+
+byte gpsSumCounter = 0;
+long gpsLatitudeSum = 0;
+long gpsLongitudeSum = 0;
+
+
+// @todo, kenny, remove this
+byte minNbGPSInUse = 6;
+long GPS_curr_latitude = GPS_INVALID_ANGLE;
+long GPS_curr_longitude = GPS_INVALID_ANGLE;
+long GPS_curr_altitude = GPS_INVALID_ALTITUDE;
+
+long GPS_prev_latitude = GPS_INVALID_ANGLE;
+long GPS_prev_longitude = GPS_INVALID_ANGLE;
+long GPS_prev_altitude = GPS_INVALID_ALTITUDE;
+
 
 void initializeGps() {
+ 
   GPS_PORT.begin(GPS_SERIAL_BAUD_SPEED);
   
   GPS_PORT.print("$PMTK251,115200*1F\r\n"); // set to 115200
@@ -43,118 +70,69 @@ void initializeGps() {
   GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
 }
 
-boolean readGps()
-{
+
+
+
+boolean readGps() {
   while (GPS_PORT.available())
   {
-    if (encode(GPS_PORT.read()))
+    if (decodeGpsChar(GPS_PORT.read())) {
+/*      GPS_prev_latitude = GPS_curr_latitude;
+      GPS_prev_longitude = GPS_curr_longitude;
+      GPS_prev_altitude = GPS_curr_altitude;
+
+      GPS_get_position(&GPS_curr_latitude, &GPS_curr_longitude, &GPS_fixAge);
+          
+      GPS_speed = GPS_f_speed_cmps();
+      GPS_course = GPS_get_course();
+      GPS_curr_altitude = GPS_get_altitude();
+       
+      GPS_satelitesInUse = GPS_get_satelites_in_use();
+        
+      GPS_waypoint GPS_wptGPSHold;
+      GPS_wptGPSHold.latitude = GPS_latitudeToHold;
+      GPS_wptGPSHold.longitude = GPS_longtitudeToHold;
+      GPS_wptGPSHold.altitude = 0;
+        
+      updateGPSRollPitchSpeedAlg(GPS_wptGPSHold); //heading using speed
+*/	  
       return true;
+    }        
   }
   return false;
 }
-
-// @todo, kenny, to be tested
+  
 boolean haveAGpsLock() {
- return _last_position_fix != GPS_INVALID_FIX_TIME;
-}
-
-long getLongitude() {
-  return _longitude; // degrees * 100000
-}
-
-long getLatitude() {
-  return _latitude; // degrees * 100000
+ return nbSatelitesInUse >= minNbGPSInUse;
 }
 
 long getCourse() {
-  return _course;
+  return gpsCourse;
 }
 unsigned long getGpsSpeed() {
-  return _gpsSpeed*1.852*10/36;
+  return gpsSpeed*1.852*10/36;
 }
 
 unsigned long getGpsAltitude() {
-  return _gpsAltitude;
+  return gpsAltitude;
+}
+  
+void mesureGpsPositionSum() {
+  
+  gpsLatitudeSum += latitude;
+  gpsLongitudeSum += longitude;
+  gpsSumCounter++;
 }
 
+void evaluateCurrentGpsPositionFromSum() {
 
-/*void printGpsFloat(double number, int digits = 0)
-{
-  // Handle negative numbers
-  if (number < 0.0)
-  {
-     Serial.print('-');
-     number = -number;
-  }
-
-  // Round correctly so that print(1.999, 2) prints as "2.00"
-  double rounding = 0.5;
-  for (uint8_t i=0; i<digits; ++i)
-    rounding /= 10.0;
+  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
+  currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
   
-  number += rounding;
-
-  // Extract the integer part of the number and print it
-  unsigned long int_part = (unsigned long)number;
-  double remainder = number - (double)int_part;
-  Serial.print(int_part);
-
-  // Print the decimal point, but only if there are digits beyond
-  if (digits > 0)
-    Serial.print("."); 
-
-  // Extract digits from the remainder one at a time
-  while (digits-- > 0)
-  {
-    remainder *= 10.0;
-    int toPrint = int(remainder);
-    Serial.print(toPrint);
-    remainder -= toPrint; 
-  } 
+  gpsLatitudeSum = 0;
+  gpsLongitudeSum = 0;
+  gpsSumCounter = 0;
 }
-
-void gpsdump()
-{
-  long lat, lon;
-  float flat, flon;
-  unsigned long age, date, time, chars;
-  int year;
-  byte month, day, hour, minute, second, hundredths;
-  unsigned short sentences, failed;
-
-  get_position(&lat, &lon, &age);
-  Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat); Serial.print(", "); Serial.print(lon); 
-  Serial.print(" Fix age: "); Serial.print(age); Serial.println("ms.");
-  
-  readGps(); // If we don't feed the gps during this long routine, we may drop characters and get checksum errors
-
-  f_get_position(&flat, &flon, &age);
-  Serial.print("Lat/Long(float): "); printGpsFloat(flat, 5); Serial.print(", "); printGpsFloat(flon, 5);
-  Serial.print(" Fix age: "); Serial.print(age); Serial.println("ms.");
-
-  readGps();
-
-  get_datetime(&date, &time, &age);
-  Serial.print("Date(ddmmyy): "); Serial.print(date); Serial.print(" Time(hhmmsscc): "); Serial.print(time);
-  Serial.print(" Fix age: "); Serial.print(age); Serial.println("ms.");
-
-  readGps();
-
-  crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
-  Serial.print("Date: "); Serial.print(static_cast<int>(month)); Serial.print("/"); Serial.print(static_cast<int>(day)); Serial.print("/"); Serial.print(year);
-  Serial.print("  Time: "); Serial.print(static_cast<int>(hour)); Serial.print(":"); Serial.print(static_cast<int>(minute)); Serial.print(":"); Serial.print(static_cast<int>(second)); Serial.print("."); Serial.print(static_cast<int>(hundredths));
-  Serial.print("  Fix age: ");  Serial.print(age); Serial.println("ms.");
-  
-  readGps();
-
-  Serial.print("Alt(cm): "); Serial.print(altitude()); Serial.print(" Course(10^-2 deg): "); Serial.print(course()); Serial.print(" Speed(10^-2 knots): "); Serial.println(speed());
-  Serial.print("Alt(float): "); printGpsFloat(f_altitude()); Serial.print(" Course(float): "); printGpsFloat(f_course()); Serial.println();
-  Serial.print("Speed(knots): "); printGpsFloat(f_speed_knots()); Serial.print(" (mph): ");  printGpsFloat(f_speed_mph());
-  Serial.print(" (mps): "); printGpsFloat(f_speed_mps()); Serial.print(" (kmph): "); printGpsFloat(f_speed_kmph()); Serial.println();
-
-  readGps();
-}
-*/
 
 
 #endif

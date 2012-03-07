@@ -18,7 +18,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   
-  Adapted from latest TinyGPS from Kenny
+  Adapted from latest TinyGPS by Kenny9999
 */
 
 #ifndef _AQ_GPS_H_
@@ -26,16 +26,15 @@
 
 #include "Arduino.h"
 
-#define _GPRMC_TERM   "GPRMC"
-#define _GPGGA_TERM   "GPGGA"
+#define GPRMC_TERM   "GPRMC"
+#define GPGGA_TERM   "GPGGA"
 
-
-#define _GPS_VERSION 10 // software version of this library
-#define _GPS_MPH_PER_KNOT 1.15077945
-#define _GPS_MPS_PER_KNOT 0.51444444
-#define _GPS_KMPH_PER_KNOT 1.852
-#define _GPS_MILES_PER_METER 0.00062137112
-#define _GPS_KM_PER_METER 0.001
+//#define _GPS_VERSION 10 // software version of this library
+#define GPS_MPH_PER_KNOT 1.15077945
+#define GPS_MPS_PER_KNOT 0.51444444
+#define GPS_KMPH_PER_KNOT 1.852
+#define GPS_MILES_PER_METER 0.00062137112
+#define GPS_KM_PER_METER 0.001
 
 enum {
   GPS_INVALID_AGE = 0xFFFFFFFF, 
@@ -48,46 +47,49 @@ enum {
 };
 
 enum {
-  _GPS_SENTENCE_GPGGA, 
-  _GPS_SENTENCE_GPRMC, 
-  _GPS_SENTENCE_OTHER
+  GPS_SENTENCE_GPGGA, 
+  GPS_SENTENCE_GPRMC, 
+  GPS_SENTENCE_OTHER
 };
 
 // properties
-unsigned long _time = GPS_INVALID_TIME;
-unsigned long _new_time = GPS_INVALID_TIME;
-unsigned long _date = GPS_INVALID_DATE;
-unsigned long _new_date = GPS_INVALID_DATE;
-long _latitude = GPS_INVALID_ANGLE;
-long _new_latitude = GPS_INVALID_ANGLE;
-long _longitude = GPS_INVALID_ANGLE; 
-long _new_longitude = GPS_INVALID_ANGLE;
-long _gpsAltitude = GPS_INVALID_ALTITUDE;
-long _new_altitude = GPS_INVALID_ALTITUDE;
-unsigned long _gpsSpeed = GPS_INVALID_SPEED;
-unsigned long _new_speed = GPS_INVALID_SPEED;
-unsigned long _course = GPS_INVALID_ANGLE;
-unsigned long _new_course = GPS_INVALID_ANGLE;
+unsigned long gpsTime = GPS_INVALID_TIME;
+unsigned long gpsNewTime = GPS_INVALID_TIME;
+unsigned long gpsDate = GPS_INVALID_DATE;
+unsigned long gpsNewDate = GPS_INVALID_DATE;
+long latitude = GPS_INVALID_ANGLE;
+long newLatitude = GPS_INVALID_ANGLE;
+long longitude = GPS_INVALID_ANGLE; 
+long newLongitude = GPS_INVALID_ANGLE;
+long gpsAltitude = GPS_INVALID_ALTITUDE;
+long gpsNewAltitude = GPS_INVALID_ALTITUDE;
+unsigned long gpsSpeed = GPS_INVALID_SPEED;
+unsigned long gpsNewSpeed = GPS_INVALID_SPEED;
+unsigned long gpsCourse = GPS_INVALID_ANGLE;
+unsigned long gpsNewCourse = GPS_INVALID_ANGLE;
 
-unsigned long _last_time_fix = GPS_INVALID_FIX_TIME; 
-unsigned long _new_time_fix = GPS_INVALID_FIX_TIME;
-unsigned long _last_position_fix = GPS_INVALID_FIX_TIME;
-unsigned long _new_position_fix = GPS_INVALID_FIX_TIME;
+unsigned long gpsLastTimeFix = GPS_INVALID_FIX_TIME; 
+unsigned long gpsNewTimeFix = GPS_INVALID_FIX_TIME;
+unsigned long gpsLastPositionFix = GPS_INVALID_FIX_TIME;
+unsigned long gpsNewPositionFix = GPS_INVALID_FIX_TIME;
+
+unsigned int nbSatelitesInUse = 0;
+unsigned int newNbSatelitesInUse = 0;
 
 // parsing state variables
-byte _parity = 0;
-boolean _is_checksum_term = false;
-char _term[15];
-byte _sentence_type = _GPS_SENTENCE_OTHER;
-byte _term_number = 0;
-byte _term_offset = 0;
-boolean _gps_data_good = false;
+byte gpsParity = 0;
+boolean isChecksumTerm = false;
+char gpsTerm[15];
+byte gpsSentenceType = GPS_SENTENCE_OTHER;
+byte gpsTermNumber = 0;
+byte gpsTermOffset = 0;
+boolean isGpsDataGood = false;
 
 
 //
 // internal utilities
 //
-int from_hex(char a) 
+int fromHex(char a) 
 {
   if (a >= 'A' && a <= 'F') {
     return a - 'A' + 10;
@@ -100,20 +102,20 @@ int from_hex(char a)
   }
 }
 
-bool gpsisdigit(char c) { 
+bool isDigit(char c) { 
   return c >= '0' && c <= '9'; 
 }
 
-long gpsatol(const char *str)
+long atol(const char *str)
 {
   long ret = 0;
-  while (gpsisdigit(*str)) {
+  while (isDigit(*str)) {
     ret = 10 * ret + *str++ - '0';
   }
   return ret;
 }
 
-int gpsstrcmp(const char *str1, const char *str2)
+int strcmp(const char *str1, const char *str2)
 {
   while (*str1 && *str1 == *str2) {
     ++str1, ++str2;
@@ -122,21 +124,21 @@ int gpsstrcmp(const char *str1, const char *str2)
 }
 
 
-unsigned long parse_decimal()
+unsigned long parseDecimal()
 {
-  char *p = _term;
+  char *p = gpsTerm;
   boolean isneg = *p == '-';
   if (isneg) ++p;
-  unsigned long ret = 100UL * gpsatol(p);
-  while (gpsisdigit(*p)) {
+  unsigned long ret = 100UL * atol(p);
+  while (isDigit(*p)) {
     ++p;
   }
   if (*p == '.')
   {
-    if (gpsisdigit(p[1]))
+    if (isDigit(p[1]))
     {
       ret += 10 * (p[1] - '0');
-      if (gpsisdigit(p[2])) {
+      if (isDigit(p[2])) {
         ret += p[2] - '0';
       }
     }
@@ -144,53 +146,54 @@ unsigned long parse_decimal()
   return isneg ? -ret : ret;
 }
 
-unsigned long parse_degrees()
+unsigned long parseDegrees()
 {
   char *p;
-  unsigned long left = gpsatol(_term);
+  unsigned long left = atol(gpsTerm);
   unsigned long tenk_minutes = (left % 100UL) * 10000UL;
-  for (p=_term; gpsisdigit(*p); ++p);
+  for (p=gpsTerm; isDigit(*p); ++p);
   if (*p == '.')
   {
     unsigned long mult = 1000;
-    while (gpsisdigit(*++p))
+    while (isDigit(*++p))
     {
       tenk_minutes += mult * (*p - '0');
       mult /= 10;
     }
   }
-  return (left / 100) * 100000 + tenk_minutes / 6;
+  return (left / 100) * 10000000 + tenk_minutes * 100 / 6;
 }
 
 // Processes a just-completed term
 // Returns true if new sentence has just passed checksum test and is validated
-boolean term_complete()
+boolean gpsTermComplete()
 {
-  if (_is_checksum_term)
+  if (isChecksumTerm)
   {
-    byte checksum = 16 * from_hex(_term[0]) + from_hex(_term[1]);
-    if (checksum == _parity)
+    byte checksum = 16 * fromHex(gpsTerm[0]) + fromHex(gpsTerm[1]);
+    if (checksum == gpsParity)
     {
-      if (_gps_data_good)
+      if (isGpsDataGood)
       {
-        _last_time_fix = _new_time_fix;
-        _last_position_fix = _new_position_fix;
+        gpsLastTimeFix = gpsNewTimeFix;
+        gpsLastPositionFix = gpsNewPositionFix;
 
-        switch(_sentence_type)
+        switch(gpsSentenceType)
         {
-        case _GPS_SENTENCE_GPRMC:
-          _time      = _new_time;
-          _date      = _new_date;
-          _latitude  = _new_latitude;
-          _longitude = _new_longitude;
-          _gpsSpeed  = _new_speed;
-          _course    = _new_course;
+        case GPS_SENTENCE_GPRMC:
+          gpsTime          = gpsNewTime;
+          gpsDate          = gpsNewDate;
+          latitude         = newLatitude;
+          longitude        = newLongitude;
+		  nbSatelitesInUse = newNbSatelitesInUse;
+          gpsSpeed         = gpsNewSpeed;
+          gpsCourse        = gpsNewCourse;
           break;
-        case _GPS_SENTENCE_GPGGA:
-          _gpsAltitude = _new_altitude;
-          _time        = _new_time;
-          _latitude    = _new_latitude;
-          _longitude   = _new_longitude;
+        case GPS_SENTENCE_GPGGA:
+          gpsAltitude      = gpsNewAltitude;
+          gpsTime          = gpsNewTime;
+          latitude         = newLatitude;
+          longitude        = newLongitude;
           break;
         }
 
@@ -202,67 +205,69 @@ boolean term_complete()
   }
 
   // the first term determines the sentence type
-  if (_term_number == 0)
+  if (gpsTermNumber == 0)
   {
-    if (!gpsstrcmp(_term, _GPRMC_TERM)) {
-      _sentence_type = _GPS_SENTENCE_GPRMC;
+    if (!strcmp(gpsTerm, GPRMC_TERM)) {
+      gpsSentenceType = GPS_SENTENCE_GPRMC;
     }
-    else if (!gpsstrcmp(_term, _GPGGA_TERM)) {
-      _sentence_type = _GPS_SENTENCE_GPGGA;
+    else if (!strcmp(gpsTerm, GPGGA_TERM)) {
+      gpsSentenceType = GPS_SENTENCE_GPGGA;
     }
     else {
-      _sentence_type = _GPS_SENTENCE_OTHER;
+      gpsSentenceType = GPS_SENTENCE_OTHER;
     }
     
 	return false;
   }
 
-  if (_sentence_type != _GPS_SENTENCE_OTHER && _term[0]) {
-    switch((_sentence_type == _GPS_SENTENCE_GPGGA ? 200 : 100) + _term_number)
+  if (gpsSentenceType != GPS_SENTENCE_OTHER && gpsTerm[0]) {
+    switch((gpsSentenceType == GPS_SENTENCE_GPGGA ? 200 : 100) + gpsTermNumber)
     {
       case 101: // Time in both sentences
       case 201:
-        _new_time = parse_decimal();
-        _new_time_fix = millis();
+        gpsNewTime = parseDecimal();
+        gpsNewTimeFix = millis();
         break;
       case 102: // GPRMC validity
-        _gps_data_good = _term[0] == 'A';
+        isGpsDataGood = gpsTerm[0] == 'A';
         break;
       case 103: // Latitude
       case 202:
-        _new_latitude = parse_degrees();
-        _new_position_fix = millis();
+        newLatitude = parseDegrees();
+        gpsNewPositionFix = millis();
         break;
       case 104: // N/S
       case 203:
-        if (_term[0] == 'S') {
-          _new_latitude = -_new_latitude;
+        if (gpsTerm[0] == 'S') {
+          newLatitude = -newLatitude;
 		}
         break;
       case 105: // Longitude
       case 204:
-        _new_longitude = parse_degrees();
+        newLongitude = parseDegrees();
         break;
       case 106: // E/W
       case 205:
-        if (_term[0] == 'W') {
-          _new_longitude = -_new_longitude;
+        if (gpsTerm[0] == 'W') {
+          newLongitude = -newLongitude;
 		}
         break;
       case 107: // Speed (GPRMC)
-        _new_speed = parse_decimal();
+        gpsNewSpeed = parseDecimal();
         break;
       case 108: // Course (GPRMC)
-        _new_course = parse_decimal();
+        gpsNewCourse = parseDecimal();
         break;
       case 109: // Date (GPRMC)
-        _new_date = gpsatol(_term);
+        gpsNewDate = atol(gpsTerm);
         break;
       case 206: // Fix data (GPGGA)
-        _gps_data_good = _term[0] > '0';
+        isGpsDataGood = gpsTerm[0] > '0';
         break;
+      case 207: //Number of satelites in use
+        newNbSatelitesInUse = atol(gpsTerm);
       case 209: // Altitude (GPGGA)
-        _new_altitude = parse_decimal();
+        gpsNewAltitude = parseDecimal();
         break;
     }
   }
@@ -270,98 +275,105 @@ boolean term_complete()
   return false;
 }
 
-boolean encode(char c)
+boolean decodeGpsChar(char c)
 {
   boolean valid_sentence = false;
 
   switch(c)
   {
   case ',': // term terminators
-    _parity ^= c;
+    gpsParity ^= c;
   case '\r':
   case '\n':
   case '*':
-    if (_term_offset < sizeof(_term)) {
-      _term[_term_offset] = 0;
-      valid_sentence = term_complete();
+    if (gpsTermOffset < sizeof(gpsTerm)) {
+      gpsTerm[gpsTermOffset] = 0;
+      valid_sentence = gpsTermComplete();
     }
-    ++_term_number;
-    _term_offset = 0;
-    _is_checksum_term = c == '*';
+    ++gpsTermNumber;
+    gpsTermOffset = 0;
+    isChecksumTerm = c == '*';
     return valid_sentence;
 
   case '$': // sentence begin
-    _term_number = _term_offset = 0;
-    _parity = 0;
-    _sentence_type = _GPS_SENTENCE_OTHER;
-    _is_checksum_term = false;
-    _gps_data_good = false;
+    gpsTermNumber = gpsTermOffset = 0;
+    gpsParity = 0;
+    gpsSentenceType = GPS_SENTENCE_OTHER;
+    isChecksumTerm = false;
+    isGpsDataGood = false;
     return valid_sentence;
   }
 
   // ordinary characters
-  if (_term_offset < sizeof(_term) - 1) {
-    _term[_term_offset++] = c;
+  if (gpsTermOffset < sizeof(gpsTerm) - 1) {
+    gpsTerm[gpsTermOffset++] = c;
   }
-  if (!_is_checksum_term) {
-    _parity ^= c;
+  if (!isChecksumTerm) {
+    gpsParity ^= c;
   }
 
   return valid_sentence;
 }
 
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void get_position(long *latitude, long *longitude, unsigned long *fix_age = 0)
+/*void getPosition(long *lat, long *longi, unsigned long *fixAge = 0)
 {
-  if (latitude) {
-    *latitude = _latitude;
+  if (lat) {
+    *lat = latitude;
   }
-  if (longitude) {
-    *longitude = _longitude;
+  if (longi) {
+    *longi = longitude;
   }	
-  if (fix_age) {
-    *fix_age = _last_position_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _last_position_fix;
+  if (fixAge) {
+    *fixAge = gpsLastPositionFix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - gpsLastPositionFix;
   }
 }
+
 
 // date as ddmmyy, time as hhmmsscc, and age in milliseconds
-inline void get_datetime(unsigned long *date, unsigned long *time, unsigned long *fix_age = 0)
+inline void getDateAndTime(unsigned long *date, unsigned long *time, unsigned long *fix_age = 0)
 {
   if (date) {
-    *date = _date;
+    *date = gpsDate;
   }
   if (time) {
-    *time = _time;
+    *time = gpsTime;
   }
   if (fix_age) {
-    *fix_age = _last_time_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _last_time_fix;
+    *fix_age = gpsLastTimeFix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - gpsLastTimeFix;
   }
 }
 
-// signed altitude in centimeters (from GPGGA sentence)
-long altitude() { 
-  return _gpsAltitude; 
+// signed GPS_altitude in centimeters (from GPGGA sentence)
+inline long GPS_get_altitude() { 
+  return gpsAltitude; 
 }
 
 // course in last full GPRMC sentence in 100th of a degree
-unsigned long course() { 
-  return _course; 
+inline unsigned long GPS_get_course() { 
+  return gpsCourse; 
 }
     
 // speed in last full GPRMC sentence in 100ths of a knot
-unsigned long speed() {
-  return _gpsSpeed; 
+inline unsigned long GPS_get_speed() {
+  return gpsSpeed; 
 }
 
-void f_get_position(float *latitude, float *longitude, unsigned long *fix_age = 0)
+inline unsigned int GPS_get_satelites_in_use() {
+  return nbSatelitesInUse;
+}
+
+void GPS_f_get_position(float *latitude, float *longitude, unsigned long *fix_age = 0)
 {
   long lat, lon;
-  get_position(&lat, &lon, fix_age);
-  *latitude = lat / 100000.0;
-  *longitude = lon / 100000.0;
+  getPosition(&lat, &lon, fix_age);
+  *latitude = lat / 10000000.0;
+  *longitude = lon / 10000000.0;
 }
 
-inline void crack_datetime(int *year, 
+
+
+inline void extractDateAndTime(int *year, 
                            byte *month, 
 						   byte *day, 
                            byte *hour, 
@@ -371,7 +383,7 @@ inline void crack_datetime(int *year,
 						   unsigned long *fix_age = 0)
 {
   unsigned long date, time;
-  get_datetime(&date, &time, fix_age);
+  getDateAndTime(&date, &time, fix_age);
   if (year) {
 	*year = date % 100;
 	*year += *year > 80 ? 1900 : 2000;
@@ -396,62 +408,44 @@ inline void crack_datetime(int *year,
   }
 }
 
-float f_altitude() { 
-  return altitude() / 100.0; 
+float GPS_f_altitude() { 
+  return GPS_get_altitude() / 100.0; 
 }
 
-float f_course() { 
-  return course() / 100.0; 
+float GPS_f_course() { 
+  return GPS_get_course() / 100.0; 
 }
 
-float f_speed_knots() {
-  return speed() / 100.0; 
+float GPS_f_speed_knots() {
+  return GPS_get_speed() / 100.0; 
 }
 
-float f_speed_mph() {
-  return _GPS_MPH_PER_KNOT * f_speed_knots(); 
+float GPS_f_speed_mph() {
+  return GPS_MPH_PER_KNOT * GPS_f_speed_knots(); 
 }
 
-float f_speed_mps() { 
-  return _GPS_MPS_PER_KNOT * f_speed_knots(); 
+float GPS_f_speed_mps() { 
+  return GPS_MPS_PER_KNOT * GPS_f_speed_knots(); 
 }
 
-float f_speed_kmph() {
-  return _GPS_KMPH_PER_KNOT * f_speed_knots(); 
+float GPS_f_speed_kmph() {
+  return GPS_KMPH_PER_KNOT * GPS_f_speed_knots(); 
 }
 
-int library_version() {
-  return _GPS_VERSION; 
-}
-
-float distance_between (float lat1, float long1, float lat2, float long2) 
-{
-  // returns distance in meters between two positions, both specified 
-  // as signed decimal-degrees latitude and longitude. Uses great-circle 
-  // distance computation for hypothetical sphere of radius 6372795 meters.
-  // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
-  // Courtesy of Maarten Lamers
-  float delta = radians(long1-long2);
-  float sdlong = sin(delta);
-  float cdlong = cos(delta);
-  lat1 = radians(lat1);
-  lat2 = radians(lat2);
-  float slat1 = sin(lat1);
-  float clat1 = cos(lat1);
-  float slat2 = sin(lat2);
-  float clat2 = cos(lat2);
-  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong); 
-  delta = sq(delta); 
-  delta += sq(clat2 * sdlong); 
-  delta = sqrt(delta); 
-  float denom = (slat1 * slat2) + (clat1 * clat2 * cdlong); 
-  delta = atan2(delta, denom); 
-  return delta * 6372795; 
-}
+float GPS_f_speed_cmps() {
+  return GPS_get_speed()*GPS_KMPH_PER_KNOT*10/36; 
+*/
 
 #endif
 
+/*long getDistanceBetween (long lat1, long long1, long lat2, long long2) 
+{
+	if(lat1 == 0 || long1 == 0) 
+		return -1;
+	if(lat2 == 0 || long2 == 0) 
+		return -1;
 
-
-
-
+	float dlat 		= (float)(lat1 - lat2);
+	float dlong  	= ((float)(long1 - long2));
+	return sqrt(sq(dlat) * 1.113195 + sq(dlong) * 0.649876) ;
+}*/
