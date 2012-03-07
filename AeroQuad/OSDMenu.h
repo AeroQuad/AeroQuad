@@ -88,13 +88,8 @@ void menuHandleSimple(byte mode, byte action) {
 #endif
 #ifdef UseGPS
     case 2:
-      gpsLatitudeSum=0;
-      gpsLongitudeSum=0;
-      gpsAltitudeSum=0;
-      gpsSumCounter=0;
-      gpsHomeLatitude   = GPS_INVALID_ANGLE;
-      gpsHomeLongitude  = GPS_INVALID_ANGLE;
-      gpsGroundAltitude = GPS_INVALID_ALTITUDE;
+      homePosition.latitude   = GPS_INVALID_ANGLE;
+      homePosition.longitude  = GPS_INVALID_ANGLE;
       break;
 #endif
 /* TEMPLATE CODE FOR NEW ACTION:

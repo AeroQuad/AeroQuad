@@ -26,42 +26,14 @@
 #define _AQ_GpsUtility_H_
 
 
-// home base data
-long gpsHomeLatitude = GPS_INVALID_ANGLE;
-long gpsHomeLongitude = GPS_INVALID_ANGLE;
-unsigned long gpsGroundAltitude = GPS_INVALID_ALTITUDE;
-
 boolean isHomeBaseInitialized() {
-  return gpsHomeLatitude != GPS_INVALID_ANGLE;
+  return homePosition.latitude != GPS_INVALID_ANGLE;
 }
 
-
-#define NB_HOME_GPS_SAMPLE 25
-byte gpsSumCounter = 0;
-long gpsLatitudeSum = 0;
-long gpsLongitudeSum = 0;
-unsigned long gpsAltitudeSum = 0;
-
-void initHomeBase()
-{
-  if (!haveAGpsLock()) {
-    return;
-  }
-  if (isHomeBaseInitialized()) {
-    return;
-  }
-  if (gpsSumCounter < NB_HOME_GPS_SAMPLE) {
-    gpsLatitudeSum  += getLatitude();
-    gpsLongitudeSum += getLongitude();
-    gpsAltitudeSum  += getGpsAltitude();
-    gpsSumCounter++;
-    return;
-  }
-  else {
-    gpsHomeLatitude   = gpsLatitudeSum / gpsSumCounter;
-    gpsHomeLongitude  = gpsLongitudeSum / gpsSumCounter;
-    gpsGroundAltitude = gpsAltitudeSum / gpsSumCounter;
-  }
+void initHomeBase() {
+  
+  homePosition.latitude = currentPosition.latitude;
+  homePosition.longitude = currentPosition.longitude;
 }
 
 

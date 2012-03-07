@@ -33,6 +33,8 @@
 #define BARO_ALTITUDE_HOLD_PID_IDX  8
 #define SONAR_ALTITUDE_HOLD_PID_IDX 9
 #define ZDAMPENING_PID_IDX          10
+#define GPSPITCH_PID_IDX            11
+#define GPSROLL_PID_IDX             12
 
 
 // PID Variables
@@ -43,7 +45,7 @@ struct PIDdata {
   float previousPIDTime;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
-} PID[11];
+} PID[13];
 // This struct above declares the variable PID[] to hold each of the PID values for various functions
 // The following constants are declared in AeroQuad.h
 // ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)

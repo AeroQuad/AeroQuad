@@ -81,10 +81,10 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 #define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -153,7 +153,7 @@
 //#define ShowRSSI
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "Kenny"         // Show (optional) callsign
+//#define CALLSIGN "Aeroquad"         // Show (optional) callsign
 #define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph)
 
