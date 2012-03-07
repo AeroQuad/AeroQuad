@@ -135,7 +135,7 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   
   vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
-  
+
   //  Yaw Compensation
   #ifdef HeadingMagHold  
     errorCourse = (dcmMatrix[0] * magY) - (dcmMatrix[3] * magX);
@@ -216,11 +216,11 @@ void initializeKinematics(float hdgX, float hdgY)
   dcmMatrix[7] =  0;
   dcmMatrix[8] =  1;
 
-  kpRollPitch = 0.1;        // alternate 0.05;
-  kiRollPitch = 0.0002;     // alternate 0.0001;
+  kpRollPitch = 0.05;        // alternate 0.1;
+  kiRollPitch = 0.0;//0.0001;     // alternate 0.0002;
     
-  kpYaw = -0.1;             // alternate -0.05;
-  kiYaw = -0.0002;          // alternate -0.0001;
+  kpYaw = -0.05;             // alternate -0.05;
+  kiYaw = 0.0;//-0.0001;          // alternate -0.0001;
     
 }
   
