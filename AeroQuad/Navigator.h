@@ -72,7 +72,7 @@ boolean haveMission() {
   return missionNbPoint != 0;
 }
 
-void updateGPSRollPitchSpeedAlg(GPS_waypoint wpt) {
+void updateGPSRollPitchSpeedAlg(GeodeticPosition wpt) {
 	float YDist = 0, XDist = 0, Dist = 0;
     
 	float DerivateDistX = 0, DerivateDistY = 0, DerivateDist = 0;

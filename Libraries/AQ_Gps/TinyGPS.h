@@ -77,19 +77,19 @@ unsigned int nbSatelitesInUse = 0;
 unsigned int newNbSatelitesInUse = 0;
 
 // parsing state variables
-byte _GPS_parity = 0;
-boolean _GPS_is_checksum_term = false;
-char _GPS_term[15];
-byte _GPS_sentence_type = GPS_SENTENCE_OTHER;
-byte _GPS_term_number = 0;
-byte _GPS_term_offset = 0;
-boolean _GPS_gps_data_good = false;
+byte gpsParity = 0;
+boolean isChecksumTerm = false;
+char gpsTerm[15];
+byte gpsSentenceType = GPS_SENTENCE_OTHER;
+byte gpsTermNumber = 0;
+byte gpsTermOffset = 0;
+boolean isGpsDataGood = false;
 
 
 //
 // internal utilities
 //
-int GPS_from_hex(char a) 
+int fromHex(char a) 
 {
   if (a >= 'A' && a <= 'F') {
     return a - 'A' + 10;
@@ -102,20 +102,20 @@ int GPS_from_hex(char a)
   }
 }
 
-bool GPS_gpsisdigit(char c) { 
+bool isDigit(char c) { 
   return c >= '0' && c <= '9'; 
 }
 
-long GPS_gpsatol(const char *str)
+long atol(const char *str)
 {
   long ret = 0;
-  while (GPS_gpsisdigit(*str)) {
+  while (isDigit(*str)) {
     ret = 10 * ret + *str++ - '0';
   }
   return ret;
 }
 
-int GPS_gpsstrcmp(const char *str1, const char *str2)
+int strcmp(const char *str1, const char *str2)
 {
   while (*str1 && *str1 == *str2) {
     ++str1, ++str2;
@@ -124,21 +124,21 @@ int GPS_gpsstrcmp(const char *str1, const char *str2)
 }
 
 
-unsigned long GPS_parse_decimal()
+unsigned long parseDecimal()
 {
-  char *p = _GPS_term;
+  char *p = gpsTerm;
   boolean isneg = *p == '-';
   if (isneg) ++p;
-  unsigned long ret = 100UL * GPS_gpsatol(p);
-  while (GPS_gpsisdigit(*p)) {
+  unsigned long ret = 100UL * atol(p);
+  while (isDigit(*p)) {
     ++p;
   }
   if (*p == '.')
   {
-    if (GPS_gpsisdigit(p[1]))
+    if (isDigit(p[1]))
     {
       ret += 10 * (p[1] - '0');
-      if (GPS_gpsisdigit(p[2])) {
+      if (isDigit(p[2])) {
         ret += p[2] - '0';
       }
     }
@@ -146,16 +146,16 @@ unsigned long GPS_parse_decimal()
   return isneg ? -ret : ret;
 }
 
-unsigned long GPS_parse_degrees()
+unsigned long parseDegrees()
 {
   char *p;
-  unsigned long left = GPS_gpsatol(_GPS_term);
+  unsigned long left = atol(gpsTerm);
   unsigned long tenk_minutes = (left % 100UL) * 10000UL;
-  for (p=_GPS_term; GPS_gpsisdigit(*p); ++p);
+  for (p=gpsTerm; isDigit(*p); ++p);
   if (*p == '.')
   {
     unsigned long mult = 1000;
-    while (GPS_gpsisdigit(*++p))
+    while (isDigit(*++p))
     {
       tenk_minutes += mult * (*p - '0');
       mult /= 10;
@@ -166,34 +166,34 @@ unsigned long GPS_parse_degrees()
 
 // Processes a just-completed term
 // Returns true if new sentence has just passed checksum test and is validated
-boolean GPS_term_complete()
+boolean gpsTermComplete()
 {
-  if (_GPS_is_checksum_term)
+  if (isChecksumTerm)
   {
-    byte checksum = 16 * GPS_from_hex(_GPS_term[0]) + GPS_from_hex(_GPS_term[1]);
-    if (checksum == _GPS_parity)
+    byte checksum = 16 * fromHex(gpsTerm[0]) + fromHex(gpsTerm[1]);
+    if (checksum == gpsParity)
     {
-      if (_GPS_gps_data_good)
+      if (isGpsDataGood)
       {
         gpsLastTimeFix = gpsNewTimeFix;
         gpsLastPositionFix = gpsNewPositionFix;
 
-        switch(_GPS_sentence_type)
+        switch(gpsSentenceType)
         {
         case GPS_SENTENCE_GPRMC:
-          gpsTime      = gpsNewTime;
-          gpsDate      = gpsNewDate;
-          latitude  = newLatitude;
-          longitude = newLongitude;
+          gpsTime          = gpsNewTime;
+          gpsDate          = gpsNewDate;
+          latitude         = newLatitude;
+          longitude        = newLongitude;
 		  nbSatelitesInUse = newNbSatelitesInUse;
-          gpsSpeed  = gpsNewSpeed;
-          gpsCourse    = gpsNewCourse;
+          gpsSpeed         = gpsNewSpeed;
+          gpsCourse        = gpsNewCourse;
           break;
         case GPS_SENTENCE_GPGGA:
-          gpsAltitude = gpsNewAltitude;
-          gpsTime        = gpsNewTime;
-          latitude    = newLatitude;
-          longitude   = newLongitude;
+          gpsAltitude      = gpsNewAltitude;
+          gpsTime          = gpsNewTime;
+          latitude         = newLatitude;
+          longitude        = newLongitude;
           break;
         }
 
@@ -205,69 +205,69 @@ boolean GPS_term_complete()
   }
 
   // the first term determines the sentence type
-  if (_GPS_term_number == 0)
+  if (gpsTermNumber == 0)
   {
-    if (!GPS_gpsstrcmp(_GPS_term, GPRMC_TERM)) {
-      _GPS_sentence_type = GPS_SENTENCE_GPRMC;
+    if (!strcmp(gpsTerm, GPRMC_TERM)) {
+      gpsSentenceType = GPS_SENTENCE_GPRMC;
     }
-    else if (!GPS_gpsstrcmp(_GPS_term, GPGGA_TERM)) {
-      _GPS_sentence_type = GPS_SENTENCE_GPGGA;
+    else if (!strcmp(gpsTerm, GPGGA_TERM)) {
+      gpsSentenceType = GPS_SENTENCE_GPGGA;
     }
     else {
-      _GPS_sentence_type = GPS_SENTENCE_OTHER;
+      gpsSentenceType = GPS_SENTENCE_OTHER;
     }
     
 	return false;
   }
 
-  if (_GPS_sentence_type != GPS_SENTENCE_OTHER && _GPS_term[0]) {
-    switch((_GPS_sentence_type == GPS_SENTENCE_GPGGA ? 200 : 100) + _GPS_term_number)
+  if (gpsSentenceType != GPS_SENTENCE_OTHER && gpsTerm[0]) {
+    switch((gpsSentenceType == GPS_SENTENCE_GPGGA ? 200 : 100) + gpsTermNumber)
     {
       case 101: // Time in both sentences
       case 201:
-        gpsNewTime = GPS_parse_decimal();
+        gpsNewTime = parseDecimal();
         gpsNewTimeFix = millis();
         break;
       case 102: // GPRMC validity
-        _GPS_gps_data_good = _GPS_term[0] == 'A';
+        isGpsDataGood = gpsTerm[0] == 'A';
         break;
       case 103: // Latitude
       case 202:
-        newLatitude = GPS_parse_degrees();
+        newLatitude = parseDegrees();
         gpsNewPositionFix = millis();
         break;
       case 104: // N/S
       case 203:
-        if (_GPS_term[0] == 'S') {
+        if (gpsTerm[0] == 'S') {
           newLatitude = -newLatitude;
 		}
         break;
       case 105: // Longitude
       case 204:
-        newLongitude = GPS_parse_degrees();
+        newLongitude = parseDegrees();
         break;
       case 106: // E/W
       case 205:
-        if (_GPS_term[0] == 'W') {
+        if (gpsTerm[0] == 'W') {
           newLongitude = -newLongitude;
 		}
         break;
       case 107: // Speed (GPRMC)
-        gpsNewSpeed = GPS_parse_decimal();
+        gpsNewSpeed = parseDecimal();
         break;
       case 108: // Course (GPRMC)
-        gpsNewCourse = GPS_parse_decimal();
+        gpsNewCourse = parseDecimal();
         break;
       case 109: // Date (GPRMC)
-        gpsNewDate = GPS_gpsatol(_GPS_term);
+        gpsNewDate = atol(gpsTerm);
         break;
       case 206: // Fix data (GPGGA)
-        _GPS_gps_data_good = _GPS_term[0] > '0';
+        isGpsDataGood = gpsTerm[0] > '0';
         break;
       case 207: //Number of satelites in use
-        newNbSatelitesInUse = GPS_gpsatol(_GPS_term);
+        newNbSatelitesInUse = atol(gpsTerm);
       case 209: // Altitude (GPGGA)
-        gpsNewAltitude = GPS_parse_decimal();
+        gpsNewAltitude = parseDecimal();
         break;
     }
   }
@@ -275,48 +275,48 @@ boolean GPS_term_complete()
   return false;
 }
 
-boolean GPS_encode(char c)
+boolean decodeGpsChar(char c)
 {
   boolean valid_sentence = false;
 
   switch(c)
   {
   case ',': // term terminators
-    _GPS_parity ^= c;
+    gpsParity ^= c;
   case '\r':
   case '\n':
   case '*':
-    if (_GPS_term_offset < sizeof(_GPS_term)) {
-      _GPS_term[_GPS_term_offset] = 0;
-      valid_sentence = GPS_term_complete();
+    if (gpsTermOffset < sizeof(gpsTerm)) {
+      gpsTerm[gpsTermOffset] = 0;
+      valid_sentence = gpsTermComplete();
     }
-    ++_GPS_term_number;
-    _GPS_term_offset = 0;
-    _GPS_is_checksum_term = c == '*';
+    ++gpsTermNumber;
+    gpsTermOffset = 0;
+    isChecksumTerm = c == '*';
     return valid_sentence;
 
   case '$': // sentence begin
-    _GPS_term_number = _GPS_term_offset = 0;
-    _GPS_parity = 0;
-    _GPS_sentence_type = GPS_SENTENCE_OTHER;
-    _GPS_is_checksum_term = false;
-    _GPS_gps_data_good = false;
+    gpsTermNumber = gpsTermOffset = 0;
+    gpsParity = 0;
+    gpsSentenceType = GPS_SENTENCE_OTHER;
+    isChecksumTerm = false;
+    isGpsDataGood = false;
     return valid_sentence;
   }
 
   // ordinary characters
-  if (_GPS_term_offset < sizeof(_GPS_term) - 1) {
-    _GPS_term[_GPS_term_offset++] = c;
+  if (gpsTermOffset < sizeof(gpsTerm) - 1) {
+    gpsTerm[gpsTermOffset++] = c;
   }
-  if (!_GPS_is_checksum_term) {
-    _GPS_parity ^= c;
+  if (!isChecksumTerm) {
+    gpsParity ^= c;
   }
 
   return valid_sentence;
 }
 
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void GPS_get_position(long *lat, long *longi, unsigned long *fixAge = 0)
+/*void getPosition(long *lat, long *longi, unsigned long *fixAge = 0)
 {
   if (lat) {
     *lat = latitude;
@@ -331,7 +331,7 @@ void GPS_get_position(long *lat, long *longi, unsigned long *fixAge = 0)
 
 
 // date as ddmmyy, time as hhmmsscc, and age in milliseconds
-inline void GPS_get_datetime(unsigned long *date, unsigned long *time, unsigned long *fix_age = 0)
+inline void getDateAndTime(unsigned long *date, unsigned long *time, unsigned long *fix_age = 0)
 {
   if (date) {
     *date = gpsDate;
@@ -366,12 +366,14 @@ inline unsigned int GPS_get_satelites_in_use() {
 void GPS_f_get_position(float *latitude, float *longitude, unsigned long *fix_age = 0)
 {
   long lat, lon;
-  GPS_get_position(&lat, &lon, fix_age);
+  getPosition(&lat, &lon, fix_age);
   *latitude = lat / 10000000.0;
   *longitude = lon / 10000000.0;
 }
 
-inline void crack_datetime(int *year, 
+
+
+inline void extractDateAndTime(int *year, 
                            byte *month, 
 						   byte *day, 
                            byte *hour, 
@@ -381,7 +383,7 @@ inline void crack_datetime(int *year,
 						   unsigned long *fix_age = 0)
 {
   unsigned long date, time;
-  GPS_get_datetime(&date, &time, fix_age);
+  getDateAndTime(&date, &time, fix_age);
   if (year) {
 	*year = date % 100;
 	*year += *year > 80 ? 1900 : 2000;
@@ -432,7 +434,7 @@ float GPS_f_speed_kmph() {
 
 float GPS_f_speed_cmps() {
   return GPS_get_speed()*GPS_KMPH_PER_KNOT*10/36; 
-}
+*/
 
 #endif
 

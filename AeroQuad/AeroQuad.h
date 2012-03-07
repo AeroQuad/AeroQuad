@@ -89,6 +89,7 @@ int testCommand = 1000;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
 #define TASK_10HZ 10
+#define TASK_1HZ 100
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
@@ -183,14 +184,10 @@ void reportVehicleState();
  */
 #if defined (UseGPS)
   int missionNbPoint = 0;
-  
-  struct GPS_waypoint {
-    long latitude;
-    long longitude;
-    long altitude;
-  };
 
-  void updateGPSRollPitchSpeedAlg(GPS_waypoint);
+  #include <TinyGPSWrapper.h>
+  GeodeticPosition homePosition;
+  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
 #endif
 //////////////////////////////////////////////////////
 

@@ -29,19 +29,20 @@
 #define GPS_PORT Serial1
 
 
-
-void initializeGps() {
-  GPS_PORT.begin(GPS_SERIAL_BAUD_SPEED);
+struct GeodeticPosition {
+  long latitude;
+  long longitude;
   
-  GPS_PORT.print("$PMTK251,115200*1F\r\n"); // set to 115200
-  delay(100);
-  GPS_PORT.end();
-  GPS_PORT.begin(115200);
-  delay(500);
-  GPS_PORT.print("$PMTK300,100,0,0,0,0*2c\r\n$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n"); //then switch to 10Hz and only RMC,GGA
-  GPS_PORT.println("$PMTK301,2*2E");
-  GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
-}
+  GeodeticPosition() {
+    latitude = GPS_INVALID_ANGLE;
+    longitude = GPS_INVALID_ANGLE;
+  }
+};
+GeodeticPosition currentPosition;
+
+byte gpsSumCounter = 0;
+long gpsLatitudeSum = 0;
+long gpsLongitudeSum = 0;
 
 
 // @todo, kenny, remove this
@@ -55,10 +56,27 @@ long GPS_prev_longitude = GPS_INVALID_ANGLE;
 long GPS_prev_altitude = GPS_INVALID_ALTITUDE;
 
 
-bool readGps() {
+void initializeGps() {
+ 
+  GPS_PORT.begin(GPS_SERIAL_BAUD_SPEED);
+  
+  GPS_PORT.print("$PMTK251,115200*1F\r\n"); // set to 115200
+  delay(100);
+  GPS_PORT.end();
+  GPS_PORT.begin(115200);
+  delay(500);
+  GPS_PORT.print("$PMTK300,100,0,0,0,0*2c\r\n$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n"); //then switch to 10Hz and only RMC,GGA
+  GPS_PORT.println("$PMTK301,2*2E");
+  GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
+}
+
+
+
+
+boolean readGps() {
   while (GPS_PORT.available())
   {
-    if (GPS_encode(GPS_PORT.read())) {
+    if (decodeGpsChar(GPS_PORT.read())) {
 /*      GPS_prev_latitude = GPS_curr_latitude;
       GPS_prev_longitude = GPS_curr_longitude;
       GPS_prev_altitude = GPS_curr_altitude;
@@ -84,19 +102,8 @@ bool readGps() {
   return false;
 }
   
-  
-  
-  // @todo, kenny, to be tested
 boolean haveAGpsLock() {
- return GPS_get_satelites_in_use() >= minNbGPSInUse;
-}
-
-long getLongitude() {
-  return longitude;
-}
-
-long getLatitude() {
-  return latitude;
+ return nbSatelitesInUse >= minNbGPSInUse;
 }
 
 long getCourse() {
@@ -110,6 +117,22 @@ unsigned long getGpsAltitude() {
   return gpsAltitude;
 }
   
+void mesureGpsPositionSum() {
+  
+  gpsLatitudeSum += latitude;
+  gpsLongitudeSum += longitude;
+  gpsSumCounter++;
+}
+
+void evaluateCurrentGpsPositionFromSum() {
+
+  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
+  currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
+  
+  gpsLatitudeSum = 0;
+  gpsLongitudeSum = 0;
+  gpsSumCounter = 0;
+}
 
 
 #endif
