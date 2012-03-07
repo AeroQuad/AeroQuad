@@ -18,7 +18,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   
-  Adapted from latest TinyGPS from Kenny
+  Adapted from latest TinyGPS by Kenny9999
 */
 
 #ifndef _AQ_GPS_H_
@@ -26,15 +26,15 @@
 
 #include "Arduino.h"
 
-#define _GPRMC_TERM   "GPRMC"
-#define _GPGGA_TERM   "GPGGA"
+#define GPRMC_TERM   "GPRMC"
+#define GPGGA_TERM   "GPGGA"
 
 //#define _GPS_VERSION 10 // software version of this library
-#define _GPS_MPH_PER_KNOT 1.15077945
-#define _GPS_MPS_PER_KNOT 0.51444444
-#define _GPS_KMPH_PER_KNOT 1.852
-#define _GPS_MILES_PER_METER 0.00062137112
-#define _GPS_KM_PER_METER 0.001
+#define GPS_MPH_PER_KNOT 1.15077945
+#define GPS_MPS_PER_KNOT 0.51444444
+#define GPS_KMPH_PER_KNOT 1.852
+#define GPS_MILES_PER_METER 0.00062137112
+#define GPS_KM_PER_METER 0.001
 
 enum {
   GPS_INVALID_AGE = 0xFFFFFFFF, 
@@ -53,35 +53,28 @@ enum {
 };
 
 // properties
-unsigned long _GPS_time = GPS_INVALID_TIME;
-unsigned long _GPS_new_time = GPS_INVALID_TIME;
-unsigned long _GPS_date = GPS_INVALID_DATE;
-unsigned long _GPS_new_date = GPS_INVALID_DATE;
-long _GPS_latitude = GPS_INVALID_ANGLE;
-long _GPS_new_latitude = GPS_INVALID_ANGLE;
-long _GPS_longitude = GPS_INVALID_ANGLE; 
-long _GPS_new_longitude = GPS_INVALID_ANGLE;
-long _GPS_gpsAltitude = GPS_INVALID_ALTITUDE;
-long _GPS_new_GPS_altitude = GPS_INVALID_ALTITUDE;
-unsigned long _GPS_gpsSpeed = GPS_INVALID_SPEED;
-unsigned long _GPS_new_speed = GPS_INVALID_SPEED;
-unsigned long _GPS_course = GPS_INVALID_ANGLE;
-unsigned long _GPS_new_course = GPS_INVALID_ANGLE;
+unsigned long gpsTime = GPS_INVALID_TIME;
+unsigned long gpsNewTime = GPS_INVALID_TIME;
+unsigned long gpsDate = GPS_INVALID_DATE;
+unsigned long gpsNewDate = GPS_INVALID_DATE;
+long latitude = GPS_INVALID_ANGLE;
+long newLatitude = GPS_INVALID_ANGLE;
+long longitude = GPS_INVALID_ANGLE; 
+long newLongitude = GPS_INVALID_ANGLE;
+long gpsAltitude = GPS_INVALID_ALTITUDE;
+long gpsNewAltitude = GPS_INVALID_ALTITUDE;
+unsigned long gpsSpeed = GPS_INVALID_SPEED;
+unsigned long gpsNewSpeed = GPS_INVALID_SPEED;
+unsigned long gpsCourse = GPS_INVALID_ANGLE;
+unsigned long gpsNewCourse = GPS_INVALID_ANGLE;
 
-unsigned long _GPS_last_time_fix = GPS_INVALID_FIX_TIME; 
-unsigned long _GPS_new_time_fix = GPS_INVALID_FIX_TIME;
-unsigned long _GPS_last_position_fix = GPS_INVALID_FIX_TIME;
-unsigned long _GPS_new_position_fix = GPS_INVALID_FIX_TIME;
+unsigned long gpsLastTimeFix = GPS_INVALID_FIX_TIME; 
+unsigned long gpsNewTimeFix = GPS_INVALID_FIX_TIME;
+unsigned long gpsLastPositionFix = GPS_INVALID_FIX_TIME;
+unsigned long gpsNewPositionFix = GPS_INVALID_FIX_TIME;
 
-unsigned int _GPS_satelites_in_use = 0;
-unsigned int _GPS_new_satelites_in_use = 0;
-
-#ifndef _GPS_NO_STATS		
-	unsigned long _GPS_encoded_characters = 0;
-	unsigned short _GPS_good_sentences = 0;
-	unsigned short _GPS_failed_checksum = 0;
-    unsigned short _GPS_passed_checksum;
-#endif
+unsigned int nbSatelitesInUse = 0;
+unsigned int newNbSatelitesInUse = 0;
 
 // parsing state variables
 byte _GPS_parity = 0;
@@ -182,25 +175,25 @@ boolean GPS_term_complete()
     {
       if (_GPS_gps_data_good)
       {
-        _GPS_last_time_fix = _GPS_new_time_fix;
-        _GPS_last_position_fix = _GPS_new_position_fix;
+        gpsLastTimeFix = gpsNewTimeFix;
+        gpsLastPositionFix = gpsNewPositionFix;
 
         switch(_GPS_sentence_type)
         {
         case GPS_SENTENCE_GPRMC:
-          _GPS_time      = _GPS_new_time;
-          _GPS_date      = _GPS_new_date;
-          _GPS_latitude  = _GPS_new_latitude;
-          _GPS_longitude = _GPS_new_longitude;
-		  _GPS_satelites_in_use = _GPS_new_satelites_in_use;
-          _GPS_gpsSpeed  = _GPS_new_speed;
-          _GPS_course    = _GPS_new_course;
+          gpsTime      = gpsNewTime;
+          gpsDate      = gpsNewDate;
+          latitude  = newLatitude;
+          longitude = newLongitude;
+		  nbSatelitesInUse = newNbSatelitesInUse;
+          gpsSpeed  = gpsNewSpeed;
+          gpsCourse    = gpsNewCourse;
           break;
         case GPS_SENTENCE_GPGGA:
-          _GPS_gpsAltitude = _GPS_new_GPS_altitude;
-          _GPS_time        = _GPS_new_time;
-          _GPS_latitude    = _GPS_new_latitude;
-          _GPS_longitude   = _GPS_new_longitude;
+          gpsAltitude = gpsNewAltitude;
+          gpsTime        = gpsNewTime;
+          latitude    = newLatitude;
+          longitude   = newLongitude;
           break;
         }
 
@@ -214,10 +207,10 @@ boolean GPS_term_complete()
   // the first term determines the sentence type
   if (_GPS_term_number == 0)
   {
-    if (!GPS_gpsstrcmp(_GPS_term, _GPRMC_TERM)) {
+    if (!GPS_gpsstrcmp(_GPS_term, GPRMC_TERM)) {
       _GPS_sentence_type = GPS_SENTENCE_GPRMC;
     }
-    else if (!GPS_gpsstrcmp(_GPS_term, _GPGGA_TERM)) {
+    else if (!GPS_gpsstrcmp(_GPS_term, GPGGA_TERM)) {
       _GPS_sentence_type = GPS_SENTENCE_GPGGA;
     }
     else {
@@ -232,49 +225,49 @@ boolean GPS_term_complete()
     {
       case 101: // Time in both sentences
       case 201:
-        _GPS_new_time = GPS_parse_decimal();
-        _GPS_new_time_fix = millis();
+        gpsNewTime = GPS_parse_decimal();
+        gpsNewTimeFix = millis();
         break;
       case 102: // GPRMC validity
         _GPS_gps_data_good = _GPS_term[0] == 'A';
         break;
       case 103: // Latitude
       case 202:
-        _GPS_new_latitude = GPS_parse_degrees();
-        _GPS_new_position_fix = millis();
+        newLatitude = GPS_parse_degrees();
+        gpsNewPositionFix = millis();
         break;
       case 104: // N/S
       case 203:
         if (_GPS_term[0] == 'S') {
-          _GPS_new_latitude = -_GPS_new_latitude;
+          newLatitude = -newLatitude;
 		}
         break;
       case 105: // Longitude
       case 204:
-        _GPS_new_longitude = GPS_parse_degrees();
+        newLongitude = GPS_parse_degrees();
         break;
       case 106: // E/W
       case 205:
         if (_GPS_term[0] == 'W') {
-          _GPS_new_longitude = -_GPS_new_longitude;
+          newLongitude = -newLongitude;
 		}
         break;
       case 107: // Speed (GPRMC)
-        _GPS_new_speed = GPS_parse_decimal();
+        gpsNewSpeed = GPS_parse_decimal();
         break;
       case 108: // Course (GPRMC)
-        _GPS_new_course = GPS_parse_decimal();
+        gpsNewCourse = GPS_parse_decimal();
         break;
       case 109: // Date (GPRMC)
-        _GPS_new_date = GPS_gpsatol(_GPS_term);
+        gpsNewDate = GPS_gpsatol(_GPS_term);
         break;
       case 206: // Fix data (GPGGA)
         _GPS_gps_data_good = _GPS_term[0] > '0';
         break;
       case 207: //Number of satelites in use
-        _GPS_new_satelites_in_use = GPS_gpsatol(_GPS_term);
+        newNbSatelitesInUse = GPS_gpsatol(_GPS_term);
       case 209: // Altitude (GPGGA)
-        _GPS_new_GPS_altitude = GPS_parse_decimal();
+        gpsNewAltitude = GPS_parse_decimal();
         break;
     }
   }
@@ -286,10 +279,6 @@ boolean GPS_encode(char c)
 {
   boolean valid_sentence = false;
 
-  #ifndef _GPS_NO_STATS
-  ++_GPS_encoded_characters;
-  #endif
-  
   switch(c)
   {
   case ',': // term terminators
@@ -327,50 +316,51 @@ boolean GPS_encode(char c)
 }
 
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void GPS_get_position(long *latitude, long *longitude, unsigned long *fix_age = 0)
+void GPS_get_position(long *lat, long *longi, unsigned long *fixAge = 0)
 {
-  if (latitude) {
-    *latitude = _GPS_latitude;
+  if (lat) {
+    *lat = latitude;
   }
-  if (longitude) {
-    *longitude = _GPS_longitude;
+  if (longi) {
+    *longi = longitude;
   }	
-  if (fix_age) {
-    *fix_age = _GPS_last_position_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _GPS_last_position_fix;
+  if (fixAge) {
+    *fixAge = gpsLastPositionFix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - gpsLastPositionFix;
   }
 }
+
 
 // date as ddmmyy, time as hhmmsscc, and age in milliseconds
 inline void GPS_get_datetime(unsigned long *date, unsigned long *time, unsigned long *fix_age = 0)
 {
   if (date) {
-    *date = _GPS_date;
+    *date = gpsDate;
   }
   if (time) {
-    *time = _GPS_time;
+    *time = gpsTime;
   }
   if (fix_age) {
-    *fix_age = _GPS_last_time_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _GPS_last_time_fix;
+    *fix_age = gpsLastTimeFix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - gpsLastTimeFix;
   }
 }
 
 // signed GPS_altitude in centimeters (from GPGGA sentence)
 inline long GPS_get_altitude() { 
-  return _GPS_gpsAltitude; 
+  return gpsAltitude; 
 }
 
 // course in last full GPRMC sentence in 100th of a degree
 inline unsigned long GPS_get_course() { 
-  return _GPS_course; 
+  return gpsCourse; 
 }
     
 // speed in last full GPRMC sentence in 100ths of a knot
 inline unsigned long GPS_get_speed() {
-  return _GPS_gpsSpeed; 
+  return gpsSpeed; 
 }
 
 inline unsigned int GPS_get_satelites_in_use() {
-  return _GPS_satelites_in_use;
+  return nbSatelitesInUse;
 }
 
 void GPS_f_get_position(float *latitude, float *longitude, unsigned long *fix_age = 0)
@@ -429,24 +419,24 @@ float GPS_f_speed_knots() {
 }
 
 float GPS_f_speed_mph() {
-  return _GPS_MPH_PER_KNOT * GPS_f_speed_knots(); 
+  return GPS_MPH_PER_KNOT * GPS_f_speed_knots(); 
 }
 
 float GPS_f_speed_mps() { 
-  return _GPS_MPS_PER_KNOT * GPS_f_speed_knots(); 
+  return GPS_MPS_PER_KNOT * GPS_f_speed_knots(); 
 }
 
 float GPS_f_speed_kmph() {
-  return _GPS_KMPH_PER_KNOT * GPS_f_speed_knots(); 
+  return GPS_KMPH_PER_KNOT * GPS_f_speed_knots(); 
 }
 
 float GPS_f_speed_cmps() {
-  return GPS_get_speed()*_GPS_KMPH_PER_KNOT*10/36; 
+  return GPS_get_speed()*GPS_KMPH_PER_KNOT*10/36; 
 }
 
 #endif
 
-/*long GPS_distance_between (long lat1, long long1, long lat2, long long2) 
+/*long getDistanceBetween (long lat1, long long1, long lat2, long long2) 
 {
 	if(lat1 == 0 || long1 == 0) 
 		return -1;

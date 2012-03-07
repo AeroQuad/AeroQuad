@@ -44,8 +44,8 @@ void initializeGps() {
 }
 
 
+// @todo, kenny, remove this
 byte minNbGPSInUse = 6;
-
 long GPS_curr_latitude = GPS_INVALID_ANGLE;
 long GPS_curr_longitude = GPS_INVALID_ANGLE;
 long GPS_curr_altitude = GPS_INVALID_ALTITUDE;
@@ -92,22 +92,22 @@ boolean haveAGpsLock() {
 }
 
 long getLongitude() {
-  return _GPS_longitude;
+  return longitude;
 }
 
 long getLatitude() {
-  return _GPS_latitude;
+  return latitude;
 }
 
 long getCourse() {
-  return _GPS_course;
+  return gpsCourse;
 }
 unsigned long getGpsSpeed() {
-  return _GPS_gpsSpeed*1.852*10/36;
+  return gpsSpeed*1.852*10/36;
 }
 
 unsigned long getGpsAltitude() {
-  return _GPS_gpsAltitude;
+  return gpsAltitude;
 }
   
 
