@@ -36,13 +36,18 @@
  */
 void calculateFlightError()
 {
-//  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-//    if (altitudeHoldState == ON) {
-//      motorAxisCommandRoll = (getReceiverSIData(XAXIS) - estimatedXVelocity) * 25;
-//      motorAxisCommandPitch = (getReceiverSIData(YAXIS) + estimatedYVelocity) * 25;
-//    }
-//    else
-//  #endif  
+  #if defined (UseGPS)
+    if (positionHoldState == ON) {
+      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -100, 100);
+      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -100, 100);
+
+      float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+      motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+    }
+    else
+  #endif
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
     float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
@@ -227,8 +232,24 @@ void processFlightControl() {
   processHeading();
   
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
+    // ********************** Process position hold or navigation **************************
+    #if defined (UseGPS)
+      if (frameCounter % TASK_1HZ == 0) {  // process gps correction at 1Hz
+        if (positionHoldState == ON) {
+          processPositionCorrection();
+        }
+        else {
+          gpsRollAxisCorrection = 0;
+          gpsPitchAxisCorrection = 0;
+        }
+      }
+    #endif
     // ********************** Process Altitude hold **************************
-    processAltitudeHold();
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      processAltitudeHold();
+    #else
+      throttle = receiverCommand[THROTTLE];
+    #endif
     // ********************** Process Battery monitor hold **************************
     #if defined BattMonitor && defined BattMonitorAutoDescent
       processBatteryMonitorThrottleAdjustment();

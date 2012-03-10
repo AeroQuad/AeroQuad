@@ -74,7 +74,7 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above//
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************

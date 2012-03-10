@@ -104,29 +104,49 @@ void readPilotCommands() {
   #endif  
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-   if (receiverCommand[AUX] < 1750) {
-     if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-       if (isStoreAltitudeNeeded) {
-         #if defined AltitudeHoldBaro
-           baroAltitudeToHoldTarget = getBaroAltitude();
-           PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-           PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
-         #endif
-         #if defined AltitudeHoldRangeFinder
+    if (receiverCommand[AUX] < 1750) {
+      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+        if (isStoreAltitudeNeeded) {
+          #if defined AltitudeHoldBaro
+            baroAltitudeToHoldTarget = getBaroAltitude();
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+          #endif
+          #if defined AltitudeHoldRangeFinder
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
-         #endif
-         altitudeHoldThrottle = receiverCommand[THROTTLE];
-         isStoreAltitudeNeeded = false;
-       }
-       altitudeHoldState = ON;
-     }
-   } 
-   else {
-     isStoreAltitudeNeeded = true;
-     altitudeHoldState = OFF;
-   }
+          #endif
+          altitudeHoldThrottle = receiverCommand[THROTTLE];
+          isStoreAltitudeNeeded = false;
+        }
+        altitudeHoldState = ON;
+      }
+    } 
+    else {
+      isStoreAltitudeNeeded = true;
+      altitudeHoldState = OFF;
+    }
+  #endif
+  
+  #if defined (UseGPS)
+    if (receiverCommand[AUX] < 1750) {
+      if (positionHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+        if (isStorePositionNeeded) {
+          positionHoldState = ON;
+          gpsRollAxisCorrection = 0;
+          gpsPitchAxisCorrection = 0;
+          positionToReach.latitude = currentPosition.latitude;
+          positionToReach.longitude = currentPosition.longitude;
+          isStorePositionNeeded = false;
+        }
+        positionHoldState = ON;
+      }
+    } 
+    else {
+      isStorePositionNeeded = true;
+      positionHoldState = OFF;
+    }
   #endif
 }
 
