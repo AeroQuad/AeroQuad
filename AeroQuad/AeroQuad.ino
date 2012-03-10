@@ -1355,7 +1355,6 @@ void loop () {
     
     #if defined (UseGPS)
       if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
-        
         if (haveAGpsLock()) {
           evaluateCurrentGpsPositionFromSum();
           if (!isHomeBaseInitialized()) {
@@ -1370,6 +1369,8 @@ void loop () {
   if (frameCounter >= 100) {
       frameCounter = 0;
   }
+  
+
 }
 
 

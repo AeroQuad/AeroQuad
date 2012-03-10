@@ -187,6 +187,7 @@ void reportVehicleState();
 
   #include <TinyGPSWrapper.h>
   GeodeticPosition homePosition;
+  GeodeticPosition positionToReach;
   void updateGPSRollPitchSpeedAlg(GeodeticPosition);
 #endif
 //////////////////////////////////////////////////////

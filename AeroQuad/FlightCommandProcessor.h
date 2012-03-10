@@ -119,6 +119,10 @@ void readPilotCommands() {
          #endif
          altitudeHoldThrottle = receiverCommand[THROTTLE];
          isStoreAltitudeNeeded = false;
+         #if defined (UseGPS)
+           positionToReach.latitude = currentPosition.latitude;
+           positionToReach.longitude = currentPosition.longitude;
+         #endif
        }
        altitudeHoldState = ON;
      }
