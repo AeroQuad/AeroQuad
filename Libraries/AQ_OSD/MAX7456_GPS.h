@@ -31,7 +31,7 @@ byte osdGPSState=0;
 #define GPS_NOFIX 0x40 // no fix displayed
 #define GPS_NONAV 0x20 // nav info hidden (no fix or no target)
 
-void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading) {
+void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading, unsigned int numsats) {
 
   if (osdGPSState & GPS_DONAV) {
     if ((hlat==GPS_INVALID_ANGLE) || (lat==GPS_INVALID_ANGLE)) {
@@ -101,20 +101,22 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
     // update position and speed
     if (lat == GPS_INVALID_ANGLE) {
       if (!(osdGPSState&GPS_NOFIX)) {
-        writeChars("Waiting for GPS fix", 28, 0, GPS_ROW, GPS_COL);
+        char buf[29];
+        snprintf(buf,29,"Waiting for GPS fix (%d/%d)",numsats,6);
+        writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
         osdGPSState|=GPS_NOFIX;
       }
     } else {
       char buf[29];
 #ifdef USUnits
       speed=speed*36/1609; // convert from cm/s to mph 
-      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld\031",
+      snprintf(buf,29,"%d:%c%02ld.%05ld %c%03ld.%05ld %3ld\031",numsats,
                (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
                (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
 	       speed);
 #else
       speed=speed*36/1000; // convert from cm/s to kmh 
-      snprintf(buf,29,"%c%02ld.%05ld %c%03ld.%05ld %3ld\030",
+      snprintf(buf,29,"%d:%c%02ld.%05ld %c%03ld.%05ld %3ld\030",numsats,
                (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
                (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
 	       speed);

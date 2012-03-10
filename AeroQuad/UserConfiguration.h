@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -74,7 +74,7 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above//
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
@@ -93,8 +93,8 @@
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
 #define BattMonitor            // Enable Battery monitor
-#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
@@ -105,7 +105,7 @@
 // *******************************************************************************************************************************
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverPPM // Use a ppm receiver
-//#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
+#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
 // You need to select one of these channel order definitions for PPM receiver
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1 //For Graupner/Spektrum (DEFAULT)
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba
@@ -129,8 +129,8 @@
 // Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
 // *******************************************************************************************************************************
-#define LASTCHANNEL 6
-//#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
 
 //
 // *******************************************************************************************************************************
@@ -151,7 +151,7 @@
 // *******************************************************************************************************************************
 #define OSD
 //#define ShowRSSI
-//#define PAL                       // uncomment this to default to PAL video
+#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "Aeroquad"         // Show (optional) callsign
 #define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
