@@ -146,14 +146,34 @@ void processAltitudeHold();
   #if defined AltitudeHoldRangeFinder
     float sonarAltitudeToHoldTarget = 0.0;
   #endif
-  
-  
-  
-
-  
 #endif
 // float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
+
+/**
+ * GPS navigation global declaration
+ */
+#if defined (UseGPS)
+  int missionNbPoint = 0;
+  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+  #include <TinyGPSWrapper.h>
+  GeodeticPosition homePosition;
+  GeodeticPosition positionToReach;
+  
+  int gpsRollAxisCorrection = 0;
+  int gpsPitchAxisCorrection = 0;
+  boolean isStorePositionNeeded = false;
+  
+  GeodeticPosition previousPosition;
+  float gpsLaggedSpeed = 0.0;
+  float gpsLaggedCourse = 0.0;
+  
+  void processPositionCorrection();
+  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
+#endif
+//////////////////////////////////////////////////////
+
 
 /**
  * Serial communication global declaration
@@ -179,18 +199,6 @@ void reportVehicleState();
 //////////////////////////////////////////////////////
 
 
-/**
- * GPS navigation global declaration
- */
-#if defined (UseGPS)
-  int missionNbPoint = 0;
-
-  #include <TinyGPSWrapper.h>
-  GeodeticPosition homePosition;
-  GeodeticPosition positionToReach;
-  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
-#endif
-//////////////////////////////////////////////////////
 
 /**
  * EEPROM global section

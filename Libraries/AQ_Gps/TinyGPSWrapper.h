@@ -45,16 +45,8 @@ long gpsLatitudeSum = 0;
 long gpsLongitudeSum = 0;
 
 
-// @todo, kenny, remove this
+
 byte minNbGPSInUse = 6;
-long GPS_curr_latitude = GPS_INVALID_ANGLE;
-long GPS_curr_longitude = GPS_INVALID_ANGLE;
-long GPS_curr_altitude = GPS_INVALID_ALTITUDE;
-
-long GPS_prev_latitude = GPS_INVALID_ANGLE;
-long GPS_prev_longitude = GPS_INVALID_ANGLE;
-long GPS_prev_altitude = GPS_INVALID_ALTITUDE;
-
 
 void initializeGps() {
  
@@ -77,25 +69,6 @@ boolean readGps() {
   while (GPS_PORT.available())
   {
     if (decodeGpsChar(GPS_PORT.read())) {
-/*      GPS_prev_latitude = GPS_curr_latitude;
-      GPS_prev_longitude = GPS_curr_longitude;
-      GPS_prev_altitude = GPS_curr_altitude;
-
-      GPS_get_position(&GPS_curr_latitude, &GPS_curr_longitude, &GPS_fixAge);
-          
-      GPS_speed = GPS_f_speed_cmps();
-      GPS_course = GPS_get_course();
-      GPS_curr_altitude = GPS_get_altitude();
-       
-      GPS_satelitesInUse = GPS_get_satelites_in_use();
-        
-      GPS_waypoint GPS_wptGPSHold;
-      GPS_wptGPSHold.latitude = GPS_latitudeToHold;
-      GPS_wptGPSHold.longitude = GPS_longtitudeToHold;
-      GPS_wptGPSHold.altitude = 0;
-        
-      updateGPSRollPitchSpeedAlg(GPS_wptGPSHold); //heading using speed
-*/	  
       return true;
     }        
   }

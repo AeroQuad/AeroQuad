@@ -991,8 +991,7 @@
 //********************************************************
 #if defined (UseGPS)
   #include <TinyGPSWrapper.h>
-  #include "GpsUtility.h"
-  #include "Navigator.h"
+  #include "GpsNavigator.h"
 #endif
 
 //********************************************************
@@ -1148,6 +1147,16 @@ void setup() {
   
   #if defined (UseGPS)
     initializeGps();
+
+    // @kenny, move those PID into a normale place
+    PID[GPSROLL_PID_IDX].P = 0.3;
+    PID[GPSROLL_PID_IDX].I = 0.0;
+    PID[GPSROLL_PID_IDX].D = 0.0;
+
+    PID[GPSPITCH_PID_IDX].P = 0.3;
+    PID[GPSPITCH_PID_IDX].I = 0.0;
+    PID[GPSPITCH_PID_IDX].D = 0.0;
+
   #endif 
 
   setupFourthOrder();
