@@ -37,7 +37,7 @@
   void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
 #ifdef UseGPS
-  void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading);
+  void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading,unsigned int numsats);
 #endif
 
 void initializeOSD();
