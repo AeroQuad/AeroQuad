@@ -40,7 +40,7 @@ boolean haveMission() {
 }
 
 float gpsSpeedSmoothValue = 0.5;
-float gpsCoarseSmoothValue = 0.5;
+float gpsCourseSmoothValue = 0.5;
 
 #define MAX_NAVIGATON_SPEED 400  // m/s * 100 // 3 m/s = 10.8km/h
 
@@ -60,7 +60,7 @@ void processPositionCorrection() {
       if (tmp < 0) {
         tmp += radians(360);
       }
-      gpsLaggedCourse = (int)((float)gpsLaggedCourse*(gpsCoarseSmoothValue) + tmp*100*(1-gpsCoarseSmoothValue));
+      gpsLaggedCourse = (int)((float)gpsLaggedCourse*(gpsCourseSmoothValue) + tmp*100*(1-gpsCourseSmoothValue));
   }
   
   float angleToWaypoint = atan2(distanceX, distanceY);
@@ -82,18 +82,14 @@ void processPositionCorrection() {
     {
       maxSpeedRoll = MAX_NAVIGATON_SPEED*tmpsin; //max speed on roll
       maxSpeedPitch = MAX_NAVIGATON_SPEED*tmpcos; //max speed on pitch
-      
-      gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
-      gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
     }
-    
-//    else {
-//      maxSpeedRoll = (MAX_NAVIGATON_SPEED*tmpsin*((float)distance/300)); //roll
-//      maxSpeedPitch = (MAX_NAVIGATON_SPEED*tmpcos*((float)distance/300)); //pitch
-//    }
+    else {
+      maxSpeedRoll = (MAX_NAVIGATON_SPEED*tmpsin*((float)distance/300)); //roll
+      maxSpeedPitch = (MAX_NAVIGATON_SPEED*tmpcos*((float)distance/300)); //pitch
+    }
+    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
+    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
   }
-
-  
   
   previousPosition.latitude = currentPosition.latitude;
   previousPosition.longitude = currentPosition.longitude;
