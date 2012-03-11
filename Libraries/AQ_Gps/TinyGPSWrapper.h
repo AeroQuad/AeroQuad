@@ -25,9 +25,11 @@
 #include "Arduino.h"
 #include "TinyGPS.h"
 
+#define GPS2RAD (1/5729577.95)
+#define RAD2DEG 57.2957795
+
 #define GPS_SERIAL_BAUD_SPEED 38400  
 #define GPS_PORT Serial1
-
 
 struct GeodeticPosition {
   long latitude;
@@ -61,9 +63,6 @@ void initializeGps() {
   GPS_PORT.println("$PMTK301,2*2E");
   GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
 }
-
-
-
 
 boolean readGps() {
   while (GPS_PORT.available())
@@ -107,5 +106,26 @@ void evaluateCurrentGpsPositionFromSum() {
   gpsSumCounter = 0;
 }
 
+
+float gpsRawDistance = 0.0;
+short gpsBearing = 0;
+
+void computeDistanceAndBearing(long lat1, long lon1, long lat2, long lon2) {
+
+  const float x = (float)(lon2-lon1) * GPS2RAD * cos((float)(lat1+lat2)/2*GPS2RAD);
+  const float y = (float)(lat2-lat1) * GPS2RAD;
+  gpsRawDistance = sqrt(x*x+y*y);
+  gpsBearing = (short)(RAD2DEG * atan2(x,y));
+}
+
+float getDistanceMeter() {
+
+  return (gpsRawDistance * 6371009);
+}
+
+float getDistanceFoot() {
+
+  return (gpsRawDistance * 20903280);
+}
 
 #endif
