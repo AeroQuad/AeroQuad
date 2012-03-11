@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -21,32 +21,40 @@
 #ifndef _AQ_BATTERY_MONITOR_TYPES
 #define _AQ_BATTERY_MONITOR_TYPES
 
+#if ! defined (__AVR_ATmega328P__) && ! defined(__AVR_ATmegaUNO__)
+  #define BM_EXTENDED
+#endif
+
 #define BM_NOPIN 255
 
 struct BatteryData {
-  byte  vPin,cPin;        // A/D pins for voltage and current sensors (255 = BM_NOPIN <=> no sensor)
-  byte  cells;            // Number of Cells (used for alarm/warning voltage
-  float vScale,vBias;     // voltage polynom V = vbias + AnalogIn(vpin)*vscale
-  float cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
-  float voltage;          // Current battery voltage
-  float current;          // Current battery current
-  float minVoltage;       // Minimum voltage since reset
-  float maxCurrent;       // Maximum current since reset
-  float usedCapacity;     // Capacity used since reset (in mAh)
+  byte  vPin;                   // A/D pin for voltage sensor
+  byte  cells;                  // Number of Cells (used for alarm/warning voltage
+  short vScale,vBias;  // voltage polynom V = vbias + AnalogIn(vpin)*vscale
+  unsigned short voltage;       // Current battery voltage (in 10mV:s)
+#ifdef BM_EXTENDED
+  unsigned short minVoltage;    // Minimum voltage since reset
+  byte  cPin;             // A/D pin for current sensor (255 = BM_NOPIN <=> no sensor)
+  short cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
+  short current;          // Current battery current (in 10mA:s)
+  short maxCurrent;       // Maximum current since reset
+  long  usedCapacity;     // Capacity used since reset (in uAh)
+#endif
 };
 
-extern struct BatteryData batteryData[];     // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
+extern struct BatteryData batteryData[];       // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
 extern byte               numberOfBatteries; // number of batteries monitored, defined by BatteryMonitor
 extern boolean            batteryAlarm;      // any battery in alarm state used for e.g. autodescent
+extern boolean            batteryWarning;    // any battery in warning state
 
 // Helper macros to make battery definitions cleaner
 
-// for defining battery with just voltage sensing
-#define BM_DEFINE_BATTERY_V(CELLS,VPIN,VSCALE,VBIAS) {VPIN,BM_NOPIN,CELLS,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-
-// for defining battery with voltage and current sensors
-#define BM_DEFINE_BATTERY_VC(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,CELLS,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0},
-
+// for defining battery with voltage and optional current sensors
+#ifdef BM_EXTENDED
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE*100.0),(VBIAS*100.0),0,0,(CPIN),(CSCALE*10.0),(CBIAS*10.0),0,0,0}
+#else
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE*100.0),(VBIAS*100.0),0}
+#endif
 // Function declarations
 
 boolean batteryIsAlarm(byte batteryNo);
@@ -54,5 +62,5 @@ boolean batteryIsWarning(byte batteryNo);
 void resetBattery(byte batteryNo);
 void initializeBatteryMonitor(byte numberOfMonitoredBatteries, float alarmVoltage);
 void setBatteryCellVoltageThreshold(float alarmVoltage);
-void measureBatteryVoltage(float deltaTime);
+void measureBatteryVoltage(unsigned short deltaTime);
 #endif

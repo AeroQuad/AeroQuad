@@ -1,6 +1,13 @@
-AeroQuad Flight Software Source Code 3.0
+AeroQuad Flight Software Source Code 3.0.1
 ========================================
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
+
+Version 3.0.1 Release Notes (2/21/2012)
+----------------------------------------
+* Updated min/max motor commanding for level flight during yaw
+* Increased floating point precision used for transmitter calibration
+* Removed motor spin up when arming/disarming motors
+* Improved battery monitor & OSD
 
 Version 3.0 Release Notes (1/29/2012)
 ----------------------------------------
