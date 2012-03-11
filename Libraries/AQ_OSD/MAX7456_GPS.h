@@ -26,6 +26,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // Show GPS information
 
+#include <TinyGPSWrapper.h>
+
 byte osdGPSState=0;
 #define GPS_DONAV 0x80 // display navigation info next time
 #define GPS_NOFIX 0x40 // no fix displayed
@@ -45,48 +47,38 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
     }
     else {
       char buf[5];
-      // update 'home arrow' and distance
+      computeDistanceAndBearing(lat, lon, hlat, hlon);
+      #ifdef USUnits
+        const unsigned int distance = getDistanceFoot(); // dist to home in feet
+	    if (distance<1000) {
+          snprintf(buf,5,"%3df",(int)distance);
+        }
+        else if (distance<5280) {
+          snprintf(buf,5,".%02dm", (int)(distance * 10 / 528));
+        }
+        else {
+          snprintf(buf,5,"%d.%1dm", (int)(distance/5280), (int)(distance / 528 % 10));
+        }
+      #else //metric
+        const unsigned int distance = getDistanceMeter(); // dist to home in meters
+	    if (distance<1000) {
+          snprintf(buf,5,"%3dm",(int)distance);
+        }
+        else {
+          snprintf(buf,5,"%d.%1d\032", (int)(distance/1000), (int)(distance / 100 % 10));
+        }
+      #endif
 
-      // Calculate direction and distance to home using "equirectangular projection"
-      #define GPS2RAD (1/5729577.95)
-      #define RAD2DEG 57.2957795
-      const float x = (float)(hlon-lon) * GPS2RAD * cos((float)(lat+hlat)/2*GPS2RAD);
-      const float y = (float)(hlat-lat) * GPS2RAD;
-#ifdef USUnits
-      const unsigned int distance = (sqrt(x*x+y*y) * 20903280); // dist to home in feet
-#else //metric
-      const unsigned int distance = (sqrt(x*x+y*y) * 6371009); // dist to home in meters
-#endif
-      short bearing = (short)(RAD2DEG * atan2(x,y));    // bearing to 'home' in degrees -180 - 180
-
-      short homearrow = bearing - magheading; // direction of home vs. craft orientation
+      short homearrow = gpsBearing - magheading; // direction of home vs. craft orientation
 
       homearrow = ((homearrow + 11) * 16 / 360 + 16) % 16; // map to the 16 direction arrow
       buf[0]=176 + homearrow * 2;
       buf[1]=buf[0]+1;
       writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
-#ifdef USUnits
-      if (distance<1000) {
-        snprintf(buf,5,"%3df",(int)distance);
-      }
-      else if (distance<5280) {
-        snprintf(buf,5,".%02dm", (int)(distance * 10 / 528));
-      }
-      else {
-        snprintf(buf,5,"%d.%1dm", (int)(distance/5280), (int)(distance / 528 % 10));
-      }
-#else // metric
-      if (distance<1000) {
-        snprintf(buf,5,"%3dm",(int)distance);
-      }
-      else {
-        snprintf(buf,5,"%d.%1d\032", (int)(distance/1000), (int)(distance / 100 % 10));
-      }
-#endif
       writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
     
       //  calculate course correction 
-      short courseCorrection = (bearing - course/100);
+      short courseCorrection = (gpsBearing - course/100);
       // normalize to -180 - 180 
       if (courseCorrection>180) courseCorrection-=360;
       if (courseCorrection<-180) courseCorrection+=360;
