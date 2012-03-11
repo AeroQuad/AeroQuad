@@ -89,6 +89,7 @@ int testCommand = 1000;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
 #define TASK_10HZ 10
+#define TASK_1HZ 100
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
@@ -124,25 +125,55 @@ void processAltitudeHold();
 /**
  * Altitude control global declaration
  */
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder || defined UseGPS
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
  // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
-
-  float altitudeToHoldTarget = 0.0;
+  int minThrottleAdjust = -50;
+  int maxThrottleAdjust = 50;
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
-  boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-  float previousSensorAltitude = 0.0;
   
 //  float estimatedXVelocity = 0;
 //  float estimatedYVelocity = 0;
 //  int estimatedZVelocity = 0;
+//  float previousSensorAltitude = 0.0;
+
+  #if defined AltitudeHoldBaro
+    float baroAltitudeToHoldTarget = 0.0;
+  #endif  
+  #if defined AltitudeHoldRangeFinder
+    float sonarAltitudeToHoldTarget = 0.0;
+  #endif
 #endif
-int minThrottleAdjust = -50;
-int maxThrottleAdjust = 50;
-float getAltitudeFromSensors();
+// float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
+
+/**
+ * GPS navigation global declaration
+ */
+#if defined (UseGPS)
+  int missionNbPoint = 0;
+  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+  #include <TinyGPSWrapper.h>
+  GeodeticPosition homePosition;
+  GeodeticPosition positionToReach;
+  
+  int gpsRollAxisCorrection = 0;
+  int gpsPitchAxisCorrection = 0;
+  boolean isStorePositionNeeded = false;
+  
+  GeodeticPosition previousPosition;
+  float gpsLaggedSpeed = 0.0;
+  float gpsLaggedCourse = 0.0;
+  
+  void processPositionCorrection();
+  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
+#endif
+//////////////////////////////////////////////////////
+
 
 /**
  * Serial communication global declaration
@@ -168,13 +199,6 @@ void reportVehicleState();
 //////////////////////////////////////////////////////
 
 
-/**
- * GPS navigation global declaration
- */
-#if defined (UseGPS)
-  int missionNbPoint = 0;
-#endif
-//////////////////////////////////////////////////////
 
 /**
  * EEPROM global section
@@ -219,8 +243,6 @@ typedef struct {
   float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
   // Gyro calibration
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
@@ -251,6 +273,20 @@ typedef struct {
   float RANGE_FINDER_MIN_ADR;
   // GPS mission storing
   float GPS_MISSION_NB_POINT;
+  // Camera Control
+  float CAMERAMODE_ADR;
+  float MCAMERAPITCH_ADR;
+  float MCAMERAROLL_ADR;    
+  float MCAMERAYAW_ADR;
+  float SERVOCENTERPITCH_ADR;
+  float SERVOCENTERROLL_ADR;
+  float SERVOCENTERYAW_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float SERVOMINYAW_ADR;
+  float SERVOMAXPITCH_ADR;
+  float SERVOMAXROLL_ADR;
+  float SERVOMAXYAW_ADR; 
 } t_NVR_Data;  
 
 

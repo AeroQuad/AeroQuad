@@ -133,11 +133,11 @@ void initializeEEPROM() {
   gyroZero[ZAXIS] = 0.0;
   gyroSmoothFactor = 0.0;
   gyroTempBiasSlope[XAXIS] = 0.0;
-  gyroTempBiasSlope[XAXIS] = 0.0;
-  gyroTempBiasSlope[XAXIS] = 0.0;
+  gyroTempBiasSlope[YAXIS] = 0.0;
+  gyroTempBiasSlope[ZAXIS] = 0.0;
   gyroTempBiasIntercept[XAXIS] = 0.0;
-  gyroTempBiasIntercept[XAXIS] = 0.0;
-  gyroTempBiasIntercept[XAXIS] = 0.0;
+  gyroTempBiasIntercept[YAXIS] = 0.0;
+  gyroTempBiasIntercept[ZAXIS] = 0.0;
   
   // Accel Cal
   accelScaleFactor[XAXIS] = 1.0;
@@ -392,11 +392,11 @@ void initSensorsZeroFromEEPROM() {
   gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
   gyroSmoothFactor = readFloat(GYROSMOOTH_ADR);
   gyroTempBiasSlope[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_SLOPE_ADR);
-  gyroTempBiasSlope[XAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
-  gyroTempBiasSlope[XAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
+  gyroTempBiasSlope[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
+  gyroTempBiasSlope[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
   gyroTempBiasIntercept[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR);
-  gyroTempBiasIntercept[XAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
-  gyroTempBiasIntercept[XAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
+  gyroTempBiasIntercept[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
+  gyroTempBiasIntercept[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
  
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
