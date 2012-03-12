@@ -36,6 +36,9 @@
 //      int zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
 //      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
 
+
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+
 #define INVALID_THROTTLE_CORRECTION -1000
 
 /**
@@ -110,5 +113,7 @@ void processAltitudeHold()
     throttle = receiverCommand[THROTTLE];
   }
 }
+
+#endif
 
 #endif // _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
