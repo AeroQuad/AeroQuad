@@ -187,7 +187,7 @@ void processAltitudeHold();
 #define SERIAL_FLUSH      SERIAL_PORT.flush
 #define SERIAL_BEGIN      SERIAL_PORT.begin
  
-HardwareSerial *binaryPort;
+//HardwareSerial *binaryPort;
 
 void readSerialCommand();
 void sendSerialTelemetry();
