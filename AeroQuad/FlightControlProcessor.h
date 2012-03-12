@@ -36,7 +36,7 @@
  */
 void calculateFlightError()
 {
-  #if defined (UseGPS)
+  #if defined (UseGPSNavigator)
     if (positionHoldState == ON) {
       gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -100, 100);
       gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -100, 100);
