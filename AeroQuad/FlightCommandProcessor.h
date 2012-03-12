@@ -88,20 +88,16 @@ void readPilotCommands() {
     }
   }
   
-  #ifdef RateModeOnly
+  // Check Mode switch for Acro or Stable
+  if (receiverCommand[MODE] > 1500) {
+    flightMode = ATTITUDE_FLIGHT_MODE;
+    digitalWrite(LED_Yellow, HIGH);
+  }
+  else {
     flightMode = RATE_FLIGHT_MODE;
     digitalWrite(LED_Yellow, LOW);
-  #else
-    // Check Mode switch for Acro or Stable
-    if (receiverCommand[MODE] > 1500) {
-      flightMode = ATTITUDE_FLIGHT_MODE;
-      digitalWrite(LED_Yellow, HIGH);
-   }
-    else {
-      flightMode = RATE_FLIGHT_MODE;
-      digitalWrite(LED_Yellow, LOW);
-    }
-  #endif  
+  }
+
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     if (receiverCommand[AUX] < 1750) {
@@ -129,7 +125,7 @@ void readPilotCommands() {
     }
   #endif
   
-  #if defined (UseGPS)
+  #if defined (UseGPSNavigator)
     if (receiverCommand[AUX] < 1750) {
       if (positionHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStorePositionNeeded) {

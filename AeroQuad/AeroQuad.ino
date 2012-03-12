@@ -78,6 +78,8 @@
   #undef CameraControl
   #undef OSD
   #undef UseGPS
+  #undef UseGPSNavigator
+
 
   /**
    * Put AeroQuad_v1 specific intialization need here
@@ -124,6 +126,7 @@
   #undef CameraControl
   #undef OSD
   #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_v1_IDG specific intialization need here
@@ -180,6 +183,7 @@
   #undef CameraControl
   #undef OSD
   #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_v18 specific intialization need here
@@ -244,6 +248,7 @@
   #undef CameraControl
   #undef OSD
   #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_Mini specific intialization need here
@@ -364,6 +369,10 @@
   #ifdef OSD
     #define MAX7456_OSD
   #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
 
   /**
    * Put AeroQuadMega_v2 specific intialization need here
@@ -450,6 +459,11 @@
   #ifdef OSD
     #define MAX7456_OSD
   #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
    * Put AeroQuadMega_v21 specific intialization need here
@@ -532,6 +546,9 @@
 
   #undef CameraControl
   #undef OSD
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
 
   
   /**
@@ -592,6 +609,8 @@
   #undef CameraControl
   #undef OSD
   #undef UseGPS
+  #undef UseGPSNavigator
+
 
   /**
    * Put AeroQuad_Wii specific intialization need here
@@ -664,6 +683,10 @@
   #ifdef OSD
     #define MAX7456_OSD
   #endif
+  
+  #undef UseGPS        // Wii not enough stable to use gps
+  #undef UseGPSNavigator
+
 
   /**
    * Put AeroQuadMega_Wii specific intialization need here
@@ -734,6 +757,11 @@
     #undef BattMonitorAutoDescent
     #undef POWERED_BY_VIN        
   #endif
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
    * Put AeroQuadMega_CHR6DM specific intialization need here
@@ -815,6 +843,11 @@
 
   #undef CameraControl
   #undef OSD
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
    * Put APM_OP_CHR6DM specific intialization need here
@@ -990,8 +1023,15 @@
 //****************** GPS DECLARATION *********************
 //********************************************************
 #if defined (UseGPS)
+  #if !defined HeadingMagHold
+    #error We need the magnetometer to use the GPS
+  #endif 
+  #if !defined AltitudeHoldBaro
+    #error We need the altitude from barometer to use the GPS
+  #endif 
   #include <TinyGPSWrapper.h>
   #include "GpsNavigator.h"
+  
 #endif
 
 //********************************************************
