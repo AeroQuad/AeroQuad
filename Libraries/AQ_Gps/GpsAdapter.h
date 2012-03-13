@@ -67,49 +67,47 @@ void initializeGps() {
 
 boolean readGps() {
   gps->update();
-  if (gps->new_data) {
-    if (gps->fix) {  
-	
-	}
-  }
+//  Serial.print(gps->num_sats); 
+//  Serial.print(" "); 
+//  Serial.println(gps->fix); 
+  return gps->new_data;
 }
   
 boolean haveAGpsLock() {
-  return false;
-//  return nbSatelitesInUse >= minNbGPSInUse;
+  return gps->num_sats >= minNbGPSInUse;
 }
 
 long getCourse() {
-  return 0;
-//  return gpsCourse;
+  return gps->ground_course;
 }
 unsigned long getGpsSpeed() {
-  return 0;
-//  return gpsSpeed*1.852*10/36;
+  return gps->ground_speed*1.852*10/36;
 }
 
 unsigned long getGpsAltitude() {
-  return 0;
-//  return gpsAltitude;
+  return gps->altitude;
 }
   
 void mesureGpsPositionSum() {
   
-/*  gpsLatitudeSum += latitude;
-  gpsLongitudeSum += longitude;
+  gpsLatitudeSum += gps->latitude;
+  gpsLongitudeSum += gps->longitude;
   gpsSumCounter++;
-*/  
+  
+  gps->new_data = false;  // reset into measure GPS and pass gere only if it's true
 }
 
 void evaluateCurrentGpsPositionFromSum() {
 
-/*  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
+  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
   currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
   
+//  Serial.print(currentPosition.latitude);
+//  Serial.print(" ");
+//  Serial.print(currentPosition.longitude);
   gpsLatitudeSum = 0;
   gpsLongitudeSum = 0;
   gpsSumCounter = 0;
-*/  
 }
 
 
