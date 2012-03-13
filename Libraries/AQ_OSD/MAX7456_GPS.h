@@ -68,6 +68,7 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
           snprintf(buf,5,"%d.%1d\032", (int)(distance/1000), (int)(distance / 100 % 10));
         }
       #endif
+      writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
 
       short homearrow = gpsBearing - magheading; // direction of home vs. craft orientation
 
@@ -75,7 +76,6 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       buf[0]=176 + homearrow * 2;
       buf[1]=buf[0]+1;
       writeChars(buf, 2, 0, GPS_HA_ROW, GPS_HA_COL);
-      writeChars(buf, 4, 0, GPS_HA_ROW + 1, GPS_HA_COL - 1);
     
       //  calculate course correction 
       short courseCorrection = (gpsBearing - course/100);
