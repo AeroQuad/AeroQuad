@@ -159,7 +159,7 @@ void processAltitudeHold();
   int missionNbPoint = 0;
   byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-  #include <TinyGPSWrapper.h>
+  #include <GpsAdapter.h>
   GeodeticPosition homePosition;
   GeodeticPosition positionToReach;
   
