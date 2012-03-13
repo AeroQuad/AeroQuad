@@ -22,14 +22,21 @@
 #ifndef _AEROQUAD_TINY_GPS_ADAPTER_H_
 #define _AEROQUAD_TINY_GPS_ADAPTER_H_
 
-#include "Arduino.h"
-#include "TinyGPS.h"
+#include <AP_GPS.h>
 
 #define GPS2RAD (1/5729577.95)
 #define RAD2DEG 57.2957795
 
-#define GPS_SERIAL_BAUD_SPEED 38400  
-#define GPS_PORT Serial1
+enum {
+  GPS_INVALID_AGE = 0xFFFFFFFF, 
+  GPS_INVALID_ANGLE = 999999999, 
+  GPS_INVALID_ALTITUDE = 999999999, 
+  GPS_INVALID_DATE = 0,
+  GPS_INVALID_TIME = 0xFFFFFFFF, 
+  GPS_INVALID_SPEED = 999999999, 
+  GPS_INVALID_FIX_TIME = 0xFFFFFFFF
+};
+
 
 struct GeodeticPosition {
   long latitude;
@@ -46,54 +53,48 @@ byte gpsSumCounter = 0;
 long gpsLatitudeSum = 0;
 long gpsLongitudeSum = 0;
 
-
-
 byte minNbGPSInUse = 6;
+byte nbSatelitesInUse = 0; // to remove
+
+GPS	    *gps;
+AP_GPS_Auto GPS(&Serial1, &gps);
 
 void initializeGps() {
  
-  GPS_PORT.begin(GPS_SERIAL_BAUD_SPEED);
-  
-  GPS_PORT.print("$PMTK251,115200*1F\r\n"); // set to 115200
-  delay(100);
-  GPS_PORT.end();
-  GPS_PORT.begin(115200);
-  delay(500);
-  GPS_PORT.print("$PMTK300,100,0,0,0,0*2c\r\n$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n"); //then switch to 10Hz and only RMC,GGA
-  GPS_PORT.println("$PMTK301,2*2E");
-  GPS_PORT.println("$PGCMD,16,1,0,0,0,1*6A"); // turn only NMEA strings needed
+  gps = &GPS;
+  gps->init();
 }
 
 boolean readGps() {
-  while (GPS_PORT.available())
-  {
-    if (decodeGpsChar(GPS_PORT.read())) {
-      return true;
-    }        
-  }
-  return false;
+  gps->update();
+//  Serial.print(gps->num_sats); 
+//  Serial.print(" "); 
+//  Serial.println(gps->fix); 
+  return gps->new_data;
 }
   
 boolean haveAGpsLock() {
- return nbSatelitesInUse >= minNbGPSInUse;
+  return gps->num_sats >= minNbGPSInUse;
 }
 
 long getCourse() {
-  return gpsCourse;
+  return gps->ground_course;
 }
 unsigned long getGpsSpeed() {
-  return gpsSpeed*1.852*10/36;
+  return gps->ground_speed*1.852*10/36;
 }
 
 unsigned long getGpsAltitude() {
-  return gpsAltitude;
+  return gps->altitude;
 }
   
 void mesureGpsPositionSum() {
   
-  gpsLatitudeSum += latitude;
-  gpsLongitudeSum += longitude;
+  gpsLatitudeSum += gps->latitude;
+  gpsLongitudeSum += gps->longitude;
   gpsSumCounter++;
+  
+  gps->new_data = false;  // reset into measure GPS and pass gere only if it's true
 }
 
 void evaluateCurrentGpsPositionFromSum() {
@@ -101,6 +102,9 @@ void evaluateCurrentGpsPositionFromSum() {
   currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
   currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
   
+//  Serial.print(currentPosition.latitude);
+//  Serial.print(" ");
+//  Serial.print(currentPosition.longitude);
   gpsLatitudeSum = 0;
   gpsLongitudeSum = 0;
   gpsSumCounter = 0;
