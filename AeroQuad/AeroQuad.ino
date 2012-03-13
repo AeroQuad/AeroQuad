@@ -28,6 +28,22 @@
 
 #include "UserConfiguration.h" // Edit this file first before uploading to the AeroQuad
 
+
+//
+// In order to use the DIYDrone libraries, this have to be declared here this way
+// @see Kenny9999 for details
+//
+#if defined UseGPS  
+  // needed here to use DIYDrone gps libraries
+  #include <FastSerial.h>
+  #include <AP_Common.h>
+  #include <AP_GPS.h>
+  
+  FastSerialPort0(Serial);
+  FastSerialPort1(Serial1);
+  FastSerialPort2(Serial3);
+#endif
+
 // Checks to make sure we have the right combinations defined
 #if defined(FlightAngleMARG) && !defined(HeadingMagHold)
   #undef FlightAngleMARG
@@ -1029,7 +1045,7 @@
   #if !defined AltitudeHoldBaro
     #error We need the altitude from barometer to use the GPS
   #endif 
-  #include <TinyGPSWrapper.h>
+  #include <GpsAdapter.h>
   #include "GpsNavigator.h"
   
 #endif

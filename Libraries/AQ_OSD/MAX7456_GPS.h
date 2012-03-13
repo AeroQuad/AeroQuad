@@ -26,7 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Show GPS information
 
-#include <TinyGPSWrapper.h>
+#include <GpsAdapter.h>
 
 byte osdGPSState=0;
 #define GPS_DONAV 0x80 // display navigation info next time
