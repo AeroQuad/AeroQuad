@@ -123,6 +123,13 @@
 
 //
 // *******************************************************************************************************************************
+// Optional audio channel telemetry (for ground station tracking purposes)
+// This will output telemetry at slow (1200baud) rate once per second on Serial2. 
+// *******************************************************************************************************************************
+#define SlowTelemetry  // Enables Wireless telemetry on Serial2
+
+//
+// *******************************************************************************************************************************
 // Define how many channels are connected from your R/C receiver
 // Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
