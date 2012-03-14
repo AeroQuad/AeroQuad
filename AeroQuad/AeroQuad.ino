@@ -1199,6 +1199,10 @@ void setup() {
 
   #endif 
 
+#ifdef SlowTelemetry
+        initSlowTelemetry();
+#endif
+
   setupFourthOrder();
 
   previousTime = micros();
@@ -1412,6 +1416,11 @@ void loop () {
         }
       }
     #endif
+
+#ifdef SlowTelemetry
+    sendSlowTelemetry();
+#endif
+
     
     previousTime = currentTime;
   }
