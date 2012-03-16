@@ -26,8 +26,8 @@
 
 //#define AeroQuad_v18
 //#define AeroQuad_Mini
-//#define AeroQuadMega_v2
-#define AeroQuadMega_v21
+#define AeroQuadMega_v2
+//#define AeroQuadMega_v21
 
 
 #ifdef AeroQuad_v18
