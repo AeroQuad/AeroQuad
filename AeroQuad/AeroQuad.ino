@@ -517,6 +517,96 @@
   }
 #endif
 
+
+#ifdef AutoNav
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
+  #include <Device_I2C.h>
+
+  // Gyroscope declaration
+  #include <Gyroscope_ITG3200.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer_BMA180.h>
+
+  // Receiver Declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+
+  // heading mag hold declaration
+  #ifdef HeadingMagHold
+//    #define SPARKFUN_5883L_BOB
+    #define SPARKFUN_9DOF_5883L
+  #endif
+
+  // Altitude declaration
+  #ifdef AltitudeHoldBaro    
+    #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
+  // Battery Monitor declaration
+  #ifdef BattMonitor
+    #ifdef POWERED_BY_VIN
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+    #else
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+    #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef POWERED_BY_VIN        
+  #endif
+
+  #ifdef OSD
+    #define MAX7456_OSD
+  #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
+  /**
+   * Put AeroQuadMega_v2 specific intialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on
+
+    Wire.begin();
+    TWBR = 12;
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureAccelSum();
+    measureGyroSum();
+  }
+#endif
+
 #ifdef ArduCopter
   #define LED_Green 37
   #define LED_Red 35
@@ -1378,8 +1468,11 @@ void loop () {
       #endif
 
       #if defined (UseGPS)
-        if (readGps()) {
-          mesureGpsPositionSum();
+        readGps();
+        if (haveAGpsLock()) {
+          if (!isHomeBaseInitialized()) {
+            initHomeBase();
+          }
         }
       #endif      
       
@@ -1422,21 +1515,9 @@ void loop () {
       #endif
     }
     
-    #if defined (UseGPS)
-      if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
-        if (haveAGpsLock()) {
-          evaluateCurrentGpsPositionFromSum();
-          if (!isHomeBaseInitialized()) {
-            initHomeBase();
-          }
-        }
-      }
+    #ifdef SlowTelemetry
+      sendSlowTelemetry();
     #endif
-
-#ifdef SlowTelemetry
-    sendSlowTelemetry();
-#endif
-
     
     previousTime = currentTime;
   }
