@@ -50,6 +50,7 @@ boolean haveMission() {
   return missionNbPoint != 0;
 }
 
+
 float gpsSpeedSmoothValue = 0.5;
 float gpsCourseSmoothValue = 0.5;
 
@@ -57,12 +58,12 @@ float gpsCourseSmoothValue = 0.5;
 
 void processPositionCorrection() {
   
-  float derivateDistanceX = (currentPosition.longitude - previousPosition.longitude)*0.649876;
-  float derivateDistanceY = (currentPosition.latitude - previousPosition.latitude)*1.113195;
+  float derivateDistanceX = (currentPosition.longitude - previousPosition.longitude) * 0.649876;
+  float derivateDistanceY = (currentPosition.latitude - previousPosition.latitude) * 1.113195;
   float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  float distanceX = (currentPosition.longitude - positionToReach.longitude)*0.649876;
-  float distanceY = (currentPosition.latitude - positionToReach.latitude)*1.113195;
+  float distanceX = (positionToReach.longitude - currentPosition.longitude) * 0.649876;
+  float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
   float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
   gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
@@ -77,7 +78,8 @@ void processPositionCorrection() {
   float angleToWaypoint = atan2(distanceX, distanceY);
   float courseRads = radians(gpsLaggedCourse/100);
   
-  float azimuth = getAbsoluteHeading();
+//  float azimuth = getAbsoluteHeading();
+  float azimuth = kinematicsAngle[ZAXIS];
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
   

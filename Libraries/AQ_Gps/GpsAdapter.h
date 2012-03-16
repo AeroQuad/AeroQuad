@@ -24,6 +24,8 @@
 
 #include <AP_GPS.h>
 
+#define MIN_NB_SATS_IN_USE 6
+
 #define GPS2RAD (1/5729577.95)
 #define RAD2DEG 57.2957795
 
@@ -50,9 +52,7 @@ struct GeodeticPosition {
 GeodeticPosition currentPosition;
 
 byte nbSatelitesInUse = 0;
-
 boolean isGpsHaveANewPosition = false;
-
 GPS	    *gps;
 AP_GPS_Auto GPS(&Serial1, &gps);
 
@@ -75,7 +75,7 @@ boolean readGps() {
 }
   
 boolean haveAGpsLock() {
-  return gps->fix;
+  return gps->fix && gps->num_sats >= MIN_NB_SATS_IN_USE;
 }
 
 long getCourse() {

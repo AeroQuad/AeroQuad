@@ -518,7 +518,7 @@
 #endif
 
 
-#ifdef AutoNav
+#ifdef AutonavShield
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
@@ -539,8 +539,7 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
-//    #define SPARKFUN_5883L_BOB
-    #define SPARKFUN_9DOF_5883L
+    #define SPARKFUN_5883L_BOB
   #endif
 
   // Altitude declaration
