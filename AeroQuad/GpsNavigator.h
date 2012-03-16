@@ -29,10 +29,21 @@ boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }
 
+
+byte countToInitHome = 0;
+#define MIN_NB_GPS_READ_TO_INIT_HOME 15
+
 void initHomeBase() {
+  if (isGpsHaveANewPosition) {
+    if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
+      countToInitHome++;
+    }
+    else {
+      homePosition.latitude = currentPosition.latitude;
+      homePosition.longitude = currentPosition.longitude;
+    }  
+  }
   
-  homePosition.latitude = currentPosition.latitude;
-  homePosition.longitude = currentPosition.longitude;
 }
 
 boolean haveMission() {
@@ -70,6 +81,9 @@ void processPositionCorrection() {
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
   
+//  Serial.print(distance);
+//  Serial.print(" ");
+  
   if (distance != 0) {
     
     float angle = angleToWaypoint-azimuth;
@@ -90,6 +104,11 @@ void processPositionCorrection() {
     gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
     gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
   }
+  
+//  Serial.print(gpsRollAxisCorrection);
+//  Serial.print(" ");
+//  Serial.println(gpsPitchAxisCorrection);
+  
   
   previousPosition.latitude = currentPosition.latitude;
   previousPosition.longitude = currentPosition.longitude;

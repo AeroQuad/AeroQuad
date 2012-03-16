@@ -49,12 +49,9 @@ struct GeodeticPosition {
 };
 GeodeticPosition currentPosition;
 
-byte gpsSumCounter = 0;
-long gpsLatitudeSum = 0;
-long gpsLongitudeSum = 0;
+byte nbSatelitesInUse = 0;
 
-byte minNbGPSInUse = 6;
-byte nbSatelitesInUse = 0; // to remove
+boolean isGpsHaveANewPosition = false;
 
 GPS	    *gps;
 AP_GPS_Auto GPS(&Serial1, &gps);
@@ -67,14 +64,18 @@ void initializeGps() {
 
 boolean readGps() {
   gps->update();
-//  Serial.print(gps->num_sats); 
-//  Serial.print(" "); 
-//  Serial.println(gps->fix); 
-  return gps->new_data;
+  if (gps->new_data) {
+    isGpsHaveANewPosition = true;
+	currentPosition.latitude = gps->latitude;
+	currentPosition.longitude = gps->longitude;
+	nbSatelitesInUse = gps->num_sats;
+	gps->new_data = false;
+  }
+  return isGpsHaveANewPosition;
 }
   
 boolean haveAGpsLock() {
-  return gps->num_sats >= minNbGPSInUse;
+  return gps->fix;
 }
 
 long getCourse() {
@@ -88,27 +89,6 @@ unsigned long getGpsAltitude() {
   return gps->altitude;
 }
   
-void mesureGpsPositionSum() {
-  
-  gpsLatitudeSum += gps->latitude;
-  gpsLongitudeSum += gps->longitude;
-  gpsSumCounter++;
-  
-  gps->new_data = false;  // reset into measure GPS and pass gere only if it's true
-}
-
-void evaluateCurrentGpsPositionFromSum() {
-
-  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
-  currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
-  
-//  Serial.print(currentPosition.latitude);
-//  Serial.print(" ");
-//  Serial.print(currentPosition.longitude);
-  gpsLatitudeSum = 0;
-  gpsLongitudeSum = 0;
-  gpsSumCounter = 0;
-}
 
 
 float gpsRawDistance = 0.0;

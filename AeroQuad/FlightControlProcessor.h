@@ -234,15 +234,18 @@ void processFlightControl() {
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
     // ********************** Process position hold or navigation **************************
     #if defined (UseGPS)
-      if (frameCounter % TASK_1HZ == 0) {  // process gps correction at 1Hz
         if (positionHoldState == ON) {
-          processPositionCorrection();
+          if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
+            positionToReach.longitude = homePosition.longitude;
+            positionToReach.latitude = homePosition.latitude;
+            processPositionCorrection();
+            isGpsHaveANewPosition = false;
+          }
         }
         else {
           gpsRollAxisCorrection = 0;
           gpsPitchAxisCorrection = 0;
         }
-      }
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
