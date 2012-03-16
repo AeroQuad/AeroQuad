@@ -236,8 +236,6 @@ void processFlightControl() {
     #if defined (UseGPS)
         if (positionHoldState == ON) {
           if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
-            positionToReach.longitude = homePosition.longitude;
-            positionToReach.latitude = homePosition.latitude;
             processPositionCorrection();
             isGpsHaveANewPosition = false;
           }

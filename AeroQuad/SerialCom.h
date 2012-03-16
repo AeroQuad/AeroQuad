@@ -739,6 +739,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
     SERIAL_PRINTLN("Mega v21");
+  #elif defined(AeroQuadMega_v21)
+    SERIAL_PRINTLN("AutoNav");
   #elif defined(AutonavShield)
     SERIAL_PRINTLN("AutonavShield");
   #elif defined(AeroQuad_Wii)

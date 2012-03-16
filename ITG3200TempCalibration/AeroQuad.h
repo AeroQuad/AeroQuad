@@ -30,9 +30,11 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#define BAUD 115200
-//#define BAUD 111111 // use this to be compatible with USB and XBee connections
-//#define BAUD 57600
+#if defined WirelessTelemetry
+  #define BAUD 111111 // use this to be compatible with USB and XBee connections
+#else
+  #define BAUD 115200
+#endif  
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -157,7 +159,7 @@ void processAltitudeHold();
   int missionNbPoint = 0;
   byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-  #include <TinyGPSWrapper.h>
+  #include <GpsAdapter.h>
   GeodeticPosition homePosition;
   GeodeticPosition positionToReach;
   
@@ -185,7 +187,7 @@ void processAltitudeHold();
 #define SERIAL_FLUSH      SERIAL_PORT.flush
 #define SERIAL_BEGIN      SERIAL_PORT.begin
  
-HardwareSerial *binaryPort;
+//HardwareSerial *binaryPort;
 
 void readSerialCommand();
 void sendSerialTelemetry();
