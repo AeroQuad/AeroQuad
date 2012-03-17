@@ -102,15 +102,15 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
       char buf[29];
 #ifdef USUnits
       speed=speed*36/1609; // convert from cm/s to mph 
-      snprintf(buf,29,"%d:%c%02ld.%05ld %c%03ld.%05ld %3ld\031",numsats,
-               (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
-               (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
+      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\031",numsats,
+               (lat>=0)?'N':'S',abs(lat)/10000000L,abs(lat)%10000000L/10,
+               (lon>=0)?'E':'W',abs(lon)/10000000L,abs(lon)%10000000L/10,
 	       speed);
 #else
       speed=speed*36/1000; // convert from cm/s to kmh 
-      snprintf(buf,29,"%d:%c%02ld.%05ld %c%03ld.%05ld %3ld\030",numsats,
-               (lat>=0)?'N':'S',abs(lat)/100000L,abs(lat)%100000L,
-               (lon>=0)?'E':'W',abs(lon)/100000L,abs(lon)%100000L,
+      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\030",numsats,
+               (lat>=0)?'N':'S',abs(lat)/10000000L,abs(lat)%10000000L/10,
+               (lon>=0)?'E':'W',abs(lon)/10000000L,abs(lon)%10000000L/10,
 	       speed);
 #endif
       writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
