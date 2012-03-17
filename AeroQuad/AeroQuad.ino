@@ -518,6 +518,97 @@
   }
 #endif
 
+
+#ifdef AutonavShield
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
+  #include <Device_I2C.h>
+
+  // Gyroscope declaration
+  #include <Gyroscope_ITG3200.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer_BMA180.h>
+
+  // Receiver Declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+
+  // heading mag hold declaration
+  #ifdef HeadingMagHold
+//    #define SPARKFUN_5883L_BOB
+    #define AutonavShield_5883L
+//    #define HMC5843
+  #endif
+
+  // Altitude declaration
+  #ifdef AltitudeHoldBaro    
+    #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
+  // Battery Monitor declaration
+  #ifdef BattMonitor
+    #ifdef POWERED_BY_VIN
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+    #else
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+    #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef POWERED_BY_VIN        
+  #endif
+
+  #ifdef OSD
+    #define MAX7456_OSD
+  #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
+  /**
+   * Put AeroQuadMega_v2 specific intialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on
+
+    Wire.begin();
+    TWBR = 12;
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureAccelSum();
+    measureGyroSum();
+  }
+#endif
+
 #ifdef ArduCopter
   #define LED_Green 37
   #define LED_Red 35
@@ -978,7 +1069,7 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
@@ -1206,19 +1297,19 @@ void setup() {
     initializeGps();
 
     // @kenny, move those PID into a normale place
-    PID[GPSROLL_PID_IDX].P = 0.3;
+    PID[GPSROLL_PID_IDX].P = 2.5;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
 
-    PID[GPSPITCH_PID_IDX].P = 0.3;
+    PID[GPSPITCH_PID_IDX].P = 2.5;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
 
   #endif 
 
-#ifdef SlowTelemetry
-        initSlowTelemetry();
-#endif
+  #ifdef SlowTelemetry
+     initSlowTelemetry();
+  #endif
 
   setupFourthOrder();
 
@@ -1379,8 +1470,11 @@ void loop () {
       #endif
 
       #if defined (UseGPS)
-        if (readGps()) {
-          mesureGpsPositionSum();
+        readGps();
+        if (haveAGpsLock()) {
+          if (!isHomeBaseInitialized()) {
+            initHomeBase();
+          }
         }
       #endif      
       
@@ -1428,14 +1522,9 @@ void loop () {
 
     }
     
-    #if defined (UseGPS)
+    #if defined (UseGPSNavigator)
       if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
-        if (haveAGpsLock()) {
-          evaluateCurrentGpsPositionFromSum();
-          if (!isHomeBaseInitialized()) {
-            initHomeBase();
-          }
-        }
+        evaluateGpsReadingHz();
       }
     #endif
     

@@ -24,6 +24,8 @@
 
 #include <AP_GPS.h>
 
+#define MIN_NB_SATS_IN_USE 6
+
 #define GPS2RAD (1/5729577.95)
 #define RAD2DEG 57.2957795
 
@@ -49,13 +51,10 @@ struct GeodeticPosition {
 };
 GeodeticPosition currentPosition;
 
-byte gpsSumCounter = 0;
-long gpsLatitudeSum = 0;
-long gpsLongitudeSum = 0;
-
-byte minNbGPSInUse = 6;
-byte nbSatelitesInUse = 0; // to remove
-
+byte nbSatelitesInUse = 0;
+boolean isGpsHaveANewPosition = false;
+byte nbGpsReadCount = 0;
+byte gpsNbReadPerSec = 0;
 GPS	    *gps;
 AP_GPS_Auto GPS(&Serial1, &gps);
 
@@ -67,14 +66,19 @@ void initializeGps() {
 
 boolean readGps() {
   gps->update();
-//  Serial.print(gps->num_sats); 
-//  Serial.print(" "); 
-//  Serial.println(gps->fix); 
-  return gps->new_data;
+  if (gps->new_data) {
+    isGpsHaveANewPosition = true;
+	currentPosition.latitude = gps->latitude;
+	currentPosition.longitude = gps->longitude;
+	nbSatelitesInUse = gps->num_sats;
+	gps->new_data = false;
+	nbGpsReadCount++;
+  }
+  return isGpsHaveANewPosition;
 }
   
 boolean haveAGpsLock() {
-  return gps->num_sats >= minNbGPSInUse;
+  return gps->fix && gps->num_sats >= MIN_NB_SATS_IN_USE;
 }
 
 long getCourse() {
@@ -87,28 +91,12 @@ unsigned long getGpsSpeed() {
 unsigned long getGpsAltitude() {
   return gps->altitude;
 }
-  
-void mesureGpsPositionSum() {
-  
-  gpsLatitudeSum += gps->latitude;
-  gpsLongitudeSum += gps->longitude;
-  gpsSumCounter++;
-  
-  gps->new_data = false;  // reset into measure GPS and pass gere only if it's true
-}
 
-void evaluateCurrentGpsPositionFromSum() {
-
-  currentPosition.latitude = gpsLatitudeSum/gpsSumCounter;
-  currentPosition.longitude = gpsLongitudeSum/gpsSumCounter;
-  
-//  Serial.print(currentPosition.latitude);
-//  Serial.print(" ");
-//  Serial.print(currentPosition.longitude);
-  gpsLatitudeSum = 0;
-  gpsLongitudeSum = 0;
-  gpsSumCounter = 0;
+void evaluateGpsReadingHz() {
+  gpsNbReadPerSec = nbGpsReadCount;
+  nbGpsReadCount = 0;
 }
+  
 
 
 float gpsRawDistance = 0.0;

@@ -29,15 +29,27 @@ boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }
 
+
+byte countToInitHome = 0;
+#define MIN_NB_GPS_READ_TO_INIT_HOME 15
+
 void initHomeBase() {
+  if (isGpsHaveANewPosition) {
+    if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
+      countToInitHome++;
+    }
+    else {
+      homePosition.latitude = currentPosition.latitude;
+      homePosition.longitude = currentPosition.longitude;
+    }  
+  }
   
-  homePosition.latitude = currentPosition.latitude;
-  homePosition.longitude = currentPosition.longitude;
 }
 
 boolean haveMission() {
   return missionNbPoint != 0;
 }
+
 
 float gpsSpeedSmoothValue = 0.5;
 float gpsCourseSmoothValue = 0.5;
@@ -46,15 +58,15 @@ float gpsCourseSmoothValue = 0.5;
 
 void processPositionCorrection() {
   
-  float derivateDistanceX = (currentPosition.longitude - previousPosition.longitude)*0.649876;
-  float derivateDistanceY = (currentPosition.latitude - previousPosition.latitude)*1.113195;
+  float derivateDistanceX = (currentPosition.longitude - previousPosition.longitude) * 0.649876;
+  float derivateDistanceY = (currentPosition.latitude - previousPosition.latitude) * 1.113195;
   float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  float distanceX = (currentPosition.longitude - positionToReach.longitude)*0.649876;
-  float distanceY = (currentPosition.latitude - positionToReach.latitude)*1.113195;
+  float distanceX = (positionToReach.longitude - currentPosition.longitude) * 0.649876;
+  float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
   float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
+  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * gpsNbReadPerSec * (1-gpsSpeedSmoothValue);
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
     float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
       if (tmp < 0) {
@@ -66,9 +78,13 @@ void processPositionCorrection() {
   float angleToWaypoint = atan2(distanceX, distanceY);
   float courseRads = radians(gpsLaggedCourse/100);
   
-  float azimuth = getAbsoluteHeading();
+//  float azimuth = getAbsoluteHeading();
+  float azimuth = kinematicsAngle[ZAXIS];
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
+  
+  
+  
   
   if (distance != 0) {
     
@@ -90,6 +106,17 @@ void processPositionCorrection() {
     gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
     gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
   }
+  else {
+    gpsRollAxisCorrection = 0.0;
+    gpsPitchAxisCorrection = 0.0;
+  }
+  
+//  Serial.print(distance);
+//  Serial.print(" ");
+//  Serial.print(gpsRollAxisCorrection);
+//  Serial.print(" ");
+//  Serial.println(gpsPitchAxisCorrection);
+  
   
   previousPosition.latitude = currentPosition.latitude;
   previousPosition.longitude = currentPosition.longitude;

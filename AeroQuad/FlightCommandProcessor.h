@@ -134,6 +134,8 @@ void readPilotCommands() {
           gpsPitchAxisCorrection = 0;
           positionToReach.latitude = currentPosition.latitude;
           positionToReach.longitude = currentPosition.longitude;
+          previousPosition.latitude = currentPosition.latitude;
+          previousPosition.longitude = currentPosition.longitude;
           isStorePositionNeeded = false;
         }
         positionHoldState = ON;
