@@ -26,7 +26,7 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
-
+#define MAX_GPS_ANGLE_CORRECTION 200
 
 /**
  * calculateFlightError
@@ -38,8 +38,8 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (positionHoldState == ON) {
-      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -150, 150);
-      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -150, 150);
+      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
+      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
 
       float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
       float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);

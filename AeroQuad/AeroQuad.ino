@@ -1297,11 +1297,11 @@ void setup() {
     initializeGps();
 
     // @kenny, move those PID into a normale place
-    PID[GPSROLL_PID_IDX].P = 2.5;
+    PID[GPSROLL_PID_IDX].P = 0.5;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
 
-    PID[GPSPITCH_PID_IDX].P = 2.5;
+    PID[GPSPITCH_PID_IDX].P = 0.5;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
 
@@ -1521,7 +1521,7 @@ void loop () {
       #endif
     }
     
-    #if defined (UseGPSNavigator)
+    #if defined (UseGPS)
       if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
         evaluateGpsReadingHz();
       }

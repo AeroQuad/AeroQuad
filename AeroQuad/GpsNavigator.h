@@ -83,9 +83,6 @@ void processPositionCorrection() {
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
   
-  
-  
-  
   if (distance != 0) {
     
     float angle = angleToWaypoint-azimuth;
@@ -111,6 +108,8 @@ void processPositionCorrection() {
     gpsPitchAxisCorrection = 0.0;
   }
   
+//  Serial.print(gpsNbReadPerSec);
+//  Serial.print(" ");
 //  Serial.print(distance);
 //  Serial.print(" ");
 //  Serial.print(gpsRollAxisCorrection);
