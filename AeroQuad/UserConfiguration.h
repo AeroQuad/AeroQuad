@@ -127,7 +127,7 @@
 // Optional audio channel telemetry (for ground station tracking purposes)
 // This will output telemetry at slow (1200baud) rate once per second on Serial2. 
 // *******************************************************************************************************************************
-//#define SlowTelemetry  // Enables Wireless telemetry on Serial2
+#define SlowTelemetry  // Enables Wireless telemetry on Serial2
 
 //
 // *******************************************************************************************************************************
