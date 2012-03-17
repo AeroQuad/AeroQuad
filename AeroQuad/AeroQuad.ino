@@ -1513,6 +1513,11 @@ void loop () {
       #if defined (UseGPS) || defined (BattMonitor)
         processLedStatus();
       #endif
+
+      #ifdef SlowTelemetry
+        sendSlowTelemetry();
+      #endif
+
     }
     
     #ifdef SlowTelemetry
