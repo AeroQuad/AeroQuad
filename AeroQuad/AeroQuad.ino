@@ -540,7 +540,9 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
-    #define SPARKFUN_5883L_BOB
+//    #define SPARKFUN_5883L_BOB
+    #define AutonavShield_5883L
+//    #define HMC5843
   #endif
 
   // Altitude declaration
@@ -1067,7 +1069,7 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
