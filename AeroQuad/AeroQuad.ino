@@ -41,7 +41,8 @@
   
   FastSerialPort0(Serial);
   FastSerialPort1(Serial1);
-  FastSerialPort2(Serial3);
+  FastSerialPort2(Serial2);
+  FastSerialPort3(Serial3);
 #endif
 
 // Checks to make sure we have the right combinations defined
@@ -1420,6 +1421,11 @@ void loop () {
       #if defined (UseGPS) || defined (BattMonitor)
         processLedStatus();
       #endif
+
+      #ifdef SlowTelemetry
+        sendSlowTelemetry();
+      #endif
+
     }
     
     #if defined (UseGPS)
@@ -1432,11 +1438,6 @@ void loop () {
         }
       }
     #endif
-
-#ifdef SlowTelemetry
-    sendSlowTelemetry();
-#endif
-
     
     previousTime = currentTime;
   }
