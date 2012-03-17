@@ -540,7 +540,9 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
-    #define SPARKFUN_5883L_BOB
+//    #define SPARKFUN_5883L_BOB
+    #define AutonavShield_5883L
+//    #define HMC5843
   #endif
 
   // Altitude declaration
@@ -1067,7 +1069,7 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
@@ -1295,19 +1297,19 @@ void setup() {
     initializeGps();
 
     // @kenny, move those PID into a normale place
-    PID[GPSROLL_PID_IDX].P = 0.3;
+    PID[GPSROLL_PID_IDX].P = 2.5;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
 
-    PID[GPSPITCH_PID_IDX].P = 0.3;
+    PID[GPSPITCH_PID_IDX].P = 2.5;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
 
   #endif 
 
-#ifdef SlowTelemetry
-        initSlowTelemetry();
-#endif
+  #ifdef SlowTelemetry
+     initSlowTelemetry();
+  #endif
 
   setupFourthOrder();
 
@@ -1513,11 +1515,18 @@ void loop () {
       #if defined (UseGPS) || defined (BattMonitor)
         processLedStatus();
       #endif
+      
+      #ifdef SlowTelemetry
+        sendSlowTelemetry();
+      #endif
     }
     
-    #ifdef SlowTelemetry
-      sendSlowTelemetry();
+    #if defined (UseGPSNavigator)
+      if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
+        evaluateGpsReadingHz();
+      }
     #endif
+        
     
     previousTime = currentTime;
   }

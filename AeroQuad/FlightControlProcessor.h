@@ -38,8 +38,8 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (positionHoldState == ON) {
-      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -100, 100);
-      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -100, 100);
+      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -150, 150);
+      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -150, 150);
 
       float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
       float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
@@ -234,16 +234,17 @@ void processFlightControl() {
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
     // ********************** Process position hold or navigation **************************
     #if defined (UseGPS)
-        if (positionHoldState == ON) {
-          if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
-            processPositionCorrection();
-            isGpsHaveANewPosition = false;
-          }
+      if (positionHoldState == ON) {
+        if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
+          processPositionCorrection();
+          isGpsHaveANewPosition = false;
         }
-        else {
-          gpsRollAxisCorrection = 0;
-          gpsPitchAxisCorrection = 0;
-        }
+      }
+      else {
+        
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+      }
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
