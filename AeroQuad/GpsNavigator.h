@@ -66,7 +66,7 @@ void processPositionCorrection() {
   float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
   float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
+  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * gpsNbReadPerSec * (1-gpsSpeedSmoothValue);
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
     float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
       if (tmp < 0) {
@@ -83,8 +83,8 @@ void processPositionCorrection() {
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
   
-//  Serial.print(distance);
-//  Serial.print(" ");
+  
+  
   
   if (distance != 0) {
     
@@ -106,7 +106,13 @@ void processPositionCorrection() {
     gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
     gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
   }
+  else {
+    gpsRollAxisCorrection = 0.0;
+    gpsPitchAxisCorrection = 0.0;
+  }
   
+//  Serial.print(distance);
+//  Serial.print(" ");
 //  Serial.print(gpsRollAxisCorrection);
 //  Serial.print(" ");
 //  Serial.println(gpsPitchAxisCorrection);

@@ -798,31 +798,31 @@ void reportVehicleState() {
 
 #ifdef SlowTelemetry
 
-byte slowTelemetryTask = 10;
+  byte slowTelemetryTask = 10;
 
-void initSlowTelemetry() {
-
-  Serial2.begin(1200);
-}
-
-void sendSlowTelemetry() {
-  slowTelemetryTask = (slowTelemetryTask +1 ) % 10;
-  switch (slowTelemetryTask) {
-    case 0  : 
+  void initSlowTelemetry() {
+  
+    Serial2.begin(1200);
+  }
+  
+  void sendSlowTelemetry() {
+    slowTelemetryTask = (slowTelemetryTask +1 ) % 10;
+    switch (slowTelemetryTask) {
+      case 0  : 
         Serial2.print(currentPosition.latitude);      // Latitude * 100000
         break;
-    case 1:
+      case 1:
         Serial2.print(currentPosition.longitude);     // Longitude * 100000
         break;
-    case 2: 
+      case 2: 
         Serial2.print((long)(getBaroAltitude()*100)); // Altitude in cm
         break;
-    case 9:
+      case 9:
         Serial2.print("\r\n");
         return;
-  } 
-  Serial2.print(',');
-}
+    } 
+    Serial2.print(',');
+  }
 
 #endif
 
