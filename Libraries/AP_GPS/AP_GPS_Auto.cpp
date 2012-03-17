@@ -17,7 +17,7 @@
 //
 //#define WITH_NMEA_MODE	1
 
-static unsigned int	baudrates[] = {38400U, 57600U, 9600U, 4800U};
+static unsigned long baudrates[] = {38400U, 57600U, 9600U, 4800U, 115200U};
 
 const prog_char	AP_GPS_Auto::_mtk_set_binary[]   PROGMEM = MTK_SET_BINARY;
 const prog_char	AP_GPS_Auto::_ublox_set_binary[] PROGMEM = UBLOX_SET_BINARY;
