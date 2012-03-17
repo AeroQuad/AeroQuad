@@ -1519,7 +1519,6 @@ void loop () {
       #ifdef SlowTelemetry
         sendSlowTelemetry();
       #endif
-
     }
     
     #if defined (UseGPSNavigator)
