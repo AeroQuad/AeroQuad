@@ -26,6 +26,15 @@
 #define _AQ_Navigator_H_
 
 #define MAX_GPS_ANGLE_CORRECTION 200
+#define MAX_WAYPOINTS 16
+
+struct {
+  long latitude;
+  long longitude;
+  int altitude;
+} waypoint[MAX_WAYPOINTS];
+
+int currentWaypoint;
 
 boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
@@ -45,13 +54,11 @@ void initHomeBase() {
       homePosition.longitude = currentPosition.longitude;
     }  
   }
-  
 }
 
 boolean haveMission() {
   return missionNbPoint != 0;
 }
-
 
 float gpsSpeedSmoothValue = 0.5;
 float gpsCourseSmoothValue = 0.5;

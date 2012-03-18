@@ -194,7 +194,7 @@ void readSerialCommand() {
         currentWaypoint = readIntegerSerial();
         waypoint[currentWaypoint].latitude = readIntegerSerial();
         waypoint[currentWaypoint].longitude = readIntegerSerial();
-        waypoint[currentWaypoint].altitude = readeIntegerSerial();
+        waypoint[currentWaypoint].altitude = readIntegerSerial();
       #else
         readIntegerSerial();
         readIntegerSerial();

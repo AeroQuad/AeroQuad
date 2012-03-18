@@ -193,6 +193,7 @@ void readSerialCommand();
 void sendSerialTelemetry();
 void printInt(int data);
 float readFloatSerial();
+long readIntegerSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry();
