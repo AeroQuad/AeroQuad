@@ -233,6 +233,16 @@ void readSerialCommand() {
       #endif
       break;
 
+    case 'V': // GPS
+      #if defined (UseGPS)
+        readSerialPID(GPSROLL_PID_IDX);
+        readSerialPID(GPSPITCH_PID_IDX);
+      #else
+        for (byte values = 0; values < 6; values++)
+          readFloatSerial();
+      #endif
+      break;
+
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
@@ -587,6 +597,20 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(minRangeFinderRange);
     #else
       PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
+  case 'v': // Send GPS PIDs
+    #if defined (UseGPS)
+      PrintPID(GPSROLL_PID_IDX);
+      PrintPID(GPSPITCH_PID_IDX);
+      SERIAL_PRINTLN();
+      queryType = 'X';
+    #else
+      for (byte values=0; values < 5; values++)
+        PrintValueComma(0);
       SERIAL_PRINTLN(0);
     #endif
     queryType = 'X';
