@@ -25,6 +25,8 @@
 #ifndef _AQ_Navigator_H_
 #define _AQ_Navigator_H_
 
+#define MAX_GPS_ANGLE_CORRECTION 200
+
 boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }
@@ -66,7 +68,7 @@ void processPositionCorrection() {
   float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
   float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * gpsNbReadPerSec * (1-gpsSpeedSmoothValue);
+  gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
     float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
       if (tmp < 0) {
@@ -108,8 +110,16 @@ void processPositionCorrection() {
     gpsPitchAxisCorrection = 0.0;
   }
   
-//  Serial.print(gpsNbReadPerSec);
+  gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
+  gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
+
+
+
+//  Serial.print(currentPosition.latitude);
 //  Serial.print(" ");
+//  Serial.println(currentPosition.longitude);
+
+  
 //  Serial.print(distance);
 //  Serial.print(" ");
 //  Serial.print(gpsRollAxisCorrection);

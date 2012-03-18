@@ -217,10 +217,10 @@ void initializeKinematics(float hdgX, float hdgY)
   dcmMatrix[8] =  1;
 
   kpRollPitch = 0.05;        // alternate 0.1;
-  kiRollPitch = 0.0;//0.0001;     // alternate 0.0002;
+  kiRollPitch = 0.0001;     // alternate 0.0002;
     
   kpYaw = -0.05;             // alternate -0.05;
-  kiYaw = 0.0;//-0.0001;          // alternate -0.0001;
+  kiYaw = -0.0001;          // alternate -0.0001;
     
 }
   

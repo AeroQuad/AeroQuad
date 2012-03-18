@@ -26,7 +26,7 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
-#define MAX_GPS_ANGLE_CORRECTION 200
+
 
 /**
  * calculateFlightError
@@ -38,9 +38,6 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (positionHoldState == ON) {
-      gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
-      gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
-
       float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
       float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
@@ -241,10 +238,10 @@ void processFlightControl() {
         }
       }
       else {
-        
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
       }
+//      Serial.println(nbSatelitesInUse);
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
