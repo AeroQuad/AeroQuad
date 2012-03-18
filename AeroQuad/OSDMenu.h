@@ -41,6 +41,7 @@ extern const struct MenuItem menuData[];
 #define MENU_EXIT     4 // stick left action
 #define MENU_CALLBACK 5 // timed callback
 #define MENU_ABORT    6 // cleanup now (motors armed), only needs to be handled if cleanups are needed
+#define MENU_HIJACK   7 // handler should interrept sticks completely !!
 
 #define MENU_NOFUNC   0
 
@@ -56,6 +57,7 @@ byte  menuInFunc = 0;       // tells if a handler func is active
 byte  menuEntry  = 255;     // Active menu entry
 byte  menuAtExit = 0;       // are we at the exit at the top
 byte  stickWaitNeutral = 1; // wait for stick to center
+byte  stickHiJack = 0;      // Pass sticks to handler (should prevent arming too)
 
 // DATA that menu functions can freely use to store state
 byte  menuFuncData[10];  // 10 bytes of data for funcs to use as they wish...
@@ -469,6 +471,41 @@ void menuHideOSD(byte mode, byte action){
   hideOSD();
 }
 
+#ifdef CameraControl
+short savedCenterYaw, savedCenterPitch;
+
+
+void menuCameraPTZ(byte mode, byte action){
+
+  if (action == MENU_INIT) {
+    hideOSD();
+    stickHiJAck = 1;
+    savedCenterYaw = servoCenterYaw;
+    savedCenterPitch = servoCenterPitch;    
+  }
+  else if (action == MENU_HIJACK) {
+    const short roll  = receiverCommand[XAXIS]  - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
+    const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
+    const short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+
+    if (yaw < -MENU_REPEAT) {
+      unhideOSD();
+      stickHiJAck = 0;
+      menuInFunc  = 0;
+      servoCenterYaw   = savedCenterYaw;
+      servoCenterPitch = savedCenterPitch;
+      return;
+    }
+    if (abs(roll) > 100) {
+      servoCenterYaw = constrain(servoCenterYaw + (roll/80), servoMinYaw, servoMaxYaw);
+    }
+    if (abs(pitch) > 100) {
+      servoCenterPitch = constrain(servoCenterPitch + (pitch/80), servoMinPitch, servoMaxPitch);
+    }
+  }
+}
+#endif
+
 // MENU STRUCTURE TABLE
 //
 // One line in this table corresponds to one entry on the menu.
@@ -518,6 +555,9 @@ const struct MenuItem menuData[] = {
   {2,     "Gyro Data",        menuSensorInfo,    1},
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
+#endif
+#ifdef CameraControl
+  {0, "Exit and hide OSD",    menuCameraPTZ,     0},
 #endif
   {0, "Exit and hide OSD",    menuHideOSD,       0},
   };
@@ -675,6 +715,12 @@ void menuExit() {
 }
 
 void updateOSDMenu() {
+
+  // check for special HiJack mode
+  if ((menuEntry!=255) && stickHiJack && menuInFunc) {
+    MENU_CALLFUNC(menuEntry, MENU_HIJACK)
+      return;
+  }
 
   // check if armed, menu is only operational when not armed
   if (motorArmed == true) {
