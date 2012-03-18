@@ -189,6 +189,19 @@ void readSerialCommand() {
       #endif
       break;
       
+    case 'O': // define waypoints
+      #ifdef UseGPSNavigator
+        currentWaypoint = readIntegerSerial();
+        waypoint[currentWaypoint].latitude = readIntegerSerial();
+        waypoint[currentWaypoint].longitude = readIntegerSerial();
+        waypoint[currentWaypoint].altitude = readeIntegerSerial();
+      #else
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+      #endif
+      break;
     case 'P': //  read Camera values
       #ifdef CameraControl
         cameraMode = readFloatSerial();
@@ -463,6 +476,24 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
+  case 'o': // send waypoints
+    #ifdef UseGpsNavigator
+      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+        PrintValueComma(index);
+        PrintValueComma(waypoint[index].latitude);
+        PrintValueComma(waypoint[index].longitude);
+        PrintValueComma(waypoint[index].altitude);
+      }
+      SERIAL_PRINTLN();
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
   case 'p': // Send Camera values
     #ifdef CameraControl
       PrintValueComma(cameraMode);
@@ -605,6 +636,29 @@ float readFloatSerial() {
   data[index] = '\0';
 
   return atof(data);
+}
+
+// Used to read integer values from the serial port
+long readIntegerSerial() {
+  #define SERIALINTEGERSIZE 16
+  byte index = 0;
+  byte timeout = 0;
+  char data[SERIALINTEGERSIZE] = "";
+
+  do {
+    if (SERIAL_AVAILABLE() == 0) {
+      delay(10);
+      timeout++;
+    }
+    else {
+      data[index] = SERIAL_READ();
+      timeout = 0;
+      index++;
+    }
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
+  data[index] = '\0';
+
+  return atol(data);
 }
 
 void comma() {
