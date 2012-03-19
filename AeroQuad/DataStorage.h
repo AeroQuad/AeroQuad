@@ -198,7 +198,7 @@ void initializeEEPROM() {
     PID[GPSPITCH_PID_IDX].P = 1.0;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
-#endif
+  #endif
 
   // Camera Control
   #ifdef CameraControl
@@ -374,7 +374,7 @@ void writeEEPROM(){
     writeFloat(missionNbPoint, RANGE_FINDER_MAX_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
-#endif
+  #endif
 
     // Camera Control
   #ifdef CameraControl
