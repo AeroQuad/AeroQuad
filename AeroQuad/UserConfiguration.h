@@ -33,9 +33,9 @@
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-#define AutonavShield       // Really good board for the guy here http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
+//#define AutonavShield       // Really good board for the guy here http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -85,8 +85,8 @@
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 //#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
-#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
+//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+//#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
 
 //
 // *******************************************************************************************************************************
@@ -107,7 +107,7 @@
 //#define NormalReceiver // this do nothing really but, it indicate users that they don't have to define other option here if they have a normal receiver
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverPPM // Use a ppm receiver
-#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
+//#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
 // You need to select one of these channel order definitions for PPM receiver
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1 //For Graupner/Spektrum (DEFAULT)
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba

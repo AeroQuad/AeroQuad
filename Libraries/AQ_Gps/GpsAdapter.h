@@ -53,8 +53,6 @@ GeodeticPosition currentPosition;
 
 byte nbSatelitesInUse = 0;
 boolean isGpsHaveANewPosition = false;
-byte nbGpsReadCount = 0;
-byte gpsNbReadPerSec = 0;
 GPS	    *gps;
 AP_GPS_Auto GPS(&Serial1, &gps);
 
@@ -72,7 +70,6 @@ boolean readGps() {
 	currentPosition.longitude = gps->longitude;
 	nbSatelitesInUse = gps->num_sats;
 	gps->new_data = false;
-	nbGpsReadCount++;
   }
   return isGpsHaveANewPosition;
 }
@@ -92,11 +89,7 @@ unsigned long getGpsAltitude() {
   return gps->altitude;
 }
 
-void evaluateGpsReadingHz() {
-  gpsNbReadPerSec = nbGpsReadCount;
-  nbGpsReadCount = 0;
-}
-  
+
 
 
 float gpsRawDistance = 0.0;

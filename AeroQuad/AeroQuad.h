@@ -193,6 +193,7 @@ void readSerialCommand();
 void sendSerialTelemetry();
 void printInt(int data);
 float readFloatSerial();
+long readIntegerSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry();
@@ -228,6 +229,8 @@ typedef struct {
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
+  t_NVR_PID GPSROLL_PID_GAIN_ADR;
+  t_NVR_PID GPSPITCH_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   
   float SOFTWARE_VERSION_ADR;

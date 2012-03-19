@@ -110,7 +110,6 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
-      measureGyro();
       measureAccel();
     }
   }
@@ -157,7 +156,6 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
-      measureGyro();
       measureAccel();
     }
   }
@@ -221,7 +219,6 @@
    */
   void measureCriticalSensors() {
     measureAccelSum();
-    measureGyroSum();
   }
 
 #endif
@@ -286,7 +283,6 @@
    */
   void measureCriticalSensors() {
     measureAccelSum();
-    measureGyroSum();
   }
 #endif
 
@@ -423,7 +419,6 @@
    */
   void measureCriticalSensors() {
     measureAccelSum();
-    measureGyroSum();
   }
 #endif
 
@@ -514,7 +509,6 @@
    */
   void measureCriticalSensors() {
     measureAccelSum();
-    measureGyroSum();
   }
 #endif
 
@@ -605,7 +599,6 @@
    */
   void measureCriticalSensors() {
     measureAccelSum();
-    measureGyroSum();
   }
 #endif
 
@@ -680,7 +673,6 @@
   void measureCriticalSensors() {
     evaluateADC();
     measureAccelSum();
-    measureGyroSum();
   }
 #endif
 
@@ -1297,11 +1289,11 @@ void setup() {
     initializeGps();
 
     // @kenny, move those PID into a normale place
-    PID[GPSROLL_PID_IDX].P = 2.5;
+    PID[GPSROLL_PID_IDX].P = 4.0;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
 
-    PID[GPSPITCH_PID_IDX].P = 2.5;
+    PID[GPSPITCH_PID_IDX].P = 4.0;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
 
@@ -1357,8 +1349,9 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
+      measureGyro();
       evaluateMetersPerSec();
-      evaluateGyroRate();
+      
 
       for (int axis = XAXIS; axis <= ZAXIS; axis++) {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
@@ -1520,12 +1513,6 @@ void loop () {
         sendSlowTelemetry();
       #endif
     }
-    
-    #if defined (UseGPSNavigator)
-      if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
-        evaluateGpsReadingHz();
-      }
-    #endif
     
     previousTime = currentTime;
   }

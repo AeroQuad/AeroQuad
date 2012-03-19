@@ -192,6 +192,12 @@ void initializeEEPROM() {
   
   #if defined (UseGPS)
     missionNbPoint = 0;
+    PID[GPSROLL_PID_IDX].P = 1.0;
+    PID[GPSROLL_PID_IDX].I = 0.0;
+    PID[GPSROLL_PID_IDX].D = 0.0;
+    PID[GPSPITCH_PID_IDX].P = 1.0;
+    PID[GPSPITCH_PID_IDX].I = 0.0;
+    PID[GPSPITCH_PID_IDX].D = 0.0;
   #endif
 
   // Camera Control
@@ -273,6 +279,8 @@ void readEEPROM() {
   
   #if defined (UseGPS)
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT);
+    readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
+    readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
   #endif
   // Camera Control
   #ifdef CameraControl
@@ -364,6 +372,8 @@ void writeEEPROM(){
   
   #if defined (UseGPS)
     writeFloat(missionNbPoint, RANGE_FINDER_MAX_ADR);
+    writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
+    writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
   #endif
 
     // Camera Control
