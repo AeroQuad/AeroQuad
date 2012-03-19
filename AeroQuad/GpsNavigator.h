@@ -73,7 +73,7 @@ void processPositionCorrection() {
   
   float distanceX = (positionToReach.longitude - currentPosition.longitude) * 0.649876;
   float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
-  float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
+  float distance = sqrt(sq(distanceY) + sq(distanceX));
   
   gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
