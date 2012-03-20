@@ -1287,16 +1287,6 @@ void setup() {
   
   #if defined (UseGPS)
     initializeGps();
-
-    // @kenny, move those PID into a normale place
-    PID[GPSROLL_PID_IDX].P = 4.0;
-    PID[GPSROLL_PID_IDX].I = 0.0;
-    PID[GPSROLL_PID_IDX].D = 0.0;
-
-    PID[GPSPITCH_PID_IDX].P = 4.0;
-    PID[GPSPITCH_PID_IDX].I = 0.0;
-    PID[GPSPITCH_PID_IDX].D = 0.0;
-
   #endif 
 
   #ifdef SlowTelemetry
@@ -1351,7 +1341,6 @@ void loop () {
       
       measureGyro();
       evaluateMetersPerSec();
-      
 
       for (int axis = XAXIS; axis <= ZAXIS; axis++) {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);

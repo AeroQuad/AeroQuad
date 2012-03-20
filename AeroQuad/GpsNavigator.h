@@ -25,7 +25,7 @@
 #ifndef _AQ_Navigator_H_
 #define _AQ_Navigator_H_
 
-#define MAX_GPS_ANGLE_CORRECTION 200
+#define MAX_GPS_ANGLE_CORRECTION 150
 #define MAX_WAYPOINTS 16
 
 struct {
@@ -67,13 +67,13 @@ float gpsCourseSmoothValue = 0.5;
 
 void processPositionCorrection() {
   
-  float derivateDistanceX = (currentPosition.longitude - previousPosition.longitude) * 0.649876;
-  float derivateDistanceY = (currentPosition.latitude - previousPosition.latitude) * 1.113195;
+  float derivateDistanceX = ((float)((float)currentPosition.longitude - (float)previousPosition.longitude) * 0.649876);
+  float derivateDistanceY = ((float)((float)currentPosition.latitude - (float)previousPosition.latitude) * 1.113195);
   float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
-  float distanceX = (positionToReach.longitude - currentPosition.longitude) * 0.649876;
-  float distanceY = (positionToReach.latitude - currentPosition.latitude) * 1.113195;
-  float distance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
+  float distanceX = ((float)((float)positionToReach.longitude - (float)currentPosition.longitude) * 0.649876);
+  float distanceY = ((float)((float)positionToReach.latitude - (float)currentPosition.latitude) * 1.113195);
+  float distance = sqrt(sq(distanceY) + sq(distanceX));
   
   gpsLaggedSpeed = gpsLaggedSpeed * (gpsSpeedSmoothValue) + derivateDistance * (1-gpsSpeedSmoothValue);
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
@@ -121,10 +121,25 @@ void processPositionCorrection() {
   gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
 
 
+//  Serial.print(gpsLaggedSpeed);
+//  Serial.print(" ");
+//  Serial.print(gpsLaggedCourse);
+//  Serial.print(" ");
+//  Serial.print(currentSpeedCmPerSecRoll);
+//  Serial.print(" ");
+//  Serial.println(currentSpeedCmPerSecPitch);
 
+
+//  Serial.print(distance);
+//  Serial.print("   ");
 //  Serial.print(currentPosition.latitude);
 //  Serial.print(" ");
-//  Serial.println(currentPosition.longitude);
+//  Serial.print(currentPosition.longitude);
+//  Serial.print("    ");
+//  Serial.print(positionToReach.latitude);
+//  Serial.print(" ");
+//  Serial.println(positionToReach.longitude);
+  
 
   
 //  Serial.print(distance);
