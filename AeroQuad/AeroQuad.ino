@@ -1287,12 +1287,6 @@ void setup() {
   
   #if defined (UseGPS)
     initializeGps();
-    PID[GPSROLL_PID_IDX].P = 1.5;
-    PID[GPSROLL_PID_IDX].I = 0.0;
-    PID[GPSROLL_PID_IDX].D = 0.0;
-    PID[GPSPITCH_PID_IDX].P = 1.5;
-    PID[GPSPITCH_PID_IDX].I = 0.0;
-    PID[GPSPITCH_PID_IDX].D = 0.0;
   #endif 
 
   #ifdef SlowTelemetry

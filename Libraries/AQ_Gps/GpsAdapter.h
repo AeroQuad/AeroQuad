@@ -43,10 +43,12 @@ enum {
 struct GeodeticPosition {
   long latitude;
   long longitude;
+  long altitude;
   
   GeodeticPosition() {
     latitude = GPS_INVALID_ANGLE;
     longitude = GPS_INVALID_ANGLE;
+	altitude = 0;
   }
 };
 GeodeticPosition currentPosition;
