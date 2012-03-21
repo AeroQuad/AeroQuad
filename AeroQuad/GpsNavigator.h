@@ -25,14 +25,9 @@
 #ifndef _AQ_Navigator_H_
 #define _AQ_Navigator_H_
 
-
+// @todo, Kenny, remove this and put it in the EEPROM
 #define MAX_WAYPOINTS 16
-
-struct {
-  long latitude;
-  long longitude;
-  int altitude;
-} waypoint[MAX_WAYPOINTS];
+GeodeticPosition waypoint[MAX_WAYPOINTS];
 
 int currentWaypoint;
 
@@ -52,6 +47,7 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
+      homePosition.altitude = 0;
     }  
   }
 }
