@@ -237,9 +237,11 @@ void readSerialCommand() {
       #if defined (UseGPS)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
+        writeEEPROM();
       #else
-        for (byte values = 0; values < 6; values++)
+        for (byte values = 0; values < 6; values++) {
           readFloatSerial();
+        }
       #endif
       break;
 
