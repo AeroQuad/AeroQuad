@@ -59,9 +59,9 @@ boolean haveMission() {
 float gpsSpeedSmoothValue = 0.5;
 float gpsCourseSmoothValue = 0.5;
 
-#define MAX_GPS_ANGLE_CORRECTION 150
+#define MAX_GPS_ANGLE_CORRECTION 200
 //#define MAX_NAVIGATON_SPEED 400  // m/s * 100 // 3 m/s = 10.8km/h
-#define MAX_NAVIGATON_SPEED 20.0  // m/s * 100 // 3 m/s = 10.8km/h
+#define MAX_NAVIGATON_SPEED 60.0  // m/s * 100 // 3 m/s = 10.8km/h
 
 void processPositionCorrection() {
   
@@ -77,6 +77,7 @@ void processPositionCorrection() {
   if (derivateDistanceX != 0 || derivateDistanceY != 0) {
     float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
       if (tmp < 0) {
+//        tmp += 360; // jakub fix, logic but... I had weird behavior, I need more investigation!
         tmp += radians(360);
       }
       gpsLaggedCourse = (int)((float)gpsLaggedCourse*(gpsCourseSmoothValue) + tmp*100*(1-gpsCourseSmoothValue));
@@ -104,18 +105,6 @@ void processPositionCorrection() {
   
   gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
   gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -MAX_GPS_ANGLE_CORRECTION, MAX_GPS_ANGLE_CORRECTION);
-
-//  Serial.print(maxSpeedRoll);
-//  Serial.print(" ");
-//  Serial.print(maxSpeedPitch);
-//  Serial.print(" ");
-//  Serial.print(currentSpeedCmPerSecRoll);
-//  Serial.print(" ");
-//  Serial.print(currentSpeedCmPerSecPitch);
-//  Serial.print(" ");
-//  Serial.print(gpsRollAxisCorrection);
-//  Serial.print(" ");
-//  Serial.println(gpsPitchAxisCorrection);
 
   previousPosition.latitude = currentPosition.latitude;
   previousPosition.longitude = currentPosition.longitude;
