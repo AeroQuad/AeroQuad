@@ -321,6 +321,7 @@
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
+  #define Buzzer_Pin 49
 
   #include <Device_I2C.h>
 
@@ -355,7 +356,7 @@
     #ifdef POWERED_BY_VIN
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(3, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
   #else
     #undef BattMonitorAutoDescent
@@ -376,6 +377,8 @@
     digitalWrite(LED_Red, LOW);
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
+    pinMode(Buzzer_Pin, OUTPUT);
+    digitalWrite(Buzzer_Pin, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -1033,7 +1036,9 @@
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
 #include "SerialCom.h"
-
+#if defined (BattMonitor)
+  #include "LedStatusProcessor.h"
+#endif 
 
 
 /**
@@ -1323,7 +1328,9 @@ void loop () {
       #endif
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt*1000.0);
+        processLedStatus();
       #endif
+          
 
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
