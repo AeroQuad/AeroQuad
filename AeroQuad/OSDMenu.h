@@ -479,11 +479,12 @@ void menuHideOSD(byte mode, byte action){
 #ifdef CameraControl
 short savedCenterYaw, savedCenterPitch;
 
+#define ZOOMPIN 24
 
 void menuCameraPTZ(byte mode, byte action){
 
   if (action == MENU_INIT) {
-//    hideOSD();
+    hideOSD();
     menuOwnsSticks = 1;
     savedCenterYaw = servoCenterYaw;
     savedCenterPitch = servoCenterPitch;    
@@ -497,22 +498,37 @@ void menuCameraPTZ(byte mode, byte action){
       unhideOSD();
       menuOwnsSticks = 0;
       menuInFunc  = 0;
+
+      // release zoom
+      pinMode(ZOOMPIN, INPUT);
+
+      // restore position
       servoCenterYaw   = savedCenterYaw;
       servoCenterPitch = savedCenterPitch;
       return;
     }
+
     if (abs(roll) > 100) {
       servoCenterYaw = constrain(servoCenterYaw + (roll/60), servoMinYaw, servoMaxYaw);
-      notifyOSD(OSD_NOCLEAR,"%d %d %d",servoCenterYaw,servoCenterPitch,servoCenterRoll);
     }
+
     if (abs(pitch) > 100) {
       servoCenterPitch = constrain(servoCenterPitch + (pitch/60), servoMinPitch, servoMaxPitch);
-      notifyOSD(OSD_NOCLEAR,"%d %d %d",servoCenterYaw,servoCenterPitch,servoCenterRoll);
     }
-    if (abs(receiverCommand[THROTTLE] - servoCenterRoll) > 50) {
-      servoCenterRoll = constrain(receiverCommand[THROTTLE], servoMinRoll, servoMaxRoll);
-      notifyOSD(OSD_NOCLEAR,"%d %d %d",servoCenterYaw,servoCenterPitch,servoCenterRoll);
-    }      
+
+    if (receiverCommand[THROTTLE] < 1200) {
+      // zoom out
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, LOW);
+    } 
+    else if (receiverCommand[THROTTLE] > 1800) {
+      // zoom in
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, HIGH);
+    } else {
+      // release zoom
+      pinMode(ZOOMPIN, INPUT);
+    }
   }
 }
 #endif
