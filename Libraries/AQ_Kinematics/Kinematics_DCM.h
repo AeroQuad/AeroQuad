@@ -39,6 +39,8 @@ float kiRollPitch = 0.0;
 float kpYaw = 0.0;
 float kiYaw = 0.0;
 
+float trueHeading = 0.0;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Matrix Update
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +176,7 @@ void eulerAngles(void)
 {
   kinematicsAngle[XAXIS]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
   kinematicsAngle[YAXIS] =  -asin(dcmMatrix[6]);
-  kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
+  trueHeading = kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   
 ////////////////////////////////////////////////////////////////////////////////
