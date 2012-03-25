@@ -46,13 +46,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -85,8 +85,8 @@
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 #define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
-#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
+//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+//#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
 
 //
 // *******************************************************************************************************************************
@@ -95,7 +95,7 @@
 // *******************************************************************************************************************************
 #define BattMonitor            // Enable Battery monitor
 #define BattMonitorAutoDescent // NEED BattMonitor defined. if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
