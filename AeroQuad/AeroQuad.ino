@@ -110,6 +110,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
+      measureGyro();
       measureAccel();
     }
   }
@@ -156,6 +157,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
+      measureGyro();
       measureAccel();
     }
   }
@@ -218,6 +220,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 
@@ -418,6 +421,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -508,6 +512,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -598,6 +603,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -672,6 +678,7 @@
    */
   void measureCriticalSensors() {
     evaluateADC();
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -1339,7 +1346,7 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
-      measureGyro();
+      evaluateGyroRate();
       evaluateMetersPerSec();
 
       for (int axis = XAXIS; axis <= ZAXIS; axis++) {
