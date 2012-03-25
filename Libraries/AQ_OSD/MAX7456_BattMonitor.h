@@ -71,5 +71,3 @@ void displayVoltage(byte areMotorsArmed) {
 }
 
 #endif  // #define _AQ_OSD_MAX7456_BATTMONITOR_H_
-
-
