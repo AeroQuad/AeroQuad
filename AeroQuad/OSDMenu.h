@@ -41,6 +41,7 @@ extern const struct MenuItem menuData[];
 #define MENU_EXIT     4 // stick left action
 #define MENU_CALLBACK 5 // timed callback
 #define MENU_ABORT    6 // cleanup now (motors armed), only needs to be handled if cleanups are needed
+#define MENU_HIJACK   7 // handler should interrept sticks completely !!
 
 #define MENU_NOFUNC   0
 
@@ -48,6 +49,10 @@ extern const struct MenuItem menuData[];
 #define MENU_SYM_UP   '\016'
 #define MENU_SYM_DOWN '\017'
 
+#define MENU_STICK_CENTER  1500  // center value
+#define MENU_STICK_NEUTRAL 100   // less than this from center is neutral
+#define MENU_STICK_ACTIVE  200   // over this is select
+#define MENU_STICK_REPEAT  400   // autorepeat at extreme values
 
 byte  menuInFunc = 0;       // tells if a handler func is active
                             // 0 - we're in base menu
@@ -56,6 +61,7 @@ byte  menuInFunc = 0;       // tells if a handler func is active
 byte  menuEntry  = 255;     // Active menu entry
 byte  menuAtExit = 0;       // are we at the exit at the top
 byte  stickWaitNeutral = 1; // wait for stick to center
+byte  menuOwnsSticks = 0;   // menu code will handle stick input (prevents arming)
 
 // DATA that menu functions can freely use to store state
 byte  menuFuncData[10];  // 10 bytes of data for funcs to use as they wish...
@@ -153,6 +159,7 @@ void menuHandleConfirm(byte mode, byte action) {
         // Initialize EEPROM with default values
         notifyOSD(OSD_NOCLEAR|OSD_CENTER, "initializing EEPROM");
         initializeEEPROM(); // defined in DataStorage.h
+        writeEEPROM(); // defined in DataStorage.h
         calibrateGyro();
         computeAccelBias();
         zeroIntegralError();
@@ -469,6 +476,63 @@ void menuHideOSD(byte mode, byte action){
   hideOSD();
 }
 
+#ifdef CameraControl
+short savedCenterYaw, savedCenterPitch;
+
+#define ZOOMPIN 24
+
+void menuCameraPTZ(byte mode, byte action){
+
+  if (action == MENU_INIT) {
+    hideOSD();
+    menuOwnsSticks = 1;
+    savedCenterYaw = servoCenterYaw;
+    savedCenterPitch = servoCenterPitch;    
+  }
+  else if (action == MENU_HIJACK) {
+    const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
+    const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
+    const short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+
+    if (yaw < -MENU_STICK_REPEAT) {
+      unhideOSD();
+      menuOwnsSticks = 0;
+      menuInFunc  = 0;
+
+      // release zoom
+      pinMode(ZOOMPIN, INPUT);
+
+      // restore position
+      servoCenterYaw   = savedCenterYaw;
+      servoCenterPitch = savedCenterPitch;
+      return;
+    }
+
+    if (abs(roll) > 100) {
+      servoCenterYaw = constrain(servoCenterYaw + (roll/60), servoMinYaw, servoMaxYaw);
+    }
+
+    if (abs(pitch) > 100) {
+      servoCenterPitch = constrain(servoCenterPitch + (pitch/60), servoMinPitch, servoMaxPitch);
+    }
+
+    if (receiverCommand[THROTTLE] < 1200) {
+      // zoom out
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, LOW);
+    } 
+    else if (receiverCommand[THROTTLE] > 1800) {
+      // zoom in
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, HIGH);
+    } else {
+      // release zoom
+      pinMode(ZOOMPIN, INPUT);
+    }
+  }
+}
+#endif
+
 // MENU STRUCTURE TABLE
 //
 // One line in this table corresponds to one entry on the menu.
@@ -519,6 +583,9 @@ const struct MenuItem menuData[] = {
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
 #endif
+#ifdef CameraControl
+  {0, "Camera PTZ mode",      menuCameraPTZ,     0},
+#endif
   {0, "Exit and hide OSD",    menuHideOSD,       0},
   };
 
@@ -541,12 +608,7 @@ byte  menuIsLast(byte entry) {
   return 1;
 }
 
-#define MENU_STICK_CENTER  1500  // center value
-#define MENU_STICK_NEUTRAL 100   // less than this from center is neutral
-#define MENU_STICK_ACTIVE  200   // over this is select
-#define MENU_STICK_REPEAT  400   // autorepeat at extreme values
-
-#define MENU_CALLFUNC(entry, action) menuData[entry].function(menuData[entry].mode,action);
+#define MENU_CALLFUNC(entry, action) menuData[entry].function(menuData[entry].mode,action)
 
 void menuShow(byte entry) {
 
@@ -572,7 +634,7 @@ void menuUp() {
   }
 
   if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry,MENU_UP)
+    MENU_CALLFUNC(menuEntry,MENU_UP);
     return;
   }
 
@@ -596,7 +658,7 @@ void menuDown() {
     return;
   }
   if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry, MENU_DOWN)
+    MENU_CALLFUNC(menuEntry, MENU_DOWN);
     return;
   }
   if (menuAtExit) {
@@ -623,7 +685,7 @@ void menuSelect() {
     menuEntry=0;
   }
   else if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry,MENU_SELECT)
+    MENU_CALLFUNC(menuEntry,MENU_SELECT);
     if (menuInFunc) return; // redisplay menu if we exited from handler
   }
   else if (menuAtExit) {
@@ -638,7 +700,7 @@ void menuSelect() {
   }
   else if (menuData[menuEntry].function != MENU_NOFUNC) {
     menuInFunc = 1;
-    MENU_CALLFUNC(menuEntry, MENU_INIT)
+    MENU_CALLFUNC(menuEntry, MENU_INIT);
     return;
   }
   else if (menuData[menuEntry].level < menuData[menuEntry + 1].level) {
@@ -657,7 +719,7 @@ void menuExit() {
     menuEntry = 255;
   }
   else if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry, MENU_EXIT)
+    MENU_CALLFUNC(menuEntry, MENU_EXIT);
     if (menuInFunc)
       return;
   }
@@ -676,12 +738,22 @@ void menuExit() {
 
 void updateOSDMenu() {
 
+  // check for special HiJack mode
+  if ((menuEntry!=255) && menuOwnsSticks  && menuInFunc) {
+    
+    MENU_CALLFUNC(menuEntry, MENU_HIJACK);
+    if (menuInFunc == 0) {
+      menuShow(menuEntry);
+    }
+    return;
+  }
+
   // check if armed, menu is only operational when not armed
   if (motorArmed == true) {
     if (menuEntry != 255) {
       // BAIL OUT of menu if armed
       if (menuInFunc) {
-        MENU_CALLFUNC(menuEntry, MENU_ABORT)
+        MENU_CALLFUNC(menuEntry, MENU_ABORT);
       }
       notifyOSD(0, NULL); // clear menuline
       menuInFunc = 0;
@@ -695,7 +767,7 @@ void updateOSDMenu() {
     menuInFunc--;
     if (menuInFunc == 1) {
       // call the callback when counter hits 1
-      MENU_CALLFUNC(menuEntry, MENU_CALLBACK)
+      MENU_CALLFUNC(menuEntry, MENU_CALLBACK);
       // show the menu entry if the handler function 'exited'
       if (menuInFunc == 0) {
         menuShow(menuEntry);
