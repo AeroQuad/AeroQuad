@@ -39,6 +39,7 @@ void processHeading()
 
     #if defined(HeadingMagHold)
       heading = degrees(kinematicsAngle[ZAXIS]);
+//      heading = degrees(trueHeading);
     #else
       heading = degrees(gyroHeading);
     #endif
