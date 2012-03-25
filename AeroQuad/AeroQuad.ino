@@ -1354,6 +1354,7 @@ void loop () {
 
       for (int axis = XAXIS; axis <= ZAXIS; axis++) {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+        smootedAccel[axis] = filterSmooth(filteredAccel[axis],smootedAccel[axis],0.5);
       }
       
 //      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
@@ -1367,9 +1368,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1379,9 +1380,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             getMagnetometerRawData(XAXIS),
                             getMagnetometerRawData(YAXIS),
                             getMagnetometerRawData(ZAXIS),
@@ -1390,9 +1391,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1401,9 +1402,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             accelOneG,
                             getHdgXY(XAXIS),
                             getHdgXY(YAXIS),
@@ -1412,9 +1413,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             accelOneG,
                             0.0,
                             0.0,
@@ -1439,19 +1440,6 @@ void loop () {
           fastTelemetry();
         }
       #endif
-      
-//      #if defined(HeadingMagHold)
-//        calculateHeading(gyroRate[XAXIS],
-//                         gyroRate[YAXIS],
-//                         gyroRate[ZAXIS],
-//                         filteredAccel[XAXIS],
-//                         filteredAccel[YAXIS],
-//                         filteredAccel[ZAXIS],
-//                         getMagnetometerRawData(XAXIS),
-//                         getMagnetometerRawData(YAXIS),
-//                         getMagnetometerRawData(ZAXIS),
-//                         G_Dt);
-//      #endif
     }
 
     // ================================================================
@@ -1501,9 +1489,9 @@ void loop () {
         calculateHeading(gyroRate[XAXIS],
                          gyroRate[YAXIS],
                          gyroRate[ZAXIS],
-                         filteredAccel[XAXIS],
-                         filteredAccel[YAXIS],
-                         filteredAccel[ZAXIS],
+                         smootedAccel[XAXIS],
+                         smootedAccel[YAXIS],
+                         smootedAccel[ZAXIS],
                          getMagnetometerRawData(XAXIS),
                          getMagnetometerRawData(YAXIS),
                          getMagnetometerRawData(ZAXIS),

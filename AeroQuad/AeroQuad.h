@@ -105,6 +105,7 @@ byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
+float smootedAccel[3] = {0.0,0.0,0.0};
 
 // main loop time variable
 unsigned long previousTime = 0;

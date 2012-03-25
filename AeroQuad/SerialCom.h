@@ -418,7 +418,8 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSecSec[axis]);
+//      PrintValueComma(meterPerSecSec[axis]);
+      PrintValueComma(smootedAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
