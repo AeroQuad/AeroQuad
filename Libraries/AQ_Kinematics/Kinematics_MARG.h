@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -96,8 +96,8 @@ void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, floa
     	
   // compute reference direction of flux
   hx = mx * 2*(0.5 - q2q2 - q3q3) + my * 2*(q1q2 - q0q3)       + mz * 2*(q1q3 + q0q2);
-  hy = mx * 2*(q1q2 + q0q3)       + my * 2*(0.5 - q1q1 - q3q3) + mz * 2*(q2q3 - q0q1);
-  hz = mx * 2*(q1q3 - q0q2)       + my * 2*(q2q3 + q0q1)       + mz * 2*(0.5 - q1q1 - q2q2);
+  hy = my * 2*(q1q2 + q0q3)       + my * 2*(0.5 - q1q1 - q3q3) + mz * 2*(q2q3 - q0q1);
+  hz = mz * 2*(q1q3 - q0q2)       + my * 2*(q2q3 + q0q1)       + mz * 2*(0.5 - q1q1 - q2q2);
     
   bx = sqrt((hx*hx) + (hy*hy));
   bz = hz;        
@@ -126,9 +126,9 @@ void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, floa
   ezInt = ezInt + ezAcc*kiAcc + ezMag*kiMag;
     	
   // adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx = gx + exAcc*kpAcc + exMag*kpMag + exInt;
-  correctedRateVector[YAXIS] = gy = gy + eyAcc*kpAcc + eyMag*kpMag + eyInt;
-  correctedRateVector[ZAXIS] = gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
+  gx = gx + exAcc*kpAcc + exMag*kpMag + exInt;
+  gy = gy + eyAcc*kpAcc + eyMag*kpMag + eyInt;
+  gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
     	
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -146,18 +146,13 @@ void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, floa
   q1 = q1 / norm;
   q2 = q2 / norm;
   q3 = q3 / norm;
-    
-  // save the adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx;
-  correctedRateVector[YAXIS] = gy;
-  correctedRateVector[ZAXIS] = gz;
 }
   
 void eulerAngles(void)
 {
-  kinematicsAngle[XAXIS]  = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
-  kinematicsAngle[YAXIS] = asin(2 * (q0*q2 - q1*q3));
-  kinematicsAngle[ZAXIS]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
+  kinematicsAngle[XAXIS] = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
+  kinematicsAngle[YAXIS] = asin(2  * (q0*q2 - q1*q3));
+  kinematicsAngle[ZAXIS] = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
 }
 
   
@@ -180,8 +175,8 @@ void initializeKinematics(float hdgX, float hdgY)
   kpAcc = 0.2;
   kiAcc = 0.0005;
     
-  kpMag = 2.0;
-  kiMag = 0.005;
+  kpMag = 0.2;//2.0;
+  kiMag = 0.0005;//0.005;
 }
   
 ////////////////////////////////////////////////////////////////////////////////

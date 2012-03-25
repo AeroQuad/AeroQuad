@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -60,11 +60,15 @@ float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
 float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
+
+float ax = 0.0;
+float ay = 0.0;
+float az = 0.0;
   
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+void argUpdate(float gx, float gy, float gz, float p_ax, float p_ay, float p_az, float mx, float my, float mz, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -74,10 +78,10 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   halfT = G_Dt/2;
   
   // normalise the measurements
-  norm = sqrt(ax*ax + ay*ay + az*az);       
-  ax = ax / norm;
-  ay = ay / norm;
-  az = az / norm;
+  norm = sqrt(p_ax*p_ax + p_ay*p_ay + p_az*p_az);       
+  ax = p_ax / norm;
+  ay = p_ay / norm;
+  az = p_az / norm;
      	
   // estimated direction of gravity and flux (v and w)
   vx = 2*(q1*q3 - q0*q2);
@@ -109,9 +113,9 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   previousEz = ez;
 	
   // adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx = gx + Kp*ex + exInt;
-  correctedRateVector[YAXIS] = gy = gy + Kp*ey + eyInt;
-  correctedRateVector[ZAXIS] = gz = gz + Kp*ez + ezInt;
+  gx = gx + Kp*ex + exInt;
+  gy = gy + Kp*ey + eyInt;
+  gz = gz + Kp*ez + ezInt;
     
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -129,11 +133,6 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   q1 = q1 / norm;
   q2 = q2 / norm;
   q3 = q3 / norm;
-    
-  // save the adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx;
-  correctedRateVector[YAXIS] = gy;
-  correctedRateVector[ZAXIS] = gz;
 }
   
 void eulerAngles()
