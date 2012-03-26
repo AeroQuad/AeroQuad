@@ -308,10 +308,16 @@ void menuEditFloat(float *f, byte i, byte d, byte pos, byte action, float min, f
   *f = constrain(*f, min, max);
 }
 
-const char *pidNames[10] = {
+const char *pidNames[] = {
   "RRoll", "RPitc", "RYaw ", "ARoll", "APitc",
-  "Headi", "AGRol", "AGPit", "Altit", "ZDamp"};
+  "Headi", "AGRol", "AGPit", "B_Alt", "S_Alt",
+  "ZDamp",
+#ifdef UseGPS
+  "GPS_P", "GPS_R",
+#endif
+};
 
+#define PIDCOUNT  (sizeof(pidNames)/sizeof(char*))
 void menuHandlePidTune(byte mode, byte action) {
 
   switch (action) {
@@ -363,7 +369,7 @@ void menuHandlePidTune(byte mode, byte action) {
 
   case MENU_UP:
     if (menuFuncData[0] == 0) {
-      if (menuFuncData[1] < 9) menuFuncData[1]++;
+      if (menuFuncData[1] < (PIDCOUNT-1)) menuFuncData[1]++;
     }
     else if (menuFuncData[0] == 1) {
       if (menuFuncData[2] < 2) menuFuncData[2]++;
@@ -410,7 +416,7 @@ void menuHandlePidTune(byte mode, byte action) {
       cl = 5;
       cr = 9;
       if (menuFuncData[1] == 0) updn = MENU_SYM_UP;
-      if (menuFuncData[1] == 9) updn = MENU_SYM_DOWN;
+      if (menuFuncData[1] == (PIDCOUNT-1)) updn = MENU_SYM_DOWN;
     }
     else if (menuFuncData[0] == 1) {
       // selecting P/I/D
