@@ -87,7 +87,8 @@ void processPositionCorrection() {
   float courseRads = radians(gpsLaggedCourse/100);
   
 //  float azimuth = getAbsoluteHeading();
-  float azimuth = kinematicsAngle[ZAXIS];
+//  float azimuth = kinematicsAngle[ZAXIS];
+  float azimuth = trueHeading;
   float currentSpeedCmPerSecRoll = sin(courseRads-azimuth)*gpsLaggedSpeed; 
   float currentSpeedCmPerSecPitch = cos(courseRads-azimuth)*gpsLaggedSpeed;
     

@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -38,6 +38,8 @@ float kpRollPitch = 0.0;
 float kiRollPitch = 0.0;
 float kpYaw = 0.0;
 float kiYaw = 0.0;
+
+float trueHeading = 0.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Matrix Update
@@ -174,7 +176,7 @@ void eulerAngles(void)
 {
   kinematicsAngle[XAXIS]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
   kinematicsAngle[YAXIS] =  -asin(dcmMatrix[6]);
-  kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
+  trueHeading = kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   
 ////////////////////////////////////////////////////////////////////////////////

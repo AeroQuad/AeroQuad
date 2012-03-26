@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - December 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -418,7 +418,8 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSecSec[axis]);
+//      PrintValueComma(meterPerSecSec[axis]);
+      PrintValueComma(smootedAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
@@ -539,7 +540,8 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
+//      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
+      SERIAL_PRINTLN(trueHeading);
     #else
       SERIAL_PRINTLN(gyroHeading);
     #endif
@@ -550,7 +552,8 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(kinematicsAngle[ZAXIS]);
+//      PrintValueComma(kinematicsAngle[ZAXIS]);
+      PrintValueComma(trueHeading);
     #else
       PrintValueComma(gyroHeading);
     #endif

@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - December 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -110,6 +110,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
+      measureGyro();
       measureAccel();
     }
   }
@@ -156,6 +157,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
+      measureGyro();
       measureAccel();
     }
   }
@@ -218,6 +220,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 
@@ -418,6 +421,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -508,6 +512,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -598,6 +603,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -672,6 +678,7 @@
    */
   void measureCriticalSensors() {
     evaluateADC();
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -1061,8 +1068,10 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
+  #include <HeadingFusionProcessor.h>
 #elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
+  #include <HeadingFusionProcessor.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
 
@@ -1232,6 +1241,7 @@ void setup() {
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
     initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
+    initializeHeadingFusion(getHdgXY(XAXIS), getHdgXY(YAXIS));
   #else
     initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
@@ -1339,11 +1349,12 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
-      measureGyro();
+      evaluateGyroRate();
       evaluateMetersPerSec();
 
       for (int axis = XAXIS; axis <= ZAXIS; axis++) {
         filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+        smootedAccel[axis] = filterSmooth(filteredAccel[axis],smootedAccel[axis],0.5);
       }
       
 //      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
@@ -1357,9 +1368,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1369,9 +1380,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             getMagnetometerRawData(XAXIS),
                             getMagnetometerRawData(YAXIS),
                             getMagnetometerRawData(ZAXIS),
@@ -1380,9 +1391,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             0.0,
                             0.0,
                             0.0,
@@ -1391,9 +1402,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             accelOneG,
                             getHdgXY(XAXIS),
                             getHdgXY(YAXIS),
@@ -1402,9 +1413,9 @@ void loop () {
         calculateKinematics(gyroRate[XAXIS],
                             gyroRate[YAXIS],
                             gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
                             accelOneG,
                             0.0,
                             0.0,
@@ -1429,8 +1440,6 @@ void loop () {
           fastTelemetry();
         }
       #endif
-
-
     }
 
     // ================================================================
@@ -1477,7 +1486,18 @@ void loop () {
 
       #if defined(HeadingMagHold)
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
+        calculateHeading(gyroRate[XAXIS],
+                         gyroRate[YAXIS],
+                         gyroRate[ZAXIS],
+                         smootedAccel[XAXIS],
+                         smootedAccel[YAXIS],
+                         smootedAccel[ZAXIS],
+                         getMagnetometerRawData(XAXIS),
+                         getMagnetometerRawData(YAXIS),
+                         getMagnetometerRawData(ZAXIS),
+                         G_Dt);
       #endif
+      
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt*1000.0);
       #endif
