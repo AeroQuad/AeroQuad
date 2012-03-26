@@ -56,6 +56,10 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   float q3q3 = lq3*lq3;          
     	
   // normalise the measurements
+  norm = sqrt(ax*ax + ay*ay + az*az);       
+  ax = ax / norm;
+  ay = ay / norm;
+  az = az / norm;
   norm = sqrt(mx*mx + my*my + mz*mz);          
   mx = mx / norm;
   my = my / norm;
@@ -63,8 +67,8 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
     	
   // compute reference direction of flux
   hx = mx * 2*(0.5 - q2q2 - q3q3) + my * 2*(q1q2 - q0q3)       + mz * 2*(q1q3 + q0q2);
-  hy = my * 2*(q1q2 + q0q3)       + my * 2*(0.5 - q1q1 - q3q3) + mz * 2*(q2q3 - q0q1);
-  hz = mz * 2*(q1q3 - q0q2)       + my * 2*(q2q3 + q0q1)       + mz * 2*(0.5 - q1q1 - q2q2);
+  hy = mx * 2*(q1q2 + q0q3)       + my * 2*(0.5 - q1q1 - q3q3) + mz * 2*(q2q3 - q0q1);
+  hz = mx * 2*(q1q3 - q0q2)       + my * 2*(q2q3 + q0q1)       + mz * 2*(0.5 - q1q1 - q2q2);
     
   bx = sqrt((hx*hx) + (hy*hy));
   bz = hz;        
