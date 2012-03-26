@@ -540,8 +540,7 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-//      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
-      SERIAL_PRINTLN(trueHeading);
+      SERIAL_PRINTLN(trueNorthHeading);
     #else
       SERIAL_PRINTLN(gyroHeading);
     #endif
@@ -552,8 +551,7 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-//      PrintValueComma(kinematicsAngle[ZAXIS]);
-      PrintValueComma(trueHeading);
+      PrintValueComma(trueNorthHeading);
     #else
       PrintValueComma(gyroHeading);
     #endif

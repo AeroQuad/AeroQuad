@@ -1486,13 +1486,7 @@ void loop () {
 
       #if defined(HeadingMagHold)
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(gyroRate[XAXIS],
-                         gyroRate[YAXIS],
-                         gyroRate[ZAXIS],
-                         smootedAccel[XAXIS],
-                         smootedAccel[YAXIS],
-                         smootedAccel[ZAXIS],
-                         getMagnetometerRawData(XAXIS),
+        calculateHeading(getMagnetometerRawData(XAXIS),
                          getMagnetometerRawData(YAXIS),
                          getMagnetometerRawData(ZAXIS),
                          G_Dt);

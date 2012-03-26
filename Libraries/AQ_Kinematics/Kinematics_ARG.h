@@ -61,10 +61,19 @@ float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
 
+float ax = 0.0;
+float ay = 0.0;
+float az = 0.0;
+
+float gx = 0.0;
+float gy = 0.0;
+float gz = 0.0;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float l_az, float mx, float my, float mz, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -74,10 +83,10 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   halfT = G_Dt/2;
   
   // normalise the measurements
-  norm = sqrt(ax*ax + ay*ay + az*az);       
-  ax = ax / norm;
-  ay = ay / norm;
-  az = az / norm;
+  norm = sqrt(l_ax*l_ax + l_ay*l_ay + l_az*l_az);       
+  ax = l_ax / norm;
+  ay = l_ay / norm;
+  az = l_az / norm;
      	
   // estimated direction of gravity and flux (v and w)
   vx = 2*(q1*q3 - q0*q2);
@@ -109,9 +118,9 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   previousEz = ez;
 	
   // adjusted gyroscope measurements
-  gx = gx + Kp*ex + exInt;
-  gy = gy + Kp*ey + eyInt;
-  gz = gz + Kp*ez + ezInt;
+  gx = l_gx + Kp*ex + exInt;
+  gy = l_gy + Kp*ey + eyInt;
+  gz = l_gz + Kp*ez + ezInt;
     
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;

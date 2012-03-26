@@ -30,10 +30,10 @@ float lhalfT = 0.0;                					// half the sample period
 float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
 float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
 
-float trueHeading = 0.0;
+float trueNorthHeading = 0.0;
 
 
-void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+void headingUpdate(float mx, float my, float mz, float G_Dt) {
   float norm;
   float hx, hy, hz, bx, bz;
   float vx, vy, vz, wx, wy, wz;
@@ -56,10 +56,6 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   float q3q3 = lq3*lq3;          
     	
   // normalise the measurements
-  norm = sqrt(ax*ax + ay*ay + az*az);       
-  ax = ax / norm;
-  ay = ay / norm;
-  az = az / norm;
   norm = sqrt(mx*mx + my*my + mz*mz);          
   mx = mx / norm;
   my = my / norm;
@@ -97,15 +93,15 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   lezInt = lezInt + ezAcc*kiAcc + ezMag*kiMag;
     	
   // adjusted gyroscope measurements
-  gx = gx + exAcc*kpAcc + exMag*kpMag + lexInt;
-  gy = gy + eyAcc*kpAcc + eyMag*kpMag + leyInt;
-  gz = gz + ezAcc*kpAcc + ezMag*kpMag + lezInt;
+  float l_gx = gx + exAcc*kpAcc + exMag*kpMag + lexInt;
+  float l_gy = gy + eyAcc*kpAcc + eyMag*kpMag + leyInt;
+  float l_gz = gz + ezAcc*kpAcc + ezMag*kpMag + lezInt;
     	
   // integrate quaternion rate and normalise
-  q0i = (-lq1*gx - lq2*gy - lq3*gz) * lhalfT;
-  q1i = ( lq0*gx + lq2*gz - lq3*gy) * lhalfT;
-  q2i = ( lq0*gy - lq1*gz + lq3*gx) * lhalfT;
-  q3i = ( lq0*gz + lq1*gy - lq2*gx) * lhalfT;
+  q0i = (-lq1*l_gx - lq2*l_gy - lq3*l_gz) * lhalfT;
+  q1i = ( lq0*l_gx + lq2*l_gz - lq3*l_gy) * lhalfT;
+  q2i = ( lq0*l_gy - lq1*l_gz + lq3*l_gx) * lhalfT;
+  q3i = ( lq0*l_gz + lq1*l_gy - lq2*l_gx) * lhalfT;
   lq0 += q0i;
   lq1 += q1i;
   lq2 += q2i;
@@ -121,7 +117,7 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   
 void headingEulerAngles()
 {
-  trueHeading = atan2(2 * (lq0*lq3 + lq1*lq2), 1 - 2 *(lq2*lq2 + lq3*lq3));
+  trueNorthHeading = atan2(2 * (lq0*lq3 + lq1*lq2), 1 - 2 *(lq2*lq2 + lq3*lq3));
 }
 
   
@@ -140,11 +136,11 @@ void initializeHeadingFusion(float hdgX, float hdgY)
   leyInt = 0.0;
   lezInt = 0.0;
 
-  kpAcc = 0.2;
-  kiAcc = 0.0005;
+  kpAcc = 0.0;//0.2;
+  kiAcc = 0.0;//0.0005;
     
-  kpMag = 0.2;//2.0;
-  kiMag = 0.0005;//0.005;
+  kpMag = 0.0;//0.2;//2.0;
+  kiMag = 0.0;//0.0005;//0.005;
 
 }
   
@@ -152,15 +148,9 @@ void initializeHeadingFusion(float hdgX, float hdgY)
 // Calculate MARG
 ////////////////////////////////////////////////////////////////////////////////
 
-void calculateHeading(float rollRate,          float pitchRate,    float yawRate,  
-                 float longitudinalAccel, float lateralAccel, float verticalAccel, 
-                 float measuredMagX,      float measuredMagY, float measuredMagZ,
-				 float G_Dt) {
+void calculateHeading(float measuredMagX, float measuredMagY, float measuredMagZ, float G_Dt) {
 				 
-  headingUpdate(rollRate,          pitchRate,    yawRate, 
-             longitudinalAccel, lateralAccel, verticalAccel,  
-             measuredMagX,      measuredMagY, measuredMagZ,
-		     G_Dt);
+  headingUpdate(measuredMagX, measuredMagY, measuredMagZ, G_Dt);
   headingEulerAngles();
 }
 
