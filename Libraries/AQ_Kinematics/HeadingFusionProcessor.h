@@ -22,10 +22,10 @@
 #define _AQ_HEADING_FUSION_PROCESSOR
 
 
-float kpAcc = 0.0;                					// proportional gain governs rate of convergence to accelerometer
-float kiAcc = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
-float kpMag = 0.0;                					// proportional gain governs rate of convergence to magnetometer
-float kiMag = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
+//float kpAcc = 0.0;                					// proportional gain governs rate of convergence to accelerometer
+//float kiAcc = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
+//float kpMag = 0.0;                					// proportional gain governs rate of convergence to magnetometer
+//float kiMag = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
 float lhalfT = 0.0;                					// half the sample period
 float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
 float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
@@ -88,15 +88,20 @@ void headingUpdate(float mx, float my, float mz, float G_Dt) {
   ezMag = (mx*wy - my*wx);
     
   // integral error scaled integral gain
-  lexInt = lexInt + exAcc*kiAcc + exMag*kiMag;
-  leyInt = leyInt + eyAcc*kiAcc + eyMag*kiMag;
-  lezInt = lezInt + ezAcc*kiAcc + ezMag*kiMag;
+//  lexInt = lexInt + exAcc*kiAcc + exMag*kiMag;
+//  leyInt = leyInt + eyAcc*kiAcc + eyMag*kiMag;
+//  lezInt = lezInt + ezAcc*kiAcc + ezMag*kiMag;
     	
   // adjusted gyroscope measurements
-  float l_gx = gx + exAcc*kpAcc + exMag*kpMag + lexInt;
-  float l_gy = gy + eyAcc*kpAcc + eyMag*kpMag + leyInt;
-  float l_gz = gz + ezAcc*kpAcc + ezMag*kpMag + lezInt;
-    	
+//  float l_gx = gx + exAcc*kpAcc + exMag*kpMag + lexInt;
+//  float l_gy = gy + eyAcc*kpAcc + eyMag*kpMag + leyInt;
+//  float l_gz = gz + ezAcc*kpAcc + ezMag*kpMag + lezInt;
+
+  // adjusted gyroscope measurements
+  float l_gx = gx + lexInt;
+  float l_gy = gy + leyInt;
+  float l_gz = gz + lezInt;
+  
   // integrate quaternion rate and normalise
   q0i = (-lq1*l_gx - lq2*l_gy - lq3*l_gz) * lhalfT;
   q1i = ( lq0*l_gx + lq2*l_gz - lq3*l_gy) * lhalfT;
@@ -136,12 +141,12 @@ void initializeHeadingFusion(float hdgX, float hdgY)
   leyInt = 0.0;
   lezInt = 0.0;
 
-  kpAcc = 0.0;//0.2;
+/*  kpAcc = 0.0;//0.2;
   kiAcc = 0.0;//0.0005;
     
   kpMag = 0.0;//0.2;//2.0;
   kiMag = 0.0;//0.0005;//0.005;
-
+*/
 }
   
 ////////////////////////////////////////////////////////////////////////////////

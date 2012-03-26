@@ -48,7 +48,6 @@ void initializeBaseKinematicsParam(float hdgX, float hdgY) {
 void initializeKinematics(float hdgX, float hdgY);
 void calculateKinematics(float rollRate,           float pitchRate,     float yawRate,       
                          float longitudinalAccel,  float lateralAccel,  float verticalAccel, 
-                         float oneG,               float magX,          float magY,
                          float G_Dt);
 float getGyroUnbias(byte axis);
 void calibrateKinematics();

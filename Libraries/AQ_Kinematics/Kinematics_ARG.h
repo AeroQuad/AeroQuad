@@ -73,7 +73,7 @@ float gz = 0.0;
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float l_az, float mx, float my, float mz, float G_Dt) {
+void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float l_az, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -175,12 +175,10 @@ void initializeKinematics(float hdgX, float hdgY)
 ////////////////////////////////////////////////////////////////////////////////
 void calculateKinematics(float rollRate,          float pitchRate,    float yawRate,  
                          float longitudinalAccel, float lateralAccel, float verticalAccel, 
-                         float measuredMagX,      float measuredMagY, float measuredMagZ,
                          float G_DT) {
     
   argUpdate(rollRate,          pitchRate,    yawRate, 
             longitudinalAccel, lateralAccel, verticalAccel,  
-            measuredMagX,      measuredMagY, measuredMagZ,
 		    G_Dt);
   eulerAngles();
 }

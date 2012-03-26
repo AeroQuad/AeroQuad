@@ -1009,12 +1009,8 @@
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#elif defined FlightAngleARG
+#else defined FlightAngleARG
   #include "Kinematics_ARG.h"
-#elif defined FlightAngleMARG
-  #include "Kinematics_MARG.h"
-#else
-  #include "Kinematics_DCM.h"
 #endif
 
 //********************************************************
@@ -1363,65 +1359,14 @@ void loop () {
 //         estimatedZVelocity += (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
 //      #endif         
       
-      // ****************** Calculate Absolute Angle *****************
-      #if defined FlightAngleNewARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            0.0,
-                            0.0,
-                            0.0,
-                            G_Dt);
-
-      #elif defined HeadingMagHold && defined FlightAngleMARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            getMagnetometerRawData(XAXIS),
-                            getMagnetometerRawData(YAXIS),
-                            getMagnetometerRawData(ZAXIS),
-                            G_Dt);
-      #elif defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            0.0,
-                            0.0,
-                            0.0,
-                            G_Dt);
-      #elif defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            accelOneG,
-                            getHdgXY(XAXIS),
-                            getHdgXY(YAXIS),
-                            G_Dt);
-      #elif !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            accelOneG,
-                            0.0,
-                            0.0,
-                            G_Dt);
-      #endif
-
+      /* calculate kinematics*/
+      calculateKinematics(gyroRate[XAXIS],
+                          gyroRate[YAXIS],
+                          gyroRate[ZAXIS],
+                          smootedAccel[XAXIS],
+                          smootedAccel[YAXIS],
+                          smootedAccel[ZAXIS],
+                          G_Dt);
 
       // Evaluate are here because we want it to be synchronized with the processFlightControl
       #if defined AltitudeHoldBaro
@@ -1516,9 +1461,9 @@ void loop () {
         sendSlowTelemetry();
       #endif
     }
-    
     previousTime = currentTime;
   }
+  
   if (frameCounter >= 100) {
       frameCounter = 0;
   }
