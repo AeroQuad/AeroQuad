@@ -529,6 +529,7 @@ void menuCameraPTZ(byte mode, byte action){
       digitalWrite(ZOOMPIN, HIGH);
     } else {
       // release zoom
+      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
       pinMode(ZOOMPIN, INPUT);
     }
   }
