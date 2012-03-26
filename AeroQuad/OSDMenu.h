@@ -487,14 +487,15 @@ void menuCameraPTZ(byte mode, byte action){
     hideOSD();
     menuOwnsSticks = 1;
     savedCenterYaw = servoCenterYaw;
-    savedCenterPitch = servoCenterPitch;    
+    savedCenterPitch = servoCenterPitch;
+    menuFuncDataFloat = 0.0;
   }
   else if (action == MENU_HIJACK) {
     const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
     const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
     const short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
 
-    if (yaw < -MENU_STICK_REPEAT) {
+    if (roll < -MENU_STICK_REPEAT) {
       unhideOSD();
       menuOwnsSticks = 0;
       menuInFunc  = 0;
@@ -508,25 +509,27 @@ void menuCameraPTZ(byte mode, byte action){
       return;
     }
 
-    if (abs(roll) > 100) {
+    if (abs(yaw) > 100) {
       servoCenterYaw = constrain(servoCenterYaw + (roll/60), servoMinYaw, servoMaxYaw);
     }
 
-    if (abs(pitch) > 100) {
-      servoCenterPitch = constrain(servoCenterPitch + (pitch/60), servoMinPitch, servoMaxPitch);
+    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 10) {
+      menuFuncDataFloat = receiverCommand[THROTTLE];
+      servoCenterPitch = constrain(receiverCommand[THROTTLE], servoMinPitch, servoMaxPitch);
     }
 
-    if (receiverCommand[THROTTLE] < 1200) {
+    if (pitch < -MENU_STICK_REPEAT) {
       // zoom out
       pinMode(ZOOMPIN, OUTPUT);
       digitalWrite(ZOOMPIN, LOW);
-    } 
-    else if (receiverCommand[THROTTLE] > 1800) {
+    }
+    else if (pitch > MENU_STICK_REPEAT) {
       // zoom in
       pinMode(ZOOMPIN, OUTPUT);
       digitalWrite(ZOOMPIN, HIGH);
     } else {
       // release zoom
+      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
       pinMode(ZOOMPIN, INPUT);
     }
   }
@@ -540,10 +543,10 @@ void menuCameraPTZ(byte mode, byte action){
 // Entry format:
 //  { LEVEL, TEXT, HANDLER, MODE},
 // Where
-//  LEVEL   - this defines the tree structure 0 == root level 
+//  LEVEL   - this defines the tree structure 0 == root level
 //  TEXT    - displayed text should be no more than ~16 characters
 //  HADNLER - handler function to be called for this item (or MENU_NOFUNC for submenu)
-//  MODE    - data passed to handler function to allow sharing them 
+//  MODE    - data passed to handler function to allow sharing them
 
 const struct MenuItem menuData[] = {
 #if 0
@@ -680,7 +683,7 @@ void menuSelect() {
 
   if (255==menuEntry) {
     // enable menu
-    unhideOSD(); // make sure OSD is visible 
+    unhideOSD(); // make sure OSD is visible
     menuAtExit=0;
     menuEntry=0;
   }
@@ -740,7 +743,7 @@ void updateOSDMenu() {
 
   // check for special HiJack mode
   if ((menuEntry!=255) && menuOwnsSticks  && menuInFunc) {
-    
+
     MENU_CALLFUNC(menuEntry, MENU_HIJACK);
     if (menuInFunc == 0) {
       menuShow(menuEntry);
