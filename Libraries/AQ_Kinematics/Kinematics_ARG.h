@@ -64,11 +64,16 @@ float previousEz = 0.0;
 float ax = 0.0;
 float ay = 0.0;
 float az = 0.0;
-  
+
+float gx = 0.0;
+float gy = 0.0;
+float gz = 0.0;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float gx, float gy, float gz, float p_ax, float p_ay, float p_az, float mx, float my, float mz, float G_Dt) {
+void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float l_az, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -78,10 +83,10 @@ void argUpdate(float gx, float gy, float gz, float p_ax, float p_ay, float p_az,
   halfT = G_Dt/2;
   
   // normalise the measurements
-  norm = sqrt(p_ax*p_ax + p_ay*p_ay + p_az*p_az);       
-  ax = p_ax / norm;
-  ay = p_ay / norm;
-  az = p_az / norm;
+  norm = sqrt(l_ax*l_ax + l_ay*l_ay + l_az*l_az);       
+  ax = l_ax / norm;
+  ay = l_ay / norm;
+  az = l_az / norm;
      	
   // estimated direction of gravity and flux (v and w)
   vx = 2*(q1*q3 - q0*q2);
@@ -113,9 +118,9 @@ void argUpdate(float gx, float gy, float gz, float p_ax, float p_ay, float p_az,
   previousEz = ez;
 	
   // adjusted gyroscope measurements
-  gx = gx + Kp*ex + exInt;
-  gy = gy + Kp*ey + eyInt;
-  gz = gz + Kp*ez + ezInt;
+  gx = l_gx + Kp*ex + exInt;
+  gy = l_gy + Kp*ey + eyInt;
+  gz = l_gz + Kp*ez + ezInt;
     
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -170,12 +175,10 @@ void initializeKinematics(float hdgX, float hdgY)
 ////////////////////////////////////////////////////////////////////////////////
 void calculateKinematics(float rollRate,          float pitchRate,    float yawRate,  
                          float longitudinalAccel, float lateralAccel, float verticalAccel, 
-                         float measuredMagX,      float measuredMagY, float measuredMagZ,
                          float G_DT) {
     
   argUpdate(rollRate,          pitchRate,    yawRate, 
             longitudinalAccel, lateralAccel, verticalAccel,  
-            measuredMagX,      measuredMagY, measuredMagZ,
 		    G_Dt);
   eulerAngles();
 }
