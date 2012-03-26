@@ -518,7 +518,7 @@ void menuCameraPTZ(byte mode, byte action){
       servoCenterPitch = constrain(receiverCommand[THROTTLE], servoMinPitch, servoMaxPitch);
     }
 
-    if (pitch < -MENNU_STICK_REPEAT) {
+    if (pitch < -MENU_STICK_REPEAT) {
       // zoom out
       pinMode(ZOOMPIN, OUTPUT);
       digitalWrite(ZOOMPIN, LOW);
