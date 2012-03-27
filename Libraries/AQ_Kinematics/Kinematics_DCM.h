@@ -127,10 +127,10 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
                          accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
                          
   // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
+  // accelWeight = constrain(1 - 4*fabs(1 - accelMagnitude),0,1);
   
   // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
+  accelWeight = constrain(1 - 2 * fabs(1 - accelMagnitude), 0, 1);
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
   vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
