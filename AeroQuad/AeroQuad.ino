@@ -1334,7 +1334,7 @@ void loop () {
 
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
-
+    
     frameCounter++;
 
     // ================================================================
@@ -1354,9 +1354,9 @@ void loop () {
       }
       
 //      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-//         estimatedXVelocity = (filteredAccel[XAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
-//         estimatedYVelocity = (filteredAccel[YAXIS] * (1 - invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS]))));
-//         estimatedZVelocity += (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+//         float estimatedXVelocity = (smootedAccel[XAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
+//         float estimatedYVelocity = (smootedAccel[YAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
+//         float estimatedZVelocity = (smootedAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
 //      #endif         
       
       /* calculate kinematics*/
@@ -1367,7 +1367,7 @@ void loop () {
                           smootedAccel[YAXIS],
                           smootedAccel[ZAXIS],
                           G_Dt);
-
+                          
       // Evaluate are here because we want it to be synchronized with the processFlightControl
       #if defined AltitudeHoldBaro
         measureBaroSum(); 
@@ -1426,16 +1426,21 @@ void loop () {
     // ================================================================
     if (frameCounter % TASK_10HZ == 0) {  //   10 Hz tasks
 
-      G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
-      tenHZpreviousTime = currentTime;
-
       #if defined(HeadingMagHold)
+        G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
+        tenHZpreviousTime = currentTime;
+ 
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(getMagnetometerRawData(XAXIS),
-                         getMagnetometerRawData(YAXIS),
-                         getMagnetometerRawData(ZAXIS),
+        calculateHeading(measuredMagX,
+                         measuredMagY,
+                         measuredMagZ,
                          G_Dt);
       #endif
+    }
+    else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
+
+      G_Dt = (currentTime - lowPriorityTenHZpreviousTime) / 1000000.0;
+      lowPriorityTenHZpreviousTime = currentTime;
       
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt*1000.0);
@@ -1461,6 +1466,7 @@ void loop () {
         sendSlowTelemetry();
       #endif
     }
+    
     previousTime = currentTime;
   }
   
