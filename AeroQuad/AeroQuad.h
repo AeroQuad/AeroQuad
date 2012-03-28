@@ -113,6 +113,7 @@ unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
 unsigned long tenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
