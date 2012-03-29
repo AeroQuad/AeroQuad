@@ -22,10 +22,6 @@
 #define _AQ_HEADING_FUSION_PROCESSOR
 
 
-//float kpAcc = 0.0;                					// proportional gain governs rate of convergence to accelerometer
-//float kiAcc = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
-//float kpMag = 0.0;                					// proportional gain governs rate of convergence to magnetometer
-//float kiMag = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
 float lhalfT = 0.0;                					// half the sample period
 float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
 float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
@@ -38,7 +34,6 @@ void headingUpdate(float mx, float my, float mz, float G_Dt) {
   float hx, hy, hz, bx, bz;
   float vx, vy, vz, wx, wy, wz;
   float q0i, q1i, q2i, q3i;
-  float exAcc, eyAcc, ezAcc;
   float exMag, eyMag, ezMag;
     
   lhalfT = G_Dt/2;
@@ -78,25 +73,10 @@ void headingUpdate(float mx, float my, float mz, float G_Dt) {
   wy = bx * 2*(q1q2 - q0q3)       + bz * 2*(q0q1 + q2q3);
   wz = bx * 2*(q0q2 + q1q3)       + bz * 2*(0.5 - q1q1 - q2q2);
     	
-  // error is sum of cross product between reference direction of fields and direction measured by sensors
-  exAcc = (vy*az - vz*ay);
-  eyAcc = (vz*ax - vx*az);
-  ezAcc = (vx*ay - vy*ax);
-    
   exMag = (my*wz - mz*wy);
   eyMag = (mz*wx - mx*wz);
   ezMag = (mx*wy - my*wx);
     
-  // integral error scaled integral gain
-//  lexInt = lexInt + exAcc*kiAcc + exMag*kiMag;
-//  leyInt = leyInt + eyAcc*kiAcc + eyMag*kiMag;
-//  lezInt = lezInt + ezAcc*kiAcc + ezMag*kiMag;
-    	
-  // adjusted gyroscope measurements
-//  float l_gx = gx + exAcc*kpAcc + exMag*kpMag + lexInt;
-//  float l_gy = gy + eyAcc*kpAcc + eyMag*kpMag + leyInt;
-//  float l_gz = gz + ezAcc*kpAcc + ezMag*kpMag + lezInt;
-
   // adjusted gyroscope measurements
   float l_gx = gx + lexInt;
   float l_gy = gy + leyInt;
@@ -140,13 +120,7 @@ void initializeHeadingFusion(float hdgX, float hdgY)
   lexInt = 0.0;
   leyInt = 0.0;
   lezInt = 0.0;
-
-/*  kpAcc = 0.0;//0.2;
-  kiAcc = 0.0;//0.0005;
-    
-  kpMag = 0.0;//0.2;//2.0;
-  kiMag = 0.0;//0.0005;//0.005;
-*/
+  
 }
   
 ////////////////////////////////////////////////////////////////////////////////
