@@ -1332,60 +1332,57 @@ void loop () {
 
   measureCriticalSensors();
 
-  // Main scheduler loop set for 100hz
+  // ================================================================
+  // 100hz task loop
+  // ================================================================
   if (deltaTime >= 10000) {
     
     frameCounter++;
-
-    // ================================================================
-    // 100hz task loop
-    // ================================================================
-    if (frameCounter % TASK_100HZ == 0) {  //  100 Hz tasks
+    
   
-      G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
-      hundredHZpreviousTime = currentTime;
-      
-      evaluateGyroRate();
-      evaluateMetersPerSec();
+    G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
+    hundredHZpreviousTime = currentTime;
+    
+    evaluateGyroRate();
+    evaluateMetersPerSec();
 
-      for (int axis = XAXIS; axis <= ZAXIS; axis++) {
-        filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
-        smootedAccel[axis] = filterSmooth(filteredAccel[axis],smootedAccel[axis],0.5);
-      }
-      
-//      #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-//         float estimatedXVelocity = (smootedAccel[XAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//         float estimatedYVelocity = (smootedAccel[YAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//         float estimatedZVelocity = (smootedAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-//      #endif         
-      
-      /* calculate kinematics*/
-      calculateKinematics(gyroRate[XAXIS],
-                          gyroRate[YAXIS],
-                          gyroRate[ZAXIS],
-                          smootedAccel[XAXIS],
-                          smootedAccel[YAXIS],
-                          smootedAccel[ZAXIS],
-                          G_Dt);
-                          
-      // Evaluate are here because we want it to be synchronized with the processFlightControl
-      #if defined AltitudeHoldBaro
-        measureBaroSum(); 
-        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-          evaluateBaroAltitude();
-        }
-      #endif
-            
-      // Combines external pilot commands and measured sensor data to generate motor commands
-      processFlightControl();
-      
-      #ifdef BinaryWrite
-        if (fastTransfer == ON) {
-          // write out fastTelemetry to Configurator or openLog
-          fastTelemetry();
-        }
-      #endif
+    for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+      filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+      smootedAccel[axis] = filterSmooth(filteredAccel[axis],smootedAccel[axis],0.5);
     }
+      
+//    #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+//       float estimatedXVelocity = (smootedAccel[XAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
+//       float estimatedYVelocity = (smootedAccel[YAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
+//       float estimatedZVelocity = (smootedAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+//    #endif         
+      
+    /* calculate kinematics*/
+    calculateKinematics(gyroRate[XAXIS],
+                        gyroRate[YAXIS],
+                        gyroRate[ZAXIS],
+                        smootedAccel[XAXIS],
+                        smootedAccel[YAXIS],
+                        smootedAccel[ZAXIS],
+                        G_Dt);
+                        
+    // Evaluate are here because we want it to be synchronized with the processFlightControl
+    #if defined AltitudeHoldBaro
+      measureBaroSum(); 
+      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+        evaluateBaroAltitude();
+      }
+    #endif
+          
+    // Combines external pilot commands and measured sensor data to generate motor commands
+    processFlightControl();
+    
+    #ifdef BinaryWrite
+      if (fastTransfer == ON) {
+        // write out fastTelemetry to Configurator or openLog
+        fastTelemetry();
+      }
+    #endif
 
     // ================================================================
     // 50hz task loop
@@ -1429,7 +1426,7 @@ void loop () {
       #if defined(HeadingMagHold)
         G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
         tenHZpreviousTime = currentTime;
- 
+         
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
         calculateHeading(measuredMagX,
                          measuredMagY,
