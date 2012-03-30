@@ -51,13 +51,13 @@ void matrixUpdate(float G_Dt)
   //Accel_adjust();//adjusting centrifugal acceleration. // Not used for quadcopter
   
   updateMatrix[0] =  0;
-  updateMatrix[1] = -G_Dt * correctedRateVector[ZAXIS];    // -r
+  updateMatrix[1] = -G_Dt * correctedRateVector[ZAXIS];  // -r
   updateMatrix[2] =  G_Dt * correctedRateVector[YAXIS];  //  q
-  updateMatrix[3] =  G_Dt * correctedRateVector[ZAXIS];    //  r
+  updateMatrix[3] =  G_Dt * correctedRateVector[ZAXIS];  //  r
   updateMatrix[4] =  0;
-  updateMatrix[5] = -G_Dt * correctedRateVector[XAXIS];   // -p
+  updateMatrix[5] = -G_Dt * correctedRateVector[XAXIS];  // -p
   updateMatrix[6] = -G_Dt * correctedRateVector[YAXIS];  // -q
-  updateMatrix[7] =  G_Dt * correctedRateVector[XAXIS];   //  p
+  updateMatrix[7] =  G_Dt * correctedRateVector[XAXIS];  //  p
   updateMatrix[8] =  0; 
 
   matrixMultiply(3, 3, 3, temporaryMatrix, dcmMatrix, updateMatrix); 
@@ -92,33 +92,14 @@ void normalize()
 // Drift Correction
 ////////////////////////////////////////////////////////////////////////////////
 
-void driftCorrection(float oneG, float magX, float magY) 
+void driftCorrection(float magX, float magY) 
 {
   //  Compensation of the Roll, Pitch and Yaw drift. 
-  float accelVector[3];
   float errorRollPitch[3];
   float errorYaw[3];
   float scaledOmegaP[3];
   float scaledOmegaI[3];
   
-  //  Roll and Pitch Compensation
-  accelVector[XAXIS] = 0.0;
-  accelVector[YAXIS] = 0.0;
-  accelVector[ZAXIS] = 0.0;
-
-  // Calculate the magnitude of the accelerometer vector
-  float accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + 
-                         accelVector[YAXIS] * accelVector[YAXIS] + 
-                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
-                         
-  float accelWeight = constrain(1 - 2 * fabs(1 - accelMagnitude), 0, 1);
-  
-  vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
-  vectorScale(3, &omegaP[0], &errorRollPitch[0], 0.0);
-  
-  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], 0.0);
-  vectorAdd(3, omegaI, omegaI, scaledOmegaI);
-
   //  Yaw Compensation
   float errorCourse = (dcmMatrix[0] * magY) - (dcmMatrix[3] * magX);
   vectorScale(3, errorYaw, &dcmMatrix[6], errorCourse);
@@ -159,7 +140,7 @@ void initializeHeadingFusion(float hdgX, float hdgY)
   dcmMatrix[7] =  0;
   dcmMatrix[8] =  1;
 
-  kpYaw = -0.05;             // alternate -0.05;
+  kpYaw = 0.0;//-0.05;             // alternate -0.05;
   kiYaw = 0.0;//-0.0001;          // alternate -0.0001;
   
 }
@@ -167,10 +148,10 @@ void initializeHeadingFusion(float hdgX, float hdgY)
 ////////////////////////////////////////////////////////////////////////////////
 // Calculate Heading fusion processor
 ////////////////////////////////////////////////////////////////////////////////
-void calculateHeading(float oneG, float magX, float magY, float G_Dt) {
+void calculateHeading(float magX, float magY, float G_Dt) {
   matrixUpdate(G_Dt); 
   normalize();
-  driftCorrection(oneG, magX, magY);
+  driftCorrection(magX, magY);
   headingEulerAngles();
 }
 

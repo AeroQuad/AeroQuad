@@ -61,10 +61,6 @@ float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
 
-float ax = 0.0;
-float ay = 0.0;
-float az = 0.0;
-
 float gx = 0.0;
 float gy = 0.0;
 float gz = 0.0;
@@ -73,7 +69,7 @@ float gz = 0.0;
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float l_az, float G_Dt) {
+void argUpdate(float l_gx, float l_gy, float l_gz, float ax, float ay, float az, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -83,10 +79,10 @@ void argUpdate(float l_gx, float l_gy, float l_gz, float l_ax, float l_ay, float
   halfT = G_Dt/2;
   
   // normalise the measurements
-  norm = sqrt(l_ax*l_ax + l_ay*l_ay + l_az*l_az);       
-  ax = l_ax / norm;
-  ay = l_ay / norm;
-  az = l_az / norm;
+  norm = sqrt(ax*ax + ay*ay + az*az);       
+  ax = ax / norm;
+  ay = ay / norm;
+  az = az / norm;
      	
   // estimated direction of gravity and flux (v and w)
   vx = 2*(q1*q3 - q0*q2);
