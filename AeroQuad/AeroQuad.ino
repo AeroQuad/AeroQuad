@@ -1432,16 +1432,11 @@ void loop () {
         tenHZpreviousTime = currentTime;
          
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            smootedAccel[XAXIS],
-                            smootedAccel[YAXIS],
-                            smootedAccel[ZAXIS],
-                            accelOneG,
-                            getHdgXY(XAXIS),
-                            getHdgXY(YAXIS),
-                            G_Dt);
+        calculateHeading(accelOneG,
+                         getHdgXY(XAXIS),
+                         getHdgXY(YAXIS),
+                         G_Dt);
+//        Serial.println(trueNorthHeading,8);
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
