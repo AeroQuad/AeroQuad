@@ -420,7 +420,9 @@
   /**
    * Measure critical sensors
    */
+//  int sampleCount = 0;
   void measureCriticalSensors() {
+//    sampleCount++;
     measureGyroSum();
     measureAccelSum();
   }
@@ -1064,10 +1066,10 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-  #include <HeadingFusionProcessor.h>
+  #include <HeadingFusionProcessorDCM.h>
 #elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
-  #include <HeadingFusionProcessor.h>
+  #include <HeadingFusionProcessorDCM.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
 
@@ -1338,6 +1340,8 @@ void loop () {
   if (deltaTime >= 10000) {
     
     frameCounter++;
+//    Serial.println(sampleCount);
+//    sampleCount=0;
     
   
     G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
@@ -1428,10 +1432,16 @@ void loop () {
         tenHZpreviousTime = currentTime;
          
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(measuredMagX,
-                         measuredMagY,
-                         measuredMagZ,
-                         G_Dt);
+        calculateHeading(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            smootedAccel[XAXIS],
+                            smootedAccel[YAXIS],
+                            smootedAccel[ZAXIS],
+                            accelOneG,
+                            getHdgXY(XAXIS),
+                            getHdgXY(YAXIS),
+                            G_Dt);
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
