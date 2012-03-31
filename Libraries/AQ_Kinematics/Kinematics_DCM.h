@@ -33,7 +33,6 @@ float dcmMatrix[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float omegaP[3] = {0.0,0.0,0.0};
 float omegaI[3] = {0.0,0.0,0.0};
 float omega[3] = {0.0,0.0,0.0};
-float errorCourse = 0.0;
 float kpRollPitch = 0.0;
 float kiRollPitch = 0.0;
 float kpYaw = 0.0;

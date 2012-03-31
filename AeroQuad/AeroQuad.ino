@@ -1327,6 +1327,7 @@ void setup() {
   sched.run();
 *******************************************************************/
 void loop () {
+  
   currentTime = micros();
   deltaTime = currentTime - previousTime;
 
@@ -1338,7 +1339,7 @@ void loop () {
   if (deltaTime >= 10000) {
     
     frameCounter++;
- 
+    
     G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
     hundredHZpreviousTime = currentTime;
     
@@ -1364,7 +1365,8 @@ void loop () {
                         smootedAccel[YAXIS],
                         smootedAccel[ZAXIS],
                         G_Dt);
-                        
+
+
     // Evaluate are here because we want it to be synchronized with the processFlightControl
     #if defined AltitudeHoldBaro
       measureBaroSum(); 
@@ -1437,7 +1439,6 @@ void loop () {
                          getHdgXY(XAXIS),
                          getHdgXY(YAXIS),
                          G_Dt);
-
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
@@ -1476,8 +1477,6 @@ void loop () {
   if (frameCounter >= 100) {
       frameCounter = 0;
   }
-  
-
 }
 
 
