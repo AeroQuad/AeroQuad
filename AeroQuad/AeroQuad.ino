@@ -420,9 +420,7 @@
   /**
    * Measure critical sensors
    */
-//  int sampleCount = 0;
   void measureCriticalSensors() {
-//    sampleCount++;
     measureGyroSum();
     measureAccelSum();
   }
@@ -1340,10 +1338,7 @@ void loop () {
   if (deltaTime >= 10000) {
     
     frameCounter++;
-//    Serial.println(sampleCount);
-//    sampleCount=0;
-    
-  
+ 
     G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
     hundredHZpreviousTime = currentTime;
     
