@@ -24,6 +24,7 @@
  * estimator with the AGR and pretty good true heading computation at the same time
  * 
  * @Kenny9999
+ * I'm open to anything more lighweight working and FLIGHT TESTED
  */
 #ifndef _AQ_HEADING_FUSION_PROCESSOR_
 #define _AQ_HEADING_FUSION_PROCESSOR_
