@@ -132,6 +132,7 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Euler Angles
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +185,7 @@ void calculateHeading(float rollRate,            float pitchRate,      float yaw
   normalize();
   driftCorrection(longitudinalAccel, lateralAccel, verticalAccel, oneG, magX, magY);
   headingEulerAngles();
+
 }
 
 
