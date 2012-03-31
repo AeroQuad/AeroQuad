@@ -1064,10 +1064,10 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-  #include <HeadingFusionProcessorDCM.h>
+  #include <HeadingFusionProcessor.h>
 #elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
   #include <Magnetometer_HMC5883L.h>
-  #include <HeadingFusionProcessorDCM.h>
+  #include <HeadingFusionProcessor.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
 
@@ -1327,6 +1327,7 @@ void setup() {
   sched.run();
 *******************************************************************/
 void loop () {
+  
   currentTime = micros();
   deltaTime = currentTime - previousTime;
 
@@ -1338,7 +1339,7 @@ void loop () {
   if (deltaTime >= 10000) {
     
     frameCounter++;
- 
+    
     G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
     hundredHZpreviousTime = currentTime;
     
@@ -1364,7 +1365,8 @@ void loop () {
                         smootedAccel[YAXIS],
                         smootedAccel[ZAXIS],
                         G_Dt);
-                        
+
+
     // Evaluate are here because we want it to be synchronized with the processFlightControl
     #if defined AltitudeHoldBaro
       measureBaroSum(); 
@@ -1427,8 +1429,16 @@ void loop () {
         tenHZpreviousTime = currentTime;
          
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(getHdgXY(XAXIS),getHdgXY(YAXIS),G_Dt);
-
+        calculateHeading(gyroRate[XAXIS],
+                         gyroRate[YAXIS],
+                         gyroRate[ZAXIS],
+                         smootedAccel[XAXIS],
+                         smootedAccel[YAXIS],
+                         smootedAccel[ZAXIS],
+                         accelOneG,
+                         getHdgXY(XAXIS),
+                         getHdgXY(YAXIS),
+                         G_Dt);
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
@@ -1467,8 +1477,6 @@ void loop () {
   if (frameCounter >= 100) {
       frameCounter = 0;
   }
-  
-
 }
 
 

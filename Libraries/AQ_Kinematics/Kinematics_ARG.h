@@ -61,15 +61,10 @@ float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
 
-float gx = 0.0;
-float gy = 0.0;
-float gz = 0.0;
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float l_gx, float l_gy, float l_gz, float ax, float ay, float az, float G_Dt) {
+void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -114,9 +109,9 @@ void argUpdate(float l_gx, float l_gy, float l_gz, float ax, float ay, float az,
   previousEz = ez;
 	
   // adjusted gyroscope measurements
-  gx = l_gx + Kp*ex + exInt;
-  gy = l_gy + Kp*ey + eyInt;
-  gz = l_gz + Kp*ez + ezInt;
+  gx = gx + Kp*ex + exInt;
+  gy = gy + Kp*ey + eyInt;
+  gz = gz + Kp*ez + ezInt;
     
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;

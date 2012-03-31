@@ -18,120 +18,170 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_HEADING_FUSION_PROCESSOR
-#define _AQ_HEADING_FUSION_PROCESSOR
+/*
+ * eventually, it's about the normal DCM processor and I KNOW that this is heavy!
+ * Still, this is the best result I did get with my knowledge that give good attitude
+ * estimator with the AGR and pretty good true heading computation at the same time
+ * 
+ * @Kenny9999
+ * I'm open to anything more lighweight working and FLIGHT TESTED
+ */
+#ifndef _AQ_HEADING_FUSION_PROCESSOR_
+#define _AQ_HEADING_FUSION_PROCESSOR_
 
-
-float lhalfT = 0.0;                					// half the sample period
-float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
-float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
+float dcmMatrix[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float omegaP[3] = {0.0,0.0,0.0};
+float omegaI[3] = {0.0,0.0,0.0};
+float omega[3] = {0.0,0.0,0.0};
+float kpRollPitch = 0.0;
+float kiRollPitch = 0.0;
+float kpYaw = 0.0;
+float kiYaw = 0.0;
+float accelMagnitude = 0.0;
+float accelWeight = 0.0;
 
 float trueNorthHeading = 0.0;
 
-
-void headingUpdate(float mx, float my, float mz, float G_Dt) {
-  float norm;
-  float hx, hy, hz, bx, bz;
-  float vx, vy, vz, wx, wy, wz;
-  float q0i, q1i, q2i, q3i;
-  float exMag, eyMag, ezMag;
-    
-  lhalfT = G_Dt/2;
-  
-  // auxiliary variables to reduce number of repeated operations
-  float q0q0 = lq0*lq0;
-  float q0q1 = lq0*lq1;
-  float q0q2 = lq0*lq2;
-  float q0q3 = lq0*lq3;
-  float q1q1 = lq1*lq1;
-  float q1q2 = lq1*lq2;
-  float q1q3 = lq1*lq3;
-  float q2q2 = lq2*lq2;   
-  float q2q3 = lq2*lq3;
-  float q3q3 = lq3*lq3;          
-    	
-  // normalise the measurements
-  norm = sqrt(mx*mx + my*my + mz*mz);          
-  mx = mx / norm;
-  my = my / norm;
-  mz = mz / norm;         
-    	
-  // compute reference direction of flux
-  hx = mx * 2*(0.5 - q2q2 - q3q3) + my * 2*(q1q2 - q0q3)       + mz * 2*(q1q3 + q0q2);
-  hy = mx * 2*(q1q2 + q0q3)       + my * 2*(0.5 - q1q1 - q3q3) + mz * 2*(q2q3 - q0q1);
-  hz = mx * 2*(q1q3 - q0q2)       + my * 2*(q2q3 + q0q1)       + mz * 2*(0.5 - q1q1 - q2q2);
-    
-  bx = sqrt((hx*hx) + (hy*hy));
-  bz = hz;        
-    	
-  // estimated direction of gravity and flux (v and w)
-  vx = 2*(q1q3 - q0q2);
-  vy = 2*(q0q1 + q2q3);
-  vz = q0q0 - q1q1 - q2q2 + q3q3;
-    
-  wx = bx * 2*(0.5 - q2q2 - q3q3) + bz * 2*(q1q3 - q0q2);
-  wy = bx * 2*(q1q2 - q0q3)       + bz * 2*(q0q1 + q2q3);
-  wz = bx * 2*(q0q2 + q1q3)       + bz * 2*(0.5 - q1q1 - q2q2);
-    	
-  exMag = (my*wz - mz*wy);
-  eyMag = (mz*wx - mx*wz);
-  ezMag = (mx*wy - my*wx);
-    
-  // adjusted gyroscope measurements
-  float l_gx = gx + lexInt;
-  float l_gy = gy + leyInt;
-  float l_gz = gz + lezInt;
-  
-  // integrate quaternion rate and normalise
-  q0i = (-lq1*l_gx - lq2*l_gy - lq3*l_gz) * lhalfT;
-  q1i = ( lq0*l_gx + lq2*l_gz - lq3*l_gy) * lhalfT;
-  q2i = ( lq0*l_gy - lq1*l_gz + lq3*l_gx) * lhalfT;
-  q3i = ( lq0*l_gz + lq1*l_gy - lq2*l_gx) * lhalfT;
-  lq0 += q0i;
-  lq1 += q1i;
-  lq2 += q2i;
-  lq3 += q3i;
-
-  // normalise quaternion
-  norm = sqrt(lq0*lq0 + lq1*lq1 + lq2*lq2 + lq3*lq3);
-  lq0 = lq0 / norm;
-  lq1 = lq1 / norm;
-  lq2 = lq2 / norm;
-  lq3 = lq3 / norm;
-}
-  
-void headingEulerAngles()
-{
-  trueNorthHeading = atan2(2 * (lq0*lq3 + lq1*lq2), 1 - 2 *(lq2*lq2 + lq3*lq3));
-}
-
-  
 ////////////////////////////////////////////////////////////////////////////////
-// Initialize MARG
+// Matrix Update
+////////////////////////////////////////////////////////////////////////////////
+void matrixUpdate(float p, float q, float r, float G_Dt) 
+{
+  float rateGyroVector[3];
+  float temporaryMatrix[9];
+  float updateMatrix[9];
+  
+  rateGyroVector[XAXIS] = p;
+  rateGyroVector[YAXIS] = q;
+  rateGyroVector[ZAXIS] = r;
+  
+  vectorSubtract(3, &omega[XAXIS], &rateGyroVector[XAXIS], &omegaI[XAXIS]);
+  vectorSubtract(3, &correctedRateVector[XAXIS], &omega[XAXIS], &omegaP[XAXIS]); 
+  
+  updateMatrix[0] =  0;
+  updateMatrix[1] = -G_Dt * correctedRateVector[ZAXIS];  // -r
+  updateMatrix[2] =  G_Dt * correctedRateVector[YAXIS];  //  q
+  updateMatrix[3] =  G_Dt * correctedRateVector[ZAXIS];  //  r
+  updateMatrix[4] =  0;
+  updateMatrix[5] = -G_Dt * correctedRateVector[XAXIS];  // -p
+  updateMatrix[6] = -G_Dt * correctedRateVector[YAXIS];  // -q
+  updateMatrix[7] =  G_Dt * correctedRateVector[XAXIS];  //  p
+  updateMatrix[8] =  0; 
+
+  matrixMultiply(3, 3, 3, temporaryMatrix, dcmMatrix, updateMatrix); 
+  matrixAdd(3, 3, dcmMatrix, dcmMatrix, temporaryMatrix);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Normalize
+////////////////////////////////////////////////////////////////////////////////
+void normalize() 
+{
+  float temporary[9];
+ 
+  float error = -vectorDotProduct(3, &dcmMatrix[0], &dcmMatrix[3]) * 0.5;  // eq.18
+
+  vectorScale(3, &temporary[0], &dcmMatrix[3], error);                     // eq.19
+  vectorScale(3, &temporary[3], &dcmMatrix[0], error);                     // eq.19
+  
+  vectorAdd(6, &temporary[0], &temporary[0], &dcmMatrix[0]);               // eq.19
+  
+  vectorCrossProduct(&temporary[6],&temporary[0],&temporary[3]);           // eq.20
+  
+  for(byte v = 0; v < 9; v+=3) {
+    float renorm = 0.5 *(3 - vectorDotProduct(3, &temporary[v],&temporary[v]));  // eq.21
+    vectorScale(3, &dcmMatrix[v], &temporary[v], renorm);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Drift Correction
+////////////////////////////////////////////////////////////////////////////////
+void driftCorrection(float ax, float ay, float az, float oneG, float magX, float magY) 
+{
+  //  Compensation of the Roll, Pitch and Yaw drift. 
+  float errorRollPitch[3];
+  float errorYaw[3];
+  float scaledOmegaP[3];
+  float scaledOmegaI[3];
+  
+  //  Roll and Pitch Compensation
+  float accelVector[3];
+  accelVector[XAXIS] = ax;
+  accelVector[YAXIS] = ay;
+  accelVector[ZAXIS] = az;
+
+  if (accelMagnitude == 0.0) {
+    // Calculate the magnitude of the accelerometer vector
+    accelMagnitude = (sqrt(accelVector[XAXIS] * accelVector[XAXIS] + 
+                         accelVector[YAXIS] * accelVector[YAXIS] + 
+                         accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
+                         
+    // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
+    accelWeight = constrain(1 - 2 * fabs(1 - accelMagnitude), 0, 1);
+  }
+  
+  vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
+  vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
+  
+  vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
+  vectorAdd(3, omegaI, omegaI, scaledOmegaI);
+
+  //  Yaw Compensation
+  float errorCourse = (dcmMatrix[0] * magY) - (dcmMatrix[3] * magX);
+  vectorScale(3, errorYaw, &dcmMatrix[6], errorCourse);
+ 
+  vectorScale(3, &scaledOmegaP[0], &errorYaw[0], kpYaw);
+  vectorAdd(3, omegaP, omegaP, scaledOmegaP);
+  
+  vectorScale(3, &scaledOmegaI[0] ,&errorYaw[0], kiYaw);
+  vectorAdd(3, omegaI, omegaI, scaledOmegaI);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Initialize Heading Fusion
 ////////////////////////////////////////////////////////////////////////////////
 void initializeHeadingFusion(float hdgX, float hdgY) 
 {
-  float hdg = atan2(hdgY, hdgX);
-    
-  lq0 = cos(hdg/2);
-  lq1 = 0;
-  lq2 = 0;
-  lq3 = sin(hdg/2);
-  lexInt = 0.0;
-  leyInt = 0.0;
-  lezInt = 0.0;
-  
-}
-  
-////////////////////////////////////////////////////////////////////////////////
-// Calculate MARG
-////////////////////////////////////////////////////////////////////////////////
+  for (byte i=0; i<3; i++) {
+    omegaP[i] = 0;
+    omegaI[i] = 0;
+  }
+  dcmMatrix[0] =  hdgX;
+  dcmMatrix[1] = -hdgY;
+  dcmMatrix[2] =  0;
+  dcmMatrix[3] =  hdgY;
+  dcmMatrix[4] =  hdgX;
+  dcmMatrix[5] =  0;
+  dcmMatrix[6] =  0;
+  dcmMatrix[7] =  0;
+  dcmMatrix[8] =  1;
 
-void calculateHeading(float measuredMagX, float measuredMagY, float measuredMagZ, float G_Dt) {
-				 
-  headingUpdate(measuredMagX, measuredMagY, measuredMagZ, G_Dt);
-  headingEulerAngles();
+  kpRollPitch = 0.05;       // alternate 0.1;
+  kiRollPitch = 0.0001;     // alternate 0.0002;
+    
+  kpYaw = -0.05;            // alternate -0.05;
+  kiYaw = -0.0001;          // alternate -0.0001;
+    
 }
+  
+////////////////////////////////////////////////////////////////////////////////
+// Initialize Heading Fusion
+////////////////////////////////////////////////////////////////////////////////
+void calculateHeading(float rollRate,            float pitchRate,      float yawRate,  
+                      float longitudinalAccel,   float lateralAccel,   float verticalAccel, 
+                      float oneG,                float magX,           float magY,
+				      float G_Dt) {
+    
+  matrixUpdate(rollRate, pitchRate, yawRate, G_Dt); 
+  normalize();
+  driftCorrection(longitudinalAccel, lateralAccel, verticalAccel, oneG, magX, magY);
+  
+  trueNorthHeading =  atan2(dcmMatrix[3], dcmMatrix[0]);
+}
+
 
 #endif
 
