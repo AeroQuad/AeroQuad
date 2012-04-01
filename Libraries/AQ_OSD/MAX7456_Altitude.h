@@ -30,7 +30,7 @@ int lastHoldAltitude = 12345;
 byte lastHoldState   = 6;
 
 void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altHoldState) {
-  #ifdef feet
+  #ifdef USUnits
     int currentAltitude = readedAltitude*3.281;
     int currentHoldAltitude = desiredAltitudeToKeep*3.281;
   #else // metric
@@ -40,7 +40,7 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
   char buf[7];
 
   if ( lastAltitude != currentAltitude ) {
-    #ifdef feet
+    #ifdef USUnits
       snprintf(buf,7,"\10%4df",currentAltitude);
     #else
       if (abs(currentAltitude)<100) {
@@ -70,7 +70,7 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
     if ((lastHoldState != ON) || (lastHoldAltitude != currentHoldAltitude)) {
       lastHoldState = ON;
       lastHoldAltitude=currentHoldAltitude;
-      #ifdef feet
+      #ifdef USUnits
         snprintf(buf,7,"\11%4df",currentHoldAltitude);
       #else
         if (abs(currentHoldAltitude)<100) {

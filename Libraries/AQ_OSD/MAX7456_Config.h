@@ -21,21 +21,6 @@
 #ifndef _AQ_OSD_MAX7456_CONFIG_H_
 #define _AQ_OSD_MAX7456_CONFIG_H_
 
-//*******************************************************************
-//******************* OSD CONFIGURATION *****************************
-//*******************************************************************
-
-// Optional OSD items
-
-//#define ShowRSSI               // Show Receiver RSSI
-#ifdef ShowRSSI
-  #define RSSI_PIN     A6     // analog pin to read
-  #define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
-  #define RSSI_100P    1023   // A/D value for 100%
-  #define RSSI_0P      0      // A/D value for 0%
-  #define RSSI_WARN    20     // show alarm at %
-#endif
-
 // You can configure positioning of various display elements below.
 // '#defines' for elements which will not be displayed, can be ignored.
 //
@@ -79,12 +64,21 @@
 #define RSSI_ROW     3
 #define RSSI_COL     23
 
+// GPS info
+#define GPS_ROW     MAX_screen_rows-2
+#define GPS_COL     1
+
+// GPS home arrow -- under the reticle
+#define GPS_HA_ROW  (MAX_screen_rows/2+2)
+#define GPS_HA_COL  14
+
 // Notify
 #define NOTIFY_ROW MAX_screen_rows-3
 #define NOTIFY_COL 1 // don't change this, it needs a full line
 
+// Artificial horizon mode (default is attitude indicator)
+#define ARTIFICIAL_HORIZON
+
 /********************** End of user configuration section ********************************/
 
 #endif  // #define _AQ_OSD_MAX7456_CONFIG_H_
-
-

@@ -28,11 +28,13 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.0
+#define SOFTWARE_VERSION 3.1
 
-#define BAUD 115200
-//#define BAUD 111111 // use this to be compatible with USB and XBee connections
-//#define BAUD 57600
+#if defined WirelessTelemetry
+  #define BAUD 111111 // use this to be compatible with USB and XBee connections
+#else
+  #define BAUD 115200
+#endif  
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -89,6 +91,7 @@ int testCommand = 1000;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
 #define TASK_10HZ 10
+#define TASK_1HZ 100
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
@@ -109,6 +112,7 @@ unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
 unsigned long tenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
@@ -126,18 +130,51 @@ void processAltitudeHold();
  */
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
  // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
-
-  float altitudeToHoldTarget = 0.0;
+  int minThrottleAdjust = -50;
+  int maxThrottleAdjust = 50;
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
-  boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-#endif
-int minThrottleAdjust = -50;
-int maxThrottleAdjust = 50;
+  
+//  float estimatedXVelocity = 0;
+//  float estimatedYVelocity = 0;
+//  int estimatedZVelocity = 0;
+//  float previousSensorAltitude = 0.0;
 
-float getAltitudeFromSensors();
+  #if defined AltitudeHoldBaro
+    float baroAltitudeToHoldTarget = 0.0;
+  #endif  
+  #if defined AltitudeHoldRangeFinder
+    float sonarAltitudeToHoldTarget = 0.0;
+  #endif
+#endif
+// float getAltitudeFromSensors();
+//////////////////////////////////////////////////////
+
+/**
+ * GPS navigation global declaration
+ */
+#if defined (UseGPS)
+  int missionNbPoint = 0;
+  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+  #include <GpsAdapter.h>
+  GeodeticPosition homePosition;
+  GeodeticPosition positionToReach;
+  
+  int gpsRollAxisCorrection = 0;
+  int gpsPitchAxisCorrection = 0;
+  boolean isStorePositionNeeded = false;
+  
+  GeodeticPosition previousPosition;
+  float gpsLaggedSpeed = 0.0;
+  float gpsLaggedCourse = 0.0;
+  
+  void processPositionCorrection();
+  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
+#endif
 //////////////////////////////////////////////////////
 
 
@@ -151,18 +188,21 @@ float getAltitudeFromSensors();
 #define SERIAL_FLUSH      SERIAL_PORT.flush
 #define SERIAL_BEGIN      SERIAL_PORT.begin
  
-HardwareSerial *binaryPort;
+//HardwareSerial *binaryPort;
 
 void readSerialCommand();
 void sendSerialTelemetry();
 void printInt(int data);
 float readFloatSerial();
+long readIntegerSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
 void reportVehicleState();
 //////////////////////////////////////////////////////
+
+
 
 /**
  * EEPROM global section
@@ -190,6 +230,8 @@ typedef struct {
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
+  t_NVR_PID GPSROLL_PID_GAIN_ADR;
+  t_NVR_PID GPSPITCH_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   
   float SOFTWARE_VERSION_ADR;
@@ -207,11 +249,16 @@ typedef struct {
   float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
+  // Gyro calibration
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
+  float GYRO_ROLL_TEMP_BIAS_SLOPE_ADR;
+  float GYRO_PITCH_TEMP_BIAS_SLOPE_ADR;
+  float GYRO_YAW_TEMP_BIAS_SLOPE_ADR;
+  float GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR;
+  float GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR;
+  float GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
   float XAXIS_ACCEL_SCALE_FACTOR_ADR;
@@ -230,6 +277,22 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT;
+  // Camera Control
+  float CAMERAMODE_ADR;
+  float MCAMERAPITCH_ADR;
+  float MCAMERAROLL_ADR;    
+  float MCAMERAYAW_ADR;
+  float SERVOCENTERPITCH_ADR;
+  float SERVOCENTERROLL_ADR;
+  float SERVOCENTERYAW_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float SERVOMINYAW_ADR;
+  float SERVOMAXPITCH_ADR;
+  float SERVOMAXROLL_ADR;
+  float SERVOMAXYAW_ADR; 
 } t_NVR_Data;  
 
 

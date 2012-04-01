@@ -86,8 +86,8 @@ void readSerialCommand() {
       
     case 'D': // Altitude hold PID
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        readSerialPID(ALTITUDE_HOLD_PID_IDX);
-        PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
+        readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
+        PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
@@ -189,21 +189,34 @@ void readSerialCommand() {
       #endif
       break;
       
+    case 'O': // define waypoints
+      #ifdef UseGPSNavigator
+        currentWaypoint = readIntegerSerial();
+        waypoint[currentWaypoint].latitude = readIntegerSerial();
+        waypoint[currentWaypoint].longitude = readIntegerSerial();
+        waypoint[currentWaypoint].altitude = readIntegerSerial();
+      #else
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+      #endif
+      break;
     case 'P': //  read Camera values
-      #ifdef Camera
-        camera.setMode(readFloatSerial());
-        camera.setCenterPitch(readFloatSerial());
-        camera.setCenterRoll(readFloatSerial());
-        camera.setCenterYaw(readFloatSerial());
-        camera.setmCameraPitch(readFloatSerial());
-        camera.setmCameraRoll(readFloatSerial());
-        camera.setmCameraYaw(readFloatSerial());
-        camera.setServoMinPitch(readFloatSerial());
-        camera.setServoMinRoll(readFloatSerial());
-        camera.setServoMinYaw(readFloatSerial());
-        camera.setServoMaxPitch(readFloatSerial());
-        camera.setServoMaxRoll(readFloatSerial());
-        camera.setServoMaxYaw(readFloatSerial());
+      #ifdef CameraControl
+        cameraMode = readFloatSerial();
+        servoCenterPitch = readFloatSerial();
+        servoCenterRoll = readFloatSerial();
+        servoCenterYaw = readFloatSerial();
+        mCameraPitch = readFloatSerial();
+        mCameraRoll = readFloatSerial();
+        mCameraYaw = readFloatSerial();
+        servoMinPitch = readFloatSerial();
+        servoMinRoll = readFloatSerial();
+        servoMinYaw = readFloatSerial();
+        servoMaxPitch = readFloatSerial();
+        servoMaxRoll = readFloatSerial();
+        servoMaxYaw = readFloatSerial();
       #else
         for (byte values = 0; values < 13; values++)
           readFloatSerial();
@@ -217,6 +230,18 @@ void readSerialCommand() {
       #else
         readFloatSerial();
         readFloatSerial();
+      #endif
+      break;
+
+    case 'V': // GPS
+      #if defined (UseGPS)
+        readSerialPID(GPSROLL_PID_IDX);
+        readSerialPID(GPSPITCH_PID_IDX);
+        writeEEPROM();
+      #else
+        for (byte values = 0; values < 6; values++) {
+          readFloatSerial();
+        }
       #endif
       break;
 
@@ -333,8 +358,8 @@ void sendSerialTelemetry() {
     
   case 'd': // Altitude Hold
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintPID(ALTITUDE_HOLD_PID_IDX);
-      PrintValueComma(PID[ALTITUDE_HOLD_PID_IDX].windupGuard);
+      PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
+      PrintValueComma(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
@@ -393,7 +418,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSecSec[axis]);
+      PrintValueComma(filteredAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
@@ -463,21 +488,39 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
+  case 'o': // send waypoints
+    #ifdef UseGpsNavigator
+      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+        PrintValueComma(index);
+        PrintValueComma(waypoint[index].latitude);
+        PrintValueComma(waypoint[index].longitude);
+        PrintValueComma(waypoint[index].altitude);
+      }
+      SERIAL_PRINTLN();
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
   case 'p': // Send Camera values
-    #ifdef Camera
-      PrintValueComma(camera.getMode());
-      PrintValueComma(camera.getCenterPitch());
-      PrintValueComma(camera.getCenterRoll());
-      PrintValueComma(camera.getCenterYaw());
-      PrintValueComma(camera.getmCameraPitch(), 2);
-      PrintValueComma(camera.getmCameraRoll(), 2);
-      PrintValueComma(camera.getmCameraYaw(), 2);
-      PrintValueComma(camera.getServoMinPitch());
-      PrintValueComma(camera.getServoMinRoll());
-      PrintValueComma(camera.getServoMinYaw());
-      PrintValueComma(camera.getServoMaxPitch());
-      PrintValueComma(camera.getServoMaxRoll());
-      SERIAL_PRINTLN(camera.getServoMaxYaw());
+    #ifdef CameraControl
+      PrintValueComma(cameraMode);
+      PrintValueComma(servoCenterPitch);
+      PrintValueComma(servoCenterRoll);
+      PrintValueComma(servoCenterYaw);
+      PrintValueComma(mCameraPitch);
+      PrintValueComma(mCameraRoll);
+      PrintValueComma(mCameraYaw);
+      PrintValueComma(servoMinPitch);
+      PrintValueComma(servoMinRoll);
+      PrintValueComma(servoMinYaw);
+      PrintValueComma(servoMaxPitch);
+      PrintValueComma(servoMaxRoll);
+      SERIAL_PRINTLN(servoMaxYaw);
     #else
       for (byte index=0; index < 12; index++) {
         PrintValueComma(0);
@@ -496,7 +539,7 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
+      SERIAL_PRINTLN(trueNorthHeading);
     #else
       SERIAL_PRINTLN(gyroHeading);
     #endif
@@ -507,12 +550,16 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(kinematicsAngle[ZAXIS]);
+      PrintValueComma(trueNorthHeading);
     #else
       PrintValueComma(gyroHeading);
     #endif
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintValueComma(getAltitudeFromSensors() == INVALID_ALTITUDE ? 0 : getAltitudeFromSensors());
+      #if defined AltitudeHoldBaro
+        PrintValueComma(getBaroAltitude());
+      #elif defined AltitudeHoldRangeFinder
+        PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
+      #endif  
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);
@@ -531,7 +578,7 @@ void sendSerialTelemetry() {
       PrintValueComma(0); // zero out unused motor channels
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryData[0].voltage/100.0);
+      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
     #else
       PrintValueComma(0);
     #endif
@@ -552,6 +599,20 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(minRangeFinderRange);
     #else
       PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
+  case 'v': // Send GPS PIDs
+    #if defined (UseGPS)
+      PrintPID(GPSROLL_PID_IDX);
+      PrintPID(GPSPITCH_PID_IDX);
+      SERIAL_PRINTLN();
+      queryType = 'X';
+    #else
+      for (byte values=0; values < 5; values++)
+        PrintValueComma(0);
       SERIAL_PRINTLN(0);
     #endif
     queryType = 'X';
@@ -601,6 +662,29 @@ float readFloatSerial() {
   data[index] = '\0';
 
   return atof(data);
+}
+
+// Used to read integer values from the serial port
+long readIntegerSerial() {
+  #define SERIALINTEGERSIZE 16
+  byte index = 0;
+  byte timeout = 0;
+  char data[SERIALINTEGERSIZE] = "";
+
+  do {
+    if (SERIAL_AVAILABLE() == 0) {
+      delay(10);
+      timeout++;
+    }
+    else {
+      data[index] = SERIAL_READ();
+      timeout = 0;
+      index++;
+    }
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
+  data[index] = '\0';
+
+  return atol(data);
 }
 
 void comma() {
@@ -735,6 +819,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
     SERIAL_PRINTLN("Mega v21");
+  #elif defined(AeroQuadMega_v21)
+    SERIAL_PRINTLN("AutoNav");
   #elif defined(AutonavShield)
     SERIAL_PRINTLN("AutonavShield");
   #elif defined(AeroQuad_Wii)
@@ -789,5 +875,37 @@ void reportVehicleState() {
   printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
   printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
 }
+
+#ifdef SlowTelemetry
+
+  byte slowTelemetryTask = 10;
+
+  void initSlowTelemetry() {
+  
+    Serial2.begin(1200);
+  }
+  
+  void sendSlowTelemetry() {
+    slowTelemetryTask = (slowTelemetryTask +1 ) % 10;
+    switch (slowTelemetryTask) {
+      case 0  : 
+        Serial2.print(currentPosition.latitude);      // Latitude * 100000
+        break;
+      case 1:
+        Serial2.print(currentPosition.longitude);     // Longitude * 100000
+        break;
+      case 2: 
+        Serial2.print((long)(getBaroAltitude()*100)); // Altitude in cm
+        break;
+      case 9:
+        Serial2.print("\r\n");
+        return;
+    } 
+    Serial2.print(',');
+  }
+
+#endif
+
+
 
 #endif // _AQ_SERIAL_COMM_

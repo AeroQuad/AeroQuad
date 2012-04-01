@@ -21,8 +21,6 @@
 #ifndef _AQ_OSD_H_
 #define _AQ_OSD_H_
 
-byte OSDsched = 0;
-
 #ifdef BattMonitor
   void displayVoltage(byte areMotorsArmed);
 #endif
@@ -38,11 +36,17 @@ byte OSDsched = 0;
 #ifdef ShowAttitudeIndicator
   void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
+#ifdef UseGPS
+  void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading,unsigned int numsats);
+#endif
 
 void initializeOSD();
 void updateOSD();
 void displayFlightTime(byte areMotorsArmed);
 byte displayNotify();
+
+void hideOSD();
+void unhideOSD();
 
 // OSD notification system
 //

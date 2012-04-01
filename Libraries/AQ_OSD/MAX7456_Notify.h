@@ -53,7 +53,7 @@ byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fm
       if (i) {
         // move text right to center it
         memmove(osdNotificationBuffer + i, osdNotificationBuffer, strlen(osdNotificationBuffer));
-        memset(osdNotificationBuffer, 0, i);
+        memset(osdNotificationBuffer, ' ', i);
         // adjust cursor position also if needed
         if (flags & OSD_CURSOR) {
           cursorLeft  += i;

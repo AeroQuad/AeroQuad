@@ -28,11 +28,29 @@ byte flashingLedState = 0; // this counter increments by one at 10Hz
 
 void processLedStatus() {
 
+  
+  //
+  // process ready state light in case we use GPS
+  //
+  #if defined (UseGPS)
+    if (haveAGpsLock()) {
+      if (isHomeBaseInitialized()) {
+        digitalWrite(LED_Green, HIGH);
+      }
+      else {
+        digitalWrite(LED_Green, (flashingLedState & 4));
+      }
+    }
+    else { 
+      digitalWrite(LED_Green, (flashingLedState & 2));
+    }
+  #endif
+  
   //
   // process ready state light in case we use Batt monitor
   //
   #if defined (BattMonitor)
-  if(motorArmed)
+  if(motorArmed == ON)
   {
     if (batteryAlarm) {
       digitalWrite(Buzzer_Pin, flashingLedState & 4);
@@ -44,7 +62,7 @@ void processLedStatus() {
   }
   else
   {
-    digitalWrite(Buzzer_Pin, LOW);
+    digitalWrite(Buzzer_Pin,LOW);
   }
   #endif  
 

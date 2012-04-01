@@ -51,37 +51,25 @@ byte rangeFinderPins[5] = {ALTITUDE_RANGE_FINDER_PIN,
 
 void inititalizeRangeFinder(byte idx) {
 
-  maxRangeFinderRange = 3.0;
+  maxRangeFinderRange = 4.5;
   minRangeFinderRange = 0.25;
   vehicleState |= RANGE_ENABLED;
   
   pinMode(rangeFinderPins[idx], INPUT);
 }
 
-/**
- * inches * 2.54 = cm
- */
-void readRangeFinderDistanceSum(byte idx) {
-  rangeFinderRangeSum[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);
-  rangeFinderSampleCount[idx]++;
+boolean isInRangeOfRangeFinder(float range) {
+  return ((range <= maxRangeFinderRange) && (range >= minRangeFinderRange));
 }
 
-void evaluateDistanceFromSample(byte idx) {
-  rangeFinderRange[idx] = ((float)rangeFinderRangeSum[idx] / (float)rangeFinderSampleCount[idx]) / 100;
-  if (!isInRangeOfRangeFinder(idx)) {
-    rangeFinderRange[idx] = INVALID_ALTITUDE;
+void readRangeFinder(byte idx) {
+  rangeFinderRange[idx] = (analogRead(rangeFinderPins[idx]) * 1.8333) / 100.0;
+  if (!isInRangeOfRangeFinder(rangeFinderRange[idx])) {
+    rangeFinderRange[idx] = INVALID_RANGE;
   }
-  rangeFinderRangeSum[idx] = 0;
-  rangeFinderSampleCount[idx] = 0;
 }
 
-/**
- * @return true if we can use safely the sonar
- */ 
-boolean isInRangeOfRangeFinder(byte idx) {
-  return ((rangeFinderRange[idx] < maxRangeFinderRange) && 
-          (rangeFinderRange[idx] > minRangeFinderRange));
-}
+
 
 #endif 
 

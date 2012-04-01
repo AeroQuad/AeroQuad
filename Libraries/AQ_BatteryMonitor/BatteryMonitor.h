@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0.1 - February 2012
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
-  Copyright (c) 2012 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 byte    numberOfBatteries = 0; 
 boolean batteryAlarm      = false;
 boolean batteryWarning    = false;
+byte    buzzerState       = 0;
 
 unsigned short batteryAlarmCellVoltage   = 333; // 9.9V on 3S
 unsigned short batteryWarningCellVoltage = 366; // 11.0V on 3S

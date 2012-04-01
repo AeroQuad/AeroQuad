@@ -33,11 +33,12 @@ float dcmMatrix[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float omegaP[3] = {0.0,0.0,0.0};
 float omegaI[3] = {0.0,0.0,0.0};
 float omega[3] = {0.0,0.0,0.0};
-float errorCourse = 0.0;
 float kpRollPitch = 0.0;
 float kiRollPitch = 0.0;
 float kpYaw = 0.0;
 float kiYaw = 0.0;
+
+float trueNorthHeading = 0.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Matrix Update
@@ -125,17 +126,17 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
                          accelVector[ZAXIS] * accelVector[ZAXIS])) / oneG;
                          
   // Weight for accelerometer info (<0.75G = 0.0, 1G = 1.0 , >1.25G = 0.0)
-  // accelWeight = constrain(1 - 4*abs(1 - accelMagnitude),0,1);
+  // accelWeight = constrain(1 - 4*fabs(1 - accelMagnitude),0,1);
   
   // Weight for accelerometer info (<0.5G = 0.0, 1G = 1.0 , >1.5G = 0.0)
-  accelWeight = constrain(1 - 2 * abs(1 - accelMagnitude), 0, 1);
+  accelWeight = constrain(1 - 2 * fabs(1 - accelMagnitude), 0, 1);
   
   vectorCrossProduct(&errorRollPitch[0], &accelVector[0], &dcmMatrix[6]);
   vectorScale(3, &omegaP[0], &errorRollPitch[0], kpRollPitch * accelWeight);
   
   vectorScale(3, &scaledOmegaI[0], &errorRollPitch[0], kiRollPitch * accelWeight);
   vectorAdd(3, omegaI, omegaI, scaledOmegaI);
-  
+
   //  Yaw Compensation
   #ifdef HeadingMagHold  
     errorCourse = (dcmMatrix[0] * magY) - (dcmMatrix[3] * magX);
@@ -174,7 +175,7 @@ void eulerAngles(void)
 {
   kinematicsAngle[XAXIS]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
   kinematicsAngle[YAXIS] =  -asin(dcmMatrix[6]);
-  kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
+  trueNorthHeading = kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,11 +217,11 @@ void initializeKinematics(float hdgX, float hdgY)
   dcmMatrix[7] =  0;
   dcmMatrix[8] =  1;
 
-  kpRollPitch = 0.1;        // alternate 0.05;
-  kiRollPitch = 0.0002;     // alternate 0.0001;
+  kpRollPitch = 0.05;        // alternate 0.1;
+  kiRollPitch = 0.0;//0.0001;     // alternate 0.0002;
     
-  kpYaw = -0.1;             // alternate -0.05;
-  kiYaw = -0.0002;          // alternate -0.0001;
+  kpYaw = -0.05;             // alternate -0.05;
+  kiYaw = -0.0001;          // alternate -0.0001;
     
 }
   

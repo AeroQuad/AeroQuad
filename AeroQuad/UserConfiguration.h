@@ -35,6 +35,7 @@
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 #define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AutonavShield       // Really good board for the guy here http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -68,24 +69,15 @@
 #define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// You must define *only* one of the following flightAngle calculations
-// If you only want DCM, then don't define either of the below
-// Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above//
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
-
-//
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
-//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
-//#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
+#define AltitudeHoldBaro // Enables BMP085 Barometer
+#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
+#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
+#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
 
 //
 // *******************************************************************************************************************************
@@ -93,16 +85,17 @@
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
 #define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitorAutoDescent // NEED BattMonitor defined. if you want the craft to auto descent when the battery reach the alarm voltage
+//#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
-#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.67, 0.86, BM_NOPIN, 0, 0) // cpin=BM_NOPIN if no sensor
+#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.67, 0.86, BM_NOPIN, 0, 0)  // cpin=BM_NOPIN if no sensor
 
 //
 // *******************************************************************************************************************************
 // Optional Receiver
 // *******************************************************************************************************************************
+//#define NormalReceiver // this do nothing really but, it indicate users that they don't have to define other option here if they have a normal receiver
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverPPM // Use a ppm receiver
 #define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
@@ -111,15 +104,21 @@
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3 //For some Hitec/Sanwa/Others
 
+//#define UseRSSIFaileSafe // read rssi for receiver failsafe NEED A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+
 //
 // *******************************************************************************************************************************
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Xbee+Installation
 // *******************************************************************************************************************************
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
-//#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
+
+//
+// *******************************************************************************************************************************
+// Optional audio channel telemetry (for ground station tracking purposes)
+// This will output telemetry at slow (1200baud) rate once per second on Serial2. 
+// *******************************************************************************************************************************
+//#define SlowTelemetry  // Enables Wireless telemetry on Serial2
 
 //
 // *******************************************************************************************************************************
@@ -148,11 +147,12 @@
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
 //#define OSD
+//#define ShowRSSI
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "AeroQD"         // Show (optional) callsign
+//#define CALLSIGN "Aeroquad"         // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
-//#define feet                      // Leave commented for altitude measured in metres, uncomment for feet
+//#define USUnits                   // Enable for US units (feet,miles,mph)
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
 
