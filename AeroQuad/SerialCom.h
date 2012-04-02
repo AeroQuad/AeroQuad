@@ -878,6 +878,8 @@ void reportVehicleState() {
 
 #ifdef SlowTelemetry
 
+#include <AQ_RSCode.h>
+
   byte slowTelemetryTask = 10;
 
   void initSlowTelemetry() {
