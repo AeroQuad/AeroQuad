@@ -204,7 +204,7 @@ void calculateHeading(float rollRate,            float pitchRate,      float yaw
 
 #if defined UseGPS
   void setDeclinationLocation(long lat, long lon) {
-    compassDeclination = getMagnetometerDeclination(lat,lon);
+    compassDeclination = getMagnetometerDeclination((float)lat / 10000000, (float)lon / 10000000);
   }
 #endif  
 
