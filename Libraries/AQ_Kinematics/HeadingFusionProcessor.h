@@ -29,6 +29,10 @@
 #ifndef _AQ_HEADING_FUSION_PROCESSOR_
 #define _AQ_HEADING_FUSION_PROCESSOR_
 
+#if defined UseGPS
+  #include "MagnetometerDeclinationDB.h"
+#endif  
+
 float dcmMatrix[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float omegaP[3] = {0.0,0.0,0.0};
 float omegaI[3] = {0.0,0.0,0.0};
@@ -41,6 +45,8 @@ float accelMagnitude = 0.0;
 float accelWeight = 0.0;
 
 float trueNorthHeading = 0.0;
+
+float compassDeclination = 0.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Matrix Update
@@ -180,7 +186,27 @@ void calculateHeading(float rollRate,            float pitchRate,      float yaw
   driftCorrection(longitudinalAccel, lateralAccel, verticalAccel, oneG, magX, magY);
   
   trueNorthHeading =  atan2(dcmMatrix[3], dcmMatrix[0]);
+  #if defined UseGPS
+    if( compassDeclination != 0.0 ) {
+	
+      trueNorthHeading = trueNorthHeading + compassDeclination;
+      if (trueNorthHeading > M_PI)  {  // Angle normalization (-180 deg, 180 deg)
+        trueNorthHeading -= (2.0 * M_PI);
+	  }
+      else {
+        trueNorthHeading += (2.0 * M_PI);
+	  }
+    }
+  #endif
+  
 }
+
+
+#if defined UseGPS
+  void setDeclinationLocation(long lat, long lon) {
+    compassDeclination = getMagnetometerDeclination(lat,lon);
+  }
+#endif  
 
 
 #endif
