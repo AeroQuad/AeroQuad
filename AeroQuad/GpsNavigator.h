@@ -48,6 +48,8 @@ void initHomeBase() {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
       homePosition.altitude = 0;
+      // Set the magnetometer declination when we get the home position set
+      setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
     }  
   }
 }
