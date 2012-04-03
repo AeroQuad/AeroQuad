@@ -78,10 +78,7 @@ void readSerialCommand() {
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      headingHoldConfig = readFloatSerial();
-      heading = 0;
-      relativeHeading = 0;
-      headingHold = 0;
+      readFloatSerial();
       break;
       
     case 'D': // Altitude hold PID
@@ -877,21 +874,22 @@ void reportVehicleState() {
 }
 
 #ifdef SlowTelemetry
-
+ 
   #define TELEMETRY_MSGSIZE 24
   #define TELEMETRY_MSGSIZE_ECC (TELEMETRY_MSGSIZE + 8)
 
   byte slowTelemetryByte = 255;
-  
   byte telemetryBuffer[TELEMETRY_MSGSIZE_ECC];
-
+ 
   void initSlowTelemetry() {
+
     Serial2.begin(1200);
     slowTelemetryByte = 255;
   }
-  
+   
   /* 100Hz task, sends data out byte by byte */
   void updateSlowTelemetry100Hz() {
+
     if (slowTelemetryByte == 0) {
       Serial2.write((byte)0xaa);
       slowTelemetryByte++;
@@ -908,7 +906,7 @@ void reportVehicleState() {
       slowTelemetryByte=255;
     }
   }
-
+ 
   void hexdump(byte *buf,int n){
     int i;
     char sbuf[4];
@@ -918,7 +916,7 @@ void reportVehicleState() {
     }
     Serial.print('\n');
   }
-
+ 
   void updateSlowTelemetry10Hz() {
 
     Serial.print('.');
@@ -941,8 +939,6 @@ void reportVehicleState() {
       slowTelemetryByte=0;
     }
   }
-#endif
-
-
+#endif // SlowTelemetry
 
 #endif // _AQ_SERIAL_COMM_

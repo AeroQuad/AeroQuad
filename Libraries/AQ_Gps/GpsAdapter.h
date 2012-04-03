@@ -26,12 +26,12 @@
 
 #define MIN_NB_SATS_IN_USE 6
 
-#define GPS2RAD (1/5729577.95)
+#define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795
 
 enum {
   GPS_INVALID_AGE = 0xFFFFFFFF, 
-  GPS_INVALID_ANGLE = 999999999, 
+  GPS_INVALID_ANGLE = 0x7FFFFFFF, 
   GPS_INVALID_ALTITUDE = 999999999, 
   GPS_INVALID_DATE = 0,
   GPS_INVALID_TIME = 0xFFFFFFFF, 
@@ -84,7 +84,7 @@ long getCourse() {
   return gps->ground_course;
 }
 unsigned long getGpsSpeed() {
-  return gps->ground_speed*1.852*10/36;
+  return gps->ground_speed;
 }
 
 unsigned long getGpsAltitude() {
@@ -97,10 +97,10 @@ unsigned long getGpsAltitude() {
 float gpsRawDistance = 0.0;
 short gpsBearing = 0;
 
-void computeDistanceAndBearing(long lat1, long lon1, long lat2, long lon2) {
+void computeDistanceAndBearing(struct GeodeticPosition p1, struct GeodeticPosition p2) {
 
-  const float x = (float)(lon2-lon1) * GPS2RAD * cos((float)(lat1+lat2)/2*GPS2RAD);
-  const float y = (float)(lat2-lat1) * GPS2RAD;
+  const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cos((float)(p1.latitude + p2.latitude) / 2.0 * GPS2RAD);
+  const float y = (float)(p2.latitude - p1.latitude) * GPS2RAD;
   gpsRawDistance = sqrt(x*x+y*y);
   gpsBearing = (short)(RAD2DEG * atan2(x,y));
 }
