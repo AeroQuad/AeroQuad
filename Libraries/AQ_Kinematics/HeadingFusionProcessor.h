@@ -192,10 +192,10 @@ void calculateHeading(float rollRate,            float pitchRate,      float yaw
       trueNorthHeading = trueNorthHeading + compassDeclination;
       if (trueNorthHeading > M_PI)  {  // Angle normalization (-180 deg, 180 deg)
         trueNorthHeading -= (2.0 * M_PI);
-	  }
-      else {
+	    } 
+      else if (trueNorthHeading < -M_PI){
         trueNorthHeading += (2.0 * M_PI);
-	  }
+	    }
     }
   #endif
   
@@ -204,7 +204,8 @@ void calculateHeading(float rollRate,            float pitchRate,      float yaw
 
 #if defined UseGPS
   void setDeclinationLocation(long lat, long lon) {
-    compassDeclination = getMagnetometerDeclination((float)lat / 10000000, (float)lon / 10000000);
+    // get declination ( in radians )
+    compassDeclination = getMagnetometerDeclination(lat, lon);    
   }
 #endif  
 

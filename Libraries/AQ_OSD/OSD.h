@@ -28,7 +28,7 @@
   void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altitudeHoldState);
 #endif
 #ifdef HeadingMagHold
-  void displayHeading(int currentHeading);
+  void displayHeading(float currentHeading);
 #endif
 #ifdef ShowRSSI
   void displayRSSI();
@@ -37,7 +37,7 @@
   void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
 #ifdef UseGPS
-  void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading,unsigned int numsats);
+  void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheading,unsigned int numsats);
 #endif
 
 void initializeOSD();
