@@ -149,7 +149,6 @@ int16_t getLookupValue(uint8_t x, uint8_t y) {
 
   // Init vars
   row_value stval;
-  int16_t offset = 0;
 
   // These will never exceed the second dimension length of 73
   uint8_t current_virtual_index = 0, r;
@@ -175,7 +174,7 @@ int16_t getLookupValue(uint8_t x, uint8_t y) {
     memcpy_P((void*) &stval, (const prog_char *)&declination_values[i], sizeof(struct row_value));
 
     // Pull the first offset and determine sign
-    offset = stval.abs_offset;
+    int16_t offset = stval.abs_offset;
     offset = (stval.offset_sign == 1) ? -offset : offset;
 
     // Add offset for each repeat
@@ -190,28 +189,24 @@ int16_t getLookupValue(uint8_t x, uint8_t y) {
 
 float getMagnetometerDeclination(long lat, long lon) {
   
-  int16_t decSW, decSE, decNW, decNE, lonmin, latmin;
-  uint8_t latmin_index,lonmin_index;
-  float decmin, decmax;
-
   // Constrain to valid inputs
   lat = constrain((float)lat / 10000000.0, -90, 90);
   lon = constrain((float)lon / 10000000.0, -180, 180);
 
-  latmin = floor(lat/5)*5;
-  lonmin = floor(lon/5)*5;
+  int16_t latmin = floor(lat/5)*5;
+  int16_t lonmin = floor(lon/5)*5;
 
-  latmin_index= (90+latmin)/5;
-  lonmin_index= (180+lonmin)/5;
+  uint8_t latmin_index= (90+latmin)/5;
+  uint8_t lonmin_index= (180+lonmin)/5;
 
-  decSW = getLookupValue(latmin_index, lonmin_index);
-  decSE = getLookupValue(latmin_index, lonmin_index+1);
-  decNE = getLookupValue(latmin_index+1, lonmin_index+1);
-  decNW = getLookupValue(latmin_index+1, lonmin_index);
+  int16_t decSW = getLookupValue(latmin_index, lonmin_index);
+  int16_t decSE = getLookupValue(latmin_index, lonmin_index+1);
+  int16_t decNE = getLookupValue(latmin_index+1, lonmin_index+1);
+  int16_t decNW = getLookupValue(latmin_index+1, lonmin_index);
 
   /* approximate declination within the grid using bilinear interpolation */
-  decmin = (lon - lonmin) / 5 * (decSE - decSW) + decSW;
-  decmax = (lon - lonmin) / 5 * (decNE - decNW) + decNW;
+  float decmin = (lon - lonmin) / 5 * (decSE - decSW) + decSW;
+  float decmax = (lon - lonmin) / 5 * (decNE - decNW) + decNW;
   return   ((lat - latmin) / 5 * (decmax - decmin) + decmin) * M_PI / 180.0;
 }
 
