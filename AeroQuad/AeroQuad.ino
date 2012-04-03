@@ -1009,7 +1009,7 @@
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#else defined FlightAngleARG
+#else
   #include "Kinematics_ARG.h"
 #endif
 
@@ -1171,6 +1171,11 @@
     #define SERIAL_PORT Serial
   #endif
 #endif  
+
+#ifdef SlowTelemetry
+  #include <AQ_RSCode.h>
+#endif
+
 
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
@@ -1384,6 +1389,10 @@ void loop () {
       }
     #endif
 
+    #ifdef SlowTelemetry
+      updateSlowTelemetry100Hz();
+    #endif
+
     // ================================================================
     // 50hz task loop
     // ================================================================
@@ -1466,7 +1475,7 @@ void loop () {
       #endif
 
       #ifdef SlowTelemetry
-        sendSlowTelemetry();
+        updateSlowTelemetry10Hz();
       #endif
     }
     

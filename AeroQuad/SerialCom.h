@@ -878,34 +878,69 @@ void reportVehicleState() {
 
 #ifdef SlowTelemetry
 
-#include <AQ_RSCode.h>
+  #define TELEMETRY_MSGSIZE 24
+  #define TELEMETRY_MSGSIZE_ECC (TELEMETRY_MSGSIZE + 8)
 
-  byte slowTelemetryTask = 10;
+  byte slowTelemetryByte = 255;
+  
+  byte telemetryBuffer[TELEMETRY_MSGSIZE_ECC];
 
   void initSlowTelemetry() {
-  
     Serial2.begin(1200);
+    slowTelemetryByte = 255;
   }
   
-  void sendSlowTelemetry() {
-    slowTelemetryTask = (slowTelemetryTask +1 ) % 10;
-    switch (slowTelemetryTask) {
-      case 0  : 
-        Serial2.print(currentPosition.latitude);      // Latitude * 100000
-        break;
-      case 1:
-        Serial2.print(currentPosition.longitude);     // Longitude * 100000
-        break;
-      case 2: 
-        Serial2.print((long)(getBaroAltitude()*100)); // Altitude in cm
-        break;
-      case 9:
-        Serial2.print("\r\n");
-        return;
-    } 
-    Serial2.print(',');
+  /* 100Hz task, sends data out byte by byte */
+  void updateSlowTelemetry100Hz() {
+    if (slowTelemetryByte == 0) {
+      Serial2.write((byte)0xaa);
+      slowTelemetryByte++;
+    }
+    else if (slowTelemetryByte == 1) {
+      Serial2.write((byte)0x55);
+      slowTelemetryByte++;
+    }
+    else if (slowTelemetryByte < (TELEMETRY_MSGSIZE_ECC + 2)) {
+      Serial2.write(telemetryBuffer[slowTelemetryByte-2]);
+      slowTelemetryByte++;
+    }
+    else {
+      slowTelemetryByte=255;
+    }
   }
 
+  void hexdump(byte *buf,int n){
+    int i;
+    char sbuf[4];
+    for (i=0; i<n; i++) {
+      snprintf(sbuf,4,"%02x ",buf[i]);
+      Serial.print(sbuf);
+    }
+    Serial.print('\n');
+  }
+
+  void updateSlowTelemetry10Hz() {
+
+    Serial.print('.');
+    if (slowTelemetryByte==255) {
+      memcpy(telemetryBuffer + 0, &currentPosition.latitude, 4);
+      memcpy(telemetryBuffer + 4, &currentPosition.longitude, 4);
+
+      short altitude = (long)(getBaroAltitude()*100.0);
+      memcpy(telemetryBuffer + 8, &altitude, 2);
+
+      /* add ECC */
+      long old=micros();
+      encode_data(telemetryBuffer,24);
+      Serial.print(micros()-old);
+      Serial.print(':');
+
+      hexdump(telemetryBuffer,32);
+
+      /* trigger send */
+      slowTelemetryByte=0;
+    }
+  }
 #endif
 
 
