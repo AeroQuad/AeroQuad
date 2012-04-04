@@ -78,7 +78,7 @@ mult_polys (byte dst[], byte p1[], byte p2[])
 {
   short i, j;
   byte tmp1[MAXDEG*2];
-	
+
   for (i=0; i < (MAXDEG*2); i++) dst[i] = 0;
 	
   for (i = 0; i < MAXDEG; i++) {
@@ -93,18 +93,6 @@ mult_polys (byte dst[], byte p1[], byte p2[])
     /* add into partial product */
     for(j=0; j < (MAXDEG*2); j++) dst[j] ^= tmp1[j];
   }
-}
-
-void copy_poly (byte dst[], byte src[]) 
-{
-  byte i;
-  for (i = 0; i < MAXDEG; i++) dst[i] = src[i];
-}
-
-void zero_poly (byte poly[]) 
-{
-  byte i;
-  for (i = 0; i < MAXDEG; i++) poly[i] = 0;
 }
 
 /* Simulate a LFSR with generator polynomial for n byte RS code. 
