@@ -875,11 +875,29 @@ void reportVehicleState() {
 
 #ifdef SlowTelemetry
  
+  struct telemetryPacket {
+    long  latitude;
+    long  longitude;
+    short altitude;
+    short course;
+    short heading;
+    short speed;
+    byte  voltage;
+    byte  current;
+    word  capacity;
+    long  reserved2;
+    byte  ecc[8];
+  };
+  
+  union {
+    struct telemetryPacket data;
+    byte   bytes[32];
+  } telemetryBuffer;
+     
   #define TELEMETRY_MSGSIZE 24
   #define TELEMETRY_MSGSIZE_ECC (TELEMETRY_MSGSIZE + 8)
 
   byte slowTelemetryByte = 255;
-  byte telemetryBuffer[TELEMETRY_MSGSIZE_ECC];
  
   void initSlowTelemetry() {
 
@@ -890,16 +908,8 @@ void reportVehicleState() {
   /* 100Hz task, sends data out byte by byte */
   void updateSlowTelemetry100Hz() {
 
-    if (slowTelemetryByte == 0) {
-      Serial2.write((byte)0xaa);
-      slowTelemetryByte++;
-    }
-    else if (slowTelemetryByte == 1) {
-      Serial2.write((byte)0x55);
-      slowTelemetryByte++;
-    }
-    else if (slowTelemetryByte < (TELEMETRY_MSGSIZE_ECC + 2)) {
-      Serial2.write(telemetryBuffer[slowTelemetryByte-2]);
+    if (slowTelemetryByte < TELEMETRY_MSGSIZE_ECC ) {
+      Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
       slowTelemetryByte++;
     }
     else {
@@ -907,33 +917,20 @@ void reportVehicleState() {
     }
   }
  
-  void hexdump(byte *buf,int n){
-    int i;
-    char sbuf[4];
-    for (i=0; i<n; i++) {
-      snprintf(sbuf,4,"%02x ",buf[i]);
-      Serial.print(sbuf);
-    }
-    Serial.print('\n');
-  }
- 
   void updateSlowTelemetry10Hz() {
 
-    Serial.print('.');
     if (slowTelemetryByte==255) {
-      memcpy(telemetryBuffer + 0, &currentPosition.latitude, 4);
-      memcpy(telemetryBuffer + 4, &currentPosition.longitude, 4);
-
-      short altitude = (long)(getBaroAltitude()*100.0);
-      memcpy(telemetryBuffer + 8, &altitude, 2);
-
-      /* add ECC */
-      long old=micros();
-      encode_data(telemetryBuffer,24);
-      Serial.print(micros()-old);
-      Serial.print(':');
-
-      hexdump(telemetryBuffer,32);
+      telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
+      telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
+      telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
+      telemetryBuffer.data.course    = getCourse()/10; // degrees
+      telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
+      telemetryBuffer.data.speed     = getGpsSpeed();              // cm/s
+      telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
+      telemetryBuffer.data.current   = batteryData[0].current/100; // to A
+      telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
+       /* add ECC */
+      encode_data(telemetryBuffer.bytes,24);
 
       /* trigger send */
       slowTelemetryByte=0;
