@@ -1,6 +1,40 @@
  #ifndef AQ_RSCODE
 
-/* **************************************************************** */
+/*********************************************************************
+ * AeroQuad Reed-Solomon coding library
+ *
+ * This module implements a Reed-Solomon ECC coder using precalculated 
+ * tables.
+ *
+ * The encoder is based on RSCODE project.
+ *
+ * Standard rscode library can be used for decoding (with NPAR=8)
+ *********************************************************************/
+
+/*********************************************************************
+ * Copyright Henry Minsky (hqm@alum.mit.edu) 1991-2009
+ *
+ * This software library is licensed under terms of the GNU GENERAL
+ * PUBLIC LICENSE
+ *
+ * RSCODE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RSCODE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Rscode.  If not, see <http://www.gnu.org/licenses/>.
+
+ * Commercial licensing is available under a separate license, please
+ * contact author for details.
+ *
+ * Source code is available at http://rscode.sourceforge.net
+ *********************************************************************/
 
 /* Number of parity bytes */
 #define NPAR 8
@@ -121,4 +155,5 @@ encode_data (byte msg[], int nbytes)
     msg[nbytes+i] = LFSR[NPAR-1-i];
   }	
 }
+
 #endif
