@@ -876,6 +876,7 @@ void reportVehicleState() {
 #ifdef SlowTelemetry
  
   struct telemetryPacket {
+    word  id;
     long  latitude;
     long  longitude;
     short altitude;
@@ -885,11 +886,11 @@ void reportVehicleState() {
     byte  voltage;
     byte  current;
     word  capacity;
-    long  reserved2;
+    word  reserved2;
     byte  ecc[8];
   };
   
-  union {
+  union telemetryBuffer {
     struct telemetryPacket data;
     byte   bytes[32];
   } telemetryBuffer;
@@ -920,6 +921,7 @@ void reportVehicleState() {
   void updateSlowTelemetry10Hz() {
 
     if (slowTelemetryByte==255) {
+      telemetryBuffer.data.id        = 0x4151;
       telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
       telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
       telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
