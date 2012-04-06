@@ -50,19 +50,19 @@ void processLedStatus() {
   // process ready state light in case we use Batt monitor
   //
   #if defined (BattMonitor)
-  if(motorArmed == ON)
+  if(motorArmed)
   {
     if (batteryAlarm) {
-      digitalWrite(Buzzer_Pin, flashingLedState & 4);
+      digitalWrite(BuzzerPin, flashingLedState & 4);
     } else if (batteryWarning) {
-      digitalWrite(Buzzer_Pin, (flashingLedState & 15)==0);
+      digitalWrite(BuzzerPin, (flashingLedState & 15)==0);
     } else { 
-      digitalWrite(Buzzer_Pin, LOW);
+      digitalWrite(BuzzerPin, LOW);
     }
   }
   else
   {
-    digitalWrite(Buzzer_Pin,LOW);
+    digitalWrite(BuzzerPin, LOW);
   }
   #endif  
 

@@ -133,7 +133,7 @@ void readPilotCommands() {
   
   #if defined (UseGPSNavigator)
     if (receiverCommand[AUX2] > 1750) {
-      if (positionHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+      if (positionHoldState != ALTPANIC) {  // check for special condition with manditory override of Altitude hold
         if (isStorePositionNeeded) {
           positionHoldState = ON;
           gpsRollAxisCorrection = 0;

@@ -241,7 +241,7 @@ void processFlightControl() {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
       }
-//      Serial.println(nbSatelitesInUse);
+
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder

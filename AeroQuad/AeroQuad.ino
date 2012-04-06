@@ -341,7 +341,7 @@
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
-  #define Buzzer_Pin 49
+  #define BuzzerPin 49
 
   #include <Device_I2C.h>
 
@@ -400,8 +400,8 @@
     digitalWrite(LED_Red, LOW);
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
-    pinMode(Buzzer_Pin, OUTPUT);
-    digitalWrite(Buzzer_Pin, LOW);
+    pinMode(BuzzerPin, OUTPUT);
+    digitalWrite(BuzzerPin, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
