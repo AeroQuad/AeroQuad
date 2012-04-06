@@ -1348,7 +1348,6 @@ void loop () {
 
     for (int axis = XAXIS; axis <= ZAXIS; axis++) {
       filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
-      smootedAccel[axis] = filterSmooth(filteredAccel[axis],smootedAccel[axis],0.5);
     }
       
 //    #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
@@ -1361,9 +1360,9 @@ void loop () {
     calculateKinematics(gyroRate[XAXIS],
                         gyroRate[YAXIS],
                         gyroRate[ZAXIS],
-                        smootedAccel[XAXIS],
-                        smootedAccel[YAXIS],
-                        smootedAccel[ZAXIS],
+                        filteredAccel[XAXIS],
+                        filteredAccel[YAXIS],
+                        filteredAccel[ZAXIS],
                         G_Dt);
 
 
@@ -1432,9 +1431,9 @@ void loop () {
         calculateHeading(gyroRate[XAXIS],
                          gyroRate[YAXIS],
                          gyroRate[ZAXIS],
-                         smootedAccel[XAXIS],
-                         smootedAccel[YAXIS],
-                         smootedAccel[ZAXIS],
+                         filteredAccel[XAXIS],
+                         filteredAccel[YAXIS],
+                         filteredAccel[ZAXIS],
                          accelOneG,
                          getHdgXY(XAXIS),
                          getHdgXY(YAXIS),

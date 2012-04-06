@@ -33,10 +33,11 @@ byte osdGPSState=0;
 #define GPS_NOFIX 0x40 // no fix displayed
 #define GPS_NONAV 0x20 // nav info hidden (no fix or no target)
 
-void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long course, short magheading, unsigned int numsats) {
+void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheadingrad, unsigned int numsats) {
 
+  short magheading = (int)(magheadingrad*RAD2DEG);
   if (osdGPSState & GPS_DONAV) {
-    if ((hlat==GPS_INVALID_ANGLE) || (lat==GPS_INVALID_ANGLE)) {
+    if ((home.latitude==GPS_INVALID_ANGLE) || (pos.latitude==GPS_INVALID_ANGLE)) {
       if (!(osdGPSState&GPS_NONAV)) {
         // clear info
         writeChars(NULL, 2, 0, GPS_HA_ROW, GPS_HA_COL);
@@ -47,7 +48,7 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
     }
     else {
       char buf[5];
-      computeDistanceAndBearing(lat, lon, hlat, hlon);
+      computeDistanceAndBearing(pos, home);
       #ifdef USUnits
         const unsigned int distance = getDistanceFoot(); // dist to home in feet
 	    if (distance<1000) {
@@ -91,7 +92,7 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
   }
   else {
     // update position and speed
-    if (lat == GPS_INVALID_ANGLE) {
+    if (pos.latitude == GPS_INVALID_ANGLE) {
       if (!(osdGPSState&GPS_NOFIX)) {
         char buf[29];
         snprintf(buf,29,"Waiting for GPS fix (%d/%d)",numsats,6);
@@ -103,14 +104,14 @@ void displayGPS(long lat, long lon, long hlat, long hlon, long speed, long cours
 #ifdef USUnits
       speed=speed*36/1609; // convert from cm/s to mph 
       snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\031",numsats,
-               (lat>=0)?'N':'S',labs(lat)/10000000L,labs(lat)%10000000L/10,
-               (lon>=0)?'E':'W',labs(lon)/10000000L,labs(lon)%10000000L/10,
+               (pos.latitude>=0)?'N':'S',labs(pos.latitude)/10000000L,labs(pos.latitude)%10000000L/10,
+               (pos.longitude>=0)?'E':'W',labs(pos.longitude)/10000000L,labs(pos.longitude)%10000000L/10,
 	       speed);
 #else
       speed=speed*36/1000; // convert from cm/s to kmh 
       snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\030",numsats,
-               (lat>=0)?'N':'S',labs(lat)/10000000L,labs(lat)%10000000L/10,
-               (lon>=0)?'E':'W',labs(lon)/10000000L,labs(lon)%10000000L/10,
+               (pos.latitude>=0)?'N':'S',labs(pos.latitude)/10000000L,labs(pos.latitude)%10000000L/10,
+               (pos.longitude>=0)?'E':'W',labs(pos.longitude)/10000000L,labs(pos.longitude)%10000000L/10,
 	       speed);
 #endif
       writeChars(buf, 28, 0, GPS_ROW, GPS_COL);

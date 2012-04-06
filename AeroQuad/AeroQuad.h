@@ -105,7 +105,6 @@ byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
-float smootedAccel[3] = {0.0,0.0,0.0};
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -160,18 +159,16 @@ void processAltitudeHold();
 #if defined (UseGPS)
   int missionNbPoint = 0;
   byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
-
+  
   #include <GpsAdapter.h>
   GeodeticPosition homePosition;
   GeodeticPosition positionToReach;
+
+  float gpsDistanceToDestination = 0.0;
   
   int gpsRollAxisCorrection = 0;
   int gpsPitchAxisCorrection = 0;
   boolean isStorePositionNeeded = false;
-  
-  GeodeticPosition previousPosition;
-  float gpsLaggedSpeed = 0.0;
-  float gpsLaggedCourse = 0.0;
   
   void processPositionCorrection();
   void updateGPSRollPitchSpeedAlg(GeodeticPosition);

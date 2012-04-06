@@ -78,10 +78,7 @@ void readSerialCommand() {
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      headingHoldConfig = readFloatSerial();
-      heading = 0;
-      relativeHeading = 0;
-      headingHold = 0;
+      readFloatSerial();
       break;
       
     case 'D': // Altitude hold PID
@@ -424,8 +421,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//      PrintValueComma(meterPerSecSec[axis]);
-      PrintValueComma(smootedAccel[axis]);
+      PrintValueComma(filteredAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)

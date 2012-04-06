@@ -49,7 +49,7 @@ void updateOSD() {
       displayAltitude(getBaroAltitude(), baroAltitudeToHoldTarget, altitudeHoldState);
     #endif
     #ifdef HeadingMagHold
-      displayHeading(kinematicsGetDegreesHeading(ZAXIS));
+      displayHeading(trueNorthHeading);
     #endif
     #ifdef ShowRSSI
       displayRSSI();
@@ -64,8 +64,7 @@ void updateOSD() {
 
   if (OSDsched&0xa0) {
     #ifdef UseGPS
-//    extern unsigned int nbSatelitesInUse;
-      displayGPS(currentPosition.latitude, currentPosition.longitude, homePosition.latitude, homePosition.longitude, getGpsSpeed(), getCourse(), kinematicsGetDegreesHeading(ZAXIS),nbSatelitesInUse);
+      displayGPS(currentPosition, homePosition, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
     #endif
   }
 
