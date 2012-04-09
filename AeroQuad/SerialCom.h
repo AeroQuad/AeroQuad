@@ -324,6 +324,12 @@ void PrintValueComma(byte val)
   comma();
 }
 
+void PrintValueComma(long int val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
 void PrintPID(unsigned char IDPid)
 {
   PrintValueComma(PID[IDPid].P);
@@ -491,23 +497,23 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
-//  case 'o': // send waypoints
-//    #ifdef UseGPSNavigator
-//      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
-//        PrintValueComma(index);
-//        PrintValueComma(waypoint[index].latitude);
-//        PrintValueComma(waypoint[index].longitude);
-//        PrintValueComma(waypoint[index].altitude);
-//      }
-//      SERIAL_PRINTLN();
-//    #else
-//      PrintValueComma(0);
-//      PrintValueComma(0);
-//      PrintValueComma(0);
-//      SERIAL_PRINTLN(0);
-//    #endif
-//    queryType = 'X';
-//    break;
+  case 'o': // send waypoints
+    #ifdef UseGPSNavigator
+      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+        PrintValueComma(index);
+        PrintValueComma(waypoint[index].latitude);
+        PrintValueComma(waypoint[index].longitude);
+        PrintValueComma(waypoint[index].altitude);
+      }
+      SERIAL_PRINTLN();
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
 
   case 'p': // Send Camera values
     #ifdef CameraControl
