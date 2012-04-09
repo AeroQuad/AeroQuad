@@ -324,6 +324,12 @@ void PrintValueComma(byte val)
   comma();
 }
 
+void PrintValueComma(long int val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
 void PrintPID(unsigned char IDPid)
 {
   PrintValueComma(PID[IDPid].P);
