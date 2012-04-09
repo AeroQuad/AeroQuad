@@ -116,6 +116,9 @@ void AP_GPS_NMEA::init(void)
 
     // send the ublox init strings
     bs->print_P((const prog_char_t *)_ublox_init_string);
+	
+	// @kenny try, try to remove pinout from nmea, Thx to Kevorkian for this
+	bs->print_P((const prog_char_t *)"$PMTK300,200,0,0,0,0*2F");
 
     idleTimeout = 1200;
 }
