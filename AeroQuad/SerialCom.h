@@ -921,7 +921,7 @@ void reportVehicleState() {
   void updateSlowTelemetry10Hz() {
 
     if (slowTelemetryByte==255) {
-      telemetryBuffer.data.id        = 0x4151;
+      telemetryBuffer.data.id        = 0x5141; // "AQ"
       telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
       telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
       telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
