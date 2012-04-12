@@ -318,6 +318,18 @@ void PrintValueComma(unsigned long val)
   comma();
 }
 
+void PrintValueComma(byte val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
+void PrintValueComma(long int val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
 void PrintPID(unsigned char IDPid)
 {
   PrintValueComma(PID[IDPid].P);
@@ -486,7 +498,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'o': // send waypoints
-    #ifdef UseGpsNavigator
+    #ifdef UseGPSNavigator
       for (byte index = 0; index < MAX_WAYPOINTS; index++) {
         PrintValueComma(index);
         PrintValueComma(waypoint[index].latitude);

@@ -285,6 +285,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
