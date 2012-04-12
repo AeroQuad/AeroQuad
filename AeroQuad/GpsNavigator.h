@@ -25,12 +25,6 @@
 #ifndef _AQ_Navigator_H_
 #define _AQ_Navigator_H_
 
-// @todo, Kenny, remove this and put it in the EEPROM
-#define MAX_WAYPOINTS 16
-GeodeticPosition waypoint[MAX_WAYPOINTS];
-
-int currentWaypoint;
-
 boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }

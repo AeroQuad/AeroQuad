@@ -60,6 +60,30 @@ void nvrWriteFloat(float value, int address) {
 #endif
 }
 
+long nvrReadLong(int address) {
+  union longStore {
+    byte longByte[4];
+    long longVal;
+  } longOut;  
+
+  for (byte i = 0; i < 4; i++)
+    longOut.longByte[i] = EEPROM.read(address + i);
+    
+  return longOut.longVal;
+}
+
+void nvrWriteLong(long value, int address) {
+  union longStore {
+    byte longByte[4];
+    long longVal;
+  } longIn;  
+
+  longIn.longVal = value;
+  
+  for (byte i = 0; i < 4; i++)
+    EEPROM.write(address + i, longIn.longByte[i]);
+}
+
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   struct PIDdata* pid = &PID[IDPid];
   pid->P = nvrReadFloat(IDEeprom);
@@ -198,6 +222,11 @@ void initializeEEPROM() {
     PID[GPSPITCH_PID_IDX].P = 1.0;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
+    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+      waypoint[location].longitude = GPS_INVALID_ANGLE;
+      waypoint[location].latitude = GPS_INVALID_ANGLE;
+      waypoint[location].altitude = GPS_INVALID_ALTITUDE;
+    }
   #endif
 
   // Camera Control
@@ -215,7 +244,7 @@ void initializeEEPROM() {
     servoMaxPitch = 2000;
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
-  #endif  
+  #endif
 }
 
 void readEEPROM() {
@@ -281,7 +310,13 @@ void readEEPROM() {
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+      waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
+      waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
+      waypoint[location].altitude = readLong(WAYPOINT_ADR[location].altitude);
+    }    
   #endif
+
   // Camera Control
   #ifdef CameraControl
     cameraMode = readFloat(CAMERAMODE_ADR);
@@ -374,6 +409,11 @@ void writeEEPROM(){
     writeFloat(missionNbPoint, RANGE_FINDER_MAX_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+      waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
+      waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
+      waypoint[location].altitude = readLong(WAYPOINT_ADR[location].altitude);
+    }       
   #endif
 
     // Camera Control

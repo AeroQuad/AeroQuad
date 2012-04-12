@@ -161,10 +161,13 @@ void processAltitudeHold();
   byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
   
   #include <GpsAdapter.h>
+  #define MAX_WAYPOINTS 16
+  GeodeticPosition waypoint[MAX_WAYPOINTS];
   GeodeticPosition homePosition;
   GeodeticPosition positionToReach;
 
   float gpsDistanceToDestination = 0.0;
+  long waypointIndex;
   
   int gpsRollAxisCorrection = 0;
   int gpsPitchAxisCorrection = 0;
@@ -290,7 +293,8 @@ typedef struct {
   float SERVOMINYAW_ADR;
   float SERVOMAXPITCH_ADR;
   float SERVOMAXROLL_ADR;
-  float SERVOMAXYAW_ADR; 
+  float SERVOMAXYAW_ADR;
+  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 
 
@@ -301,12 +305,16 @@ void initReceiverFromEEPROM();
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
+long nvrReadLong(int address); // defined in DataStorage.h
+void nvrWriteLong(long value, int address); // defined in DataStorage.h
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
 void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 
 #define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
 #define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
 #define writeFloat(value, addr) nvrWriteFloat(value, GET_NVR_OFFSET(addr))
+#define readLong(addr) nvrReadLong(GET_NVR_OFFSET(addr))
+#define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
