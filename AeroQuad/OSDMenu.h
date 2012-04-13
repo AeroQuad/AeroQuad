@@ -483,7 +483,7 @@ void menuHideOSD(byte mode, byte action){
 }
 
 #ifdef CameraControl
-short savedCenterYaw, savedCenterPitch;
+short savedCenterYaw, savedCenterPitch, savedCenterRoll;
 
 #define ZOOMPIN 24
 
@@ -492,14 +492,15 @@ void menuCameraPTZ(byte mode, byte action){
   if (action == MENU_INIT) {
     hideOSD();
     menuOwnsSticks = 1;
-    savedCenterYaw = servoCenterYaw;
+    savedCenterYaw   = servoCenterYaw;
     savedCenterPitch = servoCenterPitch;
+    savedCenterRoll  = servoCenterRoll;
     menuFuncDataFloat = 0.0;
   }
   else if (action == MENU_HIJACK) {
     const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
     const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
-    const short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+    short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
 
     if (roll < -MENU_STICK_REPEAT) {
       unhideOSD();
@@ -507,36 +508,61 @@ void menuCameraPTZ(byte mode, byte action){
       menuInFunc  = 0;
 
       // release zoom
+      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
       pinMode(ZOOMPIN, INPUT);
 
       // restore position
       servoCenterYaw   = savedCenterYaw;
       servoCenterPitch = savedCenterPitch;
+      servoCenterRoll = savedCenterRoll;
       return;
     }
 
-    if (abs(yaw) > 100) {
-      servoCenterYaw = constrain(servoCenterYaw + (roll/60), servoMinYaw, servoMaxYaw);
+    if (abs(yaw) > 50) {
+      if (yaw>0) { 
+        yaw-=50;
+      }
+      else {
+        yaw+=50;
+      }
+      servoCenterYaw = constrain(servoCenterYaw + (yaw/10), servoMinYaw, servoMaxYaw);
     }
 
-    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 10) {
+    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
       menuFuncDataFloat = receiverCommand[THROTTLE];
       servoCenterPitch = constrain(receiverCommand[THROTTLE], servoMinPitch, servoMaxPitch);
     }
 
-    if (pitch < -MENU_STICK_REPEAT) {
-      // zoom out
-      pinMode(ZOOMPIN, OUTPUT);
-      digitalWrite(ZOOMPIN, LOW);
-    }
-    else if (pitch > MENU_STICK_REPEAT) {
-      // zoom in
-      pinMode(ZOOMPIN, OUTPUT);
-      digitalWrite(ZOOMPIN, HIGH);
-    } else {
-      // release zoom
-      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
-      pinMode(ZOOMPIN, INPUT);
+    if (roll > MENU_STICK_REPEAT) {
+      // elevator
+      if (pitch < -MENU_STICK_REPEAT) {
+        // DOWN
+        servoCenterRoll = servoMinRoll;
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // UP
+        servoCenterRoll = servoMaxRoll;
+      } else {
+        // STOP
+        servoCenterRoll = savedCenterRoll;
+      }
+    } 
+    else {
+      // zoom
+      if (pitch < -MENU_STICK_REPEAT) {
+        // zoom out
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, LOW);
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // zoom in
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, HIGH);
+      } else {
+        // release zoom
+        digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
+        pinMode(ZOOMPIN, INPUT);
+      }
     }
   }
 }

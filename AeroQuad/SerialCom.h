@@ -886,35 +886,70 @@ void reportVehicleState() {
 }
 
 #ifdef SlowTelemetry
+ 
+  struct telemetryPacket {
+    word  id;
+    long  latitude;
+    long  longitude;
+    short altitude;
+    short course;
+    short heading;
+    short speed;
+    byte  voltage;
+    byte  current;
+    word  capacity;
+    word  reserved2;
+    byte  ecc[8];
+  };
+  
+  union telemetryBuffer {
+    struct telemetryPacket data;
+    byte   bytes[32];
+  } telemetryBuffer;
+     
+  #define TELEMETRY_MSGSIZE 24
+  #define TELEMETRY_MSGSIZE_ECC (TELEMETRY_MSGSIZE + 8)
 
-  byte slowTelemetryTask = 10;
-
+  byte slowTelemetryByte = 255;
+ 
   void initSlowTelemetry() {
-  
+
     Serial2.begin(1200);
+    slowTelemetryByte = 255;
   }
-  
-  void sendSlowTelemetry() {
-    slowTelemetryTask = (slowTelemetryTask +1 ) % 10;
-    switch (slowTelemetryTask) {
-      case 0  : 
-        Serial2.print(currentPosition.latitude);      // Latitude * 100000
-        break;
-      case 1:
-        Serial2.print(currentPosition.longitude);     // Longitude * 100000
-        break;
-      case 2: 
-        Serial2.print((long)(getBaroAltitude()*100)); // Altitude in cm
-        break;
-      case 9:
-        Serial2.print("\r\n");
-        return;
-    } 
-    Serial2.print(',');
+   
+  /* 100Hz task, sends data out byte by byte */
+  void updateSlowTelemetry100Hz() {
+
+    if (slowTelemetryByte < TELEMETRY_MSGSIZE_ECC ) {
+      Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
+      slowTelemetryByte++;
+    }
+    else {
+      slowTelemetryByte=255;
+    }
   }
+ 
+  void updateSlowTelemetry10Hz() {
 
-#endif
+    if (slowTelemetryByte==255) {
+      telemetryBuffer.data.id        = 0x5141; // "AQ"
+      telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
+      telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
+      telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
+      telemetryBuffer.data.course    = getCourse()/10; // degrees
+      telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
+      telemetryBuffer.data.speed     = getGpsSpeed();              // cm/s
+      telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
+      telemetryBuffer.data.current   = batteryData[0].current/100; // to A
+      telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
+       /* add ECC */
+      encode_data(telemetryBuffer.bytes,24);
 
-
+      /* trigger send */
+      slowTelemetryByte=0;
+    }
+  }
+#endif // SlowTelemetry
 
 #endif // _AQ_SERIAL_COMM_
