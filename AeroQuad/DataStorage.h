@@ -410,9 +410,9 @@ void writeEEPROM(){
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
-      waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
-      waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
-      waypoint[location].altitude = readLong(WAYPOINT_ADR[location].altitude);
+      writeLong(waypoint[location].longitude, WAYPOINT_ADR[location].longitude);
+      writeLong(waypoint[location].latitude, WAYPOINT_ADR[location].latitude);
+      writeLong(waypoint[location].altitude, WAYPOINT_ADR[location].altitude);
     }       
   #endif
 
