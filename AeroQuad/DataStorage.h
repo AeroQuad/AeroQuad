@@ -307,7 +307,7 @@ void readEEPROM() {
   #endif     
   
   #if defined (UseGPS)
-    missionNbPoint = readFloat(GPS_MISSION_NB_POINT);
+    missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
@@ -406,7 +406,7 @@ void writeEEPROM(){
   #endif
   
   #if defined (UseGPS)
-    writeFloat(missionNbPoint, RANGE_FINDER_MAX_ADR);
+    writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
