@@ -174,7 +174,6 @@ void processAltitudeHold();
   boolean isStorePositionNeeded = false;
   
   void processPositionCorrection();
-  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
 #endif
 //////////////////////////////////////////////////////
 
@@ -278,8 +277,6 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
-  // GPS mission storing
-  float GPS_MISSION_NB_POINT;
   // Camera Control
   float CAMERAMODE_ADR;
   float MCAMERAPITCH_ADR;
@@ -294,6 +291,8 @@ typedef struct {
   float SERVOMAXPITCH_ADR;
   float SERVOMAXROLL_ADR;
   float SERVOMAXYAW_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 
