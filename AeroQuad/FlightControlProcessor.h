@@ -230,7 +230,7 @@ void processFlightControl() {
   
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
     // ********************** Process position hold or navigation **************************
-    #if defined (UseGPS)
+    #if defined (UseGPSNavigator)
       if (positionHoldState == ON) {
         if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
           processPositionCorrection();

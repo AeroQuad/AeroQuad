@@ -19,38 +19,19 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_TINY_GPS_ADAPTER_H_
-#define _AEROQUAD_TINY_GPS_ADAPTER_H_
+#ifndef _AQ_GPS_ADAPTER_H_
+#define _AQ_GPS_ADAPTER_H_
 
 #include <AP_GPS.h>
+#include <GpsDataType.h>
 
 #define MIN_NB_SATS_IN_USE 6
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795
 
-enum {
-  GPS_INVALID_AGE = 0xFFFFFFFF, 
-  GPS_INVALID_ANGLE = 0x7FFFFFFF, 
-  GPS_INVALID_ALTITUDE = 999999999, 
-  GPS_INVALID_DATE = 0,
-  GPS_INVALID_TIME = 0xFFFFFFFF, 
-  GPS_INVALID_SPEED = 999999999, 
-  GPS_INVALID_FIX_TIME = 0xFFFFFFFF
-};
 
 
-struct GeodeticPosition {
-  long latitude;
-  long longitude;
-  long altitude;
-  
-  GeodeticPosition() {
-    latitude = GPS_INVALID_ANGLE;
-    longitude = GPS_INVALID_ANGLE;
-	altitude = 0;
-  }
-};
 GeodeticPosition currentPosition;
 
 byte nbSatelitesInUse = 0;

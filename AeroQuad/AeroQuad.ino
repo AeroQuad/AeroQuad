@@ -1137,7 +1137,6 @@
   #endif 
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
-  
 #endif
 
 //********************************************************
