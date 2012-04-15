@@ -229,18 +229,16 @@ void processFlightControl() {
   processHeading();
   
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
+    
     // ********************** Process position hold or navigation **************************
-    #if defined (UseGPSNavigator)
-      if (navigationState == ON) {
-        if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
-          processPositionCorrection();
-          isGpsHaveANewPosition = false;
-        }
-      }
-      else {
-        gpsRollAxisCorrection = 0;
-        gpsPitchAxisCorrection = 0;
-      }
+    #if defined (UseGPS)
+      #if defined (UseGPSNavigator)
+        processGpsNavigation();
+      #else // if we don't use the navigator, the point to reach is always the home base to display in OSD
+        missionPositionToReach.latitude = homePosition.latitude;
+        missionPositionToReach.longitude = homePosition.longitude;
+        missionPositionToReach.altitude = homePosition.altitude;
+      #endif  
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder

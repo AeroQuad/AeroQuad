@@ -162,23 +162,26 @@ void processAltitudeHold();
 
   #include <GpsAdapter.h>
   GeodeticPosition homePosition;
+  GeodeticPosition missionPositionToReach;  // in case of no GPS navigator, indicate the home position into the OSD
 
   #if defined UseGPSNavigator
     byte navigationState = OFF;  // ON, OFF or ALTPANIC
+    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
     int missionNbPoint = 0;
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
     int gpsYawAxisCorrection = 0;
     boolean isStorePositionNeeded = false;
+    boolean isInitNavigationNeeded = false;
 
     byte waypointIndex = -1;    
-    float gpsDistanceToDestination = 0.0;
+    float gpsDistanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS];
-    GeodeticPosition positionToReach;
+    GeodeticPosition positionHoldPointToReach;
     
-    void evaluatePositionToReach();
-    void processPositionCorrection();
+    void evaluateMissionPositionToReach();
+    void processGpsNavigation();
   #endif
 #endif
 //////////////////////////////////////////////////////

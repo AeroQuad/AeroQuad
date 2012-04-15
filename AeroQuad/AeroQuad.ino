@@ -1416,10 +1416,8 @@ void loop () {
 
       #if defined (UseGPS)
         readGps();
-        if (haveAGpsLock()) {
-          if (!isHomeBaseInitialized()) {
-            initHomeBase();
-          }
+        if (haveAGpsLock() && !isHomeBaseInitialized()) {
+          initHomeBase();
         }
       #endif      
       
@@ -1476,7 +1474,7 @@ void loop () {
       #if defined (UseGPS) || defined (BattMonitor)
         processLedStatus();
       #endif
-
+      
       #ifdef SlowTelemetry
         updateSlowTelemetry10Hz();
       #endif

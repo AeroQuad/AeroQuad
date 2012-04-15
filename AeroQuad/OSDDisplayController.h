@@ -64,7 +64,7 @@ void updateOSD() {
 
   if (OSDsched&0xa0) {
     #ifdef UseGPS
-      displayGPS(currentPosition, homePosition, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
+      displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
     #endif
   }
 
