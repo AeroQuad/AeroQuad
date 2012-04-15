@@ -1,7 +1,8 @@
+
 /*
-  AeroQuad v3.0.1 - February 2012
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
-  Copyright (c) 2012 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -18,24 +19,29 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GLOBAL_DEFINES_H_
-#define _AEROQUAD_GLOBAL_DEFINES_H_
+#ifndef _AQ_GPS_DATA_TYPE_H_
+#define _AQ_GPS_DATA_TYPE_H_
 
+enum {
+  GPS_INVALID_AGE = 0xFFFFFFFF, 
+  GPS_INVALID_ANGLE = 0x7FFFFFFF, 
+  GPS_INVALID_ALTITUDE = 999999999, 
+  GPS_INVALID_DATE = 0,
+  GPS_INVALID_TIME = 0xFFFFFFFF, 
+  GPS_INVALID_SPEED = 999999999, 
+  GPS_INVALID_FIX_TIME = 0xFFFFFFFF
+};
 
-// More AQ relative than generic... have to be think again
-// Basic axis definitions
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX1 5
-#define AUX2 6
-#define AUX3 7
-
-#define ON 1
-#define OFF 0
-
-#define ALTPANIC 2
+struct GeodeticPosition {
+  long latitude;
+  long longitude;
+  long altitude;
+  
+  GeodeticPosition() {
+    latitude = GPS_INVALID_ANGLE;
+    longitude = GPS_INVALID_ANGLE;
+	altitude = 0;
+  }
+};
 
 #endif

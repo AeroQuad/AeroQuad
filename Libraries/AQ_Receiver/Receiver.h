@@ -58,9 +58,9 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[ZAXIS] = 1500;
   receiverCommand[THROTTLE] = 1000;
   receiverCommand[MODE] = 1000;
-  receiverCommand[AUX] = 1000;
-  receiverCommand[AUX+1] = 1000;
-  receiverCommand[AUX+2] = 1000;
+  receiverCommand[AUX1] = 1000;
+  receiverCommand[AUX2] = 1000;
+  receiverCommand[AUX3] = 1000;
   
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverCommandSmooth[channel] = 1.0;

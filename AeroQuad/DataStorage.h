@@ -214,7 +214,7 @@ void initializeEEPROM() {
     minRangeFinderRange = 0.25;
   #endif
   
-  #if defined (UseGPS)
+  #if defined (UseGPSNavigator)
     missionNbPoint = 0;
     PID[GPSROLL_PID_IDX].P = 1.0;
     PID[GPSROLL_PID_IDX].I = 0.0;
@@ -306,7 +306,7 @@ void readEEPROM() {
     minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
   #endif     
   
-  #if defined (UseGPS)
+  #if defined (UseGPSNavigator)
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
@@ -405,7 +405,7 @@ void writeEEPROM(){
     writeFloat(0, RANGE_FINDER_MIN_ADR);
   #endif
   
-  #if defined (UseGPS)
+  #if defined (UseGPSNavigator)
     writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
