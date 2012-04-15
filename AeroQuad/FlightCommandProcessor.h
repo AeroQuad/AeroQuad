@@ -106,7 +106,7 @@ void readPilotCommands() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    if (receiverCommand[AUX] < 1750) {
+    if (receiverCommand[AUX1] < 1750) {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
@@ -132,24 +132,37 @@ void readPilotCommands() {
   #endif
   
   #if defined (UseGPSNavigator)
-    if (receiverCommand[AUX] < 1750) {
-      if (positionHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-        if (isStorePositionNeeded) {
-          positionHoldState = ON;
-          gpsRollAxisCorrection = 0;
-          gpsPitchAxisCorrection = 0;
-          positionToReach.latitude = currentPosition.latitude;
-          positionToReach.longitude = currentPosition.longitude;
-          previousPosition.latitude = currentPosition.latitude;
-          previousPosition.longitude = currentPosition.longitude;
-          isStorePositionNeeded = false;
-        }
-        positionHoldState = ON;
+    if (receiverCommand[AUX2] < 1750) {  // execute mission, if none, go back home
+      if (isStorePositionNeeded) {
+        navigationState = ON;
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+        gpsDistanceToDestination = 10000; // force at least one gps distance computation
+        isStorePositionNeeded = false;
       }
-    } 
+      evaluatePositionToReach();
+      navigationState = ON;
+    }
+    else if (receiverCommand[AUX1] < 1750) {
+      
+      if (isStorePositionNeeded) {
+        navigationState = ON;
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+
+        positionToReach.latitude = currentPosition.latitude;
+        positionToReach.longitude = currentPosition.longitude;
+        previousPosition.latitude = currentPosition.latitude;
+        previousPosition.longitude = currentPosition.longitude;
+        isStorePositionNeeded = false;
+      }
+      navigationState = ON;
+    }
     else {
       isStorePositionNeeded = true;
-      positionHoldState = OFF;
+      navigationState = OFF;
     }
   #endif
 }

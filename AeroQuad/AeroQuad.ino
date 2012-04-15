@@ -1135,6 +1135,9 @@
   #if !defined AltitudeHoldBaro
     #error We need the altitude from barometer to use the GPS
   #endif 
+//  #if defined LASTCHANNEL 6
+//    #error We need 7 receiver channel to use gps navigator
+//  #endif
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
 #endif

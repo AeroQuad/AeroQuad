@@ -29,7 +29,7 @@
 #define ZAXIS 2
 #define THROTTLE 3
 #define MODE 4
-#define AUX 5
+#define AUX1 5
 #define AUX2 6
 #define AUX3 7
 

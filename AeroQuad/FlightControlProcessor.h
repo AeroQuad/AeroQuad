@@ -37,7 +37,7 @@
 void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
-    if (positionHoldState == ON) {
+    if (navigationState == ON) {
       float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
       float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
@@ -231,7 +231,7 @@ void processFlightControl() {
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
     // ********************** Process position hold or navigation **************************
     #if defined (UseGPSNavigator)
-      if (positionHoldState == ON) {
+      if (navigationState == ON) {
         if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
           processPositionCorrection();
           isGpsHaveANewPosition = false;
@@ -241,7 +241,6 @@ void processFlightControl() {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
       }
-//      Serial.println(nbSatelitesInUse);
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder

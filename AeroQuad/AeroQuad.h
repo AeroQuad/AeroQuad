@@ -164,19 +164,20 @@ void processAltitudeHold();
   GeodeticPosition homePosition;
 
   #if defined UseGPSNavigator
-    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+    byte navigationState = OFF;  // ON, OFF or ALTPANIC
+
     int missionNbPoint = 0;
-    
-    float gpsDistanceToDestination = 0.0;
-    long waypointIndex;
-  
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
+    int gpsYawAxisCorrection = 0;
     boolean isStorePositionNeeded = false;
-    
+
+    byte waypointIndex = -1;    
+    float gpsDistanceToDestination = 0.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS];
     GeodeticPosition positionToReach;
     
+    void evaluatePositionToReach();
     void processPositionCorrection();
   #endif
 #endif
