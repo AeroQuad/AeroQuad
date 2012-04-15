@@ -41,9 +41,12 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 0;
+      homePosition.altitude = 25;
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+      #if defined UseGPSNavigator
+        evaluateMissionPositionToReach();
+      #endif
     }  
   }
 }
@@ -92,9 +95,8 @@ void initHomeBase() {
 
   /**
    * Evalutate the position to reach depending of the state of the mission 
-   * Only called when the AUX2 switch is on meaning that we execute the mission
    */
-  void evaluatePositionToReach() {
+  void evaluateMissionPositionToReach() {
 
     if (waypointIndex == -1) { // if mission have not been started
       waypointIndex++;
@@ -106,14 +108,15 @@ void initHomeBase() {
     
     if (waypointIndex == MAX_WAYPOINTS || 
         waypoint[waypointIndex].latitude == GPS_INVALID_ANGLE) { // if mission is completed, last step is to go home
-      positionToReach.latitude = homePosition.latitude;
-      positionToReach.longitude = homePosition.longitude;
-      positionToReach.altitude = 25; // 25 m of altitude to go home... for test
+        
+      missionPositionToReach.latitude = homePosition.latitude;
+      missionPositionToReach.longitude = homePosition.longitude;
+      missionPositionToReach.altitude = homePosition.altitude; 
     }
     else {
-      positionToReach.latitude = waypoint[waypointIndex].latitude;
-      positionToReach.longitude = waypoint[waypointIndex].longitude;
-      positionToReach.altitude = waypoint[waypointIndex].altitude;
+      missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
+      missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
+      missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
     }
   }
 
@@ -149,10 +152,10 @@ void initHomeBase() {
    * Compute the distance to the destination, point to reach
    * @result is gpsDistanceToDestination
    */
-  void computeDistanceToDestination() {
+  void computeDistanceToDestination(GeodeticPosition destination) {
     
-    distanceX = ((float)positionToReach.longitude - (float)currentPosition.longitude) * 0.649876;
-    distanceY = ((float)positionToReach.latitude - (float)currentPosition.latitude) * 1.113195;
+    distanceX = ((float)destination.longitude - (float)currentPosition.longitude) * 0.649876;
+    distanceY = ((float)destination.latitude - (float)currentPosition.latitude) * 1.113195;
     gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
   }
   
@@ -204,10 +207,10 @@ void initHomeBase() {
       // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
       if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
         sonarAltitudeToHoldTarget += 25;
-        positionToReach.altitude += 25;
+        missionPositionToReach.altitude += 25;
       }
     #endif
-    baroAltitudeToHoldTarget = positionToReach.altitude;
+    baroAltitudeToHoldTarget = missionPositionToReach.altitude;
   }
   
   /**
@@ -218,32 +221,48 @@ void initHomeBase() {
     // @todo, Kenny, fill this
   }
   
-  /**
-   * Compute everything need to make adjustment to the craft attitude to go to the point to reach
-   */
-  void processPositionCorrection() {
+//  /**
+//   * Compute everything need to make adjustment to the craft attitude to go to the point to reach
+//   */
+  void processGpsNavigation() {
     
-    // compute current speed in cm per sec
-    computeCurrentSpeedInCmPerSec();
-    
-    // compute distance to destination
-    computeDistanceToDestination();
-    
-    // depending of the distance from destination, we can have 2 fligth behavior, navigate or position hold
-    evaluateFlightBehaviorFromDistance();
-    
-    // if we are navigating, we also adjust altitude and heading
-    if (maxSpeedToDestination == NAVIGATION_SPEED) {
-      evaluateAltitudeCorrection();    
+    if (isHomeBaseInitialized() && isGpsHaveANewPosition) {
       
-      computeHeadingCorrection();
+      // even in manual, mission processing is in function and can be perform manually through the OSD
+      computeCurrentSpeedInCmPerSec();
+      
+      // compute distance to the current mission destination
+      computeDistanceToDestination(missionPositionToReach);
+      
+      // evaluate if we need to switch to another mission possition point
+      evaluateMissionPositionToReach();
+      
+      if (navigationState == ON) {    // navigation switch override position hold switch
+        evaluateFlightBehaviorFromDistance();
+      }
+      else if (positionHoldState == ON) {  
+        computeDistanceToDestination(positionHoldPointToReach);
+        
+        evaluateFlightBehaviorFromDistance();
+      }
+      
+      if (navigationState == ON || positionHoldState == ON) {
+        if (maxSpeedToDestination == NAVIGATION_SPEED) {
+          evaluateAltitudeCorrection();    
+      
+          computeHeadingCorrection();
+        }
+        computeRollPitchCraftAxisCorrection();
+      }
+      else {
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+      }
+      
+      isGpsHaveANewPosition = false;
     }
-    
-    
-    // compute craft angle to adapt to go to the destination
-    computeRollPitchCraftAxisCorrection();
   }
-
 #endif  // #define UseGPSNavigator
 
 #endif
