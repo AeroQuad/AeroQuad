@@ -106,7 +106,11 @@ void readPilotCommands() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    if (receiverCommand[AUX1] < 1750) {
+    #if defined (UseGPSNavigator)
+      if ((receiverCommand[AUX1] < 1750) || (receiverCommand[AUX2] < 1750)) {
+    #else
+      if (receiverCommand[AUX1] < 1750) {
+    #endif
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
