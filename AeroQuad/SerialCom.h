@@ -188,10 +188,10 @@ void readSerialCommand() {
       
     case 'O': // define waypoints
       #ifdef UseGPSNavigator
-        waypointIndex = readIntegerSerial();
-        waypoint[waypointIndex].latitude = readIntegerSerial();
-        waypoint[waypointIndex].longitude = readIntegerSerial();
-        waypoint[waypointIndex].altitude = readIntegerSerial();
+        missionNbPoint = readIntegerSerial();
+        waypoint[missionNbPoint].latitude = readIntegerSerial();
+        waypoint[missionNbPoint].longitude = readIntegerSerial();
+        waypoint[missionNbPoint].altitude = readIntegerSerial();
       #else
         readIntegerSerial();
         readIntegerSerial();

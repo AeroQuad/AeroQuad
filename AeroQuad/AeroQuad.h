@@ -26,6 +26,7 @@
 #include <math.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
+#include "GpsDataType.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
@@ -156,24 +157,29 @@ void processAltitudeHold();
 /**
  * GPS navigation global declaration
  */
+#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
 #if defined (UseGPS)
-  int missionNbPoint = 0;
-  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
-  
-  #include <GpsAdapter.h>
-  #define MAX_WAYPOINTS 16
-  GeodeticPosition waypoint[MAX_WAYPOINTS];
-  GeodeticPosition homePosition;
-  GeodeticPosition positionToReach;
 
-  float gpsDistanceToDestination = 0.0;
-  long waypointIndex;
-  
-  int gpsRollAxisCorrection = 0;
-  int gpsPitchAxisCorrection = 0;
-  boolean isStorePositionNeeded = false;
-  
-  void processPositionCorrection();
+  #include <GpsAdapter.h>
+  GeodeticPosition homePosition;
+
+  #if defined UseGPSNavigator
+    byte navigationState = OFF;  // ON, OFF or ALTPANIC
+
+    int missionNbPoint = 0;
+    int gpsRollAxisCorrection = 0;
+    int gpsPitchAxisCorrection = 0;
+    int gpsYawAxisCorrection = 0;
+    boolean isStorePositionNeeded = false;
+
+    byte waypointIndex = -1;    
+    float gpsDistanceToDestination = 0.0;
+    GeodeticPosition waypoint[MAX_WAYPOINTS];
+    GeodeticPosition positionToReach;
+    
+    void evaluatePositionToReach();
+    void processPositionCorrection();
+  #endif
 #endif
 //////////////////////////////////////////////////////
 
