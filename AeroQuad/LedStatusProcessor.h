@@ -52,11 +52,10 @@ void processLedStatus() {
   #if defined (BattMonitor)
   if(motorArmed == ON)
   {
-    if (batteryAlarm) {
-      digitalWrite(BuzzerPin, flashingLedState & 4);
-    } else if (batteryWarning) {
-      digitalWrite(BuzzerPin, (flashingLedState & 15)==0);
-    } else { 
+    if (batteryAlarm || batteryWarning) {
+      digitalWrite(BuzzerPin, HIGH);
+    }
+    else { 
       digitalWrite(BuzzerPin, LOW);
     }
   }
@@ -64,7 +63,8 @@ void processLedStatus() {
   {
     digitalWrite(BuzzerPin, LOW);
   }
-  #endif  
+  #endif
+
 
   flashingLedState++;
 
