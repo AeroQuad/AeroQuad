@@ -27,7 +27,6 @@
 byte flashingLedState = 0; // this counter increments by one at 10Hz
 
 void processLedStatus() {
-
   
   //
   // process ready state light in case we use GPS
@@ -44,24 +43,37 @@ void processLedStatus() {
     else { 
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
+    
+    if (receiverCommand[AUX2] > 1750 && !isHomeBaseInitialized()) {
+       hasBuzzerHigherPriority = true;
+       digitalWrite(BuzzerPin, HIGH);
+    }
+    else if((receiverCommand[AUX2] < 1750 || isHomeBaseInitialized()) && hasBuzzerHigherPriority)
+   {
+       hasBuzzerHigherPriority = false;
+       digitalWrite(BuzzerPin, LOW);
+   }
   #endif
   
   //
   // process ready state light in case we use Batt monitor
   //
   #if defined (BattMonitor)
-  if(motorArmed == ON)
+  if(!hasBuzzerHigherPriority)
   {
-    if (batteryAlarm || batteryWarning) {
-      digitalWrite(BuzzerPin, HIGH);
+    if(motorArmed == ON)
+    {
+      if (batteryAlarm || batteryWarning) {
+        digitalWrite(BuzzerPin, HIGH);
+      }
+      else { 
+        digitalWrite(BuzzerPin, LOW);
+      }
     }
-    else { 
+    else
+    {
       digitalWrite(BuzzerPin, LOW);
     }
-  }
-  else
-  {
-    digitalWrite(BuzzerPin, LOW);
   }
   #endif
 

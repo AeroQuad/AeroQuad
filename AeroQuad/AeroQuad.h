@@ -157,6 +157,7 @@ void processAltitudeHold();
  * GPS navigation global declaration
  */
 #if defined (UseGPS)
+  boolean hasBuzzerHigherPriority = false;
   int missionNbPoint = 0;
   byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
   

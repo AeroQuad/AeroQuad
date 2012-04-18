@@ -65,9 +65,10 @@ void readPilotCommands() {
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
       #if defined (UseGPS)
-        if (!isHomeBaseInitialized()) {  // if GPS, wait for home position fix!
-          return;
+        if (receiverCommand[AUX2] > 1750 && !isHomeBaseInitialized()) {  // if GPS, wait for home position fix!
+           return;
         }
+        hasBuzzerHigherPriority = false;
       #endif 
 
       #ifdef OSD_SYSTEM_MENU
@@ -84,10 +85,9 @@ void readPilotCommands() {
     
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
-      #endif  
-      
-      
+      #endif        
     }
+    
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
@@ -132,7 +132,7 @@ void readPilotCommands() {
   #endif
   
   #if defined (UseGPSNavigator)
-    if (receiverCommand[AUX2] > 1750) {
+    if (receiverCommand[AUX2] > 1750 && isHomeBaseInitialized()) {
       if (positionHoldState != ALTPANIC) {  // check for special condition with manditory override of Altitude hold
         if (isStorePositionNeeded) {
           positionHoldState = ON;
