@@ -101,22 +101,28 @@ void initHomeBase() {
     if (waypointIndex == -1) { // if mission have not been started
       waypointIndex++;
     }
+    
     if (waypointIndex < MAX_WAYPOINTS && gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
       waypointIndex++;
     }
     
-    if (waypointIndex == MAX_WAYPOINTS || 
+    if (waypointIndex >= MAX_WAYPOINTS || 
         waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home
-        
+
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
-//      missionPositionToReach.altitude = homePosition.altitude; 
-      missionPositionToReach.altitude = 25.0;  // til the configurator is fix
+      missionPositionToReach.altitude = homePosition.altitude; 
     }
     else {
-      missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
-      missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
+      
+      // @Kenny9999, check with Mikro if the * 100 is ok!
+      missionPositionToReach.latitude = waypoint[waypointIndex].latitude*100;
+      missionPositionToReach.longitude = waypoint[waypointIndex].longitude*100;
       missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
+      if (waypoint[waypointIndex].altitude > 2000.0) {
+        waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
+      }
+      missionPositionToReach.altitude = 20.0;  // @Kenny9999, remove this when the configurator is fix
     }
   }
 
@@ -157,6 +163,13 @@ void initHomeBase() {
     distanceX = ((float)destination.longitude - (float)currentPosition.longitude) * 0.649876;
     distanceY = ((float)destination.latitude - (float)currentPosition.latitude) * 1.113195;
     gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
+    
+//    Serial.print(gpsDistanceToDestination);Serial.print(" ");
+//    Serial.print(currentPosition.latitude);Serial.print(" ");
+//    Serial.print(currentPosition.longitude);Serial.print("   ");
+//    Serial.print(destination.latitude);Serial.print(" ");
+//    Serial.print(destination.longitude);Serial.println(" ");
+//
   }
   
   /**
@@ -206,8 +219,8 @@ void initHomeBase() {
     #if defined AltitudeHoldRangeFinder
       // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
       if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
-        sonarAltitudeToHoldTarget += 25;
-        missionPositionToReach.altitude += 25;
+        sonarAltitudeToHoldTarget += 5;
+        missionPositionToReach.altitude += 5;
       }
     #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
