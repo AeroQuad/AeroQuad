@@ -41,7 +41,7 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 25;
+      homePosition.altitude = 10;  // put it at 10m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
       #if defined UseGPSNavigator
@@ -101,17 +101,17 @@ void initHomeBase() {
     if (waypointIndex == -1) { // if mission have not been started
       waypointIndex++;
     }
-    if (waypointIndex < MAX_WAYPOINTS && 
-        gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
+    if (waypointIndex < MAX_WAYPOINTS && gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
       waypointIndex++;
     }
     
     if (waypointIndex == MAX_WAYPOINTS || 
-        waypoint[waypointIndex].latitude == GPS_INVALID_ANGLE) { // if mission is completed, last step is to go home
+        waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home
         
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
-      missionPositionToReach.altitude = homePosition.altitude; 
+//      missionPositionToReach.altitude = homePosition.altitude; 
+      missionPositionToReach.altitude = 25.0;  // til the configurator is fix
     }
     else {
       missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
