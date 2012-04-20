@@ -175,7 +175,7 @@ void processAltitudeHold();
     boolean isStorePositionNeeded = false;
     boolean isInitNavigationNeeded = false;
 
-    byte waypointIndex = -1;    
+    int waypointIndex = -1;    
     float gpsDistanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS];
     GeodeticPosition positionHoldPointToReach;
