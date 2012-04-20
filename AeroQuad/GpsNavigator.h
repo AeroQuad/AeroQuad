@@ -101,22 +101,28 @@ void initHomeBase() {
     if (waypointIndex == -1) { // if mission have not been started
       waypointIndex++;
     }
+    
     if (waypointIndex < MAX_WAYPOINTS && gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
       waypointIndex++;
     }
     
-    if (waypointIndex == MAX_WAYPOINTS || 
+    if (waypointIndex >= MAX_WAYPOINTS || 
         waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home
-        
+
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
-//      missionPositionToReach.altitude = homePosition.altitude; 
-      missionPositionToReach.altitude = 25.0;  // til the configurator is fix
+      missionPositionToReach.altitude = homePosition.altitude; 
     }
     else {
-      missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
-      missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
+      
+      // @Kenny9999, check with Mikro if the * 100 is ok!
+      missionPositionToReach.latitude = waypoint[waypointIndex].latitude*100;
+      missionPositionToReach.longitude = waypoint[waypointIndex].longitude*100;
       missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
+      if (waypoint[waypointIndex].altitude > 2000.0) {
+        waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
+      }
+      missionPositionToReach.altitude = 20.0;  // @Kenny9999, remove this when the configurator is fix
     }
   }
 
@@ -165,10 +171,12 @@ void initHomeBase() {
   void evaluateFlightBehaviorFromDistance() {
     
     if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold
+
       maxSpeedToDestination = POSITION_HOLD_SPEED;
       maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
     }
     else { // navigate
+
       maxSpeedToDestination = NAVIGATION_SPEED;
       maxCraftAngleCorrection = MAX_NAVIGATION_ANGLE_CORRECTION;
     }
@@ -179,11 +187,14 @@ void initHomeBase() {
    * @result are gpsRollAxisCorrection and gpsPitchAxisCorrection use in flight control processor
    */
   void computeRollPitchCraftAxisCorrection() {
+    
     float angleToWaypoint = atan2(distanceX, distanceY);
-      
     float angle = angleToWaypoint-trueNorthHeading;
     float tmpsin = sin(angle);
     float tmpcos = cos(angle);
+    
+//    Serial.print(gpsDistanceToDestination);Serial.print("  ");Serial.print(degrees(trueNorthHeading));Serial.print("  ");
+//    Serial.print(degrees(angleToWaypoint));Serial.print("  ");Serial.println(degrees(angle));
       
     float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
     float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
@@ -206,8 +217,8 @@ void initHomeBase() {
     #if defined AltitudeHoldRangeFinder
       // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
       if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
-        sonarAltitudeToHoldTarget += 25;
-        missionPositionToReach.altitude += 25;
+        sonarAltitudeToHoldTarget += 5;
+        missionPositionToReach.altitude += 5;
       }
     #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
@@ -231,22 +242,23 @@ void initHomeBase() {
       // even in manual, mission processing is in function and can be perform manually through the OSD
       computeCurrentSpeedInCmPerSec();
       
-      // compute distance to the current mission destination
-      computeDistanceToDestination(missionPositionToReach);
+      if (navigationState == ON) {    // navigation switch override position hold switch
+      
+        computeDistanceToDestination(missionPositionToReach);
+      }
+      else if (positionHoldState == ON) {  // then may be position hold
+        
+        computeDistanceToDestination(positionHoldPointToReach);
+      }
       
       // evaluate if we need to switch to another mission possition point
       evaluateMissionPositionToReach();
       
-      if (navigationState == ON) {    // navigation switch override position hold switch
-        evaluateFlightBehaviorFromDistance();
-      }
-      else if (positionHoldState == ON) {  
-        computeDistanceToDestination(positionHoldPointToReach);
-        
-        evaluateFlightBehaviorFromDistance();
-      }
-      
       if (navigationState == ON || positionHoldState == ON) {
+        
+        // evaluate the flight behavior to adopt
+        evaluateFlightBehaviorFromDistance();
+
         if (maxSpeedToDestination == NAVIGATION_SPEED) {
           evaluateAltitudeCorrection();    
       
