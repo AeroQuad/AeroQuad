@@ -254,10 +254,11 @@ void initHomeBase() {
       // evaluate if we need to switch to another mission possition point
       evaluateMissionPositionToReach();
       
-      // evaluate the flight behavior to adopt
-      evaluateFlightBehaviorFromDistance();
-      
       if (navigationState == ON || positionHoldState == ON) {
+        
+        // evaluate the flight behavior to adopt
+        evaluateFlightBehaviorFromDistance();
+
         if (maxSpeedToDestination == NAVIGATION_SPEED) {
           evaluateAltitudeCorrection();    
       
