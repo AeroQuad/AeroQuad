@@ -163,13 +163,6 @@ void initHomeBase() {
     distanceX = ((float)destination.longitude - (float)currentPosition.longitude) * 0.649876;
     distanceY = ((float)destination.latitude - (float)currentPosition.latitude) * 1.113195;
     gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
-    
-//    Serial.print(gpsDistanceToDestination);Serial.print(" ");
-//    Serial.print(currentPosition.latitude);Serial.print(" ");
-//    Serial.print(currentPosition.longitude);Serial.print("   ");
-//    Serial.print(destination.latitude);Serial.print(" ");
-//    Serial.print(destination.longitude);Serial.println(" ");
-//
   }
   
   /**
@@ -178,10 +171,12 @@ void initHomeBase() {
   void evaluateFlightBehaviorFromDistance() {
     
     if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold
+
       maxSpeedToDestination = POSITION_HOLD_SPEED;
       maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
     }
     else { // navigate
+
       maxSpeedToDestination = NAVIGATION_SPEED;
       maxCraftAngleCorrection = MAX_NAVIGATION_ANGLE_CORRECTION;
     }
@@ -192,11 +187,14 @@ void initHomeBase() {
    * @result are gpsRollAxisCorrection and gpsPitchAxisCorrection use in flight control processor
    */
   void computeRollPitchCraftAxisCorrection() {
+    
     float angleToWaypoint = atan2(distanceX, distanceY);
-      
     float angle = angleToWaypoint-trueNorthHeading;
     float tmpsin = sin(angle);
     float tmpcos = cos(angle);
+    
+//    Serial.print(gpsDistanceToDestination);Serial.print("  ");Serial.print(degrees(trueNorthHeading));Serial.print("  ");
+//    Serial.print(degrees(angleToWaypoint));Serial.print("  ");Serial.println(degrees(angle));
       
     float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
     float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
@@ -244,20 +242,20 @@ void initHomeBase() {
       // even in manual, mission processing is in function and can be perform manually through the OSD
       computeCurrentSpeedInCmPerSec();
       
-      // compute distance to the current mission destination
-      computeDistanceToDestination(missionPositionToReach);
+      if (navigationState == ON) {    // navigation switch override position hold switch
+      
+        computeDistanceToDestination(missionPositionToReach);
+      }
+      else if (positionHoldState == ON) {  // then may be position hold
+        
+        computeDistanceToDestination(positionHoldPointToReach);
+      }
       
       // evaluate if we need to switch to another mission possition point
       evaluateMissionPositionToReach();
       
-      if (navigationState == ON) {    // navigation switch override position hold switch
-        evaluateFlightBehaviorFromDistance();
-      }
-      else if (positionHoldState == ON) {  
-        computeDistanceToDestination(positionHoldPointToReach);
-        
-        evaluateFlightBehaviorFromDistance();
-      }
+      // evaluate the flight behavior to adopt
+      evaluateFlightBehaviorFromDistance();
       
       if (navigationState == ON || positionHoldState == ON) {
         if (maxSpeedToDestination == NAVIGATION_SPEED) {

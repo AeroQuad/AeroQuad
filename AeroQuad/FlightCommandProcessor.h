@@ -136,26 +136,25 @@ void readPilotCommands() {
   #endif
   
   #if defined (UseGPSNavigator)
-    if (receiverCommand[AUX2] < 1750) {  // execute mission, if none, go back home, override the position hold
+    if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
     
       if (isInitNavigationNeeded) {
         
-        navigationState = ON;
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
         isInitNavigationNeeded = false;
-        
-        positionHoldState = OFF;         // disable the position hold while navigating
-        isStorePositionNeeded = true;
       }
+      
+      positionHoldState = OFF;         // disable the position hold while navigating
+      isStorePositionNeeded = true;
+
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < 1750) {
+    else if (receiverCommand[AUX1] < 1750) {  // Enter in position hold state
       
       if (isStorePositionNeeded) {
         
-        positionHoldState = ON;
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
@@ -166,12 +165,19 @@ void readPilotCommands() {
         previousPosition.longitude = currentPosition.longitude;
         isStorePositionNeeded = false;
       }
+      
+      isInitNavigationNeeded = true;  // disabel navigation
+      navigationState = OFF;
+      
       positionHoldState = ON;
     }
     else {
+      // Navigation and position hold are disabled
+      positionHoldState = OFF;
       isStorePositionNeeded = true;
-      isInitNavigationNeeded = true;
+      
       navigationState = OFF;
+      isInitNavigationNeeded = true;
     }
   #endif
 }
