@@ -530,7 +530,7 @@ void menuCameraPTZ(byte mode, byte action){
 
     if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
       menuFuncDataFloat = receiverCommand[THROTTLE];
-      servoCenterPitch = constrain(receiverCommand[THROTTLE], servoMinPitch, servoMaxPitch);
+      servoCenterPitch = constrain(3000 - menuFuncDataFloat, servoMinPitch, servoMaxPitch);
     }
 
     if (roll > MENU_STICK_REPEAT) {
