@@ -1422,9 +1422,9 @@ void loop () {
       #endif      
       
       #if defined(CameraControl)
-        if (cameraMode > 0) {
+//        if (cameraMode > 0) {
           moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-        }  
+//        }  
       #endif
     }
 
