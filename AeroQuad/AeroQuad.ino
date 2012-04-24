@@ -33,7 +33,11 @@
 // In order to use the DIYDrone libraries, this have to be declared here this way
 // @see Kenny9999 for details
 //
-#if defined UseGPS  
+#if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
+ #define UseGPS
+#endif 
+
+#if defined UseGPS
   // needed here to use DIYDrone gps libraries
   #include <FastSerial.h>
   #include <AP_Common.h>
@@ -45,12 +49,6 @@
   FastSerialPort3(Serial3);
 #endif
 
-// Checks to make sure we have the right combinations defined
-#if defined(FlightAngleMARG) && !defined(HeadingMagHold)
-  #undef FlightAngleMARG
-#elif defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
-  #undef FlightAngleARG
-#endif
 
 #include <EEPROM.h>
 #include <Wire.h>

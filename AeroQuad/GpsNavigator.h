@@ -107,7 +107,7 @@ void initHomeBase() {
     }
     
     if (waypointIndex >= MAX_WAYPOINTS || 
-        waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home
+        waypoint[waypointIndex].altitude == 2147483647) { // if mission is completed, last step is to go home
 
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
@@ -115,9 +115,9 @@ void initHomeBase() {
     }
     else {
       
-      // @Kenny9999, check with Mikro if the * 100 is ok!
-      missionPositionToReach.latitude = waypoint[waypointIndex].latitude*100;
-      missionPositionToReach.longitude = waypoint[waypointIndex].longitude*100;
+
+      missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
+      missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
       missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
       if (waypoint[waypointIndex].altitude > 2000.0) {
         waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
@@ -132,8 +132,8 @@ void initHomeBase() {
    */
   void computeCurrentSpeedInCmPerSec() {
   
-    float derivateDistanceX = ((float)currentPosition.longitude - (float)previousPosition.longitude) * 0.649876;
-    float derivateDistanceY = ((float)currentPosition.latitude - (float)previousPosition.latitude) * 1.113195;
+    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * 0.649876;
+    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
     float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
     gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
@@ -160,8 +160,8 @@ void initHomeBase() {
    */
   void computeDistanceToDestination(GeodeticPosition destination) {
     
-    distanceX = ((float)destination.longitude - (float)currentPosition.longitude) * 0.649876;
-    distanceY = ((float)destination.latitude - (float)currentPosition.latitude) * 1.113195;
+    distanceX = (float)(destination.longitude - currentPosition.longitude) * 0.649876;
+    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
     gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
   }
   
@@ -169,7 +169,7 @@ void initHomeBase() {
    * Evaluate the flight behavior to adopt depending of the distance to the point to reach
    */
   void evaluateFlightBehaviorFromDistance() {
-    
+
     if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold
 
       maxSpeedToDestination = POSITION_HOLD_SPEED;
@@ -193,8 +193,10 @@ void initHomeBase() {
     float tmpsin = sin(angle);
     float tmpcos = cos(angle);
     
-//    Serial.print(gpsDistanceToDestination);Serial.print("  ");Serial.print(degrees(trueNorthHeading));Serial.print("  ");
-//    Serial.print(degrees(angleToWaypoint));Serial.print("  ");Serial.println(degrees(angle));
+//    Serial.print(gpsDistanceToDestination);Serial.print("  ");
+//    Serial.print(degrees(trueNorthHeading));Serial.print("  ");
+//    Serial.print(degrees(angleToWaypoint));Serial.print("  ");
+//    Serial.println(degrees(angle));
       
     float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
     float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
@@ -232,9 +234,9 @@ void initHomeBase() {
     // @todo, Kenny, fill this
   }
   
-//  /**
-//   * Compute everything need to make adjustment to the craft attitude to go to the point to reach
-//   */
+  /**
+   * Compute everything need to make adjustment to the craft attitude to go to the point to reach
+   */
   void processGpsNavigation() {
     
     if (isHomeBaseInitialized() && isGpsHaveANewPosition) {
