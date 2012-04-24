@@ -23,6 +23,19 @@
 #define _AQ_GPS_ADAPTER_H_
 
 #include <AP_GPS.h>
+GPS *gps;
+#if defined UseGPS_NMEA
+  AP_GPS_NMEA GPS(&Serial1);
+#elif defined UseGPS_UBLOX
+  AP_GPS_UBLOX GPS(&Serial1);  
+#elif defined UseGPS_MTK
+  AP_GPS_MTK GPS(&Serial1);
+#elif defined UseGPS_406
+  AP_GPS_406 GPS(&Serial1);
+#else
+  AP_GPS_Auto GPS(&Serial1, &gps);
+#endif
+
 #include <GpsDataType.h>
 
 #define MIN_NB_SATS_IN_USE 6
@@ -36,8 +49,6 @@ GeodeticPosition currentPosition;
 
 byte nbSatelitesInUse = 0;
 boolean isGpsHaveANewPosition = false;
-GPS	    *gps;
-AP_GPS_Auto GPS(&Serial1, &gps);
 
 void initializeGps() {
  
@@ -76,14 +87,14 @@ unsigned long getGpsAltitude() {
 
 
 float gpsRawDistance = 0.0;
-short gpsBearing = 0;
+float gpsBearing = 0;
 
 void computeDistanceAndBearing(struct GeodeticPosition p1, struct GeodeticPosition p2) {
 
   const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cos((float)(p1.latitude + p2.latitude) / 2.0 * GPS2RAD);
   const float y = (float)(p2.latitude - p1.latitude) * GPS2RAD;
   gpsRawDistance = sqrt(x*x+y*y);
-  gpsBearing = (short)(RAD2DEG * atan2(x,y));
+  gpsBearing = (RAD2DEG * atan2(x,y));
 }
 
 float getDistanceMeter() {
