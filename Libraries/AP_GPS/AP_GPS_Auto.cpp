@@ -15,7 +15,7 @@
 // the GPS to switch to binary mode at the same time that this code
 // detects it as being in NMEA mode.
 //
-//#define WITH_NMEA_MODE	1
+#define WITH_NMEA_MODE	1
 
 static unsigned long baudrates[] = {38400U, 57600U, 9600U, 4800U, 115200U};
 
