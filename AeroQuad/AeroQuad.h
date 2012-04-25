@@ -114,6 +114,7 @@ unsigned long deltaTime = 0;
 // sub loop time variable
 unsigned long tenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
@@ -241,6 +242,7 @@ typedef struct {
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
   t_NVR_PID GPSROLL_PID_GAIN_ADR;
   t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+  t_NVR_PID GPSYAW_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   
   float SOFTWARE_VERSION_ADR;

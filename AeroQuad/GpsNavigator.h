@@ -69,9 +69,12 @@ void initHomeBase() {
   #define GPS_COURSE_SMOOTH_VALUE 0.5
   
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
-  #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
-  #define NAVIGATION_SPEED 400.0  // m/s * 100 // 3 m/s = 10.8km/h
   #define POSITION_HOLD_SPEED 60.0  
+  #define MAX_NAVIGATION_ANGLE_CORRECTION 400.0
+  #define NAVIGATION_SPEED 400.0  // m/s * 100 // 3 m/s = 10.8km/h
+  
+
+  #define MAX_YAW_AXIS_CORRECTION 200.0  
     
   GeodeticPosition previousPosition;
   float gpsLaggedSpeed = 0.0;
@@ -81,6 +84,7 @@ void initHomeBase() {
   
   float distanceX = 0.0;
   float distanceY = 0.0;
+  float angleToWaypoint = 0.0;
   
   float maxSpeedToDestination = POSITION_HOLD_SPEED;
   float maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
@@ -115,10 +119,10 @@ void initHomeBase() {
     }
     else {
       
-
       missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
       missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
       missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
+
       if (waypoint[waypointIndex].altitude > 2000.0) {
         waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
       }
@@ -188,16 +192,10 @@ void initHomeBase() {
    */
   void computeRollPitchCraftAxisCorrection() {
     
-    float angleToWaypoint = atan2(distanceX, distanceY);
-    float angle = angleToWaypoint-trueNorthHeading;
-    float tmpsin = sin(angle);
-    float tmpcos = cos(angle);
+    angleToWaypoint = atan2(distanceX, distanceY)-trueNorthHeading;
+    float tmpsin = sin(angleToWaypoint);
+    float tmpcos = cos(angleToWaypoint);
     
-//    Serial.print(gpsDistanceToDestination);Serial.print("  ");
-//    Serial.print(degrees(trueNorthHeading));Serial.print("  ");
-//    Serial.print(degrees(angleToWaypoint));Serial.print("  ");
-//    Serial.println(degrees(angle));
-      
     float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
     float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
     maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
@@ -231,7 +229,14 @@ void initHomeBase() {
    * compute the heading correction to have
    */
   void computeHeadingCorrection() {
-    // @todo, Kenny, fill this
+    
+    float correctionAngle = angleToWaypoint;
+    if (correctionAngle > PI) {
+      correctionAngle = fmod(correctionAngle,PI) - PI;
+    }
+    
+    gpsYawAxisCorrection = -updatePID(0.0, degrees(correctionAngle) , &PID[GPSYAW_PID_IDX]);
+    gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
   
   /**
@@ -250,6 +255,7 @@ void initHomeBase() {
       }
       else if (positionHoldState == ON) {  // then may be position hold
         
+        gpsYawAxisCorrection = 0;
         computeDistanceToDestination(positionHoldPointToReach);
       }
       

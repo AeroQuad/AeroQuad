@@ -222,6 +222,10 @@ void initializeEEPROM() {
     PID[GPSPITCH_PID_IDX].P = 1.0;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
+    PID[GPSYAW_PID_IDX].P = 2.0;
+    PID[GPSYAW_PID_IDX].I = 0.0;
+    PID[GPSYAW_PID_IDX].D = 0.0;
+
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
       waypoint[location].longitude = GPS_INVALID_ANGLE;
       waypoint[location].latitude = GPS_INVALID_ANGLE;
@@ -310,6 +314,8 @@ void readEEPROM() {
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+    readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+    
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
       waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
       waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
@@ -409,6 +415,8 @@ void writeEEPROM(){
     writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+    writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+    
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
       writeLong(waypoint[location].longitude, WAYPOINT_ADR[location].longitude);
       writeLong(waypoint[location].latitude, WAYPOINT_ADR[location].latitude);

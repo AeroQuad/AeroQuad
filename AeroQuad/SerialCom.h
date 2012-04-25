@@ -234,6 +234,7 @@ void readSerialCommand() {
       #if defined (UseGPS)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
+        readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
       #else
         for (byte values = 0; values < 6; values++) {
@@ -617,6 +618,7 @@ void sendSerialTelemetry() {
     #if defined (UseGPS)
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
+      PrintPID(GPSYAW_PID_IDX);
       SERIAL_PRINTLN();
       queryType = 'X';
     #else

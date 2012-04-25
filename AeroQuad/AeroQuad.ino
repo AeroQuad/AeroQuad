@@ -1404,6 +1404,7 @@ void loop () {
 
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
+      
       #if defined (UseRSSIFaileSafe) 
         readRSSI();
       #endif
@@ -1420,9 +1421,7 @@ void loop () {
       #endif      
       
       #if defined(CameraControl)
-//        if (cameraMode > 0) {
-          moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-//        }  
+        moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
     }
 
@@ -1460,6 +1459,11 @@ void loop () {
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
+    }
+    else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
+      
+      G_Dt = (currentTime - lowPriorityTenHZpreviousTime2) / 1000000.0;
+      lowPriorityTenHZpreviousTime2 = currentTime;
 
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
