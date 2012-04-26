@@ -32,16 +32,12 @@ enum {
   GPS_INVALID_FIX_TIME = 0xFFFFFFFF
 };
 
+#define GPS_INVALID_POSITION {GPS_INVALID_ANGLE, GPS_INVALID_ANGLE, 0}
+
 struct GeodeticPosition {
   long latitude;
   long longitude;
   long altitude;
-  
-  GeodeticPosition() {
-    latitude = GPS_INVALID_ANGLE;
-    longitude = GPS_INVALID_ANGLE;
-	altitude = 0;
-  }
 };
 
 #endif

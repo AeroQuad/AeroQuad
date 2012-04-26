@@ -162,8 +162,8 @@ void processAltitudeHold();
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
-  GeodeticPosition homePosition;
-  GeodeticPosition missionPositionToReach;  // in case of no GPS navigator, indicate the home position into the OSD
+  GeodeticPosition homePosition = GPS_INVALID_POSITION; 
+  GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
 
   #if defined UseGPSNavigator
     byte navigationState = OFF;  // ON, OFF or ALTPANIC
@@ -178,8 +178,12 @@ void processAltitudeHold();
 
     int waypointIndex = -1;    
     float gpsDistanceToDestination = 99999999.0;
-    GeodeticPosition waypoint[MAX_WAYPOINTS];
-    GeodeticPosition positionHoldPointToReach;
+    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
+    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
     
     void evaluateMissionPositionToReach();
     void processGpsNavigation();
@@ -341,4 +345,3 @@ byte fastTransfer = OFF; // Used for troubleshooting
 //////////////////////////////////////////////////////
 
 #endif // _AQ_GLOBAL_HEADER_DEFINITION_H_
-
