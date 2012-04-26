@@ -79,7 +79,7 @@ void initHomeBase() {
 
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
-  GeodeticPosition previousPosition;
+  GeodeticPosition previousPosition = GPS_INVALID_POSITION;
   float gpsLaggedSpeed = 0.0;
   float gpsLaggedCourse = 0.0;
   float currentSpeedCmPerSecRoll = 0.0; 
