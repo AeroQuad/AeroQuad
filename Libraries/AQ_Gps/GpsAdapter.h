@@ -47,6 +47,8 @@ GPS *gps;
 
 GeodeticPosition currentPosition;
 
+float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
+
 byte nbSatelitesInUse = 0;
 boolean isGpsHaveANewPosition = false;
 
@@ -83,15 +85,17 @@ unsigned long getGpsAltitude() {
   return gps->altitude;
 }
 
+void setProjectionLocation(struct GeodeticPosition pos) {
 
-
+  cosLatitude = cos((float)pos.latitude * GPS2RAD);
+}
 
 float gpsRawDistance = 0.0;
 float gpsBearing = 0;
 
 void computeDistanceAndBearing(struct GeodeticPosition p1, struct GeodeticPosition p2) {
 
-  const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cos((float)(p1.latitude + p2.latitude) / 2.0 * GPS2RAD);
+  const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cosLatitude;
   const float y = (float)(p2.latitude - p1.latitude) * GPS2RAD;
   gpsRawDistance = sqrt(x*x+y*y);
   gpsBearing = (RAD2DEG * atan2(x,y));
