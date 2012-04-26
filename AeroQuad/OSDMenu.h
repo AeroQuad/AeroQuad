@@ -313,11 +313,12 @@ const char *pidNames[] = {
   "Headi", "AGRol", "AGPit", "B_Alt", "S_Alt",
   "ZDamp",
 #ifdef UseGPS
-  "GPS_P", "GPS_R",
+  "GPS_P", "GPS_R", "GPS_Y"
 #endif
 };
 
 #define PIDCOUNT  (sizeof(pidNames)/sizeof(char*))
+
 void menuHandlePidTune(byte mode, byte action) {
 
   switch (action) {

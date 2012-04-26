@@ -44,6 +44,9 @@ void initHomeBase() {
       homePosition.altitude = 10;  // put it at 10m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+      // Set reference location for Equirectangular projection used for coordinates
+      setProjectionLocation(currentPosition);
+
       #if defined UseGPSNavigator
         evaluateMissionPositionToReach();
       #endif
@@ -76,7 +79,7 @@ void initHomeBase() {
 
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
-  GeodeticPosition previousPosition;
+  GeodeticPosition previousPosition = GPS_INVALID_POSITION;
   float gpsLaggedSpeed = 0.0;
   float gpsLaggedCourse = 0.0;
   float currentSpeedCmPerSecRoll = 0.0; 
@@ -136,7 +139,7 @@ void initHomeBase() {
    */
   void computeCurrentSpeedInCmPerSec() {
   
-    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * 0.649876;
+    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * cosLatitude * 1.113195;
     float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
     float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
@@ -164,7 +167,7 @@ void initHomeBase() {
    */
   void computeDistanceToDestination(GeodeticPosition destination) {
     
-    distanceX = (float)(destination.longitude - currentPosition.longitude) * 0.649876;
+    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
     distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
     gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
   }
@@ -286,4 +289,3 @@ void initHomeBase() {
 #endif  // #define UseGPSNavigator
 
 #endif
-
