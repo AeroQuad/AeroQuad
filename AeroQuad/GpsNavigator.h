@@ -140,7 +140,7 @@ void initHomeBase() {
   void computeCurrentSpeedInCmPerSec() {
   
     float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * cosLatitude * 1.113195;
-    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) 1.113195;
+    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
     float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
   
     gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
