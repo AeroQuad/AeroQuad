@@ -761,13 +761,13 @@ void menuExit() {
   if (255 == menuEntry)
     return;
 
-  if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
-    menuEntry = 255;
-  }
-  else if (menuInFunc) {
+  if (menuInFunc) {
     MENU_CALLFUNC(menuEntry, MENU_EXIT);
     if (menuInFunc)
       return;
+  }
+  else if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
+    menuEntry = 255;
   }
   else {
     // leave submenu
