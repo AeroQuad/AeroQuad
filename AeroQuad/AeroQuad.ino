@@ -1200,10 +1200,6 @@ void setup() {
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
 
-  #ifdef CHANGE_YAW_DIRECTION
-    YAW_DIRECTION = -1;
-  #endif
-
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
