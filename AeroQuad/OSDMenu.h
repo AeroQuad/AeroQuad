@@ -516,6 +516,7 @@ void menuCameraPTZ(byte mode, byte action){
       menuOwnsSticks = 0;
       menuInFunc  = 40; // Callback after 4sec
 
+      pinMode(ZOOMPIN, OUTPUT);
       digitalWrite(ZOOMPIN, LOW); // Zoom out
 
       // restore position
@@ -525,8 +526,6 @@ void menuCameraPTZ(byte mode, byte action){
       cameraMode  = savedCameraMode;
 
       notifyOSD(OSD_NOCLEAR|OSD_CENTER, "exiting PTZ mode");
-
-
       return;
     }
 
