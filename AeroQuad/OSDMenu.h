@@ -485,6 +485,7 @@ void menuHideOSD(byte mode, byte action){
 
 #ifdef CameraControl
 short savedCenterYaw, savedCenterPitch, savedCenterRoll;
+byte  savedCameraMode;
 
 #define ZOOMPIN 24
 
@@ -496,7 +497,14 @@ void menuCameraPTZ(byte mode, byte action){
     savedCenterYaw   = servoCenterYaw;
     savedCenterPitch = servoCenterPitch;
     savedCenterRoll  = servoCenterRoll;
+    savedCameraMode  = cameraMode;
+    cameraMode       = 0; // disable stabilizer
     menuFuncDataFloat = 0.0;
+  }
+  else if ((action == MENU_CALLBACK) || (action == MENU_ABORT)) {
+    digitalWrite(ZOOMPIN, LOW); // Zoom off
+    pinMode(ZOOMPIN, INPUT);
+    menuInFunc = 0;    
   }
   else if (action == MENU_HIJACK) {
     const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
@@ -506,16 +514,19 @@ void menuCameraPTZ(byte mode, byte action){
     if (roll < -MENU_STICK_REPEAT) {
       unhideOSD();
       menuOwnsSticks = 0;
-      menuInFunc  = 0;
+      menuInFunc  = 40; // Callback after 4sec
 
-      // release zoom
-      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
-      pinMode(ZOOMPIN, INPUT);
+      digitalWrite(ZOOMPIN, LOW); // Zoom out
 
       // restore position
       servoCenterYaw   = savedCenterYaw;
       servoCenterPitch = savedCenterPitch;
       servoCenterRoll = savedCenterRoll;
+      cameraMode  = savedCameraMode;
+
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "exiting PTZ mode");
+
+
       return;
     }
 
