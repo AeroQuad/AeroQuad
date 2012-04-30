@@ -62,9 +62,17 @@ void updateOSD() {
     #endif
   }
 
-  if (OSDsched&0xa0) {
+  if (OSDsched&0x20) {
     #ifdef UseGPS
       displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
+    #endif
+  }
+
+  if (OSDsched&0x80) {
+    #ifdef AltitudeHoldRangeFinder
+      if (motorArmed) { 
+        displayRanger();
+      }
     #endif
   }
 

@@ -1256,11 +1256,11 @@ void setup() {
     vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
   #ifdef AltitudeHoldRangeFinder
-    inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+    inititalizeRangeFinders();
     vehicleState |= RANGE_ENABLED;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
@@ -1406,7 +1406,7 @@ void loop () {
       #endif
 
       #ifdef AltitudeHoldRangeFinder
-        readRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+        updateRangeFinders();
       #endif
 
       #if defined (UseGPS)

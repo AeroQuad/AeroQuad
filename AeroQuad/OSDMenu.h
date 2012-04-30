@@ -467,6 +467,16 @@ void menuSensorInfo(byte mode, byte action){
                   getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
           break;
       #endif
+      #if defined(AltitudeHoldRangeFinder)
+        case 3: // Rangers
+          notifyOSD(OSD_NOCLEAR,"US:a%df%dr%dr%dl%d cm",
+                  (int)(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[FRONT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[RIGHT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[REAR_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[LEFT_RANGE_FINDER_INDEX]*100));
+          break;
+      #endif
     }
     menuInFunc=3;
     break;
@@ -628,6 +638,9 @@ const struct MenuItem menuData[] = {
   {2,     "Gyro Data",        menuSensorInfo,    1},
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
+#endif
+#if defined(AltitudeHoldRangeFinder)
+  {2,     "Ranger Data",      menuSensorInfo,    3},
 #endif
 #ifdef CameraControl
   {0, "Camera PTZ mode",      menuCameraPTZ,     0},
