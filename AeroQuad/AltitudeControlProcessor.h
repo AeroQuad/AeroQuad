@@ -41,6 +41,8 @@
 
 #define INVALID_THROTTLE_CORRECTION -1000
 
+#define ALTITUDE_BUMP_SPEED 0.01
+
 /**
  * processAltitudeHold
  * 
@@ -59,7 +61,7 @@ void processAltitudeHold()
     int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
     // computer altitude error!
     #if defined AltitudeHoldRangeFinder
-      if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE) {
+      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
         if (sonarAltitudeToHoldTarget == INVALID_RANGE) {
           sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
         }
@@ -85,24 +87,24 @@ void processAltitudeHold()
       
       if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + altitudeHoldBump)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
         #if defined AltitudeHoldBaro
-          baroAltitudeToHoldTarget += 0.01;
+          baroAltitudeToHoldTarget += ALTITUDE_BUMP_SPEED;
         #endif
         #if defined AltitudeHoldRangeFinder
-          sonarAltitudeToHoldTarget += 0.01;
-          if (!isInRangeOfRangeFinder(sonarAltitudeToHoldTarget)) {
-            sonarAltitudeToHoldTarget = INVALID_RANGE;
+          float newalt = sonarAltitudeToHoldTarget + ALTITUDE_BUMP_SPEED;
+          if (isOnRangerRange(newalt)) {
+            sonarAltitudeToHoldTarget = newalt;
           }
         #endif
       }
       
       if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - altitudeHoldBump)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
         #if defined AltitudeHoldBaro
-          baroAltitudeToHoldTarget -= 0.01;
+          baroAltitudeToHoldTarget -= ALTITUDE_BUMP_SPEED;
         #endif
         #if defined AltitudeHoldRangeFinder
-          sonarAltitudeToHoldTarget -= 0.01;
-          if (!isInRangeOfRangeFinder(sonarAltitudeToHoldTarget)) {
-            sonarAltitudeToHoldTarget = INVALID_RANGE;
+          float newalt = sonarAltitudeToHoldTarget - ALTITUDE_BUMP_SPEED;
+          if (isOnRangerRange(newalt)) {
+            sonarAltitudeToHoldTarget = newalt;
           }
         #endif
       }

@@ -39,6 +39,9 @@
 #ifdef UseGPS
   void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheading,unsigned int numsats);
 #endif
+#ifdef AltitudeHoldRangeFinder
+  void displayRanger();
+#endif
 
 void initializeOSD();
 void updateOSD();

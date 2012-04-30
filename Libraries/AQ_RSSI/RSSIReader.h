@@ -40,7 +40,7 @@ void readRSSI() {
 
   rssiRawValue = analogRead(RSSI_PIN);
   #ifndef RSSI_RAWVAL
-    rssiRawValue = (rssiRawValue - RSSI_0P) * 100 / (RSSI_100P - RSSI_0P);
+    rssiRawValue = ((long)rssiRawValue - RSSI_0P) * 100 / (RSSI_100P - RSSI_0P);
     if (rssiRawValue < 0) {
       rssiRawValue = 0;
     }
