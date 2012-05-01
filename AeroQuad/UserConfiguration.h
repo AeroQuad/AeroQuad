@@ -46,18 +46,18 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
-#define triConfig
+//#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
 
-#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
+//#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -89,9 +89,9 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // NEED BattMonitor defined. if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor            // Enable Battery monitor
+#define BattMonitorAutoDescent // NEED BattMonitor defined. if you want the craft to auto descent when the battery reach the alarm voltage
+#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
 //#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
@@ -113,6 +113,16 @@
 
 //
 // *******************************************************************************************************************************
+// Define how many channels are connected from your R/C receiver
+// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
+// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// *******************************************************************************************************************************
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
+
+
+//
+// *******************************************************************************************************************************
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Xbee+Installation
 // *******************************************************************************************************************************
@@ -125,14 +135,6 @@
 // *******************************************************************************************************************************
 //#define SlowTelemetry  // Enables Wireless telemetry on Serial2
 
-//
-// *******************************************************************************************************************************
-// Define how many channels are connected from your R/C receiver
-// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
-// Additionally 8 receiver channels are only available when not using the Arduino Uno
-// *******************************************************************************************************************************
-#define LASTCHANNEL 6
-//#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
 
 //
 // *******************************************************************************************************************************
@@ -151,15 +153,15 @@
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-#define OSD
+//#define OSD
 //#define ShowRSSI
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "Aeroquad"         // Show (optional) callsign
-#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph)
 
-#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
+//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
 
 /****************************************************************************
  ****************************************************************************

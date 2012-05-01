@@ -41,7 +41,7 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 10;  // put it at 10m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
+      homePosition.altitude = 5;  // put it at 5m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
       // Set reference location for Equirectangular projection used for coordinates
@@ -73,10 +73,9 @@ void initHomeBase() {
   
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
   #define POSITION_HOLD_SPEED 60.0  
-  #define MAX_NAVIGATION_ANGLE_CORRECTION 400.0
-  #define NAVIGATION_SPEED 400.0  // m/s * 100 // 3 m/s = 10.8km/h
+  #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
+  #define NAVIGATION_SPEED 300.0  // m/s * 100 // 3 m/s = 10.8km/h
   
-
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
   GeodeticPosition previousPosition = GPS_INVALID_POSITION;
@@ -114,7 +113,7 @@ void initHomeBase() {
     }
     
     if (waypointIndex >= MAX_WAYPOINTS || 
-        waypoint[waypointIndex].altitude == 2147483647) { // if mission is completed, last step is to go home
+        waypoint[waypointIndex].altitude == 2147483647) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
 
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
@@ -124,12 +123,11 @@ void initHomeBase() {
       
       missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
       missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
-      missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
+      missionPositionToReach.altitude = waypoint[waypointIndex].altitude/100;
 
       if (waypoint[waypointIndex].altitude > 2000.0) {
         waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
       }
-      missionPositionToReach.altitude = 20.0;  // @Kenny9999, remove this when the configurator is fix
     }
   }
 
@@ -246,7 +244,7 @@ void initHomeBase() {
    * Compute everything need to make adjustment to the craft attitude to go to the point to reach
    */
   void processGpsNavigation() {
-    
+
     if (isHomeBaseInitialized() && isGpsHaveANewPosition) {
       
       // even in manual, mission processing is in function and can be perform manually through the OSD
@@ -270,20 +268,25 @@ void initHomeBase() {
         // evaluate the flight behavior to adopt
         evaluateFlightBehaviorFromDistance();
 
+        computeRollPitchCraftAxisCorrection();
+        
         if (maxSpeedToDestination == NAVIGATION_SPEED) {
           evaluateAltitudeCorrection();    
       
           computeHeadingCorrection();
         }
-        computeRollPitchCraftAxisCorrection();
       }
       else {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
       }
-      
       isGpsHaveANewPosition = false;
+      
+//      Serial.print(gpsDistanceToDestination); Serial.print(" ");
+//      Serial.print(gpsRollAxisCorrection); Serial.print(" ");
+//      Serial.print(gpsPitchAxisCorrection); Serial.print(" ");
+//      Serial.println(gpsYawAxisCorrection);
     }
   }
 #endif  // #define UseGPSNavigator
