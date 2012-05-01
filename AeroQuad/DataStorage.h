@@ -216,13 +216,13 @@ void initializeEEPROM() {
   
   #if defined (UseGPSNavigator)
     missionNbPoint = 0;
-    PID[GPSROLL_PID_IDX].P = 1.0;
+    PID[GPSROLL_PID_IDX].P = 0.8;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
-    PID[GPSPITCH_PID_IDX].P = 1.0;
+    PID[GPSPITCH_PID_IDX].P = 0.8;
     PID[GPSPITCH_PID_IDX].I = 0.0;
     PID[GPSPITCH_PID_IDX].D = 0.0;
-    PID[GPSYAW_PID_IDX].P = 2.0;
+    PID[GPSYAW_PID_IDX].P = 0.8;
     PID[GPSYAW_PID_IDX].I = 0.0;
     PID[GPSYAW_PID_IDX].D = 0.0;
 
