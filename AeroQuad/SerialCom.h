@@ -896,7 +896,8 @@ void reportVehicleState() {
     short altitude;
     short course;
     short heading;
-    short speed;
+    byte  speed;
+    byte  rssi;
     byte  voltage;
     byte  current;
     word  capacity;
@@ -941,7 +942,16 @@ void reportVehicleState() {
       telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
       telemetryBuffer.data.course    = getCourse()/10; // degrees
       telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
-      telemetryBuffer.data.speed     = getGpsSpeed();              // cm/s
+      telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
+#ifdef UseRSSIFaileSafe
+# ifdef RSSI_RAWVAL
+      telemetryBuffer.data.rssi      = rssiRawValue/10; // scale to 0-100
+# else
+      telemetryBuffer.data.rssi      = rssiRawValue;
+# endif      
+#else
+      telemetryBuffer.data.rssi      = 100;
+#endif
       telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
       telemetryBuffer.data.current   = batteryData[0].current/100; // to A
       telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh

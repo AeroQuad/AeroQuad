@@ -38,8 +38,10 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (navigationState == ON) {
-      float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      int xAxisCommand = constrain((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection),1000,2000);
+      float rollAttitudeCmd = updatePID(xAxisCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      int yAxisCommand = constrain((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection),1000,2000);
+      float pitchAttitudeCmd = updatePID(yAxisCommand * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
@@ -239,6 +241,7 @@ void processFlightControl() {
         missionPositionToReach.longitude = homePosition.longitude;
         missionPositionToReach.altitude = homePosition.altitude;
       #endif  
+//      Serial.println(nbSatelitesInUse);
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
