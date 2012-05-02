@@ -27,6 +27,8 @@
 #include "Arduino.h"
 #include "pins_arduino.h"
 #include "GpsDataType.h"
+#include "AQMath.h"
+#include "receiver.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
@@ -247,7 +249,7 @@ typedef struct {
   t_NVR_PID GPSROLL_PID_GAIN_ADR;
   t_NVR_PID GPSPITCH_PID_GAIN_ADR;
   t_NVR_PID GPSYAW_PID_GAIN_ADR;
-  t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
+  t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;

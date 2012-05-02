@@ -113,7 +113,7 @@ void initHomeBase() {
     }
     
     if (waypointIndex >= MAX_WAYPOINTS || 
-        waypoint[waypointIndex].altitude == 2147483647) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
+        waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
 
       missionPositionToReach.latitude = homePosition.latitude;
       missionPositionToReach.longitude = homePosition.longitude;
@@ -123,10 +123,10 @@ void initHomeBase() {
       
       missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
       missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
-      missionPositionToReach.altitude = waypoint[waypointIndex].altitude/100;
+      missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
 
-      if (waypoint[waypointIndex].altitude > 2000.0) {
-        waypoint[waypointIndex].altitude = 2000.0; // fix max altitude to 2 km
+      if (missionPositionToReach.altitude > 2000.0) {
+        missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
       }
     }
   }
@@ -245,7 +245,7 @@ void initHomeBase() {
    */
   void processGpsNavigation() {
 
-    if (isHomeBaseInitialized() && isGpsHaveANewPosition) {
+    if (isHomeBaseInitialized() && isGpsHaveANewPosition && haveAGpsLock()) {
       
       // even in manual, mission processing is in function and can be perform manually through the OSD
       computeCurrentSpeedInCmPerSec();
@@ -253,6 +253,9 @@ void initHomeBase() {
       if (navigationState == ON) {    // navigation switch override position hold switch
       
         computeDistanceToDestination(missionPositionToReach);
+        
+        // evaluate if we need to switch to another mission possition point
+        evaluateMissionPositionToReach();
       }
       else if (positionHoldState == ON) {  // then may be position hold
         
@@ -260,8 +263,6 @@ void initHomeBase() {
         computeDistanceToDestination(positionHoldPointToReach);
       }
       
-      // evaluate if we need to switch to another mission possition point
-      evaluateMissionPositionToReach();
       
       if (navigationState == ON || positionHoldState == ON) {
         
@@ -282,11 +283,6 @@ void initHomeBase() {
         gpsYawAxisCorrection = 0;
       }
       isGpsHaveANewPosition = false;
-      
-//      Serial.print(gpsDistanceToDestination); Serial.print(" ");
-//      Serial.print(gpsRollAxisCorrection); Serial.print(" ");
-//      Serial.print(gpsPitchAxisCorrection); Serial.print(" ");
-//      Serial.println(gpsYawAxisCorrection);
     }
   }
 #endif  // #define UseGPSNavigator
