@@ -59,6 +59,16 @@ void processLedStatus() {
     }
   #endif  
 
+  //
+  // process mode light
+  //
+  if (flightMode == ATTITUDE_FLIGHT_MODE) {
+    digitalWrite(LED_Yellow, HIGH);
+  }
+  else {
+    digitalWrite(LED_Yellow, LOW);
+  }
+
   flashingLedState++;
 
 }
