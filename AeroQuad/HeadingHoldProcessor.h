@@ -110,7 +110,7 @@ void processHeading()
   }
   // NEW SI Version
   #if defined (UseGPSNavigator) 
-    float yAxisCommand = constrain(receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection,1000,2000);
+    int yAxisCommand = constrain((receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection),-500,500);
     float receiverSiData = (yAxisCommand) * (2.5 * PWM2RAD);
   #else
     float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);

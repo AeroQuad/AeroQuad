@@ -37,11 +37,11 @@
 void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
-    if (navigationState == ON) {
-      int xAxisCommand = constrain((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection),1000,2000);
-      float rollAttitudeCmd = updatePID(xAxisCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      int yAxisCommand = constrain((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection),1000,2000);
-      float pitchAttitudeCmd = updatePID(yAxisCommand * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    if (navigationState == ON || positionHoldState == ON) {
+      int xAxisCommand = constrain((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection),-500,500);
+      int rollAttitudeCmd = updatePID(xAxisCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      int yAxisCommand = constrain((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection),-500,500);
+      int pitchAttitudeCmd = updatePID(yAxisCommand * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
@@ -282,7 +282,7 @@ void processFlightControl() {
   if (motorArmed == OFF) {
     processCalibrateESC();
   }
-
+  
   // *********************** Command Motors **********************
   if (motorArmed == ON && safetyCheck == ON) {
     writeMotors();
