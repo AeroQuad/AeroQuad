@@ -97,11 +97,9 @@ void readPilotCommands() {
   // Check Mode switch for Acro or Stable
   if (receiverCommand[MODE] > 1500) {
     flightMode = ATTITUDE_FLIGHT_MODE;
-    digitalWrite(LED_Yellow, HIGH);
   }
   else {
     flightMode = RATE_FLIGHT_MODE;
-    digitalWrite(LED_Yellow, LOW);
   }
 
   
@@ -151,7 +149,7 @@ void readPilotCommands() {
 
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < 1750) {  // Enter in position hold state
+    else if (receiverCommand[AUX1] < 1600) {  // Enter in position hold state
       
       if (isStorePositionNeeded) {
         
@@ -183,5 +181,3 @@ void readPilotCommands() {
 }
 
 #endif // _AQ_FLIGHT_COMMAND_READER_
-
-
