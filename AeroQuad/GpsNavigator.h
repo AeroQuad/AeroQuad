@@ -90,6 +90,10 @@ void initHomeBase() {
   
   float maxSpeedToDestination = POSITION_HOLD_SPEED;
   float maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
+  
+  boolean altitudeProximityAlert = false;
+  byte altitudeProximityAlertSecurityCounter = 0;
+
 
   /** 
    * @return true if there is a mission to execute
@@ -218,9 +222,21 @@ void initHomeBase() {
     #if defined AltitudeHoldRangeFinder
       // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
       if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
-        sonarAltitudeToHoldTarget += 5;
-        missionPositionToReach.altitude += 5;
+        if (!altitudeProximityAlert) {
+          sonarAltitudeToHoldTarget += 2;
+          missionPositionToReach.altitude += 2;
+          altitudeProximityAlert = true;
+        }
       }
+
+      if (altitudeProximityAlert && altitudeProximityAlertSecurityCounter <= 10) {
+        altitudeProximityAlertSecurityCounter++;
+      }
+      else {
+        altitudeProximityAlertSecurityCounter = 0;
+        altitudeProximityAlert = false;
+      }
+
     #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
   }
