@@ -91,8 +91,10 @@ void initHomeBase() {
   float maxSpeedToDestination = POSITION_HOLD_SPEED;
   float maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
   
-  boolean altitudeProximityAlert = false;
-  byte altitudeProximityAlertSecurityCounter = 0;
+  #if defined AltitudeHoldRangeFinder
+    boolean altitudeProximityAlert = false;
+    byte altitudeProximityAlertSecurityCounter = 0;
+  #endif
 
 
   /** 
