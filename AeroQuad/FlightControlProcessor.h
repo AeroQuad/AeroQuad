@@ -160,11 +160,15 @@ void processCalibrateESC()
  */
 void processThrottleCorrection() {
  
-//  int throttleAsjust = throttle / ( cos(kinematicsAngle[XAXIS]) * cos(kinematicsAngle[YAXIS]));
-//  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 25); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
-//  throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
+  int throttleAdjust = 0;
+  #if defined UseGPSNavigator
+    if (navigationState == ON || positionHoldState == ON) {
+      throttleAdjust = throttle / (cos (kinematicsAngle[XAXIS]*0.55) * cos (kinematicsAngle[YAXIS]*0.55));
+      throttleAdjust = constrain ((throttleAdjust - throttle), 0, 50); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
+    }
+  #endif
   
-  throttle = constrain(throttle + batteyMonitorThrottleCorrection,MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
+  throttle = constrain((throttle + throttleAdjust + batteyMonitorThrottleCorrection),MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
 }
 
 
@@ -241,7 +245,6 @@ void processFlightControl() {
         missionPositionToReach.longitude = homePosition.longitude;
         missionPositionToReach.altitude = homePosition.altitude;
       #endif  
-//      Serial.println(nbSatelitesInUse);
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder

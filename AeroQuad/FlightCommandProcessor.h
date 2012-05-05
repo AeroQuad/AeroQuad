@@ -134,6 +134,19 @@ void readPilotCommands() {
   #endif
   
   #if defined (UseGPSNavigator)
+  
+    // Init home command
+    if (motorArmed == OFF && 
+        receiverCommand[THROTTLE] < MINCHECK && receiverCommand[ZAXIS] < MINCHECK &&
+        receiverCommand[YAXIS] > MAXCHECK && receiverCommand[XAXIS] > MAXCHECK &&
+        haveAGpsLock()) {
+          
+      homePosition.latitude = currentPosition.latitude;
+      homePosition.longitude = currentPosition.longitude;
+      homePosition.altitude = 5;  // put it at 5m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
+    }
+  
+  
     if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
     
       if (isInitNavigationNeeded) {
