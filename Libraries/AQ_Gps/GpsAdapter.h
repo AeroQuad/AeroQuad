@@ -50,6 +50,7 @@ GeodeticPosition currentPosition;
 float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
 
 byte nbSatelitesInUse = 0;
+int  gpsHDOP = 0;
 boolean isGpsHaveANewPosition = false;
 
 void initializeGps() {
@@ -62,10 +63,11 @@ boolean readGps() {
   gps->update();
   if (gps->new_data) {
     isGpsHaveANewPosition = true;
-	currentPosition.latitude = gps->latitude;
-	currentPosition.longitude = gps->longitude;
-	nbSatelitesInUse = gps->num_sats;
-	gps->new_data = false;
+    currentPosition.latitude = gps->latitude;
+    currentPosition.longitude = gps->longitude;
+    nbSatelitesInUse = gps->num_sats;
+    gpsHDOP = gps->hdop;
+    gps->new_data = false;
   }
   return isGpsHaveANewPosition;
 }
