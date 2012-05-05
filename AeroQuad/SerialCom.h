@@ -901,7 +901,7 @@ void reportVehicleState() {
     byte  voltage;
     byte  current;
     word  capacity;
-    word  reserved2;
+    word  gpsinfo;
     byte  ecc[8];
   };
   
@@ -955,6 +955,8 @@ void reportVehicleState() {
       telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
       telemetryBuffer.data.current   = batteryData[0].current/100; // to A
       telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
+      telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff; 
+      telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12); 
        /* add ECC */
       encode_data(telemetryBuffer.bytes,24);
 
