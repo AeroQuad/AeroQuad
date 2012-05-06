@@ -35,7 +35,7 @@ AP_GPS_MTK16::init(void)
     _port->print(MTK_SET_BINARY);
 
     // set 4Hz update rate
-    _port->print(MTK_OUTPUT_10HZ);
+    _port->print(MTK_OUTPUT_5HZ);
 
     // set initial epoch code
     _epoch = TIME_OF_DAY;

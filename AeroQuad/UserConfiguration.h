@@ -66,7 +66,7 @@
 // Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
+//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // *******************************************************************************************************************************
@@ -76,8 +76,13 @@
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 #define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
-#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS to be defined, enable GPS position hold, auto return home when no mission or execute mission
+
+#define UseGPS // Try to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
+//#define UseGPS_NMEA   // force the use of NMEA GPS
+//#define UseGPS_UBLOX  // force the use of UBLOX GPS
+//#define UseGPS_MTK  // force the use of MTK GPS
+//#define UseGPS_406  // force the use of MTK GPS
+#define UseGPSNavigator // EXPERIMENTAL NEED UseGPS TO BE DEFINED, enable GPS position hold, auto return home when no mission or execute mission
 
 //
 // *******************************************************************************************************************************
@@ -89,7 +94,7 @@
 //#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
-#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.67, 0.86, BM_NOPIN, 0, 0)
+#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.67, 0.86, BM_NOPIN, 0, 0)  // cpin=BM_NOPIN if no sensor
 
 //
 // *******************************************************************************************************************************
@@ -108,6 +113,16 @@
 
 //
 // *******************************************************************************************************************************
+// Define how many channels are connected from your R/C receiver
+// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
+// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// *******************************************************************************************************************************
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
+
+
+//
+// *******************************************************************************************************************************
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Xbee+Installation
 // *******************************************************************************************************************************
@@ -120,14 +135,6 @@
 // *******************************************************************************************************************************
 //#define SlowTelemetry  // Enables Wireless telemetry on Serial2
 
-//
-// *******************************************************************************************************************************
-// Define how many channels are connected from your R/C receiver
-// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
-// Additionally 8 receiver channels are only available when not using the Arduino Uno
-// *******************************************************************************************************************************
-//#define LASTCHANNEL 6
-#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
 
 //
 // *******************************************************************************************************************************

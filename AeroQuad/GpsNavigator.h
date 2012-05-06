@@ -25,19 +25,13 @@
 #ifndef _AQ_Navigator_H_
 #define _AQ_Navigator_H_
 
-// @todo, Kenny, remove this and put it in the EEPROM
-#define MAX_WAYPOINTS 16
-GeodeticPosition waypoint[MAX_WAYPOINTS];
-
-int currentWaypoint;
+// little wait to have a more precise fix of the current position since it's called after the first gps fix
+#define MIN_NB_GPS_READ_TO_INIT_HOME 15  
+byte countToInitHome = 0;
 
 boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }
-
-
-byte countToInitHome = 0;
-#define MIN_NB_GPS_READ_TO_INIT_HOME 15
 
 void initHomeBase() {
   if (isGpsHaveANewPosition) {
@@ -47,104 +41,268 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 0;
+      homePosition.altitude = 5;  // put it at 5m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+      // Set reference location for Equirectangular projection used for coordinates
+      setProjectionLocation(currentPosition);
+
+      #if defined UseGPSNavigator
+        evaluateMissionPositionToReach();
+      #endif
     }  
   }
 }
 
-boolean haveMission() {
-  return missionNbPoint != 0;
-}
+
+#if defined UseGPSNavigator
+
+  /*
+    Because we are using lat and lon to do our distance errors here's a quick chart:
+    100 	= 1m
+    1000 	= 11m	 = 36 feet
+    1800 	= 19.80m = 60 feet
+    3000 	= 33m
+    10000       = 111m
+  */
+  
+  #define MIN_DISTANCE_TO_REACHED 1200
+
+  #define GPS_SPEED_SMOOTH_VALUE 0.5
+  #define GPS_COURSE_SMOOTH_VALUE 0.5
+  
+  #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
+  #define POSITION_HOLD_SPEED 60.0  
+  #define MAX_NAVIGATION_ANGLE_CORRECTION 200.0
+  #define NAVIGATION_SPEED 300.0  // m/s * 100 // 3 m/s = 10.8km/h
+  
+  #define MAX_YAW_AXIS_CORRECTION 200.0  
+    
+  GeodeticPosition previousPosition = GPS_INVALID_POSITION;
+  float gpsLaggedSpeed = 0.0;
+  float gpsLaggedCourse = 0.0;
+  float currentSpeedCmPerSecRoll = 0.0; 
+  float currentSpeedCmPerSecPitch = 0.0;
+  
+  float distanceX = 0.0;
+  float distanceY = 0.0;
+  float angleToWaypoint = 0.0;
+  
+  float maxSpeedToDestination = POSITION_HOLD_SPEED;
+  float maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
+  
+  #if defined AltitudeHoldRangeFinder
+    boolean altitudeProximityAlert = false;
+    byte altitudeProximityAlertSecurityCounter = 0;
+  #endif
 
 
-
-
-#define GPS_SPEED_SMOOTH_VALUE 0.5
-#define GPS_COURSE_SMOOTH_VALUE 0.5
-
-GeodeticPosition previousPosition;
-float gpsLaggedSpeed = 0.0;
-float gpsLaggedCourse = 0.0;
-float currentSpeedCmPerSecRoll = 0.0; 
-float currentSpeedCmPerSecPitch = 0.0;
-
-void computeCurrentSpeedInCmPerSec() {
-
-  float derivateDistanceX = ((float)currentPosition.longitude - (float)previousPosition.longitude) * 0.649876;
-  float derivateDistanceY = ((float)currentPosition.latitude - (float)previousPosition.latitude) * 1.113195;
-  float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
-
-  gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
-  if (derivateDistanceX != 0 || derivateDistanceY != 0) {
-    float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
-      if (tmp < 0) {
-//        tmp += 360; // jakub fix, logic but... I had weird behavior, I need more investigation!
-        tmp += radians(360);
-      }
-      gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
+  /** 
+   * @return true if there is a mission to execute
+   */
+  boolean haveMission() {
+    return missionNbPoint != 0;
   }
 
-  float courseRads = radians(gpsLaggedCourse/100);
-  currentSpeedCmPerSecRoll = sin(courseRads-trueNorthHeading)*gpsLaggedSpeed; 
-  currentSpeedCmPerSecPitch = cos(courseRads-trueNorthHeading)*gpsLaggedSpeed;
-  
-  previousPosition.latitude = currentPosition.latitude;
-  previousPosition.longitude = currentPosition.longitude;
-}
-  
 
-#define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
-#define MAX_NAVIGATION_ANGLE_CORRECTION 200.0
-#define NAVIGATION_SPEED 400.0  // m/s * 100 // 3 m/s = 10.8km/h
-#define POSITION_HOLD_SPEED 60.0  
-  
-float maxSpeedToDestination = POSITION_HOLD_SPEED;
-float maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
+  /**
+   * Evalutate the position to reach depending of the state of the mission 
+   */
+  void evaluateMissionPositionToReach() {
 
-// use to compute the heading in position hold state
-float distanceX = 0.0;
-float distanceY = 0.0;
-
-void computeDistanceToDestination() {
-  
-  distanceX = ((float)positionToReach.longitude - (float)currentPosition.longitude) * 0.649876;
-  distanceY = ((float)positionToReach.latitude - (float)currentPosition.latitude) * 1.113195;
-  gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
-
-}
-
-
-void processPositionCorrection() {
-  
-  // compute current speed in cm per sec
-  computeCurrentSpeedInCmPerSec();
-  
-  // compute distance to destination
-  computeDistanceToDestination();
-  
-  
-  
-  float angleToWaypoint = atan2(distanceX, distanceY);
+    if (waypointIndex == -1) { // if mission have not been started
+      waypointIndex++;
+    }
     
-  float angle = angleToWaypoint-trueNorthHeading;
-  float tmpsin = sin(angle);
-  float tmpcos = cos(angle);
+    if (waypointIndex < MAX_WAYPOINTS && gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
+      waypointIndex++;
+    }
     
-  float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
-  float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
-  maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
-  maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
+    if (waypointIndex >= MAX_WAYPOINTS || 
+        waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
 
-  gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
-  gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
+      missionPositionToReach.latitude = homePosition.latitude;
+      missionPositionToReach.longitude = homePosition.longitude;
+      missionPositionToReach.altitude = homePosition.altitude; 
+    }
+    else {
+      
+      missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
+      missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
+      missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
+
+      if (missionPositionToReach.altitude > 2000.0) {
+        missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
+      }
+    }
+  }
+
+  /**
+   * Compute the current craft speed in cm per sec
+   * @result are currentSpeedCmPerSecPitch and currentSpeedCmPerSecRoll
+   */
+  void computeCurrentSpeedInCmPerSec() {
   
-  gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
-  gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
-}
+    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * cosLatitude * 1.113195;
+    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
+    float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
+  
+    gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
+    if (derivateDistanceX != 0 || derivateDistanceY != 0) {
+      float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
+        if (tmp < 0) {
+  //        tmp += 360; // jakub fix, logic but... I had weird behavior, I need more investigation!
+          tmp += radians(360);
+        }
+        gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
+    }
+  
+    float courseRads = radians(gpsLaggedCourse/100);
+    currentSpeedCmPerSecRoll = sin(courseRads-trueNorthHeading)*gpsLaggedSpeed; 
+    currentSpeedCmPerSecPitch = cos(courseRads-trueNorthHeading)*gpsLaggedSpeed;
+    
+    previousPosition.latitude = currentPosition.latitude;
+    previousPosition.longitude = currentPosition.longitude;
+  }
+    
+  /** 
+   * Compute the distance to the destination, point to reach
+   * @result is gpsDistanceToDestination
+   */
+  void computeDistanceToDestination(GeodeticPosition destination) {
+    
+    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
+    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
+    gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
+  }
+  
+  /**
+   * Evaluate the flight behavior to adopt depending of the distance to the point to reach
+   */
+  void evaluateFlightBehaviorFromDistance() {
 
+    if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold
 
+      maxSpeedToDestination = POSITION_HOLD_SPEED;
+      maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
+    }
+    else { // navigate
+
+      maxSpeedToDestination = NAVIGATION_SPEED;
+      maxCraftAngleCorrection = MAX_NAVIGATION_ANGLE_CORRECTION;
+    }
+  }
+  
+  /**
+   * compute craft angle in roll/pitch to adopt to navigate to the point to reach
+   * @result are gpsRollAxisCorrection and gpsPitchAxisCorrection use in flight control processor
+   */
+  void computeRollPitchCraftAxisCorrection() {
+    
+    angleToWaypoint = atan2(distanceX, distanceY)-trueNorthHeading;
+    float tmpsin = sin(angleToWaypoint);
+    float tmpcos = cos(angleToWaypoint);
+    
+    float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
+    float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
+    maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
+    maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
+  
+    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
+    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
+    
+    gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
+    gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
+  }
+  
+  
+  /**
+   * Evaluate altitude to reach, if we use the range finder, we use it as altitude proximity alert
+   * to increase the current point to reach altitude
+   */
+  void evaluateAltitudeCorrection() {
+    #if defined AltitudeHoldRangeFinder
+      // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
+      if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
+        if (!altitudeProximityAlert) {
+          sonarAltitudeToHoldTarget += 2;
+          missionPositionToReach.altitude += 2;
+          altitudeProximityAlert = true;
+        }
+      }
+
+      if (altitudeProximityAlert && altitudeProximityAlertSecurityCounter <= 10) {
+        altitudeProximityAlertSecurityCounter++;
+      }
+      else {
+        altitudeProximityAlertSecurityCounter = 0;
+        altitudeProximityAlert = false;
+      }
+
+    #endif
+    baroAltitudeToHoldTarget = missionPositionToReach.altitude;
+  }
+  
+  /**
+   * In navigation mode, we want the craft headed to the target, so this will 
+   * compute the heading correction to have
+   */
+  void computeHeadingCorrection() {
+    
+    float correctionAngle = angleToWaypoint;
+    if (correctionAngle > PI) {
+      correctionAngle = fmod(correctionAngle,PI) - PI;
+    }
+    
+    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
+    gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
+  }
+  
+  /**
+   * Compute everything need to make adjustment to the craft attitude to go to the point to reach
+   */
+  void processGpsNavigation() {
+
+    if (isHomeBaseInitialized() && isGpsHaveANewPosition && haveAGpsLock()) {
+      
+      // even in manual, mission processing is in function and can be perform manually through the OSD
+      computeCurrentSpeedInCmPerSec();
+      
+      if (navigationState == ON) {    // navigation switch override position hold switch
+      
+        computeDistanceToDestination(missionPositionToReach);
+        
+        // evaluate if we need to switch to another mission possition point
+        evaluateMissionPositionToReach();
+      }
+      else if (positionHoldState == ON) {  // then may be position hold
+        
+        gpsYawAxisCorrection = 0;
+        computeDistanceToDestination(positionHoldPointToReach);
+      }
+      
+      
+      if (navigationState == ON || positionHoldState == ON) {
+        
+        // evaluate the flight behavior to adopt
+        evaluateFlightBehaviorFromDistance();
+
+        computeRollPitchCraftAxisCorrection();
+        
+        if (maxSpeedToDestination == NAVIGATION_SPEED) {
+          evaluateAltitudeCorrection();    
+      
+          computeHeadingCorrection();
+        }
+      }
+      else {
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+      }
+      isGpsHaveANewPosition = false;
+    }
+  }
+#endif  // #define UseGPSNavigator
 
 #endif
-

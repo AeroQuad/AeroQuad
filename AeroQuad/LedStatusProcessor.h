@@ -27,6 +27,7 @@
 byte flashingLedState = 0; // this counter increments by one at 10Hz
 
 void processLedStatus() {
+
   
   //
   // process ready state light in case we use GPS
@@ -44,14 +45,15 @@ void processLedStatus() {
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
     
-    if (receiverCommand[AUX2] > 1750 && !isHomeBaseInitialized()) {
-       hasBuzzerHigherPriority = true;
-       digitalWrite(BuzzerPin, HIGH);
-    }
-    else if((receiverCommand[AUX2] < 1750 || isHomeBaseInitialized()) && hasBuzzerHigherPriority)
+   if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized())
    {
-       hasBuzzerHigherPriority = false;
-       digitalWrite(BuzzerPin, LOW);
+        hasBuzzerHigherPriority = true;
+   	digitalWrite(BuzzerPin, HIGH);
+   }
+   else if((receiverCommand[AUX2] < 1400 || isHomeBaseInitialized()) && hasBuzzerHigherPriority)
+   {
+        hasBuzzerHigherPriority = false;
+        digitalWrite(BuzzerPin, LOW);
    }
   #endif
   
@@ -59,24 +61,35 @@ void processLedStatus() {
   // process ready state light in case we use Batt monitor
   //
   #if defined (BattMonitor)
-  if(!hasBuzzerHigherPriority)
-  {
-    if(motorArmed == ON)
-    {
-      if (batteryAlarm || batteryWarning) {
-        digitalWrite(BuzzerPin, HIGH);
-      }
-      else { 
+   if(!hasBuzzerHigherPriority)
+   {
+      if(motorArmed == ON)
+      {
+        if (batteryAlarm || batteryWarning)
+        {
+           digitalWrite(BuzzerPin, HIGH);
+        }
+        else
+       { 
+          digitalWrite(BuzzerPin, LOW);
+       }
+     }
+     else
+     {
         digitalWrite(BuzzerPin, LOW);
-      }
-    }
-    else
-    {
-      digitalWrite(BuzzerPin, LOW);
-    }
-  }
-  #endif
+     }
+   }
+  #endif  
 
+//  //
+//  // process mode light
+//  //
+//  if (flightMode == ATTITUDE_FLIGHT_MODE) {
+//    digitalWrite(LED_Yellow, HIGH);
+//  }
+//  else {
+//    digitalWrite(LED_Yellow, LOW);
+//  }
 
   flashingLedState++;
 

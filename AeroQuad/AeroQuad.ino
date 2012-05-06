@@ -33,7 +33,11 @@
 // In order to use the DIYDrone libraries, this have to be declared here this way
 // @see Kenny9999 for details
 //
-#if defined UseGPS  
+#if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
+ #define UseGPS
+#endif 
+
+#if defined UseGPS
   // needed here to use DIYDrone gps libraries
   #include <FastSerial.h>
   #include <AP_Common.h>
@@ -45,12 +49,6 @@
   FastSerialPort3(Serial3);
 #endif
 
-// Checks to make sure we have the right combinations defined
-#if defined(FlightAngleMARG) && !defined(HeadingMagHold)
-  #undef FlightAngleMARG
-#elif defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
-  #undef FlightAngleARG
-#endif
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -228,8 +226,7 @@
 
 #ifdef AeroQuad_Mini
   #define LED_Green 13
-  #define LED_Red 12
-  #define LED_Yellow 12
+  #define BuzzerPin 12
 
   #include <Device_I2C.h>
 
@@ -272,10 +269,8 @@
    */
   void initPlatform() {
 
-    pinMode(LED_Red, OUTPUT);
-    digitalWrite(LED_Red, LOW);
-    pinMode(LED_Yellow, OUTPUT);
-    digitalWrite(LED_Yellow, LOW);
+    pinMode(BuzzerPin, OUTPUT);
+    digitalWrite(BuzzerPin, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -285,6 +280,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    measureGyroSum();
     measureAccelSum();
   }
 #endif
@@ -1012,7 +1008,7 @@
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#else defined FlightAngleARG
+#else
   #include "Kinematics_ARG.h"
 #endif
 
@@ -1137,9 +1133,11 @@
   #if !defined AltitudeHoldBaro
     #error We need the altitude from barometer to use the GPS
   #endif 
+//  #if defined LASTCHANNEL 6
+//    #error We need 7 receiver channel to use gps navigator
+//  #endif
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
-  
 #endif
 
 //********************************************************
@@ -1175,6 +1173,11 @@
   #endif
 #endif  
 
+#ifdef SlowTelemetry
+  #include <AQ_RSCode.h>
+#endif
+
+
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
@@ -1196,10 +1199,6 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-
-  #ifdef CHANGE_YAW_DIRECTION
-    YAW_DIRECTION = -1;
-  #endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -1257,11 +1256,11 @@ void setup() {
     vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
   #ifdef AltitudeHoldRangeFinder
-    inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+    inititalizeRangeFinders();
     vehicleState |= RANGE_ENABLED;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D= PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
@@ -1387,6 +1386,10 @@ void loop () {
       }
     #endif
 
+    #ifdef SlowTelemetry
+      updateSlowTelemetry100Hz();
+    #endif
+
     // ================================================================
     // 50hz task loop
     // ================================================================
@@ -1397,27 +1400,24 @@ void loop () {
 
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
+      
       #if defined (UseRSSIFaileSafe) 
         readRSSI();
       #endif
 
       #ifdef AltitudeHoldRangeFinder
-        readRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+        updateRangeFinders();
       #endif
 
       #if defined (UseGPS)
         readGps();
-        if (haveAGpsLock()) {
-          if (!isHomeBaseInitialized()) {
-            initHomeBase();
-          }
+        if (haveAGpsLock() && !isHomeBaseInitialized()) {
+          initHomeBase();
         }
       #endif      
       
       #if defined(CameraControl)
-        if (cameraMode > 0) {
-          moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-        }  
+        moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
     }
 
@@ -1455,6 +1455,11 @@ void loop () {
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
+    }
+    else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
+      
+      G_Dt = (currentTime - lowPriorityTenHZpreviousTime2) / 1000000.0;
+      lowPriorityTenHZpreviousTime2 = currentTime;
 
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
@@ -1467,9 +1472,9 @@ void loop () {
       #if defined (UseGPS) || defined (BattMonitor)
         processLedStatus();
       #endif
-
+      
       #ifdef SlowTelemetry
-        sendSlowTelemetry();
+        updateSlowTelemetry10Hz();
       #endif
     }
     

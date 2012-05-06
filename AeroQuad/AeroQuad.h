@@ -26,6 +26,9 @@
 #include <math.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
+#include "GpsDataType.h"
+#include "AQMath.h"
+#include "receiver.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
@@ -113,6 +116,7 @@ unsigned long deltaTime = 0;
 // sub loop time variable
 unsigned long tenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
@@ -156,23 +160,37 @@ void processAltitudeHold();
 /**
  * GPS navigation global declaration
  */
+#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
 #if defined (UseGPS)
-  boolean hasBuzzerHigherPriority = false;
-  int missionNbPoint = 0;
-  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
-  
-  #include <GpsAdapter.h>
-  GeodeticPosition homePosition;
-  GeodeticPosition positionToReach;
 
-  float gpsDistanceToDestination = 0.0;
-  
-  int gpsRollAxisCorrection = 0;
-  int gpsPitchAxisCorrection = 0;
-  boolean isStorePositionNeeded = false;
-  
-  void processPositionCorrection();
-  void updateGPSRollPitchSpeedAlg(GeodeticPosition);
+  #include <GpsAdapter.h>
+  boolean hasBuzzerHigherPriority = false;
+  GeodeticPosition homePosition = GPS_INVALID_POSITION; 
+  GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
+
+  #if defined UseGPSNavigator
+    byte navigationState = OFF;  // ON, OFF or ALTPANIC
+    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+    int missionNbPoint = 0;
+    int gpsRollAxisCorrection = 0;
+    int gpsPitchAxisCorrection = 0;
+    int gpsYawAxisCorrection = 0;
+    boolean isStorePositionNeeded = false;
+    boolean isInitNavigationNeeded = false;
+
+    int waypointIndex = -1;    
+    float gpsDistanceToDestination = 99999999.0;
+    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
+    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
+    
+    void evaluateMissionPositionToReach();
+    void processGpsNavigation();
+  #endif
 #endif
 //////////////////////////////////////////////////////
 
@@ -231,7 +249,8 @@ typedef struct {
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
   t_NVR_PID GPSROLL_PID_GAIN_ADR;
   t_NVR_PID GPSPITCH_PID_GAIN_ADR;
-  t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
+  t_NVR_PID GPSYAW_PID_GAIN_ADR;
+  t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
@@ -276,8 +295,6 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
-  // GPS mission storing
-  float GPS_MISSION_NB_POINT;
   // Camera Control
   float CAMERAMODE_ADR;
   float MCAMERAPITCH_ADR;
@@ -291,7 +308,10 @@ typedef struct {
   float SERVOMINYAW_ADR;
   float SERVOMAXPITCH_ADR;
   float SERVOMAXROLL_ADR;
-  float SERVOMAXYAW_ADR; 
+  float SERVOMAXYAW_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT_ADR;
+  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 
 
@@ -302,12 +322,16 @@ void initReceiverFromEEPROM();
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
+long nvrReadLong(int address); // defined in DataStorage.h
+void nvrWriteLong(long value, int address); // defined in DataStorage.h
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
 void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 
 #define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
 #define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
 #define writeFloat(value, addr) nvrWriteFloat(value, GET_NVR_OFFSET(addr))
+#define readLong(addr) nvrReadLong(GET_NVR_OFFSET(addr))
+#define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
@@ -324,4 +348,3 @@ byte fastTransfer = OFF; // Used for troubleshooting
 //////////////////////////////////////////////////////
 
 #endif // _AQ_GLOBAL_HEADER_DEFINITION_H_
-

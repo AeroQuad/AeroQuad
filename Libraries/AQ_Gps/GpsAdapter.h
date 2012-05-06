@@ -19,44 +19,38 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_TINY_GPS_ADAPTER_H_
-#define _AEROQUAD_TINY_GPS_ADAPTER_H_
+#ifndef _AQ_GPS_ADAPTER_H_
+#define _AQ_GPS_ADAPTER_H_
 
 #include <AP_GPS.h>
+GPS *gps;
+#if defined UseGPS_NMEA
+  AP_GPS_NMEA GPS(&Serial1);
+#elif defined UseGPS_UBLOX
+  AP_GPS_UBLOX GPS(&Serial1);  
+#elif defined UseGPS_MTK
+  AP_GPS_MTK GPS(&Serial1);
+#elif defined UseGPS_406
+  AP_GPS_406 GPS(&Serial1);
+#else
+  AP_GPS_Auto GPS(&Serial1, &gps);
+#endif
+
+#include <GpsDataType.h>
 
 #define MIN_NB_SATS_IN_USE 6
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795
 
-enum {
-  GPS_INVALID_AGE = 0xFFFFFFFF, 
-  GPS_INVALID_ANGLE = 0x7FFFFFFF, 
-  GPS_INVALID_ALTITUDE = 999999999, 
-  GPS_INVALID_DATE = 0,
-  GPS_INVALID_TIME = 0xFFFFFFFF, 
-  GPS_INVALID_SPEED = 999999999, 
-  GPS_INVALID_FIX_TIME = 0xFFFFFFFF
-};
 
 
-struct GeodeticPosition {
-  long latitude;
-  long longitude;
-  long altitude;
-  
-  GeodeticPosition() {
-    latitude = GPS_INVALID_ANGLE;
-    longitude = GPS_INVALID_ANGLE;
-	altitude = 0;
-  }
-};
 GeodeticPosition currentPosition;
+
+float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
 
 byte nbSatelitesInUse = 0;
 boolean isGpsHaveANewPosition = false;
-GPS	    *gps;
-AP_GPS_Auto GPS(&Serial1, &gps);
 
 void initializeGps() {
  
@@ -91,18 +85,20 @@ unsigned long getGpsAltitude() {
   return gps->altitude;
 }
 
+void setProjectionLocation(struct GeodeticPosition pos) {
 
-
+  cosLatitude = cos((float)pos.latitude * GPS2RAD);
+}
 
 float gpsRawDistance = 0.0;
-short gpsBearing = 0;
+float gpsBearing = 0;
 
 void computeDistanceAndBearing(struct GeodeticPosition p1, struct GeodeticPosition p2) {
 
-  const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cos((float)(p1.latitude + p2.latitude) / 2.0 * GPS2RAD);
+  const float x = (float)(p2.longitude - p1.longitude) * GPS2RAD * cosLatitude;
   const float y = (float)(p2.latitude - p1.latitude) * GPS2RAD;
   gpsRawDistance = sqrt(x*x+y*y);
-  gpsBearing = (short)(RAD2DEG * atan2(x,y));
+  gpsBearing = (RAD2DEG * atan2(x,y));
 }
 
 float getDistanceMeter() {

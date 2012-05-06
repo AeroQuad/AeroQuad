@@ -66,7 +66,7 @@ void readPilotCommands() {
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
       #if defined (UseGPS)
         if (receiverCommand[AUX2] > 1750 && !isHomeBaseInitialized()) {  // if GPS, wait for home position fix!
-           return;
+          return;
         }
         hasBuzzerHigherPriority = false;
       #endif 
@@ -85,9 +85,10 @@ void readPilotCommands() {
     
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
-      #endif        
+      #endif  
+      
+      
     }
-    
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
@@ -97,16 +98,14 @@ void readPilotCommands() {
   // Check Mode switch for Acro or Stable
   if (receiverCommand[MODE] > 1500) {
     flightMode = ATTITUDE_FLIGHT_MODE;
-    digitalWrite(LED_Yellow, HIGH);
   }
   else {
     flightMode = RATE_FLIGHT_MODE;
-    digitalWrite(LED_Yellow, LOW);
   }
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    if (receiverCommand[AUX] < 1750) {
+     if (receiverCommand[AUX1] < 1750) {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
@@ -132,28 +131,50 @@ void readPilotCommands() {
   #endif
   
   #if defined (UseGPSNavigator)
-    if (receiverCommand[AUX2] > 1750 && isHomeBaseInitialized()) {
-      if (positionHoldState != ALTPANIC) {  // check for special condition with manditory override of Altitude hold
-        if (isStorePositionNeeded) {
-          positionHoldState = ON;
-          gpsRollAxisCorrection = 0;
-          gpsPitchAxisCorrection = 0;
-          positionToReach.latitude = currentPosition.latitude;
-          positionToReach.longitude = currentPosition.longitude;
-          previousPosition.latitude = currentPosition.latitude;
-          previousPosition.longitude = currentPosition.longitude;
-          isStorePositionNeeded = false;
-        }
-        positionHoldState = ON;
+    if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) {  // Enter in execute mission state, if none, go back home, override the position hold
+    
+      if (isInitNavigationNeeded) {
+        
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+        isInitNavigationNeeded = false;
       }
-    } 
-    else {
+      
+      positionHoldState = OFF;         // disable the position hold while navigating
       isStorePositionNeeded = true;
+
+      navigationState = ON;
+    }
+    else if (receiverCommand[AUX2] > 1400 && receiverCommand[AUX2] < 1700 && isHomeBaseInitialized()) {  // Enter in position hold state
+      
+      if (isStorePositionNeeded) {
+        
+        gpsRollAxisCorrection = 0;
+        gpsPitchAxisCorrection = 0;
+        gpsYawAxisCorrection = 0;
+
+        positionHoldPointToReach.latitude = currentPosition.latitude;
+        positionHoldPointToReach.longitude = currentPosition.longitude;
+        previousPosition.latitude = currentPosition.latitude;
+        previousPosition.longitude = currentPosition.longitude;
+        isStorePositionNeeded = false;
+      }
+      
+      isInitNavigationNeeded = true;  // disabel navigation
+      navigationState = OFF;
+      
+      positionHoldState = ON;
+    }
+    else {
+      // Navigation and position hold are disabled
       positionHoldState = OFF;
+      isStorePositionNeeded = true;
+      
+      navigationState = OFF;
+      isInitNavigationNeeded = true;
     }
   #endif
 }
 
 #endif // _AQ_FLIGHT_COMMAND_READER_
-
-

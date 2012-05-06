@@ -37,9 +37,11 @@
 void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
-    if (positionHoldState == ON) {
-      float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    if (navigationState == ON || positionHoldState == ON) {
+      int xAxisCommand = constrain((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection),-500,500);
+      int rollAttitudeCmd = updatePID(xAxisCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      int yAxisCommand = constrain((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection),-500,500);
+      int pitchAttitudeCmd = updatePID(yAxisCommand * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
@@ -229,19 +231,17 @@ void processFlightControl() {
   processHeading();
   
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
+    
     // ********************** Process position hold or navigation **************************
     #if defined (UseGPS)
-      if (positionHoldState == ON) {
-        if (isGpsHaveANewPosition && isHomeBaseInitialized()) {
-          processPositionCorrection();
-          isGpsHaveANewPosition = false;
-        }
-      }
-      else {
-        gpsRollAxisCorrection = 0;
-        gpsPitchAxisCorrection = 0;
-      }
-
+      #if defined (UseGPSNavigator)
+        processGpsNavigation();
+      #else // if we don't use the navigator, the point to reach is always the home base to display in OSD
+        missionPositionToReach.latitude = homePosition.latitude;
+        missionPositionToReach.longitude = homePosition.longitude;
+        missionPositionToReach.altitude = homePosition.altitude;
+      #endif  
+//      Serial.println(nbSatelitesInUse);
     #endif
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
@@ -282,7 +282,7 @@ void processFlightControl() {
   if (motorArmed == OFF) {
     processCalibrateESC();
   }
-
+  
   // *********************** Command Motors **********************
   if (motorArmed == ON && safetyCheck == ON) {
     writeMotors();

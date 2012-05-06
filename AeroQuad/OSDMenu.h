@@ -313,11 +313,12 @@ const char *pidNames[] = {
   "Headi", "AGRol", "AGPit", "B_Alt", "S_Alt",
   "ZDamp",
 #ifdef UseGPS
-  "GPS_P", "GPS_R",
+  "GPS_P", "GPS_R", "GPS_Y"
 #endif
 };
 
 #define PIDCOUNT  (sizeof(pidNames)/sizeof(char*))
+
 void menuHandlePidTune(byte mode, byte action) {
 
   switch (action) {
@@ -466,6 +467,16 @@ void menuSensorInfo(byte mode, byte action){
                   getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
           break;
       #endif
+      #if defined(AltitudeHoldRangeFinder)
+        case 3: // Rangers
+          notifyOSD(OSD_NOCLEAR,"US:a%df%dr%dr%dl%d cm",
+                  (int)(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[FRONT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[RIGHT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[REAR_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[LEFT_RANGE_FINDER_INDEX]*100));
+          break;
+      #endif
     }
     menuInFunc=3;
     break;
@@ -483,7 +494,8 @@ void menuHideOSD(byte mode, byte action){
 }
 
 #ifdef CameraControl
-short savedCenterYaw, savedCenterPitch;
+short savedCenterYaw, savedCenterPitch, savedCenterRoll;
+byte  savedCameraMode;
 
 #define ZOOMPIN 24
 
@@ -492,51 +504,86 @@ void menuCameraPTZ(byte mode, byte action){
   if (action == MENU_INIT) {
     hideOSD();
     menuOwnsSticks = 1;
-    savedCenterYaw = servoCenterYaw;
+    savedCenterYaw   = servoCenterYaw;
     savedCenterPitch = servoCenterPitch;
+    savedCenterRoll  = servoCenterRoll;
+    savedCameraMode  = cameraMode;
+    cameraMode       = 0; // disable stabilizer
     menuFuncDataFloat = 0.0;
+  }
+  else if ((action == MENU_CALLBACK) || (action == MENU_ABORT)) {
+    digitalWrite(ZOOMPIN, LOW); // Zoom off
+    pinMode(ZOOMPIN, INPUT);
+    menuInFunc = 0;    
   }
   else if (action == MENU_HIJACK) {
     const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
     const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
-    const short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+    short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
 
     if (roll < -MENU_STICK_REPEAT) {
       unhideOSD();
       menuOwnsSticks = 0;
-      menuInFunc  = 0;
+      menuInFunc  = 40; // Callback after 4sec
 
-      // release zoom
-      pinMode(ZOOMPIN, INPUT);
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, LOW); // Zoom out
 
       // restore position
       servoCenterYaw   = savedCenterYaw;
       servoCenterPitch = savedCenterPitch;
+      servoCenterRoll = savedCenterRoll;
+      cameraMode  = savedCameraMode;
+
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "exiting PTZ mode");
       return;
     }
 
-    if (abs(yaw) > 100) {
-      servoCenterYaw = constrain(servoCenterYaw + (roll/60), servoMinYaw, servoMaxYaw);
+    if (abs(yaw) > 50) {
+      if (yaw>0) { 
+        yaw-=50;
+      }
+      else {
+        yaw+=50;
+      }
+      servoCenterYaw = constrain(servoCenterYaw + (yaw/10), servoMinYaw, servoMaxYaw);
     }
 
-    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 10) {
+    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
       menuFuncDataFloat = receiverCommand[THROTTLE];
-      servoCenterPitch = constrain(receiverCommand[THROTTLE], servoMinPitch, servoMaxPitch);
+      servoCenterPitch = constrain(3000 - menuFuncDataFloat, servoMinPitch, servoMaxPitch);
     }
 
-    if (pitch < -MENU_STICK_REPEAT) {
-      // zoom out
-      pinMode(ZOOMPIN, OUTPUT);
-      digitalWrite(ZOOMPIN, LOW);
-    }
-    else if (pitch > MENU_STICK_REPEAT) {
-      // zoom in
-      pinMode(ZOOMPIN, OUTPUT);
-      digitalWrite(ZOOMPIN, HIGH);
-    } else {
-      // release zoom
-      digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
-      pinMode(ZOOMPIN, INPUT);
+    if (roll > MENU_STICK_REPEAT) {
+      // elevator
+      if (pitch < -MENU_STICK_REPEAT) {
+        // DOWN
+        servoCenterRoll = servoMinRoll;
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // UP
+        servoCenterRoll = servoMaxRoll;
+      } else {
+        // STOP
+        servoCenterRoll = savedCenterRoll;
+      }
+    } 
+    else {
+      // zoom
+      if (pitch < -MENU_STICK_REPEAT) {
+        // zoom out
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, LOW);
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // zoom in
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, HIGH);
+      } else {
+        // release zoom
+        digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
+        pinMode(ZOOMPIN, INPUT);
+      }
     }
   }
 }
@@ -591,6 +638,9 @@ const struct MenuItem menuData[] = {
   {2,     "Gyro Data",        menuSensorInfo,    1},
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
+#endif
+#if defined(AltitudeHoldRangeFinder)
+  {2,     "Ranger Data",      menuSensorInfo,    3},
 #endif
 #ifdef CameraControl
   {0, "Camera PTZ mode",      menuCameraPTZ,     0},
@@ -724,13 +774,13 @@ void menuExit() {
   if (255 == menuEntry)
     return;
 
-  if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
-    menuEntry = 255;
-  }
-  else if (menuInFunc) {
+  if (menuInFunc) {
     MENU_CALLFUNC(menuEntry, MENU_EXIT);
     if (menuInFunc)
       return;
+  }
+  else if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
+    menuEntry = 255;
   }
   else {
     // leave submenu
