@@ -305,4 +305,5 @@ void initHomeBase() {
   }
 #endif  // #define UseGPSNavigator
 
+
 #endif
