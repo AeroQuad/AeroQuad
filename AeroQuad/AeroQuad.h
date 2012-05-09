@@ -164,6 +164,8 @@ void processAltitudeHold();
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
+  
+  #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
   GeodeticPosition homePosition = GPS_INVALID_POSITION; 
   GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
 
