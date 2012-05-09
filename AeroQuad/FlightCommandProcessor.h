@@ -143,7 +143,7 @@ void readPilotCommands() {
           
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 5;  // put it at 5m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
+      homePosition.altitude = DEFAULT_HOME_ALTITUDE;
     }
   
   
@@ -189,6 +189,10 @@ void readPilotCommands() {
       
       navigationState = OFF;
       isInitNavigationNeeded = true;
+      
+      gpsRollAxisCorrection = 0;
+      gpsPitchAxisCorrection = 0;
+      gpsYawAxisCorrection = 0;
     }
   #endif
 }
