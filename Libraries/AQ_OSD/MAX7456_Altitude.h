@@ -41,13 +41,13 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
 
   if ( lastAltitude != currentAltitude ) {
     #ifdef USUnits
-      snprintf(buf,7,"\10%4df",currentAltitude);
+      snprintf(buf,7,"\011%4df",currentAltitude);
     #else
       if (abs(currentAltitude)<100) {
-        snprintf(buf,7,"\010%c%1d.%1dm",currentAltitude < 0 ? '-' : ' ', abs(currentAltitude/10),abs(currentAltitude%10));
+        snprintf(buf,7,"\011%c%1d.%1dm",currentAltitude < 0 ? '-' : ' ', abs(currentAltitude/10),abs(currentAltitude%10));
       }
       else {
-        snprintf(buf,7,"\010%4dm",currentAltitude/10);
+        snprintf(buf,7,"\011%4dm",currentAltitude/10);
       }
     #endif
     writeChars( buf, 6, 0, ALTITUDE_ROW, ALTITUDE_COL );
@@ -71,13 +71,13 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
       lastHoldState = ON;
       lastHoldAltitude=currentHoldAltitude;
       #ifdef USUnits
-        snprintf(buf,7,"\11%4df",currentHoldAltitude);
+        snprintf(buf,7,"\12%4df",currentHoldAltitude);
       #else
         if (abs(currentHoldAltitude)<100) {
-          snprintf(buf,7,"\011%c%1d.%1dm", currentHoldAltitude < 0 ? '-' : ' ',abs(currentHoldAltitude/10),abs(currentHoldAltitude%10));
+          snprintf(buf,7,"\012%c%1d.%1dm", currentHoldAltitude < 0 ? '-' : ' ',abs(currentHoldAltitude/10),abs(currentHoldAltitude%10));
         }
         else {
-          snprintf(buf,7,"\011%4dm",currentHoldAltitude/10);
+          snprintf(buf,7,"\012%4dm",currentHoldAltitude/10);
         }
       #endif
       isWriteNeeded = true;
@@ -86,7 +86,7 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
   case ALTPANIC:
     if (lastHoldState != ALTPANIC) {
       lastHoldState = ALTPANIC;
-      snprintf(buf,7,"\11panic");
+      snprintf(buf,7,"\12panic");
       isWriteNeeded = true;
     }
     break;

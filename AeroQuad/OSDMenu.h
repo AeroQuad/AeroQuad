@@ -497,7 +497,13 @@ void menuHideOSD(byte mode, byte action){
 short savedCenterYaw, savedCenterPitch, savedCenterRoll;
 byte  savedCameraMode;
 
+#define POWERSAVE 10 // enable to shut off servos after idle
+#if defined (POWERSAVE)
+  byte idleCounter = POWERSAVE;
+#endif
+
 #define ZOOMPIN 24
+
 
 void menuCameraPTZ(byte mode, byte action){
 
@@ -510,10 +516,16 @@ void menuCameraPTZ(byte mode, byte action){
     savedCameraMode  = cameraMode;
     cameraMode       = 0; // disable stabilizer
     menuFuncDataFloat = 0.0;
+		#if defined (POWERSAVE)
+		idleCounter = POWERSAVE;
+		#endif
   }
   else if ((action == MENU_CALLBACK) || (action == MENU_ABORT)) {
     digitalWrite(ZOOMPIN, LOW); // Zoom off
     pinMode(ZOOMPIN, INPUT);
+		#if defined (POWERSAVE)
+			TCCR1A |= ((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // make sure servos are enabled
+	  #endif
     menuInFunc = 0;    
   }
   else if (action == MENU_HIJACK) {
@@ -547,11 +559,17 @@ void menuCameraPTZ(byte mode, byte action){
         yaw+=50;
       }
       servoCenterYaw = constrain(servoCenterYaw + (yaw/10), servoMinYaw, servoMaxYaw);
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
     }
 
     if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
       menuFuncDataFloat = receiverCommand[THROTTLE];
       servoCenterPitch = constrain(3000 - menuFuncDataFloat, servoMinPitch, servoMaxPitch);
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
     }
 
     if (roll > MENU_STICK_REPEAT) {
@@ -567,6 +585,10 @@ void menuCameraPTZ(byte mode, byte action){
         // STOP
         servoCenterRoll = savedCenterRoll;
       }
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
+
     } 
     else {
       // zoom
@@ -585,6 +607,20 @@ void menuCameraPTZ(byte mode, byte action){
         pinMode(ZOOMPIN, INPUT);
       }
     }
+    #if defined (POWERSAVE)
+    	if (idleCounter == POWERSAVE) {
+    	    idleCounter--;
+          Serial.print("SON\n");
+    					TCCR1A |= ((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // Enable servos
+    	} else if (idleCounter>0) {
+    		idleCounter--;
+    		if (idleCounter == 0) {
+          Serial.print("SOFF\n");
+    			TCCR1A &= ~((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // shut off servo ppm
+    		}
+    	}
+  	#endif
+
   }
 }
 #endif

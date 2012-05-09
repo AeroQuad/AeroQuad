@@ -39,7 +39,12 @@ void updateOSD() {
 
   #ifdef ShowAttitudeIndicator
     if (OSDsched&0x55) {
-      displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], flightMode);
+      byte extendedFlightMode = flightMode;
+      #if defined UseGPSNavigator
+        if (ON == positionHoldState) extendedFlightMode = 2;
+        if (ON == navigationState) extendedFlightMode = 3;
+      #endif
+      displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
     }
   #endif
 
@@ -70,7 +75,7 @@ void updateOSD() {
 
   if (OSDsched&0x80) {
     #ifdef AltitudeHoldRangeFinder
-      if (motorArmed) { 
+      if (motorArmed) {
         displayRanger();
       }
     #endif
