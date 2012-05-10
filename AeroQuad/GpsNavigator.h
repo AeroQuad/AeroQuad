@@ -66,14 +66,14 @@ void initHomeBase() {
     10000       = 111m
   */
   
-  #define MIN_DISTANCE_TO_REACHED 1500
+  #define MIN_DISTANCE_TO_REACHED 4000
 
   #define GPS_SPEED_SMOOTH_VALUE 0.5
   #define GPS_COURSE_SMOOTH_VALUE 0.5
   
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
   #define POSITION_HOLD_SPEED 60.0  
-  #define MAX_NAVIGATION_ANGLE_CORRECTION 400.0
+  #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
   #define NAVIGATION_SPEED 300.0  // m/s * 100 // 3 m/s = 10.8km/h
   
   #define MAX_YAW_AXIS_CORRECTION 200.0  
@@ -151,8 +151,7 @@ void initHomeBase() {
     if (derivateDistanceX != 0 || derivateDistanceY != 0) {
       float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
         if (tmp < 0) {
-  //        tmp += 360; // jakub fix, logic but... I had weird behavior, I need more investigation!
-          tmp += radians(360);
+          tmp += 360; 
         }
         gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
     }
@@ -208,10 +207,8 @@ void initHomeBase() {
     maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
     maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
   
-    int tempGpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
-    gpsRollAxisCorrection = filterSmooth(tempGpsRollAxisCorrection, gpsRollAxisCorrection, 0.05);
-    int tempGpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
-    gpsPitchAxisCorrection = filterSmooth(tempGpsPitchAxisCorrection, gpsPitchAxisCorrection, 0.05);
+    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
+    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
     
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
@@ -255,10 +252,9 @@ void initHomeBase() {
     if (correctionAngle > PI) {
       correctionAngle = fmod(correctionAngle,PI) - PI;
     }
-    
-    int tempGpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
-    tempGpsYawAxisCorrection = constrain(tempGpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
-    gpsYawAxisCorrection = filterSmooth(tempGpsYawAxisCorrection, gpsYawAxisCorrection, 0.05);
+
+    int gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
+    gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
   
   /**
@@ -271,18 +267,14 @@ void initHomeBase() {
       // even in manual, mission processing is in function and can be perform manually through the OSD
       computeCurrentSpeedInCmPerSec();
       
-      if (navigationState == ON) {    // navigation switch override position hold switch
+      computeDistanceToDestination(missionPositionToReach);
+      // evaluate if we need to switch to another mission possition point
+      evaluateMissionPositionToReach();
       
-        computeDistanceToDestination(missionPositionToReach);
-        
-        // evaluate if we need to switch to another mission possition point
-        evaluateMissionPositionToReach();
-      }
-      else if (positionHoldState == ON) {  // then may be position hold
+      if (positionHoldState == ON && navigationState == OFF) {  // then may be position hold
         
         computeDistanceToDestination(positionHoldPointToReach);
       }
-      
       
       if (navigationState == ON || positionHoldState == ON) {
         
