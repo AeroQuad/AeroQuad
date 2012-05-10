@@ -306,8 +306,8 @@ void readEEPROM() {
 
   // Range Finder
   #if defined (AltitudeHoldRangeFinder)
-    maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);
-    minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
+//    maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);  // @Kenny @todo, remove this!
+//    minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
   #endif     
   
   #if defined (UseGPSNavigator)

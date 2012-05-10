@@ -83,8 +83,6 @@ void inititalizeRangeFinders() {
     pinMode(rangeFinders[i].pin, INPUT);
   }
   rangerWaitCycles = 10; // allow to initialize
-  Serial.print((int)(minRangeFinderRange*100));
-  Serial.print((int)(maxRangeFinderRange*100));
 }
 
 void updateRangeFinders() {
