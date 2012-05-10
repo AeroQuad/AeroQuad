@@ -36,7 +36,7 @@
 #if defined WirelessTelemetry
   #define BAUD 111111 // use this to be compatible with USB and XBee connections
 #else
-  #define BAUD 115200
+  #define BAUD 57600
 #endif  
 
 // Analog Reference Value
@@ -169,6 +169,8 @@ void processHeading();
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
+  
+  boolean hasBuzzerHigherPriority = false;
   
   #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
   GeodeticPosition homePosition = GPS_INVALID_POSITION; 
