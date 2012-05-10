@@ -42,7 +42,7 @@
 //#define AUX1       4
 //#define AUX2       5
 
-#define SERIAL_SUM_PPM_1         YAXIS,ZAXIS,THROTTLE,XAXIS,MODE, AUX1,AUX2,AUX3 //For Graupner/Spektrum
+#define SERIAL_SUM_PPM_1         YAXIS,ZAXIS,THROTTLE,XAXIS,AUX1,AUX2,AUX2,AUX3 //For Graupner/Spektrum
 #define SERIAL_SUM_PPM_2         XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3 //For Robe/Hitec/Futaba
 #define SERIAL_SUM_PPM_3         YAXIS,XAXIS,THROTTLE,ZAXIS,AUX1,AUX2,AUX2,AUX3 //For some Hitec/Sanwa/Others
 

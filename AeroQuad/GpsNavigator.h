@@ -41,7 +41,7 @@ void initHomeBase() {
     else {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = 5;  // put it at 5m so that the going back home don't go to the ground, even 10m is low, but, it's for testing
+      homePosition.altitude = DEFAULT_HOME_ALTITUDE;  
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
       // Set reference location for Equirectangular projection used for coordinates
@@ -66,14 +66,14 @@ void initHomeBase() {
     10000       = 111m
   */
   
-  #define MIN_DISTANCE_TO_REACHED 1200
+  #define MIN_DISTANCE_TO_REACHED 4000
 
   #define GPS_SPEED_SMOOTH_VALUE 0.5
   #define GPS_COURSE_SMOOTH_VALUE 0.5
   
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
   #define POSITION_HOLD_SPEED 60.0  
-  #define MAX_NAVIGATION_ANGLE_CORRECTION 200.0
+  #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
   #define NAVIGATION_SPEED 300.0  // m/s * 100 // 3 m/s = 10.8km/h
   
   #define MAX_YAW_AXIS_CORRECTION 200.0  
@@ -151,8 +151,7 @@ void initHomeBase() {
     if (derivateDistanceX != 0 || derivateDistanceY != 0) {
       float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
         if (tmp < 0) {
-  //        tmp += 360; // jakub fix, logic but... I had weird behavior, I need more investigation!
-          tmp += radians(360);
+          tmp += 360; 
         }
         gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
     }
@@ -221,25 +220,25 @@ void initHomeBase() {
    * to increase the current point to reach altitude
    */
   void evaluateAltitudeCorrection() {
-    #if defined AltitudeHoldRangeFinder
-      // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
-      if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
-        if (!altitudeProximityAlert) {
-          sonarAltitudeToHoldTarget += 2;
-          missionPositionToReach.altitude += 2;
-          altitudeProximityAlert = true;
-        }
-      }
-
-      if (altitudeProximityAlert && altitudeProximityAlertSecurityCounter <= 10) {
-        altitudeProximityAlertSecurityCounter++;
-      }
-      else {
-        altitudeProximityAlertSecurityCounter = 0;
-        altitudeProximityAlert = false;
-      }
-
-    #endif
+//    #if defined AltitudeHoldRangeFinder
+//      // if this is true, we are too near the ground to perform navigation, then, make current alt hold target +25m
+//      if (sonarAltitudeToHoldTarget != INVALID_RANGE) { 
+//        if (!altitudeProximityAlert) {
+//          sonarAltitudeToHoldTarget += 2;
+//          missionPositionToReach.altitude += 2;
+//          altitudeProximityAlert = true;
+//        }
+//      }
+//
+//      if (altitudeProximityAlert && altitudeProximityAlertSecurityCounter <= 10) {
+//        altitudeProximityAlertSecurityCounter++;
+//      }
+//      else {
+//        altitudeProximityAlertSecurityCounter = 0;
+//        altitudeProximityAlert = false;
+//      }
+//
+//    #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
   }
   
@@ -253,8 +252,8 @@ void initHomeBase() {
     if (correctionAngle > PI) {
       correctionAngle = fmod(correctionAngle,PI) - PI;
     }
-    
-    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
+
+    int gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
     gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
   
@@ -268,19 +267,14 @@ void initHomeBase() {
       // even in manual, mission processing is in function and can be perform manually through the OSD
       computeCurrentSpeedInCmPerSec();
       
-      if (navigationState == ON) {    // navigation switch override position hold switch
+      computeDistanceToDestination(missionPositionToReach);
+      // evaluate if we need to switch to another mission possition point
+      evaluateMissionPositionToReach();
       
-        computeDistanceToDestination(missionPositionToReach);
+      if (positionHoldState == ON && navigationState == OFF) {  // then may be position hold
         
-        // evaluate if we need to switch to another mission possition point
-        evaluateMissionPositionToReach();
-      }
-      else if (positionHoldState == ON) {  // then may be position hold
-        
-        gpsYawAxisCorrection = 0;
         computeDistanceToDestination(positionHoldPointToReach);
       }
-      
       
       if (navigationState == ON || positionHoldState == ON) {
         
@@ -289,20 +283,19 @@ void initHomeBase() {
 
         computeRollPitchCraftAxisCorrection();
         
-        if (maxSpeedToDestination == NAVIGATION_SPEED) {
+        if (navigationState == ON) {
           evaluateAltitudeCorrection();    
       
           computeHeadingCorrection();
         }
-      }
-      else {
-        gpsRollAxisCorrection = 0;
-        gpsPitchAxisCorrection = 0;
-        gpsYawAxisCorrection = 0;
+        else {
+          gpsYawAxisCorrection = 0;  
+        }
       }
       isGpsHaveANewPosition = false;
     }
   }
 #endif  // #define UseGPSNavigator
+
 
 #endif

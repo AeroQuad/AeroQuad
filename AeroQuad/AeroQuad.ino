@@ -28,6 +28,9 @@
 
 #include "UserConfiguration.h" // Edit this file first before uploading to the AeroQuad
 
+//
+// Define Security Checks
+//
 
 //
 // In order to use the DIYDrone libraries, this have to be declared here this way
@@ -36,6 +39,14 @@
 #if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
  #define UseGPS
 #endif 
+
+#if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
+  #error GpsNavigation NEED AltitudeHoldBaro defined
+#endif
+
+#if defined (AutoLanding) && !defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder)
+  #error AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined
+#endif
 
 #if defined UseGPS
   // needed here to use DIYDrone gps libraries
@@ -226,7 +237,8 @@
 
 #ifdef AeroQuad_Mini
   #define LED_Green 13
-  #define BuzzerPin 12
+  #define LED_Red 12
+  #define LED_Yellow 12
 
   #include <Device_I2C.h>
 
@@ -269,8 +281,10 @@
    */
   void initPlatform() {
 
-    pinMode(BuzzerPin, OUTPUT);
-    digitalWrite(BuzzerPin, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -337,7 +351,6 @@
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
-  #define BuzzerPin 49
 
   #include <Device_I2C.h>
 
@@ -396,8 +409,6 @@
     digitalWrite(LED_Red, LOW);
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
-    pinMode(BuzzerPin, OUTPUT);
-    digitalWrite(BuzzerPin, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -1130,9 +1141,6 @@
   #if !defined HeadingMagHold
     #error We need the magnetometer to use the GPS
   #endif 
-  #if !defined AltitudeHoldBaro
-    #error We need the altitude from barometer to use the GPS
-  #endif 
 //  #if defined LASTCHANNEL 6
 //    #error We need 7 receiver channel to use gps navigator
 //  #endif
@@ -1477,7 +1485,7 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
-    
+  
     previousTime = currentTime;
   }
   

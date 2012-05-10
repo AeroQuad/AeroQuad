@@ -62,9 +62,15 @@ void displayArtificialHorizon(float roll, float pitch, byte flightMode) {
   }
 
   // Reticle on the center of the screen
-  // We have two reticles empty one for RATE_FLIGHT_MODE and one with (s) for 'ATTITUDE_FLIGHT_MODE' mode
+  // 0 - rate mode (no letter)
+  // 1 - Attitude 'S'
+  // 2 - GPS position hold 'P'
+  // 3 - GPS navigation 'N'
   if (lastFlightMode != flightMode) {
-    writeChars( (flightMode == 0) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+    char reticle[2];
+    reticle[0] = flightMode * 2 + 1;
+    reticle[1] = reticle[0] + 1;
+    writeChars( reticle, 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     lastFlightMode = flightMode;
   }
 }
