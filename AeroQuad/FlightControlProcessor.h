@@ -38,10 +38,8 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
-      int xAxisCommand = constrain((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection),-500,500);
-      int rollAttitudeCmd = updatePID(xAxisCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      int yAxisCommand = constrain((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection),-500,500);
-      int pitchAttitudeCmd = updatePID(yAxisCommand * ATTITUDE_SCALING , -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
@@ -148,6 +146,31 @@ void processCalibrateESC()
 #endif  
 
 
+#if defined AutoLanding
+ void processAutoLandingAltitudeCorrection() {
+    if (autoLandingState == ON) {   
+      baroAltitudeToHoldTarget -= 0.01;
+      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
+        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] > 0.5) {
+          sonarAltitudeToHoldTarget -= 0.005;
+        }
+        else if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.2) {
+          commandAllMotors(MINCOMMAND);
+          motorArmed = OFF;
+        }
+        else if (autoLandingThrottleCorrection > -1000) { 
+          autoLandingThrottleCorrection -= 2;
+        }
+      }
+      if ((throttle + autoLandingThrottleCorrection) < 1000) {
+        commandAllMotors(MINCOMMAND);
+        motorArmed = OFF;
+      }
+    }
+ }
+#endif
+
+
 /**
  * processThrottleCorrection
  * 
@@ -167,8 +190,20 @@ void processThrottleCorrection() {
       throttleAdjust = constrain ((throttleAdjust - throttle), 0, 50); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
     }
   #endif
+  #if defined BattMonitorAutoDescent
+    throttleAdjust += batteyMonitorThrottleCorrection;
+  #endif
+  #if defined (AutoLanding)
+    #if defined BattMonitorAutoDescent
+      if (batteyMonitorThrottleCorrection != 0) { // don't auto land in the same time that the battery monitor do auto descent, or Override the auto descent to land, TBD
+        throttleAdjust += autoLandingThrottleCorrection;
+      }
+    #else
+      throttleAdjust += autoLandingThrottleCorrection;
+    #endif
+  #endif
   
-  throttle = constrain((throttle + throttleAdjust + batteyMonitorThrottleCorrection),MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
+  throttle = constrain((throttle + throttleAdjust),MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
 }
 
 
@@ -245,17 +280,26 @@ void processFlightControl() {
         missionPositionToReach.longitude = homePosition.longitude;
         missionPositionToReach.altitude = homePosition.altitude;
       #endif  
+//      Serial.println(nbSatelitesInUse);
     #endif
+    
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       processAltitudeHold();
     #else
       throttle = receiverCommand[THROTTLE];
     #endif
+    
     // ********************** Process Battery monitor hold **************************
     #if defined BattMonitor && defined BattMonitorAutoDescent
       processBatteryMonitorThrottleAdjustment();
     #endif
+
+    // ********************** Process Auto-Descent  **************************
+    #if defined AutoLanding
+      processAutoLandingAltitudeCorrection();
+    #endif
+    
     // ********************** Process throttle correction ********************
     processThrottleCorrection();
   }
@@ -280,6 +324,8 @@ void processFlightControl() {
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     motorCommand[motor] = constrain(motorCommand[motor], motorMinCommand[motor], motorMaxCommand[motor]);
   }
+  
+  
 
   // ESC Calibration
   if (motorArmed == OFF) {

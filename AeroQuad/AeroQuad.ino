@@ -28,6 +28,9 @@
 
 #include "UserConfiguration.h" // Edit this file first before uploading to the AeroQuad
 
+//
+// Define Security Checks
+//
 
 //
 // In order to use the DIYDrone libraries, this have to be declared here this way
@@ -36,6 +39,14 @@
 #if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
  #define UseGPS
 #endif 
+
+#if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
+  #error GpsNavigation NEED AltitudeHoldBaro defined
+#endif
+
+#if defined (AutoLanding) && !defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder)
+  #error AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined
+#endif
 
 #if defined UseGPS
   // needed here to use DIYDrone gps libraries
@@ -1130,9 +1141,6 @@
   #if !defined HeadingMagHold
     #error We need the magnetometer to use the GPS
   #endif 
-  #if !defined AltitudeHoldBaro
-    #error We need the altitude from barometer to use the GPS
-  #endif 
 //  #if defined LASTCHANNEL 6
 //    #error We need 7 receiver channel to use gps navigator
 //  #endif
@@ -1477,7 +1485,7 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
-    
+  
     previousTime = currentTime;
   }
   

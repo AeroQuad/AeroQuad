@@ -133,6 +133,45 @@ void readPilotCommands() {
     }
   #endif
   
+  #if defined (AutoLanding)
+    if (receiverCommand[AUX3] < 1750) {
+      autoLandingState = ON;
+      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+        if (isStoreAltitudeForAutoLanfingNeeded) {
+          #if defined AltitudeHoldBaro
+            baroAltitudeToHoldTarget = getBaroAltitude();
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+          #endif
+          #if defined AltitudeHoldRangeFinder
+            sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+          #endif
+          altitudeHoldThrottle = receiverCommand[THROTTLE];
+          isStoreAltitudeForAutoLanfingNeeded = false;
+        }
+        altitudeHoldState = ON;
+      }
+    }
+    else {
+      autoLandingState = OFF;
+      autoLandingThrottleCorrection = 0;
+      isStoreAltitudeForAutoLanfingNeeded = true;
+      #if defined (UseGPSNavigator)
+        if ((receiverCommand[AUX1] > 1750) && (receiverCommand[AUX2] > 1750)) {
+          altitudeHoldState = OFF;
+          isStoreAltitudeNeeded = true;
+        }
+      #else
+        if (receiverCommand[AUX1] > 1750) {
+          altitudeHoldState = OFF;
+          isStoreAltitudeNeeded = true;
+        }
+      #endif
+    }
+  #endif
+  
   #if defined (UseGPSNavigator)
   
     // Init home command
@@ -172,12 +211,11 @@ void readPilotCommands() {
 
         positionHoldPointToReach.latitude = currentPosition.latitude;
         positionHoldPointToReach.longitude = currentPosition.longitude;
-        previousPosition.latitude = currentPosition.latitude;
-        previousPosition.longitude = currentPosition.longitude;
+        positionHoldPointToReach.altitude = getBaroAltitude();
         isStorePositionNeeded = false;
       }
       
-      isInitNavigationNeeded = true;  // disabel navigation
+      isInitNavigationNeeded = true;  // disable navigation
       navigationState = OFF;
       
       positionHoldState = ON;

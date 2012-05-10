@@ -62,7 +62,7 @@ byte  headingHoldState    = OFF;
 /**
  * battery monitor and battery monitor throttle correction global declaration section
  */
-int batteyMonitorThrottleCorrection = 0;
+
 #if defined (BattMonitor)
   #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
   float batteryMonitorAlarmVoltage = 10.0;
@@ -70,10 +70,13 @@ int batteyMonitorThrottleCorrection = 0;
   int batteryMonitorThrottleTarget = 1450;
   unsigned long batteryMonitorStartTime = 0;
   unsigned long batteryMonitorGoinDownTime = 60000; 
+
   
   #if defined BattMonitorAutoDescent
-    int batteryMonitorAlarmCounter = 0;
     #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
+    
+    int batteryMonitorAlarmCounter = 0;
+    int batteyMonitorThrottleCorrection = 0;
   #endif
 #endif
 //////////////////////////////////////////////////////
@@ -120,13 +123,7 @@ unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
-void readPilotCommands(); 
-void calculateFlightError();
 void processHeading();
-void processAltitudeHold();
-void processCalibrateESC();
-void processFlightControl();
-void processAltitudeHold();
 //////////////////////////////////////////////////////
 
 /**
@@ -154,8 +151,16 @@ void processAltitudeHold();
     float sonarAltitudeToHoldTarget = 0.0;
   #endif
 #endif
-// float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
+
+/**
+ * Auto landing feature variables
+ */
+#if defined (AutoLanding)
+  byte autoLandingState = OFF;
+  boolean isStoreAltitudeForAutoLanfingNeeded = false;
+  int autoLandingThrottleCorrection = 0;
+#endif
 
 /**
  * GPS navigation global declaration
