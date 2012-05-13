@@ -147,24 +147,33 @@ void processCalibrateESC()
 
 
 #if defined AutoLanding
- void processAutoLandingAltitudeCorrection() {
-    if (autoLandingState == ON) {   
-      baroAltitudeToHoldTarget -= 0.01;
-      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
-        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] > 0.5) {
-          sonarAltitudeToHoldTarget -= 0.005;
+  #define BARO_AUTO_LANDING_DESCENT_SPEED 0.008
+  #define SONAR_AUTO_LANDING_DESCENT_SPEED 0.005
+  void processAutoLandingAltitudeCorrection() {
+    if (autoLandingState != OFF) {   
+
+      if (autoLandingState == BARO_AUTO_DESCENT_STATE) {
+        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+        if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) { 
+          autoLandingState = SONAR_AUTO_DESCENT_STATE;
         }
-        else if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.2) {
+      }
+      else if (autoLandingState == SONAR_AUTO_DESCENT_STATE) {
+        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
+        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.5) {
+          autoLandingState = MOTOR_AUTO_DESCENT_STATE;
+        }
+      }
+      else {
+        autoLandingThrottleCorrection -= 1;
+        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
+
+        if (((throttle + autoLandingThrottleCorrection) < 1000) || (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.20)) {
           commandAllMotors(MINCOMMAND);
           motorArmed = OFF;
         }
-        else if (autoLandingThrottleCorrection > -1000) { 
-          autoLandingThrottleCorrection -= 2;
-        }
-      }
-      if ((throttle + autoLandingThrottleCorrection) < 1000) {
-        commandAllMotors(MINCOMMAND);
-        motorArmed = OFF;
       }
     }
  }
