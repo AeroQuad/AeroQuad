@@ -66,7 +66,7 @@ void initHomeBase() {
     10000       = 111m
   */
   
-  #define MIN_DISTANCE_TO_REACHED 4000
+  #define MIN_DISTANCE_TO_REACHED 3000
 
   #define GPS_SPEED_SMOOTH_VALUE 0.5
   #define GPS_COURSE_SMOOTH_VALUE 0.5
@@ -74,7 +74,7 @@ void initHomeBase() {
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
   #define POSITION_HOLD_SPEED 60.0  
   #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
-  #define NAVIGATION_SPEED 300.0  // m/s * 100 // 3 m/s = 10.8km/h
+  #define NAVIGATION_SPEED 250.0  // m/s * 100 // 3 m/s = 10.8km/h
   
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
@@ -239,6 +239,11 @@ void initHomeBase() {
 //      }
 //
 //    #endif
+    #if defined AltitudeHoldRangeFinder
+      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
+        sonarAltitudeToHoldTarget += 0.05;
+      }
+    #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
   }
   
@@ -253,7 +258,7 @@ void initHomeBase() {
       correctionAngle = fmod(correctionAngle,PI) - PI;
     }
 
-    int gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
+    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
     gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
   

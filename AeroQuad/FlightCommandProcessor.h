@@ -135,9 +135,9 @@ void readPilotCommands() {
   
   #if defined (AutoLanding)
     if (receiverCommand[AUX3] < 1750) {
-      autoLandingState = ON;
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeForAutoLanfingNeeded) {
+          autoLandingState = BARO_AUTO_DESCENT_STATE;
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
