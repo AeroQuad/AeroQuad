@@ -157,6 +157,10 @@ void processHeading();
  * Auto landing feature variables
  */
 #if defined (AutoLanding)
+  #define BARO_AUTO_DESCENT_STATE 2
+  #define SONAR_AUTO_DESCENT_STATE 3
+  #define MOTOR_AUTO_DESCENT_STATE 4
+  
   byte autoLandingState = OFF;
   boolean isStoreAltitudeForAutoLanfingNeeded = false;
   int autoLandingThrottleCorrection = 0;

@@ -210,8 +210,8 @@ void initializeEEPROM() {
 
   // Range Finder
   #if defined (AltitudeHoldRangeFinder)
-    maxRangeFinderRange = 3.0;
-    minRangeFinderRange = 0.25;
+    maxRangeFinderRange = 4.5;
+    minRangeFinderRange = 0.0;
   #endif
   
   #if defined (UseGPSNavigator)

@@ -542,9 +542,9 @@ void menuCameraPTZ(byte mode, byte action){
       digitalWrite(ZOOMPIN, LOW); // Zoom out
 
       // restore position
-      servoCenterYaw   = savedCenterYaw;
-      servoCenterPitch = savedCenterPitch;
-      servoCenterRoll = savedCenterRoll;
+//      servoCenterYaw   = savedCenterYaw;
+//      servoCenterPitch = savedCenterPitch;
+//      servoCenterRoll = savedCenterRoll;
       cameraMode  = savedCameraMode;
 
       notifyOSD(OSD_NOCLEAR|OSD_CENTER, "exiting PTZ mode");
@@ -610,12 +610,10 @@ void menuCameraPTZ(byte mode, byte action){
     #if defined (POWERSAVE)
     	if (idleCounter == POWERSAVE) {
     	    idleCounter--;
-          Serial.print("SON\n");
     					TCCR1A |= ((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // Enable servos
     	} else if (idleCounter>0) {
     		idleCounter--;
     		if (idleCounter == 0) {
-          Serial.print("SOFF\n");
     			TCCR1A &= ~((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // shut off servo ppm
     		}
     	}
