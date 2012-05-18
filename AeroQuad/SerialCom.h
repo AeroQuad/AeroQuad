@@ -251,14 +251,14 @@ void readSerialCommand() {
 
     case 'V': // GPS
     //format 1 'V': gpsRollP,gpsRollI,gpsRollD,gpsPitchP,gpsPitchI,gpsPitchD,gpsYawP,gpsYawI,gpsYawD
-    //format 2 'V': dummy,dummy,dummy,dummy,dummy,dummy
+    //format 2 'V': dummy,dummy,dummy,dummy,dummy,dummydummy,dummy,dummy
       #if defined (UseGPS)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
       #else
-        for (byte values = 0; values < 6; values++) {
+        for (byte values = 0; values < 9; values++) {
           readFloatSerial();
         }
       #endif
@@ -411,8 +411,8 @@ void sendSerialTelemetry() {
       #endif
       PrintPID(ZDAMPENING_PID_IDX);
     #else
-      for(byte i=0; i<10; i++) {
-        PrintValueComma(0);
+      for(byte i=0; i<12; i++) {
+        PrintValueComma(0);//all commas because a PID is printed above with a trailing comma
       }
     #endif
     SERIAL_PRINTLN();
@@ -478,11 +478,16 @@ void sendSerialTelemetry() {
     
   case 'j': // Send raw mag values
 	//format 1 'j': MagRawX, MagRawY, MagRawZ
-	//format 2 'j': NULL
+	//format 2 'j': 0,0,0
     #ifdef HeadingMagHold
       PrintValueComma(getMagnetometerRawData(XAXIS));
       PrintValueComma(getMagnetometerRawData(YAXIS));
       SERIAL_PRINTLN(getMagnetometerRawData(ZAXIS));
+    #else
+    for(byte i=0; i<2; i++) {
+        PrintValueComma(0);//two values with commas
+      }
+      SERIAL_PRINTLN(0)
     #endif
     break;
     
@@ -523,6 +528,12 @@ void sendSerialTelemetry() {
       SERIAL_PRINT(magBias[YAXIS], 6);
       comma();
       SERIAL_PRINTLN(magBias[ZAXIS], 6);
+    #else
+      for(byte i=0; i<2; i++) {
+        SERIAL_PRINT(0.0, 6);//two values with commas
+		comma();
+      }
+      SERIAL_PRINTLN(0.0, 6);
     #endif
     queryType = 'X';
     break;
@@ -678,9 +689,9 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN();
       queryType = 'X';
     #else
-      for (byte values=0; values < 5; values++)
-        PrintValueComma(0);
-      SERIAL_PRINTLN(0);
+      for (byte values=0; values < 9; values++)
+        PrintValueComma(0);//all values have trailing commas
+      SERIAL_PRINTLN();
     #endif
     queryType = 'X';
     break;
