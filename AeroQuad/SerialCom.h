@@ -63,11 +63,13 @@ void readSerialCommand() {
     queryType = SERIAL_READ();
     switch (queryType) {
     case 'A': // Receive roll and pitch rate mode PID
+	//format 'A' , xP,xI,xD,ryP,ryI,ryD
       readSerialPID(XAXIS);
       readSerialPID(RATE_YAXIS_PID_IDX);
       break;
       
     case 'B': // Receive roll/pitch attitude mode PID
+	//format 'B' : axP,axI,axD,ayP,ayI,ayD,gxP,gxI,gxD,gyP,gyI,gyD,windupGuard
       readSerialPID(ATTITUDE_XAXIS_PID_IDX);
       readSerialPID(ATTITUDE_YAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
@@ -76,12 +78,15 @@ void readSerialCommand() {
       break;
       
     case 'C': // Receive yaw PID
+	//format 'C': zP,zI,zD,hhP,hhI,hhD,dummy
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
       readFloatSerial();
       break;
       
     case 'D': // Altitude hold PID
+    //format 1 'D' : baroAltP,baroAltI,baroAltD,baroWindup,altHoldBump,altHoldPanic,minT,maxT,baroSmooth,zDampP,zDampI,zDampD
+    //format 2 'D' : baroAltP,baroAltI,baroAltD,baroWindup,altHoldBump,altHoldPanic,minT,maxT,dummy,zDampP,zDampI,zDampD
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
         PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
@@ -99,12 +104,14 @@ void readSerialCommand() {
       break;
       
     case 'E': // Receive sensor filtering values
+    //format 'E' : gyroSmooth,aref,minArmedThrottle
       gyroSmoothFactor = readFloatSerial();
       aref = readFloatSerial();
       minArmedThrottle = readFloatSerial();
       break;
       
     case 'F': // Receive transmitter smoothing values
+	//format 'F' : recevierSmooth[CHANNELS]
       receiverXmitFactor = readFloatSerial();
       for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
         receiverSmoothFactor[channel] = readFloatSerial();
@@ -112,6 +119,7 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
+    //format 'G' : channelCal,recieverSlope[ChannelCal]
       //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
       //  receiverSlope[channel] = readFloatSerial();
       //}
@@ -120,6 +128,7 @@ void readSerialCommand() {
       break;
       
     case 'H': // Receive transmitter calibration values
+    //format 'H' : channelCal,receiverOffset[channelCal]
       //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
       //  receiverOffset[channel] = readFloatSerial();
       //}
@@ -147,6 +156,7 @@ void readSerialCommand() {
       break;
       
     case 'K': // Write accel calibration values
+	//format 'K': accScaleX,accBiasX,accScaleY,accBiasY,accScaleZ,accBiasZ
       accelScaleFactor[XAXIS] = readFloatSerial();
       runTimeAccelBias[XAXIS] = readFloatSerial();      
       accelScaleFactor[YAXIS] = readFloatSerial();
@@ -166,6 +176,7 @@ void readSerialCommand() {
       break;
       
     case 'M': // calibrate magnetometer
+	//format 'M': magBiasX,magBiasY,magBiasZ
       #ifdef HeadingMagHold
         magBias[XAXIS] = readFloatSerial();      
         magBias[YAXIS] = readFloatSerial();
@@ -174,6 +185,8 @@ void readSerialCommand() {
       break;
       
     case 'N': // battery monitor
+    //format 1 'N': battMonAV,batMonTT, batMonGDT
+    //format 2 'N': dummy,dummy,dummy
       #ifdef BattMonitor
         batteryMonitorAlarmVoltage = readFloatSerial();
         batteryMonitorThrottleTarget = readFloatSerial();
@@ -187,6 +200,8 @@ void readSerialCommand() {
       break;
       
     case 'O': // define waypoints
+	//format 1 'O': index,latitude,longitude,altitude
+	//format 2 'O': dummy,dummy,dummy,dummy
       #ifdef UseGPSNavigator
         missionNbPoint = readIntegerSerial();
         waypoint[missionNbPoint].latitude = readIntegerSerial();
@@ -200,6 +215,8 @@ void readSerialCommand() {
       #endif
       break;
     case 'P': //  read Camera values
+      //format 1 'P' : camMode,servoCP,servoCR,servoCY,mCamP,mCamR,mCamY,servoMP,servoMR,servoMY,servoXP,servoXR,servoXY
+      //format 2 'P' : dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy
       #ifdef CameraControl
         cameraMode = readFloatSerial();
         servoCenterPitch = readFloatSerial();
@@ -221,6 +238,8 @@ void readSerialCommand() {
       break;
       
     case 'U': // Range Finder
+    //format 1 'U': minRange,maxRange
+    //format 2 'U' : dummy,dummy
       #if defined (AltitudeHoldRangeFinder)
         maxRangeFinderRange = readFloatSerial();
         minRangeFinderRange = readFloatSerial();
@@ -231,6 +250,8 @@ void readSerialCommand() {
       break;
 
     case 'V': // GPS
+    //format 1 'V': gpsRollP,gpsRollI,gpsRollD,gpsPitchP,gpsPitchI,gpsPitchD,gpsYawP,gpsYawI,gpsYawD
+    //format 2 'V': dummy,dummy,dummy,dummy,dummy,dummy
       #if defined (UseGPS)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
@@ -260,6 +281,7 @@ void readSerialCommand() {
       break;
       
     case '3': // Test ESC calibration
+    //format '3' : ESC value
       if (validateCalibrateCommand(3)) {
         testCommand = readFloatSerial();
       }
@@ -273,6 +295,7 @@ void readSerialCommand() {
       break;
       
     case '5': // Send individual motor commands (motor, command)
+    //format '5' : motorConfiguratorCommand[MOTORS]
       if (validateCalibrateCommand(5)) {
         for (byte motor = 0; motor < LASTMOTOR; motor++)
           motorConfiguratorCommand[motor] = (int)readFloatSerial();
@@ -280,6 +303,7 @@ void readSerialCommand() {
       break;
       
     case 'Z': // fast telemetry transfer <--- get rid if this?
+    //format 'Z' : fastTelemetry
       if (readFloatSerial() == 1.0)
         fastTransfer = ON;
       else
@@ -344,6 +368,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'a': // Send roll and pitch rate mode PID values
+	//format 'a': rxP,rxI,rxD,ryP,ryI,ryD
     PrintPID(RATE_XAXIS_PID_IDX);
     PrintPID(RATE_YAXIS_PID_IDX);
     SERIAL_PRINTLN();
@@ -351,6 +376,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'b': // Send roll and pitch attitude mode PID values
+    //format 'b': axP,axI,axD,ayP,ayI,ayD,gxP,gxI,gxD,gyP,gyI,gyD,windupGuard
     PrintPID(ATTITUDE_XAXIS_PID_IDX);
     PrintPID(ATTITUDE_YAXIS_PID_IDX);
     PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
@@ -360,6 +386,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'c': // Send yaw PID values
+	//format 'c': zP,zI,zD,hhP,hhI,hhD,hhConfig
     PrintPID(ZAXIS_PID_IDX);
     PrintPID(HEADING_HOLD_PID_IDX);
     SERIAL_PRINTLN((int)headingHoldConfig);
@@ -367,6 +394,9 @@ void sendSerialTelemetry() {
     break;
     
   case 'd': // Altitude Hold
+  //format 1 'd': pP,pI,pD,pWindupGuard,altHoldBump,altHoldPanic,minTA, maxTA,pSmooth,zDampP,zDampI,zDampD
+  //format 2 'd': pP,pI,pD,pWindupGuard,altHoldBump,altHoldPanic,minTA, maxTA,0,zDampP,zDampI,zDampD
+  //format 3 'd': 0,0,0,0,0,0,0,0,0,0
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
       PrintValueComma(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard);
@@ -390,6 +420,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'e': // miscellaneous config values
+  //format 'e': gSmoothP,gSmoothI,gSmoothD,aref,minArmedThrottle
     PrintValueComma(gyroSmoothFactor);
     PrintValueComma(aref);
     SERIAL_PRINTLN(minArmedThrottle);
@@ -397,6 +428,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'f': // Send transmitter smoothing values
+  //format 'f': receiverXmitFactor, receiverSmoothfactor[Channels]
     PrintValueComma(receiverXmitFactor);
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverSmoothFactor[axis]);
@@ -406,6 +438,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'g': // Send transmitter calibration data
+  //format 'g': receiverSlope[Channels]
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       Serial.print(receiverSlope[axis], 6);
       Serial.print(',');
@@ -415,6 +448,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'h': // Send transmitter calibration data
+  //format 'h': receiverOffset[Channels]
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       Serial.print(receiverOffset[axis], 6);
       Serial.print(',');
@@ -424,6 +458,8 @@ void sendSerialTelemetry() {
     break;
     
   case 'i': // Send sensor data
+    //format 1 'i': grX,grY,grZ,AccX,AccY,AccZ,MagRawX,MagRawY,MagRawZ
+    //format 2 'i': grX,grY,grZ,AccX,AccY,AccZ,0,0,0
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       PrintValueComma(gyroRate[axis]);
     }
@@ -441,6 +477,8 @@ void sendSerialTelemetry() {
     break;
     
   case 'j': // Send raw mag values
+	//format 1 'j': MagRawX, MagRawY, MagRawZ
+	//format 2 'j': NULL
     #ifdef HeadingMagHold
       PrintValueComma(getMagnetometerRawData(XAXIS));
       PrintValueComma(getMagnetometerRawData(YAXIS));
@@ -449,6 +487,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'k': // Send accelerometer cal values
+  //format 'k': AccScaleX,AccBiasX,AccScaleY,AccBiasY,AccScaleZ,AccBiasZ
     SERIAL_PRINT(accelScaleFactor[XAXIS], 6);
     comma();
     SERIAL_PRINT(runTimeAccelBias[XAXIS], 6);
@@ -464,6 +503,7 @@ void sendSerialTelemetry() {
     break;
     
   case 'l': // Send raw accel values
+	//format 'l' : AccelX, AccelY, AccelZ
     measureAccelSum();
     PrintValueComma((int)(accelSample[XAXIS]/accelSampleCount));
     accelSample[XAXIS] = 0;
@@ -475,6 +515,8 @@ void sendSerialTelemetry() {
     break;
     
   case 'm': // Send magnetometer cal values
+	//format 1 'm': magBiasX, magBiasY, magBiasZ
+	//format 2 'm': NULL
     #ifdef HeadingMagHold
       SERIAL_PRINT(magBias[XAXIS], 6);
       comma();
@@ -486,6 +528,8 @@ void sendSerialTelemetry() {
     break;
     
   case 'n': // battery monitor
+  //format 1 'n' : battMonAV,battMonTT,battMonGDT
+  //format 2 'n' : 0,0,0
     #ifdef BattMonitor
       PrintValueComma(batteryMonitorAlarmVoltage);
       PrintValueComma(batteryMonitorThrottleTarget);
@@ -499,6 +543,8 @@ void sendSerialTelemetry() {
     break;
     
   case 'o': // send waypoints
+  //format 1 'o' : [WAYPOINTS] index,latitude,longitude,altitude
+  //format 2 'o' : 0,0,0,0
     #ifdef UseGPSNavigator
       for (byte index = 0; index < MAX_WAYPOINTS; index++) {
         PrintValueComma(index);
@@ -517,6 +563,8 @@ void sendSerialTelemetry() {
     break;
 
   case 'p': // Send Camera values
+  //format 1 'p' : camMode,servoCP,servoCR,servoCY,mCamP,mCamR,mCamY,servoMP,servoMR,servoMY,servoXP,servoXR,servoXY
+  //format 2 'p' : 0,0,0,0,0,0,0,0,0,0,0,0
     #ifdef CameraControl
       PrintValueComma(cameraMode);
       PrintValueComma(servoCenterPitch);
@@ -541,11 +589,14 @@ void sendSerialTelemetry() {
     break;
 
   case 'q': // Send Vehicle State Value
+	//format 'q' : vehicleState
     SERIAL_PRINTLN(vehicleState);
     queryType = 'X';
     break;
     
   case 'r': // Vehicle attitude
+	//format 1 'r' : kAngX,kAngY,NorthHeading
+	//format 2 'r' : kAngX,kAngY,GyroHeading
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -597,6 +648,7 @@ void sendSerialTelemetry() {
     break;
     
   case 't': // Send processed transmitter values
+	//format 't': receiverCommand[Channels],
     for (byte axis = 0; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverCommand[axis]);
     }
@@ -604,6 +656,8 @@ void sendSerialTelemetry() {
     break;
 
   case 'u': // Send range finder values
+	//format 1 'u' :maxRange,minRange
+	//format 2 'u' :0,0
     #if defined (AltitudeHoldRangeFinder)
       PrintValueComma(maxRangeFinderRange);
       SERIAL_PRINTLN(minRangeFinderRange);
@@ -615,6 +669,8 @@ void sendSerialTelemetry() {
     break;
 
   case 'v': // Send GPS PIDs
+	//format 1 'v': gpsRollP,gpsRollI,gpsRollD,gpsPitchP,gpsPitchI,gpsPitchD,gpsYawP,gpsYawI,gpsYawD
+	//format 2 'v':0,0,0,0,0,0
     #if defined (UseGPS)
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
@@ -633,6 +689,7 @@ void sendSerialTelemetry() {
     break;
     
   case '!': // Send flight software version
+	//format '!' : SOFTWARE_VERSION
     SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
     queryType = 'X';
     break;
@@ -643,6 +700,7 @@ void sendSerialTelemetry() {
     break;
     
   case '6': // Report remote commands
+	//format '6': motorCommand[MOTORS],
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       PrintValueComma(motorCommand[motor]);
     }
