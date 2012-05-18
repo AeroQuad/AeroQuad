@@ -94,7 +94,7 @@
 //#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
-#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.74, 0.85, BM_NOPIN, 0, 0) 
+#define BattCustomConfig DEFINE_BATTERY(3, 0, 14.67, 0.86, BM_NOPIN, 0, 0)
 
 //
 // *******************************************************************************************************************************
