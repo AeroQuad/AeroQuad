@@ -43,7 +43,7 @@ void initializeReceiver(int nbChannel = 8) {
 }
 
 void readSBUS() {
-	static uint16_t sbus[25]={0};
+	static byte sbus[25]={0};
 	while(Serial1.available()){
 		int val = Serial1.read();
 		if(sbusIndex==0 && val != SBUS_SYNCBYTE)
@@ -60,7 +60,7 @@ void readSBUS() {
 			rcValue[6]  = ((sbus[9]>>2|sbus[10]<<6) & 0x07FF);
 			rcValue[7]  = ((sbus[10]>>5|sbus[11]<<3) & 0x07FF);// & the other 8 + 2 channels if you need them
 			
-			//The following lines: If you need more than 8 channels, max 16 analog + 2 digital. Must comment the not needed channels!
+			//The following lines: If you need more than 8 channels, max 16 analog + 2 digital.
 			//rcValue[8]  = ((sbus[12]|sbus[13]<< 8) & 0x07FF)/2+976; 
 			//rcValue[9]  = ((sbus[13]>>3|sbus[14]<<5) & 0x07FF)/2+976; 
 			//rcValue[10] = ((sbus[14]>>6|sbus[15]<<2|sbus[16]<<10) & 0x07FF)/2+976; 
@@ -71,29 +71,29 @@ void readSBUS() {
 			//rcValue[15] = ((sbus[21]>>5|sbus[22]<<3) & 0x07FF)/2+976; 
 			
 			// now the two Digital-Channels
-			if ((sbus[23]) & 0x0001)       rcValue[16] = 2000; else rcValue[16] = 1000;
-			if ((sbus[23] >> 1) & 0x0001)  rcValue[17] = 2000; else rcValue[17] = 1000;
+			//if ((sbus[23]) & 0x0001)       rcValue[16] = 2000; else rcValue[16] = 1000;
+			//if ((sbus[23] >> 1) & 0x0001)  rcValue[17] = 2000; else rcValue[17] = 1000;
 			
 			// Failsafe: there is one Bit in the SBUS-protocol (Byte 25, Bit 4) whitch is the failsafe-indicator-bit
 			#if defined(FAILSAFE)
 			if (!((sbus[23] >> 3) & 0x0001))
 			{if(failsafeCnt > 20) failsafeCnt -= 20; else failsafeCnt = 0;}   // clear FailSafe counter
 			#endif
+			
+			// scaling for Futaba 8FG with NO EPA/travel limit
+			for (int axis = XAXIS; axis < AUX3; axis++) {
+				rcValue[axis] = map(rcValue[axis], 350, 1700, 1000, 2000);
+			}
+			rcChannel[XAXIS] = rcValue[0];
+			rcChannel[YAXIS] = rcValue[1];
+			rcChannel[ZAXIS] = rcValue[3];
+			rcChannel[THROTTLE] = rcValue[2];
+			rcChannel[MODE] = rcValue[4];
+			rcChannel[AUX1] = rcValue[5];
+			rcChannel[AUX2] = rcValue[6];
+			rcChannel[AUX3] = rcValue[7];
 		}
 	}
-	
-	// scaling for Futaba 8FG with NO EPA/travel limit
-	for (int axis = XAXIS; axis < AUX3; axis++) {
-		rcValue[axis] = map(rcValue[axis], 350, 1700, 1000, 2000);
-	}
-	rcChannel[XAXIS] = rcValue[0];
-	rcChannel[YAXIS] = rcValue[1];
-	rcChannel[ZAXIS] = rcValue[3];
-	rcChannel[THROTTLE] = rcValue[2];
-	rcChannel[MODE] = rcValue[4];
-	rcChannel[AUX1] = rcValue[5];
-	rcChannel[AUX2] = rcValue[6];
-	rcChannel[AUX3] = rcValue[7];
 }
 
 // call readSBUS() only on first channel request
