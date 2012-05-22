@@ -27,13 +27,13 @@
 
 int lastHeading = 361; // bogus to force update
 
-void displayHeading(int currentHeading) {
-
-  if (currentHeading != lastHeading) {
+void displayHeading(float currentHeading) {
+  int currentHeadingDeg = ((int)(currentHeading / M_PI * 180.0) + 360) % 360;
+  if (currentHeadingDeg != lastHeading) {
     char buf[6];
-    snprintf(buf,6,"\6%3d\7",currentHeading); // \6 is compass \7 is degree symbol
+    snprintf(buf,6,"\026%3d\027",currentHeadingDeg); // \026 is compass \027 is degree symbol
     writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
-    lastHeading = currentHeading;
+    lastHeading = currentHeadingDeg;
   }
 }
 

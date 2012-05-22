@@ -25,8 +25,8 @@
 #include <Gyroscope_ITG3200Common.h>
 
 void measureSpecificGyroADC(int *gyroADC) {
-  gyroADC[YAXIS] = readShortI2C() - gyroZero[YAXIS];
-  gyroADC[XAXIS] = readShortI2C() - gyroZero[XAXIS];
+  gyroADC[YAXIS] = readShortI2C()  - gyroZero[YAXIS];
+  gyroADC[XAXIS] = readShortI2C()  - gyroZero[XAXIS];
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - readShortI2C();
 }
 

@@ -316,7 +316,7 @@ float arctan2(float y, float x)
 {
   float coeff_1 = PI/4;
   float coeff_2 = 3*coeff_1;
-  float abs_y = abs(y)+1e-10;      // kludge to prevent 0/0 condition
+  float abs_y = fabs(y)+1e-10;      // kludge to prevent 0/0 condition
   float r, angle;
    
   if (x >= 0) 
