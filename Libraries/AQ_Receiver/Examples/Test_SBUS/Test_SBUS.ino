@@ -38,15 +38,14 @@ void loop() {
     timer = millis();
     readReceiver();
     
-
-    Serial.print(" Roll: ");
-    Serial.print(receiverCommand[XAXIS]);
-    Serial.print(" Pitch: ");
-    Serial.print(receiverCommand[YAXIS]);
     Serial.print("Throttle: ");
     Serial.print(receiverCommand[THROTTLE]);
     Serial.print(" Yaw: ");
     Serial.print(receiverCommand[ZAXIS]);
+    Serial.print(" Roll: ");
+    Serial.print(receiverCommand[XAXIS]);
+    Serial.print(" Pitch: ");
+    Serial.print(receiverCommand[YAXIS]);
     Serial.print(" Mode: ");
     Serial.print(receiverCommand[MODE]);
     Serial.print(" Aux1: ");
