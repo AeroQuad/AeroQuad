@@ -1033,6 +1033,8 @@
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
+#elif defined ReceiverSBUS
+  #include <Receiver_SBUS.h>
 #elif defined RECEIVER_328P
   #include <Receiver_328p.h>
 #elif defined RECEIVER_MEGA
