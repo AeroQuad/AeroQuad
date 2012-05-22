@@ -24,7 +24,8 @@
 #ifndef _AQ_LedProcessor_H_
 #define _AQ_LedProcessor_H_
 
-byte flashingLedState = 0; // this counter increments by one at 10Hz
+byte flashingLedState = 0, batteryCounter = 0; // this counter increments by one at 10Hz
+boolean keepBuzzing = false;
 
 void processLedStatus() {
 
@@ -63,18 +64,40 @@ void processLedStatus() {
   #if defined (BattMonitor)
   if(!hasBuzzerHigherPriority)
   {
-    if(motorArmed == ON)
-      {
-        if (batteryAlarm || batteryWarning) {
-          digitalWrite(BuzzerPin, HIGH);
-        } else { 
-          digitalWrite(BuzzerPin, LOW);
-        }
-      }
-      else
-      {
+    if(!keepBuzzing)
+    {
+      if(motorArmed == ON)
+        {
+          if (batteryAlarm || batteryWarning)
+          {
+             if(batteryCounter < 20)
+             {
+                 batteryCounter++;
+             }
+             else
+             {
+                keepBuzzing = true;
+             } 
+          }
+          else
+          {
+             batteryCounter = 0;
+             digitalWrite(BuzzerPin, LOW);
+          }
+       }
+    }
+  
+    if(motorArmed == OFF)
+    {
+        keepBuzzing = false;
         digitalWrite(BuzzerPin, LOW);
-      }
+        batteryCounter = 0;
+    }
+  
+    if(keepBuzzing)
+    {
+       digitalWrite(BuzzerPin, HIGH);
+    }
   }
   #endif  
 
