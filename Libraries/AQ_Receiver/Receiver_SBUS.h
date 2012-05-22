@@ -84,8 +84,8 @@ void readSBUS() {
 	for (int axis = XAXIS; axis < AUX3; axis++) {
 		rcValue[axis] = map(rcValue[axis], 200, 1850, 1000, 2000);
 	}
-	rcChannel[XAXIS] = rcValue[1];
-	rcChannel[YAXIS] = rcValue[0];
+	rcChannel[XAXIS] = rcValue[0];
+	rcChannel[YAXIS] = rcValue[1];
 	rcChannel[ZAXIS] = rcValue[3];
 	rcChannel[THROTTLE] = rcValue[2];
 	rcChannel[MODE] = rcValue[4];
