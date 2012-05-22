@@ -81,8 +81,10 @@ void readSBUS() {
 			#endif
 		}
 	}
+	
+	// scaling for Futaba 8FG with NO EPA/travel limit
 	for (int axis = XAXIS; axis < AUX3; axis++) {
-		rcValue[axis] = map(rcValue[axis], 200, 1850, 1000, 2000);
+		rcValue[axis] = map(rcValue[axis], 350, 1700, 1000, 2000);
 	}
 	rcChannel[XAXIS] = rcValue[0];
 	rcChannel[YAXIS] = rcValue[1];
@@ -94,7 +96,7 @@ void readSBUS() {
 	rcChannel[AUX3] = rcValue[7];
 }
 
-
+// call readSBUS() only on first channel request
 int getRawChannelValue(byte channel) {
 	if (channel == XAXIS) {
 		readSBUS();
