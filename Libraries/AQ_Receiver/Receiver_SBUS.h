@@ -51,7 +51,7 @@ void readSBUS() {
 		sbusIndex++;
 		if (sbusIndex == 25) {
 			sbusIndex = 0;
-			//check stop bit before updating buffers
+			// check stop bit before updating buffers
 			if (sbus[24] == 0x0) {
 				rcChannel[XAXIS]	= ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
 				rcChannel[YAXIS]	= ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
@@ -64,9 +64,8 @@ void readSBUS() {
 				
 				// Byte 25, Bit 4 - failsafe indicator
 				// for future: call auto land or RTH if failsafe on for 1s
-				if (!((sbus[23] >3) & 0x0001))
-				{
-				}
+				//if (!((sbus[23] >3) & 0x0001)) {
+				//}
 			}
 		}
 	}
