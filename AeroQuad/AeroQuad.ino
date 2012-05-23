@@ -1408,6 +1408,10 @@ void loop () {
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
 
+      #ifdef ReceiverSBUS
+        readSBUS();
+      #endif
+      
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
       
