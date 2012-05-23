@@ -49,7 +49,7 @@
 #endif
 
 #if defined (ReceiverSBUS) && defined (SlowTelemetry)
-  #error Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together
+  #error ReceiverSBUS and SlowTelemetry are in conflict for Serial2, they cannot be used together
 #endif
 
 #if defined UseGPS
@@ -478,7 +478,7 @@
     #ifdef POWERED_BY_VIN
       #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 14.859, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
   #else
     #undef BattMonitorAutoDescent
