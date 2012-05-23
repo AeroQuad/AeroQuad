@@ -1408,7 +1408,7 @@ void loop () {
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
 
-      #ifdef ReceiverSBUS
+      #if defined ReceiverSBUS
         readSBUS();
       #endif
       
