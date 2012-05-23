@@ -41,38 +41,40 @@ void initializeReceiver(int nbChannel = 8) {
 }
 
 void readSBUS() {
-	static byte sbus[25] = {0};
-	while(Serial2.available()) {
-		int val = Serial2.read();
-		if(sbusIndex == 0 && val != SBUS_SYNCBYTE) {
-			continue;
-		}
-		sbus[sbusIndex] = val;
-		sbusIndex++;
-		if (sbusIndex == 25) {
-			sbusIndex = 0;
-			// check stop bit before updating buffers
-			if (sbus[24] == 0x0) {
-				rcChannel[XAXIS]	= ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
-				rcChannel[YAXIS]	= ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
-				rcChannel[THROTTLE] = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);	// throttle
-				rcChannel[ZAXIS]	= ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);					// yaw
-				rcChannel[MODE]		= ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
-				rcChannel[AUX1]		= ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
-				rcChannel[AUX2]		= ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
-				rcChannel[AUX3]		= ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
-				
-				// Byte 25, Bit 4 - failsafe indicator
-				// for future: call auto land or RTH if failsafe on for 1s
-				//if (!((sbus[23] >3) & 0x0001)) {
-				//}
-			}
-		}
-	}
+
+  static byte sbus[25] = {0};
+  while(Serial2.available()) {
+  
+    int val = Serial2.read();
+    if(sbusIndex == 0 && val != SBUS_SYNCBYTE) {
+      continue;
+    }
+	
+    sbus[sbusIndex] = val;
+    sbusIndex++;
+    if (sbusIndex == 25) {
+	
+      sbusIndex = 0;
+      // check stop bit before updating buffers
+      if (sbus[24] == 0x0) {
+	  
+        rcChannel[XAXIS]	= ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
+        rcChannel[YAXIS]	= ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
+        rcChannel[THROTTLE] = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);	// throttle
+        rcChannel[ZAXIS]	= ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);					// yaw
+        rcChannel[MODE]		= ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
+        rcChannel[AUX1]		= ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
+        rcChannel[AUX2]		= ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
+        rcChannel[AUX3]		= ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
+      }
+    }
+  }
 }
 
-
 int getRawChannelValue(byte channel) {
+    if (channel == XAXIS) {
+	  readSBUS();
+	}
 	return rcChannel[channel];
 }
 
