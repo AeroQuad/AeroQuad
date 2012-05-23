@@ -48,6 +48,10 @@
   #error AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined
 #endif
 
+#if defined (ReceiverSBUS) && defined (SlowTelemetry)
+  #error Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together
+#endif
+
 #if defined UseGPS
   // needed here to use DIYDrone gps libraries
   #include <FastSerial.h>
@@ -1408,10 +1412,6 @@ void loop () {
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
 
-      #ifdef ReceiverSBUS
-        readSBUS();
-      #endif
-      
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
       
