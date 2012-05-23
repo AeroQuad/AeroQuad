@@ -36,6 +36,7 @@ void loop() {
   if((millis() - timer) > 20) // 50Hz
   {
     timer = millis();
+    readSBUS();
     readReceiver();
     
     Serial.print("Throttle: ");
