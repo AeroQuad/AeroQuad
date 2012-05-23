@@ -70,7 +70,7 @@ void processLedStatus() {
         {
           if (batteryAlarm || batteryWarning)
           {
-             if(batteryCounter < 20)
+             if(batteryCounter < 10)
              {
                  batteryCounter++;
              }
