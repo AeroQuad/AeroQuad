@@ -439,10 +439,8 @@ void sendSerialTelemetry() {
       PrintValueComma(filteredAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+      #if defined(HeadingMagHold)
         PrintValueComma(getMagnetometerData(axis));
-      #elif defined(HeadingMagHold)
-        PrintValueComma(getMagnetometerRawData(axis));
       #else
         PrintValueComma(0);
       #endif
@@ -779,10 +777,8 @@ void fastTelemetry()
           sendBinaryFloat(hdgX);
           sendBinaryFloat(hdgY);
 		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-		       #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+		       #if defined(HeadingMagHold)
 			      sendBinaryFloat(getMagnetometerData(axis));
-			   #else
-		          sendBinaryFloat(getMagnetometerRawData(axis));
 		       #endif
           }  
        #else
@@ -803,10 +799,8 @@ void fastTelemetry()
          sendBinaryFloat(meterPerSecSec[axis]);
        }
        for (byte axis = XAXIS; axis <= ZAXIS; axis++)
-       #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+       #if defined(HeadingMagHold)
          sendBinaryFloat(getMagnetometerData(axis));
-       #elif defined(HeadingMagHold)
-         sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
