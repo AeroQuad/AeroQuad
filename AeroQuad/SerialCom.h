@@ -167,9 +167,17 @@ void readSerialCommand() {
       
     case 'M': // calibrate magnetometer
       #ifdef HeadingMagHold
-        magBias[XAXIS] = readFloatSerial();      
-        magBias[YAXIS] = readFloatSerial();
-        magBias[ZAXIS] = readFloatSerial();
+//Mag Scale values are not settable here (yet) until the Configurator is compatible      
+//        magScale[XAXIS] = readFloatSerial();      
+        magBias[XAXIS]  = readFloatSerial();      
+//        magScale[YAXIS] = readFloatSerial();
+        magBias[YAXIS]  = readFloatSerial();
+//        magScale[ZAXIS] = readFloatSerial();
+        magBias[ZAXIS]  = readFloatSerial();
+        writeEEPROM();
+      #else
+        for(int c=0;c<3;c++)
+	      { readFloatSerial(); }
       #endif
       break;
       
@@ -431,7 +439,9 @@ void sendSerialTelemetry() {
       PrintValueComma(filteredAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      #if defined(HeadingMagHold)
+      #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+        PrintValueComma(getMagnetometerData(axis));
+      #elif defined(HeadingMagHold)
         PrintValueComma(getMagnetometerRawData(axis));
       #else
         PrintValueComma(0);
@@ -769,7 +779,11 @@ void fastTelemetry()
           sendBinaryFloat(hdgX);
           sendBinaryFloat(hdgY);
 		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-            sendBinaryFloat(getMagnetometerRawData(axis));
+		       #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+			      sendBinaryFloat(getMagnetometerData(axis));
+			   #else
+		          sendBinaryFloat(getMagnetometerRawData(axis));
+		       #endif
           }  
        #else
          sendBinaryFloat(0.0);
@@ -789,7 +803,9 @@ void fastTelemetry()
          sendBinaryFloat(meterPerSecSec[axis]);
        }
        for (byte axis = XAXIS; axis <= ZAXIS; axis++)
-       #ifdef HeadingMagHold
+       #if defined(HeadingMagHold) && defined(UseMeasuredMag)
+         sendBinaryFloat(getMagnetometerData(axis));
+       #elif defined(HeadingMagHold)
          sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
