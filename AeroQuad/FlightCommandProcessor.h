@@ -64,11 +64,6 @@ void readPilotCommands() {
     
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
-      #if defined (UseGPS)
-        if (!isHomeBaseInitialized()) {  // if GPS, wait for home position fix!
-          return;
-        }
-      #endif 
 
       #ifdef OSD_SYSTEM_MENU
         if (menuOwnsSticks) {
