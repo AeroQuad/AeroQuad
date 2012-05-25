@@ -70,9 +70,9 @@ void measureMagnetometer(float roll, float pitch) {
   measuredMagY = rawMag[YAXIS] * magScale[YAXIS] + magBias[YAXIS];
   measuredMagZ = rawMag[ZAXIS] * magScale[ZAXIS] + magBias[ZAXIS];
   
-  measuredMag[XAXIS] = measuredMagX
-  measuredMag[YAXIS] = measuredMagY
-  measuredMag[ZAXIS] = measuredMagZ
+  measuredMag[XAXIS] = measuredMagX;
+  measuredMag[YAXIS] = measuredMagY;
+  measuredMag[ZAXIS] = measuredMagZ;
   
   const float cosRoll =  cos(roll);
   const float sinRoll =  sin(roll);
