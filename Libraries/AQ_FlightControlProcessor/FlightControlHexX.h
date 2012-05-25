@@ -48,12 +48,12 @@ int motorMinCommand[6] = {0,0,0,0,0,0};
 int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
 
 void applyMotorCommand() {
-  motorCommand[FRONT_LEFT]  = throttle + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[REAR_RIGHT]  = throttle - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[FRONT_RIGHT] = throttle - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[REAR_LEFT]   = throttle + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[RIGHT]       = throttle - motorAxisCommandRoll                             - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[LEFT]        = throttle + motorAxisCommandRoll                             + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[FRONT_LEFT]  = throttle + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR_RIGHT]  = throttle - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[FRONT_RIGHT] = throttle - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR_LEFT]   = throttle + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[RIGHT]       = throttle - motorAxisCommandRoll                             + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[LEFT]        = throttle + motorAxisCommandRoll                             - (YAW_DIRECTION * motorAxisCommandYaw);
 }
 
 #endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_X_MODE_H_
