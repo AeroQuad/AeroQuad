@@ -29,8 +29,126 @@
 #ifndef _AQ_SERIAL_COMM_
 #define _AQ_SERIAL_COMM_
 
-char queryType = 'X';
+#ifdef MultipleSerialTelemetry
 
+int readLine(HardwareSerial* ser, char* buffer, size_t size, unsigned long timeout_ms, bool timeout_warning=true)
+{
+  size_t idx = 0; 
+  unsigned long time = millis() + timeout_ms;
+
+  timeout_ms++; // ensure the - 1 below doesn't underflow
+  
+  while (millis() < time)
+  {
+    if (!ser->available())
+    {
+      delay(timeout_ms < 10 ? timeout_ms - 1 : 10);
+      continue;
+    }
+    
+    char c = ser->read();
+    
+    if (c == '\r' || c == '\n') 
+    {
+      if (!ser->available())
+        delay(10);
+      
+      c = ser->peek();
+      
+      if (c == '\r' || c == '\n')
+        ser->read();
+      
+      break;
+    }
+    if (idx == size)
+    {
+      buffer[idx] = '\0';
+      SERIAL_PRINT("ERROR: serial receive overflow; so far: ");
+      SERIAL_PRINTLN(buffer);
+      return -1;
+    }
+    
+    buffer[idx++] = c;
+  }
+
+  if (millis() >= time)
+  {
+    buffer[idx] = '\0';
+    if (timeout_warning)
+    {
+      SERIAL_PRINT("ERROR: serial receive timeout; so far: ");
+      SERIAL_PRINTLN(buffer);
+    }
+    return -2;
+  }
+  
+  buffer[idx] = '\0';
+  
+  return 0;
+}
+
+bool configureXBee(char command[], const int length)
+{
+  const char MAX_LENGTH = 11;
+  
+  if (strlen(command) > 0)
+  {
+    //_ser->print("Entering XBee configuration; command: ");
+    //_ser->println(command);
+    
+    // 1s guard time
+    if (_ser == &XBEE_SERIAL)
+      delay(1100);
+    
+    char buffer[MAX_LENGTH];
+    int ret;
+    
+    XBEE_SERIAL.print("+++");
+    // default guard time (where nothing after the "+++" can be received) is 1s
+    ret = readLine(&XBEE_SERIAL, buffer, MAX_LENGTH,  1500);
+
+    if (ret != 0)
+      return false;
+    else if (strcmp(buffer, "OK")) {
+      USB_SERIAL.println("ERROR: XBee did not send 'OK'.");
+      return false;
+    }
+     
+    XBEE_SERIAL.print("AT");
+    XBEE_SERIAL.print(command);
+    XBEE_SERIAL.print('\r');
+    ret = readLine(&XBEE_SERIAL, command, length,  100);
+    
+    if (ret != 0)
+      return false;
+    else if (strlen(command) == 0) {
+      USB_SERIAL.println("ERROR: XBee did not respond.");
+      return false;
+    }
+    
+    XBEE_SERIAL.print("ATCN\r");
+    ret = readLine(&XBEE_SERIAL, buffer, MAX_LENGTH,  100);
+
+    if (ret != 0)
+      return false;
+    else if (strcmp(buffer, "OK")) {
+      USB_SERIAL.println("ERROR: XBee did not send 'OK'.");
+      return false;
+
+    //_ser->println(command);
+    }
+  }
+  //else
+  //  _ser->println("No XBee Command specified.");
+  
+  return true;
+}
+
+
+
+#endif
+
+char queryType = 'X';
 
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
@@ -59,6 +177,15 @@ void readSerialPID(unsigned char PIDid) {
 
 void readSerialCommand() {
   // Check for serial message
+#if defined (MultipleSerialTelemetry)
+    const char MAX_LENGTH=41;
+	HardwareSerial *ser;
+	ser = getSerial();
+	if (ser != NULL) {
+		_ser = ser;
+	}
+#endif
+
   if (SERIAL_AVAILABLE()) {
     queryType = SERIAL_READ();
     switch (queryType) {
@@ -219,7 +346,20 @@ void readSerialCommand() {
           readFloatSerial();
       #endif
       break;
+#ifdef MultipleSerialTelemetry      
+    case 'Q': //configure XBEE
+           
+      char command[MAX_LENGTH];
+      // ignore errors
+      readLine(_ser, command, MAX_LENGTH, 100, false);
       
+      if (configureXBee(command, MAX_LENGTH))
+          {    SERIAL_PRINTLN(command);       }
+      
+      break;
+#endif
+
+  
     case 'U': // Range Finder
       #if defined (AltitudeHoldRangeFinder)
         maxRangeFinderRange = readFloatSerial();

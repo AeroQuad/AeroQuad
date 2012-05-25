@@ -33,7 +33,9 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#if defined WirelessTelemetry
+#if defined MultipleSerialTelemetry
+  #define BAUD 115200 //v1 same as USB
+#elif defined WirelessTelemetry
   #define BAUD 111111 // use this to be compatible with USB and XBee connections
 #else
   #define BAUD 115200
@@ -208,6 +210,15 @@ void processHeading();
 /**
  * Serial communication global declaration
  */
+#if defined MultipleSerialTelemetry
+#define SERIAL_PRINT      _ser->print
+#define SERIAL_PRINTLN    _ser->println
+#define SERIAL_AVAILABLE  _ser->available
+#define SERIAL_READ       _ser->read
+#define SERIAL_FLUSH      _ser->flush
+#define SERIAL_BEGIN      _ser->begin
+HardwareSerial * getSerial();
+#else
 #define SERIAL_PRINT      SERIAL_PORT.print
 #define SERIAL_PRINTLN    SERIAL_PORT.println
 #define SERIAL_AVAILABLE  SERIAL_PORT.available
@@ -215,6 +226,7 @@ void processHeading();
 #define SERIAL_FLUSH      SERIAL_PORT.flush
 #define SERIAL_BEGIN      SERIAL_PORT.begin
  
+#endif
 //HardwareSerial *binaryPort;
 
 void readSerialCommand();
