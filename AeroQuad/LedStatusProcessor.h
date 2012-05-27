@@ -49,7 +49,7 @@ void processLedStatus() {
     if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized())
     {
        hasBuzzerHigherPriority = true;
-       digitalWrite(BuzzerPin, HIGH);
+       digitalWrite(BuzzerPin, (flashingLedState & 4));
     }
     else if(receiverCommand[AUX2] < 1400 || isHomeBaseInitialized())
     {
@@ -64,39 +64,19 @@ void processLedStatus() {
   #if defined (BattMonitor)
   if(!hasBuzzerHigherPriority)
   {
-    if(!keepBuzzing)
+    if(motorArmed)
     {
-      if(motorArmed == ON)
-        {
-          if (batteryAlarm || batteryWarning)
-          {
-             if(batteryCounter < 10)
-             {
-                 batteryCounter++;
-             }
-             else
-             {
-                keepBuzzing = true;
-             } 
-          }
-          else
-          {
-             batteryCounter = 0;
-             digitalWrite(BuzzerPin, LOW);
-          }
-       }
-    }
-  
-    if(motorArmed == OFF)
-    {
-        keepBuzzing = false;
+      if (batteryAlarm) {
+        digitalWrite(BuzzerPin, (flashingLedState & 2));
+      } else if (batteryWarning) {
+        digitalWrite(BuzzerPin, (flashingLedState & 6));
+      } else { 
         digitalWrite(BuzzerPin, LOW);
-        batteryCounter = 0;
+      }
     }
-  
-    if(keepBuzzing)
+    else
     {
-       digitalWrite(BuzzerPin, HIGH);
+      digitalWrite(BuzzerPin, LOW);
     }
   }
   #endif  
