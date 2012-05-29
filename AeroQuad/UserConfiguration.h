@@ -46,10 +46,10 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-#define hexXConfig      // EXPERIMENTAL: not completely re-tested
+//#define hexXConfig      
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
@@ -75,7 +75,7 @@
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
-#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
+//#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
 //#define AutoLanding // Enable auto landing on channel AUX3 of the remote, NEED AltitudeHoldBaro AND AltitudeHoldRangeFinder
 
 #define UseGPS // Try to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
