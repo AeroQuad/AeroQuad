@@ -31,37 +31,35 @@
 
 #ifdef MultipleSerialTelemetry
 
-int readLine(HardwareSerial* ser, char* buffer, size_t size, unsigned long timeout_ms, bool timeout_warning=true)
+int readLine(HardwareSerial* ser, char* buffer, size_t size, 
+  unsigned long timeout_ms, bool timeout_warning=true)
 {
   size_t idx = 0; 
   unsigned long time = millis() + timeout_ms;
 
   timeout_ms++; // ensure the - 1 below doesn't underflow
   
-  while (millis() < time)
-  {
-    if (!ser->available())
-    {
+  while (millis() < time) {
+    if (!ser->available()) {
       delay(timeout_ms < 10 ? timeout_ms - 1 : 10);
       continue;
     }
     
     char c = ser->read();
     
-    if (c == '\r' || c == '\n') 
-    {
-      if (!ser->available())
+    if (c == '\r' || c == '\n') {
+      if (!ser->available()) {
         delay(10);
+      }
       
       c = ser->peek();
       
-      if (c == '\r' || c == '\n')
+      if (c == '\r' || c == '\n') {
         ser->read();
-      
+      }
       break;
     }
-    if (idx == size)
-    {
+    if (idx == size) {
       buffer[idx] = '\0';
       SERIAL_PRINT("ERROR: serial receive overflow; so far: ");
       SERIAL_PRINTLN(buffer);
@@ -71,11 +69,9 @@ int readLine(HardwareSerial* ser, char* buffer, size_t size, unsigned long timeo
     buffer[idx++] = c;
   }
 
-  if (millis() >= time)
-  {
+  if (millis() >= time) {
     buffer[idx] = '\0';
-    if (timeout_warning)
-    {
+    if (timeout_warning) {
       SERIAL_PRINT("ERROR: serial receive timeout; so far: ");
       SERIAL_PRINTLN(buffer);
     }
@@ -93,12 +89,10 @@ bool configureXBee(char command[], const int length)
   
   if (strlen(command) > 0)
   {
-    //_ser->print("Entering XBee configuration; command: ");
-    //_ser->println(command);
-    
     // 1s guard time
-    if (_ser == &XBEE_SERIAL)
+    if (_ser == &XBEE_SERIAL) {
       delay(1100);
+    }
     
     char buffer[MAX_LENGTH];
     int ret;
@@ -107,9 +101,9 @@ bool configureXBee(char command[], const int length)
     // default guard time (where nothing after the "+++" can be received) is 1s
     ret = readLine(&XBEE_SERIAL, buffer, MAX_LENGTH,  1500);
 
-    if (ret != 0)
+    if (ret != 0) {
       return false;
-    else if (strcmp(buffer, "OK")) {
+    } else if (strcmp(buffer, "OK")) {
       USB_SERIAL.println("ERROR: XBee did not send 'OK'.");
       return false;
     }
@@ -119,9 +113,9 @@ bool configureXBee(char command[], const int length)
     XBEE_SERIAL.print('\r');
     ret = readLine(&XBEE_SERIAL, command, length,  100);
     
-    if (ret != 0)
+    if (ret != 0) {
       return false;
-    else if (strlen(command) == 0) {
+    } else if (strlen(command) == 0) {
       USB_SERIAL.println("ERROR: XBee did not respond.");
       return false;
     }
@@ -129,17 +123,13 @@ bool configureXBee(char command[], const int length)
     XBEE_SERIAL.print("ATCN\r");
     ret = readLine(&XBEE_SERIAL, buffer, MAX_LENGTH,  100);
 
-    if (ret != 0)
+    if (ret != 0) {
       return false;
-    else if (strcmp(buffer, "OK")) {
+    } else if (strcmp(buffer, "OK")) {
       USB_SERIAL.println("ERROR: XBee did not send 'OK'.");
       return false;
-
-    //_ser->println(command);
     }
   }
-  //else
-  //  _ser->println("No XBee Command specified.");
   
   return true;
 }
