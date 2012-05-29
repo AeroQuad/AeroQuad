@@ -172,8 +172,11 @@ void initializeEEPROM() {
   runTimeAccelBias[ZAXIS] = 0.0;
 
   #ifdef HeadingMagHold
+    magScale[XAXIS] = 1.0;
     magBias[XAXIS] = 0.0;
+    magScale[YAXIS] = 1.0;
     magBias[YAXIS] = 0.0;
+    magScale[ZAXIS] = 1.0;
     magBias[ZAXIS] = 0.0;
   #endif
   windupGuard = 1000.0;
@@ -278,9 +281,12 @@ void readEEPROM() {
 
   // Mag calibration
   #ifdef HeadingMagHold
-    magBias[XAXIS] = readFloat(XAXIS_MAG_BIAS_ADR);
-    magBias[YAXIS] = readFloat(YAXIS_MAG_BIAS_ADR);
-    magBias[ZAXIS] = readFloat(ZAXIS_MAG_BIAS_ADR);
+    magBias[XAXIS]  = readFloat(XAXIS_MAG_BIAS_ADR);
+    magScale[XAXIS] = readFloat(XAXIS_MAG_SCALE_FACTOR_ADR);
+    magBias[YAXIS]  = readFloat(YAXIS_MAG_BIAS_ADR);
+    magScale[YAXIS] = readFloat(YAXIS_MAG_SCALE_FACTOR_ADR);
+    magBias[ZAXIS]  = readFloat(ZAXIS_MAG_BIAS_ADR);
+    magScale[ZAXIS] = readFloat(ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   
   // Battery Monitor
@@ -375,8 +381,11 @@ void writeEEPROM(){
   writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #ifdef HeadingMagHold
     writeFloat(magBias[XAXIS], XAXIS_MAG_BIAS_ADR);
+    writeFloat(magScale[XAXIS], XAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
+    writeFloat(magScale[YAXIS], YAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
+    writeFloat(magScale[ZAXIS], ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);

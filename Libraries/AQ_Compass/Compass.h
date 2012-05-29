@@ -30,13 +30,13 @@ float hdgY = 0.0;
 float measuredMagX = 0.0;
 float measuredMagY = 0.0;
 float measuredMagZ = 0.0;
-
+float measuredMag[3] = {0.0,0.0,0.0};
 float rawMag[3] = {0.0,0.0,0.0};
 float magBias[3] = {0.0,0.0,0.0};
 
 //float magMax[3] = {0.0,0.0,0.0};
 //float magMin[3] = {0.0,0.0,0.0};
-//float magScale[3] = {0.0,0.0,0.0};
+float magScale[3] = {1.0,1.0,1.0};
 //float magOffset[3] = {0.0,0.0,0.0};
 //float magBias[3] = {0.0, 0.0, 0.0};
 
@@ -54,6 +54,11 @@ const float getHdgXY(byte axis) {
 const int getMagnetometerRawData(byte axis) {
   return rawMag[axis];
 }
+
+const int getMagnetometerData(byte axis) {
+  return measuredMag[axis];
+}
+
 
 const float getAbsoluteHeading() {
   float heading = atan2(hdgY, hdgX);

@@ -464,7 +464,7 @@ void menuSensorInfo(byte mode, byte action){
       #if defined(HeadingMagHold)
         case 2: // Mag
           notifyOSD(OSD_NOCLEAR,"Mag: X%5d Y%5d Z%5d",
-                  getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
+		  getMagnetometerData(XAXIS),getMagnetometerData(YAXIS),getMagnetometerData(ZAXIS));
           break;
       #endif
       #if defined(AltitudeHoldRangeFinder)
