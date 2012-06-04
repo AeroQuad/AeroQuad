@@ -41,15 +41,15 @@
 #endif 
 
 #if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
-  #error GpsNavigation NEED AltitudeHoldBaro defined
+  #error "GpsNavigation NEED AltitudeHoldBaro defined"
 #endif
 
 #if defined (AutoLanding) && (!defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder))
-  #error AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined
+  #error "AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined"
 #endif
 
 #if defined (ReceiverSBUS) && defined (SlowTelemetry)
-  #error Receiver SWBUS and SlowTelemetry are in conflict for Serial2, they can not be used together
+  #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
 #if defined UseGPS
