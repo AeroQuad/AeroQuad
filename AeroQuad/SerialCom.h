@@ -153,7 +153,8 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();      
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
-      writeEEPROM();
+      storeSensorsZeroToEEPROM();
+      //writeEEPROM();
       break;
       
     case 'L': // generate accel bias
