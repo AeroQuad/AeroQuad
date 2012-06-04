@@ -33,11 +33,13 @@ float nvrReadFloat(int address) {
   } floatOut;
 
 #ifdef EEPROM_USES_16BIT_WORDS
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; i++) {
     floatOut.floatUShort[i] = EEPROM.read(address + 2*i);
+  }
 #else
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 4; i++) {
     floatOut.floatByte[i] = EEPROM.read(address + i);
+  }
 #endif
 
   return floatOut.floatVal;
@@ -52,22 +54,32 @@ void nvrWriteFloat(float value, int address) {
 
   floatIn.floatVal = value;
 #ifdef EEPROM_USES_16BIT_WORDS
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; i++) {
     EEPROM.write(address + 2*i, floatIn.floatUShort[i]);
+  }
 #else
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 4; i++) {
     EEPROM.write(address + i, floatIn.floatByte[i]);
+  }
 #endif
 }
 
 long nvrReadLong(int address) {
   union longStore {
     byte longByte[4];
+    unsigned short longUShort[2];
     long longVal;
   } longOut;  
 
-  for (byte i = 0; i < 4; i++)
+#ifdef EEPROM_USES_16BIT_WORDS
+  for (int i = 0; i < 2; i++) {
+    longOut.longUShort[i] = EEPROM.read(address + 2*i);
+  }
+#else
+  for (byte i = 0; i < 4; i++) {
     longOut.longByte[i] = EEPROM.read(address + i);
+  }
+#endif
     
   return longOut.longVal;
 }
@@ -75,13 +87,21 @@ long nvrReadLong(int address) {
 void nvrWriteLong(long value, int address) {
   union longStore {
     byte longByte[4];
+    unsigned short longUShort[2];
     long longVal;
   } longIn;  
 
   longIn.longVal = value;
   
-  for (byte i = 0; i < 4; i++)
+#ifdef EEPROM_USES_16BIT_WORDS
+  for (int i = 0; i < 2; i++) {
+    EEPROM.write(address + 2*i, longIn.longUShort[i]);
+  }
+#else
+  for (int i = 0; i < 4; i++) {
     EEPROM.write(address + i, longIn.longByte[i]);
+  }
+#endif
 }
 
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
@@ -297,7 +317,7 @@ void readEEPROM() {
   #endif
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
-  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
+  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the EEPROM
   for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
     if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
       PID[i].windupGuard = windupGuard;
@@ -348,7 +368,7 @@ void readEEPROM() {
 }
 
 void writeEEPROM(){
-  cli(); // Needed so that APM sensor data doesn't overflow
+  cli(); // Needed so that APM sensor data does not overflow
   writePID(XAXIS, ROLL_PID_GAIN_ADR);
   writePID(YAXIS, PITCH_PID_GAIN_ADR);
   writePID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
