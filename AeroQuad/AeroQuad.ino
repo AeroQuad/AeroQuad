@@ -1243,12 +1243,12 @@ void setup() {
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
   initializeGyro(); // defined in Gyro.h
-//  initializeAccel(); // defined in Accel.h
+  initializeAccel(); // defined in Accel.h
   initSensorsZeroFromEEPROM();
 
   // Calibrate sensors
   calibrateGyro();
-  computeAccelBias();
+//  computeAccelBias();
   zeroIntegralError();
 
   // Flight angle estimation
