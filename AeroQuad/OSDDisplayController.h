@@ -73,7 +73,7 @@ void updateOSD() {
         displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
       }
       else {
-        displayGPS(positionZero, positionZero, 0, 0, trueNorthHeading, nbSatelitesInUse);
+        displayGPS(currentPosition, currentPosition, 0, 0, trueNorthHeading, nbSatelitesInUse);
       }
     #endif
   }
