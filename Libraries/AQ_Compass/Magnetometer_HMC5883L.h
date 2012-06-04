@@ -52,10 +52,6 @@ void readSpecificMag(float *rawMag) {
   #else 
     #error Define HMC5883L Orientation
   #endif
-  
-//  Serial.print(rawMag[XAXIS]);Serial.print(",");
-//  Serial.print(rawMag[YAXIS]);Serial.print(",");
-//  Serial.println(rawMag[ZAXIS]);
 }
 
 #endif

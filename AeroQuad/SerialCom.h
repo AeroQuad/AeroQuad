@@ -112,17 +112,11 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
-      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-      //  receiverSlope[channel] = readFloatSerial();
-      //}
       channelCal = (int)readFloatSerial();
       receiverSlope[channelCal] = readFloatSerial();
       break;
       
     case 'H': // Receive transmitter calibration values
-      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-      //  receiverOffset[channel] = readFloatSerial();
-      //}
       channelCal = (int)readFloatSerial();
       receiverOffset[channelCal] = readFloatSerial();
       break;
@@ -153,7 +147,8 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();      
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
-      writeEEPROM();
+      storeSensorsZeroToEEPROM();
+      //writeEEPROM();
       break;
       
     case 'L': // generate accel bias
@@ -167,12 +162,8 @@ void readSerialCommand() {
       
     case 'M': // calibrate magnetometer
       #ifdef HeadingMagHold
-//Mag Scale values are not settable here (yet) until the Configurator is compatible      
-//        magScale[XAXIS] = readFloatSerial();      
         magBias[XAXIS]  = readFloatSerial();      
-//        magScale[YAXIS] = readFloatSerial();
         magBias[YAXIS]  = readFloatSerial();
-//        magScale[ZAXIS] = readFloatSerial();
         magBias[ZAXIS]  = readFloatSerial();
         writeEEPROM();
       #else

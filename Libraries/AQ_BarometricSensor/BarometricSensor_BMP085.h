@@ -52,7 +52,6 @@ void requestRawPressure() {
 }
   
 long readRawPressure() {
-
   sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
   Wire.requestFrom(BMP085_I2C_ADDRESS, 3); // request three bytes
   return (((unsigned long)Wire.read() << 16) | ((unsigned long)Wire.read() << 8) | ((unsigned long)Wire.read())) >> (8-overSamplingSetting);
@@ -64,14 +63,13 @@ void requestRawTemperature() {
   
 unsigned int readRawTemperature() {
   sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
-  return readWordWaitI2C(BMP085_I2C_ADDRESS);
+  return readWordI2C(BMP085_I2C_ADDRESS);
 }
 
 // ***********************************************************
 // Define all the virtual functions declared in the main class
 // ***********************************************************
 void initializeBaro() {
-
   // oversampling setting
   // 0 = ultra low power
   // 1 = standard
@@ -82,7 +80,8 @@ void initializeBaro() {
   baroGroundAltitude = 0;
   pressureFactor = 1/5.255;
     
-  if (readWhoI2C(BMP085_I2C_ADDRESS) == 0) {
+  sendByteI2C(BMP085_I2C_ADDRESS, 0xD0); // BMP085_CHIP_ID_REG
+  if (readByteI2C(BMP085_I2C_ADDRESS) == 0x55) {
 	  vehicleState |= BARO_DETECTED;
   }
   
@@ -121,21 +120,21 @@ void measureBaro() {
 }
 
 void measureBaroSum() {
-  // switch between pressure and tempature measurements
-  // each loop, since it's slow to measure pressure
+  // switch between pressure and temperature measurements
+  // each loop, since it is slow to measure pressure
   if (isReadPressure) {
     rawPressureSum += readRawPressure();
-	rawPressureSumCount++;
+    rawPressureSumCount++;
     if (pressureCount == 4) {
       requestRawTemperature();
       pressureCount = 0;
       isReadPressure = false;
-    }
-    else {
+    } 
+	else {
       requestRawPressure();
 	}
     pressureCount++;
-  }
+  } 
   else { // select must equal TEMPERATURE
     rawTemperature = (long)readRawTemperature();
     requestRawPressure();
@@ -153,7 +152,7 @@ void evaluateBaroAltitude() {
   x2 = ((long) mc << 11) / (x1 + md);
   b5 = x1 + x2;
 
-  if (rawPressureSumCount == 0) { // may occure at init time that no pressure have been read yet!
+  if (rawPressureSumCount == 0) { // it may occur at init time that no pressure has been read yet!
     return;
   }
   rawPressure = rawPressureSum / rawPressureSumCount;
@@ -182,12 +181,12 @@ void evaluateBaroAltitude() {
   x1 = (p >> 8) * (p >> 8);
   x1 = (x1 * 3038) >> 16;
   x2 = (-7357 * p) >> 16;
-    pressure = (p + ((x1 + x2 + 3791) >> 4));
+  pressure = (p + ((x1 + x2 + 3791) >> 4));
     
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
+  // use calculation below in case you need a smaller binary file for CPUs having just 32KB flash ROM
+  // baroRawAltitude = (101325.0-pressure)/4096*346;
   baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
 }
-
-
 
 #endif

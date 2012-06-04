@@ -42,7 +42,7 @@ struct rangeFinder {
      // First ranger is given priority so it should be used for altitude
      // If using more than one ranger you should connect the 'trigger' to the 'RX' pin on the ranger.
      //
-    { ALTITUDE_RANGE_FINDER_INDEX, A1, 24, MB1000}, 
+    { ALTITUDE_RANGE_FINDER_INDEX, A1, 24, MB1200}, 
 //	  { FRONT_RANGE_FINDER_INDEX,    A2, 25, MB1000},
 //	  { RIGHT_RANGE_FINDER_INDEX,    A3, 26, MB1000},
 //	  { REAR_RANGE_FINDER_INDEX,     A4, 27, MB1000},
