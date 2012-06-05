@@ -1174,7 +1174,43 @@
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
-#if defined (WirelessTelemetry) 
+
+
+#if defined (MultipleSerialTelemetry)
+HardwareSerial *_ser;
+  #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
+    #define XBEE_SERIAL Serial3
+  #else    // force 328p to use the normal port
+    #define XBEE_SERIAL Serial
+  #endif
+  
+  #if defined(SERIAL_USES_USB)   // STM32 Maple
+    #define USB_SERIAL SerialUSB
+    #undef BAUD
+    #define BAUD
+  #else
+    #define USB_SERIAL Serial
+  #endif
+
+
+void InitializeSerial(){
+	_ser = &USB_SERIAL;
+	XBEE_SERIAL.begin(BAUD);
+	USB_SERIAL.begin(BAUD);
+}
+
+HardwareSerial * getSerial()
+{
+       //returns the first available serial port, starting with 
+       //1. USB
+       //2. XBEE
+       //finally NULL
+       if (USB_SERIAL.available()) return &USB_SERIAL;
+       if (XBEE_SERIAL.available()) return &XBEE_SERIAL;
+       return NULL;
+}
+
+#elif defined (WirelessTelemetry) 
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
     #define SERIAL_PORT Serial3
   #else    // force 328p to use the normal port
@@ -1213,7 +1249,12 @@
  * Aeroquad
  */
 void setup() {
+#if defined MultipleSerialTelemetry
+  InitializeSerial();
+#else
   SERIAL_BEGIN(BAUD);
+#endif
+
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
   
