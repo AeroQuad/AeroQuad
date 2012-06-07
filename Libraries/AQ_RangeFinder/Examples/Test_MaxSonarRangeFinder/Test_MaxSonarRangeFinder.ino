@@ -18,22 +18,41 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+/*
+  When powering up the MaxBotix rangefinders, 
+  ensure nothing is within 6" (15cm) of the sensor.
+  Otherwise, the readings will be off.
+*/
 #include <SensorsStatus.h>
 #include <MaxSonarRangeFinder.h>
 
-void setup() {
+unsigned long timer = 0;
+
+void setup() 
+{
   Serial.begin(115200);
-  inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+  Serial.println();
+  Serial.println("Rangefinder test library (MaxBotix)");
+  
+  inititalizeRangeFinders();
 }
 
-void loop() {
-  
-  for (int i = 0; i < 20;i++) {
-    readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-    delay(10);
+void loop() 
+{
+  if ((millis() - timer) > 20) // 50Hz
+  {
+    timer = millis();
+    updateRangeFinders();
+    
+    Serial.print("Altitude = ");
+    Serial.println(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+    //Serial.print(", Front distance = ");
+    //Serial.print(rangeFinderRange[FRONT_RANGE_FINDER_INDEX]);
+    //Serial.print(", Right distance = ");
+    //Serial.print(rangeFinderRange[RIGHT_RANGE_FINDER_INDEX]);
+    //Serial.print(", Rear distance = ");
+    //Serial.print(rangeFinderRange[REAR_RANGE_FINDER_INDEX]);
+    //Serial.print(", Left distance = ");
+    //Serial.println(rangeFinderRange[LEFT_RANGE_FINDER_INDEX]);
   }
-  evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
-  
-  Serial.print("Distance = ");
-  Serial.println(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
 }

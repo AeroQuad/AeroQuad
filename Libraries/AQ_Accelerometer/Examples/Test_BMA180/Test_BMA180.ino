@@ -20,36 +20,52 @@
 
 #include <Wire.h>
 #include <Device_I2C.h>
-#include <GlobalDefined.h>
 #include <AQMath.h>
+#include <GlobalDefined.h>
+#include <SensorsStatus.h>
 #include <Accelerometer_BMA180.h>
 
-unsigned long timer;
+unsigned long timer100Hz = 0;
+unsigned long timer25Hz = 0;
 
 void setup() {
   
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Accelerometer library test (BMA180)");
 
   Wire.begin();
   
   initializeAccel();
+  if (vehicleState & ACCEL_DETECTED) {
+    Serial.println("Accelerometer found");
+  } else {
+    Serial.println("!! Accelerometer not found !!");
+  }
   computeAccelBias();
 }
 
 void loop() {
-  
-  if((millis() - timer) > 10) // 100Hz
+  if (vehicleState & ACCEL_DETECTED)
   {
-    timer = millis();
-    measureAccel();
+    measureAccelSum();
     
-    Serial.print("Roll: ");
-    Serial.print(meterPerSecSec[XAXIS]);
-    Serial.print(" Pitch: ");
-    Serial.print(meterPerSecSec[YAXIS]);
-    Serial.print(" Yaw: ");
-    Serial.print(meterPerSecSec[ZAXIS]);
-    Serial.println();
+    if((millis() - timer100Hz) > 10) // 100Hz
+    {
+      timer100Hz = millis();
+      evaluateMetersPerSec();
+    }
+      
+    if ((millis() - timer25Hz) > 40) // 25Hz
+    {
+      timer25Hz = millis();
+      
+      Serial.print("Roll: ");
+      Serial.print(meterPerSecSec[XAXIS]);
+      Serial.print(" Pitch: ");
+      Serial.print(meterPerSecSec[YAXIS]);
+      Serial.print(" Yaw: ");
+      Serial.println(meterPerSecSec[ZAXIS]);
+    }
   }
 }

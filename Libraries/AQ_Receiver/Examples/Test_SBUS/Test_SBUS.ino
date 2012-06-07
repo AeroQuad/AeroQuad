@@ -18,6 +18,13 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+/*
+  !! KNOWN BUG !!
+  For some reason, roll/pitch/yaw do not respond in this test sketch.
+  However, if the other channels respond correctly, chances are it's working.
+  RUN TX CALIBRATION BEFORE FLYING AND ENSURE ALL CHANNELS ARE WORKING
+*/
+
 #include <AQMath.h>
 #include <GlobalDefined.h>
 #include <Receiver_SBUS.h>
@@ -26,6 +33,7 @@ unsigned long timer;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Receiver library test (Receiver_SBUS)");
   
   initializeReceiver();
@@ -36,7 +44,6 @@ void loop() {
   if((millis() - timer) > 20) // 50Hz
   {
     timer = millis();
-    readSBUS();
     readReceiver();
     
     Serial.print("Throttle: ");
@@ -54,7 +61,8 @@ void loop() {
     Serial.print(" Aux2: ");
     Serial.print(receiverCommand[AUX2]);
     Serial.print(" Aux3: ");
-    Serial.println(receiverCommand[AUX3]);
+    Serial.print(receiverCommand[AUX3]);
+    
   }
 }
 

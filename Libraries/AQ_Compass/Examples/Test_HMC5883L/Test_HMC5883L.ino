@@ -19,60 +19,57 @@
 */
 
 #include <Wire.h>
+#include <Device_I2C.h>
+
+
+// use this if using SparkFun 9DOF, comment out otherwise
+#define SPARKFUN_9DOF_5883L
 
 #include <AQMath.h>
-#include <Device_I2C.h>
 #include <GlobalDefined.h>
-
-/* 
-  If using a SparkFun 9DOF, use Accelerometer_ADXL345_9DOF.h
-  otherwise, use Accelerometer_ADXL345.h
-*/
-//#include <Accelerometer_ADXL345.h>
-#include <Accelerometer_ADXL345_9DOF.h>
+#include <SensorsStatus.h>
+#include <Magnetometer_HMC5883L.h>
 
 unsigned long timer100Hz = 0;
 unsigned long timer25Hz = 0;
 
-void setup() 
-{
+void setup() {
+  
   Serial.begin(115200);
   Serial.println();
-  Serial.println("Accelerometer library test (ADXL345)");
-
-  Wire.begin();
+  Serial.println("Magnetometer library test (HMC5883L)");
   
-  initializeAccel();
-  if (vehicleState & ACCEL_DETECTED) {
-    Serial.println("Accelerometer found");
+  Wire.begin();
+  initializeMagnetometer();
+  if (vehicleState & MAG_DETECTED) {
+    Serial.println("Magnetometer found");
+    delay(1000);
   } else {
-    Serial.println("!! Accelerometer not found !!");
+    Serial.println("!! Magnetometer not found !!");
   }
-  computeAccelBias();
 }
 
-void loop() 
-{   
-  if (vehicleState & ACCEL_DETECTED)
+void loop() {
+  
+  if (vehicleState & MAG_DETECTED)
   {
-    measureAccelSum();
-    
     if ((millis() - timer100Hz) > 10) // 100Hz
     {
       timer100Hz = millis();
-      evaluateMetersPerSec();
+      measureMagnetometer(0.0,0.0);
     }
-      
-    if ((millis() - timer25Hz) > 40) // 25Hz
+     
+    if ((millis() - timer25Hz) > 40) // 25Hz 
     {
       timer25Hz = millis();
       
       Serial.print("Roll: ");
-      Serial.print(meterPerSecSec[XAXIS]);
-      Serial.print(" Pitch: ");
-      Serial.print(meterPerSecSec[YAXIS]);
-      Serial.print(" Yaw: ");
-      Serial.println(meterPerSecSec[ZAXIS]);
+      Serial.print(getMagnetometerRawData(YAXIS));
+      Serial.print(", Pitch: ");
+      Serial.print(getMagnetometerRawData(XAXIS));
+      Serial.print(", Yaw: ");
+      Serial.print(getMagnetometerRawData(ZAXIS));
+      Serial.println();
     }
   }
 }

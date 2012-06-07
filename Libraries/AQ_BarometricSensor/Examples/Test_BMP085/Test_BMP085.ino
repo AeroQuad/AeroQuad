@@ -21,6 +21,8 @@
 #include <Wire.h>
 #include <Device_I2C.h>
 #include <AQMath.h>
+#include <GlobalDefined.h>
+#include <SensorsStatus.h>
 
 #include <BarometricSensor.h>
 #include <BarometricSensor_BMP085.h>
