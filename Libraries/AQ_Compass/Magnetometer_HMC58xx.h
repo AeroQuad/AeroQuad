@@ -79,11 +79,11 @@ void measureMagnetometer(float roll, float pitch) {
   const float cosPitch = cos(pitch);
   const float sinPitch = sin(pitch);
 
-  magX = (float)measuredMagX * cosPitch + 
+  const float magX = (float)measuredMagX * cosPitch + 
                      (float)measuredMagY * sinRoll * sinPitch + 
                      (float)measuredMagZ * cosRoll * sinPitch;
            
-  magY = (float)measuredMagY * cosRoll - 
+  const float magY = (float)measuredMagY * cosRoll - 
                      (float)measuredMagZ * sinRoll;
 
   const float tmp  = sqrt(magX * magX + magY * magY);
