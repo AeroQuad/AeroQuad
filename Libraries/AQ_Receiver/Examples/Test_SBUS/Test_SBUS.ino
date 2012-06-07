@@ -19,7 +19,7 @@
 */
 
 /*
-  !! KNOWN BUG !!
+                          !! KNOWN BUG !!
   For some reason, roll/pitch/yaw do not respond in this test sketch.
   However, if the other channels respond correctly, chances are it's working.
   RUN TX CALIBRATION BEFORE FLYING AND ENSURE ALL CHANNELS ARE WORKING
@@ -29,7 +29,7 @@
 #include <GlobalDefined.h>
 #include <Receiver_SBUS.h>
 
-unsigned long timer;
+unsigned long timer25Hz;
 
 void setup() {
   Serial.begin(115200);
@@ -39,12 +39,13 @@ void setup() {
   initializeReceiver();
 }
 
-void loop() {
-  
-  if((millis() - timer) > 20) // 50Hz
+void loop() 
+{
+  readReceiver();
+    
+  if ((millis() - timer25Hz) > 40) // 25Hz
   {
-    timer = millis();
-    readReceiver();
+    timer25Hz = millis();
     
     Serial.print("Throttle: ");
     Serial.print(receiverCommand[THROTTLE]);
@@ -61,8 +62,7 @@ void loop() {
     Serial.print(" Aux2: ");
     Serial.print(receiverCommand[AUX2]);
     Serial.print(" Aux3: ");
-    Serial.print(receiverCommand[AUX3]);
-    
+    Serial.println(receiverCommand[AUX3]);
   }
 }
 
