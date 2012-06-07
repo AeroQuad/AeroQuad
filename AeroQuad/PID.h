@@ -21,22 +21,24 @@
 #ifndef _AQ_PID_H_
 #define _AQ_PID_H_
 
+enum {
+  RATE_XAXIS_PID_IDX = 0,
+  RATE_YAXIS_PID_IDX,
+  ZAXIS_PID_IDX,
+  ATTITUDE_XAXIS_PID_IDX,
+  ATTITUDE_YAXIS_PID_IDX,
+  HEADING_HOLD_PID_IDX,
+  ATTITUDE_GYRO_XAXIS_PID_IDX,
+  ATTITUDE_GYRO_YAXIS_PID_IDX,
+  BARO_ALTITUDE_HOLD_PID_IDX,
+  SONAR_ALTITUDE_HOLD_PID_IDX,
+  ZDAMPENING_PID_IDX,
+  GPSPITCH_PID_IDX,
+  GPSROLL_PID_IDX,
+  GPSYAW_PID_IDX,
 
-#define RATE_XAXIS_PID_IDX          0
-#define RATE_YAXIS_PID_IDX          1
-#define ZAXIS_PID_IDX               2
-#define ATTITUDE_XAXIS_PID_IDX      3
-#define ATTITUDE_YAXIS_PID_IDX      4
-#define HEADING_HOLD_PID_IDX        5
-#define ATTITUDE_GYRO_XAXIS_PID_IDX 6
-#define ATTITUDE_GYRO_YAXIS_PID_IDX 7
-#define BARO_ALTITUDE_HOLD_PID_IDX  8
-#define SONAR_ALTITUDE_HOLD_PID_IDX 9
-#define ZDAMPENING_PID_IDX          10
-#define GPSPITCH_PID_IDX            11
-#define GPSROLL_PID_IDX             12
-#define GPSYAW_PID_IDX              13
-
+  LAST_PID_IDX  // keep this definition at the end of this enum
+};
 
 // PID Variables
 struct PIDdata {
@@ -46,7 +48,8 @@ struct PIDdata {
   float previousPIDTime;
   float integratedError;
   float windupGuard; // Thinking about having individual wind up guards for each PID
-} PID[14];
+} PID[LAST_PID_IDX];
+
 // This struct above declares the variable PID[] to hold each of the PID values for various functions
 // The following constants are declared in AeroQuad.h
 // ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
