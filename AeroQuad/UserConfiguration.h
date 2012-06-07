@@ -168,6 +168,49 @@
 
 #define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
 
+
+// *******************************************************************************************************************************
+// In-flight tunng of PID Values
+// For more information please refer to http://aeroquad.com/showthread.php?3460-Change-PID-Values-quot-inflight-quot
+// Posible Values for PID´s
+// RATE_XAXIS_PID_IDX              Rate Mode Gyro Roll
+// RATE_YAXIS_PID_IDX              Rate Mode Gyro Pitch          
+// ZAXIS_PID_IDX                   Yaw
+// ATTITUDE_XAXIS_PID_IDX          Attitude Mode Accel Roll
+// ATTITUDE_YAXIS_PID_IDX          Attitude Mode Accel Pitch      
+// HEADING_HOLD_PID_IDX            Heading Hold Compass
+// ATTITUDE_GYRO_XAXIS_PID_IDX     Attitude Mode Gyro Roll 
+// ATTITUDE_GYRO_YAXIS_PID_IDX     Attitude Mode Gyro Pitch
+// ALTITUDE_HOLD_PID_IDX           Altutude Hold
+// ZDAMPENING_PID_IDX              not used in 3.01
+// *******************************************************************************************************************************
+//#define PIDAdjusting                                          //Switch for turning on/off Tuning
+//#define PIDAdjustingSwitchChannel   AUX3                      //Channel for Switch
+//#define PIDAdjustingSwitchMin       900                       // Minimum value to turn on tuning
+//#define PIDAdjustingSwitchMax       1100                      // Maximum value to turn on tuning
+
+//First Potentiometer
+//#define PIDAdjustingPot1Channel     AUX1                      //Channel for first Value
+//#define PIDAdjustingPot1Min         -100                      //Minimum Value
+//#define PIDAdjustingPot1Max         -300                      //Maximum Value
+//#define PIDAdjustingPot1Decimals    0
+//#define PIDAdjustingPot1PID1        XAXIS_PID_IDX				      //which Value to change
+//#define PIDAdjustingPot1PID1Type    D                         //which Type (P,I,D) to change
+//#define PIDAdjustingPot1PID2        YAXIS_PID_IDX				      //Second value to Change with first pot
+//#define PIDAdjustingPot1PID2Type    D
+
+//Second Potentiometer
+//#define PIDAdjustingPot2Channel     AUX2
+//#define PIDAdjustingPot2Min         5  
+//#define PIDAdjustingPot2Max         10
+//#define PIDAdjustingPot2Decimals    1
+//#define PIDAdjustingPot2PID1        ZAXIS_PID_IDX
+//#define PIDAdjustingPot2PID1Type    I
+//#define PIDAdjustingPot2PID2        ATTITUDE_YAXIS_PID_IDX
+//#define PIDAdjustingPot2PID2Type    I
+
+
+
 /****************************************************************************
  ****************************************************************************
  ****************************************************************************

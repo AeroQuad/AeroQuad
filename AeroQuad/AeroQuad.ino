@@ -1117,6 +1117,13 @@
   #include <CameraStabilizer_Aeroquad.h>
 #endif
 
+//********************************************************
+//************** PID Adjusting  DECLARATION **************
+//********************************************************
+// used only on mega for now
+#ifdef PIDAdjusting
+  #include <PIDAdjusting_Aeroquad.h>
+#endif
 
 //********************************************************
 //******** FLIGHT CONFIGURATION DECLARATION **************
@@ -1293,6 +1300,11 @@ void setup() {
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
 
+ // PID Adjusting Setup
+  #if defined (PIDAdjusting)
+    initializePIDADJUSTING();
+  #endif
+
   #if defined(MAX7456_OSD)
     initializeSPI();
     initializeOSD();
@@ -1427,6 +1439,10 @@ void loop () {
       
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+      #endif
+      
+      #if defined(PIDAdjusting)
+        PIDAdjusting_update();
       #endif
     }
 
