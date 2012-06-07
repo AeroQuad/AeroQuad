@@ -52,6 +52,7 @@ float aref; // Read in from EEPROM
 /**
  * Heading and heading hold global declaration section
  */
+ 
 byte  headingHoldConfig   = 0;
 float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading             = 0; // measured heading from yaw gyro (process variable)
