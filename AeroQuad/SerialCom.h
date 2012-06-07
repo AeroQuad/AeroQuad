@@ -124,6 +124,8 @@ void readSerialCommand() {
     case 'I': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
       writeEEPROM();
+      storeSensorsZeroToEEPROM();
+
       calibrateGyro();
       computeAccelBias();
       zeroIntegralError();
@@ -147,8 +149,8 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();      
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
+
       storeSensorsZeroToEEPROM();
-      //writeEEPROM();
       break;
       
     case 'L': // generate accel bias
@@ -157,6 +159,7 @@ void readSerialCommand() {
         calibrateKinematics();
         accelOneG = meterPerSecSec[ZAXIS];
       #endif
+
       storeSensorsZeroToEEPROM();
       break;
       
@@ -167,8 +170,9 @@ void readSerialCommand() {
         magBias[ZAXIS]  = readFloatSerial();
         writeEEPROM();
       #else
-        for(int c=0;c<3;c++)
-	      { readFloatSerial(); }
+        for(int c=0;c<3;c++) {
+          readFloatSerial();
+        }
       #endif
       break;
       
@@ -651,49 +655,39 @@ void sendSerialTelemetry() {
   }
 }
 
-// Used to read floating point values from the serial port
-float readFloatSerial() {
-  #define SERIALFLOATSIZE 15
+void readValueSerial(char *data, byte size) {
   byte index = 0;
   byte timeout = 0;
-  char data[SERIALFLOATSIZE] = "";
+  data[0] = '\0';
 
   do {
     if (SERIAL_AVAILABLE() == 0) {
-      delay(10);
+      delay(1);
       timeout++;
-    }
-    else {
+    } else {
       data[index] = SERIAL_READ();
       timeout = 0;
       index++;
     }
-  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
-  data[index] = '\0';
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < size-1));
 
+  data[index] = '\0';
+}
+
+
+// Used to read floating point values from the serial port
+float readFloatSerial() {
+  char data[15] = "";
+
+  readValueSerial(data, sizeof(data));
   return atof(data);
 }
 
 // Used to read integer values from the serial port
 long readIntegerSerial() {
-  #define SERIALINTEGERSIZE 16
-  byte index = 0;
-  byte timeout = 0;
-  char data[SERIALINTEGERSIZE] = "";
+  char data[16] = "";
 
-  do {
-    if (SERIAL_AVAILABLE() == 0) {
-      delay(10);
-      timeout++;
-    }
-    else {
-      data[index] = SERIAL_READ();
-      timeout = 0;
-      index++;
-    }
-  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
-  data[index] = '\0';
-
+  readValueSerial(data, sizeof(data));
   return atol(data);
 }
 

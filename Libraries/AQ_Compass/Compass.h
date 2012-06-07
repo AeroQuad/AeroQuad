@@ -34,6 +34,8 @@ float measuredMag[3] = {0.0,0.0,0.0};
 float rawMag[3] = {0.0,0.0,0.0};
 float magBias[3] = {0.0,0.0,0.0};
 
+float magX = 0.0;
+float magY = 0.0;
 //float magMax[3] = {0.0,0.0,0.0};
 //float magMin[3] = {0.0,0.0,0.0};
 float magScale[3] = {1.0,1.0,1.0};

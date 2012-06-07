@@ -26,8 +26,8 @@
  * @Kenny9999
  * I'm open to anything more lighweight working and FLIGHT TESTED
  */
-#ifndef _AQ_HEADING_FUSION_PROCESSOR_
-#define _AQ_HEADING_FUSION_PROCESSOR_
+#ifndef _AQ_HEADING_FUSION_PROCESSOR_DCM_
+#define _AQ_HEADING_FUSION_PROCESSOR_DCM_
 
 #if defined UseGPS
   #include "MagnetometerDeclinationDB.h"

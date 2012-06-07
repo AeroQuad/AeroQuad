@@ -1082,11 +1082,11 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined (HMC5843)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5843.h>
-  #include <HeadingFusionProcessor.h>
 #elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5883L.h>
-  #include <HeadingFusionProcessor.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
 
@@ -1251,14 +1251,12 @@ void setup() {
 //  computeAccelBias();
   zeroIntegralError();
 
+  initializeKinematics();
   // Flight angle estimation
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
-    initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
-    initializeHeadingFusion(getHdgXY(XAXIS), getHdgXY(YAXIS));
-  #else
-    initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initializes to a heading of 0 degrees
+    initializeHeadingFusion();
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -1369,13 +1367,6 @@ void loop () {
       filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
     }
       
-//    #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-//       float estimatedXVelocity = (smootedAccel[XAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//       float estimatedYVelocity = (smootedAccel[YAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//       float estimatedZVelocity = (smootedAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-//    #endif         
-      
-      
     /* calculate kinematics */
     calculateKinematics(gyroRate[XAXIS],
                         gyroRate[YAXIS],
@@ -1449,16 +1440,9 @@ void loop () {
         tenHZpreviousTime = currentTime;
          
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(gyroRate[XAXIS],
-                         gyroRate[YAXIS],
-                         gyroRate[ZAXIS],
-                         filteredAccel[XAXIS],
-                         filteredAccel[YAXIS],
-                         filteredAccel[ZAXIS],
-                         accelOneG,
-                         getHdgXY(XAXIS),
-                         getHdgXY(YAXIS),
-                         G_Dt);
+        
+        calculateHeading();
+        
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
@@ -1495,7 +1479,7 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
-  
+    
     previousTime = currentTime;
   }
   
