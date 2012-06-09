@@ -299,6 +299,15 @@ void initHomeBase() {
       }
       isGpsHaveANewPosition = false;
     }
+    
+//    Serial.print(currentPosition.latitude);
+//    Serial.print(" ");
+//    Serial.print(currentPosition.longitude);
+//    Serial.print(" ");
+//    Serial.print(distanceX);
+//    Serial.print(" ");
+//    Serial.println(distanceY);
+    
   }
 #endif  // #define UseGPSNavigator
 

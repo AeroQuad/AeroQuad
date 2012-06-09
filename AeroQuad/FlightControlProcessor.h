@@ -333,8 +333,6 @@ void processFlightControl() {
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     motorCommand[motor] = constrain(motorCommand[motor], motorMinCommand[motor], motorMaxCommand[motor]);
   }
-  
-  
 
   // ESC Calibration
   if (motorArmed == OFF) {
