@@ -1096,6 +1096,9 @@
 #if defined (BMP085)
   #include <BarometricSensor_BMP085.h>
 #endif
+#elif defined (MS5611)
+ #include <BarometricSensor_MS5611.h>
+#endif
 #if defined (XLMAXSONAR)
   #include <MaxSonarRangeFinder.h>
 #endif 
