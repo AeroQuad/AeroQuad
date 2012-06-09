@@ -51,8 +51,8 @@ unsigned short MS5611Prom[MS561101BA_PROM_REG_COUNT];
 
 long MS5611lastRawTemperature;
 long MS5611lastRawPressure;
-int64 MS5611_sens=0;
-int64 MS5611_offset=0;
+int64_t MS5611_sens=0;
+int64_t MS5611_offset=0;
 
 // taken from AN520
 unsigned char MS5611crc4(unsigned short n_prom[])
@@ -149,9 +149,9 @@ unsigned long readRawTemperature()
 {
   // see datasheet page 7 for formulas
   MS5611lastRawTemperature = MS5611readConversion(MS5611_I2C_ADDRESS);
-  int64 dT       = MS5611lastRawTemperature - (((long)MS5611Prom[5]) << 8);
-  MS5611_offset  = (((int64)MS5611Prom[2]) << 16) + ((MS5611Prom[4] * dT) >> 7);
-  MS5611_sens    = (((int64)MS5611Prom[1]) << 15) + ((MS5611Prom[3] * dT) >> 8);
+  int64_t dT       = MS5611lastRawTemperature - (((long)MS5611Prom[5]) << 8);
+  MS5611_offset  = (((int64_t)MS5611Prom[2]) << 16) + ((MS5611Prom[4] * dT) >> 7);
+  MS5611_sens    = (((int64_t)MS5611Prom[1]) << 15) + ((MS5611Prom[3] * dT) >> 8);
 
 
 #ifdef DEBUG_MS5611
@@ -165,7 +165,7 @@ unsigned long readRawTemperature()
 
 float readTemperature()
 {
-  return ((1<<5)*2000 + (((MS5611lastRawTemperature - ((int64)MS5611Prom[5] << 8)) * MS5611Prom[6]) >> (23-5))) / ((1<<5) * 100.0);
+  return ((1<<5)*2000 + (((MS5611lastRawTemperature - ((int64_t)MS5611Prom[5] << 8)) * MS5611Prom[6]) >> (23-5))) / ((1<<5) * 100.0);
 }
 
 void requestRawPressure()

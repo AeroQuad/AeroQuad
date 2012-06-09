@@ -51,7 +51,7 @@ void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(int *gyroADC);
 
 void initializeGyro() {
-  if (readWhoI2C((ITG3200_ADDRESS) & ITG3200_IDENTITY_MASK) == ITG3200_IDENTITY) {
+  if ((readWhoI2C(ITG3200_ADDRESS) & ITG3200_IDENTITY_MASK) == ITG3200_IDENTITY) {
 	vehicleState |= GYRO_DETECTED;
   }
 	
