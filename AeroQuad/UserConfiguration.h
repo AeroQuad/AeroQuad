@@ -49,7 +49,7 @@
 #define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-//#define hexXConfig      // EXPERIMENTAL: not completely re-tested
+//#define hexXConfig      
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
@@ -57,7 +57,12 @@
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
 
+
+// MOTOR ADVANCE CONFIG SECTION
 //#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
+
+//#define USE_400HZ_ESC // For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
+
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -76,12 +81,11 @@
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
 #define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
+//#define AutoLanding // Enable auto landing on channel AUX3 of the remote, NEED AltitudeHoldBaro AND AltitudeHoldRangeFinder
 
 #define UseGPS // Try to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
 //#define UseGPS_NMEA   // force the use of NMEA GPS
-//#define UseGPS_UBLOX  // force the use of UBLOX GPS
 //#define UseGPS_MTK  // force the use of MTK GPS
-//#define UseGPS_406  // force the use of MTK GPS
 #define UseGPSNavigator // EXPERIMENTAL NEED UseGPS TO BE DEFINED, enable GPS position hold, auto return home when no mission or execute mission
 
 //
@@ -102,6 +106,7 @@
 // *******************************************************************************************************************************
 //#define NormalReceiver // this do nothing really but, it indicate users that they don't have to define other option here if they have a normal receiver
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
+//#define ReceiverSBUS  // Use a Futaba sBUS RX, connect sBUS data line to Serial2 RX, supports up to 8 channels
 //#define ReceiverPPM // Use a ppm receiver
 #define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
 // You need to select one of these channel order definitions for PPM receiver

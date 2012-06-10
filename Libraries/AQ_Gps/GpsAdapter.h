@@ -29,7 +29,7 @@ GPS *gps;
 #elif defined UseGPS_UBLOX
   AP_GPS_UBLOX GPS(&Serial1);  
 #elif defined UseGPS_MTK
-  AP_GPS_MTK GPS(&Serial1);
+  AP_GPS_MTK16 GPS(&Serial1);
 #elif defined UseGPS_406
   AP_GPS_406 GPS(&Serial1);
 #else
@@ -38,7 +38,7 @@ GPS *gps;
 
 #include <GpsDataType.h>
 
-#define MIN_NB_SATS_IN_USE 6
+#define MIN_NB_SATS_IN_USE 5
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795

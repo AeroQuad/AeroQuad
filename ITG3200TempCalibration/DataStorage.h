@@ -148,9 +148,12 @@ void initializeEEPROM() {
   runTimeAccelBias[ZAXIS] = 0.0;
 
   #ifdef HeadingMagHold
-    magBias[XAXIS] = 0.0;
-    magBias[YAXIS] = 0.0;
-    magBias[ZAXIS] = 0.0;
+    magScale[XAXIS] = 1.0;
+    magBias[XAXIS]  = 0.0;
+    magScale[YAXIS] = 1.0;
+    magBias[YAXIS]  = 0.0;
+    magScale[ZAXIS] = 1.0;
+    magBias[ZAXIS]  = 0.0;
   #endif
   windupGuard = 1000.0;
 
@@ -328,6 +331,9 @@ void writeEEPROM(){
     writeFloat(magBias[XAXIS], XAXIS_MAG_BIAS_ADR);
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
+    writeFloat(magScale[XAXIS], XAXIS_MAG_SCALE_FACTOR_ADR);
+    writeFloat(magScale[YAXIS], YAXIS_MAG_SCALE_FACTOR_ADR);
+    writeFloat(magScale[ZAXIS], ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);

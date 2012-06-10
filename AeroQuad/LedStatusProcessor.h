@@ -24,8 +24,7 @@
 #ifndef _AQ_LedProcessor_H_
 #define _AQ_LedProcessor_H_
 
-byte flashingLedState = 0, batteryCounter = 0; // this counter increments by one at 10Hz
-boolean keepBuzzing = false;
+byte flashingLedState = 0; // this counter increments by one at 10Hz
 
 void processLedStatus() {
 
@@ -45,7 +44,7 @@ void processLedStatus() {
     else { 
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
-    
+   
     if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized())
     {
        hasBuzzerHigherPriority = true;

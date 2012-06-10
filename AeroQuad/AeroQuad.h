@@ -28,7 +28,7 @@
 #include "pins_arduino.h"
 #include "GpsDataType.h"
 #include "AQMath.h"
-#include "receiver.h"
+#include "Receiver.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
@@ -52,6 +52,7 @@ float aref; // Read in from EEPROM
 /**
  * Heading and heading hold global declaration section
  */
+ 
 byte  headingHoldConfig   = 0;
 float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading             = 0; // measured heading from yaw gyro (process variable)
@@ -145,6 +146,7 @@ void processHeading();
 //  float previousSensorAltitude = 0.0;
 
   #if defined AltitudeHoldBaro
+    float previousBaroAltitude = 0.0;
     float baroAltitudeToHoldTarget = 0.0;
   #endif  
   #if defined AltitudeHoldRangeFinder
@@ -157,6 +159,10 @@ void processHeading();
  * Auto landing feature variables
  */
 #if defined (AutoLanding)
+  #define BARO_AUTO_DESCENT_STATE 2
+  #define SONAR_AUTO_DESCENT_STATE 3
+  #define MOTOR_AUTO_DESCENT_STATE 4
+  
   byte autoLandingState = OFF;
   boolean isStoreAltitudeForAutoLanfingNeeded = false;
   int autoLandingThrottleCorrection = 0;
@@ -294,8 +300,11 @@ typedef struct {
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
   // Mag Calibration
   float XAXIS_MAG_BIAS_ADR;
+  float XAXIS_MAG_SCALE_FACTOR_ADR;
   float YAXIS_MAG_BIAS_ADR;
+  float YAXIS_MAG_SCALE_FACTOR_ADR;
   float ZAXIS_MAG_BIAS_ADR;
+  float ZAXIS_MAG_SCALE_FACTOR_ADR;
   // Battery Monitor
   float BATT_ALARM_VOLTAGE_ADR;
   float BATT_THROTTLE_TARGET_ADR;

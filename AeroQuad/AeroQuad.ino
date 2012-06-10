@@ -22,7 +22,7 @@
    Before flight, select the different user options for your AeroQuad by
    editing UserConfiguration.h.
 
-   If you need additional assitance go to http://www.aeroquad.com/forum.php
+   If you need additional assistance go to http://www.aeroquad.com/forum.php
    or talk to us live on IRC #aeroquad
 *****************************************************************************/
 
@@ -41,15 +41,19 @@
 #endif 
 
 #if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
-  #error GpsNavigation NEED AltitudeHoldBaro defined
+  #error "GpsNavigation NEED AltitudeHoldBaro defined"
 #endif
 
-#if defined (AutoLanding) && !defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder)
-  #error AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined
+#if defined (AutoLanding) && (!defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder))
+  #error "AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined"
+#endif
+
+#if defined (ReceiverSBUS) && defined (SlowTelemetry)
+  #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
 #if defined UseGPS
-  // needed here to use DIYDrone gps libraries
+  // needed here to use DIYDrone GPS libraries
   #include <FastSerial.h>
   #include <AP_Common.h>
   #include <AP_GPS.h>
@@ -59,7 +63,6 @@
   FastSerialPort2(Serial2);
   FastSerialPort3(Serial3);
 #endif
-
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -94,7 +97,7 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported in v1
+  // unsupported in v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
@@ -108,7 +111,7 @@
 
 
   /**
-   * Put AeroQuad_v1 specific intialization need here
+   * Put AeroQuad_v1 specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -142,7 +145,7 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported in v1
+  // unsupported in v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
@@ -155,7 +158,7 @@
   #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_v1_IDG specific intialization need here
+   * Put AeroQuad_v1_IDG specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -182,7 +185,7 @@
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
 
-  // Accelerometer declaraion
+  // Accelerometer declaration
   #include <Accelerometer_BMA180.h>
 
   // Receiver declaration
@@ -212,7 +215,7 @@
   #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_v18 specific intialization need here
+   * Put AeroQuad_v18 specific initialization need here
    */
   void initPlatform() {
 
@@ -253,7 +256,11 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM
+  #if defined (quadXConfig) || defined (quadPlusConfig) || defined (quadY4Config)
+    #define MOTOR_PWM_Timer
+  #else
+    #define MOTOR_PWM
+  #endif    
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -268,7 +275,7 @@
     #undef POWERED_BY_VIN        
   #endif
 
-  // unsuported in mini
+  // unsupported in mini
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef CameraControl
@@ -277,7 +284,7 @@
   #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_Mini specific intialization need here
+   * Put AeroQuad_Mini specific initialization need here
    */
   void initPlatform() {
 
@@ -319,7 +326,7 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported on mega v1
+  // unsupported on mega v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
@@ -330,7 +337,7 @@
   #undef OSD
 
   /**
-   * Put AeroQuadMega_v1 specific intialization need here
+   * Put AeroQuadMega_v1 specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -375,7 +382,7 @@
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro    
-    #define BMP085
+    #define BMP085 
   #endif
   #ifdef AltitudeHoldRangeFinder
     #define XLMAXSONAR 
@@ -402,7 +409,7 @@
   #endif
 
   /**
-   * Put AeroQuadMega_v2 specific intialization need here
+   * Put AeroQuadMega_v2 specific initialization need here
    */
   void initPlatform() {
 
@@ -495,7 +502,7 @@
 
 
   /**
-   * Put AeroQuadMega_v21 specific intialization need here
+   * Put AeroQuadMega_v21 specific initialization need here
    */
   void initPlatform() {
 
@@ -586,7 +593,7 @@
   #endif
 
   /**
-   * Put AeroQuadMega_v2 specific intialization need here
+   * Put AeroQuadMega_v2 specific initialization need here
    */
   void initPlatform() {
 
@@ -672,7 +679,7 @@
 
   
   /**
-   * Put ArduCopter specific intialization need here
+   * Put ArduCopter specific initialization need here
    */
   void initPlatform() {
     pinMode(LED_Red, OUTPUT);
@@ -719,7 +726,7 @@
   #define MOTOR_PWM
 
   // heading mag hold declaration
-  // unsuported on mega v1
+  // unsupported on mega v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
@@ -733,7 +740,7 @@
 
 
   /**
-   * Put AeroQuad_Wii specific intialization need here
+   * Put AeroQuad_Wii specific initialization need here
    */
   void initPlatform() {
      Wire.begin();
@@ -809,7 +816,7 @@
 
 
   /**
-   * Put AeroQuadMega_Wii specific intialization need here
+   * Put AeroQuadMega_Wii specific initialization need here
    */
   void initPlatform() {
     Wire.begin();
@@ -853,7 +860,7 @@
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
 
-  // Compas declaration
+  // Compass declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
@@ -884,7 +891,7 @@
 
 
   /**
-   * Put AeroQuadMega_CHR6DM specific intialization need here
+   * Put AeroQuadMega_CHR6DM specific initialization need here
    */
   void initPlatform() {
     Serial1.begin(BAUD);
@@ -939,7 +946,7 @@
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
 
-  // Compas declaration
+  // Compass declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
@@ -970,7 +977,7 @@
 
 
   /**
-   * Put APM_OP_CHR6DM specific intialization need here
+   * Put APM_OP_CHR6DM specific initialization need here
    */
   void initPlatform() {
     pinMode(LED_Red, OUTPUT);
@@ -1037,6 +1044,8 @@
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
+#elif defined ReceiverSBUS
+  #include <Receiver_SBUS.h>
 #elif defined RECEIVER_328P
   #include <Receiver_328p.h>
 #elif defined RECEIVER_MEGA
@@ -1076,11 +1085,11 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined (HMC5843)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5843.h>
-  #include <HeadingFusionProcessor.h>
 #elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5883L.h>
-  #include <HeadingFusionProcessor.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
 
@@ -1089,6 +1098,8 @@
 //********************************************************
 #if defined (BMP085)
   #include <BarometricSensor_BMP085.h>
+#elif defined (MS5611)
+ #include <BarometricSensor_MS5611.h>
 #endif
 #if defined (XLMAXSONAR)
   #include <MaxSonarRangeFinder.h>
@@ -1145,7 +1156,7 @@
     #error We need the magnetometer to use the GPS
   #endif 
 //  #if defined LASTCHANNEL 6
-//    #error We need 7 receiver channel to use gps navigator
+//    #error We need 7 receiver channel to use GPS navigator
 //  #endif
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
@@ -1162,7 +1173,7 @@
     #include "OSDMenu.h"
   #endif
 #else  
-    #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
+    #undef OSD_SYSTEM_MENU  // can't use menu system without an OSD
 #endif
 
 //********************************************************
@@ -1203,14 +1214,14 @@
 
 /**
  * Main setup function, called one time at bootup
- * initalize all system and sub system of the 
+ * initialize all system and sub system of the
  * Aeroquad
  */
 void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-
+  
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
@@ -1242,17 +1253,15 @@ void setup() {
 
   // Calibrate sensors
   calibrateGyro();
-  computeAccelBias();
+//  computeAccelBias();
   zeroIntegralError();
 
+  initializeKinematics();
   // Flight angle estimation
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
-    initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
-    initializeHeadingFusion(getHdgXY(XAXIS), getHdgXY(YAXIS));
-  #else
-    initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
+    initializeHeadingFusion();
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -1313,7 +1322,7 @@ void setup() {
   #endif
 
   setupFourthOrder();
-
+  
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
@@ -1347,7 +1356,7 @@ void loop () {
   measureCriticalSensors();
 
   // ================================================================
-  // 100hz task loop
+  // 100Hz task loop
   // ================================================================
   if (deltaTime >= 10000) {
     
@@ -1363,13 +1372,7 @@ void loop () {
       filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
     }
       
-//    #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-//       float estimatedXVelocity = (smootedAccel[XAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//       float estimatedYVelocity = (smootedAccel[YAXIS] * (1 - invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS]))));
-//       float estimatedZVelocity = (smootedAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(smootedAccel[XAXIS]) + isq(smootedAccel[YAXIS]) + isq(smootedAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-//    #endif         
-      
-    /* calculate kinematics*/
+    /* calculate kinematics */
     calculateKinematics(gyroRate[XAXIS],
                         gyroRate[YAXIS],
                         gyroRate[ZAXIS],
@@ -1382,9 +1385,6 @@ void loop () {
     // Evaluate are here because we want it to be synchronized with the processFlightControl
     #if defined AltitudeHoldBaro
       measureBaroSum(); 
-      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-        evaluateBaroAltitude();
-      }
     #endif
           
     // Combines external pilot commands and measured sensor data to generate motor commands
@@ -1402,7 +1402,7 @@ void loop () {
     #endif
 
     // ================================================================
-    // 50hz task loop
+    // 50Hz task loop
     // ================================================================
     if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
 
@@ -1411,6 +1411,10 @@ void loop () {
 
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
+      
+      #if defined AltitudeHoldBaro
+        processExtrapolatedBaroAltitude();
+      #endif
       
       #if defined (UseRSSIFaileSafe) 
         readRSSI();
@@ -1433,7 +1437,7 @@ void loop () {
     }
 
     // ================================================================
-    // 10hz task loop
+    // 10Hz task loop
     // ================================================================
     if (frameCounter % TASK_10HZ == 0) {  //   10 Hz tasks
 
@@ -1442,16 +1446,9 @@ void loop () {
         tenHZpreviousTime = currentTime;
          
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-        calculateHeading(gyroRate[XAXIS],
-                         gyroRate[YAXIS],
-                         gyroRate[ZAXIS],
-                         filteredAccel[XAXIS],
-                         filteredAccel[YAXIS],
-                         filteredAccel[ZAXIS],
-                         accelOneG,
-                         getHdgXY(XAXIS),
-                         getHdgXY(YAXIS),
-                         G_Dt);
+        
+        calculateHeading();
+        
       #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
@@ -1488,7 +1485,7 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
-  
+    
     previousTime = currentTime;
   }
   

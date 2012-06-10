@@ -64,13 +64,14 @@ void readPilotCommands() {
     
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
-      #if defined (UseGPS)
-       if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized()) {   // if GPS, wait for home position fix!
-          return;
-        }
-        hasBuzzerHigherPriority = false;
-      #endif 
 
+      #if defined (UseGPS)
+        if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized()) {   // if GPS, wait for home position fix!
+           return;
+         }
+         hasBuzzerHigherPriority = false;
+      #endif 
+      
       #ifdef OSD_SYSTEM_MENU
         if (menuOwnsSticks) {
           return;
@@ -105,11 +106,11 @@ void readPilotCommands() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      if (receiverCommand[AUX1] < 1750) {
-       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+     if (receiverCommand[AUX1] < 1750) {
+      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
-            baroAltitudeToHoldTarget = getBaroAltitude();
+            baroAltitudeToHoldTarget = estimatedBaroAltitude;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
           #endif
@@ -132,9 +133,9 @@ void readPilotCommands() {
   
   #if defined (AutoLanding)
     if (receiverCommand[AUX3] < 1750) {
-      autoLandingState = ON;
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeForAutoLanfingNeeded) {
+          autoLandingState = BARO_AUTO_DESCENT_STATE;
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
@@ -183,7 +184,7 @@ void readPilotCommands() {
     }
   
   
-    if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) {  // Enter in execute mission state, if none, go back home, override the position hold
+    if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) {   // Enter in execute mission state, if none, go back home, override the position hold
     
       if (isInitNavigationNeeded) {
         
