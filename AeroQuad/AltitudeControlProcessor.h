@@ -43,6 +43,40 @@
 
 #define ALTITUDE_BUMP_SPEED 0.01
 
+#if defined AltitudeHoldBaro
+  #define BARO_MAX_SAMPLE_COUNT 20
+  float estimatedBaroAltitude = 0.0;
+  unsigned long previousBaroReadTime = 0.0;
+  unsigned long baroTimeOffset = 0.0;
+  unsigned long previousBaroAltitudeEstimationTime;
+  float baroAltitudeOffset = 0.0;
+  
+
+  void processExtrapolatedBaroAltitude() {
+    
+    unsigned long baroTime = micros();
+    if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
+      
+      previousBaroAltitude = getBaroAltitude();
+      evaluateBaroAltitude();
+      baroAltitudeOffset = previousBaroAltitude - getBaroAltitude();
+      
+      baroTimeOffset = baroTime - previousBaroReadTime;
+      previousBaroReadTime = baroTime;
+      
+      estimatedBaroAltitude = getBaroAltitude();
+    }
+    else {
+      
+      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
+      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
+      estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
+    }
+
+    previousBaroAltitudeEstimationTime = baroTime;
+  }
+#endif
+
 /**
  * processAltitudeHold
  * 
@@ -71,7 +105,7 @@ void processAltitudeHold()
     #endif
     #if defined AltitudeHoldBaro
       if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
-        altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, getBaroAltitude(), &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
+        altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, estimatedBaroAltitude, &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
         altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       }
     #endif        

@@ -28,6 +28,10 @@ void sendByteI2C(int deviceAddress, byte dataValue) {
   Wire.endTransmission();
 }
 
+byte readByteI2C() {
+    return Wire.read();
+}
+
 byte readByteI2C(int deviceAddress) {
 
     Wire.requestFrom(deviceAddress, 1);
