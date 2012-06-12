@@ -59,7 +59,7 @@
       
       previousBaroAltitude = getBaroAltitude();
       evaluateBaroAltitude();
-      baroAltitudeOffset = previousBaroAltitude - getBaroAltitude();
+      baroAltitudeOffset = getBaroAltitude() - previousBaroAltitude;
       
       baroTimeOffset = baroTime - previousBaroReadTime;
       previousBaroReadTime = baroTime;
