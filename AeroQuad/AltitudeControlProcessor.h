@@ -28,6 +28,7 @@
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 
+
 //      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
 //      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
 //      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
