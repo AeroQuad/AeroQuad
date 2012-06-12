@@ -121,10 +121,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -168,10 +166,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
