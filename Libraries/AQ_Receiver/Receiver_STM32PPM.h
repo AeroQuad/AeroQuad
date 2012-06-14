@@ -30,7 +30,7 @@
 // definition of pins used for PWM receiver input
 
 #ifdef BOARD_aeroquad32
-static byte receiverPin = Port2Pin('D', 15); // was 12
+static byte receiverPin = Port2Pin('D', 15);
 #endif
 
 #ifdef BOARD_aeroquad32mini
@@ -136,13 +136,13 @@ void FrqChange()
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
 
   if(rising) {
-    uint16_t highTime = c - FrqData.RiseTime;
-    if ((highTime>900) && (highTime<2100)) {
+    uint16_t diffTime = c - FrqData.RiseTime;
+    if ((diffTime>900) && (diffTime<2100)) {
       if (currentChannel<8) {
-	rawChannelValue[currentChannel]=highTime;
+	rawChannelValue[currentChannel]=diffTime;
 	currentChannel++;
       }
-    } else if (highTime>2500) {
+    } else if (diffTime>2500) {
       currentChannel=0;
     } else {
       // glitch stop and wait next round
