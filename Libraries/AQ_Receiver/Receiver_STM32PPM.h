@@ -80,8 +80,6 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 {
   aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
 
-  FrqData.Channel      = 0;
-  
   FrqData.TimerDev     = aTimer;
   timer_gen_reg_map *timer = aTimer->regs.gen;
   FrqData.TimerRegs    = timer;
