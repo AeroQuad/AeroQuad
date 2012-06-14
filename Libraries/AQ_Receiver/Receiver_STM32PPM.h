@@ -146,29 +146,18 @@ void FrqChange()
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
 
   if(FrqData.Valid) {
-    if(FrqData.Debug) {
-      //      Serial.print(FrqData.Channel);
-      //Serial.print(rising ? " r " : " f ");
-      //Serial.print((int)c);
-      //Serial.print(" ");
-      uint16_t delta = c - FrqData.LastChange;
-      Serial.print((int)delta);
-      Serial.println();
-      FrqData.LastChange = c;
-    }
-    
     if(rising) {
       // rising edge, store start time
       FrqData.RiseTime = c;
-      //Serial.print("  r ");
-      //Serial.println(FrqData.RiseTime, 10);
     } else {
       uint16_t highTime = c - FrqData.RiseTime;
-      if(highTime > 900 && highTime < 2100) {
-	FrqData.HighTime = highTime;
-      } else {
-	FrqData.Valid = false;
-      }
+      Serial.print(highTime);
+      Serial.println();
+      //      if(highTime > 900 && highTime < 2100) {
+      //FrqData.HighTime = highTime;
+      //} else {
+      //FrqData.Valid = false;
+      //}
       //Serial.print("  f ");
       //Serial.println(FrqData.HighTime, 10);
     }
@@ -177,7 +166,6 @@ void FrqChange()
       // rising edge, store start time
       FrqData.RiseTime = c;
       FrqData.Valid = true;
-    Serial.print("V ");
     }
   }
   
