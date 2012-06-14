@@ -1049,6 +1049,8 @@
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32PPM
+  #include <Receiver_STM32PPM.h>  
 #elif defined RECEIVER_STM32
   #include <Receiver_STM32.h>  
 #endif
