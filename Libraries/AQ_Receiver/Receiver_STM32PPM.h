@@ -1,10 +1,10 @@
 /*
-  Copyright (c) 2011 ala42.  All rights reserved.
+  Copyright (c) 2012 kha.  All rights reserved.
 
+  STM32 PPM receiver by kha based on 
   STM32 receiver class by ala42 using time input capture
   for use with AeroQuad software and Maple library
-  V 1.0 Oct 15 2011
-  V 1.1 Jan 22 2012	class free version for AeroQuad 3.0 compatibility
+  V 1.0 Jun 14 2012
 
   Define the pin numbers used for the receiver in receiverPin[]
 
@@ -69,16 +69,9 @@ typedef struct {
   timer_dev   *TimerDev;
   timer_gen_reg_map *TimerRegs;
   __io uint32	*Timer_ccr;
-  int			Low;
-  int			High;
-  uint16		HighTime;
   uint16		RiseTime;
-  uint16		LastChange;
-  int			Channel;
   int			TimerChannel;
   int			PolarityMask;
-  int			Valid;
-  int			Debug;
 } tFrqData;
 
 volatile tFrqData FrqData;
@@ -88,15 +81,12 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
   aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
 
   FrqData.Channel      = 0;
-  FrqData.Valid        = false;
   
   FrqData.TimerDev     = aTimer;
   timer_gen_reg_map *timer = aTimer->regs.gen;
   FrqData.TimerRegs    = timer;
   
   FrqData.Timer_ccr    = &timer->CCR1 + aTimerChannel;
-  FrqData.Debug        = true;
-  FrqData.HighTime     = aDefault;
   FrqData.TimerChannel = aTimerChannel;
   
   int TimerEnable = (1 << (4*aTimerChannel));
