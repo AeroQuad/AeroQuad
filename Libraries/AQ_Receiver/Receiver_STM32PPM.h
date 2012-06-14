@@ -30,7 +30,7 @@
 // definition of pins used for PWM receiver input
 
 #ifdef BOARD_aeroquad32
-static byte receiverPin = Port2Pin('D', 12);
+static byte receiverPin = Port2Pin('D', 15); // was 12
 #endif
 
 #ifdef BOARD_aeroquad32mini
