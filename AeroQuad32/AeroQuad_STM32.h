@@ -52,7 +52,11 @@ tSerial &Serial = SERIAL_VAR;
 #endif
 
 // Receiver Declaration
+#ifndef Receiver_PPM
 #define RECEIVER_STM32
+#else
+#define RECEIVER_STM32PPM
+#endif
 
 // Motor declaration
 #define MOTOR_STM32
