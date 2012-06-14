@@ -23,7 +23,7 @@
 #include "Receiver.h"
 #include "wirish.h"
 
-//#define STM32_TIMER_DEBUG // enable debug messages
+#define STM32_TIMER_DEBUG // enable debug messages
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration part starts here
