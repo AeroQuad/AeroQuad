@@ -63,7 +63,7 @@ static byte ReceiverChannelMap[] = {SERIAL_SUM_PPM};
 ///////////////////////////////////////////////////////////////////////////////
 // implementation part starts here.
 // forward declaration, array is defined at the end of this file
-extern voidFuncPtr FrqChange;
+extern voidFuncPtr FrqChange();
 
 typedef struct {
   timer_dev   *TimerDev;
@@ -228,7 +228,7 @@ void FrqChange()
     }
   }
   
-  PWMInvertPolarity(f);
+  PWMInvertPolarity();
 }
 
 
