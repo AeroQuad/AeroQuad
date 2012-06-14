@@ -144,6 +144,8 @@ void FrqChange()
   timer_gen_reg_map *timer = FrqData.TimerRegs;
   uint16_t c = *(FrqData.Timer_ccr);
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
+
+  Serial.print(rising ? " I " : " i ");
   
   if(FrqData.Valid) {
     if(FrqData.Debug) {
