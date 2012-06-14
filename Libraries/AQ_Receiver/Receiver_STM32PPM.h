@@ -141,6 +141,7 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 
 void FrqChange()
 {
+    Serial.print("I ");
   timer_gen_reg_map *timer = FrqData.TimerRegs;
   uint16_t c = *(FrqData.Timer_ccr);
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
@@ -177,6 +178,7 @@ void FrqChange()
       // rising edge, store start time
       FrqData.RiseTime = c;
       FrqData.Valid = true;
+    Serial.print("V ");
     }
   }
   
