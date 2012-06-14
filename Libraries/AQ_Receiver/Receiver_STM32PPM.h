@@ -93,7 +93,7 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
   FrqData.TimerRegs    = timer;
   
   FrqData.Timer_ccr    = &timer->CCR1 + aTimerChannel;
-  FrqData.Debug        = false;
+  FrqData.Debug        = true;
   FrqData.HighTime     = aDefault;
   FrqData.TimerChannel = aTimerChannel;
   
@@ -141,13 +141,12 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 
 void FrqChange()
 {
-    Serial.print("I ");
   timer_gen_reg_map *timer = FrqData.TimerRegs;
   uint16_t c = *(FrqData.Timer_ccr);
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
   
   if(FrqData.Valid) {
-    if(FrqData.Debug && FrqData.Channel == 6) {
+    if(FrqData.Debug) {
       Serial.print(FrqData.Channel);
       Serial.print(rising ? " r " : " f ");
       Serial.print((int)c);
