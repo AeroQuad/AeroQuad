@@ -145,14 +145,12 @@ void FrqChange()
   uint16_t c = *(FrqData.Timer_ccr);
   bool rising = (timer->CCER & FrqData.PolarityMask) == 0;
 
-  Serial.print(rising ? " I " : " i ");
-  
   if(FrqData.Valid) {
     if(FrqData.Debug) {
-      Serial.print(FrqData.Channel);
-      Serial.print(rising ? " r " : " f ");
-      Serial.print((int)c);
-      Serial.print(" ");
+      //      Serial.print(FrqData.Channel);
+      //Serial.print(rising ? " r " : " f ");
+      //Serial.print((int)c);
+      //Serial.print(" ");
       uint16_t delta = c - FrqData.LastChange;
       Serial.print((int)delta);
       Serial.println();
