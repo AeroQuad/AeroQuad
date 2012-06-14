@@ -174,9 +174,9 @@ void InitFrqMeasurement()
     
     timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
   }
-}
+  
 #ifdef STM32_TIMER_DEBUG
-Serial.println("InitFrqMeasurement done");
+  Serial.println("InitFrqMeasurement done");
 #endif
 }
 
