@@ -83,7 +83,7 @@ typedef struct {
 
 volatile tFrqData FrqData;
 
-void FrqInit(int aChannel, int aDefault, volatile tFrqData *f, timer_dev *aTimer, int aTimerChannel)
+void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 {
   aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
 
@@ -170,7 +170,7 @@ void InitFrqMeasurement()
     Serial.print((int32)timer,16);
     Serial.println();
 #endif
-    FrqInit(rcLine, 1500, &FrqData[rcLine], timer_num, PIN_MAP[pin].timer_channel);
+    FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
     
     timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
   }
