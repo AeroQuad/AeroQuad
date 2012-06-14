@@ -172,7 +172,7 @@ void InitFrqMeasurement()
 #endif
     FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
     
-    timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
+    timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, &FrqChange);
   }
   
 #ifdef STM32_TIMER_DEBUG
