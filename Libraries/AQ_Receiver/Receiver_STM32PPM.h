@@ -23,7 +23,7 @@
 #include "Receiver.h"
 #include "wirish.h"
 
-#define STM32_TIMER_DEBUG // enable debug messages
+//#define STM32_TIMER_DEBUG // enable debug messages
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration part starts here
@@ -58,6 +58,8 @@ static byte receiverPin = Port2Pin('E',  9);
 
 static byte ReceiverChannelMap[] = {SERIAL_SUM_PPM};
 
+uint16 rawChannelValue[8] =  {1500,1500,1500,1500,1500,1500,1500,1500};
+byte   currentChannel;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,8 +149,19 @@ void FrqChange()
 
   if(rising) {
     uint16_t highTime = c - FrqData.RiseTime;
-    Serial.print(highTime);
-    Serial.println();
+    if ((highTime>900) && (highTime<2100)) {
+      if (currentChannel<8) {
+	rawChannelValue[currentChannel]=highTime;
+	currentChannel++;
+      }
+    } else if (highTime>2500) {
+      currentChannel=0;
+    } else {
+      // glitch stop and wait next round
+      currentChannel=9;
+    }
+    //    Serial.print(highTime);
+    //    Serial.println();
     FrqData.RiseTime = c;
   }
   FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
@@ -156,11 +169,14 @@ void FrqChange()
 
 void InitFrqMeasurement()
 {
+
 #ifdef STM32_TIMER_DEBUG
   Serial.println("InitFrqMeasurement");
 #endif
   int pin = receiverPin;
   timer_dev *timer_num = PIN_MAP[pin].timer_device;
+
+  currentChannel=8;
   if(timer_num == NULL) {
 #ifdef STM32_TIMER_DEBUG
     Serial.print("InitFrqMeasurement: invalid PWM input ");
@@ -205,8 +221,7 @@ void initializeReceiver(int nbChannel = 8) {
 
 
 int getRawChannelValue(const byte channel) {
-	int chan = ReceiverChannelMap[channel];
-	return 1500;
+  return rawChannelValue[ReceiverChannelMap[channel]];
 }
 
 
