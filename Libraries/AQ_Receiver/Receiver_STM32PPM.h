@@ -62,8 +62,6 @@ static byte ReceiverChannelMap[] = {SERIAL_SUM_PPM};
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementation part starts here.
-// forward declaration, array is defined at the end of this file
-extern voidFuncPtr FrqChange();
 
 typedef struct {
   timer_dev   *TimerDev;
@@ -141,52 +139,6 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 #endif
 }
 
-
-void InitFrqMeasurement()
-{
-#ifdef STM32_TIMER_DEBUG
-  Serial.println("InitFrqMeasurement");
-#endif
-  int pin = receiverPin;
-  timer_dev *timer_num = PIN_MAP[pin].timer_device;
-  if(timer_num == NULL) {
-#ifdef STM32_TIMER_DEBUG
-    Serial.print("InitFrqMeasurement: invalid PWM input ");
-    Serial.print(pin);
-    Serial.println();
-#endif
-  } else {
-#ifdef STM32F2
-    gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
-#else
-    pinMode(pin, INPUT_PULLDOWN);
-#endif
-    
-#ifdef STM32_TIMER_DEBUG
-    timer_gen_reg_map *timer = PIN_MAP[pin].timer_device->regs.gen;
-    Serial.print("pin ");
-    Serial.print(pin);
-    Serial.print(" timerbase ");
-    Serial.print((int32)timer,16);
-    Serial.println();
-#endif
-    FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
-    
-    timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, &FrqChange);
-  }
-  
-#ifdef STM32_TIMER_DEBUG
-  Serial.println("InitFrqMeasurement done");
-#endif
-}
-
-
-void PWMInvertPolarity()
-{
-  FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
-}
-
-
 void FrqChange()
 {
   timer_gen_reg_map *timer = FrqData.TimerRegs;
@@ -228,8 +180,47 @@ void FrqChange()
     }
   }
   
-  PWMInvertPolarity();
+  FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
 }
+
+void InitFrqMeasurement()
+{
+#ifdef STM32_TIMER_DEBUG
+  Serial.println("InitFrqMeasurement");
+#endif
+  int pin = receiverPin;
+  timer_dev *timer_num = PIN_MAP[pin].timer_device;
+  if(timer_num == NULL) {
+#ifdef STM32_TIMER_DEBUG
+    Serial.print("InitFrqMeasurement: invalid PWM input ");
+    Serial.print(pin);
+    Serial.println();
+#endif
+  } else {
+#ifdef STM32F2
+    gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
+#else
+    pinMode(pin, INPUT_PULLDOWN);
+#endif
+    
+#ifdef STM32_TIMER_DEBUG
+    timer_gen_reg_map *timer = PIN_MAP[pin].timer_device->regs.gen;
+    Serial.print("pin ");
+    Serial.print(pin);
+    Serial.print(" timerbase ");
+    Serial.print((int32)timer,16);
+    Serial.println();
+#endif
+    FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
+    
+    timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
+  }
+  
+#ifdef STM32_TIMER_DEBUG
+  Serial.println("InitFrqMeasurement done");
+#endif
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
