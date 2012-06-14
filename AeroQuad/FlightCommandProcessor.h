@@ -206,6 +206,8 @@ void readPilotCommands() {
 
         positionHoldPointToReach.latitude = currentPosition.latitude;
         positionHoldPointToReach.longitude = currentPosition.longitude;
+        previousPositionHoldPosition.latitude = currentPosition.latitude;
+        previousPositionHoldPosition.longitude = currentPosition.longitude;
         positionHoldPointToReach.altitude = getBaroAltitude();
         isStorePositionNeeded = false;
       }

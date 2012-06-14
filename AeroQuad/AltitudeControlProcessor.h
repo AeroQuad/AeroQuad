@@ -55,26 +55,25 @@
 
   void processExtrapolatedBaroAltitude() {
     
-    unsigned long baroTime = micros();
     if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
       
       previousBaroAltitude = getBaroAltitude();
       evaluateBaroAltitude();
       baroAltitudeOffset = getBaroAltitude() - previousBaroAltitude;
       
-      baroTimeOffset = baroTime - previousBaroReadTime;
-      previousBaroReadTime = baroTime;
+      baroTimeOffset = currentTime - previousBaroReadTime;
+      previousBaroReadTime = currentTime;
       
       estimatedBaroAltitude = getBaroAltitude();
     }
     else {
       
-      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
-      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
+      unsigned long baroExtrapolatedAltitudeTimeOffset = currentTime - previousBaroAltitudeEstimationTime;
+      float currentBaroAltitudeOffset = baroExtrapolatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
       estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
     }
 
-    previousBaroAltitudeEstimationTime = baroTime;
+    previousBaroAltitudeEstimationTime = currentTime;
   }
 #endif
 
