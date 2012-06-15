@@ -28,6 +28,7 @@
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 
+
 //      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
 //      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
 //      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
@@ -54,26 +55,26 @@
 
   void processExtrapolatedBaroAltitude() {
     
-    unsigned long baroTime = micros();
     if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
       
       previousBaroAltitude = getBaroAltitude();
       evaluateBaroAltitude();
-      baroAltitudeOffset = previousBaroAltitude - getBaroAltitude();
+      baroAltitudeOffset = getBaroAltitude() - previousBaroAltitude;
       
-      baroTimeOffset = baroTime - previousBaroReadTime;
-      previousBaroReadTime = baroTime;
+      
+      baroTimeOffset = currentTime - previousBaroReadTime;
+      previousBaroReadTime = currentTime;
       
       estimatedBaroAltitude = getBaroAltitude();
     }
     else {
       
-      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
-      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
+      unsigned long baroExtrapolatedAltitudeTimeOffset = currentTime - previousBaroAltitudeEstimationTime;
+      float currentBaroAltitudeOffset = baroExtrapolatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
       estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
     }
 
-    previousBaroAltitudeEstimationTime = baroTime;
+    previousBaroAltitudeEstimationTime = currentTime;
   }
 #endif
 

@@ -262,42 +262,129 @@ void initHomeBase() {
     gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
   
+  
+  /** 
+   * Process navigation
+   */
+  void processNavigation() {
+    
+    if (!isGpsHaveANewPosition) {
+      return;
+    }
+    
+    // even in manual, mission processing is in function and can be perform manually through the OSD
+    computeCurrentSpeedInCmPerSec();
+    
+    computeDistanceToDestination(missionPositionToReach);
+    // evaluate if we need to switch to another mission possition point
+    evaluateMissionPositionToReach();
+      
+    // evaluate the flight behavior to adopt
+    evaluateFlightBehaviorFromDistance();
+
+    computeRollPitchCraftAxisCorrection();
+    
+    evaluateAltitudeCorrection();    
+
+    computeHeadingCorrection();
+    
+    isGpsHaveANewPosition = false;
+  }
+
+
+
+
+
+  /**
+   * Process position hold
+   */
+// 
+// unsigned long baroTime = micros();
+//    if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
+//      
+//      previousBaroAltitude = getBaroAltitude();
+//      evaluateBaroAltitude();
+//      baroAltitudeOffset = getBaroAltitude() - previousBaroAltitude;
+//      
+//      baroTimeOffset = baroTime - previousBaroReadTime;
+//      previousBaroReadTime = baroTime;
+//      
+//      estimatedBaroAltitude = getBaroAltitude();
+//    }
+//    else {
+//      
+//      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
+//      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
+//      estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
+//    }
+//
+//    previousBaroAltitudeEstimationTime = baroTime;  
+
+  float longitudeVelocity = 0.0;
+  float latitudeVelocity = 0.0;
+  unsigned long gpsPositionHoldTimeOffset = 0;
+  unsigned long gpsPreviousPositionReadTime = 0;
+  unsigned long previousGpsPositionHoldComputationTime = 0;
+  GeodeticPosition previousPositionHoldPosition;
+     
+  void processPositionHold() {
+    
+    if (isGpsHaveANewPosition) {
+      
+      longitudeVelocity = previousPositionHoldPosition.longitude - currentPosition.longitude;
+      latitudeVelocity = previousPositionHoldPosition.latitude - currentPosition.latitude;
+      
+      previousPositionHoldPosition.longitude = currentPosition.longitude;
+      previousPositionHoldPosition.latitude = currentPosition.latitude;
+      
+      gpsPositionHoldTimeOffset = currentTime - gpsPreviousPositionReadTime;
+      gpsPreviousPositionReadTime = currentTime;
+
+      isGpsHaveANewPosition = false;
+    }
+    else {
+      previousPosition.latitude = currentPosition.latitude;
+      previousPosition.longitude = currentPosition.longitude;
+      
+      unsigned long gpsExtrapolatedTimeOffset = currentTime - previousGpsPositionHoldComputationTime;
+      float currentLatitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * latitudeVelocity / gpsPositionHoldTimeOffset;
+      float currentLongitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * longitudeVelocity / gpsPositionHoldTimeOffset;
+      currentPosition.latitude = currentPosition.latitude + currentLatitudeOffsetDisplacement;
+      currentPosition.longitude = currentPosition.longitude + currentLongitudeOffsetDisplacement;
+    }
+    
+    
+    // even in manual, mission processing is in function and can be perform manually through the OSD
+    computeCurrentSpeedInCmPerSec();
+    
+    computeDistanceToDestination(missionPositionToReach);
+    // evaluate if we need to switch to another mission possition point
+    evaluateMissionPositionToReach();
+    
+    computeDistanceToDestination(positionHoldPointToReach);
+     
+    // evaluate the flight behavior to adopt
+    evaluateFlightBehaviorFromDistance();
+
+    computeRollPitchCraftAxisCorrection();
+    
+    gpsYawAxisCorrection = 0;  
+  }
+  
   /**
    * Compute everything need to make adjustment to the craft attitude to go to the point to reach
    */
   void processGpsNavigation() {
 
-    if (isHomeBaseInitialized() && isGpsHaveANewPosition && haveAGpsLock()) {
+//    if (isHomeBaseInitialized() && isGpsHaveANewPosition && haveAGpsLock()) {
+    if (haveAGpsLock()) {
       
-      // even in manual, mission processing is in function and can be perform manually through the OSD
-      computeCurrentSpeedInCmPerSec();
-      
-      computeDistanceToDestination(missionPositionToReach);
-      // evaluate if we need to switch to another mission possition point
-      evaluateMissionPositionToReach();
-      
-      if (positionHoldState == ON && navigationState == OFF) {  // then may be position hold
-        
-        computeDistanceToDestination(positionHoldPointToReach);
+      if (navigationState == ON) {
+        processNavigation();
       }
-      
-      if (navigationState == ON || positionHoldState == ON) {
-        
-        // evaluate the flight behavior to adopt
-        evaluateFlightBehaviorFromDistance();
-
-        computeRollPitchCraftAxisCorrection();
-        
-        if (navigationState == ON) {
-          evaluateAltitudeCorrection();    
-      
-          computeHeadingCorrection();
-        }
-        else {
-          gpsYawAxisCorrection = 0;  
-        }
+      else if (positionHoldState == ON ) {
+        processPositionHold();
       }
-      isGpsHaveANewPosition = false;
     }
     
 //    Serial.print(currentPosition.latitude);

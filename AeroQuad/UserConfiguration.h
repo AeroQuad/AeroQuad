@@ -80,7 +80,7 @@
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
-#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
+//#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
 //#define AutoLanding // Enable auto landing on channel AUX3 of the remote, NEED AltitudeHoldBaro AND AltitudeHoldRangeFinder
 
 #define UseGPS // Try to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
@@ -93,12 +93,12 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-#define BattMonitor            // Enable Battery monitor
+//#define BattMonitor            // Enable Battery monitor
 //#define BattMonitorAutoDescent // NEED BattMonitor defined. if you want the craft to auto descent when the battery reach the alarm voltage
 //#define POWERED_BY_VIN         // NEED BattMonitor defined. Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 //
 // Advanced configuration. Please refer to wiki for instructions
-#define BattCustomConfig DEFINE_BATTERY( 3,0,15,0,2,50,0)
+//#define BattCustomConfig DEFINE_BATTERY( 3,0,15,0,2,50,0)
 
 //
 // *******************************************************************************************************************************
