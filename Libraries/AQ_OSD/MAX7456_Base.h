@@ -154,8 +154,8 @@ void detectVideoStandard() {
 void initializeOSD() {
 
 
-  pinMode( CS, OUTPUT );
-  digitalWrite( CS, HIGH );
+  pinMode( OSD_CS, OUTPUT );
+  digitalWrite( OSD_CS, HIGH );
 
   detectVideoStandard();
 
