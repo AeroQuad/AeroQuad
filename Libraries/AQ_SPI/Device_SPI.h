@@ -21,8 +21,9 @@
 #ifndef _AEROQUAD_DEVICE_SPI_H_
 #define _AEROQUAD_DEVICE_SPI_H_
 
-//OSD pins on AQ v2 shield:
-#define CS   22 //SS_OSD
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+//SPI pins on Mega2560:
 #define DOUT 51 //MOSI
 #define DIN  50 //MISO
 #define SCK  52 //SCLK
@@ -30,13 +31,20 @@
 
 void initializeSPI() {
 
-  pinMode( CS, OUTPUT );
   pinMode( 53, OUTPUT ); //Default CS pin - needs to be output or SPI peripheral will behave as a slave instead of master
-  digitalWrite( CS, HIGH );
 
   pinMode( DOUT, OUTPUT );
   pinMode( DIN, INPUT );
   pinMode( SCK, OUTPUT );
+
+  // SPCR = 01010000
+  // interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
+  // sample on leading edge of clk,system clock/4 rate (fastest)
+  SPCR = (1 << SPE) | (1 << MSTR);
+  SPSR; // dummy read from HW register
+  SPDR; // dummy read from HW register
+  delay( 10 );
+
 }
 
 
@@ -61,14 +69,31 @@ byte spi_readreg(byte r) {
   return spi_transfer(0);
 }
 
-void spi_select() {
-  digitalWrite( CS, LOW );
+#endif // Mega1280/2560
+
+#if defined(AeroQuadSTM32)
+
+HardwareSPI device_spi(2); // SPI2 on STM32; wired on header
+
+void initializeSPI() {
+
+  device_spi.begin(SPI_9MHZ, MSBFIRST, 0);
+
 }
 
-void spi_deselect() {
-  digitalWrite( CS, HIGH );
+
+void spi_writereg(byte r, byte d) {
+
+  device_spi.write(r);
+  device_spi.write(d);
+}
+
+byte spi_readreg(byte r) {
+
+  device_spi.write(r);
+  return(device_spi.read());
 }
 
 
-
+#endif // AeroQuadSTM32
 #endif

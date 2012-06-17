@@ -21,6 +21,8 @@
 #ifndef _AQ_OSD_MAX7456_BASE_H_
 #define _AQ_OSD_MAX7456_BASE_H_
 
+#define OSD_CS   22 //SS_OSD on AeroQuad v2.x shield
+
 //MAX7456 register write addresses - see datasheet for lots of info
 #define DMM   0x04 //Display memory mode register - for choosing 16bit/8bit write mode, clearing display memory, enabling auto-increment
 #define DMAH  0x05 //Holds MSB of display memory address, for setting location of a character on display
@@ -47,21 +49,29 @@ byte DISABLE_display     = 0;
 
 boolean OSDDisabled=0;
 
+void osd_select() {
+  digitalWrite( OSD_CS, LOW );
+}
+
+void osd_deselect() {
+  digitalWrite( OSD_CS, HIGH );
+}
+
 void hideOSD() {
   
   if (!OSDDisabled) {
-    spi_select();
+    osd_select();
     spi_writereg( VM0, DISABLE_display );
-    spi_deselect();
+    osd_deselect();
     OSDDisabled=true;
   }
 };
 void unhideOSD() {
 
   if (OSDDisabled) {
-    spi_select();
+    osd_select();
     spi_writereg( VM0, ENABLE_display );
-    spi_deselect();
+    osd_deselect();
     OSDDisabled=false;
   }
 }
@@ -81,7 +91,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
     unhideOSD(); // make sure OSD is visible in case of alarms etc.
   }
   
-  spi_select();
+  osd_select();
   // 16bit transfer, transparent BG, autoincrement mode (if len!=1)
   spi_writereg(DMM, ((flags&1) ? 0x10 : 0x00) | ((flags&2) ? 0x08 : 0x00) | ((len!=1)?0x01:0x00) );
 
@@ -99,7 +109,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
     spi_writereg(DMDI, END_string );
   }
   // finished writing
-  spi_deselect();
+  osd_deselect();
 }
 
 void detectVideoStandard() {
@@ -112,7 +122,7 @@ void detectVideoStandard() {
   #ifdef AUTODETECT_VIDEO_STANDARD
     // if autodetect enabled modify the default if signal is present on either standard
     // otherwise default is preserved
-    spi_select();
+    osd_select();
     byte stat=spi_readreg(STAT);
     if (stat & 0x01) {
       pal = true;
@@ -120,7 +130,7 @@ void detectVideoStandard() {
     if (stat & 0x02) {
       pal = false;
     }
-    spi_deselect();
+    osd_deselect();
   #endif
 
   if (pal) {
@@ -143,24 +153,20 @@ void detectVideoStandard() {
 
 void initializeOSD() {
 
-  // SPCR = 01010000
-  // interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
-  // sample on leading edge of clk,system clock/4 rate (fastest)
-  SPCR = (1 << SPE) | (1 << MSTR);
-  SPSR; // dummy read from HW register
-  SPDR; // dummy read from HW register
-  delay( 10 );
+
+  pinMode( CS, OUTPUT );
+  digitalWrite( CS, HIGH );
 
   detectVideoStandard();
 
   //Soft reset the MAX7456 - clear display memory
-  spi_select();
+  osd_select();
   spi_writereg( VM0, MAX7456_reset );
-  spi_deselect();
+  osd_deselect();
   delay( 1 ); //Only takes ~100us typically
 
   //Set white level to 90% for all rows
-  spi_select();
+  osd_select();
   for( byte i = 0; i < MAX_screen_rows; i++ ) {
     spi_writereg( RB0 + i, WHITE_level_90 );
   }
@@ -169,7 +175,7 @@ void initializeOSD() {
   spi_writereg( VM0, ENABLE_display );
   delay(100);
   //finished writing
-  spi_deselect();
+  osd_deselect();
 
   #if defined CALLSIGN
     writeChars(callsign,strlen(callsign),0,CALLSIGN_ROW,CALLSIGN_COL);
