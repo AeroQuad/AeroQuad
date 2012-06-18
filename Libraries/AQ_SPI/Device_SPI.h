@@ -88,25 +88,20 @@ HardwareSPI device_spi(2); // SPI2 on STM32; wired on header
 #define OSD_CS   26 // 'SVR0' pin on AQ32 (TIM5_CH4), may need to be changed...
 
 void spi_osd_select() {
-  Serial.print("s");
   digitalWrite( OSD_CS, LOW );
 }
 
-void spi_osd_deselect() { 
-  Serial.print("d");
+void spi_osd_deselect() {
   digitalWrite( OSD_CS, HIGH );
 }
 
 
 void initializeSPI() {
 
-  Serial.print("SPI init");
   pinMode( OSD_CS, OUTPUT );
   digitalWrite( OSD_CS, HIGH );
 
   device_spi.begin(SPI_9MHZ, MSBFIRST, 0);
-  Serial.print("done");
-  Serial.println();
 }
 
 
