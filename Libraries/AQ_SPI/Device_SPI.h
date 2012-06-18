@@ -24,18 +24,28 @@
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 //SPI pins on Mega2560:
-#define DOUT 51 //MOSI
-#define DIN  50 //MISO
-#define SCK  52 //SCLK
+#define DOUT     51 //MOSI
+#define DIN      50 //MISO
+#define SCK      52 //SCLK
+#define OSD_CS   22 //SS_OSD on AeroQuad v2.x shield
 
+void spi_osd_select() {
+  digitalWrite( OSD_CS, LOW );
+}
+
+void spi_osd_deselect() {
+  digitalWrite( OSD_CS, HIGH );
+}
 
 void initializeSPI() {
 
   pinMode( 53, OUTPUT ); //Default CS pin - needs to be output or SPI peripheral will behave as a slave instead of master
-
   pinMode( DOUT, OUTPUT );
   pinMode( DIN, INPUT );
   pinMode( SCK, OUTPUT );
+
+  pinMode( OSD_CS, OUTPUT );
+  digitalWrite( OSD_CS, HIGH );
 
   // SPCR = 01010000
   // interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
@@ -75,10 +85,23 @@ byte spi_readreg(byte r) {
 
 HardwareSPI device_spi(2); // SPI2 on STM32; wired on header
 
+#define OSD_CS   26 // 'SVR0' pin on AQ32 (TIM5_CH4), may need to be changed...
+
+void spi_osd_select() {
+  digitalWrite( OSD_CS, LOW );
+}
+
+void spi_osd_deselect() {
+  digitalWrite( OSD_CS, HIGH );
+}
+
+
 void initializeSPI() {
 
-  device_spi.begin(SPI_9MHZ, MSBFIRST, 0);
+  pinMode( OSD_CS, OUTPUT );
+  digitalWrite( OSD_CS, HIGH );
 
+  device_spi.begin(SPI_9MHZ, MSBFIRST, 0);
 }
 
 
