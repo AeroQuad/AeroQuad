@@ -101,7 +101,6 @@ void spi_osd_deselect() {
 void initializeSPI() {
 
   Serial.print("SPI init");
-  Serial.print((char*)(device_spi?"OK":"??"));
   pinMode( OSD_CS, OUTPUT );
   digitalWrite( OSD_CS, HIGH );
 
