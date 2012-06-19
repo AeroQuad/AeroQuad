@@ -1406,7 +1406,7 @@ void loop () {
       readPilotCommands(); 
       
       #if defined AltitudeHoldBaro
-        processExtrapolatedBaroAltitude();
+        evaluateBaroAltitude();
       #endif
       
       #if defined (UseRSSIFaileSafe) 

@@ -46,9 +46,14 @@ void initHomeBase() {
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
       // Set reference location for Equirectangular projection used for coordinates
       setProjectionLocation(currentPosition);
+      
 
       #if defined UseGPSNavigator
         evaluateMissionPositionToReach();
+      #else
+        missionPositionToReach.latitude = homePosition.latitude;
+        missionPositionToReach.longitude = homePosition.longitude;
+        missionPositionToReach.altitude = homePosition.altitude;
       #endif
     }  
   }
@@ -298,60 +303,43 @@ void initHomeBase() {
   /**
    * Process position hold
    */
-// 
-// unsigned long baroTime = micros();
-//    if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
-//      
-//      previousBaroAltitude = getBaroAltitude();
-//      evaluateBaroAltitude();
-//      baroAltitudeOffset = getBaroAltitude() - previousBaroAltitude;
-//      
-//      baroTimeOffset = baroTime - previousBaroReadTime;
-//      previousBaroReadTime = baroTime;
-//      
-//      estimatedBaroAltitude = getBaroAltitude();
-//    }
-//    else {
-//      
-//      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
-//      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
-//      estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
-//    }
-//
-//    previousBaroAltitudeEstimationTime = baroTime;  
-
-  float longitudeVelocity = 0.0;
-  float latitudeVelocity = 0.0;
-  unsigned long gpsPositionHoldTimeOffset = 0;
-  unsigned long gpsPreviousPositionReadTime = 0;
-  unsigned long previousGpsPositionHoldComputationTime = 0;
-  GeodeticPosition previousPositionHoldPosition;
+//  float longitudeVelocity = 0.0;
+//  float latitudeVelocity = 0.0;
+//  unsigned long gpsPositionHoldTimeOffset = 0;
+//  unsigned long gpsPreviousPositionReadTime = 0;
+//  unsigned long previousGpsPositionHoldComputationTime = 0;
+//  GeodeticPosition previousPositionHoldPosition;
      
   void processPositionHold() {
     
-    if (isGpsHaveANewPosition) {
-      
-      longitudeVelocity = previousPositionHoldPosition.longitude - currentPosition.longitude;
-      latitudeVelocity = previousPositionHoldPosition.latitude - currentPosition.latitude;
-      
-      previousPositionHoldPosition.longitude = currentPosition.longitude;
-      previousPositionHoldPosition.latitude = currentPosition.latitude;
-      
-      gpsPositionHoldTimeOffset = currentTime - gpsPreviousPositionReadTime;
-      gpsPreviousPositionReadTime = currentTime;
-
-      isGpsHaveANewPosition = false;
+    if (!isGpsHaveANewPosition) {
+      return;
     }
-    else {
-      previousPosition.latitude = currentPosition.latitude;
-      previousPosition.longitude = currentPosition.longitude;
-      
-      unsigned long gpsExtrapolatedTimeOffset = currentTime - previousGpsPositionHoldComputationTime;
-      float currentLatitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * latitudeVelocity / gpsPositionHoldTimeOffset;
-      float currentLongitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * longitudeVelocity / gpsPositionHoldTimeOffset;
-      currentPosition.latitude = currentPosition.latitude + currentLatitudeOffsetDisplacement;
-      currentPosition.longitude = currentPosition.longitude + currentLongitudeOffsetDisplacement;
-    }
+//    if (isGpsHaveANewPosition) {
+//      
+//      Serial.println("NEW POSITION");
+//      longitudeVelocity = previousPositionHoldPosition.longitude - currentPosition.longitude;
+//      latitudeVelocity = previousPositionHoldPosition.latitude - currentPosition.latitude;
+//      
+//      previousPositionHoldPosition.longitude = currentPosition.longitude;
+//      previousPositionHoldPosition.latitude = currentPosition.latitude;
+//      
+//      gpsPositionHoldTimeOffset = currentTime - gpsPreviousPositionReadTime;
+//      gpsPreviousPositionReadTime = currentTime;
+//
+//      isGpsHaveANewPosition = false;
+//    }
+//    else {
+//      Serial.print("EXTRAPOLATE  ");
+//      previousPosition.latitude = currentPosition.latitude;
+//      previousPosition.longitude = currentPosition.longitude;
+//      
+//      unsigned long gpsExtrapolatedTimeOffset = currentTime - previousGpsPositionHoldComputationTime;
+//      float currentLatitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * latitudeVelocity / gpsPositionHoldTimeOffset;
+//      float currentLongitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * longitudeVelocity / gpsPositionHoldTimeOffset;
+//      currentPosition.latitude = currentPosition.latitude + currentLatitudeOffsetDisplacement;
+//      currentPosition.longitude = currentPosition.longitude + currentLongitudeOffsetDisplacement;
+//    }
     
     
     // even in manual, mission processing is in function and can be perform manually through the OSD
@@ -362,13 +350,14 @@ void initHomeBase() {
     evaluateMissionPositionToReach();
     
     computeDistanceToDestination(positionHoldPointToReach);
-     
+    
     // evaluate the flight behavior to adopt
     evaluateFlightBehaviorFromDistance();
 
     computeRollPitchCraftAxisCorrection();
     
     gpsYawAxisCorrection = 0;  
+    isGpsHaveANewPosition = false;
   }
   
   /**
@@ -376,25 +365,16 @@ void initHomeBase() {
    */
   void processGpsNavigation() {
 
-//    if (isHomeBaseInitialized() && isGpsHaveANewPosition && haveAGpsLock()) {
     if (haveAGpsLock()) {
       
-      if (navigationState == ON) {
-        processNavigation();
-      }
-      else if (positionHoldState == ON ) {
+//      if (navigationState == ON) {
+//        processNavigation();
+//      }
+//      else 
+      if (positionHoldState == ON ) {
         processPositionHold();
       }
     }
-    
-//    Serial.print(currentPosition.latitude);
-//    Serial.print(" ");
-//    Serial.print(currentPosition.longitude);
-//    Serial.print(" ");
-//    Serial.print(distanceX);
-//    Serial.print(" ");
-//    Serial.println(distanceY);
-    
   }
 #endif  // #define UseGPSNavigator
 
