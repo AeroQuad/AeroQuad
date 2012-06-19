@@ -312,19 +312,13 @@ void initHomeBase() {
     computeDistanceToDestination(positionHoldPointToReach);
     
     // evaluate the flight behavior to adopt
-    evaluateFlightBehaviorFromDistance();
+    maxSpeedToDestination = POSITION_HOLD_SPEED;
+    maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
 
     computeRollPitchCraftAxisCorrection();
 
-//    Serial.print(distanceX);
-//    Serial.print(" ");
-//    Serial.print(distanceX);
-//    Serial.print(" ");
-//    Serial.print(gpsRollAxisCorrection);
-//    Serial.print(" ");
-//    Serial.println(gpsPitchAxisCorrection);
-
     gpsYawAxisCorrection = 0;  
+    
     isGpsHaveANewPosition = false;
   }
   
