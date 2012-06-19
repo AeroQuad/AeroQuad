@@ -85,13 +85,14 @@ byte spi_readreg(byte r) {
 
 HardwareSPI device_spi(2); // SPI2 on STM32; wired on header
 
-#define OSD_CS   0 // pin 26 == 'SVR0' pin on AQ32 (TIM5_CH4), may need to be changed...
+#define OSD_CS    Port2Pin('A', 3) // pin 26 == 'SVR0' pin on AQ32 (TIM5_CH4), may need to be changed...
 
 void spi_osd_select() {
   digitalWrite( OSD_CS, LOW );
 }
 
 void spi_osd_deselect() {
+  device_spi.write(0);// dummy write
   digitalWrite( OSD_CS, HIGH );
 }
 
