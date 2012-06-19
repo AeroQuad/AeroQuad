@@ -142,6 +142,17 @@ void initHomeBase() {
     }
   }
 
+  /** 
+   * Compute the distance to the destination, point to reach
+   * @result is gpsDistanceToDestination
+   */
+  void computeDistanceToDestination(GeodeticPosition destination) {
+    
+    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
+    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
+    gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
+  }
+
   /**
    * Compute the current craft speed in cm per sec
    * @result are currentSpeedCmPerSecPitch and currentSpeedCmPerSecRoll
@@ -169,16 +180,6 @@ void initHomeBase() {
     previousPosition.longitude = currentPosition.longitude;
   }
     
-  /** 
-   * Compute the distance to the destination, point to reach
-   * @result is gpsDistanceToDestination
-   */
-  void computeDistanceToDestination(GeodeticPosition destination) {
-    
-    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
-    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
-    gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
-  }
   
   /**
    * Evaluate the flight behavior to adopt depending of the distance to the point to reach
@@ -211,7 +212,7 @@ void initHomeBase() {
     float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
     maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
     maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
-  
+    
     gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
     gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
     
@@ -266,39 +267,6 @@ void initHomeBase() {
     gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
     gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
-  
-  
-  /** 
-   * Process navigation
-   */
-  void processNavigation() {
-    
-    if (!isGpsHaveANewPosition) {
-      return;
-    }
-    
-    // even in manual, mission processing is in function and can be perform manually through the OSD
-    computeCurrentSpeedInCmPerSec();
-    
-    computeDistanceToDestination(missionPositionToReach);
-    // evaluate if we need to switch to another mission possition point
-    evaluateMissionPositionToReach();
-      
-    // evaluate the flight behavior to adopt
-    evaluateFlightBehaviorFromDistance();
-
-    computeRollPitchCraftAxisCorrection();
-    
-    evaluateAltitudeCorrection();    
-
-    computeHeadingCorrection();
-    
-    isGpsHaveANewPosition = false;
-  }
-
-
-
-
 
   /**
    * Process position hold
@@ -341,24 +309,51 @@ void initHomeBase() {
 //      currentPosition.longitude = currentPosition.longitude + currentLongitudeOffsetDisplacement;
 //    }
     
-    
-    // even in manual, mission processing is in function and can be perform manually through the OSD
-    computeCurrentSpeedInCmPerSec();
-    
-    computeDistanceToDestination(missionPositionToReach);
-    // evaluate if we need to switch to another mission possition point
-    evaluateMissionPositionToReach();
-    
     computeDistanceToDestination(positionHoldPointToReach);
     
     // evaluate the flight behavior to adopt
     evaluateFlightBehaviorFromDistance();
 
     computeRollPitchCraftAxisCorrection();
-    
+
+//    Serial.print(distanceX);
+//    Serial.print(" ");
+//    Serial.print(distanceX);
+//    Serial.print(" ");
+//    Serial.print(gpsRollAxisCorrection);
+//    Serial.print(" ");
+//    Serial.println(gpsPitchAxisCorrection);
+
     gpsYawAxisCorrection = 0;  
     isGpsHaveANewPosition = false;
   }
+  
+    /** 
+   * Process navigation
+   */
+  void processNavigation() {
+    
+    if (!isGpsHaveANewPosition) {
+      return;
+    }
+    
+    // evaluate if we need to switch to another mission possition point
+    evaluateMissionPositionToReach();
+    
+    computeDistanceToDestination(missionPositionToReach);
+
+    // evaluate the flight behavior to adopt
+    evaluateFlightBehaviorFromDistance();
+
+    computeRollPitchCraftAxisCorrection();
+    
+    evaluateAltitudeCorrection();    
+
+    computeHeadingCorrection();
+    
+    isGpsHaveANewPosition = false;
+  }
+
   
   /**
    * Compute everything need to make adjustment to the craft attitude to go to the point to reach
@@ -366,6 +361,10 @@ void initHomeBase() {
   void processGpsNavigation() {
 
     if (haveAGpsLock()) {
+      
+      if (isGpsHaveANewPosition) {
+        computeCurrentSpeedInCmPerSec();
+      }
       
 //      if (navigationState == ON) {
 //        processNavigation();

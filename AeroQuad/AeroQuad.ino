@@ -1246,7 +1246,7 @@ void setup() {
 
   // Calibrate sensors
   calibrateGyro();
-//  computeAccelBias();
+  computeAccelBias();
   zeroIntegralError();
 
   initializeKinematics();
