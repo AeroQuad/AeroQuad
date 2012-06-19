@@ -92,7 +92,6 @@ void spi_osd_select() {
 }
 
 void spi_osd_deselect() {
-  device_spi.write(0);// dummy write
   digitalWrite( OSD_CS, HIGH );
 }
 
@@ -109,7 +108,7 @@ void initializeSPI() {
 void spi_writereg(byte r, byte d) {
 
   device_spi.write(r);
-  device_spi.write(d);
+  device_spi.transfer(d);  // use transfer to ensure we don't return until bus is free
 }
 
 byte spi_readreg(byte r) {
