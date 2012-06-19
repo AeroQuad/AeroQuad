@@ -271,43 +271,11 @@ void initHomeBase() {
   /**
    * Process position hold
    */
-//  float longitudeVelocity = 0.0;
-//  float latitudeVelocity = 0.0;
-//  unsigned long gpsPositionHoldTimeOffset = 0;
-//  unsigned long gpsPreviousPositionReadTime = 0;
-//  unsigned long previousGpsPositionHoldComputationTime = 0;
-//  GeodeticPosition previousPositionHoldPosition;
-     
   void processPositionHold() {
     
     if (!isGpsHaveANewPosition) {
       return;
     }
-//    if (isGpsHaveANewPosition) {
-//      
-//      Serial.println("NEW POSITION");
-//      longitudeVelocity = previousPositionHoldPosition.longitude - currentPosition.longitude;
-//      latitudeVelocity = previousPositionHoldPosition.latitude - currentPosition.latitude;
-//      
-//      previousPositionHoldPosition.longitude = currentPosition.longitude;
-//      previousPositionHoldPosition.latitude = currentPosition.latitude;
-//      
-//      gpsPositionHoldTimeOffset = currentTime - gpsPreviousPositionReadTime;
-//      gpsPreviousPositionReadTime = currentTime;
-//
-//      isGpsHaveANewPosition = false;
-//    }
-//    else {
-//      Serial.print("EXTRAPOLATE  ");
-//      previousPosition.latitude = currentPosition.latitude;
-//      previousPosition.longitude = currentPosition.longitude;
-//      
-//      unsigned long gpsExtrapolatedTimeOffset = currentTime - previousGpsPositionHoldComputationTime;
-//      float currentLatitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * latitudeVelocity / gpsPositionHoldTimeOffset;
-//      float currentLongitudeOffsetDisplacement = gpsExtrapolatedTimeOffset * longitudeVelocity / gpsPositionHoldTimeOffset;
-//      currentPosition.latitude = currentPosition.latitude + currentLatitudeOffsetDisplacement;
-//      currentPosition.longitude = currentPosition.longitude + currentLongitudeOffsetDisplacement;
-//    }
     
     computeDistanceToDestination(positionHoldPointToReach);
     
