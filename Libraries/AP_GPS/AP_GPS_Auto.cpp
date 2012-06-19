@@ -15,9 +15,9 @@
 // the GPS to switch to binary mode at the same time that this code
 // detects it as being in NMEA mode.
 //
-#define WITH_NMEA_MODE	1
+//#define WITH_NMEA_MODE	1
 
-static unsigned long baudrates[] = {38400U, 57600U, 9600U, 4800U, 115200U};
+static unsigned int	baudrates[] = {38400U, 57600U, 9600U, 4800U};
 
 const prog_char	AP_GPS_Auto::_mtk_set_binary[]   PROGMEM = MTK_SET_BINARY;
 const prog_char	AP_GPS_Auto::_ublox_set_binary[] PROGMEM = UBLOX_SET_BINARY;
@@ -34,10 +34,11 @@ AP_GPS_Auto::AP_GPS_Auto(FastSerial *s, GPS **gps)  :
 // Do nothing at init time - it may be too early to try detecting the GPS
 //
 void
-AP_GPS_Auto::init(void)
+AP_GPS_Auto::init(enum GPS_Engine_Setting nav_setting)
 {
     idleTimeout = 1200;
     if (callback == NULL) callback = delay;
+	_nav_setting = nav_setting;
 }
 
 // Called the first time that a client tries to kick the GPS to update.
@@ -55,7 +56,7 @@ AP_GPS_Auto::read(void)
 {
     GPS		*gps;
     uint8_t		i;
-    unsigned long then;
+    uint32_t then;
 
     // Loop through possible baudrates trying to detect a GPS at one of them.
     //
@@ -65,11 +66,12 @@ AP_GPS_Auto::read(void)
     //
     for (i = 0; i < (sizeof(baudrates) / sizeof(baudrates[0])); i++) {
 
-        _fs->begin(baudrates[i]);
+		// ensure the serial port has a large enough buffer for any protocol
+        _fs->begin(baudrates[i], 256, 16);
         if (NULL != (gps = _detect())) {
 
             // configure the detected GPS and give it a chance to listen to its device
-            gps->init();
+            gps->init(_nav_setting);
             then = millis();
             while ((millis() - then) < 1200) {
                 // if we get a successful update from the GPS, we are done
@@ -96,7 +98,7 @@ AP_GPS_Auto::read(void)
 GPS *
 AP_GPS_Auto::_detect(void)
 {
-    unsigned long then;
+    uint32_t then;
     uint8_t	fingerprint[4];
     uint8_t	tries;
     uint16_t charcount;
@@ -160,6 +162,17 @@ AP_GPS_Auto::_detect(void)
             }
 
             // any other message is ublox
+            gps = new AP_GPS_UBLOX(_port);
+            Serial.print_P(PSTR(" ublox "));
+            break;
+        }
+
+        // new style 3DR UBlox (April 2012)x
+        if (0xb5 == fingerprint[0] &&
+			0x62 == fingerprint[1] &&
+			0x0d == fingerprint[2] &&
+			0x01 == fingerprint[3]) {
+			// new style Ublox
             gps = new AP_GPS_UBLOX(_port);
             Serial.print_P(PSTR(" ublox "));
             break;

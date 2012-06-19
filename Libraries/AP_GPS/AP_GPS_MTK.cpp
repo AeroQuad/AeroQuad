@@ -21,7 +21,7 @@ AP_GPS_MTK::AP_GPS_MTK(Stream *s) : GPS(s)
 
 // Public Methods //////////////////////////////////////////////////////////////
 void
-AP_GPS_MTK::init(void)
+AP_GPS_MTK::init(enum GPS_Engine_Setting nav_setting)
 {
     _port->flush();
     // initialize serial port for binary protocol use
@@ -29,7 +29,7 @@ AP_GPS_MTK::init(void)
     _port->print(MTK_SET_BINARY);
 
     // set 4Hz update rate
-    _port->print(MTK_OUTPUT_5HZ);
+    _port->print(MTK_OUTPUT_4HZ);
 
     // set initial epoch code
     _epoch = TIME_OF_DAY;

@@ -58,7 +58,7 @@ public:
     /// Perform a (re)initialisation of the GPS; sends the
     /// protocol configuration messages.
     ///
-    virtual void	init();
+    virtual void	init(enum GPS_Engine_Setting nav_setting = GPS_ENGINE_NONE);
 
     /// Checks the serial receive buffer for characters,
     /// attempts to parse NMEA data and updates internal state
@@ -96,7 +96,7 @@ private:
     /// @returns		The value expressed by the string in _term,
     ///					multiplied by 100.
     ///
-    unsigned long	_parse_decimal();
+    uint32_t	_parse_decimal();
 
     /// Parses the current term as a NMEA-style degrees + minutes
     /// value with up to four decimal digits.
@@ -106,7 +106,7 @@ private:
     /// @returns		The value expressed by the string in _term,
     ///					multiplied by 10000.
     ///
-    unsigned long	_parse_degrees();
+    uint32_t	_parse_degrees();
 
     /// Processes the current term when it has been deemed to be
     /// complete.

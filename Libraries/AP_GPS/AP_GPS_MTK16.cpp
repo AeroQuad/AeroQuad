@@ -26,7 +26,7 @@ AP_GPS_MTK16::AP_GPS_MTK16(Stream *s) : GPS(s)
 
 // Public Methods //////////////////////////////////////////////////////////////
 void
-AP_GPS_MTK16::init(void)
+AP_GPS_MTK16::init(enum GPS_Engine_Setting nav_setting)
 {
     _port->flush();
 
@@ -35,13 +35,12 @@ AP_GPS_MTK16::init(void)
     _port->print(MTK_SET_BINARY);
 
     // set 4Hz update rate
-    _port->print(MTK_OUTPUT_5HZ);
+    _port->print(MTK_OUTPUT_4HZ);
 
     // set initial epoch code
     _epoch = TIME_OF_DAY;
     _time_offset = 0;
     _offset_calculated = false;
-    _step=0;
     idleTimeout = 1200;
 }
 
@@ -60,9 +59,11 @@ bool
 AP_GPS_MTK16::read(void)
 {
     uint8_t 	data;
+    int 		numc;
     bool		parsed = false;
 
-    while (_port->available() > 0) {	// Process bytes received
+    numc = _port->available();
+    for (int i = 0; i < numc; i++) {	// Process bytes received
 
         // read the next byte
         data = _port->read();
@@ -80,9 +81,8 @@ restart:
             // the preamble appearing as data in some other message.
             //
         case 0:
-            if(PREAMBLE1 == data) {
+            if(PREAMBLE1 == data)
                 _step++;
-              }
             break;
         case 1:
             if (PREAMBLE2 == data) {
