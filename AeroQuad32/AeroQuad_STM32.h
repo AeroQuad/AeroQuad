@@ -1,6 +1,3 @@
-#undef CameraControl
-#undef OSD
-
 #define __STM32__
 #define DEBUG_INIT
 tSerial &Serial = SERIAL_VAR;
