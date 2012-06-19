@@ -141,6 +141,10 @@ void initPlatform() {
 	pinMode(LED_Yellow, OUTPUT);
 	digitalWrite(LED_Yellow, LOW);
 
+#ifdef BattMonitor
+	pinMode(BATT_ANALOG_INPUT, INPUT_ANALOG);
+#endif
+
 #ifdef DEBUG_INIT
   Serial.println("\r\nAeroQuad STM32, board type " STM32_BOARD_TYPE ", build date " __DATE__ " "__TIME__);
 #endif
