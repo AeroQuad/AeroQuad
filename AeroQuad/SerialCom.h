@@ -567,7 +567,7 @@ void sendSerialTelemetry() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       #if defined AltitudeHoldBaro
 //        PrintValueComma(getBaroAltitude());
-        PrintValueComma(estimatedBaroAltitude);
+        PrintValueComma(getBaroAltitude());
       #elif defined AltitudeHoldRangeFinder
         PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
       #endif  
