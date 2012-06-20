@@ -94,10 +94,17 @@ const char AP_GPS_NMEA::_gpvtg_string[] PROGMEM = "GPVTG";
 AP_GPS_NMEA::AP_GPS_NMEA(Stream *s) :
     GPS(s)
 {
+    FastSerial	*fs = (FastSerial *)_port;
+
+    // Re-open the port with enough receive buffering for the messages we expect
+    // and very little tx buffering, since we don't care about sending.
+    // Leave the port speed alone as we don't actually know at what rate we're running...
+    //
+    fs->begin(0, 200, 16);
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
-void AP_GPS_NMEA::init(enum GPS_Engine_Setting nav_setting)
+void AP_GPS_NMEA::init(void)
 {
     BetterStream	*bs = (BetterStream *)_port;
 
@@ -109,6 +116,11 @@ void AP_GPS_NMEA::init(enum GPS_Engine_Setting nav_setting)
 
     // send the ublox init strings
     bs->print_P((const prog_char_t *)_ublox_init_string);
+	
+	// @kenny try, try to remove pinout from nmea, Thx to Kevorkian for this
+	// PMTK300,FixInterval,0,0,0,0
+	// PIOS_COM_SendStringNonBlocking(gpsPort, "$PMTK397,0*23\r\n");
+	bs->print_P((const prog_char_t *)"$PMTK397,0*23\n\r");
 
     idleTimeout = 1200;
 }
@@ -177,10 +189,10 @@ int AP_GPS_NMEA::_from_hex(char a)
         return a - '0';
 }
 
-uint32_t AP_GPS_NMEA::_parse_decimal()
+unsigned long AP_GPS_NMEA::_parse_decimal()
 {
     char *p = _term;
-    uint32_t ret = 100UL * atol(p);
+    unsigned long ret = 100UL * atol(p);
     while (isdigit(*p))
         ++p;
     if (*p == '.') {
@@ -193,12 +205,11 @@ uint32_t AP_GPS_NMEA::_parse_decimal()
     return ret;
 }
 
-uint32_t AP_GPS_NMEA::_parse_degrees()
+unsigned long AP_GPS_NMEA::_parse_degrees()
 {
     char *p, *q;
     uint8_t deg = 0, min = 0;
     unsigned int frac_min = 0;
-	int32_t ret = 0;
 
     // scan for decimal point or end of field
     for (p = _term; isdigit(*p); p++)
@@ -224,14 +235,13 @@ uint32_t AP_GPS_NMEA::_parse_degrees()
     // ten-thousandths of a minute
     if (*p == '.') {
         q = p + 1;
-        for (int i = 0; i < 5; i++) {
-            frac_min = (int32_t)(frac_min * 10);
+        for (int i = 0; i < 4; i++) {
+            frac_min *= 10;
             if (isdigit(*q))
                 frac_min += *q++ - '0';
         }
     }
-	ret = (int32_t)deg * (int32_t)1000000UL + (int32_t)((min * 100000UL + frac_min) / 6UL);
-    return ret;
+    return deg * 100000UL + (min * 10000UL + frac_min) / 6;
 }
 
 // Processes a just-completed term
@@ -247,8 +257,8 @@ bool AP_GPS_NMEA::_term_complete()
                 case _GPS_SENTENCE_GPRMC:
                     time			= _new_time;
                     date			= _new_date;
-                    latitude		= _new_latitude * 10;	// degrees*10e5 -> 10e7
-                    longitude		= _new_longitude * 10;	// degrees*10e5 -> 10e7
+                    latitude		= _new_latitude * 100;	// degrees*10e5 -> 10e7
+                    longitude		= _new_longitude * 100;	// degrees*10e5 -> 10e7
                     ground_speed	= _new_speed;
                     ground_course	= _new_course;
                     fix				= true;
@@ -256,8 +266,8 @@ bool AP_GPS_NMEA::_term_complete()
                 case _GPS_SENTENCE_GPGGA:
                     altitude		= _new_altitude;
                     time			= _new_time;
-                    latitude		= _new_latitude * 10;	// degrees*10e5 -> 10e7
-                    longitude		= _new_longitude * 10;	// degrees*10e5 -> 10e7
+                    latitude		= _new_latitude * 100;	// degrees*10e5 -> 10e7
+                    longitude		= _new_longitude * 100;	// degrees*10e5 -> 10e7
                     num_sats		= _new_satellite_count;
                     hdop			= _new_hdop;
                     fix				= true;

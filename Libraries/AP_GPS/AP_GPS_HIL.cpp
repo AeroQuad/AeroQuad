@@ -24,7 +24,7 @@ AP_GPS_HIL::AP_GPS_HIL(Stream *s) : GPS(s)
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
-void AP_GPS_HIL::init(enum GPS_Engine_Setting nav_setting)
+void AP_GPS_HIL::init(void)
 {
     idleTimeout = 1200;
 }

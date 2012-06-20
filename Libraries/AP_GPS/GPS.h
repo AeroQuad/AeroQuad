@@ -36,18 +36,6 @@ public:
         GPS_OK = 2		///< Receiving valid messages and locked
     };
 
-	// GPS navigation engine settings. Not all GPS receivers support
-	// this
-	enum GPS_Engine_Setting {
-		GPS_ENGINE_NONE        = -1,
-		GPS_ENGINE_PEDESTRIAN  = 3,
-		GPS_ENGINE_AUTOMOTIVE  = 4,
-		GPS_ENGINE_SEA         = 5,
-		GPS_ENGINE_AIRBORNE_1G = 6,
-		GPS_ENGINE_AIRBORNE_2G = 7,
-		GPS_ENGINE_AIRBORNE_4G = 8
-	};
-
     /// Query GPS status
     ///
     /// The 'valid message' status indicates that a recognised message was
@@ -84,10 +72,10 @@ public:
     ///
     /// Must be implemented by the GPS driver.
     ///
-    virtual void	init(enum GPS_Engine_Setting engine_setting = GPS_ENGINE_NONE) = 0;
+    virtual void	init(void) = 0;
 
     // Properties
-    uint32_t time;			///< GPS time (milliseconds from epoch)
+    long	time;			///< GPS time (milliseconds from epoch)
     long	date;			///< GPS date (FORMAT TBD)
     long	latitude;		///< latitude in degrees * 10,000,000
     long	longitude;		///< longitude in degrees * 10,000,000
@@ -120,13 +108,7 @@ public:
     /// 1200ms allows a small amount of slack over the worst-case 1Hz update
     /// rate.
     ///
-    uint32_t	idleTimeout;
-
-	// our approximate linear acceleration in m/s/s
-	float acceleration(void) { return _acceleration; }
-
-	// the time we got our last fix in system milliseconds
-	uint32_t last_fix_time;
+    unsigned long	idleTimeout;
 
 protected:
     Stream	*_port;			///< port the GPS is attached to
@@ -178,23 +160,16 @@ protected:
     /// Time epoch code for the gps in use
     GPS_Time_Epoch				_epoch;
 
-	enum GPS_Engine_Setting _nav_setting;
-
 private:
 
 
     /// Last time that the GPS driver got a good packet from the GPS
     ///
-    uint32_t 				_idleTimer;
+    unsigned long 				_idleTimer;
 
     /// Our current status
     GPS_Status					_status;
 
-	// previous ground speed in cm/s
-    uint32_t _last_ground_speed;
-
-	// smoothed estimate of our acceleration
-	float _acceleration;
 };
 
 inline long

@@ -19,7 +19,7 @@ class AP_GPS_Shim : public GPS
 public:
     AP_GPS_Shim() : GPS(NULL) {}
 
-    virtual void init(enum GPS_Engine_Setting nav_setting = GPS_ENGINE_NONE) {};
+    virtual void init(void) {};
     virtual bool read(void) {
         bool updated = _updated;
         _updated = false;
@@ -30,7 +30,7 @@ public:
     /// defines a member function set_<variable>(<type>)
     ///
 #define __GPS_SHIM_SET(__type, __name) void set_##__name(__type v) { __name = v; _updated = true; }
-    __GPS_SHIM_SET(uint32_t, time);
+    __GPS_SHIM_SET(long, time);
     __GPS_SHIM_SET(long, latitude);
     __GPS_SHIM_SET(long, longitude);
     __GPS_SHIM_SET(long, altitude);

@@ -11,7 +11,7 @@ public:
 
     // Methods
     AP_GPS_IMU(Stream *s);
-    virtual void init(enum GPS_Engine_Setting nav_setting);
+    virtual void init(void);
     virtual bool read(void);
 
     // Properties

@@ -30,7 +30,7 @@ AP_GPS_SIRF::AP_GPS_SIRF(Stream *s) : GPS(s)
 
 // Public Methods //////////////////////////////////////////////////////////////
 void
-AP_GPS_SIRF::init(enum GPS_Engine_Setting nav_setting)
+AP_GPS_SIRF::init(void)
 {
     _port->flush();
 

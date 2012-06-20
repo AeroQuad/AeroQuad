@@ -9,7 +9,6 @@
 #include <FastSerial.h>
 #include <AP_Common.h>
 #include <AP_GPS.h>
-#include <AP_Math.h>
 
 FastSerialPort0(Serial);
 FastSerialPort1(Serial1);
