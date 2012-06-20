@@ -107,7 +107,7 @@ void readPilotCommands() {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
-            baroAltitudeToHoldTarget = estimatedBaroAltitude;
+            baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
           #endif
@@ -206,8 +206,6 @@ void readPilotCommands() {
 
         positionHoldPointToReach.latitude = currentPosition.latitude;
         positionHoldPointToReach.longitude = currentPosition.longitude;
-        previousPositionHoldPosition.latitude = currentPosition.latitude;
-        previousPositionHoldPosition.longitude = currentPosition.longitude;
         positionHoldPointToReach.altitude = getBaroAltitude();
         isStorePositionNeeded = false;
       }

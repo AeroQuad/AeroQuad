@@ -38,7 +38,7 @@
 float trueNorthHeading = 0.0;
 float compassDeclination = 0.0;
 
-float filter1 = 1.0 / (1.0 + 0.0002);
+float filter1 = 1.0 / (1.0 + 0.002);
 float filter2 = 1 - filter1;
 int headingGyroZero = 0;
 float localHeading = 0.0;

@@ -146,7 +146,6 @@ void processHeading();
 //  float previousSensorAltitude = 0.0;
 
   #if defined AltitudeHoldBaro
-    float previousBaroAltitude = 0.0;
     float baroAltitudeToHoldTarget = 0.0;
   #endif  
   #if defined AltitudeHoldRangeFinder
