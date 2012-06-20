@@ -335,6 +335,11 @@ void initHomeBase() {
       if (positionHoldState == ON ) {
         processPositionHold();
       }
+      
+      if (isGpsHaveANewPosition) {
+        isGpsHaveANewPosition = false;
+      }
+
     }
   }
 #endif  // #define UseGPSNavigator
