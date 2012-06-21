@@ -815,6 +815,8 @@ void reportVehicleState() {
   SERIAL_PRINT("Board Type: ");
   #if defined(AeroQuad_v1)
     SERIAL_PRINTLN("v1.x");
+  #elif defined(AeroQuad_v1_IDG)
+    SERIAL_PRINTLN("v1.x IDG");
   #elif defined(AeroQuadMega_v1)
     SERIAL_PRINTLN("Mega v1.x");
   #elif defined(AeroQuad_v18)
