@@ -7,6 +7,13 @@ tSerial &Serial = SERIAL_VAR;
 	#define LED_Green  Port2Pin('E', 6)
 	#define LED_Red    Port2Pin('E', 5)
 	#define LED_Yellow LED_Red
+        #define ADC1       Port2Pin('B',0)
+        #define ADC2       Port2Pin('C',4)
+        #define ADC3       Port2Pin('B',1)
+        #define ADC4       Port2Pin('C',5)
+        #define ADC5       Port2Pin('C',2)
+        #define ADC6       Port2Pin('C',3)
+
 #endif
 #ifdef BOARD_aeroquad32mini
 	#define STM32_BOARD_TYPE "aeroquad32 mini"
@@ -97,7 +104,7 @@ tSerial &Serial = SERIAL_VAR;
 		#define BATT_ANALOG_INPUT	Port2Pin('C', 0)
 		#define BATT_DIODE_LOSS		0.0
 	#endif
-	#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, ((BATT_AREF / BATT_MAX_DIGITAL) * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
+	#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, ((BATT_AREF / BATT_MAX_DIGITAL * 1024) * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
 #endif
 
 #ifdef OSD
@@ -140,6 +147,19 @@ void initPlatform() {
 	digitalWrite(LED_Red, LOW);
 	pinMode(LED_Yellow, OUTPUT);
 	digitalWrite(LED_Yellow, LOW);
+
+#ifdef BattMonitor
+	pinMode(BATT_ANALOG_INPUT, INPUT_ANALOG);
+#endif
+
+#ifdef BOARD_aeroquad32
+	pinMode(ADC1, INPUT_ANALOG);
+	pinMode(ADC2, INPUT_ANALOG);
+	pinMode(ADC3, INPUT_ANALOG);
+	pinMode(ADC4, INPUT_ANALOG);
+	pinMode(ADC5, INPUT_ANALOG);
+	pinMode(ADC6, INPUT_ANALOG);
+#endif
 
 #ifdef DEBUG_INIT
   Serial.println("\r\nAeroQuad STM32, board type " STM32_BOARD_TYPE ", build date " __DATE__ " "__TIME__);
