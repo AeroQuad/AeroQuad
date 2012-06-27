@@ -1,0 +1,2 @@
+make library
+pause
