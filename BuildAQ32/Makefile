@@ -127,7 +127,7 @@ ifeq ($(BUILDTYPE), STM32)
 	   F_CPU = 168000000
 	endif
 
-	LIB_MAPLE_HOME = ../../libmaple
+	LIB_MAPLE_HOME = ../Libmaple/libmaple
 	SRCROOT := $(LIB_MAPLE_HOME)
 	SUPPORT_PATH := $(SRCROOT)/support
 	LDDIR    := $(SUPPORT_PATH)/ld
