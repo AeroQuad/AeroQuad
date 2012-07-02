@@ -29,15 +29,15 @@ void initializeAccel() {
 
 void measureAccel() {
 
-  meterPerSecSec[XAXIS] = analogRead(1) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
-  meterPerSecSec[YAXIS] = analogRead(0) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSecSec[XAXIS] = analogRead(0) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSecSec[YAXIS] = analogRead(1) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
   meterPerSecSec[ZAXIS] = analogRead(2) * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
 }
 
 void measureAccelSum() {
   
-  accelSample[XAXIS] += analogRead(1);
-  accelSample[YAXIS] += analogRead(0);
+  accelSample[XAXIS] += analogRead(0);
+  accelSample[YAXIS] += analogRead(1);
   accelSample[ZAXIS] += analogRead(2);
   accelSampleCount++;
 }

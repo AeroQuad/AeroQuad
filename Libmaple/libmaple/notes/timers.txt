@@ -1,0 +1,96 @@
+Timers
+======
+
+Medium-density chips have timers 1 through 4.  High- and XL-density
+chips additionally have timers 5 through 8.  XL-density chips
+additionally have timers 9--14, which we don't support yet.
+
+Timer Capabilities
+------------------
+
+Each of timers 1--4 has 4 capture/compare (C/C) channels (also numbered
+1--4). These are directly used by PWM, but may serve other purposes as
+well (including handling user-specified periodic interrupts). The
+STM32 implementation is particularly featureful, with, e.g., the
+ability to chain together timers.
+
+Timers 1 and 8 are an advanced timers, with many more features.
+Wirish just uses just their capture/compare interrupts and enables MOE
+during initialization, essentially treating them as general purpose
+timers (like timers 2--5).  Advanced timers also have separate break,
+update, and trigger interrupts that we only provide low-level
+(i.e. libmaple proper) support for.
+
+Timers 6 and 7 are basic timers, without C/C channels.  They are still
+useful for interrupts (via NVIC_TIMER6, NVIC_TIMER7 IRQs, which can
+fire upon an update event), but they're most useful for controlling
+periodic DAC output.
+
+Known Issues and Other Caveats
+------------------------------
+
+There are some conflicts between timer C/C outputs and USART 1 and 2
+TX/RX.  Wirish tries to handle this gracefully, but (as of 7 April
+2011) not all the bugs are sorted yet.  In particular, if you call
+HardwareSerial::disable(), then try to use PWM, the USART TX pins
+don't cooperate.
+
+Resetting the prescaler or reload value only takes effect at the next
+update event.  You can use timer_generate_update() to generate an
+update event via software.
+
+Other interrupts (SysTick, USB, Serial, etc.) can interfere with
+timing-critical applications.  If your program requires precise
+timing, you should probably at least disable USB and SysTick.  Note
+that this also disables the bootloader and stops millis()/micros()
+from counting.
+
+Getting really good timing is a bit of an art.  If things don't work
+at first, you need to fiddle with an oscilloscope and the exact
+overflow/compare numbers to get precise behavior.
+
+TODO
+----
+
+- Document more carefully (e.g., determine clock-wise and
+  overflow-wise behavior for each function).
+
+- Track down and handle pin conflicts.
+
+- Input capture interface.  DON'T WRITE pulseIn() IN TERMS OF THIS.
+  Do that as a simple, Arduino style implementation that just
+  busy-waits and uses micros(), to allow a pulseIn() on arbitrary
+  pins.  Eventually, expose the more precise/harder to use timer-based
+  API via a convenience library.
+
+- Complementary outputs, with convenient break/dead time interface.
+
+- Additional modes (center-aligned PWM, one pulse mode, etc.) and
+  count configuration (down, up/down).
+
+Alternative Wirish Implementations
+----------------------------------
+
+The current Wirish API is big and clunky.  Its inclusion by default
+also threatens making everyone's sketches bigger unnecessarily.  We
+need to deprecate the parts of it that are bad for 0.0.10, and remove
+them when 0.1.0 comes out.
+
+Current implementation was inspired by Timer1 Library for Arduino:
+
+http://arduino.cc/pipermail/developers_arduino.cc/2010-June/002845.html
+
+Here's one of the more standard libaries out there:
+
+http://www.arduino.cc/playground/Code/Timer1
+
+        void initialize(long microseconds=1000000);
+        void start();
+        void stop();
+        void restart();
+        void setPeriod(long microseconds);
+        void pwm(char pin, int duty, long microseconds=-1);
+        void setPwmDuty(char pin, int duty);
+        void disablePwm(char pin);
+        void attachInterrupt(void (*isr)(), long microseconds=-1);
+        void detachInterrupt();

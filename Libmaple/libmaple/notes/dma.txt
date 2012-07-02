@@ -1,0 +1,99 @@
+DMA Notes
+=========
+
+Medium-density devices have one DMA controller, DMA1.  High-density
+devices and up also have DMA2.  DMA1 has 7 channels; DMA2 has 5.  Each
+channel multiplexes DMA requests from various peripherals, like so:
+
+Channel Capabilities
+--------------------
+
+DMA1:
+
+    * Channel 1: ADC1, TIM2_CH3, TIM4_CH1
+    * Channel 2: USART3_TX, TIM1_CH1, TIM2_UP,  TIM3_CH3, SPI1_RX
+    * Channel 3: USART3_RX, TIM1_CH2, TIM3_CH4, TIM3_UP,  SPI1_TX
+    * Channel 4: USART1_TX, TIM1_CH4, TIM1_TRIG, TIM1_COM, TIM4_CH2,
+                 SPI2/I2S2_RX, I2C2_TX
+    * Channel 5: USART1_RX, TIM1_UP, TIM2_CH1, TIM4_CH3,
+                 SPI2/I2S2_TX, I2C2_RX
+    * Channel 6: USART2_RX, TIM1_CH3, TIM3_CH1, TIM3_TRIG, I2C1_TX
+    * Channel 7: USART2_TX, TIM2_CH2, TIM2_CH4, TIM4_UP, I2C1_RX
+
+DMA2:
+
+    * Channel 1: TIM5_CH4, TIM5_TRIG, TIM8_CH3, TIM8_UP, SPI/I2S3_RX
+    * Channel 2: TIM8_CH4, TIM8_TRIG, TIM8_COM, TIM5_CH3, TIM5_UP, SPI/I2S3_TX
+    * Channel 3: TIM8_CH1, UART4_RX, TIM6_UP/DAC_CH1
+    * Channel 4: TIM5_CH2, SDIO, TIM7_UP/DAC_CH2
+    * Channel 5: ADC3, TIM8_CH2, TIM5_CH1, UART4_TX
+
+An example usage: via DMA1, channel 1, you can have ADC1 periodically
+dump converted data into an array in memory.  The DMA controller can
+then interrupt you when the array is half-full and full, and if any
+error occurred.
+
+Since channels are multiplexed in hardware, you can't simultaneously
+use the same DMA channel to serve requests from two of its peripherals
+at the same time.  For example, if you are using DMA 1 channel 1 to
+serve DMA requests from ADC1, you can't also serve requests from Timer
+2 channel 3.
+
+Channel Priority
+----------------
+
+An arbiter prioritizes simultaneous channel DMA requests.  Channel
+priority levels are configurable (4 levels of priority).  Ties within
+a DMA controller are broken by choosing the lower channel number;
+between the controllers, DMA1 has higher priority than DMA2.
+
+Interrupts
+----------
+
+You can cause an interrupt to fire once half the transfers are
+complete, when all the transfers are complete, if an error occurs
+during transfer, or any combination of the three.
+
+If an error occurs, the transfer is automatically disabled.
+
+Configuration
+-------------
+
+In order to configure a DMA transfer for DMA controller n, channel x,
+ST RM0008 says you should do the following:
+
+    A. Set the peripheral register address in DMAn_BASE->CPARx.
+    B. Set the memory address in DMAn_BASE->CMARx.
+    C. Set the number of data to be transferred in DMAn_BASE->CNDTRx.
+    D. Set the channel priority via the PL bits in DMAn_BASE->CCRx.
+    E. Configure various other things (e.g. data transfer sizes, what
+       events cause channel interrupts) in DMAn_BASE->CCRx as desired.
+    F. Activate the channel by setting ENABLE bit in DMAn_BASE->CCRx.
+
+The channel will start serving DMA requests as soon as it's activated.
+
+The DMA library lets you accomplish these tasks as follows:
+
+    **Setup transfer**
+
+    Do (A), (B), and (E) using dma_setup_transfer().
+
+    This also does (D), but chooses the lowest priority by default.
+
+    **Perform any other desired configuration**
+
+    You can do (C) using dma_set_num_transfers().
+
+    You can do (D) using dma_set_priority().
+
+    You can attach interrupt handlers with dma_attach_interrupt().
+
+    **Activate the channel**
+
+    Do (F) with dma_enable().
+
+Once you're all done, you can dma_disable() the channel.  If you
+dma_detach_interrupt() an interrupt handler, the channel interrupts
+will stop firing, but the transfer itself won't stop until it's done
+(which never happens if you set the DMA_CIRC_MODE flag when you called
+dma_setup_transfer()).

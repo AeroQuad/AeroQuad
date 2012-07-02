@@ -65,7 +65,7 @@ void readPilotCommands() {
     // Arm motors (left stick lower right corner)
     if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
 
-      #if defined (UseGPS)
+      #ifdef UseGPS
         if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized()) {   // if GPS, wait for home position fix!
            return;
          }
@@ -110,7 +110,7 @@ void readPilotCommands() {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
-            baroAltitudeToHoldTarget = estimatedBaroAltitude;
+            baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
           #endif
@@ -184,7 +184,7 @@ void readPilotCommands() {
     }
   
   
-    if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) {   // Enter in execute mission state, if none, go back home, override the position hold
+    if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) {  // Enter in execute mission state, if none, go back home, override the position hold
     
       if (isInitNavigationNeeded) {
         
@@ -199,7 +199,7 @@ void readPilotCommands() {
 
       navigationState = ON;
     }
-    else if (receiverCommand[AUX2] > 1400 && receiverCommand[AUX2] < 1700 && isHomeBaseInitialized()) {  // Enter in position hold state
+    else if (receiverCommand[AUX2] > 1400 && receiverCommand[AUX2] < 1700 && isHomeBaseInitialized()) {   // Enter in position hold state
       
       if (isStorePositionNeeded) {
         

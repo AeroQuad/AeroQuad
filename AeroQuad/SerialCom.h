@@ -567,7 +567,7 @@ void sendSerialTelemetry() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       #if defined AltitudeHoldBaro
 //        PrintValueComma(getBaroAltitude());
-        PrintValueComma(estimatedBaroAltitude);
+        PrintValueComma(getBaroAltitude());
       #elif defined AltitudeHoldRangeFinder
         PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
       #endif  
@@ -815,6 +815,8 @@ void reportVehicleState() {
   SERIAL_PRINT("Board Type: ");
   #if defined(AeroQuad_v1)
     SERIAL_PRINTLN("v1.x");
+  #elif defined(AeroQuad_v1_IDG)
+    SERIAL_PRINTLN("v1.x IDG");
   #elif defined(AeroQuadMega_v1)
     SERIAL_PRINTLN("Mega v1.x");
   #elif defined(AeroQuad_v18)
@@ -881,7 +883,6 @@ void reportVehicleState() {
 }
 
 #ifdef SlowTelemetry
- 
   struct telemetryPacket {
     word  id;
     long  latitude;
@@ -930,12 +931,29 @@ void reportVehicleState() {
 
     if (slowTelemetryByte==255) {
       telemetryBuffer.data.id        = 0x5141; // "AQ"
-      telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
-      telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
-      telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
-      telemetryBuffer.data.course    = getCourse()/10; // degrees
-      telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
-      telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
+      #ifdef UseGPS
+        telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
+        telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
+        telemetryBuffer.data.course    = getCourse()/10; // degrees
+        telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
+        telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
+        telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff; 
+        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12); 
+      #else
+        telemetryBuffer.data.latitude  = 0;
+        telemetryBuffer.data.longitude = 0;
+        telemetryBuffer.data.course    = 0;
+        telemetryBuffer.data.speed     = 0;
+        telemetryBuffer.data.heading   = 0;
+        telemetryBuffer.data.gpsinfo   = 0;
+      #endif
+
+      #ifdef AltitudeHoldBaro
+        telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
+      #else
+        telemetryBuffer.data.altitude  = 0;
+      #endif
+
       #ifdef UseRSSIFaileSafe
         #ifdef RSSI_RAWVAL
           telemetryBuffer.data.rssi      = rssiRawValue/10; // scale to 0-100
@@ -945,11 +963,17 @@ void reportVehicleState() {
       #else
         telemetryBuffer.data.rssi      = 100;
       #endif
-      telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
-      telemetryBuffer.data.current   = batteryData[0].current/100; // to A
-      telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
-      telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff; 
-      telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12); 
+
+      #ifdef BattMonitor
+        telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
+        telemetryBuffer.data.current   = batteryData[0].current/100; // to A
+        telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
+      #else
+        telemetryBuffer.data.voltage   = 0;
+        telemetryBuffer.data.current   = 0;
+        telemetryBuffer.data.capacity  = 0;
+      #endif
+
        /* add ECC */
       encode_data(telemetryBuffer.bytes,24);
 

@@ -1,0 +1,33 @@
+libmaple was previously very restricted to LeafLabs boards.  However,
+the contents of libmaple proper are now fairly portable across medium-
+and high-density STM32F1xx chips (though there are some caveats).  The
+current design is expected to accomodate new chips straightforwardly
+and well into the future.
+
+The library's configuration is based around the files wirish/boards.h
+(and .cpp), wirish/boards/*, and libmaple/stm32.h, as well as some
+#defines it expects the environment to handle during compilation.
+
+If you want to use libmaple proper, you must define one of
+STM32_MEDIUM_DENSITY or STM32_HIGH_DENSITY during compilation.
+Defining one of these allows libmaple to decide what processor
+features to expose to you (e.g., definitions related to ADC3 aren't
+compiled in when STM32_MEDIUM_DENSITY is defined).  There's no support
+for low-density chips.  XL-density is planned but not done (we don't
+have one to test on); patches (and samples) are welcome!  See:
+
+    http://leaflabs.com/docs/libmaple/contributing.html
+
+There are some other useful #defines the environment can provide when
+compiling libmaple.  They aren't as crucial, though.  See the Makefile
+for more information.
+
+If you want to use Wirish, you'll need to define a BOARD_foo
+(e.g. BOARD_maple, BOARD_maple_mini, etc.).  This determines which
+board files get loaded from wirish/boards/.  See /wirish/boards.h and
+/wirish/boards.cpp for more details.  See /wirish/boards/maple.h and
+/wirish/boards/maple.cpp for well-commented examples on how to add a
+new board configuration.
+
+The code in libmaple/usb/ is not very portable at all right now;
+expect this to change in the future.

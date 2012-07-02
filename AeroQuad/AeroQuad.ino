@@ -32,10 +32,6 @@
 // Define Security Checks
 //
 
-//
-// In order to use the DIYDrone libraries, this have to be declared here this way
-// @see Kenny9999 for details
-//
 #if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
  #define UseGPS
 #endif 
@@ -52,6 +48,10 @@
   #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
+//
+// In order to use the DIYDrone libraries, this have to be declared here this way
+// @see Kenny9999 for details
+//
 #if defined UseGPS
   // needed here to use DIYDrone GPS libraries
   #include <FastSerial.h>
@@ -121,10 +121,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -168,10 +166,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -1052,6 +1048,8 @@
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32PPM
+  #include <Receiver_STM32PPM.h>  
 #elif defined RECEIVER_STM32
   #include <Receiver_STM32.h>  
 #endif
@@ -1413,7 +1411,7 @@ void loop () {
       readPilotCommands(); 
       
       #if defined AltitudeHoldBaro
-        processExtrapolatedBaroAltitude();
+        evaluateBaroAltitude();
       #endif
       
       #if defined (UseRSSIFaileSafe) 

@@ -1,0 +1,64 @@
+
+FSMC notes (for maple native and other "high density" STM32 devices)
+-------------------------------------------------------------------------------
+
+There is an application note for all this which is helpful; see the ST website.
+
+SRAM chip details
+    IS62WV51216BLL
+    512k x 16
+    19 address input
+    16 data inputs
+    t_wc (write cycle) = 55ns
+    t_rc (write cycle) = 55ns
+    t_pwe1 (write enable low pulse) = 40ns
+    t_aa (address access) = 55ns
+
+
+The FSMC nomenclature is very confusing. There are three separate
+"banks" (which I will call "peripheral banks") each specialized for
+different types of external memory (NOR flash, NAND flash, SRAM,
+etc). We use the one for "PSRAM" with our SRAM chip; it's bank #1. The
+SRAM peripheral bank is further split into 4 "banks" (which I will
+call "channels") to support multiple external devices with chip select
+pins. I think what's going on is that there are 4 hardware peripherals
+and many sections of RAM; the docs are confusing about what's a "block
+of memeory" and what's an "FSMC block".
+
+Anyways, this all takes place on the AHB memory bus.
+
+I'm going to use not-extended mode 1 for read/write.
+
+Steps from application note:
+
+- enable bank3: BCR3_MBKEN = '1'
+- memory type is SRAM: BCR3_MTYP = '00'
+- databuse weidth is 16bits: BCR3_MWID = '01'
+- memory is nonmultiplexed: BCR3_MEXEN is reset (= '0')
+- everything else is cleared
+
+But not true! Actually write enable needs to be set. 
+
+Using the application note, which is based around a very similar chip (with
+faster timing), I calculated an ADDSET (address setup) value of 0x0 and a
+DATAST (data setup) value of 0x3.
+
+Using channel1, NOR/PSRAM1 memory starts at 0x60000000.
+
+Have to turn on the RCC clock for all those GPIO pins, but don't need to use
+any interrupts.
+
+Not-super-helpful-link:
+http://www.keil.com/support/man/docs/mcbstm32e/mcbstm32e_to_xmemory.htm
+
+Note the possible confusion with address spaces, bitwidths, rollovers, etc. 
+
+
+TODO
+-------------------------------------------------------------------------------
+- more rigorous testing: throughput, latency, bounds checking, bitwidth, data
+  resiliance, etc.
+- update .ld scripts to transparently make use of this external memory
+- test/demo using a seperate external SRAM chip or screen
+- write up documentation
+

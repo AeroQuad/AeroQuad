@@ -1,3 +1,6 @@
+#ifndef _AEROQUAD_SPI_HARDWARESPIEXT_H_
+#define _AEROQUAD_SPI_HARDWARESPIEXT_H_
+
 #if defined(AeroQuadSTM32)
 
 // helper class to extend the maple HardwareSPI class
@@ -71,5 +74,7 @@ private:
 	int fCS;
 	unsigned char fSpiMultiFlag;
 };
+
+#endif
 
 #endif

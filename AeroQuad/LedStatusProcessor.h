@@ -44,7 +44,7 @@ void processLedStatus() {
     else { 
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
-   
+    
     if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized())
     {
        hasBuzzerHigherPriority = true;

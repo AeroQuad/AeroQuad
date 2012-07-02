@@ -1,0 +1,41 @@
+External interrupt notes.
+
+To generate the interrupt, the interrupt line should be configured
+and enabled. This is done by programming the two trigger registers
+with the desired edge detection and by enabling the interrupt
+request by writing a '1' to the corresponding bit in the interrupt
+mask register.  When the selected edge occurs on the external
+interrupt line, an interrupt request is generated. The pending bit
+corresponding to the interrupt line is also set.  This request is
+reset by writing a '1' in the pending register.
+
+Hardware interrupt selection:
+
+To configure the 20 lines as interrupt sources, use the following
+procedure:
+
+1) Configure AFIO_EXTICR[y] to select the source input for EXTIx
+   external interrupt
+2) Configure the mask bits of the 20 interrupt lines (EXTI_IMR)
+3) Configure the trigger selection bits of the interrupt lines
+   (EXTI_RTSR and EXTI_FTSR)
+4) Configure the enable and mask bits that control the NVIC_IRQ
+   channel mapped to the External Interrupt Controller (EXTI) so
+   that an inerrupt coming from one of the 20 lines can be
+   correctly acknowledged.
+
+AFIO clock must be on.
+
+RM0008, page 107: "PD0, PD1 cannot be used for external
+interrupt/event generation on 36, 48, 64-bin packages."
+
+The 16 EXTI interrupts are mapped to 7 interrupt handlers.
+
+EXTI Lines to Interrupt Mapping:
+EXTI0 -> EXTI0
+EXTI1 -> EXTI1
+EXTI2 -> EXTI2
+EXTI3 -> EXTI3
+EXTI4 -> EXTI4
+EXTI[5-9] -> EXT9_5
+EXTI[10-15] -> EXT15_10

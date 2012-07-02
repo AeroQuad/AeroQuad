@@ -22,6 +22,7 @@
 #include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
 
 #include <GlobalDefined.h>
+#include <SensorsStatus.h>
 #include <AQMath.h>
 #include <Magnetometer_HMC5843.h>
 

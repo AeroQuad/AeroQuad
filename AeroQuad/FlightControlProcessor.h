@@ -284,12 +284,7 @@ void processFlightControl() {
     #if defined (UseGPS)
       #if defined (UseGPSNavigator)
         processGpsNavigation();
-      #else // if we don't use the navigator, the point to reach is always the home base to display in OSD
-        missionPositionToReach.latitude = homePosition.latitude;
-        missionPositionToReach.longitude = homePosition.longitude;
-        missionPositionToReach.altitude = homePosition.altitude;
       #endif  
-//      Serial.println(nbSatelitesInUse);
     #endif
     
     // ********************** Process Altitude hold **************************

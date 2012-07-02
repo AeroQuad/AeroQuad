@@ -38,7 +38,7 @@ GPS *gps;
 
 #include <GpsDataType.h>
 
-#define MIN_NB_SATS_IN_USE 5
+#define MIN_NB_SATS_IN_USE 6
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795

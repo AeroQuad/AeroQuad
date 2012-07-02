@@ -1,0 +1,67 @@
+DAC
+-------------------------------------------------------------------------------
+
+There is an ST application note for the DACs; it provides a lot of
+context but doesn't help setup the peripheral very much.
+
+For the first code iteration we'll just use 12-bit right-aligned
+single writes, or DAC_DHR12Rx.
+
+Once data is loaded into the digital registers, there are a number of
+possible triggers to start conversion to analog output: external
+interrupts, software control, and timer events. We'll just use
+software triggering for now.
+
+There is (obviously) DMA support for DAC output.
+
+There are noise (via LFSR) output and triangle wave output features
+with variable amplitude.
+
+There are eleven modes to trigger output to both channels at the same
+time, as follows:
+
+    - Independent trigger:
+                  (1) No wave generation
+                  (2) Same LFSR
+                  (3) Different LFSR
+                  (4) Same triangle
+                  (5) Different triangle
+    - (6) Simultaneous software start
+    - Simultaneous trigger:
+                   (7) Without wave generation
+                   (8) Same LFSR
+                   (9) Different LFSR
+                   (10) Same triangle
+                   (11) Different triangle
+
+Buffering is enabled by default.
+
+Triangle Wave HOWTO
+-------------------------------------------------------------------------------
+
+In order to generate a full-amplitude triangle wave:
+
+   - Make the following settings in DAC_BASE->CR, for the DAC channel you
+     want: set MAMP to 1011 (amplitude 4095), WAVE to 10 (triangle),
+     TSEL to 111 (software trigger), TEN to 1 (trigger enabled), and
+     EN to 1 (chanel enabled).
+
+   - Set dac->DHR12Rx to 0 (where x is your channel).  This gets added
+     to the triangle wave value at each trigger step.
+
+   - Now, forever: set DAC_SWTRIGR_SWTRIGx in dac->SWTRIGR, and wait
+     for it to get cleared by hardware.
+
+You can do something similar for noise (by setting WAVE to 01
+instead).  You can also cause the waves to advance due to timer events
+or external line 9, by making appropriate settings to TSEL.
+
+TODO
+-------------------------------------------------------------------------------
+
+- Sine wave demo (using timer interrupts?)
+- Wirish implementation
+- Official docs
+- Higher performance modes?
+- Signal quality testing
+- DMA output
