@@ -27,6 +27,8 @@ Version 3.1 Beta 1 Release Notes (7/1/2012)
  * AUX1 < 1600 = GPS position hold
   * If AUX1 in middle switch position = altitude hold
   * If AUX1 in last position = GPS position hold
+* Support for AeroQuad 32 board
+ * Updated Maple libraries
 
 Version 3.0.1 Release Notes (2/21/2012)
 ----------------------------------------
