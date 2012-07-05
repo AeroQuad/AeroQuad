@@ -1171,6 +1171,10 @@
   #include "MAX7456.h"
 #endif
 
+#if defined (SERIAL_LCD)
+  #include "SerialLCD.h"
+#endif
+
 #ifdef OSD_SYSTEM_MENU
   #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
     #error "Menu cannot be used without OSD or LCD"
@@ -1178,9 +1182,6 @@
   #include "OSDMenu.h"
 #endif
 
-#if defined (SERIAL_LCD)
-  #include "SerialLCD.h"
-#endif
 
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
@@ -1307,6 +1308,10 @@ void setup() {
   #if defined(MAX7456_OSD)
     initializeSPI();
     initializeOSD();
+  #endif
+  
+  #if defined(SERIAL_LCD)
+    InitSerialLCD();
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)

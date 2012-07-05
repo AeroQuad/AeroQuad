@@ -21,7 +21,7 @@
 #ifndef _AQ_SerialLCD_H_
 #define _AQ_SerialLCD_H_
 
-// OSD notification system
+// OSD notification system on SparkFun serial enabled LCD (2x16)
 //
 // void notifyOSD(byte flags, char *fmt, ...)
 //   - display notification string on OSD
@@ -46,10 +46,17 @@
 
 #define notifyOSD(flags,fmt,args...) notifyOSDmenu(flags,255,255,fmt, ## args)
 
+void hideOSD()   // dummy functions to avoid modifying menu code
+{
+}
+void unhideOSD()
+{
+}
+
 void InitSerialLCD() {
-  SerialLCD.begin(9600);
-  SerialLCD.write(0xFE); // Clear
-  SerialLCD.write(0x01);
+  SERIAL_LCD.begin(9600);
+  SERIAL_LCD.write(0xFE);
+  SERIAL_LCD.write(0x01); // Clear
 }
 
 byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fmt, ...) {
@@ -57,14 +64,13 @@ byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fm
   va_list ap;
 
   char buf[32];
-  byte buflen=0;
 
-  SerialLCD.write(0xfe);
-  SerialLCD.write(0x01);
+  SERIAL_LCD.write(0xfe);
+  SERIAL_LCD.write(0x01); // clear
 
   if (fmt == NULL) {
-    // clear
-    memset(buf, 0, 28);
+    SERIAL_LCD.write(0xFE);
+    SERIAL_LCD.write(0x0C); // disable cursor
   }
   else {
     va_start(ap, fmt);
@@ -73,7 +79,7 @@ byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fm
     if (len > 28) {
       len = 28;
     }
-    memset(buf+len, 0, 28-len);
+    memset(buf+len, ' ', 28-len);
     if (flags & OSD_CENTER) {
       byte i = (28 - len) / 2;
       if (i) {
@@ -87,25 +93,27 @@ byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fm
         }
       }
     }
+
     for (byte i=0; i<28; i++) {
-      SerialLCD.write(buf[i]);
+      SERIAL_LCD.write(buf[i]);
+    }
+
+    if (flags & OSD_CURSOR) {
+      if (cursorLeft > 27) cursorLeft = 27;
+      if (cursorLeft > 15) cursorLeft += 48; // adjust for 2 line display
+
+      SERIAL_LCD.write(0xFE);
+      SERIAL_LCD.write(0x80 + cursorLeft); // set cursor position
+
+      SERIAL_LCD.write(0xFE);
+      SERIAL_LCD.write(0x0D); // enable block cursor
+    }
+    else {
+      SERIAL_LCD.write(0xFE);
+      SERIAL_LCD.write(0x0C); // disable cursor
     }
   }
 
-  if {flags & OSD_CURSOR) {
-    if (cursorLeft > 27) cursorLeft = 27;
-    if (cursorLeft > 15) cursorLeft += 48; // adjust for 2 line display
-
-    SerialLCD.write(0xFE);
-    SerialLCD.write(0x80 + cursorLeft);
-
-    SerialLCD.write(0xFE);
-    SerialLCD.write(0x0D);
-  }
-  else {
-    SerialLCD.write(0xFE);
-    SerialLCD.write(0x0C);
-  }
   return 0;
 }
 
