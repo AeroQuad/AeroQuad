@@ -1016,6 +1016,11 @@
   #include "AeroQuad_STM32.h"
 #endif
 
+// default to 10bit ADC (AVR)
+#ifndef ADC_NUMBER_OF_BITS
+#define ADC_NUMBER_OF_BITS 10
+#endif
+
 //********************************************************
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
