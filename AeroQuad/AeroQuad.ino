@@ -1169,11 +1169,17 @@
   #include <Device_SPI.h>
   #include "OSDDisplayController.h"
   #include "MAX7456.h"
-  #ifdef OSD_SYSTEM_MENU
-    #include "OSDMenu.h"
+#endif
+
+#ifdef OSD_SYSTEM_MENU
+  #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
+    #error "Menu cannot be used without OSD or LCD"
   #endif
-#else  
-    #undef OSD_SYSTEM_MENU  // can't use menu system without an OSD
+  #include "OSDMenu.h"
+#endif
+
+#if defined (SERIAL_LCD)
+  #include "SerialLCD.h"
 #endif
 
 //********************************************************
