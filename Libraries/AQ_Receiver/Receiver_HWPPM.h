@@ -41,7 +41,7 @@
 // Channel data
 volatile unsigned int startPulse = 0;
 volatile byte         ppmCounter = 8; // ignore data until first sync pulse
-volatile int          PWM_RAW[8] = { 2200,2200,2200,2200,2200,2200,2200,2200 };
+volatile int          PWM_RAW[8] = { 3000,3000,3000,3000,3000,3000,3000,3000 };
 
 #define TIMER5_FREQUENCY_HZ 50
 #define TIMER5_PRESCALER    8
@@ -52,27 +52,21 @@ volatile int          PWM_RAW[8] = { 2200,2200,2200,2200,2200,2200,2200,2200 };
  ****************************************************/
 ISR(TIMER5_CAPT_vect)//interrupt.
 {
-  if ((1 << ICES5) & TCCR5B) {
-    // Triggered at rising edge
-    startPulse = ICR5;         // Save time at pulse start
+  unsigned int stopPulse = ICR5;
+  
+  // Compensate for timer overflow if needed
+  unsigned int pulseWidth = ((startPulse > stopPulse) ? TIMER5_PERIOD : 0) + stopPulse - startPulse;
+
+  if (pulseWidth > 5000) {      // Verify if this is the sync pulse (2.5ms)
+    ppmCounter = 0;             // -> restart the channel counter
   }
   else {
-    // Triggered at dropping edge; measure pulse length
-    unsigned int stopPulse = ICR5;
-    // Note: compensate for timer overflow if needed
-    unsigned int pulseWidth = ((startPulse > stopPulse) ? TIMER5_PERIOD : 0) + stopPulse - startPulse;
-
-    if (pulseWidth > 5000) {      // Verify if this is the sync pulse
-      ppmCounter = 0;             // -> restart the channel counter
-    }
-    else {
-      if (ppmCounter < 8) { // channels 9- will get ignored here
-        PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
-        ppmCounter++;                     // Advance to next channel
-      }
+    if (ppmCounter < 8) { // channels 9- will get ignored here
+      PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
+      ppmCounter++;                     // Advance to next channel
     }
   }
-  TCCR5B ^= (1 << ICES5); // Switch edge
+  startPulse = stopPulse;         // Save time at pulse start
 }
 
 #define SERIAL_SUM_PPM_1         1,2,3,0,4,5,6,7 // PITCH,YAW,THR,ROLL... For Graupner/Spektrum
@@ -106,8 +100,7 @@ int getRawChannelValue(byte channel) {
   uint8_t oldSREG = SREG;
   cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
 
-  // Apply receiver calibration adjustment
-  int receiverRawValue = ((PWM_RAW[rcChannel[channel]]+800)/2);
+  int receiverRawValue = ((PWM_RAW[rcChannel[channel]])/2);
 
   SREG = oldSREG;
   
