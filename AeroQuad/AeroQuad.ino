@@ -64,6 +64,7 @@
   FastSerialPort3(Serial3);
 #endif
 
+
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
@@ -1045,6 +1046,8 @@
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32PPM
+  #include <Receiver_STM32PPM.h>  
 #elif defined RECEIVER_STM32
   #include <Receiver_STM32.h>  
 #endif
@@ -1169,6 +1172,8 @@
     #undef OSD_SYSTEM_MENU  // can't use menu system without an OSD
 #endif
 
+
+
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
@@ -1193,6 +1198,9 @@
 #endif
 
 
+
+
+
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
@@ -1204,6 +1212,15 @@
   #include "LedStatusProcessor.h"
 #endif  
 
+#if defined MavLink
+  #include "MavLink.h"
+  // MavLink 0.9 
+  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
+  // MavLink 1.0 DKP - need to get here.
+  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#endif
+
+
 
 /**
  * Main setup function, called one time at bootup
@@ -1214,7 +1231,11 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-  
+
+  #ifdef MavLink
+    sendSerialBoot();
+  #endif
+
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
@@ -1383,12 +1404,18 @@ void loop () {
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #ifdef BinaryWrite
-      if (fastTransfer == ON) {
-        // write out fastTelemetry to Configurator or openLog
-        fastTelemetry();
-      }
+    #if defined BinaryWrite && !defined MavLink
+        if (fastTransfer == ON) {
+          // write out fastTelemetry to Configurator or openLog
+          fastTelemetry();
+        }
+    #endif      
+    #ifdef MavLink
+        //sendSerialHudData();
+        //sendSerialAttitude(); // Defined in MavLink.pde
+        //sendSerialGpsPostion();
     #endif
+    
 
     #ifdef SlowTelemetry
       updateSlowTelemetry100Hz();
@@ -1426,6 +1453,11 @@ void loop () {
       
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+      #endif
+      
+      #ifdef MavLink
+        readSerialCommand();
+        sendSerialTelemetry();
       #endif
     }
 
