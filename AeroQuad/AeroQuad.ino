@@ -48,6 +48,12 @@
   #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
+// Special motor config additionnal variable
+#if defined quadXHT_FPVConfig
+ #define quadXConfig
+ #define FRONT_YAW_CORRECTION 0.75
+#endif
+
 //
 // In order to use the DIYDrone libraries, this have to be declared here this way
 // @see Kenny9999 for details
