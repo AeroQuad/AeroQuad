@@ -1176,13 +1176,18 @@
   #include <Device_SPI.h>
   #include "OSDDisplayController.h"
   #include "MAX7456.h"
-  #ifdef OSD_SYSTEM_MENU
-    #include "OSDMenu.h"
-  #endif
-#else  
-    #undef OSD_SYSTEM_MENU  // can't use menu system without an OSD
 #endif
 
+#if defined (SERIAL_LCD)
+  #include "SerialLCD.h"
+#endif
+
+#ifdef OSD_SYSTEM_MENU
+  #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
+    #error "Menu cannot be used without OSD or LCD"
+  #endif
+  #include "OSDMenu.h"
+#endif
 
 
 //********************************************************
@@ -1326,6 +1331,10 @@ void setup() {
   #if defined(MAX7456_OSD)
     initializeSPI();
     initializeOSD();
+  #endif
+  
+  #if defined(SERIAL_LCD)
+    InitSerialLCD();
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)

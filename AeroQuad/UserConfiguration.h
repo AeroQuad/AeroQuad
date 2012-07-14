@@ -171,7 +171,14 @@
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph)
 
-//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
+//
+// *******************************************************************************************************************************
+// Support menu on serial enabled LCD display (16x2 characters).  You can change serial port if needed
+// Note: cannot be enabled at the same time with OSD
+// *************************************************************.******************************************************************
+//#define SERIAL_LCD Serial3
+
+//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 
 /****************************************************************************
  ****************************************************************************
