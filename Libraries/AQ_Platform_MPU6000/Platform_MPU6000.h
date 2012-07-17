@@ -221,6 +221,7 @@ void MPU6000SwapData(unsigned char *data, int datalen)
 void readMPU6000Sensors()
 {
 #ifdef MPU6000_I2C
+	sendByteI2C(MPUREG_ACCEL_XOUT_H, addr);
     Wire.requestFrom(MPU6000_I2C_ADDRESS, sizeof(MPU6000));
     for(byte i=0; i<sizeof(MPU6000)/2; i++) {
     	MPU6000.rawWord[i] = readWordI2C();
