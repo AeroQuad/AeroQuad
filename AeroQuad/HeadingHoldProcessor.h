@@ -92,7 +92,7 @@ void processHeading()
         else {
         // No new yaw input, calculate current heading vs. desired heading heading hold
         // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
+          headingHold = updatePID(0, relativeHeading, G_Dt, inFlight, &PID[HEADING_HOLD_PID_IDX]);
           headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
         }
       }
@@ -112,7 +112,7 @@ void processHeading()
   #endif
   
   const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
+  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], G_Dt, inFlight, &PID[ZAXIS_PID_IDX]);
 }
 
 #endif

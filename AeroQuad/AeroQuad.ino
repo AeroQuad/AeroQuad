@@ -1289,6 +1289,7 @@ void setup() {
 
   initializeKinematics();
   // Flight angle estimation
+  PID[HEADING_HOLD_PID_IDX].type = 1;
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();

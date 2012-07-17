@@ -36,10 +36,12 @@ void readPilotCommands() {
   readReceiver(); 
   if (receiverCommand[THROTTLE] < MINCHECK) {
     zeroIntegralError();
+    zeroLastError();
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
       motorArmed = OFF;
+      inFlight = false;
             
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
@@ -59,6 +61,7 @@ void readPilotCommands() {
       storeSensorsZeroToEEPROM();
       calibrateKinematics();
       zeroIntegralError();
+      zeroLastError();
       pulseMotors(3);
     }   
     
@@ -72,6 +75,7 @@ void readPilotCommands() {
       #endif
 
       zeroIntegralError();
+      zeroLastError();
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
       }
@@ -86,6 +90,12 @@ void readPilotCommands() {
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
+    }
+  }
+  
+  if (!inFlight) {
+    if (motorArmed == ON && receiverCommand[THROTTLE] > minArmedThrottle) {
+      inFlight = true;
     }
   }
   
@@ -109,12 +119,12 @@ void readPilotCommands() {
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
           #if defined AltitudeHoldRangeFinder
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
           altitudeHoldThrottle = receiverCommand[THROTTLE];
           isStoreAltitudeNeeded = false;
@@ -136,12 +146,12 @@ void readPilotCommands() {
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
           #if defined AltitudeHoldRangeFinder
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
           altitudeHoldThrottle = receiverCommand[THROTTLE];
           isStoreAltitudeForAutoLanfingNeeded = false;

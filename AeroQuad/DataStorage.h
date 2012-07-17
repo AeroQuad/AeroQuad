@@ -109,7 +109,7 @@ void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->P = nvrReadFloat(IDEeprom);
   pid->I = nvrReadFloat(IDEeprom+4);
   pid->D = nvrReadFloat(IDEeprom+8);
-  pid->lastPosition = 0;
+  pid->lastError = 0;
   pid->integratedError = 0;
 }
 
