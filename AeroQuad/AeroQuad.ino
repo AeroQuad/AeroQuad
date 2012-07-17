@@ -51,7 +51,8 @@
 // Special motor config additionnal variable
 #if defined quadXHT_FPVConfig
  #define quadXConfig
- #define FRONT_YAW_CORRECTION 0.75
+ #define FRONT_YAW_CORRECTION 0.82
+ #define REAR_YAW_CORRECTION 1.13
 #endif
 
 //
