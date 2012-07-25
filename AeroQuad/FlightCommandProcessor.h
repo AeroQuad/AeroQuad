@@ -35,8 +35,6 @@ void readPilotCommands() {
   
   readReceiver(); 
   if (receiverCommand[THROTTLE] < MINCHECK) {
-    zeroIntegralError();
-    zeroLastError();
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
@@ -61,7 +59,7 @@ void readPilotCommands() {
       storeSensorsZeroToEEPROM();
       calibrateKinematics();
       zeroIntegralError();
-      zeroLastError();
+//      zeroLastError();
       pulseMotors(3);
     }   
     
@@ -74,8 +72,6 @@ void readPilotCommands() {
         }
       #endif
 
-      zeroIntegralError();
-      zeroLastError();
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
       }
@@ -84,8 +80,10 @@ void readPilotCommands() {
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
       #endif  
-      
-      
+
+//      zeroLastError();      
+      zeroIntegralError();
+
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {

@@ -109,7 +109,7 @@ void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->P = nvrReadFloat(IDEeprom);
   pid->I = nvrReadFloat(IDEeprom+4);
   pid->D = nvrReadFloat(IDEeprom+8);
-  pid->lastError = 0;
+//  pid->lastError = 0;
   pid->integratedError = 0;
 }
 
@@ -148,18 +148,22 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -300.0;
 
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = 0.6;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  #if defined (AltitudeHoldBaro)
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+    PID[ZDAMPENING_PID_IDX].P = 0.0;
+    PID[ZDAMPENING_PID_IDX].I = 0.0;
+    PID[ZDAMPENING_PID_IDX].D = 0.0;
+  #endif
+  #if defined (AltitudeHoldRangeFinder)
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = 0.6;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = 0.0;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  #endif
 
-  PID[ZDAMPENING_PID_IDX].P = 0.0;
-  PID[ZDAMPENING_PID_IDX].I = 0.0;
-  PID[ZDAMPENING_PID_IDX].D = 0.0;
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     minThrottleAdjust = -50.0;
@@ -202,10 +206,14 @@ void initializeEEPROM() {
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
-    if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+  for (byte i = XAXIS; i <= LAST_PID_IDX; i++ ) {
+    #if defined AltitudeHoldBaro
+      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+        PID[i].windupGuard = windupGuard;
+      }
+    #else
       PID[i].windupGuard = windupGuard;
-    }
+    #endif
   }
     
   receiverXmitFactor = 1.0;
@@ -286,9 +294,9 @@ void readEEPROM() {
 
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
-  readPID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    readPID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     #if defined AltitudeHoldBaro
       baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
     #endif  
@@ -296,8 +304,8 @@ void readEEPROM() {
     altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+    readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
-  readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
 
   // Mag calibration
   #ifdef HeadingMagHold
@@ -318,10 +326,14 @@ void readEEPROM() {
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the EEPROM
-  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
-    if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+  for (byte i = XAXIS; i <= LAST_PID_IDX; i++ ) {
+    #if defined AltitudeHoldBaro
+      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+        PID[i].windupGuard = windupGuard;
+      }
+    #else
       PID[i].windupGuard = windupGuard;
-    }
+    #endif      
   }
     
   minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
@@ -377,8 +389,10 @@ void writeEEPROM(){
   writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-  writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
+  #if defined AltitudeHoldBaro
+    writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+    writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
+  #endif
 
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     #if defined AltitudeHoldBaro
@@ -390,6 +404,7 @@ void writeEEPROM(){
     writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+    writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
     writeFloat(90, ALTITUDE_BUMP_ADR);
@@ -398,7 +413,7 @@ void writeEEPROM(){
     writeFloat(50, ALTITUDE_MAX_THROTTLE_ADR);
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
-  writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
+  
   #ifdef HeadingMagHold
     writeFloat(magBias[XAXIS], XAXIS_MAG_BIAS_ADR);
     writeFloat(magScale[XAXIS], XAXIS_MAG_SCALE_FACTOR_ADR);
