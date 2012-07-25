@@ -45,7 +45,11 @@ void readSpecificMag(float *rawMag) {
     rawMag[XAXIS] = readShortI2C();
     rawMag[ZAXIS] = readShortI2C();
     rawMag[YAXIS] = readShortI2C();
-  #else
+  #elif defined(AutonavShield_5883L)
+    rawMag[XAXIS] =   readShortI2C();
+    rawMag[ZAXIS] =  -readShortI2C();
+    rawMag[YAXIS] =  -readShortI2C();
+  #else 
     #error Define HMC5883L Orientation
   #endif
 }

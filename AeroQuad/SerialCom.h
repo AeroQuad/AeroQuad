@@ -78,16 +78,13 @@ void readSerialCommand() {
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      headingHoldConfig = readFloatSerial();
-      heading = 0;
-      relativeHeading = 0;
-      headingHold = 0;
+      readFloatSerial();
       break;
       
     case 'D': // Altitude hold PID
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        readSerialPID(ALTITUDE_HOLD_PID_IDX);
-        PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
+        readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
+        PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
@@ -115,17 +112,11 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
-      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-      //  receiverSlope[channel] = readFloatSerial();
-      //}
       channelCal = (int)readFloatSerial();
       receiverSlope[channelCal] = readFloatSerial();
       break;
       
     case 'H': // Receive transmitter calibration values
-      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-      //  receiverOffset[channel] = readFloatSerial();
-      //}
       channelCal = (int)readFloatSerial();
       receiverOffset[channelCal] = readFloatSerial();
       break;
@@ -133,6 +124,7 @@ void readSerialCommand() {
     case 'I': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
       writeEEPROM();
+      storeSensorsZeroToEEPROM();
       calibrateGyro();
       computeAccelBias();
       zeroIntegralError();
@@ -156,7 +148,7 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();      
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
-      writeEEPROM();
+      storeSensorsZeroToEEPROM();
       break;
       
     case 'L': // generate accel bias
@@ -170,9 +162,14 @@ void readSerialCommand() {
       
     case 'M': // calibrate magnetometer
       #ifdef HeadingMagHold
-        magBias[XAXIS] = readFloatSerial();      
-        magBias[YAXIS] = readFloatSerial();
-        magBias[ZAXIS] = readFloatSerial();
+        magBias[XAXIS]  = readFloatSerial();      
+        magBias[YAXIS]  = readFloatSerial();
+        magBias[ZAXIS]  = readFloatSerial();
+        writeEEPROM();
+      #else
+        for(int c=0;c<3;c++) {
+          readFloatSerial();
+        }
       #endif
       break;
       
@@ -189,21 +186,34 @@ void readSerialCommand() {
       #endif
       break;
       
+    case 'O': // define waypoints
+      #ifdef UseGPSNavigator
+        missionNbPoint = readIntegerSerial();
+        waypoint[missionNbPoint].latitude = readIntegerSerial();
+        waypoint[missionNbPoint].longitude = readIntegerSerial();
+        waypoint[missionNbPoint].altitude = readIntegerSerial();
+      #else
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+        readIntegerSerial();
+      #endif
+      break;
     case 'P': //  read Camera values
-      #ifdef Camera
-        camera.setMode(readFloatSerial());
-        camera.setCenterPitch(readFloatSerial());
-        camera.setCenterRoll(readFloatSerial());
-        camera.setCenterYaw(readFloatSerial());
-        camera.setmCameraPitch(readFloatSerial());
-        camera.setmCameraRoll(readFloatSerial());
-        camera.setmCameraYaw(readFloatSerial());
-        camera.setServoMinPitch(readFloatSerial());
-        camera.setServoMinRoll(readFloatSerial());
-        camera.setServoMinYaw(readFloatSerial());
-        camera.setServoMaxPitch(readFloatSerial());
-        camera.setServoMaxRoll(readFloatSerial());
-        camera.setServoMaxYaw(readFloatSerial());
+      #ifdef CameraControl
+        cameraMode = readFloatSerial();
+        servoCenterPitch = readFloatSerial();
+        servoCenterRoll = readFloatSerial();
+        servoCenterYaw = readFloatSerial();
+        mCameraPitch = readFloatSerial();
+        mCameraRoll = readFloatSerial();
+        mCameraYaw = readFloatSerial();
+        servoMinPitch = readFloatSerial();
+        servoMinRoll = readFloatSerial();
+        servoMinYaw = readFloatSerial();
+        servoMaxPitch = readFloatSerial();
+        servoMaxRoll = readFloatSerial();
+        servoMaxYaw = readFloatSerial();
       #else
         for (byte values = 0; values < 13; values++)
           readFloatSerial();
@@ -217,6 +227,19 @@ void readSerialCommand() {
       #else
         readFloatSerial();
         readFloatSerial();
+      #endif
+      break;
+
+    case 'V': // GPS
+      #if defined (UseGPS)
+        readSerialPID(GPSROLL_PID_IDX);
+        readSerialPID(GPSPITCH_PID_IDX);
+        readSerialPID(GPSYAW_PID_IDX);
+        writeEEPROM();
+      #else
+        for (byte values = 0; values < 6; values++) {
+          readFloatSerial();
+        }
       #endif
       break;
 
@@ -296,6 +319,18 @@ void PrintValueComma(unsigned long val)
   comma();
 }
 
+void PrintValueComma(byte val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
+void PrintValueComma(long int val)
+{
+  SERIAL_PRINT(val);
+  comma();
+}
+
 void PrintPID(unsigned char IDPid)
 {
   PrintValueComma(PID[IDPid].P);
@@ -333,8 +368,8 @@ void sendSerialTelemetry() {
     
   case 'd': // Altitude Hold
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintPID(ALTITUDE_HOLD_PID_IDX);
-      PrintValueComma(PID[ALTITUDE_HOLD_PID_IDX].windupGuard);
+      PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
+      PrintValueComma(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
@@ -393,11 +428,11 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSecSec[axis]);
+      PrintValueComma(filteredAccel[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
-        PrintValueComma(getMagnetometerRawData(axis));
+        PrintValueComma(getMagnetometerData(axis));
       #else
         PrintValueComma(0);
       #endif
@@ -463,21 +498,39 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
+  case 'o': // send waypoints
+    #ifdef UseGPSNavigator
+      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+        PrintValueComma(index);
+        PrintValueComma(waypoint[index].latitude);
+        PrintValueComma(waypoint[index].longitude);
+        PrintValueComma(waypoint[index].altitude);
+      }
+      SERIAL_PRINTLN();
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
   case 'p': // Send Camera values
-    #ifdef Camera
-      PrintValueComma(camera.getMode());
-      PrintValueComma(camera.getCenterPitch());
-      PrintValueComma(camera.getCenterRoll());
-      PrintValueComma(camera.getCenterYaw());
-      PrintValueComma(camera.getmCameraPitch(), 2);
-      PrintValueComma(camera.getmCameraRoll(), 2);
-      PrintValueComma(camera.getmCameraYaw(), 2);
-      PrintValueComma(camera.getServoMinPitch());
-      PrintValueComma(camera.getServoMinRoll());
-      PrintValueComma(camera.getServoMinYaw());
-      PrintValueComma(camera.getServoMaxPitch());
-      PrintValueComma(camera.getServoMaxRoll());
-      SERIAL_PRINTLN(camera.getServoMaxYaw());
+    #ifdef CameraControl
+      PrintValueComma(cameraMode);
+      PrintValueComma(servoCenterPitch);
+      PrintValueComma(servoCenterRoll);
+      PrintValueComma(servoCenterYaw);
+      PrintValueComma(mCameraPitch);
+      PrintValueComma(mCameraRoll);
+      PrintValueComma(mCameraYaw);
+      PrintValueComma(servoMinPitch);
+      PrintValueComma(servoMinRoll);
+      PrintValueComma(servoMinYaw);
+      PrintValueComma(servoMaxPitch);
+      PrintValueComma(servoMaxRoll);
+      SERIAL_PRINTLN(servoMaxYaw);
     #else
       for (byte index=0; index < 12; index++) {
         PrintValueComma(0);
@@ -496,7 +549,7 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
+      SERIAL_PRINTLN(trueNorthHeading);
     #else
       SERIAL_PRINTLN(gyroHeading);
     #endif
@@ -507,12 +560,17 @@ void sendSerialTelemetry() {
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(kinematicsAngle[ZAXIS]);
+      PrintValueComma(trueNorthHeading);
     #else
       PrintValueComma(gyroHeading);
     #endif
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintValueComma(getAltitudeFromSensors() == INVALID_ALTITUDE ? 0 : getAltitudeFromSensors());
+      #if defined AltitudeHoldBaro
+//        PrintValueComma(getBaroAltitude());
+        PrintValueComma(getBaroAltitude());
+      #elif defined AltitudeHoldRangeFinder
+        PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
+      #endif  
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);
@@ -531,7 +589,7 @@ void sendSerialTelemetry() {
       PrintValueComma(0); // zero out unused motor channels
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryData[0].voltage/100.0);
+      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
     #else
       PrintValueComma(0);
     #endif
@@ -552,6 +610,21 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(minRangeFinderRange);
     #else
       PrintValueComma(0);
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
+    break;
+
+  case 'v': // Send GPS PIDs
+    #if defined (UseGPS)
+      PrintPID(GPSROLL_PID_IDX);
+      PrintPID(GPSPITCH_PID_IDX);
+      PrintPID(GPSYAW_PID_IDX);
+      SERIAL_PRINTLN();
+      queryType = 'X';
+    #else
+      for (byte values=0; values < 5; values++)
+        PrintValueComma(0);
       SERIAL_PRINTLN(0);
     #endif
     queryType = 'X';
@@ -580,27 +653,40 @@ void sendSerialTelemetry() {
   }
 }
 
-// Used to read floating point values from the serial port
-float readFloatSerial() {
-  #define SERIALFLOATSIZE 15
+void readValueSerial(char *data, byte size) {
   byte index = 0;
   byte timeout = 0;
-  char data[SERIALFLOATSIZE] = "";
+  data[0] = '\0';
 
   do {
     if (SERIAL_AVAILABLE() == 0) {
-      delay(10);
+      delay(1);
       timeout++;
-    }
-    else {
+    } else {
       data[index] = SERIAL_READ();
       timeout = 0;
       index++;
     }
-  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
-  data[index] = '\0';
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < size-1));
 
+  data[index] = '\0';
+}
+
+
+// Used to read floating point values from the serial port
+float readFloatSerial() {
+  char data[15] = "";
+
+  readValueSerial(data, sizeof(data));
   return atof(data);
+}
+
+// Used to read integer values from the serial port
+long readIntegerSerial() {
+  char data[16] = "";
+
+  readValueSerial(data, sizeof(data));
+  return atol(data);
 }
 
 void comma() {
@@ -674,7 +760,9 @@ void fastTelemetry()
           sendBinaryFloat(hdgX);
           sendBinaryFloat(hdgY);
 		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-            sendBinaryFloat(getMagnetometerRawData(axis));
+		       #if defined(HeadingMagHold)
+			      sendBinaryFloat(getMagnetometerData(axis));
+		       #endif
           }  
        #else
          sendBinaryFloat(0.0);
@@ -694,8 +782,8 @@ void fastTelemetry()
          sendBinaryFloat(meterPerSecSec[axis]);
        }
        for (byte axis = XAXIS; axis <= ZAXIS; axis++)
-       #ifdef HeadingMagHold
-         sendBinaryFloat(getMagnetometerRawData(axis));
+       #if defined(HeadingMagHold)
+         sendBinaryFloat(getMagnetometerData(axis));
        #else
          sendBinaryFloat(0);
        #endif
@@ -727,6 +815,8 @@ void reportVehicleState() {
   SERIAL_PRINT("Board Type: ");
   #if defined(AeroQuad_v1)
     SERIAL_PRINTLN("v1.x");
+  #elif defined(AeroQuad_v1_IDG)
+    SERIAL_PRINTLN("v1.x IDG");
   #elif defined(AeroQuadMega_v1)
     SERIAL_PRINTLN("Mega v1.x");
   #elif defined(AeroQuad_v18)
@@ -735,6 +825,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
     SERIAL_PRINTLN("Mega v21");
+  #elif defined(AeroQuadMega_v21)
+    SERIAL_PRINTLN("AutoNav");
   #elif defined(AutonavShield)
     SERIAL_PRINTLN("AutonavShield");
   #elif defined(AeroQuad_Wii)
@@ -789,5 +881,106 @@ void reportVehicleState() {
   printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
   printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
 }
+
+#ifdef SlowTelemetry
+  struct telemetryPacket {
+    word  id;
+    long  latitude;
+    long  longitude;
+    short altitude;
+    short course;
+    short heading;
+    byte  speed;
+    byte  rssi;
+    byte  voltage;
+    byte  current;
+    word  capacity;
+    word  gpsinfo;
+    byte  ecc[8];
+  };
+  
+  union telemetryBuffer {
+    struct telemetryPacket data;
+    byte   bytes[32];
+  } telemetryBuffer;
+     
+  #define TELEMETRY_MSGSIZE 24
+  #define TELEMETRY_MSGSIZE_ECC (TELEMETRY_MSGSIZE + 8)
+
+  byte slowTelemetryByte = 255;
+ 
+  void initSlowTelemetry() {
+
+    Serial2.begin(1200);
+    slowTelemetryByte = 255;
+  }
+   
+  /* 100Hz task, sends data out byte by byte */
+  void updateSlowTelemetry100Hz() {
+
+    if (slowTelemetryByte < TELEMETRY_MSGSIZE_ECC ) {
+      Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
+      slowTelemetryByte++;
+    }
+    else {
+      slowTelemetryByte=255;
+    }
+  }
+ 
+  void updateSlowTelemetry10Hz() {
+
+    if (slowTelemetryByte==255) {
+      telemetryBuffer.data.id        = 0x5141; // "AQ"
+      #ifdef UseGPS
+        telemetryBuffer.data.latitude  = currentPosition.latitude;  // degrees/10000000
+        telemetryBuffer.data.longitude = currentPosition.longitude; // degrees/10000000
+        telemetryBuffer.data.course    = getCourse()/10; // degrees
+        telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
+        telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
+        telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff; 
+        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12); 
+      #else
+        telemetryBuffer.data.latitude  = 0;
+        telemetryBuffer.data.longitude = 0;
+        telemetryBuffer.data.course    = 0;
+        telemetryBuffer.data.speed     = 0;
+        telemetryBuffer.data.heading   = 0;
+        telemetryBuffer.data.gpsinfo   = 0;
+      #endif
+
+      #ifdef AltitudeHoldBaro
+        telemetryBuffer.data.altitude  = (short)(getBaroAltitude()*10.0); // 0.1m
+      #else
+        telemetryBuffer.data.altitude  = 0;
+      #endif
+
+      #ifdef UseRSSIFaileSafe
+        #ifdef RSSI_RAWVAL
+          telemetryBuffer.data.rssi      = rssiRawValue/10; // scale to 0-100
+        #else
+          telemetryBuffer.data.rssi      = rssiRawValue;
+        #endif      
+      #else
+        telemetryBuffer.data.rssi      = 100;
+      #endif
+
+      #ifdef BattMonitor
+        telemetryBuffer.data.voltage   = batteryData[0].voltage/10;  // to 0.1V
+        telemetryBuffer.data.current   = batteryData[0].current/100; // to A
+        telemetryBuffer.data.capacity  = batteryData[0].usedCapacity/1000; // mAh
+      #else
+        telemetryBuffer.data.voltage   = 0;
+        telemetryBuffer.data.current   = 0;
+        telemetryBuffer.data.capacity  = 0;
+      #endif
+
+       /* add ECC */
+      encode_data(telemetryBuffer.bytes,24);
+
+      /* trigger send */
+      slowTelemetryByte=0;
+    }
+  }
+#endif // SlowTelemetry
 
 #endif // _AQ_SERIAL_COMM_
