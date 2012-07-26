@@ -38,10 +38,10 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
-      float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], G_Dt, !inFlight, &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], G_Dt, !inFlight, &PID[ATTITUDE_YAXIS_PID_IDX]);
-      motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], G_Dt, !inFlight, &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-      motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], G_Dt, !inFlight, &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+      float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+      motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
     else
   #endif

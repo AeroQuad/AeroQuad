@@ -51,7 +51,7 @@
 // Special motor config additionnal variable
 #if defined quadXHT_FPVConfig
  #define quadXConfig
- #define FRONT_YAW_CORRECTION 0.82
+ #define FRONT_YAW_CORRECTION 0.83
  #define REAR_YAW_CORRECTION 1.13
 #endif
 
@@ -1289,7 +1289,6 @@ void setup() {
 
   initializeKinematics();
   // Flight angle estimation
-//  PID[HEADING_HOLD_PID_IDX].type = 1;
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
@@ -1358,6 +1357,10 @@ void setup() {
   #endif
 
   setupFourthOrder();
+  
+//  PID[ZAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_XAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_YAXIS_PID_IDX].type = 1;
   
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);

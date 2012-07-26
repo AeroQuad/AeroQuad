@@ -30,7 +30,7 @@ enum {
   HEADING_HOLD_PID_IDX,
   ATTITUDE_GYRO_XAXIS_PID_IDX,
   ATTITUDE_GYRO_YAXIS_PID_IDX,
-  #if defined AltitudeHoldBaro
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     BARO_ALTITUDE_HOLD_PID_IDX,
     ZDAMPENING_PID_IDX,
   #endif
@@ -46,8 +46,56 @@ enum {
   LAST_PID_IDX  // keep this definition at the end of this enum
 };
 
-
 //// PID Variables
+struct PIDdata {
+  float P, I, D;
+  float lastError;
+  // AKA experiments with PID
+  float previousPIDTime;
+  float integratedError;
+  float windupGuard; // Thinking about having individual wind up guards for each PID
+} PID[LAST_PID_IDX];
+
+// This struct above declares the variable PID[] to hold each of the PID values for various functions
+// The following constants are declared in AeroQuad.h
+// ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
+// ROLLLEVEL = 3, PITCHLEVEL = 4, LEVELGYROROLL = 6, LEVELGYROPITCH = 7 (used for Stable Mode, accels + gyros)
+// HEADING = 5 (used for heading hold)
+// ALTITUDE = 8 (used for altitude hold)
+// ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
+float windupGuard; // Read in from EEPROM
+//// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
+float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+
+  // AKA PID experiments
+  const float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
+
+  PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
+  float error = targetPosition - currentPosition;
+
+  if (inFlight) {
+    PIDparameters->integratedError += error * deltaPIDTime;
+  }
+  else {
+    PIDparameters->integratedError = 0.0;
+  }
+  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
+  float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastError) / (deltaPIDTime * 100); // dT fix from Honk
+  PIDparameters->lastError = currentPosition;
+
+  return (PIDparameters->P * error) + (PIDparameters->I * PIDparameters->integratedError) + dTerm;
+}
+
+void zeroIntegralError() __attribute__ ((noinline));
+void zeroIntegralError() {
+  for (byte axis = 0; axis <= ATTITUDE_YAXIS_PID_IDX; axis++) {
+    PID[axis].integratedError = 0;
+    PID[axis].previousPIDTime = currentTime;
+  }
+}
+
+
+////// PID Variables
 //struct PIDdata {
 //  float P, I, D;
 //  float integratedError;
@@ -57,23 +105,12 @@ enum {
 //  float dTerm2;
 //  uint8_t type;
 //} PID[LAST_PID_IDX];
-
-//boolean holdIntegrators = true;
 //
 //#define F_CUT 20.0f
 //float rc = 1.0f / ( TWO_PI * F_CUT );
 //float windupGuard; // Read in from EEPROM
-
-
-//void initPID()
-//{
-//  for (uint8_t index = 0; index < NUMBER_OF_PIDS; index++) {
-//    PID[index].lastError = 0.0f;
-//    PID[index].dTerm1    = 0.0f;
-//    PID[index].dTerm2    = 0.0f;
-//  }
-//}
-
+//
+//
 //float standardRadianFormat(float angle)
 //{
 //  if (angle >= PI) {
@@ -86,9 +123,9 @@ enum {
 //      return (angle);
 //  }
 //}
-
-
-/////////////////////////////////////////////////////////////////////////////////
+//
+//
+///////////////////////////////////////////////////////////////////////////////////
 //float updatePID(float command, float state, struct PIDdata *PIDparameters)
 //{
 //  
@@ -123,19 +160,8 @@ enum {
 //        return(PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + (PIDparameters->D * dSum);
 //    }
 //}
-
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-//void zeroIntegralError() __attribute__ ((noinline));
-//void zeroIntegralError()
-//{
-//  for (uint8_t index = 0; index < LAST_PID_IDX; index++) {
-//      PID[index].integratedError = 0.0;
-//  }
-//}
-
-///////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////////
 //void zeroLastError() __attribute__ ((noinline));
 //void zeroLastError() 
 //{
@@ -143,6 +169,19 @@ enum {
 //    PID[index].lastError = 0.0f;
 //  }
 //}
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
+//void zeroIntegralError() __attribute__ ((noinline));
+//void zeroIntegralError()
+//{
+//  zeroLastError();
+//  for (uint8_t index = 0; index < LAST_PID_IDX; index++) {
+//      PID[index].integratedError = 0.0;
+//  }
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -151,48 +190,6 @@ enum {
 
 
 
-
-//// PID Variables
-struct PIDdata {
-  float P, I, D;
-  float lastPosition;
-  // AKA experiments with PID
-  float previousPIDTime;
-  float integratedError;
-  float windupGuard; // Thinking about having individual wind up guards for each PID
-} PID[LAST_PID_IDX];
-
-// This struct above declares the variable PID[] to hold each of the PID values for various functions
-// The following constants are declared in AeroQuad.h
-// ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
-// ROLLLEVEL = 3, PITCHLEVEL = 4, LEVELGYROROLL = 6, LEVELGYROPITCH = 7 (used for Stable Mode, accels + gyros)
-// HEADING = 5 (used for heading hold)
-// ALTITUDE = 8 (used for altitude hold)
-// ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
-float windupGuard; // Read in from EEPROM
-//// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
-
-  // AKA PID experiments
-  const float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
-
-  PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
-  float error = targetPosition - currentPosition;
-
-  PIDparameters->integratedError += error * deltaPIDTime;
-  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
-  float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (deltaPIDTime * 100); // dT fix from Honk
-  PIDparameters->lastPosition = currentPosition;
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
-}
-
-void zeroIntegralError() __attribute__ ((noinline));
-void zeroIntegralError() {
-  for (byte axis = 0; axis <= ATTITUDE_YAXIS_PID_IDX; axis++) {
-    PID[axis].integratedError = 0;
-    PID[axis].previousPIDTime = currentTime;
-  }
-}
 
 #endif // _AQ_PID_H_
 

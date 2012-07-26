@@ -59,7 +59,6 @@ void readPilotCommands() {
       storeSensorsZeroToEEPROM();
       calibrateKinematics();
       zeroIntegralError();
-//      zeroLastError();
       pulseMotors(3);
     }   
     
@@ -81,7 +80,6 @@ void readPilotCommands() {
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
       #endif  
 
-//      zeroLastError();      
       zeroIntegralError();
 
     }
