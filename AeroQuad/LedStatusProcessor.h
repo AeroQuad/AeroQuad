@@ -44,25 +44,13 @@ void processLedStatus() {
     else { 
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
-    
-    if (receiverCommand[AUX2] > 1400 && !isHomeBaseInitialized())
-    {
-       hasBuzzerHigherPriority = true;
-       digitalWrite(BuzzerPin, (flashingLedState & 4));
-    }
-    else if(receiverCommand[AUX2] < 1400 || isHomeBaseInitialized())
-    {
-       hasBuzzerHigherPriority = false;
-       digitalWrite(BuzzerPin, LOW);
-    }
+ 
   #endif
   
   //
   // process ready state light in case we use Batt monitor
   //
   #if defined (BattMonitor)
-  if(!hasBuzzerHigherPriority)
-  {
     if(motorArmed)
     {
       if (batteryAlarm) {
@@ -77,7 +65,6 @@ void processLedStatus() {
     {
       digitalWrite(BuzzerPin, LOW);
     }
-  }
   #endif  
 
   //

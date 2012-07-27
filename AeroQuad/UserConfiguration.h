@@ -47,6 +47,7 @@
  ****************************************************************************/
 // Use only one of the following definitions
 #define quadXConfig
+//#define quadXHT_FPVConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      
@@ -61,7 +62,9 @@
 // MOTOR ADVANCE CONFIG SECTION
 //#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
-//#define USE_400HZ_ESC // For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
+#define USE_400HZ_ESC // For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
+
+
 
 
 //
@@ -80,8 +83,8 @@
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer
-#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
-#define AutoLanding // Enable auto landing on channel AUX3 of the remote, NEED AltitudeHoldBaro AND AltitudeHoldRangeFinder
+//#define AltitudeHoldRangeFinder // Enable altitude hold with range finder, Not displayed on the configurator
+//#define AutoLanding // Enable auto landing on channel AUX3 of the remote, NEED AltitudeHoldBaro AND AltitudeHoldRangeFinder
 
 #define UseGPS // Try to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
 #define UseGPSNavigator // EXPERIMENTAL NEED UseGPS TO BE DEFINED, enable GPS position hold, auto return home when no mission or execute mission
@@ -131,6 +134,12 @@
 // *******************************************************************************************************************************
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
+//#define MavLink
+#define MAV_SYSTEM_ID 100
+#define MAV_COMPONENT_ID MAV_COMP_ID_IMU
+
+#define GraupnerHoTTTelemetry  // Enables telemetry for Graupner HoTT devices, connect RX3 and TX3 (on Mega platforms) or RX0 and TX0 (on 328p platforms) via a diode (e.g. 1N4004) to the telemetry port of your receiver
+
 //
 // *******************************************************************************************************************************
 // Optional audio channel telemetry (for ground station tracking purposes)
@@ -155,7 +164,7 @@
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
-// *******************************************************************************************************************************
+// *************************************************************.******************************************************************
 //#define OSD
 //#define ShowRSSI
 //#define PAL                       // uncomment this to default to PAL video
@@ -164,7 +173,14 @@
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph)
 
-//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
+//
+// *******************************************************************************************************************************
+// Support menu on serial enabled LCD display (16x2 characters).  You can change serial port if needed
+// Note: cannot be enabled at the same time with OSD
+// *************************************************************.******************************************************************
+//#define SERIAL_LCD Serial3
+
+//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 
 /****************************************************************************
  ****************************************************************************

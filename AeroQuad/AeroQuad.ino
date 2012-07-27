@@ -48,6 +48,13 @@
   #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
+// Special motor config additionnal variable
+#if defined quadXHT_FPVConfig
+ #define quadXConfig
+ #define FRONT_YAW_CORRECTION 0.82
+ #define REAR_YAW_CORRECTION 1.13
+#endif
+
 //
 // In order to use the DIYDrone libraries, this have to be declared here this way
 // @see Kenny9999 for details
@@ -63,6 +70,7 @@
   FastSerialPort2(Serial2);
   FastSerialPort3(Serial3);
 #endif
+
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -1019,6 +1027,11 @@
   #include "AeroQuad_STM32.h"
 #endif
 
+// default to 10bit ADC (AVR)
+#ifndef ADC_NUMBER_OF_BITS
+#define ADC_NUMBER_OF_BITS 10
+#endif
+
 //********************************************************
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
@@ -1121,6 +1134,11 @@
 #endif
 
 
+#ifdef GraupnerHoTTTelemetry
+  #include <HoTT.h>
+  #include <HoTT_Telemetry.h>
+#endif
+
 //********************************************************
 //******** FLIGHT CONFIGURATION DECLARATION **************
 //********************************************************
@@ -1167,12 +1185,19 @@
   #include <Device_SPI.h>
   #include "OSDDisplayController.h"
   #include "MAX7456.h"
-  #ifdef OSD_SYSTEM_MENU
-    #include "OSDMenu.h"
-  #endif
-#else  
-    #undef OSD_SYSTEM_MENU  // can't use menu system without an OSD
 #endif
+
+#if defined (SERIAL_LCD)
+  #include "SerialLCD.h"
+#endif
+
+#ifdef OSD_SYSTEM_MENU
+  #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
+    #error "Menu cannot be used without OSD or LCD"
+  #endif
+  #include "OSDMenu.h"
+#endif
+
 
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
@@ -1191,11 +1216,14 @@
   #else
     #define SERIAL_PORT Serial
   #endif
-#endif  
+#endif 
 
 #ifdef SlowTelemetry
   #include <AQ_RSCode.h>
 #endif
+
+
+
 
 
 // Include this last as it contains objects from above declarations
@@ -1209,6 +1237,15 @@
   #include "LedStatusProcessor.h"
 #endif  
 
+#if defined MavLink
+  #include "MavLink.h"
+  // MavLink 0.9 
+  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
+  // MavLink 1.0 DKP - need to get here.
+  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#endif
+
+
 
 /**
  * Main setup function, called one time at bootup
@@ -1219,7 +1256,11 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-  
+
+  #ifdef MavLink
+    sendSerialBoot();
+  #endif
+
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
@@ -1300,6 +1341,10 @@ void setup() {
     initializeSPI();
     initializeOSD();
   #endif
+  
+  #if defined(SERIAL_LCD)
+    InitSerialLCD();
+  #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
     #ifdef OpenlogBinaryWrite
@@ -1317,6 +1362,10 @@ void setup() {
 
   #ifdef SlowTelemetry
      initSlowTelemetry();
+  #endif
+
+  #if defined (GraupnerHoTTTelemetry)
+    hottv4Init();
   #endif
 
   setupFourthOrder();
@@ -1388,11 +1437,16 @@ void loop () {
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #ifdef BinaryWrite
-      if (fastTransfer == ON) {
-        // write out fastTelemetry to Configurator or openLog
-        fastTelemetry();
-      }
+    #if defined BinaryWrite && !defined MavLink
+        if (fastTransfer == ON) {
+          // write out fastTelemetry to Configurator or openLog
+          fastTelemetry();
+        }
+    #endif      
+    #ifdef MavLink
+        //sendSerialHudData();
+        //sendSerialAttitude(); // Defined in MavLink.pde
+        //sendSerialGpsPostion();
     #endif
 
     #ifdef SlowTelemetry
@@ -1432,7 +1486,16 @@ void loop () {
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
-    }
+      
+      #ifdef MavLink
+        readSerialCommand();
+        sendSerialTelemetry();
+      #endif
+      
+      #if defined (GraupnerHoTTTelemetry)
+	    hottV4Hook(Serial3.read());
+	  #endif
+	  }
 
     // ================================================================
     // 10Hz task loop
@@ -1482,6 +1545,7 @@ void loop () {
       #ifdef SlowTelemetry
         updateSlowTelemetry10Hz();
       #endif
+
     }
     
     previousTime = currentTime;

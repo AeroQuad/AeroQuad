@@ -2,17 +2,20 @@
 #define DEBUG_INIT
 tSerial &Serial = SERIAL_VAR;
 
+#define ADC_NUMBER_OF_BITS	12
+
+
 #ifdef BOARD_aeroquad32
 	#define STM32_BOARD_TYPE "aeroquad32"
 	#define LED_Green  Port2Pin('E', 6)
 	#define LED_Red    Port2Pin('E', 5)
 	#define LED_Yellow LED_Red
-        #define ADC1       Port2Pin('B',0)
-        #define ADC2       Port2Pin('C',4)
-        #define ADC3       Port2Pin('B',1)
-        #define ADC4       Port2Pin('C',5)
-        #define ADC5       Port2Pin('C',2)
-        #define ADC6       Port2Pin('C',3)
+        #define A1       Port2Pin('B',0)
+        #define A2       Port2Pin('C',4)
+        #define A3       Port2Pin('B',1)
+        #define A4       Port2Pin('C',5)
+        #define A5       Port2Pin('C',2)
+        #define A6       Port2Pin('C',3)
 
 #endif
 #ifdef BOARD_aeroquad32mini
@@ -56,10 +59,12 @@ tSerial &Serial = SERIAL_VAR;
 #endif
 
 // Receiver Declaration
-#ifndef Receiver_PPM
-#define RECEIVER_STM32
+#if defined (ReceiverPPM) || defined (ReceiverHWPPM)
+  #undef ReceiverPPM
+  #undef ReceiverHWPPM
+  #define RECEIVER_STM32PPM
 #else
-#define RECEIVER_STM32PPM
+  #define RECEIVER_STM32
 #endif
 
 // Motor declaration
@@ -89,9 +94,7 @@ tSerial &Serial = SERIAL_VAR;
 
 // Battery Monitor declaration
 #ifdef BattMonitor
-	#define ADC_NUMBER_OF_BITS	12
 	#define BATT_AREF			3.3		// V
-	#define BATT_MAX_DIGITAL	((float)(1<<ADC_NUMBER_OF_BITS))
 
 	#ifdef BOARD_freeflight
 		#define BATT_R_HIGH			10.0	// kOhm
@@ -104,7 +107,7 @@ tSerial &Serial = SERIAL_VAR;
 		#define BATT_ANALOG_INPUT	Port2Pin('C', 0)
 		#define BATT_DIODE_LOSS		0.0
 	#endif
-	#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, ((BATT_AREF / BATT_MAX_DIGITAL * 1024) * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
+        #define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, (BATT_AREF * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
 #endif
 
 #ifdef OSD
@@ -153,12 +156,12 @@ void initPlatform() {
 #endif
 
 #ifdef BOARD_aeroquad32
-	pinMode(ADC1, INPUT_ANALOG);
-	pinMode(ADC2, INPUT_ANALOG);
-	pinMode(ADC3, INPUT_ANALOG);
-	pinMode(ADC4, INPUT_ANALOG);
-	pinMode(ADC5, INPUT_ANALOG);
-	pinMode(ADC6, INPUT_ANALOG);
+	pinMode(A1, INPUT_ANALOG);
+	pinMode(A2, INPUT_ANALOG);
+	pinMode(A3, INPUT_ANALOG);
+	pinMode(A4, INPUT_ANALOG);
+	pinMode(A5, INPUT_ANALOG);
+	pinMode(A6, INPUT_ANALOG);
 #endif
 
 #ifdef DEBUG_INIT
