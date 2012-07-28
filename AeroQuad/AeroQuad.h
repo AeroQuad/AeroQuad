@@ -77,6 +77,7 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
+unsigned long oneHZpreviousTime = 0;
 unsigned long tenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime2 = 0;

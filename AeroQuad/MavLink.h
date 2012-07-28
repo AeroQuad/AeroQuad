@@ -29,20 +29,20 @@
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
 #ifdef MavLink
-#define PORT Serial3
+#define PORT Serial //TODO Serial3
 #include "BatteryMonitor.h"
 
-// MavLink 0.9 
-#include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
-// MavLink 1.0 DKP - need to get here.
-//#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+// MavLink 1.0 DKP
+ #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
 
-const int system_type = MAV_QUADROTOR;
-const int autopilot_type = MAV_AUTOPILOT_GENERIC;
+int systemType = MAV_TYPE_QUADROTOR;
+int autopilotType = MAV_AUTOPILOT_GENERIC;
 uint16_t len;
-int system_mode = MAV_MODE_UNINIT;
-int system_nav_mode = MAV_NAV_GROUNDED;
-int system_status = MAV_STATE_ACTIVE;
+int systemMode = 	MAV_MODE_PREFLIGHT;
+//int systemModeFlag = 	MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
+//int systemNavMode = 	MAV_NAV_GROUNDED;
+int systemStatus = MAV_STATE_UNINIT;
+int parameterType = MAVLINK_TYPE_FLOAT;
 
 long system_dropped_packets = 0;
 
@@ -58,97 +58,122 @@ void readSerialMavLink() {
       if(mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) { 
         // Handle message
         switch(msg.msgid) {
+
           case MAVLINK_MSG_ID_SET_MODE: {
-            system_mode = mavlink_msg_set_mode_get_mode(&msg);
+            systemMode = mavlink_msg_set_mode_get_base_mode(&msg); // TODO check
             sendSerialSysStatus();
           }
           break;
-          case MAVLINK_MSG_ID_ACTION: {
-            uint8_t result = 0;
-            uint8_t action = mavlink_msg_action_get_action(&msg);
-            if (action == MAV_ACTION_MOTORS_START)
-            {
-              motorArmed = ON;
-              result = 1;
-            }
-            else if (action == MAV_ACTION_MOTORS_STOP)
-            {
-              motorArmed = OFF;
-              result = 1;
-            }
-            else if (action == MAV_ACTION_EMCY_KILL || action == MAV_ACTION_CONFIRM_KILL)
-            {
-              motorArmed = OFF;
-              result = 1;
-            }
-/*
 
-              MAV_ACTION_MOTORS_STOP: {
-                motorArmed = OFF;
-                result = 1;
-              }
-              break;
-              MAV_ACTION_CALIBRATE_GYRO: {
-                if (system_status == MAV_STATE_STANDBY)
-                {
-                  gyro.calibrate();
-                  result = 0;
-                }
-                else
-                {
-                  result = 1;
-                }
-              }                
-              break;                    
+          case MAVLINK_MSG_ID_COMMAND_LONG: {
+            uint8_t result = 0;
+            uint8_t command = mavlink_msg_command_long_get_command(&msg);
+            if (command == 	MAV_CMD_COMPONENT_ARM_DISARM) {
+			  if(mavlink_msg_command_long_get_param1(&msg) == 1) motorArmed = ON;
+			  else if (mavlink_msg_command_long_get_param1(&msg) == 0) motorArmed = OFF;
+              result = 	MAV_RESULT_ACCEPTED;
             }
-            */
-             mavlink_msg_action_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, action, result);
+
+		    else if (command == MAV_CMD_DO_SET_MODE) {
+		  	  systemMode = mavlink_msg_command_long_get_param1(&msg);
+			  result = 	MAV_RESULT_ACCEPTED;
+			}
+
+			else if (command ==	MAV_CMD_NAV_RETURN_TO_LAUNCH) {
+				#if defined UseGPSNavigator 
+						//TODO	add coming home
+				result = 	MAV_RESULT_ACCEPTED;
+				#else
+				result = 	MAV_RESULT_UNSUPPORTED;
+				#endif
+			}
+
+			else if (command == MAV_CMD_NAV_TAKEOFF) {
+				#if defined UseGPSNavigator 
+						//TODO	add gps takeoff
+				result = 	MAV_RESULT_ACCEPTED;
+				#else
+				result = 	MAV_RESULT_UNSUPPORTED;	
+				#endif
+			}
+
+			else if (command == MAV_CMD_DO_SET_HOME) {
+				#if defined UseGPS
+				if(mavlink_msg_command_long_get_param1(&msg) == 1) homePosition = currentPosition;
+				else {
+					homePosition.latitude = mavlink_msg_command_long_get_param5(&msg);
+					homePosition.longitude = mavlink_msg_command_long_get_param6(&msg);
+					homePosition.altitude = mavlink_msg_command_long_get_param7(&msg);
+					}
+				result = 	MAV_RESULT_ACCEPTED;
+				#else
+				result = 	MAV_RESULT_UNSUPPORTED;
+				#endif
+				}
+
+			else if (command ==	MAV_CMD_PREFLIGHT_CALIBRATION) {
+				if(systemMode = MAV_MODE_PREFLIGHT) {
+					if(mavlink_msg_command_long_get_param1(&msg) == 1) calibrateGyro();
+					if(mavlink_msg_command_long_get_param1(&msg) == 1) {
+						computeAccelBias();
+						storeSensorsZeroToEEPROM();
+						calibrateKinematics();
+						zeroIntegralError();
+						}
+					result = 	MAV_RESULT_ACCEPTED;
+					}
+				else result = 	MAV_RESULT_TEMPORARILY_REJECTED;
+				}
+
+             mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, command, result);
              len = mavlink_msg_to_send_buffer(buf, &msg);
              PORT.write(buf, len);
           }
           break;
-          case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
-            int8_t roll_p[15] = "Roll_P";
-            int8_t roll_i[15] = "Roll_I";
-            int8_t roll_d[15] = "Roll_D";
-            sendSerialPID(XAXIS, roll_p, roll_i, roll_d, 1, 24);
-            
-            int8_t pitch_p[15] = "Pitch_P";
-            int8_t pitch_i[15] = "Pitch_I";
-            int8_t pitch_d[15] = "Pitch_D";
-            sendSerialPID(YAXIS, pitch_p, pitch_i, pitch_d, 4, 24);
-            
-            int8_t yaw_p[15] = "Yaw_P";
-            int8_t yaw_i[15] = "Yaw_I";
-            int8_t yaw_d[15] = "Yaw_D";
-            sendSerialPID(ZAXIS, yaw_p, yaw_i, yaw_d, 7, 24);
-            
-            int8_t heading_p[15] = "Heading_P";
-            int8_t heading_i[15] = "Heading_I";
-            int8_t heading_d[15] = "Heading_D";
-            sendSerialPID(HEADING_HOLD_PID_IDX, heading_p, heading_i, heading_d, 10, 24);
-            
-            int8_t levelroll_p[15] = "Level Roll_P";
-            int8_t levelroll_i[15] = "Level Roll_I";
-            int8_t levelroll_d[15] = "Level Roll_D";
-            sendSerialPID(ATTITUDE_XAXIS_PID_IDX, levelroll_p, levelroll_i, levelroll_d, 13, 24);
-                        
-            int8_t levelpitch_p[15] = "Level Pitch_P";
-            int8_t levelpitch_i[15] = "Level Pitch_I";
-            int8_t levelpitch_d[15] = "Level Pitch_D";
-            sendSerialPID(ATTITUDE_YAXIS_PID_IDX, levelpitch_p, levelpitch_i, levelpitch_d, 16, 24);
-            
-            int8_t levelgyroroll_p[15] = "Lvl gyro rol_P";
-            int8_t levelgyroroll_i[15] = "Lvl gyro rol_I";
-            int8_t levelgyroroll_d[15] = "Lvl gyro rol_D";
-            sendSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX, levelgyroroll_p, levelgyroroll_i, levelgyroroll_d, 19, 24);
-            
-            int8_t levelgyropitch_p[15] = "Lvl gyro pit_P";
-            int8_t levelgyropitch_i[15] = "Lvl gyro pit_I";
-            int8_t levelgyropitch_d[15] = "Lvl gyro pit_D";
-            sendSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX, levelgyropitch_p, levelgyropitch_i, levelgyropitch_d, 22, 24);
-          }
-          break;
+
+//           case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
+//             int8_t rateRoll_P[15] = "Rate Roll_P";
+//             int8_t rateRoll_I[15] = "Rate Roll_I";
+//             int8_t rateRoll_D[15] = "Rate Roll_D";
+//             sendSerialPID(RATE_XAXIS_PID_IDX, rateRoll_P, rateRoll_I, rateRoll_D, 1, 24);
+//             
+//             int8_t ratePitch_P[15] = "Rate Pitch_P";
+//             int8_t ratePitch_I[15] = "Rate Pitch_I";
+//             int8_t ratePitch_D[15] = "Rate Pitch_D";
+//             sendSerialPID(RATE_YAXIS_PID_IDX, ratePitch_P, ratePitch_I, ratePitch_D, 4, 24);
+//             
+//             int8_t yaw_p[15] = "Yaw_P";
+//             int8_t yaw_i[15] = "Yaw_I";
+//             int8_t yaw_d[15] = "Yaw_D";
+//             sendSerialPID(ZAXIS_PID_IDX, yaw_p, yaw_i, yaw_d, 7, 24);
+//             
+//             int8_t heading_p[15] = "Heading_P";
+//             int8_t heading_i[15] = "Heading_I";
+//             int8_t heading_d[15] = "Heading_D";
+//             sendSerialPID(HEADING_HOLD_PID_IDX, heading_p, heading_i, heading_d, 10, 24);
+//             
+//             int8_t attitudeRoll_P[15] = "Stable Roll_P";
+//             int8_t attitudeRoll_I[15] = "Stable Roll_I";
+//             int8_t attitudeRoll_D[15] = "Stable Roll_D";
+//             sendSerialPID(ATTITUDE_XAXIS_PID_IDX, attitudeRoll_P, attitudeRoll_I, attitudeRoll_D, 13, 24);
+//                         
+//             int8_t attitudePitch_P[15] = "Stable Pitch_P";
+//             int8_t attitudePitch_i[15] = "Stable Pitch_I";
+//             int8_t attitudePitch_d[15] = "Stable Pitch_D";
+//             sendSerialPID(ATTITUDE_YAXIS_PID_IDX, attitudePitch_P, attitudePitch_i, attitudePitch_d, 16, 24);
+//             
+//             int8_t attitudeGyroRoll_P[15] = "Sta Gyro rol_P";
+//             int8_t attitudeGyroRoll_I[15] = "Sta Gyro rol_I";
+//             int8_t attitudeGyroRoll_D[15] = "Sta Gyro rol_D";
+//             sendSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX, attitudeGyroRoll_P, attitudeGyroRoll_I, attitudeGyroRoll_D, 19, 24);
+//             
+//             int8_t attitudeGyroPitch_P[15] = "Sta Gyro pit_P";
+//             int8_t attitudeGyroPitch_I[15] = "Sta Gyro pit_I";
+//             int8_t attitudeGyroPitch_D[15] = "Sta Gyro pit_D";
+//             sendSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX, attitudeGyroPitch_P, attitudeGyroPitch_I, attitudeGyroPitch_D, 22, 24);
+//           }
+//           break;
+
           default:
             //Do nothing
           break;
@@ -160,104 +185,156 @@ void readSerialMavLink() {
 }
 
 void sendSerialHeartbeat() {
-  mavlink_msg_heartbeat_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_type, autopilot_type);
+  mavlink_msg_heartbeat_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, systemType, autopilotType, systemMode, 0, systemStatus);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   PORT.write(buf, len);
 }
+// 
+// void sendSerialRawIMU() {
+//   mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroADC[XAXIS], gyroADC[YAXIS], gyroADC[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
+//   len = mavlink_msg_to_send_buffer(buf, &msg);
+//   PORT.write(buf, len);
+// }
+// 
+ void sendSerialAttitude() {
+   mavlink_msg_attitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
+   len = mavlink_msg_to_send_buffer(buf, &msg);
+   PORT.write(buf, len);
+ }
+ void sendSerialHudData() {
+ #if defined HeadingMagHold //TODO check if barometer is defined
+ 	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, trueNorthHeading, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+ #else
+ 	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, gyroHeading, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+ #endif
+   len = mavlink_msg_to_send_buffer(buf, &msg);
+   PORT.write(buf, len);   
+ }
+// void sendSerialGpsPostion() {
+//   #ifdef UseGPS
+//     if (true /*haveAGpsLock()*/)
+//     {
+//       mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, currentPosition.latitude*100, currentPosition.longitude*100, getBaroAltitude()*1000, 0, 0, 0);
+//       len = mavlink_msg_to_send_buffer(buf, &msg);
+//       PORT.write(buf, len);
+//     }
+//   #endif
+// }
+// 
+//  void sendSerialAltitude() {
+//    mavlink_msg_set_altitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, (int)(1234));
+//    len = mavlink_msg_to_send_buffer(buf, &msg);
+//    PORT.write(buf, len);
+//  }
+ 
+ void sendSerialRawPressure() {
+   mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, readRawPressure(), 0,0, readRawTemperature());
+   len = mavlink_msg_to_send_buffer(buf, &msg);
+   PORT.write(buf, len);
+ }
+ 
+//  void sendSerialBoot() {
+//     mavlink_msg_auth_key_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg);
+//     len = mavlink_msg_to_send_buffer(buf, &msg);
+//     PORT.write(buf, len);
+//   }
+ 
+ void sendSerialRcRaw() {
+ #if defined UseRSSIFaileSafe
+   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
+ #else 
+   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
+ #endif
+   len = mavlink_msg_to_send_buffer(buf, &msg);
+   PORT.write(buf, len);
+ }
+ 
+ 
+// void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[],int index, int listsize) {
+//   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_p, PID[IDPid].P, parameterType, listsize, index);
+//   len = mavlink_msg_to_send_buffer(buf, &msg);
+//   PORT.write(buf, len);
+//   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_i, PID[IDPid].I, parameterType, listsize, index+1);
+//   len = mavlink_msg_to_send_buffer(buf, &msg);
+//   PORT.write(buf, len);
+//   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_d, PID[IDPid].D, parameterType, listsize, index+2);
+//   len = mavlink_msg_to_send_buffer(buf, &msg);
+//   PORT.write(buf, len);
+// }
+// 
+// void sendSerialParamValue(int8_t id[], float value, int index, int listsize) {
+//   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id, value, index,listsize);
+//   len = mavlink_msg_to_send_buffer(buf, &msg);
+//   PORT.write(buf, len);
+// }
+// 
+// 
+ void sendSerialSysStatus() {
+   if (motorArmed == OFF)
+   {
+     systemMode = MAV_MODE_MANUAL_DISARMED;
+     systemStatus = MAV_STATE_STANDBY;
+   }
+   else if (motorArmed == ON && flightMode == ATTITUDE_FLIGHT_MODE)
+   {
+     systemMode = MAV_MODE_STABILIZE_ARMED;
+     systemStatus = MAV_STATE_ACTIVE;
+   }
+   else
+   {
+     systemMode = MAV_MODE_MANUAL_ARMED;
+     systemStatus = MAV_STATE_ACTIVE;
+   }
 
-void sendSerialRawIMU() {
-  //mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, accel->getRaw(XAXIS), accel->getRaw(YAXIS), accel->getRaw(ZAXIS), gyro.getRaw(XAXIS), gyro.getRaw(YAXIS), gyro.getRaw(ZAXIS), compass.getRawData(XAXIS), compass.getRawData(YAXIS), compass.getRawData(ZAXIS));
-  //len = mavlink_msg_to_send_buffer(buf, &msg);
-  //PORT.write(buf, len);
-}
-
-void sendSerialAttitude() {
-  mavlink_msg_attitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-void sendSerialHudData() {
-  mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, gyroHeading, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-  
-  
-}
-void sendSerialGpsPostion() {
-  #ifdef UseGPS
-    if (true /* || gps->latitude != 0.0 && gps->longitude != 0.0*/)
-    {
-      mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, gps->latitude*100, gps->longitude*100, getBaroAltitude()*1000 /*gps->altitude*10*/, gps->speed, 0, 0);
-      len = mavlink_msg_to_send_buffer(buf, &msg);
-      PORT.write(buf, len);
-    }
-  #endif
-}
-
-void sendSerialAltitude() {
-  mavlink_msg_set_altitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, (int)(1234));
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-void sendSerialRawPressure() {
-  mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, (int)(1000*getBaroAltitude()), 0,0,0);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-void sendSerialBoot() {
-  mavlink_msg_boot_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, SOFTWARE_VERSION);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-void sendSerialRcRaw() {
-  mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 64);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-
-void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[],int index, int listsize) {
-  mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_p, PID[IDPid].P, index,listsize);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-  mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_i, PID[IDPid].I, index+1,listsize);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-  mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_d, PID[IDPid].D, index+2,listsize);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-void sendSerialParamValue(int8_t id[], float value, int index, int listsize) {
-  mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id, value, index,listsize);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
-
-
-void sendSerialSysStatus() {
-  if (motorArmed == OFF)
-  {
-    system_mode = MAV_MODE_LOCKED;
-    system_status = MAV_STATE_STANDBY;
-  }
-  else if (motorArmed == ON && flightMode == ATTITUDE_FLIGHT_MODE)
-  {
-    system_mode = MAV_MODE_TEST1;
-    system_status = MAV_STATE_ACTIVE;
-  }
-  else
-  {
-    system_mode = MAV_MODE_TEST2;
-    system_status = MAV_STATE_ACTIVE;
-  }
-  mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_mode, system_nav_mode, system_status, (int)(deltaTime/15), (int)(batteryData[0].current*1000), 0, system_dropped_packets);
-  len = mavlink_msg_to_send_buffer(buf, &msg);
-  PORT.write(buf, len);
-}
+    uint32_t control_sensors_present = 0;
+    uint32_t control_sensors_enabled;
+    uint32_t control_sensors_health;
+	
+    // first what sensors/controllers we have
+	if (GYRO_DETECTED)   control_sensors_present |= (1<<0); // 3D gyro present
+    if (ACCEL_DETECTED)  control_sensors_present |= (1<<1); // 3D accelerometer present
+#if defined HeadingMagHold
+    if (MAG_DETECTED)   control_sensors_present |= (1<<2); // compass present
 #endif
+#if defined AltitudeHoldBaro
+    if (BARO_DETECTED)   control_sensors_present |= (1<<3); // absolute pressure sensor present
+#endif
+#if defined UseGPS
+	if (gps->valid_read) control_sensors_present |= (1<<5); // GPS present
+#endif
+    control_sensors_present |= (1<<10); // 3D angular rate control
+    control_sensors_present |= (1<<11); // attitude stabilisation
+    control_sensors_present |= (1<<12); // yaw position
+    control_sensors_present |= (1<<13); // altitude control
+    control_sensors_present |= (1<<14); // X/Y position control
+    control_sensors_present |= (1<<15); // motor control
+
+    // now what sensors/controllers are enabled
+	// first the sensors
+    control_sensors_enabled = control_sensors_present & 0x1FF;
+	
+    // now the controllers
+    control_sensors_enabled = control_sensors_present & 0x1FF;
+	
+    control_sensors_enabled |= (1<<10); // 3D angular rate control
+	if (flightMode == ATTITUDE_FLIGHT_MODE) control_sensors_enabled |= (1<<11); // attitude stabilisation
+    if (altitudeHoldState == ON) control_sensors_enabled |= (1<<13); // altitude control
+    control_sensors_enabled |= (1<<15); // motor control
+    if (headingHoldConfig == ON) control_sensors_enabled |= (1<<12); // yaw position
+    if (positionHoldState == ON || navigationState == ON) control_sensors_enabled |= (1<<14); // X/Y position control
+
+    // at the moment all sensors/controllers are assumed healthy
+    control_sensors_health = control_sensors_present;
+
+#if defined BattMonitor
+   mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, control_sensors_present, control_sensors_enabled, control_sensors_health, 0, (int)(batteryData[0].current*1000), batteryData[0].usedCapacity/100, 0, system_dropped_packets, 0, 0, 0, 0, 0);
+#else
+   mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, control_sensors_present, control_sensors_enabled, control_sensors_health, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
+#endif
+
+   len = mavlink_msg_to_send_buffer(buf, &msg);
+   PORT.write(buf, len);
+ }
+ #endif
 
 #endif //#define _AQ_MAVLINK_H_

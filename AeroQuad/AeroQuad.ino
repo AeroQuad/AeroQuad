@@ -245,6 +245,7 @@
 #ifdef AeroQuad_Mini
   #define LED_Green 13
   #define LED_Red 12
+  #define LED_Yellow 12
 
   #include <Device_I2C.h>
 
@@ -253,7 +254,7 @@
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
-  #include <Accelerometer_BMA180.h>
+  #include <Accelerometer_ADXL345.h>
 
   // Receiver declaration
   #define RECEIVER_328P
@@ -293,6 +294,8 @@
 
     pinMode(LED_Red, OUTPUT);
     digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -1193,7 +1196,7 @@
 //********************************************************
 #if defined (WirelessTelemetry) 
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-    #define SERIAL_PORT Serial3
+    #define SERIAL_PORT Serial //TODO Serial3
   #else    // force 328p to use the normal port
     #define SERIAL_PORT Serial
   #endif
@@ -1228,10 +1231,9 @@
 
 #if defined MavLink
   #include "MavLink.h"
-  // MavLink 0.9 
-  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
-  // MavLink 1.0 DKP - need to get here.
-  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+
+  // MavLink 1.0 DKP
+  #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
 #endif
 
 
@@ -1247,7 +1249,7 @@ void setup() {
   digitalWrite(LED_Green, LOW);
 
   #ifdef MavLink
-    sendSerialBoot();
+    /*sendSerialBoot();*/  // TODO check if needed
   #endif
 
   // Read user values from EEPROM
@@ -1433,9 +1435,10 @@ void loop () {
         }
     #endif      
     #ifdef MavLink
-        //sendSerialHudData();
-        //sendSerialAttitude(); // Defined in MavLink.pde
-        //sendSerialGpsPostion();
+		readSerialMavLink();
+        sendSerialHudData();
+        sendSerialAttitude(); // Defined in MavLink.pde
+       // sendSerialGpsPostion();
     #endif
     
 
@@ -1531,6 +1534,17 @@ void loop () {
       #ifdef SlowTelemetry
         updateSlowTelemetry10Hz();
       #endif
+    }
+
+
+	 if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
+
+		 #ifdef MavLink
+		   G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+		   oneHZpreviousTime = currentTime;
+	       
+		   sendSerialHeartbeat();
+		  #endif
     }
     
     previousTime = currentTime;
