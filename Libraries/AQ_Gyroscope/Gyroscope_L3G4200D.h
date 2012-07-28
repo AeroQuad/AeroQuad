@@ -45,7 +45,8 @@
 #define GYRO_CTRL_REG4 0x23
 #define GYRO_CTRL_REG5 0x24
 
-
+// Axis inversion: -1 = invert, 1 = don't invert
+int gyroAxisInversionFactor[3] = {1,-1,-1};
 
 
 void initializeGyro() {
@@ -72,11 +73,13 @@ void initializeGyro() {
     gyroScaleFactor = radians(1.0 / 17.5);
   }else{
     updateRegisterI2C(GYRO_ADDRESS, GYRO_CTRL_REG4, 0b10110000);
-    gyroScaleFactor = radians(1.0 / 70);
+    //gyroScaleFactor = radians(1.0 / 70);
+    gyroScaleFactor = radians(0.061);
   }
   delay(5);
   // High pass filter enabled 
   updateRegisterI2C(GYRO_ADDRESS, GYRO_CTRL_REG5, 0b00000010);
+
   delay(10); 
 }
   
@@ -85,8 +88,10 @@ void measureGyro() {
   sendByteI2C(GYRO_ADDRESS, 0x80 | 0x28); // 0x80 autoincrement from 0x28 register
   Wire.requestFrom(GYRO_ADDRESS,6);
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) { 
-    value = (Wire.read() | (Wire.read() << 8));
-    gyroRate[axis] = filterSmooth(value * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
+    //value = (Wire.read() | (Wire.read() << 8));
+      value = gyroAxisInversionFactor[axis] * readReverseShortI2C();
+      gyroRate[axis] = filterSmooth(value * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
+      //gyroRate[axis] = value;
   }
   
   // Measure gyro heading
