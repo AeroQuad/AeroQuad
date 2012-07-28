@@ -1,8 +1,0 @@
-<VisualMicro>
-  <Program Name="AeroQuad" Ext=".ino" Location="C:\Users\Lord Hahn\Documents\Arduino\AeroQuad">
-    <Compile CompilerErrors="0" ConfigurationName="Debug" StopOnError="True" OptimiseLibs="True" OptimiseCore="True" BuildPath="C:\Users\Lord Hahn\AppData\Local\VMicro\Arduino\Builds\AeroQuad\mega2560" IncludeDebug="0" IncludesDebug="0" SketchName="AeroQuad" IsCompiled="1" />
-    <Platform Name="Arduino">
-      <Board Name="mega2560" Description="Arduino Mega 2560 or Mega ADK" CoreFolder="E:\Alle Ordner\Multicopter\AeroQuad\arduino-1.0.1\hardware\arduino\cores\arduino" VariantFullPath="E:\Alle Ordner\Multicopter\AeroQuad\arduino-1.0.1\hardware\arduino\variants\mega" />
-    </Platform>
-  </Program>
-</VisualMicro>
