@@ -39,48 +39,6 @@
   #define BAUD 115200
 #endif  
 
-// Analog Reference Value
-// This value provided from Configurator
-// Use a DMM to measure the voltage between AREF and GND
-// Enter the measured voltage below to define your value for aref
-// If you don't have a DMM use the following:
-// AeroQuad Shield v1.7, aref = 3.0
-// AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Read in from EEPROM
-//////////////////////////////////////////////////////
-
-/**
- * Heading and heading hold global declaration section
- */
- 
-byte  headingHoldConfig   = 0;
-float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading             = 0; // measured heading from yaw gyro (process variable)
-float relativeHeading     = 0; // current heading the quad is set to (set point)
-byte  headingHoldState    = OFF;
-//////////////////////////////////////////////////////
-
-/**
- * battery monitor and battery monitor throttle correction global declaration section
- */
-
-#if defined (BattMonitor)
-  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
-  float batteryMonitorAlarmVoltage = 10.0;
-  int batteryMonitorStartThrottle = 0;
-  int batteryMonitorThrottleTarget = 1450;
-  unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
-
-  
-  #if defined BattMonitorAutoDescent
-    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
-    
-    int batteryMonitorAlarmCounter = 0;
-    int batteyMonitorThrottleCorrection = 0;
-  #endif
-#endif
-//////////////////////////////////////////////////////
 
 /**
  * ESC calibration process global declaration
@@ -112,6 +70,7 @@ byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
+boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -124,16 +83,81 @@ unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
-#ifdef MavLink
-  #define RECEIVELOOPTIME 10000 // 100Hz
-  #define HEARTBEATLOOPTIME 1000000 // 1Hz
-  #define RAWDATALOOPTIME 100000 // 10Hz
-  #define SYSTEMSTATUSLOOPTIME 100000 // 10Hz
-  #define ATTITUDELOOPTIME 100000 // 10Hz
-#endif
 
-void processHeading();
+
 //////////////////////////////////////////////////////
+
+
+// Analog Reference Value
+// This value provided from Configurator
+// Use a DMM to measure the voltage between AREF and GND
+// Enter the measured voltage below to define your value for aref
+// If you don't have a DMM use the following:
+// AeroQuad Shield v1.7, aref = 3.0
+// AeroQuad Shield v1.6 or below, aref = 2.8
+float aref; // Read in from EEPROM
+//////////////////////////////////////////////////////
+
+/**
+ * Heading and heading hold global declaration section
+ */
+ 
+byte  headingHoldConfig   = 0;
+float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
+float heading             = 0; // measured heading from yaw gyro (process variable)
+float relativeHeading     = 0; // current heading the quad is set to (set point)
+byte  headingHoldState    = OFF;
+void  processHeading();
+//////////////////////////////////////////////////////
+
+
+/**
+ * Serial communication global declaration
+ */
+#define SERIAL_PRINT      SERIAL_PORT.print
+#define SERIAL_PRINTLN    SERIAL_PORT.println
+#define SERIAL_AVAILABLE  SERIAL_PORT.available
+#define SERIAL_READ       SERIAL_PORT.read
+#define SERIAL_FLUSH      SERIAL_PORT.flush
+#define SERIAL_BEGIN      SERIAL_PORT.begin
+ 
+//HardwareSerial *binaryPort;
+
+void readSerialCommand();
+void sendSerialTelemetry();
+void printInt(int data);
+float readFloatSerial();
+long readIntegerSerial();
+void sendBinaryFloat(float);
+void sendBinaryuslong(unsigned long);
+void fastTelemetry();
+void comma();
+void reportVehicleState();
+//////////////////////////////////////////////////////
+
+/**
+ * battery monitor and battery monitor throttle correction global declaration section
+ */
+#if defined (BattMonitor)
+  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
+  float batteryMonitorAlarmVoltage = 10.0;
+  int batteryMonitorStartThrottle = 0;
+  int batteryMonitorThrottleTarget = 1450;
+  unsigned long batteryMonitorStartTime = 0;
+  unsigned long batteryMonitorGoinDownTime = 60000; 
+
+  
+  #if defined BattMonitorAutoDescent
+    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
+    
+    int batteryMonitorAlarmCounter = 0;
+    int batteyMonitorThrottleCorrection = 0;
+  #endif
+#endif
+//////////////////////////////////////////////////////
+
+
+
 
 /**
  * Altitude control global declaration
@@ -215,28 +239,19 @@ void processHeading();
 //////////////////////////////////////////////////////
 
 
-/**
- * Serial communication global declaration
- */
-#define SERIAL_PRINT      SERIAL_PORT.print
-#define SERIAL_PRINTLN    SERIAL_PORT.println
-#define SERIAL_AVAILABLE  SERIAL_PORT.available
-#define SERIAL_READ       SERIAL_PORT.read
-#define SERIAL_FLUSH      SERIAL_PORT.flush
-#define SERIAL_BEGIN      SERIAL_PORT.begin
- 
-//HardwareSerial *binaryPort;
 
-void readSerialCommand();
-void sendSerialTelemetry();
-void printInt(int data);
-float readFloatSerial();
-long readIntegerSerial();
-void sendBinaryFloat(float);
-void sendBinaryuslong(unsigned long);
-void fastTelemetry();
-void comma();
-void reportVehicleState();
+
+
+/**
+ * Mavlink Serial communication global declaration
+ */
+#ifdef MavLink
+  #define RECEIVELOOPTIME 10000 // 100Hz
+  #define HEARTBEATLOOPTIME 1000000 // 1Hz
+  #define RAWDATALOOPTIME 100000 // 10Hz
+  #define SYSTEMSTATUSLOOPTIME 100000 // 10Hz
+  #define ATTITUDELOOPTIME 100000 // 10Hz
+#endif
 //////////////////////////////////////////////////////
 
 

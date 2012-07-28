@@ -214,7 +214,7 @@ void initHomeBase() {
     maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
     
     gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
-    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch , &PID[GPSPITCH_PID_IDX]);
+    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]);
     
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
@@ -264,7 +264,7 @@ void initHomeBase() {
       correctionAngle = fmod(correctionAngle,PI) - PI;
     }
 
-    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle , &PID[GPSYAW_PID_IDX]);
+    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle, &PID[GPSYAW_PID_IDX]);
     gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
   }
 

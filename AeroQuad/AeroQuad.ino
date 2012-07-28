@@ -51,7 +51,7 @@
 // Special motor config additionnal variable
 #if defined quadXHT_FPVConfig
  #define quadXConfig
- #define FRONT_YAW_CORRECTION 0.82
+ #define FRONT_YAW_CORRECTION 0.83
  #define REAR_YAW_CORRECTION 1.13
 #endif
 
@@ -245,7 +245,6 @@
 #ifdef AeroQuad_Mini
   #define LED_Green 13
   #define LED_Red 12
-  #define LED_Yellow 12
 
   #include <Device_I2C.h>
 
@@ -254,7 +253,7 @@
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
-  #include <Accelerometer_ADXL345.h>
+  #include <Accelerometer_BMA180.h>
 
   // Receiver declaration
   #define RECEIVER_328P
@@ -294,8 +293,6 @@
 
     pinMode(LED_Red, OUTPUT);
     digitalWrite(LED_Red, LOW);
-    pinMode(LED_Yellow, OUTPUT);
-    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -362,7 +359,6 @@
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
-  #define BuzzerPin 49
 
   #include <Device_I2C.h>
 
@@ -421,8 +417,6 @@
     digitalWrite(LED_Red, LOW);
     pinMode(LED_Yellow, OUTPUT);
     digitalWrite(LED_Yellow, LOW);
-    pinMode(BuzzerPin, OUTPUT);
-    digitalWrite(BuzzerPin, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -1134,11 +1128,6 @@
 #endif
 
 
-#ifdef GraupnerHoTTTelemetry
-  #include <HoTT.h>
-  #include <HoTT_Telemetry.h>
-#endif
-
 //********************************************************
 //******** FLIGHT CONFIGURATION DECLARATION **************
 //********************************************************
@@ -1216,7 +1205,7 @@
   #else
     #define SERIAL_PORT Serial
   #endif
-#endif 
+#endif  
 
 #ifdef SlowTelemetry
   #include <AQ_RSCode.h>
@@ -1364,11 +1353,11 @@ void setup() {
      initSlowTelemetry();
   #endif
 
-  #if defined (GraupnerHoTTTelemetry)
-    hottv4Init();
-  #endif
-
   setupFourthOrder();
+  
+//  PID[ZAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_XAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_YAXIS_PID_IDX].type = 1;
   
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
@@ -1448,6 +1437,7 @@ void loop () {
         //sendSerialAttitude(); // Defined in MavLink.pde
         //sendSerialGpsPostion();
     #endif
+    
 
     #ifdef SlowTelemetry
       updateSlowTelemetry100Hz();
@@ -1491,11 +1481,7 @@ void loop () {
         readSerialCommand();
         sendSerialTelemetry();
       #endif
-      
-      #if defined (GraupnerHoTTTelemetry)
-	    hottV4Hook(Serial3.read());
-	  #endif
-	  }
+    }
 
     // ================================================================
     // 10Hz task loop
@@ -1545,7 +1531,6 @@ void loop () {
       #ifdef SlowTelemetry
         updateSlowTelemetry10Hz();
       #endif
-
     }
     
     previousTime = currentTime;

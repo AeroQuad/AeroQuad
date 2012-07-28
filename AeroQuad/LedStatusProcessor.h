@@ -44,7 +44,6 @@ void processLedStatus() {
     else { 
       digitalWrite(LED_Green, (flashingLedState & 2));
     }
- 
   #endif
   
   //
@@ -54,28 +53,18 @@ void processLedStatus() {
     if(motorArmed)
     {
       if (batteryAlarm) {
-        digitalWrite(BuzzerPin, (flashingLedState & 2));
+        digitalWrite(LED_Red, (flashingLedState & 2));
       } else if (batteryWarning) {
-        digitalWrite(BuzzerPin, (flashingLedState & 6));
+        digitalWrite(LED_Red, (flashingLedState & 6));
       } else { 
-        digitalWrite(BuzzerPin, LOW);
+        digitalWrite(LED_Red, LOW);
       }
     }
     else
     {
-      digitalWrite(BuzzerPin, LOW);
+      digitalWrite(LED_Red, LOW);
     }
-  #endif  
-
-  //
-  // process mode light
-  //
-  if (flightMode == ATTITUDE_FLIGHT_MODE) {
-    digitalWrite(LED_Yellow, HIGH);
-  }
-  else {
-    digitalWrite(LED_Yellow, LOW);
-  }
+  #endif   
 
   flashingLedState++;
 

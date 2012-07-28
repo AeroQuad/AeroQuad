@@ -35,11 +35,11 @@ void readPilotCommands() {
   
   readReceiver(); 
   if (receiverCommand[THROTTLE] < MINCHECK) {
-    zeroIntegralError();
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
       motorArmed = OFF;
+      inFlight = false;
             
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
@@ -71,7 +71,6 @@ void readPilotCommands() {
         }
       #endif
 
-      zeroIntegralError();
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
       }
@@ -80,12 +79,19 @@ void readPilotCommands() {
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
       #endif  
-      
-      
+
+      zeroIntegralError();
+
     }
     // Prevents accidental arming of motor output if no transmitter command received
     if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
+    }
+  }
+  
+  if (!inFlight) {
+    if (motorArmed == ON && receiverCommand[THROTTLE] > minArmedThrottle) {
+      inFlight = true;
     }
   }
   
@@ -99,18 +105,22 @@ void readPilotCommands() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-     if (receiverCommand[AUX1] < 1750) {
+    #if defined (UseGPSNavigator)
+      if ((receiverCommand[AUX1] < 1750) || (receiverCommand[AUX2] < 1750)) {
+    #else
+      if (receiverCommand[AUX1] < 1750) {
+    #endif
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isStoreAltitudeNeeded) {
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
           #if defined AltitudeHoldRangeFinder
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
           altitudeHoldThrottle = receiverCommand[THROTTLE];
           isStoreAltitudeNeeded = false;
@@ -132,12 +142,12 @@ void readPilotCommands() {
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastPosition = baroAltitudeToHoldTarget;
+            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
           #if defined AltitudeHoldRangeFinder
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastPosition = sonarAltitudeToHoldTarget;
+            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
           altitudeHoldThrottle = receiverCommand[THROTTLE];
           isStoreAltitudeForAutoLanfingNeeded = false;
@@ -177,7 +187,7 @@ void readPilotCommands() {
     }
   
   
-     if (receiverCommand[AUX2] >= 1700 && isHomeBaseInitialized()) { // Enter in execute mission state, if none, go back home, override the position hold
+    if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
     
       if (isInitNavigationNeeded) {
         
@@ -192,7 +202,7 @@ void readPilotCommands() {
 
       navigationState = ON;
     }
-     else if (receiverCommand[AUX2] > 1400 && receiverCommand[AUX2] < 1700 && isHomeBaseInitialized()) {  // Enter in position hold state
+    else if (receiverCommand[AUX1] < 1600) {  // Enter in position hold state
       
       if (isStorePositionNeeded) {
         
