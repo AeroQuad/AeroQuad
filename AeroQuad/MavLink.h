@@ -158,16 +158,36 @@
 	}
  
 
-	void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[], int listsize, int index) {
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_p, PID[IDPid].P, parameterType, listsize, index);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		PORT.write(buf, len);
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_i, PID[IDPid].I, parameterType, listsize, index+1);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		PORT.write(buf, len);
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_d, PID[IDPid].D, parameterType, listsize, index+2);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		PORT.write(buf, len);
+	void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[], int8_t id_windUp[], int listsize, int index) {
+		int counter = 0;
+
+		if(id_p != 0) {	
+			mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_p, PID[IDPid].P, parameterType, listsize, index);
+			len = mavlink_msg_to_send_buffer(buf, &msg);
+			PORT.write(buf, len);
+			counter++;
+		}
+
+		if(id_i != 0) {
+			mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_i, PID[IDPid].I, parameterType, listsize, index + counter);
+			len = mavlink_msg_to_send_buffer(buf, &msg);
+			PORT.write(buf, len);
+			counter++;
+		}
+
+		if(id_d != 0) {
+			mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_d, PID[IDPid].D, parameterType, listsize, index + counter);
+			len = mavlink_msg_to_send_buffer(buf, &msg);
+			PORT.write(buf, len);
+			counter++;
+		}
+
+		if(id_windUp != 0) {
+			mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_windUp, PID[IDPid].windupGuard, parameterType, listsize, index + counter);
+			len = mavlink_msg_to_send_buffer(buf, &msg);
+			PORT.write(buf, len);
+		}
+
 	}
 	 
 	void sendSerialParamValue(int8_t id[], float value, int listsize, int index) {
@@ -181,77 +201,77 @@
 		int8_t rateRoll_P[15] = "Rate Roll_P";
 		int8_t rateRoll_I[15] = "Rate Roll_I";
 		int8_t rateRoll_D[15] = "Rate Roll_D";
-		sendSerialPID(RATE_XAXIS_PID_IDX, rateRoll_P, rateRoll_I, rateRoll_D, paramaterListSize, 0);
+		sendSerialPID(RATE_XAXIS_PID_IDX, rateRoll_P, rateRoll_I, rateRoll_D, 0, paramaterListSize, 0);
 
 		int8_t ratePitch_P[15] = "Rate Pitch_P";
 		int8_t ratePitch_I[15] = "Rate Pitch_I";
 		int8_t ratePitch_D[15] = "Rate Pitch_D";
-		sendSerialPID(RATE_YAXIS_PID_IDX, ratePitch_P, ratePitch_I, ratePitch_D, paramaterListSize, 3);
+		sendSerialPID(RATE_YAXIS_PID_IDX, ratePitch_P, ratePitch_I, ratePitch_D, 0, paramaterListSize, 3);
 
 		int8_t attitudeRoll_P[15] = "Stable Roll_P";
 		int8_t attitudeRoll_I[15] = "Stable Roll_I";
 		int8_t attitudeRoll_D[15] = "Stable Roll_D";
-		sendSerialPID(ATTITUDE_XAXIS_PID_IDX, attitudeRoll_P, attitudeRoll_I, attitudeRoll_D, paramaterListSize, 6);
+		sendSerialPID(ATTITUDE_XAXIS_PID_IDX, attitudeRoll_P, attitudeRoll_I, attitudeRoll_D, 0, paramaterListSize, 6);
 
 		int8_t attitudePitch_P[15] = "Stable Pitch_P";
 		int8_t attitudePitch_i[15] = "Stable Pitch_I";
 		int8_t attitudePitch_d[15] = "Stable Pitch_D";
-		sendSerialPID(ATTITUDE_YAXIS_PID_IDX, attitudePitch_P, attitudePitch_i, attitudePitch_d, paramaterListSize, 9);
+		sendSerialPID(ATTITUDE_YAXIS_PID_IDX, attitudePitch_P, attitudePitch_i, attitudePitch_d, 0, paramaterListSize, 9);
 
 		int8_t attitudeGyroRoll_P[15] = "Sta Gyro Rol P";
 		int8_t attitudeGyroRoll_I[15] = "Sta Gyro Rol I";
 		int8_t attitudeGyroRoll_D[15] = "Sta Gyro Rol D";
-		sendSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX, attitudeGyroRoll_P, attitudeGyroRoll_I, attitudeGyroRoll_D, paramaterListSize, 12);
+		sendSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX, attitudeGyroRoll_P, attitudeGyroRoll_I, attitudeGyroRoll_D, 0, paramaterListSize, 12);
 
 		int8_t attitudeGyroPitch_P[15] = "Sta Gyro Pit P";
 		int8_t attitudeGyroPitch_I[15] = "Sta Gyro Pit I";
 		int8_t attitudeGyroPitch_D[15] = "Sta Gyro Pit D";
-		sendSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX, attitudeGyroPitch_P, attitudeGyroPitch_I, attitudeGyroPitch_D, paramaterListSize, 15);
+		sendSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX, attitudeGyroPitch_P, attitudeGyroPitch_I, attitudeGyroPitch_D, 0, paramaterListSize, 15);
 
 		int8_t yaw_p[15] = "Yaw P";
 		int8_t yaw_i[15] = "Yaw I";
 		int8_t yaw_d[15] = "Yaw D";
-		sendSerialPID(ZAXIS_PID_IDX, yaw_p, yaw_i, yaw_d, paramaterListSize, 18);
+		sendSerialPID(ZAXIS_PID_IDX, yaw_p, yaw_i, yaw_d, 0, paramaterListSize, 18);
 
 		int8_t heading_p[15] = "Heading P";
 		int8_t heading_i[15] = "Heading I";
 		int8_t heading_d[15] = "Heading D";
-		sendSerialPID(HEADING_HOLD_PID_IDX, heading_p, heading_i, heading_d, paramaterListSize, 21);
+		sendSerialPID(HEADING_HOLD_PID_IDX, heading_p, heading_i, heading_d, 0, paramaterListSize, 21);
 
 
 	#if defined (AltitudeHoldBaro)
 		int8_t baro_p[15] = "Barometer P";
 		int8_t baro_i[15] = "Barometer I";
 		int8_t baro_d[15] = "Barometer D";
-		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, paramaterListSize, 24);
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, paramaterListSize, 24);
 
 		int8_t baro_windUpGuard[15] = "Baro WindUp";
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)baro_windUpGuard, PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, parameterType, paramaterListSize, 25);
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, paramaterListSize, 27);
 
 		int8_t zDampening_p[15] = "Z Dampening P";
 		int8_t zDampening_i[15] = "Z Dampening I";
 		int8_t zDampening_d[15] = "Z Dampening D";
-		sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, paramaterListSize, 28);
+		sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, paramaterListSize, 28);
 	#endif
 
 	#if defined (AltitudeHoldRangeFinder) && defined AltitudeHoldBaro
 		int8_t range_p[15] = "Range P";
 		int8_t range_i[15] = "Range I";
 		int8_t range_d[15] = "Range D";
-		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, paramaterListSize, 31);
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, paramaterListSize, 31);
 
 		int8_t range_windUpGuard[15] = "Range WindUp";
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)range_windUpGuard, PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard, parameterType, paramaterListSize, 32);
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, paramaterListSize, 32);
 	#endif
 
 	#if defined (AltitudeHoldRangeFinder) && !defined AltitudeHoldBaro
 		int8_t range_p[15] = "Range P";
 		int8_t range_i[15] = "Range I";
 		int8_t range_d[15] = "Range D";
-		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, paramaterListSize, 24);
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, paramaterListSize, 24);
 
 		int8_t range_windUpGuard[15] = "Range WindUp";
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)range_windUpGuard, PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard, parameterType, paramaterListSize, 27);
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, paramaterListSize, 27);
 	#endif 
 	}
 
@@ -402,14 +422,23 @@
 
 					case MAVLINK_MSG_ID_PARAM_REQUEST_READ: {
 						const char parameterID = mavlink_msg_param_request_read_get_param_id(&msg, 0);
-						int16_t paramterIndex = mavlink_msg_param_request_read_get_param_index(&msg);
+						int16_t parameterIndex = mavlink_msg_param_request_read_get_param_index(&msg);
 
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, paramterIndex);
+						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, parameterIndex);
+					}
+					break;
+
+					case MAVLINK_MSG_ID_PARAM_SET: {
+						float parameterValue = mavlink_msg_param_set_get_param_value(&msg);
+						uint16_t parameterID = mavlink_msg_param_set_get_param_id(&msg, (char*)parameterID);
+
+						PID[parameterID].P = parameterValue; //TODO check how to differ between P/I/D/windUpGuard
+						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, 0);
+
 					}
 					break;
 
 					default:
-						sendParameterList();
 					break;
 				}
 			} 
