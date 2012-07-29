@@ -33,7 +33,7 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#if defined WirelessTelemetry
+#if defined WirelessTelemetry && !defined MavLink
   #define BAUD 111111 // use this to be compatible with USB and XBee connections
 #else
   #define BAUD 115200

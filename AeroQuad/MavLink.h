@@ -409,6 +409,7 @@
 					break;
 
 					default:
+						sendParameterList();
 					break;
 				}
 			} 
