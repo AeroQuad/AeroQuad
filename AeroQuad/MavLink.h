@@ -305,8 +305,12 @@ void sendSerialHeartbeat() {
     control_sensors_present |= (1<<10); // 3D angular rate control
     control_sensors_present |= (1<<11); // attitude stabilisation
     control_sensors_present |= (1<<12); // yaw position
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     control_sensors_present |= (1<<13); // altitude control
-    control_sensors_present |= (1<<14); // X/Y position control
+#endif
+#if defined UseGPS
+	control_sensors_present |= (1<<14); // X/Y position control
+#endif
     control_sensors_present |= (1<<15); // motor control
 
     // now what sensors/controllers are enabled
@@ -318,10 +322,14 @@ void sendSerialHeartbeat() {
 	
     control_sensors_enabled |= (1<<10); // 3D angular rate control
 	if (flightMode == ATTITUDE_FLIGHT_MODE) control_sensors_enabled |= (1<<11); // attitude stabilisation
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     if (altitudeHoldState == ON) control_sensors_enabled |= (1<<13); // altitude control
+#endif
     control_sensors_enabled |= (1<<15); // motor control
     if (headingHoldConfig == ON) control_sensors_enabled |= (1<<12); // yaw position
+#if defined UseGPS
     if (positionHoldState == ON || navigationState == ON) control_sensors_enabled |= (1<<14); // X/Y position control
+#endif
 
     // at the moment all sensors/controllers are assumed healthy
     control_sensors_health = control_sensors_present;
