@@ -1248,10 +1248,6 @@ void setup() {
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
 
-  #ifdef MavLink
-    /*sendSerialBoot();*/  // TODO check if needed
-  #endif
-
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
@@ -1354,6 +1350,9 @@ void setup() {
   #ifdef SlowTelemetry
      initSlowTelemetry();
   #endif
+  #ifdef MavLink
+	 sendParameterList();
+  #endif
 
   setupFourthOrder();
   
@@ -1433,13 +1432,15 @@ void loop () {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
-    #endif      
+    #endif    
+
     #ifdef MavLink
 		readSerialMavLink();
         sendSerialHudData();
         sendSerialAttitude(); // Defined in MavLink.pde
 		sendSerialRcRaw();
 		sendSerialRawPressure();
+		sendSerialRawIMU();
         sendSerialGpsPostion();
 		sendSerialSysStatus();
     #endif
@@ -1540,16 +1541,15 @@ void loop () {
       #endif
     }
 
-
-	 if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
-
-		 #ifdef MavLink
+	 #ifdef MavLink
+	   if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
+		
 		   G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
 		   oneHZpreviousTime = currentTime;
 	       
-		   sendSerialHeartbeat();
-		  #endif
-    }
+		   sendSerialHeartbeat();	 
+      }
+	#endif
     
     previousTime = currentTime;
   }
