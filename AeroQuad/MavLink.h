@@ -202,10 +202,18 @@ void sendSerialHeartbeat() {
    PORT.write(buf, len);
  }
  void sendSerialHudData() {
- #if defined HeadingMagHold //TODO check if barometer is defined
- 	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, trueNorthHeading, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+ #if defined HeadingMagHold
+	#if defined AltitudeHoldBaro
+ 		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+	#else
+		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverData[THROTTLE]-1000)/10, 0, 0.0);
+	#endif
  #else
- 	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, gyroHeading, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+	#if defined AltitudeHoldBaro
+ 		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+	#else
+		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverData[THROTTLE]-1000)/10, 0, 0.0);
+	#endif
  #endif
    len = mavlink_msg_to_send_buffer(buf, &msg);
    PORT.write(buf, len);   
