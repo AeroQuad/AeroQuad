@@ -1438,7 +1438,10 @@ void loop () {
 		readSerialMavLink();
         sendSerialHudData();
         sendSerialAttitude(); // Defined in MavLink.pde
-       // sendSerialGpsPostion();
+		sendSerialRcRaw();
+		sendSerialRawPressure();
+        sendSerialGpsPostion();
+		sendSerialSysStatus();
     #endif
     
 
@@ -1483,6 +1486,7 @@ void loop () {
       #ifdef MavLink
         readSerialCommand();
         sendSerialTelemetry();
+		updateFlightTime();
       #endif
     }
 

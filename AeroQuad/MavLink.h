@@ -39,11 +39,10 @@ int systemType = MAV_TYPE_QUADROTOR;
 int autopilotType = MAV_AUTOPILOT_GENERIC;
 uint16_t len;
 int systemMode = 	MAV_MODE_PREFLIGHT;
-//int systemModeFlag = 	MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
-//int systemNavMode = 	MAV_NAV_GROUNDED;
 int systemStatus = MAV_STATE_UNINIT;
 int parameterType = MAVLINK_TYPE_FLOAT;
 
+static uint16_t millisecondsSinceBoot = 0;
 long system_dropped_packets = 0;
 
 mavlink_message_t msg; 
@@ -184,6 +183,17 @@ void readSerialMavLink() {
     system_dropped_packets += status.packet_rx_drop_count;
 }
 
+static void updateFlightTime() {
+	static uint32_t previousUpdate = 0;
+
+	uint16_t timeDiff = millis() - previousUpdate;
+	previousUpdate += timeDiff;
+
+	if (motorArmed) {
+		millisecondsSinceBoot += timeDiff;
+		}
+	}
+
 void sendSerialHeartbeat() {
   mavlink_msg_heartbeat_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, systemType, autopilotType, systemMode, 0, systemStatus);
   len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -197,7 +207,7 @@ void sendSerialHeartbeat() {
 // }
 // 
  void sendSerialAttitude() {
-   mavlink_msg_attitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
+   mavlink_msg_attitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
    len = mavlink_msg_to_send_buffer(buf, &msg);
    PORT.write(buf, len);
  }
@@ -218,16 +228,16 @@ void sendSerialHeartbeat() {
    len = mavlink_msg_to_send_buffer(buf, &msg);
    PORT.write(buf, len);   
  }
-// void sendSerialGpsPostion() {
-//   #ifdef UseGPS
-//     if (true /*haveAGpsLock()*/)
-//     {
-//       mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, currentPosition.latitude*100, currentPosition.longitude*100, getBaroAltitude()*1000, 0, 0, 0);
-//       len = mavlink_msg_to_send_buffer(buf, &msg);
-//       PORT.write(buf, len);
-//     }
-//   #endif
-// }
+ void sendSerialGpsPostion() {
+   #ifdef UseGPS
+     if (haveAGpsLock())
+     {
+       mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, currentPosition.latitude*100, currentPosition.longitude*100, baroAltitude, getBaroAltitude()*1000, 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
+       len = mavlink_msg_to_send_buffer(buf, &msg);
+       PORT.write(buf, len);
+     }
+   #endif
+ }
 // 
 //  void sendSerialAltitude() {
 //    mavlink_msg_set_altitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, (int)(1234));
@@ -236,7 +246,7 @@ void sendSerialHeartbeat() {
 //  }
  
  void sendSerialRawPressure() {
-   mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_COMPONENT_ID, readRawPressure(), 0,0, readRawTemperature());
+   mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, readRawPressure(), 0,0, readRawTemperature());
    len = mavlink_msg_to_send_buffer(buf, &msg);
    PORT.write(buf, len);
  }
@@ -249,9 +259,9 @@ void sendSerialHeartbeat() {
  
  void sendSerialRcRaw() {
  #if defined UseRSSIFaileSafe
-   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
+   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
  #else 
-   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
+   mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
  #endif
    len = mavlink_msg_to_send_buffer(buf, &msg);
    PORT.write(buf, len);
@@ -343,7 +353,7 @@ void sendSerialHeartbeat() {
     control_sensors_health = control_sensors_present;
 
 #if defined BattMonitor
-   mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, control_sensors_present, control_sensors_enabled, control_sensors_health, 0, (int)(batteryData[0].current*1000), batteryData[0].usedCapacity/100, 0, system_dropped_packets, 0, 0, 0, 0, 0);
+   mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, control_sensors_present, control_sensors_enabled, control_sensors_health, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
 #else
    mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, control_sensors_present, control_sensors_enabled, control_sensors_health, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
 #endif
