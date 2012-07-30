@@ -1196,7 +1196,7 @@
 //********************************************************
 #if defined (WirelessTelemetry) 
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-    #define SERIAL_PORT Serial3
+    #define SERIAL_PORT Seriall //TODO Serial3
   #else    // force 328p to use the normal port
     #define SERIAL_PORT Serial
   #endif
@@ -1231,10 +1231,9 @@
 
 #if defined MavLink
   #include "MavLink.h"
-  // MavLink 0.9 
-  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
-  // MavLink 1.0 DKP - need to get here.
-  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+
+  // MavLink 1.0 DKP
+  #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
 #endif
 
 
@@ -1248,10 +1247,6 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-
-  #ifdef MavLink
-    sendSerialBoot();
-  #endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -1356,6 +1351,10 @@ void setup() {
      initSlowTelemetry();
   #endif
 
+  #ifdef MavLink
+	 sendParameterList();
+ #endif
+
   setupFourthOrder();
   
 //  PID[ZAXIS_PID_IDX].type = 1;
@@ -1436,9 +1435,8 @@ void loop () {
         }
     #endif      
     #ifdef MavLink
-        //sendSerialHudData();
-        //sendSerialAttitude(); // Defined in MavLink.pde
-        //sendSerialGpsPostion();
+        readSerialMavLink();
+		sendSerialVehicleData();
     #endif
     
 
@@ -1483,6 +1481,7 @@ void loop () {
       #ifdef MavLink
         readSerialCommand();
         sendSerialTelemetry();
+		updateFlightTime();
       #endif
     }
 
@@ -1535,6 +1534,16 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
+
+   #ifdef MavLink
+     if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
+
+        G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+        oneHZpreviousTime = currentTime;
+        
+        sendSerialHeartbeat();   
+     }
+  #endif
     
     previousTime = currentTime;
   }
