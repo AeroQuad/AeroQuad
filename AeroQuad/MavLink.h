@@ -692,16 +692,35 @@
 						int16_t parameterIndex = mavlink_msg_param_request_read_get_param_index(&msg);
 
 						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, parameterIndex);
+						len = mavlink_msg_to_send_buffer(buf, &msg);
+						PORT.write(buf, len);
 					}
 					break;
 
-					case MAVLINK_MSG_ID_PARAM_SET: {
+					case MAVLINK_MSG_ID_PARAM_SET: { //TODO not working yet
 						float parameterValue = mavlink_msg_param_set_get_param_value(&msg);
 						uint16_t parameterID = mavlink_msg_param_set_get_param_id(&msg, (char*)parameterID);
 
 						PID[parameterID].P = parameterValue; //TODO check how to differ between P/I/D/windUpGuard
 						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, 0);
+						len = mavlink_msg_to_send_buffer(buf, &msg);
+						PORT.write(buf, len);
+					}
+					break;
 
+					case MAVLINK_MSG_ID_MISSION_REQUEST_LIST: { //TODO needs to be tested
+						#if defined UseGPSNavigator
+							mavlink_msg_mission_count_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, MAX_WAYPOINTS);
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							PORT.write(buf, len);
+
+							for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+								if(index != missionNbPoint) mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
+								else mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+							}			
+						#endif
 					}
 					break;
 
