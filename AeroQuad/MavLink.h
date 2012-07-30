@@ -77,13 +77,16 @@
 
 	void sendSerialHeartbeat() {
 		systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+
 		if (flightMode == ATTITUDE_FLIGHT_MODE) {
 			systemMode |= MAV_MODE_FLAG_STABILIZE_ENABLED;
 		}
 
-		if (navigationState == ON || positionHoldState == ON) {
-			systemMode |= MAV_MODE_FLAG_GUIDED_ENABLED;
-		}
+		#ifdef UseGPS
+			if (navigationState == ON || positionHoldState == ON) {
+				systemMode |= MAV_MODE_FLAG_GUIDED_ENABLED;
+			}
+		#endif
 
 		systemMode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
@@ -101,7 +104,11 @@
 	}
 
 	void sendSerialRawIMU() {
-		mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
+		#ifdef HeadingMagHold
+			mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
+		#else
+			mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 0, 0, 0);
+		#endif
 		len = mavlink_msg_to_send_buffer(buf, &msg);
 		PORT.write(buf, len);
 	}
@@ -142,9 +149,11 @@
 	}
  
 	void sendSerialRawPressure() {
-		mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, readRawPressure(), 0,0, readRawTemperature());
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		PORT.write(buf, len);
+		#ifdef AltitudeHoldBaro
+			mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, readRawPressure(), 0,0, readRawTemperature());
+			len = mavlink_msg_to_send_buffer(buf, &msg);
+			PORT.write(buf, len);
+		#endif
 	}
  
 	void sendSerialRcRaw() {
@@ -155,6 +164,16 @@
 		#endif
 		len = mavlink_msg_to_send_buffer(buf, &msg);
 		PORT.write(buf, len);
+	}
+
+	void sendSerialVehicleData() {
+		sendSerialHudData();
+		sendSerialAttitude();
+		sendSerialRcRaw();
+		sendSerialRawPressure();
+		sendSerialRawIMU();
+		sendSerialGpsPostion();
+		sendSerialSysStatus();
 	}
  
 

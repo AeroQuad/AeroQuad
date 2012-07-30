@@ -1436,13 +1436,7 @@ void loop () {
 
     #ifdef MavLink
 		readSerialMavLink();
-        sendSerialHudData();
-        sendSerialAttitude(); // Defined in MavLink.pde
-		sendSerialRcRaw();
-		sendSerialRawPressure();
-		sendSerialRawIMU();
-        sendSerialGpsPostion();
-		sendSerialSysStatus();
+		sendSerialVehicleData();
     #endif
     
 
