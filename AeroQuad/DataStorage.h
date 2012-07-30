@@ -236,7 +236,7 @@ void initializeEEPROM() {
   #ifdef BattMonitor
     batteryMonitorAlarmVoltage = 3.33;
     batteryMonitorThrottleTarget = 1450;
-    batteryMonitorGoinDownTime = 60000;
+    batteryMonitorGoingDownTime = 60000;
   #endif
 
   // Range Finder
@@ -321,7 +321,7 @@ void readEEPROM() {
   #ifdef BattMonitor
     batteryMonitorAlarmVoltage = readFloat(BATT_ALARM_VOLTAGE_ADR);
     batteryMonitorThrottleTarget = readFloat(BATT_THROTTLE_TARGET_ADR);
-    batteryMonitorGoinDownTime = readFloat(BATT_DOWN_TIME_ADR);
+    batteryMonitorGoingDownTime = readFloat(BATT_DOWN_TIME_ADR);
   #endif
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -443,7 +443,7 @@ void writeEEPROM(){
   #ifdef BattMonitor
     writeFloat(batteryMonitorAlarmVoltage, BATT_ALARM_VOLTAGE_ADR);
     writeFloat(batteryMonitorThrottleTarget, BATT_THROTTLE_TARGET_ADR);
-    writeFloat(batteryMonitorGoinDownTime, BATT_DOWN_TIME_ADR);
+    writeFloat(batteryMonitorGoingDownTime, BATT_DOWN_TIME_ADR);
   #endif
 
   // Range Finder

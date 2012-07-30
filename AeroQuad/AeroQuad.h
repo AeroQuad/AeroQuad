@@ -145,7 +145,7 @@ void reportVehicleState();
   int batteryMonitorStartThrottle = 0;
   int batteryMonitorThrottleTarget = 1450;
   unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
+  unsigned long batteryMonitorGoingDownTime = 60000; 
 
   
   #if defined BattMonitorAutoDescent
