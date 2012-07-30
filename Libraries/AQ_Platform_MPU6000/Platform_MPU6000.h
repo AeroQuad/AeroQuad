@@ -29,6 +29,7 @@
 #include "Arduino.h"
 #include <SensorsStatus.h>
 
+//#define MPU6000_I2C	// insert this define before #include <Platform_MPU6000.h> when you use a I2C based MPU6050
 
 // MPU 6000 registers
 #define MPUREG_WHOAMI			0x75
@@ -107,7 +108,9 @@ union uMPU6000 {
 
 
 #ifdef MPU6000_I2C
-	#define MPU6000_I2C_ADDRESS 0x68
+	#ifndef MPU6000_I2C_ADDRESS
+		#define MPU6000_I2C_ADDRESS 0x68
+	#endif
 #else
 	#include <HardwareSPIExt.h>
 	HardwareSPIExt spiMPU6000(4);
@@ -150,8 +153,14 @@ byte MPU6000_ReadReg(int addr)
     return data;
 }
 
+bool initializeMPU6000SensorsDone = false;
 void initializeMPU6000Sensors()
 {
+	if(initializeMPU6000SensorsDone) {
+		return;
+	}
+	initializeMPU6000SensorsDone = true;
+
 #ifdef DEBUG_INIT
 	Serial.println("initializeMPU6000Sensors");
 #endif
@@ -221,9 +230,9 @@ void MPU6000SwapData(unsigned char *data, int datalen)
 void readMPU6000Sensors()
 {
 #ifdef MPU6000_I2C
-	sendByteI2C(MPUREG_ACCEL_XOUT_H, addr);
+	sendByteI2C(MPU6000_I2C_ADDRESS, MPUREG_ACCEL_XOUT_H);
     Wire.requestFrom(MPU6000_I2C_ADDRESS, sizeof(MPU6000));
-    for(byte i=0; i<sizeof(MPU6000)/2; i++) {
+    for(byte i=0; i<sizeof(MPU6000)/sizeof(short); i++) {
     	MPU6000.rawWord[i] = readWordI2C();
     }
 #else
@@ -232,4 +241,25 @@ void readMPU6000Sensors()
 #endif
 }
 
+int readMPU6000Count=0;
+int readMPU6000AccelCount=0;
+int readMPU6000GyroCount=0;
+
+void readMPU6000Accel()
+{
+	readMPU6000AccelCount++;
+	if(readMPU6000AccelCount != readMPU6000Count) {
+		readMPU6000Sensors();
+		readMPU6000Count++;
+	}
+}
+
+void readMPU6000Gyro()
+{
+	readMPU6000GyroCount++;
+	if(readMPU6000GyroCount != readMPU6000Count) {
+		readMPU6000Sensors();
+		readMPU6000GyroCount++;
+	}
+}
 #endif

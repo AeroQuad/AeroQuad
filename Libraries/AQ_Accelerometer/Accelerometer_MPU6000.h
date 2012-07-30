@@ -21,14 +21,16 @@
 #ifndef _AEROQUAD_ACCELEROMETER_MPU6000_COMMON_H_
 #define _AEROQUAD_ACCELEROMETER_MPU6000_COMMON_H_
 
+#include <Platform_MPU6000.h>
 #include <Accelerometer.h>
 
 void initializeAccel() {
+  initializeMPU6000Sensors();
 }
 
 
 void measureAccel() {
-  readMPU6000Sensors();
+  readMPU6000Accel();
 
   meterPerSecSec[XAXIS] = MPU6000.data.accel.x * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
   meterPerSecSec[YAXIS] = MPU6000.data.accel.y * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
@@ -36,6 +38,7 @@ void measureAccel() {
 }
 
 void measureAccelSum() {
+  readMPU6000Accel();
   accelSample[XAXIS] += MPU6000.data.accel.x;
   accelSample[YAXIS] += MPU6000.data.accel.y;
   accelSample[ZAXIS] += MPU6000.data.accel.z;
@@ -53,7 +56,7 @@ void evaluateMetersPerSec() {
 
 void computeAccelBias() {
   for (int samples = 0; samples < SAMPLECOUNT; samples++) {
-		readMPU6000Sensors();
+	readMPU6000Sensors();
     measureAccelSum();
     delayMicroseconds(2500);
   }
