@@ -24,6 +24,7 @@
 #include "BarometricSensor.h"
 #include "Device_I2C.h"
 #include <AQMath.h>
+#include <SensorsStatus.h>
 
 // This sets up the BMP085 from Sparkfun
 // Code from http://wiring.org.co/learning/libraries/bmp085.html
