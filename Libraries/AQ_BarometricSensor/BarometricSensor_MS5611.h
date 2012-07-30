@@ -149,7 +149,7 @@ unsigned long readRawTemperature()
 {
   // see datasheet page 7 for formulas
   MS5611lastRawTemperature = MS5611readConversion(MS5611_I2C_ADDRESS);
-  int64_t dT       = MS5611lastRawTemperature - (((long)MS5611Prom[5]) << 8);
+  int64_t dT     = MS5611lastRawTemperature - (((long)MS5611Prom[5]) << 8);
   MS5611_offset  = (((int64_t)MS5611Prom[2]) << 16) + ((MS5611Prom[4] * dT) >> 7);
   MS5611_sens    = (((int64_t)MS5611Prom[1]) << 15) + ((MS5611Prom[3] * dT) >> 8);
 
@@ -185,8 +185,12 @@ float readRawPressure()
   return (((( MS5611lastRawPressure * MS5611_sens) >> 21) - MS5611_offset) >> (15-5)) / ((float)(1<<5));
 }
 
+bool baroGroundUpdateDone = false;
+unsigned long baroStartTime;
 
 void initializeBaro() {
+  baroStartTime = micros();
+
   pressure = 0;
   baroGroundAltitude = 0;
   pressureFactor = 1/5.255;
@@ -198,7 +202,6 @@ void initializeBaro() {
 	  vehicleState |= BARO_DETECTED;
   }
 
-
   requestRawTemperature(); // setup up next measure() for temperature
   isReadPressure = false;
   pressureCount = 0;
@@ -208,6 +211,7 @@ void initializeBaro() {
   measureBaro(); // read pressure
   delay(10);
 
+  measureGroundBaro();
   measureGroundBaro();
 
 #if 0
@@ -227,7 +231,6 @@ void measureBaro() {
 
 void measureBaroSum() {
   // switch between pressure and temperature measurements
-  // each loop, since it is slow to measure pressure
   if (isReadPressure) {
     rawPressureSum += readRawPressure();
     rawPressureSumCount++;
@@ -278,6 +281,13 @@ void evaluateBaroAltitude() {
 
   rawPressureSum = 0.0;
   rawPressureSumCount = 0;
+
+  // set ground altitude after a delay, so sensor has time to heat up
+  const unsigned long updateDelayInSeconds = 10;
+  if(!baroGroundUpdateDone && (micros()-baroStartTime) > updateDelayInSeconds*1000000) {
+	  baroGroundAltitude = baroAltitude;
+	  baroGroundUpdateDone = true;
+  }
 }
 
 #endif
