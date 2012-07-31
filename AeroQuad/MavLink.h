@@ -107,6 +107,7 @@
 		String parameterNameAHPanicValue = "AH_Panic Value";
 	#endif
 	#if defined AltitudeHoldBaro
+		String parameterNameAHBaroSmooth = "AH_SmoothFactor";
 		String parameterNameBaroP = "Baro_P";
 		String parameterNameBaroI = "Baro_P";
 		String parameterNameBaroD = "Baro_P";
@@ -396,11 +397,11 @@
 		}
 
 		#if defined BattMonitor
-			int8_t battery_monitor_alarm_voltage[15] = "BatMo_AlarmVol";
+			int8_t battery_monitor_alarm_voltage[16] = "BatMo_AlarmVolt";
 			sendSerialParameter(batteryMonitorAlarmVoltage, battery_monitor_alarm_voltage, parameterListSize, indexCounter);
 			indexCounter++;
 
-			int8_t battery_monitor_throttle_target[15] = "BatMo_ThTarget";
+			int8_t battery_monitor_throttle_target[16] = "BatMo_ThrTarget";
 			sendSerialParameter(batteryMonitorThrottleTarget, battery_monitor_throttle_target, parameterListSize, indexCounter);
 			indexCounter++;
 
@@ -482,7 +483,7 @@
 		#endif 
 
 		#if defined (AltitudeHoldBaro)  && !defined AltitudeHoldRangeFinder
-			int8_t baro_smooth_factor[15] = "AH_SmoothFacto";
+			int8_t baro_smooth_factor[16] = "AH_SmoothFactor";
 			sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
 			indexCounter++;
 
@@ -943,6 +944,11 @@
 		#endif
 
 		#if defined AltitudeHoldBaro
+			if (checkParameterMatch(parameterNameAHBaroSmooth, key)) {
+				paramIndicator = NONE;
+				parameterToBeChangedFloat = &baroSmoothFactor;
+				return -1;
+			}
 			if (checkParameterMatch(parameterNameBaroP, key)) {
 				paramIndicator = P;
 				return BARO_ALTITUDE_HOLD_PID_IDX;
@@ -1219,6 +1225,16 @@
 									writeEEPROM();
 									// Report back new value
 									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedInt, parameterType, parameterListSize, -1);
+									len = mavlink_msg_to_send_buffer(buf, &msg);
+									PORT.write(buf, len);
+								}
+							}
+							else if (parameterToBeChangedULong != NULL) {
+								if (*parameterToBeChangedULong != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+									*parameterToBeChangedULong = set.param_value;
+									writeEEPROM();
+									// Report back new value
+									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedULong, parameterType, parameterListSize, -1);
 									len = mavlink_msg_to_send_buffer(buf, &msg);
 									PORT.write(buf, len);
 								}
