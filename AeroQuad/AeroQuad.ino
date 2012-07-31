@@ -1224,7 +1224,7 @@
 #include "FlightCommandProcessor.h"
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
-#include "SerialCom.h"
+
 #if defined (UseGPS) || defined (BattMonitor)
   #include "LedStatusProcessor.h"
 #endif  
@@ -1235,6 +1235,8 @@
   #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
   // MavLink 1.0 DKP - need to get here.
   //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#else
+  #include "SerialCom.h"
 #endif
 
 
@@ -1249,9 +1251,7 @@ void setup() {
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
 
-  #ifdef MavLink
-    sendSerialBoot();
-  #endif
+  initCommunication();
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -1429,18 +1429,12 @@ void loop () {
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #if defined BinaryWrite && !defined MavLink
+    #if defined BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
     #endif      
-    #ifdef MavLink
-        //sendSerialHudData();
-        //sendSerialAttitude(); // Defined in MavLink.pde
-        //sendSerialGpsPostion();
-    #endif
-    
 
     #ifdef SlowTelemetry
       updateSlowTelemetry100Hz();
@@ -1478,11 +1472,6 @@ void loop () {
       
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-      #endif
-      
-      #ifdef MavLink
-        readSerialCommand();
-        sendSerialTelemetry();
       #endif
     }
 
