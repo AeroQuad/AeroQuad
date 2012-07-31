@@ -18,7 +18,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// MavLink.pde is responsible for the serial communication for commands and telemetry from the AeroQuad
+// MavLink.h is responsible for the serial communication for commands and telemetry from the AeroQuad
 // This comtains readSerialCommand() which listens for a serial command and it's arguments
 // This also contains readSerialTelemetry() which listens for a telemetry request and responds with the requested data
 
@@ -31,7 +31,6 @@
 #ifdef MavLink
 #define PORT Serial3
 #include "BatteryMonitor.h"
-
 // MavLink 0.9 
 #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
 // MavLink 1.0 DKP - need to get here.
@@ -51,7 +50,7 @@ uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 mavlink_status_t status;
 
 
-void readSerialMavLink() {
+void readSerialCommand() {
   while(PORT.available() > 0) { 
     uint8_t c = PORT.read();
     //try to get a new message 
@@ -159,6 +158,10 @@ void readSerialMavLink() {
     system_dropped_packets += status.packet_rx_drop_count;
 }
 
+void sendSerialTelemetry() {
+  sendSerialHeartbeat();
+}
+
 void sendSerialHeartbeat() {
   mavlink_msg_heartbeat_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_type, autopilot_type);
   len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -206,7 +209,7 @@ void sendSerialRawPressure() {
   PORT.write(buf, len);
 }
 
-void sendSerialBoot() {
+void initCommunication() {
   mavlink_msg_boot_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, SOFTWARE_VERSION);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   PORT.write(buf, len);
@@ -254,10 +257,16 @@ void sendSerialSysStatus() {
     system_mode = MAV_MODE_TEST2;
     system_status = MAV_STATE_ACTIVE;
   }
-  mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_mode, system_nav_mode, system_status, (int)(deltaTime/15), (int)(batteryData[0].current*1000), 0, system_dropped_packets);
+  #ifdef BattMonitor
+    mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_mode, system_nav_mode, system_status, (int)(deltaTime/15), (int)(batteryData[0].current*1000), 0, system_dropped_packets);  
+  #else
+   mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, system_mode, system_nav_mode, system_status, (int)(deltaTime/15), 0, 0, system_dropped_packets);  
+  #endif
+  
   len = mavlink_msg_to_send_buffer(buf, &msg);
   PORT.write(buf, len);
 }
 #endif
 
 #endif //#define _AQ_MAVLINK_H_
+
