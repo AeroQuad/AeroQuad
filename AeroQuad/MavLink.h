@@ -326,7 +326,7 @@
 			sendSerialParameter(batteryMonitorThrottleTarget, battery_monitor_throttle_target, parameterListSize, indexCounter);
 			indexCounter++;
 
-			int8_t battery_monitor_going_down_time[16] = "BatMo_DownTime";
+			int8_t battery_monitor_going_down_time[16] = "BatMo_DownTime";  //TODO seems to produce an overflow, choosing unint32_t as data type doesn't help
 			sendSerialParameter(batteryMonitorGoingDownTime, battery_monitor_going_down_time, parameterListSize, indexCounter);
 			indexCounter++;
 		#endif
@@ -601,6 +601,12 @@
 		PORT.write(buf, len);
 	}
 
+	int findParameter(char parameterID[]) { //TODO
+		if(parameterID == "Rate Roll_P"){
+			return RATE_XAXIS_PID_IDX;
+			}
+		return LAST_PID_IDX;
+		}
 
 	void readSerialMavLink() {
 		while(PORT.available() > 0) { 
@@ -687,24 +693,29 @@
 					}
 					break;
 
-					case MAVLINK_MSG_ID_PARAM_REQUEST_READ: {
-						const char parameterID = mavlink_msg_param_request_read_get_param_id(&msg, 0);
-						int16_t parameterIndex = mavlink_msg_param_request_read_get_param_index(&msg);
+					case MAVLINK_MSG_ID_PARAM_REQUEST_READ: { //TODO not working yet
+						//uint16_t parameterID = mavlink_msg_param_request_read_get_param_id(&msg, 0);
+						//int16_t parameterIndex = mavlink_msg_param_request_read_get_param_index(&msg);
 
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, parameterIndex);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						PORT.write(buf, len);
+// 						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, parameterIndex);
+// 						len = mavlink_msg_to_send_buffer(buf, &msg);
+// 						PORT.write(buf, len);
 					}
 					break;
 
 					case MAVLINK_MSG_ID_PARAM_SET: { //TODO not working yet
 						float parameterValue = mavlink_msg_param_set_get_param_value(&msg);
-						uint16_t parameterID = mavlink_msg_param_set_get_param_id(&msg, (char*)parameterID);
+						char parameterID[16];
+						int a = mavlink_msg_param_set_get_param_id(&msg, (char*)parameterID);
 
-						PID[parameterID].P = parameterValue; //TODO check how to differ between P/I/D/windUpGuard
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterID].P, parameterType, 1, 0);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						PORT.write(buf, len);
+						int parameterToBeChanged = findParameter(parameterID);
+						if(parameterToBeChanged != LAST_PID_IDX) {
+								PID[parameterToBeChanged].P = parameterValue; //TODO check how to differ between P/I/D/windUpGuard
+								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterID, PID[parameterToBeChanged].P, parameterType, parameterListSize, -1);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+						}
+
 					}
 					break;
 
