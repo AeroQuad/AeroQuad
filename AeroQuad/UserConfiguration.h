@@ -185,7 +185,7 @@
 //
 // *******************************************************************************************************************************
 // Support menu on serial enabled LCD display (16x2 characters).  You can change serial port if needed
-// Note: cannot be enabled at the same time with OSD
+// Note: Can NOT be enabled at the same time with OSD
 // For more information please refer to http://aeroquad.com/showwiki.php?title=OnBoardMenu
 // *************************************************************.******************************************************************
 //#define SERIAL_LCD Serial3

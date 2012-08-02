@@ -247,6 +247,64 @@
 		len = mavlink_msg_to_send_buffer(buf, &msg);
 		PORT.write(buf, len);
 	}
+	void sendSerialSysStatus() {
+		uint32_t controlSensorsPresent = 0;
+		uint32_t controlSensorEnabled;
+		uint32_t controlSensorsHealthy;
+	
+		// first what sensors/controllers we have
+		if (GYRO_DETECTED)   controlSensorsPresent |= (1<<0); // 3D gyro present
+		if (ACCEL_DETECTED)  controlSensorsPresent |= (1<<1); // 3D accelerometer present
+		#if defined HeadingMagHold
+			if (MAG_DETECTED)   controlSensorsPresent |= (1<<2); // compass present
+		#endif
+		#if defined AltitudeHoldBaro
+			if (BARO_DETECTED)   controlSensorsPresent |= (1<<3); // absolute pressure sensor present
+		#endif
+		#if defined UseGPS
+			if (gps->valid_read) controlSensorsPresent |= (1<<5); // GPS present
+		#endif
+		controlSensorsPresent |= (1<<10); // 3D angular rate control
+		controlSensorsPresent |= (1<<11); // attitude stabilisation
+		controlSensorsPresent |= (1<<12); // yaw position
+		#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+			controlSensorsPresent |= (1<<13); // altitude control
+		#endif
+		#if defined UseGPSNavigator
+			controlSensorsPresent |= (1<<14); // X/Y position control
+		#endif
+		controlSensorsPresent |= (1<<15); // motor control
+
+		// now what sensors/controllers are enabled
+		// first the sensors
+		controlSensorEnabled = controlSensorsPresent & 0x1FF;
+	
+		// now the controllers
+		controlSensorEnabled = controlSensorsPresent & 0x1FF;
+	
+		controlSensorEnabled |= (1<<10); // 3D angular rate control
+		if (flightMode == ATTITUDE_FLIGHT_MODE) controlSensorEnabled |= (1<<11); // attitude stabilisation
+		#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+			if (altitudeHoldState == ON) controlSensorEnabled |= (1<<13); // altitude control
+		#endif
+		controlSensorEnabled |= (1<<15); // motor control
+		if (headingHoldConfig == ON) controlSensorEnabled |= (1<<12); // yaw position
+		#if defined UseGPSNavigator
+			if (positionHoldState == ON || navigationState == ON) controlSensorEnabled |= (1<<14); // X/Y position control
+		#endif
+
+		// at the moment all sensors/controllers are assumed healthy
+		controlSensorsHealthy = controlSensorsPresent;
+
+		#if defined BattMonitor
+			mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
+		#else
+			mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
+		#endif
+
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		PORT.write(buf, len);
+	}
 	void sendSerialVehicleData() {
 		sendSerialHudData();
 		sendSerialAttitude();
@@ -651,64 +709,6 @@
 		#endif
 
 		if (LASTCHANNEL == 8) parameterListSize += 2;
-	}
-	void sendSerialSysStatus() {
-		uint32_t controlSensorsPresent = 0;
-		uint32_t controlSensorEnabled;
-		uint32_t controlSensorsHealthy;
-	
-		// first what sensors/controllers we have
-		if (GYRO_DETECTED)   controlSensorsPresent |= (1<<0); // 3D gyro present
-		if (ACCEL_DETECTED)  controlSensorsPresent |= (1<<1); // 3D accelerometer present
-		#if defined HeadingMagHold
-			if (MAG_DETECTED)   controlSensorsPresent |= (1<<2); // compass present
-		#endif
-		#if defined AltitudeHoldBaro
-			if (BARO_DETECTED)   controlSensorsPresent |= (1<<3); // absolute pressure sensor present
-		#endif
-		#if defined UseGPS
-			if (gps->valid_read) controlSensorsPresent |= (1<<5); // GPS present
-		#endif
-		controlSensorsPresent |= (1<<10); // 3D angular rate control
-		controlSensorsPresent |= (1<<11); // attitude stabilisation
-		controlSensorsPresent |= (1<<12); // yaw position
-		#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-			controlSensorsPresent |= (1<<13); // altitude control
-		#endif
-		#if defined UseGPSNavigator
-			controlSensorsPresent |= (1<<14); // X/Y position control
-		#endif
-		controlSensorsPresent |= (1<<15); // motor control
-
-		// now what sensors/controllers are enabled
-		// first the sensors
-		controlSensorEnabled = controlSensorsPresent & 0x1FF;
-	
-		// now the controllers
-		controlSensorEnabled = controlSensorsPresent & 0x1FF;
-	
-		controlSensorEnabled |= (1<<10); // 3D angular rate control
-		if (flightMode == ATTITUDE_FLIGHT_MODE) controlSensorEnabled |= (1<<11); // attitude stabilisation
-		#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-			if (altitudeHoldState == ON) controlSensorEnabled |= (1<<13); // altitude control
-		#endif
-		controlSensorEnabled |= (1<<15); // motor control
-		if (headingHoldConfig == ON) controlSensorEnabled |= (1<<12); // yaw position
-		#if defined UseGPSNavigator
-			if (positionHoldState == ON || navigationState == ON) controlSensorEnabled |= (1<<14); // X/Y position control
-		#endif
-
-		// at the moment all sensors/controllers are assumed healthy
-		controlSensorsHealthy = controlSensorsPresent;
-
-		#if defined BattMonitor
-			mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
-		#else
-			mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
-		#endif
-
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		PORT.write(buf, len);
 	}
 	bool checkParameterMatch(String parameterName, char* key) {
 		for (uint16_t j = 0; j < parameterName.length(); j++) {

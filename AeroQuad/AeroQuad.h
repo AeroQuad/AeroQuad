@@ -239,24 +239,6 @@ void reportVehicleState();
 #endif
 //////////////////////////////////////////////////////
 
-
-
-
-
-/**
- * Mavlink Serial communication global declaration
- */
-#ifdef MavLink
-  #define RECEIVELOOPTIME 10000 // 100Hz
-  #define HEARTBEATLOOPTIME 1000000 // 1Hz
-  #define RAWDATALOOPTIME 100000 // 10Hz
-  #define SYSTEMSTATUSLOOPTIME 100000 // 10Hz
-  #define ATTITUDELOOPTIME 100000 // 10Hz
-#endif
-//////////////////////////////////////////////////////
-
-
-
 /**
  * EEPROM global section
  */
@@ -373,23 +355,6 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
-
-#ifdef MavLink
-  void readSerialCommand(void);
-  void sendSerialHeartbeat(void); // defined in MavLink.pde
-  void sendSerialBoot(void);
-  void sendSerialSysStatus(void);
-  void sendSerialRawIMU(void);
-  void sendSerialAttitude(void);
-  void sendSerialAltitude(void);
-  void sendSerialRcRaw(void);
-  void sendSerialRcScaled(void);
-  void sendSerialRawPressure(void);
-  void sendSerialPID(int , int8_t[], int8_t[], int8_t[], int, int);
-  void sendSerialParamValue(int8_t[], float, int, int);
-  void sendSerialHudData(void);
-  void sendSerialGpsPostion(void);
-#endif
 
 /**
  * Debug utility global declaration

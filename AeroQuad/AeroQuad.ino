@@ -1216,8 +1216,6 @@
 
 
 
-
-
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
@@ -1230,8 +1228,6 @@
 
 #if defined MavLink
   #include "MavLink.h"
-  // MavLink 1.0 DKP
-  #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
 #else
   #include "SerialCom.h"
 #endif
