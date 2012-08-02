@@ -1478,6 +1478,7 @@ void loop () {
         readSerialCommand();
 		updateFlightTime();
 		sendQueuedParameters();
+		changeAndSendParameter();
       #endif
     }
 
@@ -1550,6 +1551,5 @@ void loop () {
       frameCounter = 0;
   }
 }
-
 
 

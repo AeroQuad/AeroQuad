@@ -34,8 +34,17 @@
 		windUpGuard,
 		NONE };
 
+	// Variables for sending parameters
 	int indexCounter = 0;
 	int paramListPartIndicator = -1;
+
+	// Variables for writing parameters
+	int parameterChangeIndicator = -1;
+	int parameterMatch = 0;
+	mavlink_param_set_t set;
+	char* key;
+
+
 	int systemType = MAV_TYPE_QUADROTOR;
 	int autopilotType = MAV_AUTOPILOT_GENERIC;
 	uint16_t len;
@@ -1072,6 +1081,91 @@
 
 		return 0;
 	}
+
+	void changeAndSendParameter() {
+		if(parameterChangeIndicator == 0) {
+			// Only write and emit changes if there is actually a difference AND only write if new value is NOT "not-a-number" AND is NOT infinity
+			if(parameterMatch != 0) {
+				if (paramIndicator == P) {
+					if (PID[parameterMatch].P != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+						PID[parameterMatch].P = set.param_value;
+						writeEEPROM();
+						// Report back new value
+						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
+						len = mavlink_msg_to_send_buffer(buf, &msg);
+						PORT.write(buf, len);
+					}
+				}
+
+				else if (paramIndicator == I) {
+					if (PID[parameterMatch].I != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+						PID[parameterMatch].I = set.param_value;
+						writeEEPROM();
+						// Report back new value
+						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
+						len = mavlink_msg_to_send_buffer(buf, &msg);
+						PORT.write(buf, len);
+					}
+				}
+
+				else if (paramIndicator == D) {
+					if (PID[parameterMatch].D != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+						PID[parameterMatch].D = set.param_value;
+						writeEEPROM();
+						// Report back new value
+						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
+						len = mavlink_msg_to_send_buffer(buf, &msg);
+						PORT.write(buf, len);
+					}
+				}
+
+				else if (paramIndicator == NONE) {
+					if (parameterToBeChangedFloat != NULL) {
+						if (*parameterToBeChangedFloat != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+							*parameterToBeChangedFloat = set.param_value;
+							writeEEPROM();
+							// Report back new value
+							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedFloat, parameterType, parameterListSize, -1);
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							PORT.write(buf, len);
+						}
+					}
+					else if (parameterToBeChangedByte != NULL) {
+						if (*parameterToBeChangedByte != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+							*parameterToBeChangedByte = set.param_value;
+							writeEEPROM();
+							// Report back new value
+							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedByte, parameterType, parameterListSize, -1);
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							PORT.write(buf, len);
+						}
+					}
+					else if (parameterToBeChangedInt != NULL) {
+						if (*parameterToBeChangedInt != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+							*parameterToBeChangedInt = set.param_value;
+							writeEEPROM();
+							// Report back new value
+							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedInt, parameterType, parameterListSize, -1);
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							PORT.write(buf, len);
+						}
+					}
+					else if (parameterToBeChangedULong != NULL) {
+						if (*parameterToBeChangedULong != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+							*parameterToBeChangedULong = set.param_value;
+							writeEEPROM();
+							// Report back new value
+							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedULong, parameterType, parameterListSize, -1);
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							PORT.write(buf, len);
+						}
+					}
+				parameterChangeIndicator = -1;
+				}
+			}
+		}
+	}
+
 	void readSerialCommand() {
 		while(PORT.available() > 0) { 
 			uint8_t c = PORT.read();
@@ -1162,10 +1256,10 @@
 					break;
 
 					case MAVLINK_MSG_ID_PARAM_REQUEST_READ: { 
-						mavlink_param_request_read_t set;
-						mavlink_msg_param_request_read_decode(&msg, &set);
+						mavlink_param_request_read_t read;
+						mavlink_msg_param_request_read_decode(&msg, &read);
 
-						char* key = (char*) set.param_id;
+						key = (char*) read.param_id;
 
 						int parameterMatch = findParameter(key);
 
@@ -1199,91 +1293,14 @@
 					break;
 
 					case MAVLINK_MSG_ID_PARAM_SET: {
-						mavlink_param_set_t set;
-						mavlink_msg_param_set_decode(&msg, &set);
+						if(!motorArmed) { // added for security reason, as the software is shortly blocked by this command (maybe this can be avoided?)
+							mavlink_msg_param_set_decode(&msg, &set);
 
-						char* key = (char*) set.param_id;
+							key = (char*) set.param_id;
 
-						int parameterMatch = findParameter(key);
-
-						// Only write and emit changes if there is actually a difference AND only write if new value is NOT "not-a-number" AND is NOT infinity
-						if(parameterMatch != 0) {
-							if (paramIndicator == P) {
-								if (PID[parameterMatch].P != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									PID[parameterMatch].P = set.param_value;
-									writeEEPROM();
-									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									PORT.write(buf, len);
-								}
-							}
-
-							if (paramIndicator == I) {
-								if (PID[parameterMatch].I != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									PID[parameterMatch].I = set.param_value;
-									writeEEPROM();
-									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									PORT.write(buf, len);
-								}
-							}
-
-							if (paramIndicator == D) {
-								if (PID[parameterMatch].D != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									PID[parameterMatch].D = set.param_value;
-									writeEEPROM();
-									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									PORT.write(buf, len);
-								}
-							}
-
-							if (paramIndicator == NONE) {
-								if (parameterToBeChangedFloat != NULL) {
-									if (*parameterToBeChangedFloat != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-										*parameterToBeChangedFloat = set.param_value;
-										writeEEPROM();
-										// Report back new value
-										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedFloat, parameterType, parameterListSize, -1);
-										len = mavlink_msg_to_send_buffer(buf, &msg);
-										PORT.write(buf, len);
-									}
-								}
-								else if (parameterToBeChangedByte != NULL) {
-									if (*parameterToBeChangedByte != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-										*parameterToBeChangedByte = set.param_value;
-										writeEEPROM();
-										// Report back new value
-										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedByte, parameterType, parameterListSize, -1);
-										len = mavlink_msg_to_send_buffer(buf, &msg);
-										PORT.write(buf, len);
-									}
-								}
-								else if (parameterToBeChangedInt != NULL) {
-									if (*parameterToBeChangedInt != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-										*parameterToBeChangedInt = set.param_value;
-										writeEEPROM();
-										// Report back new value
-										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedInt, parameterType, parameterListSize, -1);
-										len = mavlink_msg_to_send_buffer(buf, &msg);
-										PORT.write(buf, len);
-									}
-								}
-								else if (parameterToBeChangedULong != NULL) {
-									if (*parameterToBeChangedULong != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-										*parameterToBeChangedULong = set.param_value;
-										writeEEPROM();
-										// Report back new value
-										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedULong, parameterType, parameterListSize, -1);
-										len = mavlink_msg_to_send_buffer(buf, &msg);
-										PORT.write(buf, len);
-									}
-								}
-							}
-						}				
+							parameterMatch = findParameter(key);
+							parameterChangeIndicator = 0;
+						}
 					}
 					break;
 
