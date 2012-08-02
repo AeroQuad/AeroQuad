@@ -35,6 +35,8 @@
 		windUpGuard,
 		NONE };
 
+	int indexCounter = 0;
+	int paramListPartIndicator = -1;
 	int systemType = MAV_TYPE_QUADROTOR;
 	int autopilotType = MAV_AUTOPILOT_GENERIC;
 	uint16_t len;
@@ -55,59 +57,59 @@
 	String parameterNameAttitudePitchP = "Att Pitch_P";
 	String parameterNameAttitudePitchI = "Att Pitch_I";
 	String parameterNameAttitudePitchD = "Att Pitch_D";
-	String parameterNameAttitudeGyroRollP = "Att Gyro Roll_P";
-	String parameterNameAttitudeGyroRollI = "Att Gyro Roll_I";
-	String parameterNameAttitudeGyroRollD = "Att Gyro Roll_D";
-	String parameterNameAttitudeGyroPitchP = "Att Gyro Pitc_P";
-	String parameterNameAttitudeGyroPitchI = "Att Gyro Pitc_I";
-	String parameterNameAttitudeGyroPitchD = "Att Gyro Pitc_D";
+	String parameterNameAttitudeGyroRollP = "AttGyroRoll_P";
+	String parameterNameAttitudeGyroRollI = "AttGyroRoll_I";
+	String parameterNameAttitudeGyroRollD = "AttGyroRoll_D";
+	String parameterNameAttitudeGyroPitchP = "AttGyroPitc_P";
+	String parameterNameAttitudeGyroPitchI = "AttGyroPitc_I";
+	String parameterNameAttitudeGyroPitchD = "AttGyroPitc_D";
 	String parameterNameYawP = "Yaw_P";
 	String parameterNameYawI = "Yaw_I";
 	String parameterNameYawD = "Yaw_D";
 	String parameterNameHeadingP = "Heading_P";
 	String parameterNameHeadingI = "Heading_I";
 	String parameterNameHeadingD = "Heading_D";
-	String parameterNameHeadingConfig = "Heading_Config";
-	String parameterNameGyroSmooth = "Misc_GyroSmooth";
-	String parameterNameAREF = "Misc_AREF value";
-	String parameterNameMinThrottle = "Misc_MinThrottl";
+	String parameterNameHeadingConfig = "Heading_Conf";
+	String parameterNameGyroSmooth = "Misc_GyroSmoo";
+	String parameterNameAREF = "Misc_AREF";
+	String parameterNameMinThrottle = "Misc_MinThr";
 	String parameterNameTxFactor = "TX_TX Factor";
-	String parameterNameTxRollSmooth = "TX_Roll Smooth";
-	String parameterNameTxPitchSmooth = "TX_Pitch Smooth";
-	String parameterNameTxYawSmooth = "TX_Yaw Smooth";
-	String parameterNameTxThrottleSmooth = "TX_Thr Smooth";
-	String parameterNameTxModeSmooth = "TX_Mode Smooth";
-	String parameterNameTxAUX1Smooth = "TX_AUX1 Smooth";
-	String parameterNameTxAUX2Smooth = "TX_AUX2 Smooth";
-	String parameterNameTxAUX3Smooth = "TX_AUX3 Smooth";
+	String parameterNameTxRollSmooth = "TX_RollSmooth";
+	String parameterNameTxPitchSmooth = "TX_PitcSmooth";
+	String parameterNameTxYawSmooth = "TX_YawSmooth";
+	String parameterNameTxThrottleSmooth = "TX_ThrSmooth";
+	String parameterNameTxModeSmooth = "TX_ModeSmooth";
+	String parameterNameTxAUX1Smooth = "TX_AUX1Smooth";
+	String parameterNameTxAUX2Smooth = "TX_AUX2Smooth";
+	String parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
 	#if defined BattMonitor
-		String parameterNameBattMonAlarmVoltage = "BatMo_AlarmVolt";
-		String parameterNameBattMonThrottleTarget = "BatMo_ThrTarget";
-		String parameterNameBattMonGoingDownTime = "BatMo_DownTime";
+		String parameterNameBattMonAlarmVoltage = "BatMo_AlarmVo";
+		String parameterNameBattMonThrottleTarget = "BatMo_ThrTarg";
+		String parameterNameBattMonGoingDownTime = "BatMo_DownTim";
 	#endif
 	#ifdef CameraControl
 		String parameterNameCamMode = "Cam_Mode";
-		String parameterNameCamPitchMiddle = "Cam_PitchMiddle";
-		String parameterNameCamRollMiddle = "Cam_RollMiddle";
-		String parameterNameCamYawMiddle = "Cam_YawMiddle";
-		String parameterNameCamRollServoMiddle = "Cam_ServoPitchM";
-		String parameterNameCamPitchServoMiddle = "Cam_ServoRollM";
+		String parameterNameCamPitchMiddle = "Cam_PitchMid";
+		String parameterNameCamRollMiddle = "Cam_RollMid";
+		String parameterNameCamYawMiddle = "Cam_YawMid";
+		String parameterNameCamRollServoMiddle = "Cam_ServoPitM";
+		String parameterNameCamPitchServoMiddle = "Cam_ServoRolM";
 		String parameterNameCamYawServoMiddle = "Cam_ServoYawM";
-		String parameterNameCamPitchServoMin = "Cam_ServoMinPit";
-		String parameterNameCamRollServoMin = "Cam_ServoMinRol";
-		String parameterNameCamYawServoMin = "Cam_ServoMinYaw";
-		String parameterNameCamPitchServoMax = "Cam_ServoMaxPit";
-		String parameterNameCamRollServoMax = "Cam_ServoMaxRol";
-		String parameterNameCamYawServoMax = "Cam_ServoMaxYaw";
+		String parameterNameCamPitchServoMin = "Cam_SerMinPit";
+		String parameterNameCamRollServoMin = "Cam_SerMinRol";
+		String parameterNameCamYawServoMin = "Cam_SerMinYaw";
+		String parameterNameCamPitchServoMax = "Cam_SerMaxPit";
+		String parameterNameCamRollServoMax = "Cam_SerMaxRol";
+		String parameterNameCamYawServoMax = "Cam_SerMaxYaw";
 	#endif
 	#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 		String parameterNameAHminThrottleAdjust = "AH_Min Adjust";
 		String parameterNameAHmaxThrottleAdjust = "AH_Max Adjust";
 		String parameterNameAHBumpValue = "AH_Bump Value";
-		String parameterNameAHPanicValue = "AH_Panic Value";
+		String parameterNameAHPanicValue = "AH_PanicValue";
 	#endif
 	#if defined AltitudeHoldBaro
-		String parameterNameAHBaroSmooth = "AH_SmoothFactor";
+		String parameterNameAHBaroSmooth = "AH_SmoothFact";
 		String parameterNameBaroP = "Baro_P";
 		String parameterNameBaroI = "Baro_P";
 		String parameterNameBaroD = "Baro_P";
@@ -120,7 +122,7 @@
 		String parameterNameRangeFinderP = "Range_P";
 		String parameterNameRangeFinderI = "Range_P";
 		String parameterNameRangeFinderD = "Range_P";
-		String parameterNameBaroWindUpGuard = "Range_WindUp";
+		String parameterNameRangeFinderWindUpGuard = "Range_WindUp";
 	#endif
 	#if defined UseGPSNavigator
 		String parameterNameGPSRollP = "GPS Roll_P";
@@ -292,302 +294,336 @@
 		len = mavlink_msg_to_send_buffer(buf, &msg);
 		PORT.write(buf, len);
 		}	
-	void sendParameterList() {
-		int indexCounter = 0;
-		int8_t rateRoll_P[15] = "Rate Roll_P";
-		int8_t rateRoll_I[15] = "Rate Roll_I";
-		int8_t rateRoll_D[15] = "Rate Roll_D";
+	void sendSerialParameter(int parameterID, int8_t parameterName[], int listsize, int index) {
+		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		PORT.write(buf, len);
+		}	
+	void sendSerialParameter(byte parameterID, int8_t parameterName[], int listsize, int index) {
+		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		PORT.write(buf, len);
+		}	
+	void sendSerialParameter(unsigned long parameterID, int8_t parameterName[], int listsize, int index) {
+		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		PORT.write(buf, len);
+		}	
+
+	void sendParamListPart1() {
+		int8_t rateRoll_P[14] = "Rate Roll_P";
+		int8_t rateRoll_I[14] = "Rate Roll_I";
+		int8_t rateRoll_D[14] = "Rate Roll_D";
 		sendSerialPID(RATE_XAXIS_PID_IDX, rateRoll_P, rateRoll_I, rateRoll_D, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t ratePitch_P[15] = "Rate Pitch_P";
-		int8_t ratePitch_I[15] = "Rate Pitch_I";
-		int8_t ratePitch_D[15] = "Rate Pitch_D";
+		int8_t ratePitch_P[14] = "Rate Pitch_P";
+		int8_t ratePitch_I[14] = "Rate Pitch_I";
+		int8_t ratePitch_D[14] = "Rate Pitch_D";
 		sendSerialPID(RATE_YAXIS_PID_IDX, ratePitch_P, ratePitch_I, ratePitch_D, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t attitudeRoll_P[16] = "Att Roll_P";
-		int8_t attitudeRoll_I[16] = "Att Roll_I";
-		int8_t attitudeRoll_D[16] = "Att Roll_D";
+		int8_t attitudeRoll_P[14] = "Att Roll_P";
+		int8_t attitudeRoll_I[14] = "Att Roll_I";
+		int8_t attitudeRoll_D[14] = "Att Roll_D";
 		sendSerialPID(ATTITUDE_XAXIS_PID_IDX, attitudeRoll_P, attitudeRoll_I, attitudeRoll_D, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t attitudePitch_P[16] = "Att Pitch_P";
-		int8_t attitudePitch_i[16] = "Att Pitch_I";
-		int8_t attitudePitch_d[16] = "Att Pitch_D";
+		int8_t attitudePitch_P[14] = "Att Pitch_P";
+		int8_t attitudePitch_i[14] = "Att Pitch_I";
+		int8_t attitudePitch_d[14] = "Att Pitch_D";
 		sendSerialPID(ATTITUDE_YAXIS_PID_IDX, attitudePitch_P, attitudePitch_i, attitudePitch_d, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t attitudeGyroRoll_P[16] = "Att Gyro Roll_P";
-		int8_t attitudeGyroRoll_I[16] = "Att Gyro Roll_I";
-		int8_t attitudeGyroRoll_D[16] = "Att Gyro Roll_D";
+		int8_t attitudeGyroRoll_P[14] = "AttGyroRoll_P";
+		int8_t attitudeGyroRoll_I[14] = "AttGyroRoll_I";
+		int8_t attitudeGyroRoll_D[14] = "AttGyroRoll_D";
 		sendSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX, attitudeGyroRoll_P, attitudeGyroRoll_I, attitudeGyroRoll_D, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t attitudeGyroPitch_P[16] = "Att Gyro Pitc_P";
-		int8_t attitudeGyroPitch_I[16] = "Att Gyro Pitc_I";
-		int8_t attitudeGyroPitch_D[16] = "Att Gyro Pitc_D";
+		int8_t attitudeGyroPitch_P[14] = "AttGyroPitc_P";
+		int8_t attitudeGyroPitch_I[14] = "AttGyroPitc_I";
+		int8_t attitudeGyroPitch_D[14] = "AttGyroPitc_D";
 		sendSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX, attitudeGyroPitch_P, attitudeGyroPitch_I, attitudeGyroPitch_D, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t yaw_p[15] = "Yaw_P";
-		int8_t yaw_i[15] = "Yaw_I";
-		int8_t yaw_d[15] = "Yaw_D";
+		int8_t yaw_p[14] = "Yaw_P";
+		int8_t yaw_i[14] = "Yaw_I";
+		int8_t yaw_d[14] = "Yaw_D";
 		sendSerialPID(ZAXIS_PID_IDX, yaw_p, yaw_i, yaw_d, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t heading_p[15] = "Heading_P";
-		int8_t heading_i[15] = "Heading_I";
-		int8_t heading_d[15] = "Heading_D";
+		int8_t heading_p[14] = "Heading_P";
+		int8_t heading_i[14] = "Heading_I";
+		int8_t heading_d[14] = "Heading_D";
 		sendSerialPID(HEADING_HOLD_PID_IDX, heading_p, heading_i, heading_d, 0, parameterListSize, indexCounter);
 		indexCounter += 3;
 
-		int8_t heading_config[15] = "Heading_Config";
+		int8_t heading_config[14] = "Heading_Conf";
 		sendSerialParameter(headingHoldConfig, heading_config, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t gyro_smooth_factor[16] = "Misc_GyroSmooth";
+		int8_t gyro_smooth_factor[14] = "Misc_GyroSmoo";
 		sendSerialParameter(gyroSmoothFactor, gyro_smooth_factor, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t a_ref[16] = "Misc_AREF value";
+		int8_t a_ref[14] = "Misc_AREF";
 		sendSerialParameter(aref, a_ref, parameterListSize, indexCounter);
 		indexCounter++;
+	}
 
-		int8_t min_armed_throttle[16] = "Misc_MinThrottl";
+	void sendParamListPart2() {
+		int8_t min_armed_throttle[14] = "Misc_MinThr";
 		sendSerialParameter(minArmedThrottle, min_armed_throttle, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_xmit_factor[16] = "TX_TX Factor";
+		int8_t receiver_xmit_factor[14] = "TX_TX Factor";
 		sendSerialParameter(receiverXmitFactor, receiver_xmit_factor, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_roll[16] = "TX_Roll Smooth";
+		int8_t receiver_smooth_factor_roll[14] = "TX_RollSmooth";
 		sendSerialParameter(receiverSmoothFactor[XAXIS], receiver_smooth_factor_roll, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_pitch[16] = "TX_Pitch Smooth";
+		int8_t receiver_smooth_factor_pitch[14] = "TX_PitcSmooth";
 		sendSerialParameter(receiverSmoothFactor[YAXIS], receiver_smooth_factor_pitch, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_yaw[16] = "TX_Yaw Smooth";
+		int8_t receiver_smooth_factor_yaw[14] = "TX_YawSmooth";
 		sendSerialParameter(receiverSmoothFactor[ZAXIS], receiver_smooth_factor_yaw, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_throttle[16] = "TX_Thr Smooth";
+		int8_t receiver_smooth_factor_throttle[14] = "TX_ThrSmooth";
 		sendSerialParameter(receiverSmoothFactor[THROTTLE], receiver_smooth_factor_throttle, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_mode[16] = "TX_Mode Smooth";
+		int8_t receiver_smooth_factor_mode[14] = "TX_ModeSmooth";
 		sendSerialParameter(receiverSmoothFactor[MODE], receiver_smooth_factor_mode, parameterListSize, indexCounter);
 		indexCounter++;
 
-		int8_t receiver_smooth_factor_aux1[16] = "TX_AUX1 Smooth";
+		int8_t receiver_smooth_factor_aux1[14] = "TX_AUX1Smooth";
 		sendSerialParameter(receiverSmoothFactor[AUX1], receiver_smooth_factor_aux1, parameterListSize, indexCounter);
 		indexCounter++;
 
 		if (LASTCHANNEL == 8) {
-			int8_t receiver_smooth_factor_aux2[16] = "TX_AUX2 Smooth";
+			int8_t receiver_smooth_factor_aux2[14] = "TX_AUX2Smooth";
 			sendSerialParameter(receiverSmoothFactor[AUX2], receiver_smooth_factor_aux2, parameterListSize, indexCounter);
 			indexCounter++;
 
-			int8_t receiver_smooth_factor_aux3[16] = "TX_AUX3 Smooth";
+			int8_t receiver_smooth_factor_aux3[14] = "TX_AUX3Smooth";
 			sendSerialParameter(receiverSmoothFactor[AUX3], receiver_smooth_factor_aux3, parameterListSize, indexCounter);
 			indexCounter++;
 		}
 
 		#if defined BattMonitor
-			int8_t battery_monitor_alarm_voltage[16] = "BatMo_AlarmVolt";
-			sendSerialParameter(batteryMonitorAlarmVoltage, battery_monitor_alarm_voltage, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t battery_monitor_alarm_voltage[14] = "BatMo_AlarmVo";
+		sendSerialParameter(batteryMonitorAlarmVoltage, battery_monitor_alarm_voltage, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t battery_monitor_throttle_target[16] = "BatMo_ThrTarget";
-			sendSerialParameter(batteryMonitorThrottleTarget, battery_monitor_throttle_target, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t battery_monitor_throttle_target[14] = "BatMo_ThrTarg";
+		sendSerialParameter(batteryMonitorThrottleTarget, battery_monitor_throttle_target, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t battery_monitor_going_down_time[15] = "BatMo_DownTime";
-			sendSerialParameter(batteryMonitorGoingDownTime, battery_monitor_going_down_time, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t battery_monitor_going_down_time[14] = "BatMo_DownTim";
+		sendSerialParameter(batteryMonitorGoingDownTime, battery_monitor_going_down_time, parameterListSize, indexCounter);
+		indexCounter++;
+		#endif
+	}
+	void sendParamListPart3() {
+		#if defined CameraControl
+		int8_t camera_mode[14] = "Cam_Mode";
+		sendSerialParameter(cameraMode, camera_mode, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_camera_pitch[14] = "Cam_PitchMid";
+		sendSerialParameter(mCameraPitch, m_camera_pitch, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_camera_roll[14] = "Cam_RollMid";
+		sendSerialParameter(mCameraRoll, m_camera_roll, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_camera_yaw[14] = "Cam_YawMid";
+		sendSerialParameter(mCameraYaw, m_camera_yaw, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_servo_pitch[14] = "Cam_ServoPitM";
+		sendSerialParameter(servoCenterPitch, m_servo_pitch, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_servo_roll[14] = "Cam_ServoRolM";
+		sendSerialParameter(servoCenterRoll, m_servo_roll, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t m_servo_yaw[14] = "Cam_ServoYawM";
+		sendSerialParameter(servoCenterYaw, m_servo_yaw, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_min_pitch[14] = "Cam_SerMinPit";
+		sendSerialParameter(servoMinPitch, servo_min_pitch, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_min_roll[14] = "Cam_SerMinRol";
+		sendSerialParameter(servoMinRoll, servo_min_roll, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_min_yaw[14] = "Cam_SerMinYaw";
+		sendSerialParameter(servoMinYaw, servo_min_yaw, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_max_pitch[14] = "Cam_SerMaxPit";
+		sendSerialParameter(servoMaxPitch, servo_max_pitch, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_max_roll[14] = "Cam_SerMaxRol";
+		sendSerialParameter(servoMaxRoll, servo_max_roll, parameterListSize, indexCounter);
+		indexCounter++;
+
+		int8_t servo_max_yaw[14] = "Cam_SerMaxYaw";
+		sendSerialParameter(servoMaxYaw, servo_max_yaw, parameterListSize, indexCounter);
+		indexCounter++;
 		#endif
 
-		#ifdef CameraControl
-			int8_t camera_mode[16] = "Cam_Mode";
-			sendSerialParameter(cameraMode, camera_mode, parameterListSize, indexCounter);
-			indexCounter++;
+		#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+		int8_t min_throttle_adjust[14] = "AH_Min Adjust";
+		sendSerialParameter(minThrottleAdjust, min_throttle_adjust, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t m_camera_pitch[16] = "Cam_PitchMiddle";
-			sendSerialParameter(mCameraPitch, m_camera_pitch, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t max_throttle_adjust[14] = "AH_Max Adjust";
+		sendSerialParameter(maxThrottleAdjust, max_throttle_adjust, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t m_camera_roll[16] = "Cam_RollMiddle";
-			sendSerialParameter(mCameraRoll, m_camera_roll, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t altitude_hold_bump[14] = "AH_Bump Value";
+		sendSerialParameter(altitudeHoldBump, altitude_hold_bump, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t m_camera_yaw[16] = "Cam_YawMiddle";
-			sendSerialParameter(mCameraYaw, m_camera_yaw, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t m_servo_pitch[16] = "Cam_ServoPitchM";
-			sendSerialParameter(servoCenterPitch, m_servo_pitch, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t m_servo_roll[16] = "Cam_ServoRollM";
-			sendSerialParameter(servoCenterRoll, m_servo_roll, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t m_servo_yaw[16] = "Cam_ServoYawM";
-			sendSerialParameter(servoCenterYaw, m_servo_yaw, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_min_pitch[16] = "Cam_ServoMinPit";
-			sendSerialParameter(servoMinPitch, servo_min_pitch, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_min_roll[16] = "Cam_ServoMinRol";
-			sendSerialParameter(servoMinRoll, servo_min_roll, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_min_yaw[16] = "Cam_ServoMinYaw";
-			sendSerialParameter(servoMinYaw, servo_min_yaw, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_max_pitch[16] = "Cam_ServoMaxPit";
-			sendSerialParameter(servoMaxPitch, servo_max_pitch, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_max_roll[16] = "Cam_ServoMaxRol";
-			sendSerialParameter(servoMaxRoll, servo_max_roll, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t servo_max_yaw[16] = "Cam_ServoMaxYaw";
-			sendSerialParameter(servoMaxYaw, servo_max_yaw, parameterListSize, indexCounter);
-			indexCounter++;
-		#endif
-
-		#if defined (AltitudeHoldBaro) || defined AltitudeHoldRangeFinder
-			int8_t min_throttle_adjust[16] = "AH_Min Adjust";
-			sendSerialParameter(minThrottleAdjust, min_throttle_adjust, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t max_throttle_adjust[16] = "AH_Max Adjust";
-			sendSerialParameter(maxThrottleAdjust, max_throttle_adjust, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t altitude_hold_bump[16] = "AH_Bump Value";
-			sendSerialParameter(altitudeHoldBump, altitude_hold_bump, parameterListSize, indexCounter);
-			indexCounter++;
-
-			int8_t altitude_hold_panic_stick_movement[16] = "AH_Panic Value";
-			sendSerialParameter(altitudeHoldPanicStickMovement, altitude_hold_panic_stick_movement, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t altitude_hold_panic_stick_movement[14] = "AH_PanicValue";
+		sendSerialParameter(altitudeHoldPanicStickMovement, altitude_hold_panic_stick_movement, parameterListSize, indexCounter);
+		indexCounter++;
 		#endif 
+		}
 
-		#if defined (AltitudeHoldBaro)  && !defined AltitudeHoldRangeFinder
-			int8_t baro_smooth_factor[16] = "AH_SmoothFactor";
-			sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
-			indexCounter++;
+	void sendParamListPart4() {
+		#if defined AltitudeHoldBaro  && !defined AltitudeHoldRangeFinder
+		int8_t baro_smooth_factor[14] = "AH_SmoothFact";
+		sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t baro_p[15] = "Baro_P";
-			int8_t baro_i[15] = "Baro_I";
-			int8_t baro_d[15] = "Baro_D";
-			sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t baro_p[14] = "Baro_P";
+		int8_t baro_i[14] = "Baro_I";
+		int8_t baro_d[14] = "Baro_D";
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t baro_windUpGuard[15] = "Baro_WindUp";
-			sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
-			indexCounter ++;
+		int8_t baro_windUpGuard[14] = "Baro_WindUp";
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
+		indexCounter ++;
 
-			int8_t zDampening_p[15] = "Z Dampening_P";
-			int8_t zDampening_i[15] = "Z Dampening_I";
-			int8_t zDampening_d[15] = "Z Dampening_D";
-			sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t zDampening_p[14] = "Z Dampening_P";
+		int8_t zDampening_i[14] = "Z Dampening_I";
+		int8_t zDampening_d[14] = "Z Dampening_D";
+		sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 		#endif
 
 		#if defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
-			int8_t baro_smooth_factor[16] = "AH_SmoothFactor";
-			sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
-			indexCounter++;
+		int8_t baro_smooth_factor[14] = "AH_SmoothFact";
+		sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
+		indexCounter++;
 
-			int8_t baro_p[15] = "Baro_P";
-			int8_t baro_i[15] = "Baro_I";
-			int8_t baro_d[15] = "Baro_D";
-			sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t baro_p[14] = "Baro_P";
+		int8_t baro_i[14] = "Baro_I";
+		int8_t baro_d[14] = "Baro_D";
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t baro_windUpGuard[16] = "Baro_WindUp";
-			sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
-			indexCounter ++;
+		int8_t baro_windUpGuard[14] = "Baro_WindUp";
+		sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
+		indexCounter ++;
 
-			int8_t zDampening_p[15] = "Z Dampening_P";
-			int8_t zDampening_i[15] = "Z Dampening_I";
-			int8_t zDampening_d[15] = "Z Dampening_D";
-			sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t zDampening_p[14] = "Z Dampening_P";
+		int8_t zDampening_i[14] = "Z Dampening_I";
+		int8_t zDampening_d[14] = "Z Dampening_D";
+		sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t range_p[15] = "Range_P";
-			int8_t range_i[15] = "Range_I";
-			int8_t range_d[15] = "Range_D";
-			sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t range_p[14] = "Range_P";
+		int8_t range_i[14] = "Range_I";
+		int8_t range_d[14] = "Range_D";
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t range_windUpGuard[15] = "Range_WindUp";
-			sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
-			indexCounter ++;
+		int8_t range_windUpGuard[14] = "Range_WindUp";
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
+		indexCounter ++;
 		#endif
-
+		}
+	void sendParamListPart5() {
 		#if defined UseGPSNavigator && defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
-			int8_t gps_roll_p[15] = "GPS Roll_P";
-			int8_t gps_roll_i[15] = "GPS Roll_I";
-			int8_t gps_roll_d[15] = "GPS Roll_D";
-			sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t gps_roll_p[14] = "GPS Roll_P";
+		int8_t gps_roll_i[14] = "GPS Roll_I";
+		int8_t gps_roll_d[14] = "GPS Roll_D";
+		sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t gps_pitch_p[15] = "GPS Pitch_P";
-			int8_t gps_pitch_i[15] = "GPS Pitch_I";
-			int8_t gps_pitch_d[15] = "GPS Pitch_D";
-			sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
-			
-			int8_t gps_yaw_p[15] = "GPS Yaw_P";
-			int8_t gps_yaw_i[15] = "GPS Yaw_I";
-			int8_t gps_yaw_d[15] = "GPS Yaw_D";
-			sendSerialPID(GPSYAW_PID_IDX, gps_yaw_p, gps_yaw_i, gps_yaw_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t gps_pitch_p[14] = "GPS Pitch_P";
+		int8_t gps_pitch_i[14] = "GPS Pitch_I";
+		int8_t gps_pitch_d[14] = "GPS Pitch_D";
+		sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
+
+		int8_t gps_yaw_p[14] = "GPS Yaw_P";
+		int8_t gps_yaw_i[14] = "GPS Yaw_I";
+		int8_t gps_yaw_d[14] = "GPS Yaw_D";
+		sendSerialPID(GPSYAW_PID_IDX, gps_yaw_p, gps_yaw_i, gps_yaw_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 		#endif
 
 		#if defined UseGPSNavigator && !defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
-			int8_t gps_roll_p[15] = "GPS Roll_P";
-			int8_t gps_roll_i[15] = "GPS Roll_I";
-			int8_t gps_roll_d[15] = "GPS Roll_D";
-			sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t gps_roll_p[14] = "GPS Roll_P";
+		int8_t gps_roll_i[14] = "GPS Roll_I";
+		int8_t gps_roll_d[14] = "GPS Roll_D";
+		sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t gps_pitch_p[15] = "GPS Pitch_P";
-			int8_t gps_pitch_i[15] = "GPS Pitch_I";
-			int8_t gps_pitch_d[15] = "GPS Pitch_D";
-			sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t gps_pitch_p[14] = "GPS Pitch_P";
+		int8_t gps_pitch_i[14] = "GPS Pitch_I";
+		int8_t gps_pitch_d[14] = "GPS Pitch_D";
+		sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t gps_yaw_p[15] = "GPS Yaw_P";
-			int8_t gps_yaw_i[15] = "GPS Yaw_I";
-			int8_t gps_yaw_d[15] = "GPS Yaw_D";
-			sendSerialPID(GPSYAW_PID_IDX, gps_yaw_p, gps_yaw_i, gps_yaw_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t gps_yaw_p[14] = "GPS Yaw_P";
+		int8_t gps_yaw_i[14] = "GPS Yaw_I";
+		int8_t gps_yaw_d[14] = "GPS Yaw_D";
+		sendSerialPID(GPSYAW_PID_IDX, gps_yaw_p, gps_yaw_i, gps_yaw_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 		#endif
 
 		#if defined AltitudeHoldRangeFinder && !defined AltitudeHoldBaro
-			int8_t range_p[15] = "Range_P";
-			int8_t range_i[15] = "Range_I";
-			int8_t range_d[15] = "Range_D";
-			sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
-			indexCounter += 3;
+		int8_t range_p[14] = "Range_P";
+		int8_t range_i[14] = "Range_I";
+		int8_t range_d[14] = "Range_D";
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
+		indexCounter += 3;
 
-			int8_t range_windUpGuard[15] = "Range_WindUp";
-			sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
-			indexCounter ++;
+		int8_t range_windUpGuard[14] = "Range_WindUp";
+		sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
+		indexCounter ++;
 		#endif 
+		}
+
+	void sendQueuedParameters()	{
+		if(paramListPartIndicator >= 0 && paramListPartIndicator <= 4)	{
+			if(paramListPartIndicator == 0) sendParamListPart1();
+			else if(paramListPartIndicator == 1) sendParamListPart2();
+			else if(paramListPartIndicator == 2) sendParamListPart3();
+			else if(paramListPartIndicator == 3) sendParamListPart4();
+			else if(paramListPartIndicator == 4) sendParamListPart5();
+			paramListPartIndicator++;
+		}
+		else paramListPartIndicator = -1;
 	}
+
 	void evaluateParameterListSize() {
 		#if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && defined UseGPSNavigator
 			parameterListSize += 25;
@@ -992,6 +1028,10 @@
 				paramIndicator = D;
 				return SONAR_ALTITUDE_HOLD_PID_IDX;
 			}
+			if (checkParameterMatch(parameterNameRangeFinderWindUpGuard, key)) {
+				paramIndicator = windUpGuard;
+				return SONAR_ALTITUDE_HOLD_PID_IDX;
+			}
 		#endif
 
 		#if defined UseGPSNavigator
@@ -1033,7 +1073,7 @@
 			}
 		#endif
 
-		return -1;
+		return 0;
 	}
 	void readSerialMavLink() {
 		while(PORT.available() > 0) { 
@@ -1044,7 +1084,7 @@
 				switch(msg.msgid) {
 
 					case MAVLINK_MSG_ID_SET_MODE: {
-						systemMode = mavlink_msg_set_mode_get_base_mode(&msg); // TODO check
+						systemMode = mavlink_msg_set_mode_get_base_mode(&msg);
 					}
 					break;
 
@@ -1116,7 +1156,7 @@
 					break;
 
 					case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: { //TODO check why this suddenly resets the software?
-						sendParameterList();
+						paramListPartIndicator = indexCounter = 0;
 					}
 					break;
 
@@ -1128,31 +1168,32 @@
 
 						int parameterMatch = findParameter(key);
 
-						if (paramIndicator == P) {
-							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							PORT.write(buf, len);
-						}
-						
-						else if (paramIndicator == I) {
-							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							PORT.write(buf, len);
-						}
+						if(parameterMatch != 0) {
+							if (paramIndicator == P) {
+								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+							}
 
-						else if (paramIndicator == D) {
-							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							PORT.write(buf, len);
-							
-						}
+							else if (paramIndicator == I) {
+								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+							}
 
-						else if (paramIndicator == NONE) {
-							mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, parameterMatch, parameterType, parameterListSize, -1);
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							PORT.write(buf, len);
-							
-						}				
+							else if (paramIndicator == D) {
+								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+
+							}
+							else if (paramIndicator == NONE) {
+								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, parameterMatch, parameterType, parameterListSize, -1);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								PORT.write(buf, len);
+
+							}
+						}
 					}
 					break;
 
@@ -1165,78 +1206,80 @@
 						int parameterMatch = findParameter(key);
 
 						// Only write and emit changes if there is actually a difference AND only write if new value is NOT "not-a-number" AND is NOT infinity
-						if (paramIndicator == P) {
-							if (PID[parameterMatch].P != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-								PID[parameterMatch].P = set.param_value;
-								writeEEPROM();
-								// Report back new value
-								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								PORT.write(buf, len);
-							}
-						}
-
-						if (paramIndicator == I) {
-							if (PID[parameterMatch].I != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-								PID[parameterMatch].I = set.param_value;
-								writeEEPROM();
-								// Report back new value
-								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								PORT.write(buf, len);
-							}
-						}
-
-						if (paramIndicator == D) {
-							if (PID[parameterMatch].D != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-								PID[parameterMatch].D = set.param_value;
-								writeEEPROM();
-								// Report back new value
-								mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								PORT.write(buf, len);
-							}
-						}
-
-						if (paramIndicator == NONE) {
-							if (parameterToBeChangedFloat != NULL) {
-								if (*parameterToBeChangedFloat != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									*parameterToBeChangedFloat = set.param_value;
+						if(parameterMatch != 0) {
+							if (paramIndicator == P) {
+								if (PID[parameterMatch].P != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+									PID[parameterMatch].P = set.param_value;
 									writeEEPROM();
 									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedFloat, parameterType, parameterListSize, -1);
+									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
 									len = mavlink_msg_to_send_buffer(buf, &msg);
 									PORT.write(buf, len);
 								}
 							}
-							else if (parameterToBeChangedByte != NULL) {
-								if (*parameterToBeChangedByte != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									*parameterToBeChangedByte = set.param_value;
+
+							if (paramIndicator == I) {
+								if (PID[parameterMatch].I != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+									PID[parameterMatch].I = set.param_value;
 									writeEEPROM();
 									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedByte, parameterType, parameterListSize, -1);
+									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
 									len = mavlink_msg_to_send_buffer(buf, &msg);
 									PORT.write(buf, len);
 								}
 							}
-							else if (parameterToBeChangedInt != NULL) {
-								if (*parameterToBeChangedInt != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									*parameterToBeChangedInt = set.param_value;
+
+							if (paramIndicator == D) {
+								if (PID[parameterMatch].D != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+									PID[parameterMatch].D = set.param_value;
 									writeEEPROM();
 									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedInt, parameterType, parameterListSize, -1);
+									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
 									len = mavlink_msg_to_send_buffer(buf, &msg);
 									PORT.write(buf, len);
 								}
 							}
-							else if (parameterToBeChangedULong != NULL) {
-								if (*parameterToBeChangedULong != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
-									*parameterToBeChangedULong = set.param_value;
-									writeEEPROM();
-									// Report back new value
-									mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedULong, parameterType, parameterListSize, -1);
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									PORT.write(buf, len);
+
+							if (paramIndicator == NONE) {
+								if (parameterToBeChangedFloat != NULL) {
+									if (*parameterToBeChangedFloat != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+										*parameterToBeChangedFloat = set.param_value;
+										writeEEPROM();
+										// Report back new value
+										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedFloat, parameterType, parameterListSize, -1);
+										len = mavlink_msg_to_send_buffer(buf, &msg);
+										PORT.write(buf, len);
+									}
+								}
+								else if (parameterToBeChangedByte != NULL) {
+									if (*parameterToBeChangedByte != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+										*parameterToBeChangedByte = set.param_value;
+										writeEEPROM();
+										// Report back new value
+										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedByte, parameterType, parameterListSize, -1);
+										len = mavlink_msg_to_send_buffer(buf, &msg);
+										PORT.write(buf, len);
+									}
+								}
+								else if (parameterToBeChangedInt != NULL) {
+									if (*parameterToBeChangedInt != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+										*parameterToBeChangedInt = set.param_value;
+										writeEEPROM();
+										// Report back new value
+										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedInt, parameterType, parameterListSize, -1);
+										len = mavlink_msg_to_send_buffer(buf, &msg);
+										PORT.write(buf, len);
+									}
+								}
+								else if (parameterToBeChangedULong != NULL) {
+									if (*parameterToBeChangedULong != set.param_value && !isnan(set.param_value) && !isinf(set.param_value)) {
+										*parameterToBeChangedULong = set.param_value;
+										writeEEPROM();
+										// Report back new value
+										mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterToBeChangedULong, parameterType, parameterListSize, -1);
+										len = mavlink_msg_to_send_buffer(buf, &msg);
+										PORT.write(buf, len);
+									}
 								}
 							}
 						}				

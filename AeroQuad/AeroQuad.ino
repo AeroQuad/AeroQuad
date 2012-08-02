@@ -1353,7 +1353,6 @@ void setup() {
 
   #ifdef MavLink
 	 evaluateParameterListSize();
-	 sendParameterList();
  #endif
 
   setupFourthOrder();
@@ -1483,6 +1482,7 @@ void loop () {
         readSerialCommand();
         sendSerialTelemetry();
 		updateFlightTime();
+		sendQueuedParameters();
       #endif
     }
 
