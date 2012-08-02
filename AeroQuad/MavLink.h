@@ -21,9 +21,8 @@
 	#ifndef _AQ_MAVLINK_H_
 	#define _AQ_MAVLINK_H_
 
-	#ifdef MavLink
-		#define PORT Serial //TODO Serial3
-	#endif
+	#define PORT Serial //TODO Serial3
+	#define MAV_COMPONENT_ID MAV_COMP_ID_IMU
 
 	// MavLink 1.0 DKP
 	#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
@@ -111,8 +110,8 @@
 	#if defined AltitudeHoldBaro
 		String parameterNameAHBaroSmooth = "AH_SmoothFact";
 		String parameterNameBaroP = "Baro_P";
-		String parameterNameBaroI = "Baro_P";
-		String parameterNameBaroD = "Baro_P";
+		String parameterNameBaroI = "Baro_I";
+		String parameterNameBaroD = "Baro_D";
 		String parameterNameBaroWindUpGuard = "Baro_WindUp";
 		String parameterNameZDampeningP = "Z Dampening_P";
 		String parameterNameZDampeningI = "Z Dampening_I";
@@ -120,8 +119,8 @@
 	#endif
 	#if defined AltitudeHoldRangeFinder
 		String parameterNameRangeFinderP = "Range_P";
-		String parameterNameRangeFinderI = "Range_P";
-		String parameterNameRangeFinderD = "Range_P";
+		String parameterNameRangeFinderI = "Range_I";
+		String parameterNameRangeFinderD = "Range_D";
 		String parameterNameRangeFinderWindUpGuard = "Range_WindUp";
 	#endif
 	#if defined UseGPSNavigator
@@ -135,8 +134,6 @@
 		String parameterNameGPSYawI = "GPS Yaw_I";
 		String parameterNameGPSYawD = "GPS Yaw_D";
 	#endif
-
-
 
 	parameterTypeIndicator paramIndicator = NONE;
 	float *parameterToBeChangedFloat;
@@ -1075,7 +1072,7 @@
 
 		return 0;
 	}
-	void readSerialMavLink() {
+	void readSerialCommand() {
 		while(PORT.available() > 0) { 
 			uint8_t c = PORT.read();
 			//try to get a new message 
@@ -1083,27 +1080,27 @@
 				// Handle message
 				switch(msg.msgid) {
 
-					case MAVLINK_MSG_ID_SET_MODE: {
-						systemMode = mavlink_msg_set_mode_get_base_mode(&msg);
-					}
-					break;
+// 					case MAVLINK_MSG_ID_SET_MODE: { // setting the system mode makes no sense for now
+// 						systemMode = mavlink_msg_set_mode_get_base_mode(&msg);
+// 					}
+// 					break;
 
 					case MAVLINK_MSG_ID_COMMAND_LONG: {
 						uint8_t result = 0;
 						uint8_t command = mavlink_msg_command_long_get_command(&msg);
 
-						if (command == 	MAV_CMD_COMPONENT_ARM_DISARM) {
-							if (mavlink_msg_command_long_get_param1(&msg) == 1) motorArmed = ON;
-							else if (mavlink_msg_command_long_get_param1(&msg) == 0) motorArmed = OFF;
-							result = MAV_RESULT_ACCEPTED;
-						}
+// 						if (command == 	MAV_CMD_COMPONENT_ARM_DISARM) { // needs some security checks to prevent accidential arming/disarming
+// 							if (mavlink_msg_command_long_get_param1(&msg) == 1.0) motorArmed = ON;
+// 							else if (mavlink_msg_command_long_get_param1(&msg) == 0.0) motorArmed = OFF;
+// 							result = MAV_RESULT_ACCEPTED;
+// 						}
 
-						else if (command == MAV_CMD_DO_SET_MODE) {
-							systemMode = mavlink_msg_command_long_get_param1(&msg);
-							result = MAV_RESULT_ACCEPTED;
-						}
+// 						if (command == MAV_CMD_DO_SET_MODE) { // setting the system mode makes no sense for now
+// 							systemMode = mavlink_msg_command_long_get_param1(&msg);
+// 							result = MAV_RESULT_ACCEPTED;
+// 						}
 
-						else if (command ==	MAV_CMD_NAV_RETURN_TO_LAUNCH) {
+						if (command ==	MAV_CMD_NAV_RETURN_TO_LAUNCH) {
 							#if defined UseGPSNavigator 
 							//TODO	add coming home
 							//result = MAV_RESULT_ACCEPTED;
@@ -1123,7 +1120,7 @@
 
 						else if (command == MAV_CMD_DO_SET_HOME) {
 							#if defined UseGPS
-								if (mavlink_msg_command_long_get_param1(&msg) == 1) homePosition = currentPosition;
+								if (mavlink_msg_command_long_get_param1(&msg) == 1.0) homePosition = currentPosition;
 								else {
 									homePosition.latitude = mavlink_msg_command_long_get_param5(&msg);
 									homePosition.longitude = mavlink_msg_command_long_get_param6(&msg);
@@ -1136,16 +1133,20 @@
 						}
 
 						else if (command ==	MAV_CMD_PREFLIGHT_CALIBRATION) {
-							if (systemMode == MAV_MODE_PREFLIGHT) {
-								if (mavlink_msg_command_long_get_param1(&msg) == 1) calibrateGyro();
-								if (mavlink_msg_command_long_get_param2(&msg) == 1) {
+							if (!motorArmed) {
+								if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
+									calibrateGyro();
+									storeSensorsZeroToEEPROM();
+									result = MAV_RESULT_ACCEPTED;
+								}
+								if (mavlink_msg_command_long_get_param2(&msg) == 1.0f) {
 									computeAccelBias();
 									storeSensorsZeroToEEPROM();
 									calibrateKinematics();
 									zeroIntegralError();
-									}
-								result = 	MAV_RESULT_ACCEPTED;
-								}
+									result = MAV_RESULT_ACCEPTED;
+								}			
+							}
 							else result = 	MAV_RESULT_TEMPORARILY_REJECTED;
 						}
 
@@ -1155,7 +1156,7 @@
 					}
 					break;
 
-					case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: { //TODO check why this suddenly resets the software?
+					case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
 						paramListPartIndicator = indexCounter = 0;
 					}
 					break;

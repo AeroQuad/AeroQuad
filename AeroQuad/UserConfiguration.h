@@ -143,8 +143,8 @@
 #define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
 #define MavLink				// Enables the MavLink protocol
-#define MAV_SYSTEM_ID 100
-#define MAV_COMPONENT_ID MAV_COMP_ID_IMU
+#define MAV_SYSTEM_ID 100	// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+							// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
 //
 // *******************************************************************************************************************************

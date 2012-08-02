@@ -1224,16 +1224,16 @@
 #include "FlightCommandProcessor.h"
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
-#include "SerialCom.h"
 #if defined (UseGPS) || defined (BattMonitor)
   #include "LedStatusProcessor.h"
 #endif  
 
 #if defined MavLink
   #include "MavLink.h"
-
   // MavLink 1.0 DKP
   #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#else
+  #include "SerialCom.h"
 #endif
 
 
@@ -1428,14 +1428,14 @@ void loop () {
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #if defined BinaryWrite && !defined MavLink
+    #if defined BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
     #endif      
     #ifdef MavLink
-        readSerialMavLink();
+        readSerialCommand();
 		sendSerialVehicleData();
     #endif
     
@@ -1480,7 +1480,6 @@ void loop () {
       
       #ifdef MavLink
         readSerialCommand();
-        sendSerialTelemetry();
 		updateFlightTime();
 		sendQueuedParameters();
       #endif
@@ -1511,8 +1510,10 @@ void loop () {
       #endif
 
       // Listen for configuration commands and reports telemetry
-      readSerialCommand(); // defined in SerialCom.pde
-      sendSerialTelemetry(); // defined in SerialCom.pde
+	  #if !defined MavLink
+		readSerialCommand(); // defined in SerialCom.pde
+		sendSerialTelemetry(); // defined in SerialCom.pde
+	  #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       

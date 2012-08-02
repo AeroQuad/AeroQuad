@@ -375,7 +375,7 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
 #ifdef MavLink
-  void readSerialMavLink(void);
+  void readSerialCommand(void);
   void sendSerialHeartbeat(void); // defined in MavLink.pde
   void sendSerialBoot(void);
   void sendSerialSysStatus(void);
