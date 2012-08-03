@@ -46,6 +46,9 @@
 
 #define notifyOSD(flags,fmt,args...) notifyOSDmenu(flags,255,255,fmt, ## args)
 
+#include <stdio.h>
+#include <stdarg.h>
+
 void hideOSD()   // dummy functions to avoid modifying menu code
 {
 }
