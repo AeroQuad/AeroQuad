@@ -21,7 +21,7 @@
 	#ifndef _AQ_MAVLINK_H_
 	#define _AQ_MAVLINK_H_
 
-	#define PORT Serial //TODO Serial3
+	#define PORT Serial3
 	#define MAV_COMPONENT_ID MAV_COMP_ID_IMU
 
 	// MavLink 1.0 DKP
