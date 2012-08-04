@@ -18,46 +18,33 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AQ_OSD_MAX7456_RSSI_H_
-#define _AQ_OSD_MAX7456_RSSI_H_
+#ifndef _AQ_EzUHF_RSSI_READER_H_
+#define _AQ_EzUHF_RSSI_READER_H_
+
+#include <Receiver.h>
+
+#define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
+#define RSSI_MAX_RAW_VALUE 1001
+#define RSSI_MIN_RAW_VALUE 1485
+#define SIGNAL_QUALITY_MAX_RAW_VALUE 1885
+#define SIGNAL_QUALITY_MIN_RAW_VALUE 1543
+
+#define RSSI_WARN    20     // show alarm at %
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// RSSI Display /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Show RSSI information (analog input value optionally mapped to percents.)
-#if defined (UseEzUHFRSSIReader)
-  #include <..\AQ_RSSI\EzUHFRSSIReader.h>
-#else
-  #include <..\AQ_RSSI\AnalogRSSIReader.h>
-#endif	
 
-short lastRSSI = 1234; //forces update at first run
-#if defined (UseEzUHFRSSIReader)
-  short lastQuality = 1234;  //forces update at first run
-#endif
+short rssiRawValue = 0; //forces update at first run
+short signalQualityRawValue = 0;
 
-void displayRSSI() {
+void readRSSI() {
 
-  if (rssiRawValue != lastRSSI) {
-    lastRSSI = rssiRawValue;
-    char buf[6];
-    #ifdef RSSI_RAWVAL
-      snprintf(buf, 6, "\372%4u", rssiRawValue);
-      writeChars(buf, 5, 0, RSSI_ROW, RSSI_COL);
-    #else
-      snprintf(buf, 6, "\372%3u%%", rssiRawValue);
-      writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, RSSI_ROW, RSSI_COL);
-    #endif
-  }
-  #if defined (UseEzUHFRSSIReader)
-    if (lastQuality != signalQualityRawValue) {
-	  char buf[6];
-	  snprintf(buf, 6, "\372%4u", signalQualityRawValue);
-      writeChars(buf, 5, 0, SIGNAL_QUALITY_ROW, SIGNAL_QUALITY_COL);
-	  signalQualityRawValue = lastQuality;
-	}
-  #endif
-  
+  rssiRawValue = map(receiverCommand[AUX2],RSSI_MIN_RAW_VALUE,RSSI_MAX_RAW_VALUE,0,100);
+  rssiRawValue = constrain(rssiRawValue,0,100);
+  signalQualityRawValue = map(receiverCommand[AUX3],SIGNAL_QUALITY_MIN_RAW_VALUE,SIGNAL_QUALITY_MAX_RAW_VALUE,0,100);
+  signalQualityRawValue = constrain(signalQualityRawValue,0,100);
 }
 
 #endif  // #define _AQ_OSD_MAX7456_RSSI_H_
