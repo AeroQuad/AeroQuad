@@ -26,6 +26,8 @@
 // MavLink 1.0 DKP
 #include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
 
+#include "Aeroquad.h"
+
 enum parameterTypeIndicator 
 {
   P,
@@ -384,15 +386,9 @@ void sendSerialSysStatus() {
   SERIAL_PORT.write(buf, len);
 }
 
-void sendSerialTelemetry() {
-  sendSerialHudData();
-  sendSerialAttitude();
-  sendSerialRcRaw();
-  sendSerialRawPressure();
-  sendSerialRawIMU();
-  sendSerialGpsPostion();
-  sendSerialSysStatus();
-}
+
+
+
 
 void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[], int8_t id_windUp[], int listsize, int index) {
 
@@ -752,29 +748,7 @@ void sendParamListPart5() {
   #endif 
 }
 
-void sendQueuedParameters() {
-  if(paramListPartIndicator >= 0 && paramListPartIndicator <= 4) {
-    if(paramListPartIndicator == 0) {
-      sendParamListPart1();
-    }
-    else if(paramListPartIndicator == 1) {
-      sendParamListPart2();
-    }
-    else if(paramListPartIndicator == 2) {
-      sendParamListPart3();
-    }
-    else if(paramListPartIndicator == 3) {
-      sendParamListPart4();
-    }
-    else if(paramListPartIndicator == 4) {
-      sendParamListPart5();
-    }
-    paramListPartIndicator++;
-  }
-  else {
-    paramListPartIndicator = -1;
-  }
-}
+
 
 
 bool checkParameterMatch(String parameterName, char* key) {
@@ -1385,6 +1359,48 @@ void readSerialCommand() {
   system_dropped_packets += status.packet_rx_drop_count;
 }
 
+
+void sendQueuedParameters() {
+  if(paramListPartIndicator >= 0 && paramListPartIndicator <= 4) {
+    if(paramListPartIndicator == 0) {
+      sendParamListPart1();
+    }
+    else if(paramListPartIndicator == 1) {
+      sendParamListPart2();
+    }
+    else if(paramListPartIndicator == 2) {
+      sendParamListPart3();
+    }
+    else if(paramListPartIndicator == 3) {
+      sendParamListPart4();
+    }
+    else if(paramListPartIndicator == 4) {
+      sendParamListPart5();
+    }
+    paramListPartIndicator++;
+  }
+  else {
+    paramListPartIndicator = -1;
+  }
+}
+
+void sendSerialVehicleData() {
+  sendSerialHudData();
+  sendSerialAttitude();
+  sendSerialRcRaw();
+  sendSerialRawPressure();
+  sendSerialRawIMU();
+  sendSerialGpsPostion();
+  sendSerialSysStatus();
+}
+
+
+void sendSerialTelemetry() {
+  sendSerialVehicleData();
+  updateFlightTime();
+  sendQueuedParameters();
+  changeAndSendParameter();
+}
 
 #endif //#define _AQ_MAVLINK_H_
 

@@ -1065,9 +1065,9 @@
 #endif
 
 #if defined (UseAnalogRSSIReader) 
-  #include <AQ_RSSI\AnalogRSSIReader.h>
+  #include <AnalogRSSIReader.h>
 #elif defined (UseEzUHFRSSIReader)
-  #include <AQ_RSSI\EzUHFRSSIReader.h>
+  #include <EzUHFRSSIReader.h>
 #endif
 
 
@@ -1435,7 +1435,7 @@ void loop () {
           fastTelemetry();
         }
     #endif      
-
+    
     #ifdef SlowTelemetry
       updateSlowTelemetry100Hz();
     #endif
@@ -1473,6 +1473,11 @@ void loop () {
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
+      
+//      #ifdef MavLink
+//        readSerialCommand();
+//        sendSerialTelemetry();
+//      #endif
     }
 
     // ================================================================
@@ -1500,8 +1505,10 @@ void loop () {
       #endif
 
       // Listen for configuration commands and reports telemetry
-      readSerialCommand(); // defined in SerialCom.pde
-      sendSerialTelemetry(); // defined in SerialCom.pde
+//      #if !defined MavLink
+        readSerialCommand(); // defined in SerialCom.pde
+        sendSerialTelemetry(); // defined in SerialCom.pde
+//      #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       
@@ -1525,6 +1532,15 @@ void loop () {
       #endif
     }
     
+    #ifdef MavLink
+     if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
+
+        G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+        oneHZpreviousTime = currentTime;
+        
+        sendSerialHeartbeat();   
+     }
+    #endif
     previousTime = currentTime;
   }
   

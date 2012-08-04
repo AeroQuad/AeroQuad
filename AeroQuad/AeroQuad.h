@@ -33,7 +33,7 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#if defined WirelessTelemetry
+#if defined WirelessTelemetry && !defined MavLink
   #define BAUD 111111 // use this to be compatible with USB and XBee connections
 #else
   #define BAUD 115200
@@ -77,6 +77,7 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
+unsigned long oneHZpreviousTime = 0;
 unsigned long tenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime2 = 0;
@@ -144,7 +145,7 @@ void reportVehicleState();
   int batteryMonitorStartThrottle = 0;
   int batteryMonitorThrottleTarget = 1450;
   unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
+  unsigned long batteryMonitorGoingDownTime = 60000; 
 
   
   #if defined BattMonitorAutoDescent
