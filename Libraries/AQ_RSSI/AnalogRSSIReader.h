@@ -18,46 +18,36 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AQ_OSD_MAX7456_RSSI_H_
-#define _AQ_OSD_MAX7456_RSSI_H_
+#ifndef _AQ_ANALOG_RSSI_READER_H_
+#define _AQ_ANALOG_RSSI_READER_H_
+
+
+#define RSSI_PIN     A6     // analog pin to read
+#define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
+#define RSSI_100P    1023   // A/D value for 100%
+#define RSSI_0P      0      // A/D value for 0%
+#define RSSI_WARN    20     // show alarm at %
+
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// RSSI Display /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Show RSSI information (analog input value optionally mapped to percents.)
-#if defined (UseEzUHFRSSIReader)
-  #include <..\AQ_RSSI\EzUHFRSSIReader.h>
-#else
-  #include <..\AQ_RSSI\AnalogRSSIReader.h>
-#endif	
 
-short lastRSSI = 1234; //forces update at first run
-#if defined (UseEzUHFRSSIReader)
-  short lastQuality = 1234;  //forces update at first run
-#endif
+short rssiRawValue = 0; //forces update at first run
 
-void displayRSSI() {
+void readRSSI() {
 
-  if (rssiRawValue != lastRSSI) {
-    lastRSSI = rssiRawValue;
-    char buf[6];
-    #ifdef RSSI_RAWVAL
-      snprintf(buf, 6, "\372%4u", rssiRawValue);
-      writeChars(buf, 5, 0, RSSI_ROW, RSSI_COL);
-    #else
-      snprintf(buf, 6, "\372%3u%%", rssiRawValue);
-      writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, RSSI_ROW, RSSI_COL);
-    #endif
-  }
-  #if defined (UseEzUHFRSSIReader)
-    if (lastQuality != signalQualityRawValue) {
-	  char buf[6];
-	  snprintf(buf, 6, "\372%4u", signalQualityRawValue);
-      writeChars(buf, 5, 0, SIGNAL_QUALITY_ROW, SIGNAL_QUALITY_COL);
-	  signalQualityRawValue = lastQuality;
-	}
+  rssiRawValue = analogRead(RSSI_PIN);
+  #ifndef RSSI_RAWVAL
+    rssiRawValue = ((long)rssiRawValue - RSSI_0P) * 100 / (RSSI_100P - RSSI_0P);
+    if (rssiRawValue < 0) {
+      rssiRawValue = 0;
+    }
+    if (rssiRawValue > 100) {
+      rssiRawValue = 100;
+    }
   #endif
-  
 }
 
 #endif  // #define _AQ_OSD_MAX7456_RSSI_H_

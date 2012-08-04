@@ -47,6 +47,9 @@
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
 
+// STM32 platform
+//#define AeroQuadSTM32        // Baloo board
+
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -125,7 +128,8 @@
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2	//For Robe/Hitec/Futaba
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
 
-//#define UseRSSIFaileSafe // Read RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+//#define UseAnalogRSSIReader // Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+//#define UseEzUHFRSSIReader // Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
 
 //
 // *******************************************************************************************************************************
@@ -173,7 +177,7 @@
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *************************************************************.******************************************************************
 //#define OSD
-//#define ShowRSSI
+//#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "Aeroquad"       // Show (optional) callsign

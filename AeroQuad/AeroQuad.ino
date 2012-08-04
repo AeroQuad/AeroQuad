@@ -1071,6 +1071,12 @@
   #include <RSSIReader.h>
 #endif 
 
+#if defined (UseAnalogRSSIReader) 
+  #include <AQ_RSSI\AnalogRSSIReader.h>
+#elif defined (UseEzUHFRSSIReader)
+  #include <AQ_RSSI\EzUHFRSSIReader.h>
+#endif
+
 
 //********************************************************
 //********************** MOTORS DECLARATION **************
@@ -1455,7 +1461,7 @@ void loop () {
         evaluateBaroAltitude();
       #endif
       
-      #if defined (UseRSSIFaileSafe) 
+      #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader) 
         readRSSI();
       #endif
 
