@@ -180,7 +180,7 @@ void readSerialCommand() {
       #ifdef BattMonitor
         batteryMonitorAlarmVoltage = readFloatSerial();
         batteryMonitorThrottleTarget = readFloatSerial();
-        batteryMonitorGoinDownTime = readFloatSerial();
+        batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
       #else
         readFloatSerial();
@@ -492,7 +492,7 @@ void sendSerialTelemetry() {
     #ifdef BattMonitor
       PrintValueComma(batteryMonitorAlarmVoltage);
       PrintValueComma(batteryMonitorThrottleTarget);
-      SERIAL_PRINTLN(batteryMonitorGoinDownTime);
+      SERIAL_PRINTLN(batteryMonitorGoingDownTime);
     #else
       PrintValueComma(0);
       PrintValueComma(0);
