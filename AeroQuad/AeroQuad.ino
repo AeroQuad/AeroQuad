@@ -1064,12 +1064,12 @@
   #include <Receiver_STM32.h>  
 #endif
 
-#if defined (ShowRSSI)
-  #define UseRSSIFaileSafe
+#if defined (UseAnalogRSSIReader) 
+  #include <AQ_RSSI\AnalogRSSIReader.h>
+#elif defined (UseEzUHFRSSIReader)
+  #include <AQ_RSSI\EzUHFRSSIReader.h>
 #endif
-#if defined (UseRSSIFaileSafe) 
-  #include <RSSIReader.h>
-#endif 
+
 
 
 //********************************************************
@@ -1455,7 +1455,7 @@ void loop () {
         evaluateBaroAltitude();
       #endif
       
-      #if defined (UseRSSIFaileSafe) 
+      #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader)
         readRSSI();
       #endif
 
