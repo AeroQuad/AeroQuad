@@ -245,6 +245,7 @@
 #ifdef AeroQuad_Mini
   #define LED_Green 13
   #define LED_Red 12
+  #define LED_Yellow 12
 
   #include <Device_I2C.h>
 
@@ -253,7 +254,7 @@
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
-  #include <Accelerometer_BMA180.h>
+  #include <Accelerometer_ADXL345.h>
 
   // Receiver declaration
   #define RECEIVER_328P
@@ -293,6 +294,8 @@
 
     pinMode(LED_Red, OUTPUT);
     digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -1213,25 +1216,20 @@
 
 
 
-
-
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
 #include "FlightCommandProcessor.h"
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
-#include "SerialCom.h"
 #if defined (UseGPS) || defined (BattMonitor)
   #include "LedStatusProcessor.h"
 #endif  
 
 #if defined MavLink
   #include "MavLink.h"
-  // MavLink 0.9 
-  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
-  // MavLink 1.0 DKP - need to get here.
-  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#else
+  #include "SerialCom.h"
 #endif
 
 
@@ -1245,10 +1243,6 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
-
-  #ifdef MavLink
-    sendSerialBoot();
-  #endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -1353,6 +1347,10 @@ void setup() {
      initSlowTelemetry();
   #endif
 
+  #ifdef MavLink
+	 evaluateParameterListSize();
+ #endif
+
   setupFourthOrder();
   
 //  PID[ZAXIS_PID_IDX].type = 1;
@@ -1426,16 +1424,15 @@ void loop () {
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #if defined BinaryWrite && !defined MavLink
+    #if defined BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
     #endif      
     #ifdef MavLink
-        //sendSerialHudData();
-        //sendSerialAttitude(); // Defined in MavLink.pde
-        //sendSerialGpsPostion();
+        readSerialCommand();
+		sendSerialVehicleData();
     #endif
     
 
@@ -1479,7 +1476,9 @@ void loop () {
       
       #ifdef MavLink
         readSerialCommand();
-        sendSerialTelemetry();
+		updateFlightTime();
+		sendQueuedParameters();
+		changeAndSendParameter();
       #endif
     }
 
@@ -1508,8 +1507,10 @@ void loop () {
       #endif
 
       // Listen for configuration commands and reports telemetry
-      readSerialCommand(); // defined in SerialCom.pde
-      sendSerialTelemetry(); // defined in SerialCom.pde
+	  #if !defined MavLink
+		readSerialCommand(); // defined in SerialCom.pde
+		sendSerialTelemetry(); // defined in SerialCom.pde
+	  #endif
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       
@@ -1532,6 +1533,16 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
+
+   #ifdef MavLink
+     if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
+
+        G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+        oneHZpreviousTime = currentTime;
+        
+        sendSerialHeartbeat();   
+     }
+  #endif
     
     previousTime = currentTime;
   }
@@ -1540,6 +1551,5 @@ void loop () {
       frameCounter = 0;
   }
 }
-
 
 

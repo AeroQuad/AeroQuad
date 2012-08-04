@@ -23,11 +23,14 @@
 
 int gyroRaw[3] = {0,0,0};
 
+#include <Platform_MPU6000.h>
 #include <Gyroscope.h>
 
 void initializeGyro() {
   float range = 2*1000.0;
   gyroScaleFactor = radians(range/65536.0);
+
+  initializeMPU6000Sensors();
 }
 
 void GyroUpdateHeading()
@@ -40,7 +43,7 @@ void GyroUpdateHeading()
 }
 
 void measureGyro() {
-  readMPU6000Sensors();
+  readMPU6000Gyro();
 
   int gyroADC[3];
   gyroADC[XAXIS] = (gyroRaw[XAXIS]=MPU6000.data.gyro.x)  - gyroZero[XAXIS];
@@ -55,6 +58,7 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
+  readMPU6000Gyro();
   gyroSample[XAXIS] += (gyroRaw[XAXIS]=MPU6000.data.gyro.x);
   gyroSample[YAXIS] += (gyroRaw[YAXIS]=MPU6000.data.gyro.y);
   gyroSample[ZAXIS] += (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);

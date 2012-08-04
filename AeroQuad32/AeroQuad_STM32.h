@@ -45,7 +45,6 @@ tSerial &Serial = SERIAL_VAR;
 	#include <Gyroscope_ITG3200_ala42.h>
 #else
 	//#include <Gyroscope_ITG3200.h>
-	#include <Platform_MPU6000.h>
 	#include <Gyroscope_MPU6000.h>
 #endif
 
@@ -122,7 +121,9 @@ tSerial &Serial = SERIAL_VAR;
 
 void HardCodedAxisCalibration()
 {
-  if(accelScaleFactor[XAXIS] == 1.0 && accelScaleFactor[YAXIS] == 1.0 && accelScaleFactor[ZAXIS] == 1.0) {
+  if(   (accelScaleFactor[XAXIS] == 1.0 && accelScaleFactor[YAXIS] == 1.0 && accelScaleFactor[ZAXIS] == 1.0)
+     || (accelScaleFactor[XAXIS] == 0.0 && accelScaleFactor[YAXIS] == 0.0 && accelScaleFactor[ZAXIS] == 0.0)
+  ) {
 #ifdef BOARD_freeflight
     accelScaleFactor[XAXIS] = accelScaleFactor[YAXIS] = accelScaleFactor[ZAXIS] = -0.038;
 #else
@@ -177,17 +178,12 @@ void initPlatform() {
   Wire.begin(16, 17); // I2C2_SDA PB11, I2C2_SCL PB10
 #endif
 #ifdef BOARD_freeflight
-  Wire.begin(Port2Pin('B', 11), Port2Pin('B', 10)); // I2C1_SDA PB9, I2C1_SCL PB6
+  Wire.begin(Port2Pin('B', 11), Port2Pin('B', 10)); // I2C1_SDA PB11, I2C1_SCL PB10
 #endif
 #ifdef BOARD_discovery_f4
   Wire.begin(Port2Pin('B', 9), Port2Pin('B', 6)); // I2C1_SDA PB9, I2C1_SCL PB6
 #endif
 
-
-
-#ifdef _AEROQUAD_PLATFORM_MPU6000_H_
-  initializeMPU6000Sensors();
-#endif
 
   HardCodedAxisCalibration();
 
@@ -205,11 +201,9 @@ unsigned long previousMeasureCriticalSensorsTime = 0;
 void measureCriticalSensors() {
   // read sensors not faster than every 1 ms
   if (currentTime - previousMeasureCriticalSensorsTime >= 1000) {
-#ifdef _AEROQUAD_PLATFORM_MPU6000_H_
-    readMPU6000Sensors();
-#endif
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
+
     SignalAlive(frameCounter);
 
     previousMeasureCriticalSensorsTime = currentTime;

@@ -177,7 +177,7 @@ void readSerialCommand() {
       #ifdef BattMonitor
         batteryMonitorAlarmVoltage = readFloatSerial();
         batteryMonitorThrottleTarget = readFloatSerial();
-        batteryMonitorGoinDownTime = readFloatSerial();
+        batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
       #else
         readFloatSerial();
@@ -231,7 +231,7 @@ void readSerialCommand() {
       break;
 
     case 'V': // GPS
-      #if defined (UseGPS)
+      #if defined (UseGPSNavigator)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
@@ -489,7 +489,7 @@ void sendSerialTelemetry() {
     #ifdef BattMonitor
       PrintValueComma(batteryMonitorAlarmVoltage);
       PrintValueComma(batteryMonitorThrottleTarget);
-      SERIAL_PRINTLN(batteryMonitorGoinDownTime);
+      SERIAL_PRINTLN(batteryMonitorGoingDownTime);
     #else
       PrintValueComma(0);
       PrintValueComma(0);
@@ -616,7 +616,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'v': // Send GPS PIDs
-    #if defined (UseGPS)
+    #if defined (UseGPSNavigator)
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
