@@ -128,7 +128,7 @@ void processCalibrateESC()
               batteryMonitorStartThrottle = throttle; 
             }
           }
-          int batteryMonitorThrottle = map(millis()-batteryMonitorStartTime, 0, batteryMonitorGoinDownTime, batteryMonitorStartThrottle, batteryMonitorThrottleTarget);
+          int batteryMonitorThrottle = map(millis()-batteryMonitorStartTime, 0, batteryMonitorGoingDownTime, batteryMonitorStartThrottle, batteryMonitorThrottleTarget);
           if (batteryMonitorThrottle < batteryMonitorThrottleTarget) {
             batteryMonitorThrottle = batteryMonitorThrottleTarget;
           }

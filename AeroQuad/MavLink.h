@@ -55,7 +55,7 @@ int systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
 int systemStatus = MAV_STATE_UNINIT;
 
 int parameterType = MAVLINK_TYPE_FLOAT;
-int parameterListSize = 35;
+int parameterListSize;
 String parameterNameRateRollP = "Rate Roll_P";
 String parameterNameRateRollI = "Rate Roll_I";
 String parameterNameRateRollD = "Rate Roll_D";
@@ -162,6 +162,8 @@ mavlink_status_t status;
 
 
 void evaluateParameterListSize() {
+	parameterListSize = 35;
+
   #if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && defined UseGPSNavigator
     parameterListSize += 25;
   #endif
@@ -445,7 +447,7 @@ void sendSerialParameter(unsigned long parameterID, int8_t parameterName[], int 
   SERIAL_PORT.write(buf, len);
 }	
 
-void sendParamListPart1() {
+void sendParameterListPart1() {
   int8_t rateRoll_P[14] = "Rate Roll_P";
   int8_t rateRoll_I[14] = "Rate Roll_I";
   int8_t rateRoll_D[14] = "Rate Roll_D";
@@ -507,7 +509,7 @@ void sendParamListPart1() {
   indexCounter++;
 }
 
-void sendParamListPart2() {
+void sendParameterListPart2() {
   int8_t min_armed_throttle[14] = "Misc_MinThr";
   sendSerialParameter(minArmedThrottle, min_armed_throttle, parameterListSize, indexCounter);
   indexCounter++;
@@ -564,7 +566,7 @@ void sendParamListPart2() {
     indexCounter++;
   #endif
 }
-void sendParamListPart3() {
+void sendParameterListPart3() {
   #if defined CameraControl
     int8_t camera_mode[14] = "Cam_Mode";
     sendSerialParameter(cameraMode, camera_mode, parameterListSize, indexCounter);
@@ -638,7 +640,7 @@ void sendParamListPart3() {
   #endif 
 }
 
-void sendParamListPart4() {
+void sendParameterListPart4() {
   #if defined AltitudeHoldBaro  && !defined AltitudeHoldRangeFinder
     int8_t baro_smooth_factor[14] = "AH_SmoothFact";
     sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
@@ -694,7 +696,7 @@ void sendParamListPart4() {
   #endif
 }
 
-void sendParamListPart5() {
+void sendParameterListPart5() {
   #if defined UseGPSNavigator && defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
     int8_t gps_roll_p[14] = "GPS Roll_P";
     int8_t gps_roll_i[14] = "GPS Roll_I";
@@ -1326,7 +1328,6 @@ void readSerialCommand() {
       case MAVLINK_MSG_ID_PARAM_SET: 
         {
           if(!motorArmed) { // added for security reason, as the software is shortly blocked by this command (maybe this can be avoided?)
-
             mavlink_msg_param_set_decode(&msg, &set);
             key = (char*) set.param_id;
             parameterMatch = findParameter(key);
@@ -1363,19 +1364,19 @@ void readSerialCommand() {
 void sendQueuedParameters() {
   if(paramListPartIndicator >= 0 && paramListPartIndicator <= 4) {
     if(paramListPartIndicator == 0) {
-      sendParamListPart1();
+      sendParameterListPart1();
     }
     else if(paramListPartIndicator == 1) {
-      sendParamListPart2();
+      sendParameterListPart2();
     }
     else if(paramListPartIndicator == 2) {
-      sendParamListPart3();
+      sendParameterListPart3();
     }
     else if(paramListPartIndicator == 3) {
-      sendParamListPart4();
+      sendParameterListPart4();
     }
     else if(paramListPartIndicator == 4) {
-      sendParamListPart5();
+      sendParameterListPart5();
     }
     paramListPartIndicator++;
   }
