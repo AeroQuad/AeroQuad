@@ -163,7 +163,7 @@ EXTRAINCDIRS += $(LIBDIR)/AQ_Accelerometer $(LIBDIR)/AQ_BarometricSensor $(LIBDI
  $(LIBDIR)/AQ_FlightControlProcessor $(LIBDIR)/ $(LIBDIR)/AQ_Gps $(LIBDIR)/AQ_Gyroscope \
  $(LIBDIR)/AQ_I2C $(LIBDIR)/AQ_Kinematics $(LIBDIR)/AQ_Math $(LIBDIR)/AQ_Motors \
  $(LIBDIR)/AQ_OSD  $(LIBDIR)/AQ_Platform_APM $(LIBDIR)/AQ_Platform_CHR6DM \
- $(LIBDIR)/AQ_Platform_MPU6000 $(LIBDIR)/AQ_Platform_Wii $(LIBDIR)/AQ_RangeFinder $(LIBDIR)/AQ_Receiver $(LIBDIR)/AQ_SPI
+ $(LIBDIR)/AQ_Platform_MPU6000 $(LIBDIR)/AQ_Platform_Wii $(LIBDIR)/AQ_RangeFinder $(LIBDIR)/AQ_Receiver $(LIBDIR)/AQ_SPI $(LIBDIR)/AQ_RSSI
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
