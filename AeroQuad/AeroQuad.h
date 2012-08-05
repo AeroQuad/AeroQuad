@@ -33,7 +33,7 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#if defined WirelessTelemetry
+#if defined WirelessTelemetry && !defined MavLink
   #define BAUD 111111 // use this to be compatible with USB and XBee connections
 #else
   #define BAUD 115200
@@ -77,6 +77,7 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
+unsigned long oneHZpreviousTime = 0;
 unsigned long tenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime2 = 0;
@@ -144,7 +145,7 @@ void reportVehicleState();
   int batteryMonitorStartThrottle = 0;
   int batteryMonitorThrottleTarget = 1450;
   unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
+  unsigned long batteryMonitorGoingDownTime = 60000; 
 
   
   #if defined BattMonitorAutoDescent
@@ -237,24 +238,6 @@ void reportVehicleState();
   #endif
 #endif
 //////////////////////////////////////////////////////
-
-
-
-
-
-/**
- * Mavlink Serial communication global declaration
- */
-#ifdef MavLink
-  #define RECEIVELOOPTIME 10000 // 100Hz
-  #define HEARTBEATLOOPTIME 1000000 // 1Hz
-  #define RAWDATALOOPTIME 100000 // 10Hz
-  #define SYSTEMSTATUSLOOPTIME 100000 // 10Hz
-  #define ATTITUDELOOPTIME 100000 // 10Hz
-#endif
-//////////////////////////////////////////////////////
-
-
 
 /**
  * EEPROM global section
@@ -372,23 +355,6 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
-
-#ifdef MavLink
-  void readSerialMavLink(void);
-  void sendSerialHeartbeat(void); // defined in MavLink.pde
-  void sendSerialBoot(void);
-  void sendSerialSysStatus(void);
-  void sendSerialRawIMU(void);
-  void sendSerialAttitude(void);
-  void sendSerialAltitude(void);
-  void sendSerialRcRaw(void);
-  void sendSerialRcScaled(void);
-  void sendSerialRawPressure(void);
-  void sendSerialPID(int , int8_t[], int8_t[], int8_t[], int, int);
-  void sendSerialParamValue(int8_t[], float, int, int);
-  void sendSerialHudData(void);
-  void sendSerialGpsPostion(void);
-#endif
 
 /**
  * Debug utility global declaration
