@@ -39,7 +39,7 @@ void displayFlightTime(byte areMotorsArmed) {
   if (armedTimeSecs != prevArmedTimeSecs) {
     prevArmedTimeSecs = armedTimeSecs;
     char buf[7];
-    snprintf(buf,7,"\5%02u:%02u",armedTimeSecs/60,armedTimeSecs%60);
+    snprintf(buf,7,"\025%02u:%02u",armedTimeSecs/60,armedTimeSecs%60);
     writeChars(buf, 6, 0, TIMER_ROW, TIMER_COL );
   }
 }

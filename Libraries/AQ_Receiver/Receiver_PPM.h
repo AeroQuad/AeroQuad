@@ -34,17 +34,17 @@
 #include <AQMath.h>
 #include "GlobalDefined.h"
 
+// Comment this out, already defined in GlobalDefined.h
+//#define XAXIS      0
+//#define YAXIS      1
+//#define ZAXIS      2
+//#define THROTTLE   3
+//#define AUX1       4
+//#define AUX2       5
 
-#define XAXIS      0
-#define YAXIS      1
-#define ZAXIS      2
-#define THROTTLE   3
-#define AUX1       4
-#define AUX2       5
-
-#define SERIAL_SUM_PPM_1         YAXIS,ZAXIS,THROTTLE,XAXIS,AUX1,AUX2,0,0 //For Graupner/Spektrum
-#define SERIAL_SUM_PPM_2         XAXIS,YAXIS,THROTTLE,ZAXIS,AUX1,AUX2,0,0 //For Robe/Hitec/Futaba
-#define SERIAL_SUM_PPM_3         YAXIS,XAXIS,THROTTLE,ZAXIS,AUX1,AUX2,0,0 //For some Hitec/Sanwa/Others
+#define SERIAL_SUM_PPM_1         YAXIS,ZAXIS,THROTTLE,XAXIS,MODE,AUX1,AUX2,AUX3 //For Graupner/Spektrum
+#define SERIAL_SUM_PPM_2         XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3 //For Robe/Hitec/Futaba
+#define SERIAL_SUM_PPM_3         YAXIS,XAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3 //For some Hitec/Sanwa/Others
 
 #if defined (SKETCH_SERIAL_SUM_PPM)
   #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM

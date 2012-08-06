@@ -45,17 +45,43 @@ byte ENABLE_display_vert = 0;
 byte MAX7456_reset       = 0;
 byte DISABLE_display     = 0;
 
+boolean OSDDisabled=0;
+
+void hideOSD() {
+  
+  if (!OSDDisabled) {
+    spi_osd_select();
+    spi_writereg( VM0, DISABLE_display );
+    spi_osd_deselect();
+    OSDDisabled=true;
+  }
+};
+void unhideOSD() {
+
+  if (OSDDisabled) {
+    spi_osd_select();
+    spi_writereg( VM0, ENABLE_display );
+    spi_osd_deselect();
+    OSDDisabled=false;
+  }
+}
+
 // void writeChars( const char* buf, byte len, byte flags, byte y, byte x )
 //
 // Writes 'len' character address bytes to the display memory corresponding to row y, column x
 // - uses autoincrement mode when writing more than one character
 // - will wrap around to next row if 'len' is greater than the remaining cols in row y
-// - buf=NULL can be used to write zeroes (clear)
+// - buf=NULL or len>strlen(buf) can be used to write zeroes (clear)
 // - flags: 0x01 blink, 0x02 invert (can be combined)
 void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
 
   unsigned offset = y * 30 + x;
-  spi_select();
+
+  if (flags) {
+    unhideOSD(); // make sure OSD is visible in case of alarms etc.
+  }
+  
+  spi_osd_select();
   // 16bit transfer, transparent BG, autoincrement mode (if len!=1)
   spi_writereg(DMM, ((flags&1) ? 0x10 : 0x00) | ((flags&2) ? 0x08 : 0x00) | ((len!=1)?0x01:0x00) );
 
@@ -64,8 +90,8 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
   spi_writereg(DMAL, offset & 0xff );
 
   // write out data
-  for ( int i = 0; i < len; i++ ) {
-    spi_writereg(DMDI, buf==NULL?0:buf[i] );
+  for ( byte i = 0; i < len; i++ ) {
+    spi_writereg(DMDI, (!buf || strlen(buf)<i)?0:buf[i] );
   }
 
   // Send escape 11111111 to exit autoincrement mode
@@ -73,7 +99,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
     spi_writereg(DMDI, END_string );
   }
   // finished writing
-  spi_deselect();
+  spi_osd_deselect();
 }
 
 void detectVideoStandard() {
@@ -86,7 +112,7 @@ void detectVideoStandard() {
   #ifdef AUTODETECT_VIDEO_STANDARD
     // if autodetect enabled modify the default if signal is present on either standard
     // otherwise default is preserved
-    spi_select();
+    spi_osd_select();
     byte stat=spi_readreg(STAT);
     if (stat & 0x01) {
       pal = true;
@@ -94,7 +120,7 @@ void detectVideoStandard() {
     if (stat & 0x02) {
       pal = false;
     }
-    spi_deselect();
+    spi_osd_deselect();
   #endif
 
   if (pal) {
@@ -117,25 +143,17 @@ void detectVideoStandard() {
 
 void initializeOSD() {
 
-  // SPCR = 01010000
-  // interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
-  // sample on leading edge of clk,system clock/4 rate (fastest)
-  SPCR = (1 << SPE) | (1 << MSTR);
-  SPSR; // dummy read from HW register
-  SPDR; // dummy read from HW register
-  delay( 10 );
-
   detectVideoStandard();
 
   //Soft reset the MAX7456 - clear display memory
-  spi_select();
+  spi_osd_select();
   spi_writereg( VM0, MAX7456_reset );
-  spi_deselect();
+  spi_osd_deselect();
   delay( 1 ); //Only takes ~100us typically
 
   //Set white level to 90% for all rows
-  spi_select();
-  for( int i = 0; i < MAX_screen_rows; i++ ) {
+  spi_osd_select();
+  for( byte i = 0; i < MAX_screen_rows; i++ ) {
     spi_writereg( RB0 + i, WHITE_level_90 );
   }
 
@@ -143,10 +161,7 @@ void initializeOSD() {
   spi_writereg( VM0, ENABLE_display );
   delay(100);
   //finished writing
-  spi_deselect();
-
-  OSDsched = 0xff; // This will make everything to be updated next round
-  updateOSD();     // Make first update now
+  spi_osd_deselect();
 
   #if defined CALLSIGN
     writeChars(callsign,strlen(callsign),0,CALLSIGN_ROW,CALLSIGN_COL);

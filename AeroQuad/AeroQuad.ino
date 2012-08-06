@@ -22,18 +22,55 @@
    Before flight, select the different user options for your AeroQuad by
    editing UserConfiguration.h.
 
-   If you need additional assitance go to http://www.aeroquad.com/forum.php
+   If you need additional assistance go to http://www.aeroquad.com/forum.php
    or talk to us live on IRC #aeroquad
 *****************************************************************************/
 
 #include "UserConfiguration.h" // Edit this file first before uploading to the AeroQuad
 
-// Checks to make sure we have the right combinations defined
-#if defined(FlightAngleMARG) && !defined(HeadingMagHold)
-  #undef FlightAngleMARG
-#elif defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
-  #undef FlightAngleARG
+//
+// Define Security Checks
+//
+
+#if defined(UseGPS_NMEA) || defined(UseGPS_UBLOX) || defined(UseGPS_MTK) || defined(UseGPS_406)
+ #define UseGPS
+#endif 
+
+#if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
+  #error "GpsNavigation NEED AltitudeHoldBaro defined"
 #endif
+
+#if defined (AutoLanding) && (!defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder))
+  #error "AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined"
+#endif
+
+#if defined (ReceiverSBUS) && defined (SlowTelemetry)
+  #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
+#endif
+
+// Special motor config additionnal variable
+#if defined quadXHT_FPVConfig
+ #define quadXConfig
+ #define FRONT_YAW_CORRECTION 0.83
+ #define REAR_YAW_CORRECTION 1.13
+#endif
+
+//
+// In order to use the DIYDrone libraries, this have to be declared here this way
+// @see Kenny9999 for details
+//
+#if defined UseGPS
+  // needed here to use DIYDrone GPS libraries
+  #include <FastSerial.h>
+  #include <AP_Common.h>
+  #include <AP_GPS.h>
+  
+  FastSerialPort0(Serial);
+  FastSerialPort1(Serial1);
+  FastSerialPort2(Serial2);
+  FastSerialPort3(Serial3);
+#endif
+
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -68,19 +105,21 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported in v1
+  // unsupported in v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount   
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
+
 
   /**
-   * Put AeroQuad_v1 specific intialization need here
+   * Put AeroQuad_v1 specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -90,10 +129,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -114,19 +151,20 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported in v1
+  // unsupported in v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount       
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_v1_IDG specific intialization need here
+   * Put AeroQuad_v1_IDG specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -136,10 +174,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if (deltaTime >= 10000) {
-      measureGyro();
-      measureAccel();
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -153,7 +189,7 @@
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
 
-  // Accelerometer declaraion
+  // Accelerometer declaration
   #include <Accelerometer_BMA180.h>
 
   // Receiver declaration
@@ -172,7 +208,6 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
@@ -180,9 +215,11 @@
   #undef AltitudeHoldRangeFinder
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_v18 specific intialization need here
+   * Put AeroQuad_v18 specific initialization need here
    */
   void initPlatform() {
 
@@ -199,8 +236,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
   }
 
 #endif
@@ -223,7 +260,11 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM
+  #if defined (quadXConfig) || defined (quadPlusConfig) || defined (quadY4Config)
+    #define MOTOR_PWM_Timer
+  #else
+    #define MOTOR_PWM
+  #endif    
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -235,18 +276,19 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
-  // unsuported in mini
+  // unsupported in mini
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
 
   /**
-   * Put AeroQuad_Mini specific intialization need here
+   * Put AeroQuad_Mini specific initialization need here
    */
   void initPlatform() {
 
@@ -263,8 +305,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
   }
 #endif
 
@@ -288,19 +330,18 @@
   // Motor declaration
   #define MOTOR_PWM
 
-  // unsuported on mega v1
+  // unsupported on mega v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
 
   /**
-   * Put AeroQuadMega_v1 specific intialization need here
+   * Put AeroQuadMega_v1 specific initialization need here
    */
   void initPlatform() {
     setGyroAref(aref);
@@ -344,7 +385,7 @@
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro    
-    #define BMP085
+    #define BMP085 
   #endif
   #ifdef AltitudeHoldRangeFinder
     #define XLMAXSONAR 
@@ -359,16 +400,19 @@
     #endif
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
     #define MAX7456_OSD
   #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
 
   /**
-   * Put AeroQuadMega_v2 specific intialization need here
+   * Put AeroQuadMega_v2 specific initialization need here
    */
   void initPlatform() {
 
@@ -398,8 +442,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
   }
 #endif
 
@@ -446,16 +490,20 @@
     #endif
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
     #define MAX7456_OSD
   #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
-   * Put AeroQuadMega_v21 specific intialization need here
+   * Put AeroQuadMega_v21 specific initialization need here
    */
   void initPlatform() {
 
@@ -485,8 +533,99 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
+  }
+#endif
+
+
+#ifdef AutonavShield
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
+  #include <Device_I2C.h>
+
+  // Gyroscope declaration
+  #include <Gyroscope_ITG3200.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer_BMA180.h>
+
+  // Receiver Declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+
+  // heading mag hold declaration
+  #ifdef HeadingMagHold
+//    #define SPARKFUN_5883L_BOB
+    #define AutonavShield_5883L
+//    #define HMC5843
+  #endif
+
+  // Altitude declaration
+  #ifdef AltitudeHoldBaro    
+    #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
+  // Battery Monitor declaration
+  #ifdef BattMonitor
+    #ifdef POWERED_BY_VIN
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+    #else
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+    #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef POWERED_BY_VIN        
+  #endif
+
+  #ifdef OSD
+    #define MAX7456_OSD
+  #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
+  /**
+   * Put AeroQuadMega_v2 specific initialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on
+
+    Wire.begin();
+    TWBR = 12;
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyroSum();
+    measureAccelSum();
   }
 #endif
 
@@ -530,16 +669,18 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
   #undef OSD
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
 
   
   /**
-   * Put ArduCopter specific intialization need here
+   * Put ArduCopter specific initialization need here
    */
   void initPlatform() {
     pinMode(LED_Red, OUTPUT);
@@ -558,8 +699,8 @@
    */
   void measureCriticalSensors() {
     evaluateADC();
-    measureAccelSum();
     measureGyroSum();
+    measureAccelSum();
   }
 #endif
 
@@ -586,19 +727,21 @@
   #define MOTOR_PWM
 
   // heading mag hold declaration
-  // unsuported on mega v1
+  // unsupported on mega v1
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
   #undef BattMonitorAutoDescent
-  #undef BattCellCount
   #undef POWERED_BY_VIN        
   #undef CameraControl
   #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
+
 
   /**
-   * Put AeroQuad_Wii specific intialization need here
+   * Put AeroQuad_Wii specific initialization need here
    */
   void initPlatform() {
      Wire.begin();
@@ -662,16 +805,19 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
   #ifdef OSD
     #define MAX7456_OSD
   #endif
+  
+  #undef UseGPS        // Wii not enough stable to use gps
+  #undef UseGPSNavigator
+
 
   /**
-   * Put AeroQuadMega_Wii specific intialization need here
+   * Put AeroQuadMega_Wii specific initialization need here
    */
   void initPlatform() {
     Wire.begin();
@@ -715,7 +861,7 @@
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
 
-  // Compas declaration
+  // Compass declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
@@ -737,12 +883,16 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.9, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
-   * Put AeroQuadMega_CHR6DM specific intialization need here
+   * Put AeroQuadMega_CHR6DM specific initialization need here
    */
   void initPlatform() {
     Serial1.begin(BAUD);
@@ -797,7 +947,7 @@
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
 
-  // Compas declaration
+  // Compass declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
@@ -816,15 +966,19 @@
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 13.35, 0.31, BM_NOPIN, 0, 0)
   #else
     #undef BattMonitorAutoDescent
-    #undef BattCellCount
     #undef POWERED_BY_VIN        
   #endif
 
   #undef CameraControl
   #undef OSD
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
 
   /**
-   * Put APM_OP_CHR6DM specific intialization need here
+   * Put APM_OP_CHR6DM specific initialization need here
    */
   void initPlatform() {
     pinMode(LED_Red, OUTPUT);
@@ -870,18 +1024,19 @@
   #include "AeroQuad_STM32.h"
 #endif
 
+// default to 10bit ADC (AVR)
+#ifndef ADC_NUMBER_OF_BITS
+#define ADC_NUMBER_OF_BITS 10
+#endif
+
 //********************************************************
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#elif defined FlightAngleARG
-  #include "Kinematics_ARG.h"
-#elif defined FlightAngleMARG
-  #include "Kinematics_MARG.h"
 #else
-  #include "Kinematics_DCM.h"
+  #include "Kinematics_ARG.h"
 #endif
 
 //********************************************************
@@ -891,19 +1046,30 @@
   #include <Receiver_HWPPM.h>
 #elif defined ReceiverPPM
   #include <Receiver_PPM.h>
-#elif defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
+#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
+#elif defined ReceiverSBUS
+  #include <Receiver_SBUS.h>
 #elif defined RECEIVER_328P
   #include <Receiver_328p.h>
 #elif defined RECEIVER_MEGA
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32PPM
+  #include <Receiver_STM32PPM.h>  
 #elif defined RECEIVER_STM32
   #include <Receiver_STM32.h>  
 #endif
+
+#if defined (ShowRSSI)
+  #define UseRSSIFaileSafe
+#endif
+#if defined (UseRSSIFaileSafe) 
+  #include <RSSIReader.h>
+#endif 
 
 
 //********************************************************
@@ -927,8 +1093,10 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined (HMC5843)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5843.h>
-#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
+  #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
@@ -938,6 +1106,8 @@
 //********************************************************
 #if defined (BMP085)
   #include <BarometricSensor_BMP085.h>
+#elif defined (MS5611)
+ #include <BarometricSensor_MS5611.h>
 #endif
 #if defined (XLMAXSONAR)
   #include <MaxSonarRangeFinder.h>
@@ -990,7 +1160,14 @@
 //****************** GPS DECLARATION *********************
 //********************************************************
 #if defined (UseGPS)
-  #include <TinyGPSWrapper.h>
+  #if !defined HeadingMagHold
+    #error We need the magnetometer to use the GPS
+  #endif 
+//  #if defined LASTCHANNEL 6
+//    #error We need 7 receiver channel to use GPS navigator
+//  #endif
+  #include <GpsAdapter.h>
+  #include "GpsNavigator.h"
 #endif
 
 //********************************************************
@@ -1000,12 +1177,19 @@
   #include <Device_SPI.h>
   #include "OSDDisplayController.h"
   #include "MAX7456.h"
-  #ifdef OSD_SYSTEM_MENU
-    #include "OSDMenu.h"
-  #endif
-#else  
-    #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
 #endif
+
+#if defined (SERIAL_LCD)
+  #include "SerialLCD.h"
+#endif
+
+#ifdef OSD_SYSTEM_MENU
+  #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
+    #error "Menu cannot be used without OSD or LCD"
+  #endif
+  #include "OSDMenu.h"
+#endif
+
 
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
@@ -1026,19 +1210,40 @@
   #endif
 #endif  
 
+#ifdef SlowTelemetry
+  #include <AQ_RSCode.h>
+#endif
+
+
+
+
+
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
 #include "FlightCommandProcessor.h"
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
-#include "SerialCom.h"
+
+#if defined (UseGPS) || defined (BattMonitor)
+  #include "LedStatusProcessor.h"
+#endif  
+
+#if defined MavLink
+  #include "MavLink.h"
+  // MavLink 0.9 
+  #include "../mavlink/include/mavlink/v0.9/common/mavlink.h"   
+  // MavLink 1.0 DKP - need to get here.
+  //#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#else
+  #include "SerialCom.h"
+#endif
 
 
 
 /**
  * Main setup function, called one time at bootup
- * initalize all system and sub system of the 
+ * initialize all system and sub system of the
  * Aeroquad
  */
 void setup() {
@@ -1046,9 +1251,7 @@ void setup() {
   pinMode(LED_Green, OUTPUT);
   digitalWrite(LED_Green, LOW);
 
-  #ifdef CHANGE_YAW_DIRECTION
-    YAW_DIRECTION = -1;
-  #endif
+  initCommunication();
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -1062,16 +1265,11 @@ void setup() {
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
-  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
+  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
      initializeMotors(SIX_Motors);
-  #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
+  #elif defined (octoX8Config) || defined (octoXConfig) || defined(octoPlusConfig)
      initializeMotors(EIGHT_Motors);
   #endif
-  // Initialize max/min values for all motors
-  for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motorMinCommand[motor] = minArmedThrottle;
-    motorMaxCommand[motor] = MAXCOMMAND;
-  }
 
   // Setup receiver pins for pin change interrupts
   initializeReceiver(LASTCHANNEL);
@@ -1086,16 +1284,15 @@ void setup() {
 
   // Calibrate sensors
   calibrateGyro();
-  computeAccelBias();
+//  computeAccelBias();
   zeroIntegralError();
 
+  initializeKinematics();
   // Flight angle estimation
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
-    initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
-  #else
-    initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
+    initializeHeadingFusion();
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -1110,10 +1307,13 @@ void setup() {
     vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
   #ifdef AltitudeHoldRangeFinder
-    inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+    inititalizeRangeFinders();
     vehicleState |= RANGE_ENABLED;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
-
 
   // Battery Monitor
   #ifdef BattMonitor
@@ -1122,23 +1322,20 @@ void setup() {
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
   
-  #if defined (UseGPS)
-    initializeGps();
-  #endif 
 
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
-    setmCameraRoll(318.3); // Need to figure out nice way to reverse servos
-    setCenterRoll(1500); // Need to figure out nice way to set center position
-    setmCameraPitch(318.3);
-    setCenterPitch(1300);
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
 
   #if defined(MAX7456_OSD)
     initializeSPI();
     initializeOSD();
+  #endif
+  
+  #if defined(SERIAL_LCD)
+    InitSerialLCD();
   #endif
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
@@ -1150,9 +1347,21 @@ void setup() {
      binaryPort = &Serial;
     #endif
   #endif
+  
+  #if defined (UseGPS)
+    initializeGps();
+  #endif 
+
+  #ifdef SlowTelemetry
+     initSlowTelemetry();
+  #endif
 
   setupFourthOrder();
-
+  
+//  PID[ZAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_XAXIS_PID_IDX].type = 1;
+//  PID[ATTITUDE_YAXIS_PID_IDX].type = 1;
+  
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
@@ -1160,12 +1369,12 @@ void setup() {
 
 /*******************************************************************
   // tasks (microseconds of interval)
-  ReadGyro        readGyro      (   5000); // 200hz
-  ReadAccel       readAccel     (   5000); // 200hz
-  RunDCM          runDCM        (  10000); // 100hz
+  ReadGyro        readGyro      (as fast as we can depending of the platform)
+  ReadAccel       readAccel     (as fast as we can depending of the platform)
+  RunDCM          runKinematics (  10000); // 100hz
   FlightControls  flightControls(  10000); // 100hz
+  ReadBaro        readBaro      (  10000); // 100hz
   ReadReceiver    readReceiver  (  20000); //  50hz
-  ReadBaro        readBaro      (  40000); //  25hz
   ReadCompass     readCompass   ( 100000); //  10Hz
   ProcessTelem    processTelem  ( 100000); //  10Hz
   ReadBattery     readBattery   ( 100000); //  10Hz
@@ -1179,120 +1388,60 @@ void setup() {
   sched.run();
 *******************************************************************/
 void loop () {
+  
   currentTime = micros();
   deltaTime = currentTime - previousTime;
 
   measureCriticalSensors();
 
-  // Main scheduler loop set for 100hz
+  // ================================================================
+  // 100Hz task loop
+  // ================================================================
   if (deltaTime >= 10000) {
-
+    
     frameCounter++;
+    
+    G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
+    hundredHZpreviousTime = currentTime;
+    
+    evaluateGyroRate();
+    evaluateMetersPerSec();
 
-    // ================================================================
-    // 100hz task loop
-    // ================================================================
-    if (frameCounter % TASK_100HZ == 0) {  //  100 Hz tasks
-  
-      G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
-      hundredHZpreviousTime = currentTime;
+    for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+      filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+    }
       
-      evaluateMetersPerSec();
-      evaluateGyroRate();
-
-      for (int axis = XAXIS; axis <= ZAXIS; axis++) {
-        filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
-      }
-      
-      // ****************** Calculate Absolute Angle *****************
-      #if defined FlightAngleNewARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
-                            0.0,
-                            0.0,
-                            0.0,
-                            G_Dt);
-
-      #elif defined HeadingMagHold && defined FlightAngleMARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
-                            getMagnetometerRawData(XAXIS),
-                            getMagnetometerRawData(YAXIS),
-                            getMagnetometerRawData(ZAXIS),
-                            G_Dt);
-      #elif defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
-                            0.0,
-                            0.0,
-                            0.0,
-                            G_Dt);
-      #elif defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
-                            accelOneG,
-                            getHdgXY(XAXIS),
-                            getHdgXY(YAXIS),
-                            G_Dt);
-      #elif !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],
-                            gyroRate[YAXIS],
-                            gyroRate[ZAXIS],
-                            filteredAccel[XAXIS],
-                            filteredAccel[YAXIS],
-                            filteredAccel[ZAXIS],
-                            accelOneG,
-                            0.0,
-                            0.0,
-                            G_Dt);
-      #endif
+    /* calculate kinematics */
+    calculateKinematics(gyroRate[XAXIS],
+                        gyroRate[YAXIS],
+                        gyroRate[ZAXIS],
+                        filteredAccel[XAXIS],
+                        filteredAccel[YAXIS],
+                        filteredAccel[ZAXIS],
+                        G_Dt);
 
 
-      // Evaluate are here because we want it to be synchronized with the processFlightControl
-      #if defined AltitudeHoldBaro
-        measureBaroSum(); 
-        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-          evaluateBaroAltitude();
-        }
-      #endif
-      #ifdef AltitudeHoldRangeFinder
-        readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-          evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
-        }
-      #endif
-            
-      // Combines external pilot commands and measured sensor data to generate motor commands
-      processFlightControl();
-      
-      #ifdef BinaryWrite
+    // Evaluate are here because we want it to be synchronized with the processFlightControl
+    #if defined AltitudeHoldBaro
+      measureBaroSum(); 
+    #endif
+          
+    // Combines external pilot commands and measured sensor data to generate motor commands
+    processFlightControl();
+    
+    #if defined BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
-      #endif
+    #endif      
 
-
-    }
+    #ifdef SlowTelemetry
+      updateSlowTelemetry100Hz();
+    #endif
 
     // ================================================================
-    // 50hz task loop
+    // 50Hz task loop
     // ================================================================
     if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
 
@@ -1300,27 +1449,52 @@ void loop () {
       fiftyHZpreviousTime = currentTime;
 
       // Reads external pilot commands and performs functions based on stick configuration
-      readPilotCommands(); // defined in FlightCommand.pde
+      readPilotCommands(); 
+      
+      #if defined AltitudeHoldBaro
+        evaluateBaroAltitude();
+      #endif
+      
+      #if defined (UseRSSIFaileSafe) 
+        readRSSI();
+      #endif
 
+      #ifdef AltitudeHoldRangeFinder
+        updateRangeFinders();
+      #endif
+
+      #if defined (UseGPS)
+        readGps();
+        if (haveAGpsLock() && !isHomeBaseInitialized()) {
+          initHomeBase();
+        }
+      #endif      
+      
       #if defined(CameraControl)
-        cameraControlSetPitch(kinematicsAngle[YAXIS]);
-        cameraControlSetRoll(kinematicsAngle[XAXIS]);
-        cameraControlSetYaw(kinematicsAngle[ZAXIS]);
-        cameraControlMove();
+        moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
     }
 
     // ================================================================
-    // 10hz task loop
+    // 10Hz task loop
     // ================================================================
     if (frameCounter % TASK_10HZ == 0) {  //   10 Hz tasks
 
-      G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
-      tenHZpreviousTime = currentTime;
-
       #if defined(HeadingMagHold)
+        G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
+        tenHZpreviousTime = currentTime;
+         
         measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
+        
+        calculateHeading();
+        
       #endif
+    }
+    else if ((currentTime - lowPriorityTenHZpreviousTime) > 100000) {
+
+      G_Dt = (currentTime - lowPriorityTenHZpreviousTime) / 1000000.0;
+      lowPriorityTenHZpreviousTime = currentTime;
+      
       #if defined(BattMonitor)
         measureBatteryVoltage(G_Dt*1000.0);
       #endif
@@ -1328,6 +1502,11 @@ void loop () {
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
+    }
+    else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
+      
+      G_Dt = (currentTime - lowPriorityTenHZpreviousTime2) / 1000000.0;
+      lowPriorityTenHZpreviousTime2 = currentTime;
 
       #ifdef OSD_SYSTEM_MENU
         updateOSDMenu();
@@ -1337,14 +1516,18 @@ void loop () {
         updateOSD();
       #endif
       
-      #if defined (UseGPS)
-        readGps();
-//        gpsdump();
+      #if defined (UseGPS) || defined (BattMonitor)
+        processLedStatus();
+      #endif
+      
+      #ifdef SlowTelemetry
+        updateSlowTelemetry10Hz();
       #endif
     }
-
+    
     previousTime = currentTime;
   }
+  
   if (frameCounter >= 100) {
       frameCounter = 0;
   }

@@ -29,7 +29,8 @@
   #define ITG3200_ADDRESS					0x69
 #endif
 
-#define ITG3200_IDENTITY 0x69
+#define ITG3200_IDENTITY                0x68
+#define ITG3200_IDENTITY_MASK           0x7E
 #define ITG3200_MEMORY_ADDRESS			0x1D
 #define ITG3200_BUFFER_SIZE				6
 #define ITG3200_RESET_ADDRESS			0x3E
@@ -39,17 +40,18 @@
 #define ITG3200_OSCILLATOR_ADDR			0x3E
 #define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
 #define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
+#define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
+float gyroTempBias[3] = {0.0,0.0,0.0};
 
-
+void computeGyroTCBias();
 void measureSpecificGyroADC(int *gyroADC);
 void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(int *gyroADC);
 
 void initializeGyro() {
-
-  if (readWhoI2C(ITG3200_ADDRESS) == ITG3200_IDENTITY) {
+  if ((readWhoI2C(ITG3200_ADDRESS) & ITG3200_IDENTITY_MASK) == ITG3200_IDENTITY) {
 	vehicleState |= GYRO_DETECTED;
   }
 	
@@ -59,17 +61,26 @@ void initializeGyro() {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
 
+void computeGyroTCBias() {
+  readGyroTemp();
+
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
+    gyroTempBias[axis]  = gyroTempBiasSlope[axis]  * gyroTemperature + gyroTempBiasIntercept[axis];
+  }
+}
+
 
 void measureGyro() {
-
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
 
   int gyroADC[3];
   measureSpecificGyroADC(gyroADC);
+  
+  computeGyroTCBias();
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
   }
  
   // Measure gyro heading
@@ -81,7 +92,6 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
   
@@ -90,8 +100,13 @@ void measureGyroSum() {
   gyroSampleCount++;
 }
 
-void evaluateGyroRate() {
+void readGyroTemp() {
+  sendByteI2C(ITG3200_ADDRESS, ITG3200_TEMPERATURE_ADDRESS);
+  Wire.requestFrom(ITG3200_ADDRESS, 2);
+  gyroTemperature = (readWordI2C() + 13200) / 280 + 35;
+}
 
+void evaluateGyroRate() {
   int gyroADC[3];
   evaluateSpecificGyroRate(gyroADC);
   gyroSample[XAXIS] = 0;
@@ -99,8 +114,10 @@ void evaluateGyroRate() {
   gyroSample[ZAXIS] = 0;
   gyroSampleCount = 0;
 
+  computeGyroTCBias();
+  
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
   }
   
   // Measure gyro heading
