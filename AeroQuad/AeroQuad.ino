@@ -36,20 +36,20 @@
  #define UseGPS
 #endif 
 
-#if defined (UseGPSNavigator) && !defined (AltitudeHoldBaro)
+#if defined(UseGPSNavigator) && !defined(AltitudeHoldBaro)
   #error "GpsNavigation NEED AltitudeHoldBaro defined"
 #endif
 
-#if defined (AutoLanding) && (!defined (AltitudeHoldBaro) || !defined (AltitudeHoldRangeFinder))
+#if defined(AutoLanding) && (!defined(AltitudeHoldBaro) || !defined(AltitudeHoldRangeFinder))
   #error "AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined"
 #endif
 
-#if defined (ReceiverSBUS) && defined (SlowTelemetry)
+#if defined(ReceiverSBUS) && defined(SlowTelemetry)
   #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
 // Special motor config additionnal variable
-#if defined quadXHT_FPVConfig
+#if defined(quadXHT_FPVConfig)
  #define quadXConfig
  #define FRONT_YAW_CORRECTION 0.83
  #define REAR_YAW_CORRECTION 1.13
@@ -59,7 +59,7 @@
 // In order to use the DIYDrone libraries, this have to be declared here this way
 // @see Kenny9999 for details
 //
-#if defined UseGPS
+#if defined(UseGPS)
   // needed here to use DIYDrone GPS libraries
   #include <FastSerial.h>
   #include <AP_Common.h>
@@ -260,7 +260,7 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #if defined (quadXConfig) || defined (quadPlusConfig) || defined (quadY4Config)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
     #define MOTOR_PWM_Timer
   #else
     #define MOTOR_PWM
@@ -1033,7 +1033,7 @@
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
 #include "Kinematics.h"
-#if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
+#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
 #else
   #include "Kinematics_ARG.h"
@@ -1042,31 +1042,31 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined ReceiverHWPPM
+#if defined(ReceiverHWPPM)
   #include <Receiver_HWPPM.h>
-#elif defined ReceiverPPM
+#elif defined(ReceiverPPM)
   #include <Receiver_PPM.h>
-#elif defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
+#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
   #include <Receiver_PPM.h>
-#elif defined RemotePCReceiver
+#elif defined(RemotePCReceiver)
   #include <Receiver_RemotePC.h>
-#elif defined ReceiverSBUS
+#elif defined(ReceiverSBUS)
   #include <Receiver_SBUS.h>
-#elif defined RECEIVER_328P
+#elif defined(RECEIVER_328P)
   #include <Receiver_328p.h>
-#elif defined RECEIVER_MEGA
+#elif defined(RECEIVER_MEGA)
   #include <Receiver_MEGA.h>
-#elif defined RECEIVER_APM
+#elif defined(RECEIVER_APM)
   #include <Receiver_APM.h>
-#elif defined RECEIVER_STM32PPM
+#elif defined(RECEIVER_STM32PPM)
   #include <Receiver_STM32PPM.h>  
-#elif defined RECEIVER_STM32
+#elif defined(RECEIVER_STM32)
   #include <Receiver_STM32.h>  
 #endif
 
-#if defined (UseAnalogRSSIReader) 
+#if defined(UseAnalogRSSIReader) 
   #include <AnalogRSSIReader.h>
-#elif defined (UseEzUHFRSSIReader)
+#elif defined(UseEzUHFRSSIReader)
   #include <EzUHFRSSIReader.h>
 #endif
 
@@ -1075,41 +1075,41 @@
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined triConfig
+#if defined(triConfig)
   #include <Motors_Tri.h>
-#elif defined MOTOR_PWM
+#elif defined(MOTOR_PWM)
   #include <Motors_PWM.h>
-#elif defined MOTOR_PWM_Timer
+#elif defined(MOTOR_PWM_Timer)
   #include <Motors_PWM_Timer.h>
-#elif defined MOTOR_APM
+#elif defined(MOTOR_APM)
   #include <Motors_APM.h>
-#elif defined MOTOR_I2C
+#elif defined(MOTOR_I2C)
   #include <Motors_I2C.h>
-#elif defined MOTOR_STM32
+#elif defined(MOTOR_STM32)
   #include <Motors_STM32.h>    
 #endif
 
 //********************************************************
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
-#if defined (HMC5843)
+#if defined(HMC5843)
   #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5843.h>
-#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB) || defined (AutonavShield_5883L)
+#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(AutonavShield_5883L)
   #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5883L.h>
-#elif defined (COMPASS_CHR6DM)
+#elif defined(COMPASS_CHR6DM)
 #endif
 
 //********************************************************
 //******* ALTITUDE HOLD BAROMETER DECLARATION ************
 //********************************************************
-#if defined (BMP085)
+#if defined(BMP085)
   #include <BarometricSensor_BMP085.h>
-#elif defined (MS5611)
+#elif defined(MS5611)
  #include <BarometricSensor_MS5611.h>
 #endif
-#if defined (XLMAXSONAR)
+#if defined(XLMAXSONAR)
   #include <MaxSonarRangeFinder.h>
 #endif 
 //********************************************************
@@ -1134,33 +1134,33 @@
 //********************************************************
 //******** FLIGHT CONFIGURATION DECLARATION **************
 //********************************************************
-#if defined quadXConfig
+#if defined(quadXConfig)
   #include "FlightControlQuadX.h"
-#elif defined quadPlusConfig
+#elif defined(quadPlusConfig)
   #include "FlightControlQuadPlus.h"
-#elif defined hexPlusConfig
+#elif defined(hexPlusConfig)
   #include "FlightControlHexPlus.h"
-#elif defined hexXConfig
+#elif defined(hexXConfig)
   #include "FlightControlHexX.h"
-#elif defined triConfig
+#elif defined(triConfig)
   #include "FlightControlTri.h"
-#elif defined quadY4Config
+#elif defined(quadY4Config)
   #include "FlightControlQuadY4.h"
-#elif defined hexY6Config
+#elif defined(hexY6Config)
   #include "FlightControlHexY6.h"
-#elif defined octoX8Config
+#elif defined(octoX8Config)
   #include "FlightControlOctoX8.h"
-#elif defined octoXConfig
+#elif defined(octoXConfig)
   #include "FlightControlOctoX.h"
-#elif defined octoPlusConfig
+#elif defined(octoPlusConfig)
   #include "FlightControlOctoPlus.h"
 #endif
 
 //********************************************************
 //****************** GPS DECLARATION *********************
 //********************************************************
-#if defined (UseGPS)
-  #if !defined HeadingMagHold
+#if defined(UseGPS)
+  #if !defined(HeadingMagHold)
     #error We need the magnetometer to use the GPS
   #endif 
 //  #if defined LASTCHANNEL 6
@@ -1179,12 +1179,12 @@
   #include "MAX7456.h"
 #endif
 
-#if defined (SERIAL_LCD)
+#if defined(SERIAL_LCD)
   #include "SerialLCD.h"
 #endif
 
 #ifdef OSD_SYSTEM_MENU
-  #if ! defined (MAX7456_OSD) && ! defined (SERIAL_LCD)
+  #if !defined(MAX7456_OSD) && !defined(SERIAL_LCD)
     #error "Menu cannot be used without OSD or LCD"
   #endif
   #include "OSDMenu.h"
@@ -1194,8 +1194,8 @@
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
-#if defined (WirelessTelemetry) 
-  #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
+#if defined(WirelessTelemetry) 
+  #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     #define SERIAL_PORT Serial3
   #else    // force 328p to use the normal port
     #define SERIAL_PORT Serial
@@ -1225,11 +1225,11 @@
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
 
-#if defined (UseGPS) || defined (BattMonitor)
+#if defined(UseGPS) || defined(BattMonitor)
   #include "LedStatusProcessor.h"
 #endif  
 
-#if defined MavLink
+#if defined(MavLink)
   #include "MavLink.h"
 #else
   #include "SerialCom.h"
@@ -1261,9 +1261,9 @@ void setup() {
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
-  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
+  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
      initializeMotors(SIX_Motors);
-  #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
+  #elif defined(octoX8Config) || defined(octoXConfig) || defined(octoPlusConfig)
      initializeMotors(EIGHT_Motors);
   #endif
 
@@ -1320,7 +1320,7 @@ void setup() {
   
 
   // Camera stabilization setup
-  #if defined (CameraControl)
+  #if defined(CameraControl)
     initializeCameraStabilization();
     vehicleState |= CAMERASTABLE_ENABLED;
   #endif
@@ -1344,7 +1344,7 @@ void setup() {
     #endif
   #endif
   
-  #if defined (UseGPS)
+  #if defined(UseGPS)
     initializeGps();
   #endif 
 
@@ -1422,14 +1422,14 @@ void loop () {
 
 
     // Evaluate are here because we want it to be synchronized with the processFlightControl
-    #if defined AltitudeHoldBaro
+    #if defined(AltitudeHoldBaro)
       measureBaroSum(); 
     #endif
           
     // Combines external pilot commands and measured sensor data to generate motor commands
     processFlightControl();
     
-    #if defined BinaryWrite
+    #if defined(BinaryWrite)
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
@@ -1451,11 +1451,11 @@ void loop () {
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); 
       
-      #if defined AltitudeHoldBaro
+      #if defined(AltitudeHoldBaro)
         evaluateBaroAltitude();
       #endif
       
-      #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader)
+      #if defined(UseAnalogRSSIReader) || defined(UseEzUHFRSSIReader)
         readRSSI();
       #endif
 
@@ -1463,7 +1463,7 @@ void loop () {
         updateRangeFinders();
       #endif
 
-      #if defined (UseGPS)
+      #if defined(UseGPS)
         readGps();
         if (haveAGpsLock() && !isHomeBaseInitialized()) {
           initHomeBase();
@@ -1516,7 +1516,7 @@ void loop () {
         updateOSD();
       #endif
       
-      #if defined (UseGPS) || defined (BattMonitor)
+      #if defined(UseGPS) || defined(BattMonitor)
         processLedStatus();
       #endif
       
