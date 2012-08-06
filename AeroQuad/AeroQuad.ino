@@ -1046,7 +1046,7 @@
   #include <Receiver_HWPPM.h>
 #elif defined ReceiverPPM
   #include <Receiver_PPM.h>
-#elif defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
+#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
@@ -1064,12 +1064,12 @@
   #include <Receiver_STM32.h>  
 #endif
 
-#if defined (UseAnalogRSSIReader) 
-  #include <AnalogRSSIReader.h>
-#elif defined (UseEzUHFRSSIReader)
-  #include <EzUHFRSSIReader.h>
+#if defined (ShowRSSI)
+  #define UseRSSIFaileSafe
 #endif
-
+#if defined (UseRSSIFaileSafe) 
+  #include <RSSIReader.h>
+#endif 
 
 
 //********************************************************
@@ -1265,9 +1265,9 @@ void setup() {
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
-  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
+  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
      initializeMotors(SIX_Motors);
-  #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
+  #elif defined (octoX8Config) || defined (octoXConfig) || defined(octoPlusConfig)
      initializeMotors(EIGHT_Motors);
   #endif
 
@@ -1435,7 +1435,7 @@ void loop () {
           fastTelemetry();
         }
     #endif      
-    
+
     #ifdef SlowTelemetry
       updateSlowTelemetry100Hz();
     #endif
@@ -1455,7 +1455,7 @@ void loop () {
         evaluateBaroAltitude();
       #endif
       
-      #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader)
+      #if defined (UseRSSIFaileSafe) 
         readRSSI();
       #endif
 
@@ -1473,11 +1473,6 @@ void loop () {
       #if defined(CameraControl)
         moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
       #endif
-      
-//      #ifdef MavLink
-//        readSerialCommand();
-//        sendSerialTelemetry();
-//      #endif
     }
 
     // ================================================================
@@ -1505,10 +1500,8 @@ void loop () {
       #endif
 
       // Listen for configuration commands and reports telemetry
-//      #if !defined MavLink
-        readSerialCommand(); // defined in SerialCom.pde
-        sendSerialTelemetry(); // defined in SerialCom.pde
-//      #endif
+      readSerialCommand(); // defined in SerialCom.pde
+      sendSerialTelemetry(); // defined in SerialCom.pde
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       
@@ -1532,15 +1525,6 @@ void loop () {
       #endif
     }
     
-    #ifdef MavLink
-     if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
-
-        G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
-        oneHZpreviousTime = currentTime;
-        
-        sendSerialHeartbeat();   
-     }
-    #endif
     previousTime = currentTime;
   }
   
