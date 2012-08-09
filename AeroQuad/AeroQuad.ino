@@ -1500,8 +1500,8 @@ void loop () {
       #endif
 
       // Listen for configuration commands and reports telemetry
-		readSerialCommand();
-		sendSerialTelemetry();
+      readSerialCommand();
+      sendSerialTelemetry();
     }
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       

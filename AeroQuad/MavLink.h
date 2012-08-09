@@ -3,19 +3,19 @@
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
-   
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
-   
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
-   
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _AQ_MAVLINK_H_
@@ -24,11 +24,11 @@
 #define MAV_COMPONENT_ID MAV_COMP_ID_IMU
 
 // MavLink 1.0 DKP
-#include "../mavlink/include/mavlink/v1.0/common/mavlink.h" 
+#include "../mavlink/include/mavlink/v1.0/common/mavlink.h"
 
 #include "Aeroquad.h"
 
-enum parameterTypeIndicator 
+enum parameterTypeIndicator
 {
   P,
   I,
@@ -56,95 +56,96 @@ int systemStatus = MAV_STATE_UNINIT;
 
 int parameterType = MAVLINK_TYPE_FLOAT;
 int parameterListSize;
-String parameterNameRateRollP = "Rate Roll_P";
-String parameterNameRateRollI = "Rate Roll_I";
-String parameterNameRateRollD = "Rate Roll_D";
-String parameterNameRatePitchP = "Rate Pitch_P";
-String parameterNameRatePitchI = "Rate Pitch_I";
-String parameterNameRatePitchD = "Rate Pitch_D";
-String parameterNameAttitudeRollP = "Att Roll_P";
-String parameterNameAttitudeRollI = "Att Roll_I";
-String parameterNameAttitudeRollD = "Att Roll_D";
-String parameterNameAttitudePitchP = "Att Pitch_P";
-String parameterNameAttitudePitchI = "Att Pitch_I";
-String parameterNameAttitudePitchD = "Att Pitch_D";
-String parameterNameAttitudeGyroRollP = "AttGyroRoll_P";
-String parameterNameAttitudeGyroRollI = "AttGyroRoll_I";
-String parameterNameAttitudeGyroRollD = "AttGyroRoll_D";
-String parameterNameAttitudeGyroPitchP = "AttGyroPitc_P";
-String parameterNameAttitudeGyroPitchI = "AttGyroPitc_I";
-String parameterNameAttitudeGyroPitchD = "AttGyroPitc_D";
-String parameterNameYawP = "Yaw_P";
-String parameterNameYawI = "Yaw_I";
-String parameterNameYawD = "Yaw_D";
-String parameterNameHeadingP = "Heading_P";
-String parameterNameHeadingI = "Heading_I";
-String parameterNameHeadingD = "Heading_D";
-String parameterNameHeadingConfig = "Heading_Conf";
-String parameterNameGyroSmooth = "Misc_GyroSmoo";
-String parameterNameAREF = "Misc_AREF";
-String parameterNameMinThrottle = "Misc_MinThr";
-String parameterNameTxFactor = "TX_TX Factor";
-String parameterNameTxRollSmooth = "TX_RollSmooth";
-String parameterNameTxPitchSmooth = "TX_PitcSmooth";
-String parameterNameTxYawSmooth = "TX_YawSmooth";
-String parameterNameTxThrottleSmooth = "TX_ThrSmooth";
-String parameterNameTxModeSmooth = "TX_ModeSmooth";
-String parameterNameTxAUX1Smooth = "TX_AUX1Smooth";
-String parameterNameTxAUX2Smooth = "TX_AUX2Smooth";
-String parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
+
+const char* parameterNameRateRollP = "Rate Roll_P";
+const char* parameterNameRateRollI = "Rate Roll_I";
+const char* parameterNameRateRollD = "Rate Roll_D";
+const char* parameterNameRatePitchP = "Rate Pitch_P";
+const char* parameterNameRatePitchI = "Rate Pitch_I";
+const char* parameterNameRatePitchD = "Rate Pitch_D";
+const char* parameterNameAttitudeRollP = "Att Roll_P";
+const char* parameterNameAttitudeRollI = "Att Roll_I";
+const char* parameterNameAttitudeRollD = "Att Roll_D";
+const char* parameterNameAttitudePitchP = "Att Pitch_P";
+const char* parameterNameAttitudePitchI = "Att Pitch_I";
+const char* parameterNameAttitudePitchD = "Att Pitch_D";
+const char* parameterNameAttitudeGyroRollP = "AttGyroRoll_P";
+const char* parameterNameAttitudeGyroRollI = "AttGyroRoll_I";
+const char* parameterNameAttitudeGyroRollD = "AttGyroRoll_D";
+const char* parameterNameAttitudeGyroPitchP = "AttGyroPitc_P";
+const char* parameterNameAttitudeGyroPitchI = "AttGyroPitc_I";
+const char* parameterNameAttitudeGyroPitchD = "AttGyroPitc_D";
+const char* parameterNameYawP = "Yaw_P";
+const char* parameterNameYawI = "Yaw_I";
+const char* parameterNameYawD = "Yaw_D";
+const char* parameterNameHeadingP = "Heading_P";
+const char* parameterNameHeadingI = "Heading_I";
+const char* parameterNameHeadingD = "Heading_D";
+const char* parameterNameHeadingConfig = "Heading_Conf";
+const char* parameterNameGyroSmooth = "Misc_GyroSmoo";
+const char* parameterNameAREF = "Misc_AREF";
+const char* parameterNameMinThrottle = "Misc_MinThr";
+const char* parameterNameTxFactor = "TX_TX Factor";
+const char* parameterNameTxRollSmooth = "TX_RollSmooth";
+const char* parameterNameTxPitchSmooth = "TX_PitcSmooth";
+const char* parameterNameTxYawSmooth = "TX_YawSmooth";
+const char* parameterNameTxThrottleSmooth = "TX_ThrSmooth";
+const char* parameterNameTxModeSmooth = "TX_ModeSmooth";
+const char* parameterNameTxAUX1Smooth = "TX_AUX1Smooth";
+const char* parameterNameTxAUX2Smooth = "TX_AUX2Smooth";
+const char* parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
 #if defined BattMonitor
-  String parameterNameBattMonAlarmVoltage = "BatMo_AlarmVo";
-  String parameterNameBattMonThrottleTarget = "BatMo_ThrTarg";
-  String parameterNameBattMonGoingDownTime = "BatMo_DownTim";
+  const char* parameterNameBattMonAlarmVoltage = "BatMo_AlarmVo";
+  const char* parameterNameBattMonThrottleTarget = "BatMo_ThrTarg";
+  const char* parameterNameBattMonGoingDownTime = "BatMo_DownTim";
 #endif
 #ifdef CameraControl
-  String parameterNameCamMode = "Cam_Mode";
-  String parameterNameCamPitchMiddle = "Cam_PitchMid";
-  String parameterNameCamRollMiddle = "Cam_RollMid";
-  String parameterNameCamYawMiddle = "Cam_YawMid";
-  String parameterNameCamRollServoMiddle = "Cam_ServoPitM";
-  String parameterNameCamPitchServoMiddle = "Cam_ServoRolM";
-  String parameterNameCamYawServoMiddle = "Cam_ServoYawM";
-  String parameterNameCamPitchServoMin = "Cam_SerMinPit";
-  String parameterNameCamRollServoMin = "Cam_SerMinRol";
-  String parameterNameCamYawServoMin = "Cam_SerMinYaw";
-  String parameterNameCamPitchServoMax = "Cam_SerMaxPit";
-  String parameterNameCamRollServoMax = "Cam_SerMaxRol";
-  String parameterNameCamYawServoMax = "Cam_SerMaxYaw";
+  const char* parameterNameCamMode = "Cam_Mode";
+  const char* parameterNameCamPitchMiddle = "Cam_PitchMid";
+  const char* parameterNameCamRollMiddle = "Cam_RollMid";
+  const char* parameterNameCamYawMiddle = "Cam_YawMid";
+  const char* parameterNameCamRollServoMiddle = "Cam_ServoPitM";
+  const char* parameterNameCamPitchServoMiddle = "Cam_ServoRolM";
+  const char* parameterNameCamYawServoMiddle = "Cam_ServoYawM";
+  const char* parameterNameCamPitchServoMin = "Cam_SerMinPit";
+  const char* parameterNameCamRollServoMin = "Cam_SerMinRol";
+  const char* parameterNameCamYawServoMin = "Cam_SerMinYaw";
+  const char* parameterNameCamPitchServoMax = "Cam_SerMaxPit";
+  const char* parameterNameCamRollServoMax = "Cam_SerMaxRol";
+  const char* parameterNameCamYawServoMax = "Cam_SerMaxYaw";
 #endif
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-  String parameterNameAHminThrottleAdjust = "AH_Min Adjust";
-  String parameterNameAHmaxThrottleAdjust = "AH_Max Adjust";
-  String parameterNameAHBumpValue = "AH_Bump Value";
-  String parameterNameAHPanicValue = "AH_PanicValue";
+  const char* parameterNameAHminThrottleAdjust = "AH_Min Adjust";
+  const char* parameterNameAHmaxThrottleAdjust = "AH_Max Adjust";
+  const char* parameterNameAHBumpValue = "AH_Bump Value";
+  const char* parameterNameAHPanicValue = "AH_PanicValue";
 #endif
 #if defined AltitudeHoldBaro
-  String parameterNameAHBaroSmooth = "AH_SmoothFact";
-  String parameterNameBaroP = "Baro_P";
-  String parameterNameBaroI = "Baro_I";
-  String parameterNameBaroD = "Baro_D";
-  String parameterNameBaroWindUpGuard = "Baro_WindUp";
-  String parameterNameZDampeningP = "Z Dampening_P";
-  String parameterNameZDampeningI = "Z Dampening_I";
-  String parameterNameZDampeningD = "Z Dampening_D";
+  const char* parameterNameAHBaroSmooth = "AH_SmoothFact";
+  const char* parameterNameBaroP = "Baro_P";
+  const char* parameterNameBaroI = "Baro_I";
+  const char* parameterNameBaroD = "Baro_D";
+  const char* parameterNameBaroWindUpGuard = "Baro_WindUp";
+  const char* parameterNameZDampeningP = "Z Dampening_P";
+  const char* parameterNameZDampeningI = "Z Dampening_I";
+  const char* parameterNameZDampeningD = "Z Dampening_D";
 #endif
 #if defined AltitudeHoldRangeFinder
-  String parameterNameRangeFinderP = "Range_P";
-  String parameterNameRangeFinderI = "Range_I";
-  String parameterNameRangeFinderD = "Range_D";
-  String parameterNameRangeFinderWindUpGuard = "Range_WindUp";
+  const char* parameterNameRangeFinderP = "Range_P";
+  const char* parameterNameRangeFinderI = "Range_I";
+  const char* parameterNameRangeFinderD = "Range_D";
+  const char* parameterNameRangeFinderWindUpGuard = "Range_WindUp";
 #endif
 #if defined UseGPSNavigator
-  String parameterNameGPSRollP = "GPS Roll_P";
-  String parameterNameGPSRollI = "GPS Roll_I";
-  String parameterNameGPSRollD = "GPS Roll_D";
-  String parameterNameGPSPitchP = "GPS Pitch_P";
-  String parameterNameGPSPitchI = "GPS Pitch_I";
-  String parameterNameGPSPitchD = "GPS Pitch_D";
-  String parameterNameGPSYawP = "GPS Yaw_P";
-  String parameterNameGPSYawI = "GPS Yaw_I";
-  String parameterNameGPSYawD = "GPS Yaw_D";
+  const char* parameterNameGPSRollP = "GPS Roll_P";
+  const char* parameterNameGPSRollI = "GPS Roll_I";
+  const char* parameterNameGPSRollD = "GPS Roll_D";
+  const char* parameterNameGPSPitchP = "GPS Pitch_P";
+  const char* parameterNameGPSPitchI = "GPS Pitch_I";
+  const char* parameterNameGPSPitchD = "GPS Pitch_D";
+  const char* parameterNameGPSYawP = "GPS Yaw_P";
+  const char* parameterNameGPSYawI = "GPS Yaw_I";
+  const char* parameterNameGPSYawD = "GPS Yaw_D";
 #endif
 
 parameterTypeIndicator paramIndicator = NONE;
@@ -156,7 +157,7 @@ unsigned long *parameterToBeChangedULong;
 static uint16_t millisecondsSinceBoot = 0;
 long system_dropped_packets = 0;
 
-mavlink_message_t msg; 
+mavlink_message_t msg;
 uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 mavlink_status_t status;
 
@@ -167,27 +168,27 @@ void evaluateParameterListSize() {
   #if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && defined UseGPSNavigator
     parameterListSize += 25;
   #endif
-  
+
   #if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
     parameterListSize += 16;
   #endif
-  
+
   #if defined AltitudeHoldBaro && !defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
     parameterListSize += 12;
   #endif
-  
+
   #if !defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
     parameterListSize += 8;
   #endif
-  
+
   #if defined AltitudeHoldBaro && !defined AltitudeHoldRangeFinder && defined UseGPSNavigator
     parameterListSize += 21;
   #endif
-  
+
   #if defined BattMonitor
     parameterListSize += 3;
   #endif
-  
+
   #ifdef CameraControl
     parameterListSize += 13;
   #endif
@@ -274,7 +275,7 @@ void sendSerialHudData() {
     #endif
   #endif
   len = mavlink_msg_to_send_buffer(buf, &msg);
-  SERIAL_PORT.write(buf, len);   
+  SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialGpsPostion() {
@@ -303,7 +304,7 @@ void sendSerialRawPressure() {
 void sendSerialRcRaw() {
   #if defined UseRSSIFaileSafe
     mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
-  #else 
+  #else
     mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
   #endif
   len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -327,7 +328,7 @@ void sendSerialSysStatus() {
       controlSensorsPresent |= (1<<2); // compass present
     }
   #endif
-  
+
   #if defined AltitudeHoldBaro
     if (BARO_DETECTED) {
       controlSensorsPresent |= (1<<3); // absolute pressure sensor present
@@ -395,7 +396,7 @@ void sendSerialSysStatus() {
 void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[], int8_t id_windUp[], int listsize, int index) {
 
   int counter = 0;
-  if (id_p != 0) {	
+  if (id_p != 0) {
     mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)id_p, PID[IDPid].P, parameterType, listsize, index);
     len = mavlink_msg_to_send_buffer(buf, &msg);
     SERIAL_PORT.write(buf, len);
@@ -427,25 +428,25 @@ void sendSerialParameter(float parameterID, int8_t parameterName[], int listsize
   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   SERIAL_PORT.write(buf, len);
-}	
+}
 
 void sendSerialParameter(int parameterID, int8_t parameterName[], int listsize, int index) {
   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   SERIAL_PORT.write(buf, len);
-}	
+}
 
 void sendSerialParameter(byte parameterID, int8_t parameterName[], int listsize, int index) {
   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   SERIAL_PORT.write(buf, len);
-}	
+}
 
 void sendSerialParameter(unsigned long parameterID, int8_t parameterName[], int listsize, int index) {
   mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
   len = mavlink_msg_to_send_buffer(buf, &msg);
   SERIAL_PORT.write(buf, len);
-}	
+}
 
 void sendParameterListPart1() {
   int8_t rateRoll_P[14] = "Rate Roll_P";
@@ -556,11 +557,11 @@ void sendParameterListPart2() {
     int8_t battery_monitor_alarm_voltage[14] = "BatMo_AlarmVo";
     sendSerialParameter(batteryMonitorAlarmVoltage, battery_monitor_alarm_voltage, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t battery_monitor_throttle_target[14] = "BatMo_ThrTarg";
     sendSerialParameter(batteryMonitorThrottleTarget, battery_monitor_throttle_target, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t battery_monitor_going_down_time[14] = "BatMo_DownTim";
     sendSerialParameter(batteryMonitorGoingDownTime, battery_monitor_going_down_time, parameterListSize, indexCounter);
     indexCounter++;
@@ -571,51 +572,51 @@ void sendParameterListPart3() {
     int8_t camera_mode[14] = "Cam_Mode";
     sendSerialParameter(cameraMode, camera_mode, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_camera_pitch[14] = "Cam_PitchMid";
     sendSerialParameter(mCameraPitch, m_camera_pitch, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_camera_roll[14] = "Cam_RollMid";
     sendSerialParameter(mCameraRoll, m_camera_roll, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_camera_yaw[14] = "Cam_YawMid";
     sendSerialParameter(mCameraYaw, m_camera_yaw, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_servo_pitch[14] = "Cam_ServoPitM";
     sendSerialParameter(servoCenterPitch, m_servo_pitch, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_servo_roll[14] = "Cam_ServoRolM";
     sendSerialParameter(servoCenterRoll, m_servo_roll, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t m_servo_yaw[14] = "Cam_ServoYawM";
     sendSerialParameter(servoCenterYaw, m_servo_yaw, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_min_pitch[14] = "Cam_SerMinPit";
     sendSerialParameter(servoMinPitch, servo_min_pitch, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_min_roll[14] = "Cam_SerMinRol";
     sendSerialParameter(servoMinRoll, servo_min_roll, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_min_yaw[14] = "Cam_SerMinYaw";
     sendSerialParameter(servoMinYaw, servo_min_yaw, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_max_pitch[14] = "Cam_SerMaxPit";
     sendSerialParameter(servoMaxPitch, servo_max_pitch, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_max_roll[14] = "Cam_SerMaxRol";
     sendSerialParameter(servoMaxRoll, servo_max_roll, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t servo_max_yaw[14] = "Cam_SerMaxYaw";
     sendSerialParameter(servoMaxYaw, servo_max_yaw, parameterListSize, indexCounter);
     indexCounter++;
@@ -625,19 +626,19 @@ void sendParameterListPart3() {
     int8_t min_throttle_adjust[14] = "AH_Min Adjust";
     sendSerialParameter(minThrottleAdjust, min_throttle_adjust, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t max_throttle_adjust[14] = "AH_Max Adjust";
     sendSerialParameter(maxThrottleAdjust, max_throttle_adjust, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t altitude_hold_bump[14] = "AH_Bump Value";
     sendSerialParameter(altitudeHoldBump, altitude_hold_bump, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t altitude_hold_panic_stick_movement[14] = "AH_PanicValue";
     sendSerialParameter(altitudeHoldPanicStickMovement, altitude_hold_panic_stick_movement, parameterListSize, indexCounter);
     indexCounter++;
-  #endif 
+  #endif
 }
 
 void sendParameterListPart4() {
@@ -645,17 +646,17 @@ void sendParameterListPart4() {
     int8_t baro_smooth_factor[14] = "AH_SmoothFact";
     sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t baro_p[14] = "Baro_P";
     int8_t baro_i[14] = "Baro_I";
     int8_t baro_d[14] = "Baro_D";
     sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t baro_windUpGuard[14] = "Baro_WindUp";
     sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
     indexCounter ++;
-  
+
     int8_t zDampening_p[14] = "Z Dampening_P";
     int8_t zDampening_i[14] = "Z Dampening_I";
     int8_t zDampening_d[14] = "Z Dampening_D";
@@ -667,29 +668,29 @@ void sendParameterListPart4() {
     int8_t baro_smooth_factor[14] = "AH_SmoothFact";
     sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
     indexCounter++;
-  
+
     int8_t baro_p[14] = "Baro_P";
     int8_t baro_i[14] = "Baro_I";
     int8_t baro_d[14] = "Baro_D";
     sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, baro_p, baro_i, baro_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t baro_windUpGuard[14] = "Baro_WindUp";
     sendSerialPID(BARO_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, baro_windUpGuard, parameterListSize, indexCounter);
     indexCounter ++;
-  
+
     int8_t zDampening_p[14] = "Z Dampening_P";
     int8_t zDampening_i[14] = "Z Dampening_I";
     int8_t zDampening_d[14] = "Z Dampening_D";
     sendSerialPID(ZDAMPENING_PID_IDX, zDampening_p, zDampening_i, zDampening_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t range_p[14] = "Range_P";
     int8_t range_i[14] = "Range_I";
     int8_t range_d[14] = "Range_D";
     sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t range_windUpGuard[14] = "Range_WindUp";
     sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
     indexCounter ++;
@@ -703,13 +704,13 @@ void sendParameterListPart5() {
     int8_t gps_roll_d[14] = "GPS Roll_D";
     sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t gps_pitch_p[14] = "GPS Pitch_P";
     int8_t gps_pitch_i[14] = "GPS Pitch_I";
     int8_t gps_pitch_d[14] = "GPS Pitch_D";
     sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t gps_yaw_p[14] = "GPS Yaw_P";
     int8_t gps_yaw_i[14] = "GPS Yaw_I";
     int8_t gps_yaw_d[14] = "GPS Yaw_D";
@@ -723,13 +724,13 @@ void sendParameterListPart5() {
     int8_t gps_roll_d[14] = "GPS Roll_D";
     sendSerialPID(GPSROLL_PID_IDX, gps_roll_p, gps_roll_i, gps_roll_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t gps_pitch_p[14] = "GPS Pitch_P";
     int8_t gps_pitch_i[14] = "GPS Pitch_I";
     int8_t gps_pitch_d[14] = "GPS Pitch_D";
     sendSerialPID(GPSPITCH_PID_IDX, gps_pitch_p, gps_pitch_i, gps_pitch_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t gps_yaw_p[14] = "GPS Yaw_P";
     int8_t gps_yaw_i[14] = "GPS Yaw_I";
     int8_t gps_yaw_d[14] = "GPS Yaw_D";
@@ -743,19 +744,18 @@ void sendParameterListPart5() {
     int8_t range_d[14] = "Range_D";
     sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, range_p, range_i, range_d, 0, parameterListSize, indexCounter);
     indexCounter += 3;
-  
+
     int8_t range_windUpGuard[14] = "Range_WindUp";
     sendSerialPID(SONAR_ALTITUDE_HOLD_PID_IDX, 0, 0, 0, range_windUpGuard, parameterListSize, indexCounter);
     indexCounter ++;
-  #endif 
+  #endif
 }
 
 
 
 
-bool checkParameterMatch(String parameterName, char* key) {
-  
-  for (uint16_t j = 0; j < parameterName.length(); j++) {
+bool checkParameterMatch(const char* parameterName, char* key) {
+  for (uint16_t j = 0; parameterName[j] != '\0'; j++) {
     if (((char) (parameterName[j])) != (char) (key[j]))	{
       return false;
     }
@@ -1204,11 +1204,11 @@ void changeAndSendParameter() {
 }
 
 void readSerialCommand() {
-  while(SERIAL_PORT.available() > 0) { 
+  while(SERIAL_PORT.available() > 0) {
 
     uint8_t c = SERIAL_PORT.read();
-    //try to get a new message 
-    if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) { 
+    //try to get a new message
+    if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
       // Handle message
       switch(msg.msgid) {
 
@@ -1233,7 +1233,7 @@ void readSerialCommand() {
           // 						}
 
           if (command == MAV_CMD_NAV_RETURN_TO_LAUNCH) {
-            #if defined UseGPSNavigator 
+            #if defined UseGPSNavigator
               //TODO	add coming home
               //result = MAV_RESULT_ACCEPTED;
             #else
@@ -1241,11 +1241,11 @@ void readSerialCommand() {
             #endif
           }
           else if (command == MAV_CMD_NAV_TAKEOFF) {
-            #if defined UseGPSNavigator 
+            #if defined UseGPSNavigator
               //TODO	add gps takeoff
               //result = MAV_RESULT_ACCEPTED;
             #else
-              result = MAV_RESULT_UNSUPPORTED;	
+              result = MAV_RESULT_UNSUPPORTED;
             #endif
           }
           else if (command == MAV_CMD_DO_SET_HOME) {
@@ -1276,7 +1276,7 @@ void readSerialCommand() {
                 calibrateKinematics();
                 zeroIntegralError();
                 result = MAV_RESULT_ACCEPTED;
-              }			
+              }
             }
             else result = 	MAV_RESULT_TEMPORARILY_REJECTED;
           }
@@ -1292,7 +1292,7 @@ void readSerialCommand() {
         }
         break;
 
-      case MAVLINK_MSG_ID_PARAM_REQUEST_READ: { 
+      case MAVLINK_MSG_ID_PARAM_REQUEST_READ: {
           mavlink_param_request_read_t read;
           mavlink_msg_param_request_read_decode(&msg, &read);
 
@@ -1325,7 +1325,7 @@ void readSerialCommand() {
         }
         break;
 
-      case MAVLINK_MSG_ID_PARAM_SET: 
+      case MAVLINK_MSG_ID_PARAM_SET:
         {
           if(!motorArmed) { // added for security reason, as the software is shortly blocked by this command (maybe this can be avoided?)
             mavlink_msg_param_set_decode(&msg, &set);
@@ -1347,7 +1347,7 @@ void readSerialCommand() {
             else mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
             len = mavlink_msg_to_send_buffer(buf, &msg);
             SERIAL_PORT.write(buf, len);
-          }			
+          }
         #endif
         }
         break;
@@ -1355,8 +1355,8 @@ void readSerialCommand() {
       default:
         break;
       }
-    } 
-  } 
+    }
+  }
   system_dropped_packets += status.packet_rx_drop_count;
 }
 
