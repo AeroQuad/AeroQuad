@@ -109,7 +109,7 @@ void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->P = nvrReadFloat(IDEeprom);
   pid->I = nvrReadFloat(IDEeprom+4);
   pid->D = nvrReadFloat(IDEeprom+8);
-//  pid->lastError = 0;
+  pid->lastError = 0;
   pid->integratedError = 0;
 }
 
@@ -147,6 +147,7 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].P = 100.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -300.0;
+  rotationSpeedFactor = 1.0;
 
   #if defined (AltitudeHoldBaro)
     PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
@@ -179,13 +180,12 @@ void initializeEEPROM() {
   gyroZero[XAXIS] = 0.0;
   gyroZero[YAXIS] = 0.0;
   gyroZero[ZAXIS] = 0.0;
-  gyroSmoothFactor = 0.0;
-  gyroTempBiasSlope[XAXIS] = 0.0;
-  gyroTempBiasSlope[YAXIS] = 0.0;
-  gyroTempBiasSlope[ZAXIS] = 0.0;
-  gyroTempBiasIntercept[XAXIS] = 0.0;
-  gyroTempBiasIntercept[YAXIS] = 0.0;
-  gyroTempBiasIntercept[ZAXIS] = 0.0;
+//  gyroTempBiasSlope[XAXIS] = 0.0;
+//  gyroTempBiasSlope[YAXIS] = 0.0;
+//  gyroTempBiasSlope[ZAXIS] = 0.0;
+//  gyroTempBiasIntercept[XAXIS] = 0.0;
+//  gyroTempBiasIntercept[YAXIS] = 0.0;
+//  gyroTempBiasIntercept[ZAXIS] = 0.0;
   
   // Accel Cal
   accelScaleFactor[XAXIS] = 1.0;
@@ -218,7 +218,6 @@ void initializeEEPROM() {
     
   receiverXmitFactor = 1.0;
   minArmedThrottle = 1150;
-  gyroSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
@@ -292,6 +291,8 @@ void readEEPROM() {
   readPID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
+  rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
@@ -389,6 +390,9 @@ void writeEEPROM(){
   writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
+  
+  writeFloat(rotationSpeedFactor,ROTATION_SPEED_FACTOR_ARD);
+  
   #if defined AltitudeHoldBaro
     writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
     writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
@@ -424,7 +428,6 @@ void writeEEPROM(){
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
-  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
@@ -492,14 +495,7 @@ void initSensorsZeroFromEEPROM() {
   gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
   gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
   gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-  gyroSmoothFactor = readFloat(GYROSMOOTH_ADR);
-//  gyroTempBiasSlope[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasSlope[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasSlope[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasIntercept[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR);
-//  gyroTempBiasIntercept[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
-//  gyroTempBiasIntercept[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
- 
+
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
   // Accel calibration
@@ -516,14 +512,6 @@ void storeSensorsZeroToEEPROM() {
   writeFloat(gyroZero[XAXIS], GYRO_ROLL_ZERO_ADR);
   writeFloat(gyroZero[YAXIS], GYRO_PITCH_ZERO_ADR);
   writeFloat(gyroZero[ZAXIS], GYRO_YAW_ZERO_ADR);
-  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
-  
-  writeFloat(gyroTempBiasSlope[XAXIS], GYRO_ROLL_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasSlope[YAXIS], GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasSlope[ZAXIS], GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasIntercept[XAXIS], GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR);
-  writeFloat(gyroTempBiasIntercept[YAXIS], GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
-  writeFloat(gyroTempBiasIntercept[ZAXIS], GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);

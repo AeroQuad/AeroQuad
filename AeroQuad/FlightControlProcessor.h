@@ -52,8 +52,8 @@ void calculateFlightError()
     motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*0.8, &PID[RATE_XAXIS_PID_IDX]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*0.8, &PID[RATE_YAXIS_PID_IDX]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
   }
 }
 
@@ -320,7 +320,12 @@ void processFlightControl() {
   if (receiverCommand[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minArmedThrottle;
-      motorMaxCommand[motor] = minArmedThrottle;
+      if (inFlight && flightMode == RATE_FLIGHT_MODE) {
+        motorMaxCommand[motor] = MAXCOMMAND;
+      }
+      else {
+        motorMaxCommand[motor] = minArmedThrottle;
+      }
     }
   }
   
