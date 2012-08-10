@@ -71,6 +71,7 @@ byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
+float rotationSpeedFactor = 1.0; 
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -274,7 +275,6 @@ typedef struct {
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
-  float GYROSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
@@ -289,12 +289,7 @@ typedef struct {
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
-  float GYRO_ROLL_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_PITCH_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_YAW_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR;
-  float GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR;
-  float GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR;
+  float ROTATION_SPEED_FACTOR_ARD;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
   float XAXIS_ACCEL_SCALE_FACTOR_ADR;

@@ -56,7 +56,7 @@ void measureGyro() {
 	
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) { 
     float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
+    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor; 
   }
   
   // Measure gyro heading

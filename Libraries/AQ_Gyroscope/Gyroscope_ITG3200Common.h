@@ -44,8 +44,6 @@
 
 
 float gyroTempBias[3] = {0.0,0.0,0.0};
-
-void computeGyroTCBias();
 void measureSpecificGyroADC(int *gyroADC);
 void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(int *gyroADC);
@@ -61,15 +59,6 @@ void initializeGyro() {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
 
-void computeGyroTCBias() {
-  readGyroTemp();
-
-  for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroTempBias[axis]  = gyroTempBiasSlope[axis]  * gyroTemperature + gyroTempBiasIntercept[axis];
-  }
-}
-
-
 void measureGyro() {
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
@@ -77,10 +66,8 @@ void measureGyro() {
   int gyroADC[3];
   measureSpecificGyroADC(gyroADC);
   
-  computeGyroTCBias();
-
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
+	gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
  
   // Measure gyro heading
@@ -100,12 +87,6 @@ void measureGyroSum() {
   gyroSampleCount++;
 }
 
-void readGyroTemp() {
-  sendByteI2C(ITG3200_ADDRESS, ITG3200_TEMPERATURE_ADDRESS);
-  Wire.requestFrom(ITG3200_ADDRESS, 2);
-  gyroTemperature = (readWordI2C() + 13200) / 280 + 35;
-}
-
 void evaluateGyroRate() {
   int gyroADC[3];
   evaluateSpecificGyroRate(gyroADC);
@@ -114,10 +95,8 @@ void evaluateGyroRate() {
   gyroSample[ZAXIS] = 0;
   gyroSampleCount = 0;
 
-  computeGyroTCBias();
-  
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth((gyroADC[axis] * gyroScaleFactor) - gyroTempBias[axis], gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
   
   // Measure gyro heading
