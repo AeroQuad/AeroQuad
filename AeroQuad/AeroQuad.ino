@@ -538,97 +538,6 @@
   }
 #endif
 
-
-#ifdef AutonavShield
-  #define LED_Green 13
-  #define LED_Red 4
-  #define LED_Yellow 31
-
-  #include <Device_I2C.h>
-
-  // Gyroscope declaration
-  #include <Gyroscope_ITG3200.h>
-
-  // Accelerometer declaration
-  #include <Accelerometer_BMA180.h>
-
-  // Receiver Declaration
-  #define RECEIVER_MEGA
-
-  // Motor declaration
-  #define MOTOR_PWM_Timer
-
-  // heading mag hold declaration
-  #ifdef HeadingMagHold
-//    #define SPARKFUN_5883L_BOB
-    #define AutonavShield_5883L
-//    #define HMC5843
-  #endif
-
-  // Altitude declaration
-  #ifdef AltitudeHoldBaro    
-    #define BMP085
-  #endif
-  #ifdef AltitudeHoldRangeFinder
-    #define XLMAXSONAR 
-  #endif
-
-  // Battery Monitor declaration
-  #ifdef BattMonitor
-    #ifdef POWERED_BY_VIN
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
-    #else
-      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
-    #endif
-  #else
-    #undef BattMonitorAutoDescent
-    #undef POWERED_BY_VIN        
-  #endif
-
-  #ifdef OSD
-    #define MAX7456_OSD
-  #endif  
-  
-  #ifndef UseGPS
-    #undef UseGPSNavigator
-  #endif
-
-  /**
-   * Put AeroQuadMega_v2 specific initialization need here
-   */
-  void initPlatform() {
-
-    pinMode(LED_Red, OUTPUT);
-    digitalWrite(LED_Red, LOW);
-    pinMode(LED_Yellow, OUTPUT);
-    digitalWrite(LED_Yellow, LOW);
-
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
-    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
-    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
-    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
-    pinMode(43, OUTPUT); // LED 1
-    pinMode(44, OUTPUT); // LED 2
-    pinMode(45, OUTPUT); // LED 3
-    pinMode(46, OUTPUT); // LED 4
-    digitalWrite(43, HIGH); // LED 1 on
-    digitalWrite(44, HIGH); // LED 2 on
-    digitalWrite(45, HIGH); // LED 3 on
-    digitalWrite(46, HIGH); // LED 4 on
-
-    Wire.begin();
-    TWBR = 12;
-  }
-
-  /**
-   * Measure critical sensors
-   */
-  void measureCriticalSensors() {
-    measureGyroSum();
-    measureAccelSum();
-  }
-#endif
-
 #ifdef ArduCopter
   #define LED_Green 37
   #define LED_Red 35
@@ -1271,18 +1180,6 @@ void setup() {
   initializeReceiver(LASTCHANNEL);
   initReceiverFromEEPROM();
 
-  // Initialize sensors
-  // If sensors have a common initialization routine
-  // insert it into the gyro class because it executes first
-  initializeGyro(); // defined in Gyro.h
-  initializeAccel(); // defined in Accel.h
-  initSensorsZeroFromEEPROM();
-
-  // Calibrate sensors
-  calibrateGyro();
-//  computeAccelBias();
-  zeroIntegralError();
-
   initializeKinematics();
   // Flight angle estimation
   #ifdef HeadingMagHold
@@ -1358,9 +1255,18 @@ void setup() {
 
   setupFourthOrder();
   
-//  PID[ZAXIS_PID_IDX].type = 1;
-//  PID[ATTITUDE_XAXIS_PID_IDX].type = 1;
-//  PID[ATTITUDE_YAXIS_PID_IDX].type = 1;
+  // Initialize sensors
+  // If sensors have a common initialization routine
+  // insert it into the gyro class because it executes first
+  initializeGyro(); // defined in Gyro.h
+  initializeAccel(); // defined in Accel.h
+  initSensorsZeroFromEEPROM();
+
+  // Calibrate sensors
+  calibrateGyro();
+//  computeAccelBias();
+  zeroIntegralError();
+
   
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
