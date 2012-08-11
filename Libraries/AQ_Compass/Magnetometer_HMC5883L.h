@@ -30,7 +30,7 @@
 
 void readSpecificMag(float *rawMag) {
 
-  #if defined(SPARKFUN_9DOF_5883L) || defined(HMC5883L)
+  #if defined(SPARKFUN_9DOF_5883L)
     // JI - 1/4/12 - Add _5883L to define
     // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
     // JI - 11/24/11 - 5883L X axis points aft
@@ -45,6 +45,10 @@ void readSpecificMag(float *rawMag) {
     rawMag[XAXIS] = readShortI2C();
     rawMag[ZAXIS] = readShortI2C();
     rawMag[YAXIS] = readShortI2C();
+  #elif defined (HMC5883L)  // baloo
+    rawMag[YAXIS] =  readShortI2C();
+    rawMag[ZAXIS] = -readShortI2C();
+    rawMag[XAXIS] =  readShortI2C();
   #else 
     #error Define HMC5883L Orientation
   #endif
