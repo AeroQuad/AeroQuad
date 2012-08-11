@@ -51,8 +51,8 @@
 // Special motor config additionnal variable
 #if defined(quadXHT_FPVConfig)
  #define quadXConfig
- #define FRONT_YAW_CORRECTION 0.83
- #define REAR_YAW_CORRECTION 1.13
+ #define FRONT_YAW_CORRECTION 0.95
+ #define REAR_YAW_CORRECTION 1.17
 #endif
 
 //
@@ -1004,7 +1004,7 @@
 #if defined(HMC5843)
   #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5843.h>
-#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(AutonavShield_5883L)
+#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
   #include <HeadingFusionProcessorCompFilter.h>
   #include <Magnetometer_HMC5883L.h>
 #elif defined(COMPASS_CHR6DM)
@@ -1124,9 +1124,6 @@
 #endif
 
 
-
-
-
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
@@ -1181,12 +1178,7 @@ void setup() {
   initReceiverFromEEPROM();
 
   initializeKinematics();
-  // Flight angle estimation
-  #ifdef HeadingMagHold
-    vehicleState |= HEADINGHOLD_ENABLED;
-    initializeMagnetometer();
-    initializeHeadingFusion();
-  #endif
+
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
   // Set for 1/2 max attitude command (+/-0.75 radians)
@@ -1265,7 +1257,13 @@ void setup() {
   // Calibrate sensors
   calibrateGyro();
 //  computeAccelBias();
-  zeroIntegralError();
+  // Flight angle estimation
+  #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
+    initializeMagnetometer();
+    initializeHeadingFusion();
+  #endif
+
 
   
   previousTime = micros();
@@ -1430,7 +1428,7 @@ void loop () {
         updateSlowTelemetry10Hz();
       #endif
     }
-    
+
     #ifdef MavLink
      if (frameCounter % TASK_1HZ == 0) {  //  1 Hz tasks
 

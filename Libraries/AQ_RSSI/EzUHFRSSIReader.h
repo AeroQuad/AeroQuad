@@ -25,9 +25,9 @@
 
 #define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
 #define RSSI_MAX_RAW_VALUE 1001
-#define RSSI_MIN_RAW_VALUE 1485
-#define SIGNAL_QUALITY_MAX_RAW_VALUE 1885
-#define SIGNAL_QUALITY_MIN_RAW_VALUE 1543
+#define RSSI_MIN_RAW_VALUE 2000
+#define SIGNAL_QUALITY_MAX_RAW_VALUE 2001
+#define SIGNAL_QUALITY_MIN_RAW_VALUE 1614
 
 #define RSSI_WARN    20     // show alarm at %
 
