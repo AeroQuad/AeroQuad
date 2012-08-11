@@ -389,10 +389,6 @@ void sendSerialSysStatus() {
   SERIAL_PORT.write(buf, len);
 }
 
-
-
-
-
 void sendSerialPID(int IDPid, int8_t id_p[], int8_t id_i[], int8_t id_d[], int8_t id_windUp[], int listsize, int index) {
 
   int counter = 0;
@@ -499,10 +495,6 @@ void sendParameterListPart1() {
 
   int8_t heading_config[14] = "Heading_Conf";
   sendSerialParameter(headingHoldConfig, heading_config, parameterListSize, indexCounter);
-  indexCounter++;
-
-  int8_t gyro_smooth_factor[14] = "Misc_GyroSmoo";
-  sendSerialParameter(gyroSmoothFactor, gyro_smooth_factor, parameterListSize, indexCounter);
   indexCounter++;
 
   int8_t a_ref[14] = "Misc_AREF";
@@ -857,16 +849,6 @@ int findParameter(char* key) {
   if (checkParameterMatch(parameterNameHeadingConfig, key)) {
     paramIndicator = NONE;
     parameterToBeChangedByte = &headingHoldConfig;
-    return -1;
-  }
-  if (checkParameterMatch(parameterNameGyroSmooth, key)) {
-    paramIndicator = NONE;
-    parameterToBeChangedFloat = &gyroSmoothFactor;
-    return -1;
-  }
-  if (checkParameterMatch(parameterNameGyroSmooth, key)) {
-    paramIndicator = NONE;
-    parameterToBeChangedFloat = &gyroSmoothFactor;
     return -1;
   }
   if (checkParameterMatch(parameterNameAREF, key)) {
