@@ -29,7 +29,7 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-// 328p platform
+// 328p processor
 //#define AeroQuad_v1         // Arduino Uno with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino Uno with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
@@ -37,7 +37,7 @@
 //#define AeroQuad_Wii        // Arduino Uno with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
-// Mega platform
+// Mega processor
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
@@ -46,7 +46,7 @@
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
 
-// STM32 platform
+// STM32 processor
 #define AeroQuadSTM32        // Baloo board
 
 
@@ -96,7 +96,7 @@
 //#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
 //#define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
-//#define UseGPS			// Enables GPS, tries to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
+#define UseGPS			// Enables GPS, tries to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
 //#define UseGPSNavigator		// EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
 
 //
@@ -145,7 +145,7 @@
 // *******************************************************************************************************************************
 //#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
-//#define MavLink		// Enables the MavLink protocol
+//#define MavLink               // Enables the MavLink protocol
 //#define MAV_SYSTEM_ID 100	// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 				// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
