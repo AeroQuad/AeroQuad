@@ -206,7 +206,7 @@ void initializeEEPROM() {
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i <= LAST_PID_IDX; i++ ) {
+  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
     #if defined AltitudeHoldBaro
       if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
         PID[i].windupGuard = windupGuard;
@@ -327,7 +327,7 @@ void readEEPROM() {
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the EEPROM
-  for (byte i = XAXIS; i <= LAST_PID_IDX; i++ ) {
+  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
     #if defined AltitudeHoldBaro
       if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
         PID[i].windupGuard = windupGuard;
