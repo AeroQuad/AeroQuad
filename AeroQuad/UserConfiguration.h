@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0.1 - February 2012
+  AeroQuad v3.x - 2012
   www.AeroQuad.com
   Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -19,116 +19,143 @@
 */
 
 /****************************************************************************
+				The AeroQuad Manual can be found here:
+		http://aeroquad.com/showwiki.php?title=Book:AeroQuad+Manual
+ ****************************************************************************/
+
+
+/****************************************************************************
  ************************* Hardware Configuration ***************************
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-// 328p platform
-//#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-//#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
+// 328p processor
+//#define AeroQuad_v1         // Arduino Uno with AeroQuad Shield v1.7 and below
+//#define AeroQuad_v1_IDG     // Arduino Uno with AeroQuad Shield v1.7 and below using IDG yaw gyro
+//#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+//#define AeroQuad_Wii        // Arduino Uno with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
-// Mega platform
+// Mega processor
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
+//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
+
+// STM32 processor
+#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
+//For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
+
 #define quadXConfig
+//#define quadXHT_FPVConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-//#define hexXConfig      // EXPERIMENTAL: not completely re-tested
+//#define hexXConfig      
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Config
-//#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
-//#define octoXConfig     // EXPERIMENTAL: not completely re-tested
+//#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
+//#define octoXConfig			// EXPERIMENTAL: not completely re-tested
 
-//#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
+
+// MOTOR ADVANCE CONFIG SECTION
+//#define CHANGE_YAW_DIRECTION	// if you want to reverse the yaw correction direction
+
+#define USE_400HZ_ESC			// For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
+
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
-// Please refer to the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
+// Please refer to our wiki (http://aeroquad.com/showwiki.php?title=Flight+Configurations)
+// or the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
-
-//
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// You must define *only* one of the following flightAngle calculations
-// If you only want DCM, then don't define either of the below
-// Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above//
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define OLD_MOTOR_NUMBERING	// Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // *******************************************************************************************************************************
 // Optional Sensors
-// Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
+// Warning:  If you enable HeadingMagHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
+// For more information on how to activate theese features with your transmitter
+// Please refer to http://aeroquad.com/showwiki.php?title=Using+the+transmitters+sticks+and+switches+to+operate+your+AeroQuad
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
-//#define UseGPS // EXPERIMENTAL, use GPS for position hold or navigation (Serial1 , speed 38400, 5Hz update rate, needed)
-//#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
+#define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHoldBaro		// Enables Barometer
+//#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
+//#define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
+
+#define UseGPS			// Enables GPS, tries to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
+//#define UseGPSNavigator		// EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
 
 //
 // *******************************************************************************************************************************
 // Battery Monitor Options
-// For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
+// For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
 // *******************************************************************************************************************************
-#define BattMonitor            // Enable Battery monitor
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor		  // Enables Battery monitor
+//#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
+//#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //
-// Advanced configuration. Please refer to wiki for instructions
-//#define BattCustomConfig DEFINE_BATTERY(cellcount,vpin,vscale,vbias,cpin,cscale,cbias) // cpin=BM_NOPIN if no sensor
+// Advanced configuration. Please refer to the wiki for instructions.
+#define BattCustomConfig DEFINE_BATTERY(3,BATT_ANALOG_INPUT,25.3,0,A6,66,0)
 
 //
 // *******************************************************************************************************************************
 // Optional Receiver
+// For more information on how to connect your receiver to your AeroQuad board please refer to http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
 // *******************************************************************************************************************************
-//#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
-//#define ReceiverPPM // Use a ppm receiver
-//#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
+//#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
+//#define RemotePCReceiver	// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
+//#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels
+#define ReceiverPPM		// Use a PPM receiver
+//#define ReceiverHWPPM		// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
+
 // You need to select one of these channel order definitions for PPM receiver
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1 //For Graupner/Spektrum (DEFAULT)
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3 //For some Hitec/Sanwa/Others
+//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
+#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2	//For Robe/Hitec/Futaba
+//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
+
+//#define UseAnalogRSSIReader // Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+#define UseEzUHFRSSIReader // Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
+
+//
+// *******************************************************************************************************************************
+// Define how many channels are connected from your R/C receiver
+// *******************************************************************************************************************************
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8
+
 
 //
 // *******************************************************************************************************************************
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Xbee+Installation
 // *******************************************************************************************************************************
-//#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
-//#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
+//#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+
+//#define MavLink               // Enables the MavLink protocol
+//#define MAV_SYSTEM_ID 100	// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+				// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
 //
 // *******************************************************************************************************************************
-// Define how many channels are connected from your R/C receiver
-// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
-// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// Optional audio channel telemetry (for ground station tracking purposes)
+// This will output telemetry at slow (1200baud) rate once per second on Serial2. 
 // *******************************************************************************************************************************
-#define LASTCHANNEL 6
-//#define LASTCHANNEL 8 // - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
+//#define SlowTelemetry		// Enables audio channel telemetry on Serial2
+
 
 //
 // *******************************************************************************************************************************
@@ -139,6 +166,7 @@
 // D11 to D34 for pitch, connect servo to SERVO2
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
+// For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
 //#define CameraControl
 
@@ -146,15 +174,26 @@
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
-// *******************************************************************************************************************************
-//#define OSD
+// *************************************************************.******************************************************************
+#define OSD
+#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "AeroQD"         // Show (optional) callsign
+//#define CALLSIGN "Aeroquad"       // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
-//#define feet                      // Leave commented for altitude measured in metres, uncomment for feet
+//#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
 
-//#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD
+#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
+
+//
+// *******************************************************************************************************************************
+// Support menu on serial enabled LCD display (16x2 characters).  You can change serial port if needed
+// Note: Can NOT be enabled at the same time with OSD
+// For more information please refer to http://aeroquad.com/showwiki.php?title=OnBoardMenu
+// *************************************************************.******************************************************************
+//#define SERIAL_LCD Serial3
+
+
 
 /****************************************************************************
  ****************************************************************************

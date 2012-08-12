@@ -1,6 +1,34 @@
-AeroQuad Flight Software Source Code 3.0.1
+AeroQuad Flight Software Source Code 3.1 Beta 1
 ========================================
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
+
+Version 3.1 Beta 1 Release Notes (7/1/2012)
+----------------------------------------
+* Waypoint following (Waypoints uploaded from Configurator)
+* Auto Descent/Land (Must be tuned for your individual setup)
+* GPS Position Hold
+* GPS Return to Home
+* Obstacle detection
+ * Uses ultrasonic sensors to detect if objects are nearby and displays on the OSD
+* Telemetry over audio channel of your video transmitter
+ * Requires telemetry modem soon to come to AeroQuad store)
+* Option to enable 400Hz update rate to motors (ESC's must support this)
+* Fixed hex configuration motor control
+* OSD improvements to support above features
+ * Ability to tune PIDs and store them
+ * Graphical indication when objects are nearby
+ * Icons to denote flight mode (acro, stable, position hold)
+ * Return to home arrow and distance to home
+* Transmitter switch assignments for new features
+ * AUX1 or AUX2 < 1750 = Altitude hold (baro or ultrasonic)
+ * AUX3 < 1750 = Auto descent/land (baro or ultrasonic)
+* If GPS Navigation Enabled
+ * AUX2 < 1750 = Start waypoint following
+ * AUX1 < 1600 = GPS position hold
+  * If AUX1 in middle switch position = altitude hold
+  * If AUX1 in last position = GPS position hold
+* Support for AeroQuad 32 board
+ * Updated Maple libraries
 
 Version 3.0.1 Release Notes (2/21/2012)
 ----------------------------------------

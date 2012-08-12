@@ -38,12 +38,10 @@ void initializeCameraControl() {
   ICR4 = 39999; //50hz freq (standard servos)
 }
   
-void cameraControlMove() {
-  if (mode > 0) {
-    OCR4A = servoPitch * 2;
-    OCR4B = servoRoll * 2;
-    OCR4C = servoYaw * 2;
-  }
+void cameraControlMove(int servoPitch, int servoRoll, int servoYaw) {
+  OCR4A = servoPitch * 2;
+  OCR4B = servoRoll * 2;
+  OCR4C = servoYaw * 2;
 }
 
 

@@ -60,11 +60,11 @@ float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
 float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
-  
+
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float G_Dt) {
   
   float norm;
   float vx, vy, vz;
@@ -109,9 +109,9 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   previousEz = ez;
 	
   // adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx = gx + Kp*ex + exInt;
-  correctedRateVector[YAXIS] = gy = gy + Kp*ey + eyInt;
-  correctedRateVector[ZAXIS] = gz = gz + Kp*ez + ezInt;
+  gx = gx + Kp*ex + exInt;
+  gy = gy + Kp*ey + eyInt;
+  gz = gz + Kp*ez + ezInt;
     
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -129,11 +129,6 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   q1 = q1 / norm;
   q2 = q2 / norm;
   q3 = q3 / norm;
-    
-  // save the adjusted gyroscope measurements
-  correctedRateVector[XAXIS] = gx;
-  correctedRateVector[YAXIS] = gy;
-  correctedRateVector[ZAXIS] = gz;
 }
   
 void eulerAngles()
@@ -147,9 +142,9 @@ void eulerAngles()
 // Initialize ARG
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeKinematics(float hdgX, float hdgY) 
+void initializeKinematics() 
 {
-  initializeBaseKinematicsParam(hdgX,hdgY);
+  initializeBaseKinematicsParam();
   q0 = 1.0;
   q1 = 0.0;
   q2 = 0.0;
@@ -171,12 +166,10 @@ void initializeKinematics(float hdgX, float hdgY)
 ////////////////////////////////////////////////////////////////////////////////
 void calculateKinematics(float rollRate,          float pitchRate,    float yawRate,  
                          float longitudinalAccel, float lateralAccel, float verticalAccel, 
-                         float measuredMagX,      float measuredMagY, float measuredMagZ,
                          float G_DT) {
     
   argUpdate(rollRate,          pitchRate,    yawRate, 
             longitudinalAccel, lateralAccel, verticalAccel,  
-            measuredMagX,      measuredMagY, measuredMagZ,
 		    G_Dt);
   eulerAngles();
 }

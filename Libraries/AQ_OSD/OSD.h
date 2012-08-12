@@ -21,8 +21,6 @@
 #ifndef _AQ_OSD_H_
 #define _AQ_OSD_H_
 
-byte OSDsched = 0;
-
 #ifdef BattMonitor
   void displayVoltage(byte areMotorsArmed);
 #endif
@@ -30,7 +28,7 @@ byte OSDsched = 0;
   void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altitudeHoldState);
 #endif
 #ifdef HeadingMagHold
-  void displayHeading(int currentHeading);
+  void displayHeading(float currentHeading);
 #endif
 #ifdef ShowRSSI
   void displayRSSI();
@@ -38,11 +36,20 @@ byte OSDsched = 0;
 #ifdef ShowAttitudeIndicator
   void displayArtificialHorizon(float roll, float pitch, byte flightMode);
 #endif
+#ifdef UseGPS
+  void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheading,unsigned int numsats);
+#endif
+#ifdef AltitudeHoldRangeFinder
+  void displayRanger();
+#endif
 
 void initializeOSD();
 void updateOSD();
 void displayFlightTime(byte areMotorsArmed);
 byte displayNotify();
+
+void hideOSD();
+void unhideOSD();
 
 // OSD notification system
 //
