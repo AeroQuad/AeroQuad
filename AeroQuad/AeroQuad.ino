@@ -1035,7 +1035,9 @@
 //************** CAMERA CONTROL DECLARATION **************
 //********************************************************
 // used only on mega for now
-#ifdef CameraControl
+#if defined(CameraControl_STM32)
+  #include <CameraStabilizer_STM32.h>
+#elif defined(CameraControl)
   #include <CameraStabilizer_Aeroquad.h>
 #endif
 

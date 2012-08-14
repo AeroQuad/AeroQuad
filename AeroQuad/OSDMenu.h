@@ -499,7 +499,7 @@ void menuHideOSD(byte mode, byte action){
 short savedCenterYaw, savedCenterPitch, savedCenterRoll;
 byte  savedCameraMode;
 
-#define POWERSAVE 10 // enable to shut off servos after idle
+// #define POWERSAVE 10 // enable to shut off servos after idle
 #if defined (POWERSAVE)
   byte idleCounter = POWERSAVE;
 #endif
