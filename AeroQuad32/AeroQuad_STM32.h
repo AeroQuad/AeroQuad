@@ -113,7 +113,9 @@ tSerial &Serial = SERIAL_VAR;
 	#define MAX7456_OSD
 #endif
 
-
+#ifdef CameraControl
+        #define CameraControl_STM32
+#endif
 
 /**
  * Put AeroQuadSTM32 specific initialization need here
