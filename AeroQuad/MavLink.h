@@ -26,7 +26,7 @@
 // MavLink 1.0 DKP
 #include "../mavlink/include/mavlink/v1.0/common/mavlink.h"
 
-#include "Aeroquad.h"
+#include "AeroQuad.h"
 
 enum parameterTypeIndicator
 {
