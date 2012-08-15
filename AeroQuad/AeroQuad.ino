@@ -1243,10 +1243,6 @@ void setup() {
      initSlowTelemetry();
   #endif
 
-  #ifdef MavLink
-	 initCommunication();
-  #endif
-
   setupFourthOrder();
   
   // Initialize sensors
