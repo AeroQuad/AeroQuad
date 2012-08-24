@@ -90,8 +90,8 @@ void measureGyro() {
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) { 
     //value = (Wire.read() | (Wire.read() << 8));
       value = gyroAxisInversionFactor[axis] * readReverseShortI2C();
-      gyroRate[axis] = filterSmooth(value * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
-      //gyroRate[axis] = value;
+      //gyroRate[axis] = filterSmooth(value * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+      gyroRate[axis] = value * gyroScaleFactor;
   }
   
   // Measure gyro heading
