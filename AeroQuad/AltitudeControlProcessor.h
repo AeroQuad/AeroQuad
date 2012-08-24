@@ -47,8 +47,12 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
+  
+  #if defined AltitudeHoldBaro
+    evaluateBaroAltitude();
+  #endif
+  
   if (altitudeHoldState == ON) {
-
     int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
     // computer altitude error!
     #if defined AltitudeHoldRangeFinder
