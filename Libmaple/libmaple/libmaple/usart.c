@@ -32,15 +32,14 @@
  */
 
 #include "usart.h"
+#define USART_TX_IRQ
 
 /*
  * Devices
  */
 
-static ring_buffer usart1_rb;
 static usart_dev usart1 = {
     .regs     = USART1_BASE,
-    .rb       = &usart1_rb,
     .max_baud = 4500000UL,
     .clk_id   = RCC_USART1,
     .irq_num  = NVIC_USART1
@@ -48,10 +47,8 @@ static usart_dev usart1 = {
 /** USART1 device */
 usart_dev *USART1 = &usart1;
 
-static ring_buffer usart2_rb;
 static usart_dev usart2 = {
     .regs     = USART2_BASE,
-    .rb       = &usart2_rb,
     .max_baud = 2250000UL,
     .clk_id   = RCC_USART2,
     .irq_num  = NVIC_USART2
@@ -59,10 +56,8 @@ static usart_dev usart2 = {
 /** USART2 device */
 usart_dev *USART2 = &usart2;
 
-static ring_buffer usart3_rb;
 static usart_dev usart3 = {
     .regs     = USART3_BASE,
-    .rb       = &usart3_rb,
     .max_baud = 2250000UL,
     .clk_id   = RCC_USART3,
     .irq_num  = NVIC_USART3
@@ -71,10 +66,8 @@ static usart_dev usart3 = {
 usart_dev *USART3 = &usart3;
 
 #ifdef STM32_HIGH_DENSITY
-static ring_buffer uart4_rb;
 static usart_dev uart4 = {
     .regs     = UART4_BASE,
-    .rb       = &uart4_rb,
     .max_baud = 2250000UL,
     .clk_id   = RCC_UART4,
     .irq_num  = NVIC_UART4
@@ -82,10 +75,8 @@ static usart_dev uart4 = {
 /** UART4 device */
 usart_dev *UART4 = &uart4;
 
-static ring_buffer uart5_rb;
 static usart_dev uart5 = {
     .regs     = UART5_BASE,
-    .rb       = &uart5_rb,
     .max_baud = 2250000UL,
     .clk_id   = RCC_UART5,
     .irq_num  = NVIC_UART5
@@ -99,7 +90,8 @@ usart_dev *UART5 = &uart5;
  * @param dev         Serial port to be initialized
  */
 void usart_init(usart_dev *dev) {
-    rb_init(dev->rb, USART_RX_BUF_SIZE, dev->rx_buf);
+    rb_init(&dev->rbRX, USART_RX_BUF_SIZE, dev->rx_buf);
+    rb_init(&dev->rbTX, USART_TX_BUF_SIZE, dev->tx_buf);
     rcc_clk_enable(dev->clk_id);
     nvic_irq_enable(dev->irq_num);
 }
@@ -144,6 +136,25 @@ void usart_enable(usart_dev *dev) {
     regs->CR1 |= USART_CR1_UE;
 }
 
+
+/**
+ * @brief Enable serial port tx interrupt.
+ *
+ * @param dev Serial port.
+ */
+void usart_tx_irq_enable(usart_dev *dev) {
+    bb_peri_set_bit(&dev->regs->CR1, USART_CR1_TXEIE_BIT, 1);
+}
+
+/**
+ * @brief Disable serial port tx interrupt.
+ *
+ * @param dev Serial port.
+ */
+void usart_tx_irq_disable(usart_dev *dev) {
+    bb_peri_set_bit(&dev->regs->CR1, USART_CR1_TXEIE_BIT, 0);
+}
+
 /**
  * @brief Turn off a serial port.
  * @param dev Serial port to be disabled
@@ -151,6 +162,10 @@ void usart_enable(usart_dev *dev) {
 void usart_disable(usart_dev *dev) {
     /* FIXME this misbehaves if you try to use PWM on TX afterwards */
     usart_reg_map *regs = dev->regs;
+
+    // flush output buffer
+    while(usart_data_pending(dev) > 0)
+    	;
 
     /* TC bit must be high before disabling the USART */
     while((regs->CR1 & USART_CR1_UE) && !(regs->SR & USART_SR_TC))
@@ -185,11 +200,20 @@ void usart_foreach(void (*fn)(usart_dev*)) {
  * @return Number of bytes transmitted
  */
 uint32 usart_tx(usart_dev *dev, const uint8 *buf, uint32 len) {
-    usart_reg_map *regs = dev->regs;
     uint32 txed = 0;
+#ifdef USART_TX_IRQ
+    while (txed < len && rb_safe_insert(&dev->rbTX, buf[txed])) {
+    	usart_tx_irq_enable(dev);
+    	txed++;
+    }
+
+#else
+    usart_reg_map *regs = dev->regs;
     while ((regs->SR & USART_SR_TXE) && (txed < len)) {
         regs->DR = buf[txed++];
     }
+#endif
+
     return txed;
 }
 
@@ -220,16 +244,31 @@ void usart_putudec(usart_dev *dev, uint32 val) {
 /*
  * Interrupt handlers.
  */
-
 static inline void usart_irq(usart_dev *dev) {
+	volatile int sr = dev->regs->SR;
+	if(sr & USART_SR_RXNE) {
 #ifdef USART_SAFE_INSERT
-    /* If the buffer is full and the user defines USART_SAFE_INSERT,
-     * ignore new bytes. */
-    rb_safe_insert(dev->rb, (uint8)dev->regs->DR);
+		/* If the buffer is full and the user defines USART_SAFE_INSERT,
+		 * ignore new bytes. */
+		rb_safe_insert(&dev->rbRX, (uint8)dev->regs->DR);
 #else
-    /* By default, push bytes around in the ring buffer. */
-    rb_push_insert(dev->rb, (uint8)dev->regs->DR);
+		/* By default, push bytes around in the ring buffer. */
+		rb_push_insert(&dev->rbRX, (uint8)dev->regs->DR);
 #endif
+
+#ifdef USART_TX_IRQ
+	} else if(sr & USART_SR_TXE) {
+		if(rb_full_count(&dev->rbTX) > 0) {
+			dev->regs->DR = rb_remove(&dev->rbTX);
+		} else {
+			usart_tx_irq_disable(dev); // disable tx irq
+			// nops needed to deactivate the irq before irq handler is left
+		    asm volatile("nop");
+		    asm volatile("nop");
+		}
+#endif
+
+	}
 }
 
 void __irq_usart1(void) {

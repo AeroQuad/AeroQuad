@@ -39,6 +39,8 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "ring_buffer.h"
+#include "bitband.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -236,15 +238,21 @@ typedef struct usart_reg_map {
 #define USART_RX_BUF_SIZE               256
 #endif
 
+#ifndef USART_TX_BUF_SIZE
+#define USART_TX_BUF_SIZE               256
+#endif
+
 /** USART device type */
 typedef struct usart_dev {
     usart_reg_map *regs;             /**< Register map */
-    ring_buffer *rb;                 /**< RX ring buffer */
+    ring_buffer rbRX;                 /**< RX ring buffer */
+    ring_buffer rbTX;                 /**< RX ring buffer */
     uint32 max_baud;                 /**< Maximum baud */
     uint8 rx_buf[USART_RX_BUF_SIZE]; /**< @brief Deprecated.
                                       * Actual RX buffer used by rb.
                                       * This field will be removed in
                                       * a future release. */
+    uint8 tx_buf[USART_TX_BUF_SIZE];
     rcc_clk_id clk_id;               /**< RCC clock information */
     nvic_irq_num irq_num;            /**< USART NVIC interrupt */
 } usart_dev;
@@ -312,7 +320,7 @@ static inline void usart_putstr(usart_dev *dev, const char* str) {
  * @see usart_data_available()
  */
 static inline uint8 usart_getc(usart_dev *dev) {
-    return rb_remove(dev->rb);
+    return rb_remove(&dev->rbRX);
 }
 
 /**
@@ -321,7 +329,16 @@ static inline uint8 usart_getc(usart_dev *dev) {
  * @return Number of bytes in dev's RX buffer.
  */
 static inline uint32 usart_data_available(usart_dev *dev) {
-    return rb_full_count(dev->rb);
+    return rb_full_count(&dev->rbRX);
+}
+
+/**
+ * @brief Return the amount of data available in a serial port's TX buffer.
+ * @param dev Serial port to check
+ * @return Number of bytes in dev's TX buffer.
+ */
+static inline uint32 usart_data_pending(usart_dev *dev) {
+    return rb_full_count(&dev->rbTX);
 }
 
 /**
@@ -329,7 +346,7 @@ static inline uint32 usart_data_available(usart_dev *dev) {
  * @param dev Serial port whose buffer to empty.
  */
 static inline void usart_reset_rx(usart_dev *dev) {
-    rb_reset(dev->rb);
+    rb_reset(&dev->rbRX);
 }
 
 #ifdef __cplusplus
