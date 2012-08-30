@@ -155,7 +155,8 @@
 // This will output telemetry at slow (1200baud) rate once per second on Serial2. 
 // *******************************************************************************************************************************
 //#define SlowTelemetry		// Enables audio channel telemetry on Serial2
-
+//#define SoftModem             // Enable usage of DAC as modem on AQ32 instead of Serial 2
+//#define SOFTMODEM_FSKv2       // Enable non standard FSK frequencies used by FSKv2 module (TCM3105 at 8Mhz)
 
 //
 // *******************************************************************************************************************************

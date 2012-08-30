@@ -163,7 +163,10 @@ EXTRAINCDIRS += $(LIBDIR)/AQ_Accelerometer $(LIBDIR)/AQ_BarometricSensor $(LIBDI
  $(LIBDIR)/AQ_FlightControlProcessor $(LIBDIR)/ $(LIBDIR)/AQ_Gps $(LIBDIR)/AQ_Gyroscope \
  $(LIBDIR)/AQ_I2C $(LIBDIR)/AQ_Kinematics $(LIBDIR)/AQ_Math $(LIBDIR)/AQ_Motors \
  $(LIBDIR)/AQ_OSD  $(LIBDIR)/AQ_Platform_APM $(LIBDIR)/AQ_Platform_CHR6DM \
- $(LIBDIR)/AQ_Platform_MPU6000 $(LIBDIR)/AQ_Platform_Wii $(LIBDIR)/AQ_RangeFinder $(LIBDIR)/AQ_Receiver $(LIBDIR)/AQ_SPI $(LIBDIR)/AQ_RSSI
+ $(LIBDIR)/AQ_Platform_MPU6000 $(LIBDIR)/AQ_Platform_Wii $(LIBDIR)/AQ_RangeFinder \
+ $(LIBDIR)/AQ_Receiver $(LIBDIR)/AQ_SPI $(LIBDIR)/AQ_RSSI $(LIBDIR)/AQ_SoftModem \
+ $(LIBDIR)/AQ_RSCode
+
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -587,15 +590,15 @@ gccversion :
 # Program the device.  
 program: 
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) 
-	
+
 # Set device fuses  
 write-fuses: 
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FUSES) 
-	
+
 # Read device fuses  
 read-fuses: 
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_READ_FUSES) 
-	
+
 # Un brick the device with a 1 MHz crystal connected to pin7 (XTAL1  
 unbrick: 
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FUSES) -B 100
@@ -701,7 +704,7 @@ extcoff: $(TARGET).elf
 	@echo
 	@echo $(MSG_LINKING) $@
 	@$(CC) $(ALL_CFLAGS) $^ $(RUNTIMELIB) $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o --output $@ $(LDFLAGS)
-	#@$(CC) $(ALL_CFLAGS) $^ AeroQuad32/libm.a $(RUNTIMELIB) $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o --output $@ $(LDFLAGS)
+#	@$(CC) $(ALL_CFLAGS) $^ AeroQuad32/libm.a $(RUNTIMELIB) $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o --output $@ $(LDFLAGS)
 
 
 # Compile: create object files from C source files.

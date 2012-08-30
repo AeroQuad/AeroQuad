@@ -887,7 +887,7 @@ void reportVehicleState() {
 
 #ifdef SlowTelemetry
   struct telemetryPacket {
-    word  id;
+    unsigned short  id;
     long  latitude;
     long  longitude;
     short altitude;
@@ -897,8 +897,8 @@ void reportVehicleState() {
     byte  rssi;
     byte  voltage;
     byte  current;
-    word  capacity;
-    word  gpsinfo;
+    unsigned short capacity;
+    unsigned short gpsinfo;
     byte  ecc[8];
   };
   
@@ -913,8 +913,11 @@ void reportVehicleState() {
   byte slowTelemetryByte = 255;
  
   void initSlowTelemetry() {
-
+#ifdef SoftModem
+    softmodemInit();
+#else
     Serial2.begin(1200);
+#endif
     slowTelemetryByte = 255;
   }
    
@@ -922,8 +925,15 @@ void reportVehicleState() {
   void updateSlowTelemetry100Hz() {
 
     if (slowTelemetryByte < TELEMETRY_MSGSIZE_ECC ) {
+#ifdef SoftModem
+      if (softmodemFreeToSend()) {
+	softmodemSendByte(telemetryBuffer.bytes[slowTelemetryByte]);
+	slowTelemetryByte++;
+      }
+#else
       Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
       slowTelemetryByte++;
+#endif
     }
     else {
       slowTelemetryByte=255;
