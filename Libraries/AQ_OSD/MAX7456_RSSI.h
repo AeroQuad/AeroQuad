@@ -26,9 +26,9 @@
 //////////////////////////////////////////////////////////////////////////////
 // Show RSSI information (analog input value optionally mapped to percents.)
 #if defined (UseEzUHFRSSIReader)
-  #include <..\AQ_RSSI\EzUHFRSSIReader.h>
+  #include <EzUHFRSSIReader.h>
 #else
-  #include <..\AQ_RSSI\AnalogRSSIReader.h>
+  #include <AnalogRSSIReader.h>
 #endif	
 
 short lastRSSI = 1234; //forces update at first run
