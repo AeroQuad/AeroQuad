@@ -886,7 +886,7 @@ void reportVehicleState() {
 }
 
 #ifdef SlowTelemetry
-  struct telemetryPacket {
+  struct __attribute__((packed)) telemetryPacket {
     unsigned short  id;
     long  latitude;
     long  longitude;
