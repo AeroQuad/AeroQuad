@@ -1130,6 +1130,10 @@
   #include <AQ_RSCode.h>
 #endif
 
+#ifdef SoftModem
+  #include <AQ_SoftModem.h>
+#endif
+
 
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
