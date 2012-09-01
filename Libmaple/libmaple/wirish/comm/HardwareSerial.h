@@ -59,6 +59,7 @@ public:
 
     /* I/O */
     uint32 available(void);
+    uint32 pending(void);
     int read(void);
     void flush(void);
     virtual void write(unsigned char);

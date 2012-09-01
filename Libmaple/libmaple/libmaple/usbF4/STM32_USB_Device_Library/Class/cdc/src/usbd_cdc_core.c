@@ -615,6 +615,7 @@ static uint8_t  usbd_cdc_EP0_RxReady (void  *pdev)
   * @param  epnum: endpoint number
   * @retval status
   */
+#if 0
 static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
 {
   uint16_t USB_Tx_ptr;
@@ -654,6 +655,63 @@ static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
   
   return USBD_OK;
 }
+#endif
+
+// ala42: applied fix from
+//https://my.st.com/public/STe2ecommunities/mcu/Lists/cortex_mx_stm32/Flat.aspx?RootFolder=%2fpublic%2f
+//STe2ecommunities%2fmcu%2fLists%2fcortex_mx_stm32%2fUSB%20CDC%20Device%20hung%20fix&
+//FolderCTID=0x01200200770978C69A1141439FE559EB459D7580009C4E14902C3CDE46A77F0FFD06506F5B&currentviews=75
+static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
+{
+  uint16_t USB_Tx_ptr;
+  uint16_t USB_Tx_length;
+
+  if (USB_Tx_State == 1)
+  {
+    if (APP_Rx_length == 0)
+    {
+    	if (((USB_OTG_CORE_HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
+    	{
+    		USB_Tx_State = 0;
+    		return USBD_OK;
+    	}
+    	/* Transmit zero sized packet in case the last one has maximum allowed size. Otherwise
+    	 * the recipient may expect more data coming soon and not return buffered data to app.
+    	 * See section 5.8.3 Bulk Transfer Packet Size Constraints
+    	 * of the USB Specification document.
+    	*/
+    	USB_Tx_ptr = APP_Rx_ptr_out;
+    	USB_Tx_length = 0;
+    }
+    else
+    {
+      if (APP_Rx_length > CDC_DATA_IN_PACKET_SIZE){
+        USB_Tx_ptr = APP_Rx_ptr_out;
+        USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
+
+        APP_Rx_ptr_out += CDC_DATA_IN_PACKET_SIZE;
+        APP_Rx_length -= CDC_DATA_IN_PACKET_SIZE;
+      }
+      else
+      {
+        USB_Tx_ptr = APP_Rx_ptr_out;
+        USB_Tx_length = APP_Rx_length;
+
+        APP_Rx_ptr_out += APP_Rx_length;
+        APP_Rx_length = 0;
+      }
+    }
+
+    /* Prepare the available data buffer to be sent on IN endpoint */
+    DCD_EP_Tx (pdev,
+                 CDC_IN_EP,
+                 (uint8_t*)&APP_Rx_Buffer[USB_Tx_ptr],
+                 USB_Tx_length);
+  }
+
+  return USBD_OK;
+}
+
 
 /**
   * @brief  usbd_audio_DataOut

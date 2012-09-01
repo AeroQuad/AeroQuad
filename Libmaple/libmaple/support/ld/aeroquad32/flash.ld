@@ -5,7 +5,7 @@
 
 MEMORY
 {
-  ram (rwx) : ORIGIN = 0x20000C00, LENGTH = 61K
+  ram (rwx) : ORIGIN = 0x20000C00, LENGTH = 125K
   rom (rx)  : ORIGIN = 0x08010000, LENGTH = 960K  /* ala42 */
 }
 

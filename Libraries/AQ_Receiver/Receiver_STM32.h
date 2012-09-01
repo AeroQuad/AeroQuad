@@ -29,56 +29,6 @@
 // configuration part starts here
 // definition of pins used for PWM receiver input
 
-#ifdef BOARD_aeroquad32
-static byte receiverPin[] = {
-	Port2Pin('D', 12),
-	Port2Pin('D', 13),
-	Port2Pin('D', 14),
-	Port2Pin('D', 15),
-	Port2Pin('E',  9),
-	Port2Pin('E', 11),
-	Port2Pin('E', 13),
-	Port2Pin('E', 14)
-};
-#endif
-
-#ifdef BOARD_aeroquad32mini
-static byte receiverPin[] = {
-	2, // PB7
-	4, // PB6
-	5, // PB8
-	6, // PB9
-	7, // PA15    JTDI   TIM2_CH1
-	8  // PB3     JTDO   SPI3SCK /TIM2_CH2
-};
-#endif
-
-#ifdef BOARD_freeflight
-static byte receiverPin[] = {
-	Port2Pin('A',  0),
-	Port2Pin('A',  1),
-	Port2Pin('A',  2),
-	Port2Pin('A',  3),
-	Port2Pin('A',  6),
-	Port2Pin('A',  7),
-	Port2Pin('B',  0),
-	Port2Pin('B',  1)
-};
-#endif
-
-#ifdef BOARD_discovery_f4
-static byte receiverPin[] = {
-	Port2Pin('E',  9),
-	Port2Pin('E', 11),
-	Port2Pin('E', 13),
-	Port2Pin('E', 14),
-	Port2Pin('B',  4),
-	Port2Pin('B',  5),
-	Port2Pin('B',  0),
-	Port2Pin('B',  1)
-};
-#endif
-
 
 /*
 	ROLL     0	3

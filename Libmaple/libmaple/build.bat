@@ -1,2 +1,2 @@
-make library
+make library -j4
 pause

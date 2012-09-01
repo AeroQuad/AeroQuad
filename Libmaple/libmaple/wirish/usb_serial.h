@@ -57,6 +57,9 @@ public:
     uint8 getDTR();
     uint8 isConnected();
     uint8 pending();
+
+    void enableBlockingTx(void);
+    void disableBlockingTx(void);
 };
 
 extern USBSerial SerialUSB;

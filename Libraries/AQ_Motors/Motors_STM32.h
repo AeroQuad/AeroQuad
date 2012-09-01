@@ -10,43 +10,6 @@
 
 #define PWM_FREQUENCY 400 // Hz
 
-#if defined(BOARD_aeroquad32)
-  static byte stm32_motor_mapping[] = {
-    Port2Pin('C',  9),
-    Port2Pin('C',  8),
-    Port2Pin('C',  7),
-    Port2Pin('C',  6),
-    Port2Pin('A', 15),
-    Port2Pin('B',  3),
-    Port2Pin('B',  4),
-    Port2Pin('B',  5)
-  };
-#elif defined(BOARD_aeroquad32mini)
-  static byte stm32_motor_mapping[] = {3, 9, 10, 11, 12, 13};
-#elif defined(BOARD_freeflight)
-  static byte stm32_motor_mapping[] = {
-    Port2Pin('B',  6),
-    Port2Pin('B',  7),
-    Port2Pin('B',  8),
-    Port2Pin('B',  9),
-    Port2Pin('A',  8),
-    Port2Pin('A', 11)
-  };
-#elif defined(BOARD_discovery_f4)
-  static byte stm32_motor_mapping[] = {
-    Port2Pin('C',  9),
-    Port2Pin('C',  8),
-    Port2Pin('C',  7),
-    Port2Pin('C',  6),
-	// pin mapping for motor 5-8 not specified, yet
-    Port2Pin('A', 15),
-    Port2Pin('B',  3),
-    Port2Pin('B',  4),
-    Port2Pin('B',  5)
-  };
-#else
-  #error "No motor pinout defined for this STM32 board"
-#endif
 
 
 ////////////////////////////////////////////////////////

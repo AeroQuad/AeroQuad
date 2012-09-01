@@ -38,14 +38,22 @@ void setupUSB (void) {
 }
 
 extern uint16_t VCP_DataTx (uint8_t* Buf, uint32_t Len);
+extern void     VCP_SetUSBTxBlocking(uint8_t mode);
 extern uint32_t VCPBytesAvailable(void);
-extern uint8_t VCPGetByte(void);
+extern uint8_t  VCPGetByte(void);
 
 uint32_t usbSendBytes(const uint8_t* sendBuf, uint32_t len) {
 	VCP_DataTx((uint8_t*)sendBuf, len);
 	return len;
 }
 
+void usbEnableBlockingTx(void) {
+	VCP_SetUSBTxBlocking(1);
+}
+
+void usbDisableBlockingTx(void) {
+	VCP_SetUSBTxBlocking(0);
+}
 
 
 uint32_t usbBytesAvailable(void) {

@@ -931,6 +931,11 @@
 
 #ifdef AeroQuadSTM32
   #include "AeroQuad_STM32.h"
+  #define LOOP_SPEED 5000
+  #define LOOP_SPEED_DIVIDER 1000000.0
+#else   
+  #define LOOP_SPEED 10000
+  #define LOOP_SPEED_DIVIDER 500000.0
 #endif
 
 // default to 10bit ADC (AVR)
@@ -1299,11 +1304,11 @@ void loop () {
   // ================================================================
   // 100Hz task loop
   // ================================================================
-  if (deltaTime >= 10000) {
+  if (deltaTime >= LOOP_SPEED) {
     
     frameCounter++;
     
-    G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
+    G_Dt = (currentTime - hundredHZpreviousTime) / LOOP_SPEED_DIVIDER;
     hundredHZpreviousTime = currentTime;
     
     evaluateGyroRate();
@@ -1326,9 +1331,9 @@ void loop () {
     // Evaluate are here because we want it to be synchronized with the processFlightControl
     #if defined(AltitudeHoldBaro)
       measureBaroSum(); 
-//      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-//        evaluateBaroAltitude();
-//      }
+      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+        evaluateBaroAltitude();
+      }
     #endif
           
     // Combines external pilot commands and measured sensor data to generate motor commands

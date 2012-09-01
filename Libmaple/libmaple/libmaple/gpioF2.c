@@ -183,7 +183,7 @@ void afio_init(void) {
  * @see afio_exti_port
  */
 void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port) {
-    __io uint32 *exti_cr = &AFIO_BASE->EXTICR1 + exti / 4;
+    __io uint32 *exti_cr = &SYSCFG_BASE->EXTICR1 + exti / 4;
     uint32 shift = 4 * (exti % 4);
     uint32 cr = *exti_cr;
 
@@ -196,6 +196,7 @@ void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port) {
  * @brief Perform an alternate function remap.
  * @param remapping Remapping to perform.
  */
+#if 0
 void afio_remap(afio_remap_peripheral remapping) {
     if (remapping & AFIO_REMAP_USE_MAPR2) {
         remapping &= ~AFIO_REMAP_USE_MAPR2;
@@ -204,3 +205,4 @@ void afio_remap(afio_remap_peripheral remapping) {
         AFIO_BASE->MAPR |= remapping;
     }
 }
+#endif

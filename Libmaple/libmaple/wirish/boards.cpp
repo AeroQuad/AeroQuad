@@ -59,7 +59,9 @@ void init(void) {
 	systick_init(SYSTICK_RELOAD_VAL);
 	gpio_init_all();
 
-#ifndef STM32F2
+#ifdef STM32F2
+	rcc_clk_enable(RCC_SYSCFG);
+#else
     afio_init();
 #endif
 

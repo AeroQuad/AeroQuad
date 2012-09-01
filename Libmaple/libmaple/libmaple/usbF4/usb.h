@@ -9,11 +9,11 @@ extern "C" {
 
 typedef enum _RESULT
 {
-  USB_SUCCESS = 0,    /* Process sucessfully */
+  USB_SUCCESS = 0,    /* Process successfully */
   USB_ERROR,
   USB_UNSUPPORT,
   USB_NOT_READY       /* The process has not been finished, endpoint will be
-                         NAK to further rquest */
+                         NAK to further request */
 } RESULT;
 
 void setupUSB(void);
@@ -37,6 +37,8 @@ uint8_t usbGetRTS(void);
 uint8_t usbIsConnected(void);
 uint8_t usbIsConfigured(void);
 uint16_t usbGetPending(void);
+void usbEnableBlockingTx(void);
+void usbDisableBlockingTx(void);
 
 
 

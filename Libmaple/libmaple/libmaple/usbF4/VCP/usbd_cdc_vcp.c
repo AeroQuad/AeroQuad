@@ -57,6 +57,7 @@ uint8_t UsbRecBuffer[UsbRecBufferSize];
 volatile int UsbRecRead = 0;
 volatile int UsbRecWrite = 0;
 volatile int VCP_DTRHIGH = 0;
+uint8_t UsbTXBlock = 0;
 
 uint32_t VCPBytesAvailable(void) {
 	return (UsbRecWrite - UsbRecRead + UsbRecBufferSize) % UsbRecBufferSize;
@@ -116,6 +117,16 @@ static uint16_t VCP_DeInit(void)
   return USBD_OK;
 }
 
+/**
+  * @brief  VCP_SetUSBTxBlocking
+  *         Set USB blocking mode for output buffer overrun
+  * @param  Mode: 0: non blocking, 1: blocking
+  * @retval None
+  */
+void VCP_SetUSBTxBlocking(uint8_t Mode)
+{
+	UsbTXBlock = Mode;
+}
 
 /**
   * @brief  VCP_Ctrl
@@ -198,8 +209,15 @@ static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 uint16_t VCP_DataTx (uint8_t* Buf, uint32_t Len)
 {
 	while(Len-- > 0) {
-		while ((APP_Rx_ptr_in - APP_Rx_ptr_out + APP_RX_DATA_SIZE) % APP_RX_DATA_SIZE + 1 >= APP_RX_DATA_SIZE)
-			;
+		if(UsbTXBlock) {
+			while ((APP_Rx_ptr_in - APP_Rx_ptr_out + APP_RX_DATA_SIZE) % APP_RX_DATA_SIZE + 1 >= APP_RX_DATA_SIZE)
+				;
+		} else {
+			if ((APP_Rx_ptr_in - APP_Rx_ptr_out + APP_RX_DATA_SIZE) % APP_RX_DATA_SIZE + 1 >= APP_RX_DATA_SIZE) {
+				return USBD_BUSY;
+			}
+		}
+
 
 		APP_Rx_Buffer[APP_Rx_ptr_in++] = *Buf++;
 		  /* To avoid buffer overflow */

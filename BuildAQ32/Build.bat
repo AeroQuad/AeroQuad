@@ -1,2 +1,2 @@
-make
+make -j4
 pause

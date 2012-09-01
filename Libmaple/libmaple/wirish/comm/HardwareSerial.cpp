@@ -136,6 +136,10 @@ uint32 HardwareSerial::available(void) {
     return usart_data_available(usart_device);
 }
 
+uint32 HardwareSerial::pending(void) {
+    return usart_data_pending(usart_device);
+}
+
 void HardwareSerial::write(unsigned char ch) {
     usart_putc(usart_device, ch);
 }

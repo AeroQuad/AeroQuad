@@ -117,4 +117,12 @@ uint8 USBSerial::getRTS(void) {
     return usbGetRTS();
 }
 
+void USBSerial::enableBlockingTx(void) {
+	usbEnableBlockingTx();
+}
+
+void USBSerial::disableBlockingTx(void) {
+	usbEnableBlockingTx();
+}
+
 USBSerial SerialUSB;

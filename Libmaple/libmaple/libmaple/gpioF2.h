@@ -251,24 +251,18 @@ static inline void gpio_toggle_bit(gpio_dev *dev, uint8 pin) {
  */
 
 /** AFIO register map */
-typedef struct afio_reg_map {
-    __io uint32 EVCR;        /**< Event control register.  */
-    __io uint32 MAPR;        /**< AF remap and debug I/O configuration
-                                register. */
-    __io uint32 EXTICR1;     /**< External interrupt configuration
-                                register 1. */
-    __io uint32 EXTICR2;     /**< External interrupt configuration
-                                register 2. */
-    __io uint32 EXTICR3;     /**< External interrupt configuration
-                                register 3. */
-    __io uint32 EXTICR4;     /**< External interrupt configuration
-                                register 4. */
-    __io uint32 MAPR2;       /**< AF remap and debug I/O configuration
-                                register 2. */
-} afio_reg_map;
+typedef struct syscfg_reg_map {
+    __io uint32 MEMRM;    /**< memory remap register  */
+    __io uint32 PMC;      /**< peripheral mode configuration register */
+    __io uint32 EXTICR1;  /**< External interrupt configuration register 1. */
+    __io uint32 EXTICR2;  /**< External interrupt configuration register 2. */
+    __io uint32 EXTICR3;  /**< External interrupt configuration register 3. */
+    __io uint32 EXTICR4;  /**< External interrupt configuration register 4. */
+    __io uint32 CMPCR;    /**< Compensation cell control register */
+} syscfg_reg_map;
 
 /** AFIO register map base pointer. */
-#define AFIO_BASE                       ((struct afio_reg_map *)0x40010000)
+#define SYSCFG_BASE                       ((struct syscfg_reg_map *)0x40013800)
 
 /*
  * AFIO register bit definitions
@@ -544,8 +538,8 @@ typedef enum afio_debug_cfg {
  * @see afio_debug_cfg
  */
 static inline void afio_cfg_debug_ports(afio_debug_cfg config) {
-    __io uint32 *mapr = &AFIO_BASE->MAPR;
-    *mapr = (*mapr & ~AFIO_MAPR_SWJ_CFG) | config;
+    //__io uint32 *mapr = &AFIO_BASE->MAPR;
+    //*mapr = (*mapr & ~AFIO_MAPR_SWJ_CFG) | config;
 }
 
 #ifdef __cplusplus
