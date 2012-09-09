@@ -28,54 +28,12 @@
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 
-//      float zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-//      float estimatedSensorAltitude = previousSensorAltitude - zVelocity;
-//      float estimatedCurrentAltitude = (estimatedSensorAltitude + currentSensorAltitude) / 2;
-//      previousSensorAltitude = currentSensorAltitude;
-      // compute throttle z dampening
-//      int zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-//      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust*0.8, maxThrottleAdjust*0.8);
-
-
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 
 #define INVALID_THROTTLE_CORRECTION -1000
-
 #define ALTITUDE_BUMP_SPEED 0.01
 
-#if defined AltitudeHoldBaro
-  #define BARO_MAX_SAMPLE_COUNT 20
-  float estimatedBaroAltitude = 0.0;
-  unsigned long previousBaroReadTime = 0.0;
-  unsigned long baroTimeOffset = 0.0;
-  unsigned long previousBaroAltitudeEstimationTime;
-  float baroAltitudeOffset = 0.0;
-  
 
-  void processExtrapolatedBaroAltitude() {
-    
-    unsigned long baroTime = micros();
-    if (rawPressureSumCount >= BARO_MAX_SAMPLE_COUNT) {
-      
-      previousBaroAltitude = getBaroAltitude();
-      evaluateBaroAltitude();
-      baroAltitudeOffset = previousBaroAltitude - getBaroAltitude();
-      
-      baroTimeOffset = baroTime - previousBaroReadTime;
-      previousBaroReadTime = baroTime;
-      
-      estimatedBaroAltitude = getBaroAltitude();
-    }
-    else {
-      
-      unsigned long baroEstimatedAltitudeTimeOffset = baroTime - previousBaroAltitudeEstimationTime;
-      float currentBaroAltitudeOffset = baroEstimatedAltitudeTimeOffset * baroAltitudeOffset / baroTimeOffset;
-      estimatedBaroAltitude = estimatedBaroAltitude + currentBaroAltitudeOffset;
-    }
-
-    previousBaroAltitudeEstimationTime = baroTime;
-  }
-#endif
 
 /**
  * processAltitudeHold
@@ -90,8 +48,8 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-  if (altitudeHoldState == ON) {
 
+  if (altitudeHoldState == ON) {
     int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
     // computer altitude error!
     #if defined AltitudeHoldRangeFinder
@@ -105,7 +63,7 @@ void processAltitudeHold()
     #endif
     #if defined AltitudeHoldBaro
       if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
-        altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, estimatedBaroAltitude, &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
+        altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, getBaroAltitude(), &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
         altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       }
     #endif        
@@ -113,6 +71,13 @@ void processAltitudeHold()
       throttle = receiverCommand[THROTTLE];
       return;
     }
+    
+    // ZDAMPENING COMPUTATIONS
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      float zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    #endif
+
     
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
       altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
@@ -143,7 +108,7 @@ void processAltitudeHold()
         #endif
       }
     }
-    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;// + zDampeningThrottleCorrection;
+    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
   }
   else {
     throttle = receiverCommand[THROTTLE];

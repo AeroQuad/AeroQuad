@@ -23,7 +23,7 @@
 
 // @see http://www.arduino.cc/playground/Main/MaxSonar
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(BOARD_aeroquad32)
 
 #include "RangeFinder.h"
 
@@ -42,7 +42,8 @@ struct rangeFinder {
      // First ranger is given priority so it should be used for altitude
      // If using more than one ranger you should connect the 'trigger' to the 'RX' pin on the ranger.
      //
-    { ALTITUDE_RANGE_FINDER_INDEX, A1, 24, MB1200}, 
+  //    { ALTITUDE_RANGE_FINDER_INDEX, A1, 24, MB1200}, 
+    { ALTITUDE_RANGE_FINDER_INDEX, A1, 0, MB1200}, 
 //	  { FRONT_RANGE_FINDER_INDEX,    A2, 25, MB1000},
 //	  { RIGHT_RANGE_FINDER_INDEX,    A3, 26, MB1000},
 //	  { REAR_RANGE_FINDER_INDEX,     A4, 27, MB1000},
@@ -80,7 +81,7 @@ void inititalizeRangeFinders() {
       pinMode(rangeFinders[i].triggerpin, OUTPUT);
     }
     lastRange[i] = 32000; 
-    pinMode(rangeFinders[i].pin, INPUT);
+    //    pinMode(rangeFinders[i].pin, INPUT);
   }
   rangerWaitCycles = 10; // allow to initialize
 }
@@ -110,9 +111,11 @@ void updateRangeFinders() {
     }
   }
 
-  digitalWrite(rangeFinders[rangerToTrigger].triggerpin, HIGH);
+  if (rangeFinders[rangerToTrigger].triggerpin) {
+    digitalWrite(rangeFinders[rangerToTrigger].triggerpin, HIGH);
+  }
 
-  short range = (short)((long)analogRead(rangeFinders[rangerToRead].pin) * (long)(rangerScale[rangeFinders[rangerToRead].type]) / 1024L);
+  short range = (short)((long)analogRead(rangeFinders[rangerToRead].pin) * (long)(rangerScale[rangeFinders[rangerToRead].type]) / (1L<<ADC_NUMBER_OF_BITS));
 
   // Following will accept the sample if it's either withing "spike margin" of last raw reading or previous accepted reading
   // otherwise it's ignored as noise
@@ -125,8 +128,9 @@ void updateRangeFinders() {
  
   rangerWaitCycles = rangerWait[rangeFinders[rangerToRead].type];
 
-  digitalWrite(rangeFinders[rangerToTrigger].triggerpin, LOW);
-
+  if (rangeFinders[rangerToTrigger].triggerpin) {
+    digitalWrite(rangeFinders[rangerToTrigger].triggerpin, LOW);
+  }
 }
 
 #endif 

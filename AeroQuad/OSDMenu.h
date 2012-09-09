@@ -18,7 +18,7 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Menu system implementation, usable with OSD */
+/* Menu system implementation, usable with OSD or SerialLCD */
 
 #ifndef _AQ_OSD_MENU_
 #define _AQ_OSD_MENU_
@@ -81,7 +81,9 @@ void menuHandleSimple(byte mode, byte action) {
   if (action == MENU_INIT) {
     switch (mode) {
     case 0:
+#ifdef OSD
       armedTime = 0;
+#endif
       break;
 #ifdef BattMonitor
     case 1:
@@ -497,7 +499,7 @@ void menuHideOSD(byte mode, byte action){
 short savedCenterYaw, savedCenterPitch, savedCenterRoll;
 byte  savedCameraMode;
 
-#define POWERSAVE 10 // enable to shut off servos after idle
+// #define POWERSAVE 10 // enable to shut off servos after idle
 #if defined (POWERSAVE)
   byte idleCounter = POWERSAVE;
 #endif

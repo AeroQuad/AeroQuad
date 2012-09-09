@@ -30,15 +30,18 @@ void initializeGyro() {
 }
   
 void measureGyro() {
-  int gyroADC;
+  int gyroADC = 0;
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     float rawADC = readADC(axis);
-    if (rawADC > 500) // Check if good measurement
-      if (axis == XAXIS)
+    if (rawADC > 500) {// Check if good measurement
+      if (axis == XAXIS) {
         gyroADC =  rawADC - gyroZero[axis];
-      else
+	  }
+      else {
         gyroADC =  gyroZero[axis] - rawADC;
-    gyroRate[axis] = filterSmooth(gyroADC * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+	  }
+	}
+    gyroRate[axis] = gyroADC * gyroScaleFactor;
   }
   
   // Measure gyro heading
@@ -64,7 +67,7 @@ void evaluateGyroRate() {
       gyroADC = (gyroSample[axis] / gyroSampleCount) - gyroZero[axis];
     else
       gyroADC = gyroZero[axis] - (gyroSample[axis] / gyroSampleCount);
-    gyroRate[axis] = filterSmooth(gyroADC * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC * gyroScaleFactor;
   }
   gyroSample[0] = 0;
   gyroSample[1] = 0;

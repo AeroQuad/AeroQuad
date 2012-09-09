@@ -30,20 +30,26 @@ enum {
   HEADING_HOLD_PID_IDX,
   ATTITUDE_GYRO_XAXIS_PID_IDX,
   ATTITUDE_GYRO_YAXIS_PID_IDX,
-  BARO_ALTITUDE_HOLD_PID_IDX,
-  SONAR_ALTITUDE_HOLD_PID_IDX,
-  ZDAMPENING_PID_IDX,
-  GPSPITCH_PID_IDX,
-  GPSROLL_PID_IDX,
-  GPSYAW_PID_IDX,
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    BARO_ALTITUDE_HOLD_PID_IDX,
+    ZDAMPENING_PID_IDX,
+  #endif
+  #if defined AltitudeHoldRangeFinder
+    SONAR_ALTITUDE_HOLD_PID_IDX,
+  #endif
+  #if defined UseGPSNavigator
+    GPSPITCH_PID_IDX,
+    GPSROLL_PID_IDX,
+    GPSYAW_PID_IDX,
+  #endif    
 
   LAST_PID_IDX  // keep this definition at the end of this enum
 };
 
-// PID Variables
+//// PID Variables
 struct PIDdata {
   float P, I, D;
-  float lastPosition;
+  float lastError;
   // AKA experiments with PID
   float previousPIDTime;
   float integratedError;
@@ -58,9 +64,7 @@ struct PIDdata {
 // ALTITUDE = 8 (used for altitude hold)
 // ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
 float windupGuard; // Read in from EEPROM
-
-
-// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
+//// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
 float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
 
   // AKA PID experiments
@@ -69,11 +73,17 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
   float error = targetPosition - currentPosition;
 
-  PIDparameters->integratedError += error * deltaPIDTime;
+  if (inFlight) {
+    PIDparameters->integratedError += error * deltaPIDTime;
+  }
+  else {
+    PIDparameters->integratedError = 0.0;
+  }
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
-  float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (deltaPIDTime * 100); // dT fix from Honk
-  PIDparameters->lastPosition = currentPosition;
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+  float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastError) / (deltaPIDTime * 100); // dT fix from Honk
+  PIDparameters->lastError = currentPosition;
+
+  return (PIDparameters->P * error) + (PIDparameters->I * PIDparameters->integratedError) + dTerm;
 }
 
 void zeroIntegralError() __attribute__ ((noinline));

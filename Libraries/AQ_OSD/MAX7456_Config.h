@@ -38,19 +38,19 @@
 // on the row you specify.
 
 //Battery info - 5-16 characters long
-#define VOLTAGE_ROW 2
-#define VOLTAGE_COL 1
+#define VOLTAGE_ROW 1
+#define VOLTAGE_COL 0
 
 //Compass reading - 5 characters long
-#define COMPASS_ROW 1
+#define COMPASS_ROW 0
 #define COMPASS_COL 13
 
 //Altitude reading - up to 8 characters long (32768 max)
-#define ALTITUDE_ROW 1
-#define ALTITUDE_COL 1
+#define ALTITUDE_ROW 0
+#define ALTITUDE_COL 0
 
 //Flight timer - 6 characters long
-#define TIMER_ROW 1
+#define TIMER_ROW 0
 #define TIMER_COL 23
 
 //Callsign
@@ -61,8 +61,10 @@
 #endif
 
 // RSSI monitor
-#define RSSI_ROW     3
-#define RSSI_COL     23
+#define RSSI_ROW     2
+#define RSSI_COL     24
+#define SIGNAL_QUALITY_ROW 2
+#define SIGNAL_QUALITY_COL 0
 
 // GPS info
 #define GPS_ROW     MAX_screen_rows-2

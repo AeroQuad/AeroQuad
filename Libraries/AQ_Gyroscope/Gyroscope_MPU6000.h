@@ -23,14 +23,17 @@
 
 int gyroRaw[3] = {0,0,0};
 
+#include <Platform_MPU6000.h>
 #include <Gyroscope.h>
 
 void initializeGyro() {
   float range = 2*1000.0;
   gyroScaleFactor = radians(range/65536.0);
+
+  initializeMPU6000Sensors();
 }
 
-void GyroUpdateHeading()
+void gyroUpdateHeading()
 {
   long int currentTime = micros();
   if (gyroRate[ZAXIS] > (float)radians(1.0) || gyroRate[ZAXIS] < (float)radians(-1.0)) {
@@ -40,7 +43,7 @@ void GyroUpdateHeading()
 }
 
 void measureGyro() {
-  readMPU6000Sensors();
+  readMPU6000Gyro();
 
   int gyroADC[3];
   gyroADC[XAXIS] = (gyroRaw[XAXIS]=MPU6000.data.gyro.x)  - gyroZero[XAXIS];
@@ -48,13 +51,14 @@ void measureGyro() {
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
 
-  GyroUpdateHeading();
+  gyroUpdateHeading();
 }
 
 void measureGyroSum() {
+  readMPU6000Gyro();
   gyroSample[XAXIS] += (gyroRaw[XAXIS]=MPU6000.data.gyro.x);
   gyroSample[YAXIS] += (gyroRaw[YAXIS]=MPU6000.data.gyro.y);
   gyroSample[ZAXIS] += (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);
@@ -74,10 +78,10 @@ void evaluateGyroRate() {
   gyroSampleCount = 0;
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
 
-  GyroUpdateHeading();
+  gyroUpdateHeading();
 }
 
 

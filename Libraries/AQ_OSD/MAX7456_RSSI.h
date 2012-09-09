@@ -25,9 +25,16 @@
 /////////////////////////// RSSI Display /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Show RSSI information (analog input value optionally mapped to percents.)
-#include <RSSIReader.h>
+#if defined (UseEzUHFRSSIReader)
+  #include <EzUHFRSSIReader.h>
+#else
+  #include <AnalogRSSIReader.h>
+#endif	
 
 short lastRSSI = 1234; //forces update at first run
+#if defined (UseEzUHFRSSIReader)
+  short lastQuality = 1234;  //forces update at first run
+#endif
 
 void displayRSSI() {
 
@@ -42,6 +49,15 @@ void displayRSSI() {
       writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, RSSI_ROW, RSSI_COL);
     #endif
   }
+  #if defined (UseEzUHFRSSIReader)
+    if (lastQuality != signalQualityRawValue) {
+	  char buf[6];
+	  snprintf(buf, 6, "\372%4u", signalQualityRawValue);
+      writeChars(buf, 5, 0, SIGNAL_QUALITY_ROW, SIGNAL_QUALITY_COL);
+	  signalQualityRawValue = lastQuality;
+	}
+  #endif
+  
 }
 
 #endif  // #define _AQ_OSD_MAX7456_RSSI_H_
