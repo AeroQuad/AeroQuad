@@ -34,6 +34,7 @@
 #define ALTITUDE_BUMP_SPEED 0.01
 
 
+
 /**
  * processAltitudeHold
  * 
@@ -47,7 +48,7 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-  
+
   if (altitudeHoldState == ON) {
     int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
     // computer altitude error!
@@ -70,6 +71,13 @@ void processAltitudeHold()
       throttle = receiverCommand[THROTTLE];
       return;
     }
+    
+    // ZDAMPENING COMPUTATIONS
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      float zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
+      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    #endif
+
     
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
       altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
@@ -100,7 +108,7 @@ void processAltitudeHold()
         #endif
       }
     }
-    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;// + zDampeningThrottleCorrection;
+    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
   }
   else {
     throttle = receiverCommand[THROTTLE];
