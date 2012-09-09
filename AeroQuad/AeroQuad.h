@@ -174,10 +174,15 @@ void reportVehicleState();
   int altitudeHoldThrottle = 1000;
   boolean isStoreAltitudeNeeded = false;
   
-//  float estimatedXVelocity = 0;
-//  float estimatedYVelocity = 0;
-//  int estimatedZVelocity = 0;
-//  float previousSensorAltitude = 0.0;
+  
+  float velocityCompFilter1 = 1.0 / (1.0 + 0.3);
+  float velocityCompFilter2 = 1 - velocityCompFilter1;
+
+  boolean runtimaZBiasInitialized = false;  
+  float zVelocity = 0.0;
+  float estimatedZVelocity = 0.0;
+  float runtimeZBias = 0.0; 
+  float zDampeningThrottleCorrection = 0.0;
 
   #if defined AltitudeHoldBaro
     float baroAltitudeToHoldTarget = 0.0;

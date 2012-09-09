@@ -1074,9 +1074,6 @@
   #if !defined(HeadingMagHold)
     #error We need the magnetometer to use the GPS
   #endif 
-//  #if defined LASTCHANNEL 6
-//    #error We need 7 receiver channel to use GPS navigator
-//  #endif
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
 #endif
@@ -1282,6 +1279,16 @@ void process100HzTask() {
   }
     
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+  
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS] - runtimeZBias;
+    if (!runtimaZBiasInitialized) {
+      runtimeZBias = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+      runtimaZBiasInitialized = true;
+    }
+    estimatedZVelocity += zVelocity;
+    estimatedZVelocity = (velocityCompFilter1 * zVelocity) + (velocityCompFilter2 * estimatedZVelocity);
+  #endif    
 
   #if defined(AltitudeHoldBaro)
     measureBaroSum(); 
@@ -1390,6 +1397,9 @@ void process10HzTask3() {
     #endif
 }
 
+/*******************************************************************
+ * 1Hz task 
+ ******************************************************************/
 void process1HzTask() {
   #ifdef MavLink
     G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
