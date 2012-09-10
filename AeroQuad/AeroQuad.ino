@@ -55,22 +55,6 @@
  #define REAR_YAW_CORRECTION 1.17
 #endif
 
-//
-// In order to use the DIYDrone libraries, this have to be declared here this way
-// @see Kenny9999 for details
-//
-#if defined(UseGPS)
-  // needed here to use DIYDrone GPS libraries
-  #include <FastSerial.h>
-  #include <AP_Common.h>
-  #include <AP_GPS.h>
-  
-  FastSerialPort0(Serial);
-  FastSerialPort1(Serial1);
-  FastSerialPort2(Serial2);
-  FastSerialPort3(Serial3);
-#endif
-
 
 #include <EEPROM.h>
 #include <Wire.h>

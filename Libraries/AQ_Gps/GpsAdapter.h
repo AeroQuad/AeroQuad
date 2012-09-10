@@ -22,21 +22,11 @@
 #ifndef _AQ_GPS_ADAPTER_H_
 #define _AQ_GPS_ADAPTER_H_
 
-#include <AP_GPS.h>
-GPS *gps;
-#if defined UseGPS_NMEA
-  AP_GPS_NMEA GPS(&Serial1);
-#elif defined UseGPS_UBLOX
-  AP_GPS_UBLOX GPS(&Serial1);  
-#elif defined UseGPS_MTK
-  AP_GPS_MTK16 GPS(&Serial1);
-#elif defined UseGPS_406
-  AP_GPS_406 GPS(&Serial1);
-#else
-  AP_GPS_Auto GPS(&Serial1, &gps);
-#endif
-
 #include <GpsDataType.h>
+
+
+#include <ublox.h>
+
 
 #define MIN_NB_SATS_IN_USE 6
 
@@ -49,26 +39,24 @@ GeodeticPosition currentPosition;
 
 float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
 
-byte nbSatelitesInUse = 0;
-int  gpsHDOP = 0;
 boolean isGpsHaveANewPosition = false;
 
 void initializeGps() {
+    gpsdata.lat = GPS_INVALID_ANGLE;
+    gpsdata.lon = GPS_INVALID_ANGLE;
+    gpsdata.course = GPS_INVALID_ANGLE;
+    gpsdata.speed = GPS_INVALID_SPEED;
+    gpsdata.height = GPS_INVALID_ALTITUDE;
+    gpsdata.accuracy = GPS_INVALID_ACCURACY;
+    gpsdata.fixage = GPS_INVALID_AGE; 
+    gpsdata.state = DETECTING;
+    gpsdata.sats = 0;
+    gpsdata.fixtime = 0xFFFFFFFF;
+} gpsdata;
  
-  gps = &GPS;
-  gps->init();
 }
 
 boolean readGps() {
-  gps->update();
-  if (gps->new_data) {
-    isGpsHaveANewPosition = true;
-    currentPosition.latitude = gps->latitude;
-    currentPosition.longitude = gps->longitude;
-    nbSatelitesInUse = gps->num_sats;
-    gpsHDOP = gps->hdop;
-    gps->new_data = false;
-  }
   return isGpsHaveANewPosition;
 }
   

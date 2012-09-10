@@ -40,4 +40,16 @@ struct GeodeticPosition {
   long altitude;
 };
 
+struct gpsdata {
+    int32_t  lat,lon; // position as degrees (*10E7)
+    int32_t  course;  // degrees (*10E5)
+    uint32_t speed;   // cm/s
+    int32_t  height;  // mm (from ellipsoid)
+    uint32_t accuracy; // mm
+    uint32_t fixage;  // fix 
+    uint32_t fixtime;  // fix 
+    enum uint8_t  { DETECTING, NOFIX, 2DFIX, 3DFIX } state;
+    uint8_t  sats;    // number of satellites active
+} gpsdata;
+
 #endif
