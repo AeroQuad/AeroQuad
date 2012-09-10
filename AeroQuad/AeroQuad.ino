@@ -1331,6 +1331,13 @@ void process50HzTask() {
   #if defined(CameraControl)
     moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
   #endif      
+
+    #ifdef MAX7456_OSD
+    #ifdef OSD50HZ
+      updateOSD();
+    #endif
+    #endif
+    
 }
 
 /*******************************************************************
@@ -1376,7 +1383,9 @@ void process10HzTask3() {
     #endif
 
     #ifdef MAX7456_OSD
+    #ifndef OSD50HZ
       updateOSD();
+    #endif
     #endif
     
     #if defined(UseGPS) || defined(BattMonitor)
