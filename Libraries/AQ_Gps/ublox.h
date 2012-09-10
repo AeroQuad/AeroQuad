@@ -159,7 +159,13 @@ int ubloxProcessData(unsigned char data) {
     ubloxDataLength=0;
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
-    ubloxProcessDataState = GET_DATA;
+    if (ubloxExpectedDataLength <= sizeof(ubloxMessage)) {
+      ubloxProcessDataState = GET_DATA;
+    }
+    else {
+      // discard overlong message
+      ubloxProcessDataState = WAIT_SYNC1;
+    }
     break;
   case GET_DATA:
     ubloxCKA += data;
