@@ -969,8 +969,8 @@ void reportVehicleState() {
         telemetryBuffer.data.course    = getCourse()/10; // degrees
         telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
         telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
-        telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff;
-        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12);
+        telemetryBuffer.data.gpsinfo   = 0;
+        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((gpsData.sats<15)?gpsData.sats:15)) << 12);
       #else
         telemetryBuffer.data.latitude  = 0;
         telemetryBuffer.data.longitude = 0;

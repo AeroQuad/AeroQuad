@@ -70,10 +70,10 @@ void updateOSD() {
   if (OSDsched&0x20) {
     #ifdef UseGPS
       if (haveAGpsLock()) {
-        displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, nbSatelitesInUse);
+        displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, gpsData.sats);
       }
       else {
-        displayGPS(currentPosition, currentPosition, 0, 0, trueNorthHeading, nbSatelitesInUse);
+        displayGPS(currentPosition, currentPosition, 0, 0, trueNorthHeading, gpsData.sats);
       }
     #endif
   }
