@@ -39,8 +39,8 @@
 
 // Mega processor
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -97,7 +97,11 @@
 //#define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
 #define UseGPS			// Enables GPS, tries to auto-detect the GPS, may have some detection trouble making the connection to the configurator not working
-#define UseGPSNavigator		// EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
+//#define UseGPSNavigator		// EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
+
+#define GPS_SERIAL Serial1
+#define USEGPS_UBLOX
+#define USEGPS_NMEA
 
 //
 // *******************************************************************************************************************************

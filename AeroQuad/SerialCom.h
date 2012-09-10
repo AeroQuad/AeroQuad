@@ -235,7 +235,7 @@ void readSerialCommand() {
       break;
 
     case 'V': // GPS
-      #if defined (UseGPS)
+      #if defined (UseGPSNavigator)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
@@ -624,7 +624,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'v': // Send GPS PIDs
-    #if defined (UseGPS)
+    #if defined (UseGPSNavigator)
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
@@ -637,6 +637,20 @@ void sendSerialTelemetry() {
     #endif
     queryType = 'X';
     break;
+  case 'y': // send GPS info
+    #if defined (UseGPS)
+      PrintValueComma(gpsData.state);
+      PrintValueComma(gpsData.lat);
+      PrintValueComma(gpsData.lon);
+      PrintValueComma(gpsData.height);
+      PrintValueComma(gpsData.course);
+      PrintValueComma(gpsData.speed);
+      PrintValueComma(gpsData.sentences);
+      PrintValueComma(gpsData.idlecount);
+      PrintValueComma(gpsData.sats);
+      SERIAL_PRINTLN();
+    #else
+    #endif    
 
   case 'x': // Stop sending messages
     break;

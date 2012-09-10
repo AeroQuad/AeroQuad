@@ -1297,6 +1297,10 @@ void process100HzTask() {
   #ifdef SlowTelemetry
     updateSlowTelemetry100Hz();
   #endif
+
+  #if defined(UseGPS)
+    updateGps();
+  #endif      
 }
 
 
@@ -1319,7 +1323,6 @@ void process50HzTask() {
   #endif
 
   #if defined(UseGPS)
-    readGps();
     if (haveAGpsLock() && !isHomeBaseInitialized()) {
       initHomeBase();
     }
