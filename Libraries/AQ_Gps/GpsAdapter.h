@@ -24,55 +24,143 @@
 
 #include <GpsDataType.h>
 
+struct gpsData gpsData; // This is accessed by the parser functions directly !
 
+#ifdef USEGPS_UBLOX
 #include <ublox.h>
+#endif
 
+#ifdef USEGPS_NMEA
+#include <nmea.h>
+#endif
 
 #define MIN_NB_SATS_IN_USE 6
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795
 
-
-
 GeodeticPosition currentPosition;
 
 float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
 
-boolean isGpsHaveANewPosition = false;
 
-void initializeGps() {
-    gpsdata.lat = GPS_INVALID_ANGLE;
-    gpsdata.lon = GPS_INVALID_ANGLE;
-    gpsdata.course = GPS_INVALID_ANGLE;
-    gpsdata.speed = GPS_INVALID_SPEED;
-    gpsdata.height = GPS_INVALID_ALTITUDE;
-    gpsdata.accuracy = GPS_INVALID_ACCURACY;
-    gpsdata.fixage = GPS_INVALID_AGE; 
-    gpsdata.state = DETECTING;
-    gpsdata.sats = 0;
-    gpsdata.fixtime = 0xFFFFFFFF;
-} gpsdata;
- 
+
+const unsigned long gpsBaudRates[] = { 9600L, 19200L, 38400L, 57600L, 115200L};
+const int gpsTypes[] = {
+#ifdef USEGPS_UBLOX
+   GPS_UBLOX,
+#endif
+#ifdef USEGPS_NMEA
+   GPS_NMEA,
+#endif
+};
+
+#define GPS_NUMBAUDRATES (sizeof(gpsBaudRates)/sizeof(gpsBaudRates[0]))
+#define GPS_NUMTYPES     (sizeof(gpsTypes)/sizeof(gpsTypes[0]))
+
+// Timeout for GPS
+#define GPS_MAXIDLE_DETECTING 200 // 2 seconds at 100Hz 
+#define GPS_MAXIDLE 1000          // 10 seconds at 100Hz 
+
+void initializeGpsPlugin() {
+  
+  gpsData.lat = GPS_INVALID_ANGLE;
+  gpsData.lon = GPS_INVALID_ANGLE;
+  gpsData.course = GPS_INVALID_ANGLE;
+  gpsData.speed = GPS_INVALID_SPEED;
+  gpsData.height = GPS_INVALID_ALTITUDE;
+  gpsData.accuracy = GPS_INVALID_ACCURACY;
+  gpsData.fixage = GPS_INVALID_AGE; 
+  gpsData.state = GPS_DETECTING;
+  gpsData.sentences = 0;
+  gpsData.sats = 0;
+  gpsData.fixtime = 0xFFFFFFFF;
+  GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);  
+  switch (gpsData.type) {
+#ifdef USEGPS_UBLOX
+    case GPS_UBLOX:
+      ubloxInit();
+      break;
+#endif
+#ifdef USEGPS_NMEA
+    case GPS_NMEA:
+      nmeaInit();
+      break;
+#endif
+  }
 }
 
-boolean readGps() {
-  return isGpsHaveANewPosition;
+void initializeGps() {
+    gpsData.baudrate = 0;
+    gpsData.type = 0;
+    initializeGpsPlugin();  
+ }
+
+void updateGps() {
+  
+  gpsData.idlecount++;
+  
+  while (GPS_SERIAL.available()) {
+    unsigned char c = GPS_SERIAL.read();
+    int ret=0;
+    switch (gpsData.type) {
+#ifdef USEGPS_UBLOX
+      case GPS_UBLOX:
+        ret = ubloxProcessData(c);
+        break;
+#endif
+#ifdef USEGPS_NMEA
+      case GPS_NMEA:
+        ret = nmeaProcessData(c);
+        break;
+#endif
+    }
+    if (ret) {
+      gpsData.idlecount=0;
+      currentPosition.latitude=gpsData.lat;
+      currentPosition.longitude=gpsData.lon;
+      currentPosition.altitude=gpsData.height;
+    }
+  }
+   
+  if (gpsData.idlecount > ((gpsData.state == GPS_DETECTING)?GPS_MAXIDLE_DETECTING:GPS_MAXIDLE)) {
+    gpsData.state = GPS_DETECTING;
+    gpsData.idlecount=0; 
+    // advance baudrate and/or type
+    gpsData.baudrate++;
+    if (gpsData.baudrate >= GPS_NUMBAUDRATES) {
+      gpsData.baudrate = 0;
+      gpsData.type++;
+      if (gpsData.type >= GPS_NUMTYPES) {
+        gpsData.type=0;
+      }
+    }
+    GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);  
+    initializeGpsPlugin();  
+    Serial.print('G');
+    Serial.print(gpsData.type);
+    Serial.print(':');
+    Serial.println(gpsBaudRates[gpsData.baudrate]);
+  }
 }
   
 boolean haveAGpsLock() {
-  return gps->fix && gps->num_sats >= MIN_NB_SATS_IN_USE;
+  return (gpsData.state > GPS_NOFIX) && (gpsData.sats >= MIN_NB_SATS_IN_USE);
 }
 
 long getCourse() {
-  return gps->ground_course;
+  return gpsData.course;
 }
 unsigned long getGpsSpeed() {
-  return gps->ground_speed;
+  return gpsData.speed;
+}
+
+unsigned long getGpsFixTime() {
+  return gpsData.speed;
 }
 
 unsigned long getGpsAltitude() {
-  return gps->altitude;
+  return gpsData.height;
 }
 
 void setProjectionLocation(struct GeodeticPosition pos) {

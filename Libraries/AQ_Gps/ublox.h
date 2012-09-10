@@ -1,14 +1,7 @@
 /* simple UBLOX parser */
 
-/*
-typedef unsigned int uint32_t;
-typedef int int32_t;
-typedef unsigned short uint16_t;
-typedef short int16_t;
-typedef unsigned char uint8_t;
-*/
-
-#define UBLOX_MAX 128
+#ifndef _AQ_ublox_H_
+#define _AQ_ublox_H_
 
 struct ublox_NAV_STATUS { // 01 03 (16)
   uint32_t iTow;
@@ -67,7 +60,7 @@ union ublox_message {
   struct ublox_NAV_POSLLH nav_posllh;
   struct ublox_NAV_VELNED nav_velned;
   struct ublox_NAV_SOL nav_sol;
-  unsigned char raw[UBLOX_MAX];
+  unsigned char raw[];
 } ubloxMessage;
 
 unsigned short ubloxExpectedDataLength;
@@ -80,7 +73,7 @@ struct fixdata {
   unsigned char fixtype;
 };
 
-enum { WAIT_SYNC1, WAIT_SYNC2, GET_CLASS, GET_ID, GET_LL, GET_LH, GET_DATA, GET_CKA, GET_CKB  } ubloxProcessDataState = WAIT_SYNC1;
+enum ubloxState{ WAIT_SYNC1, WAIT_SYNC2, GET_CLASS, GET_ID, GET_LL, GET_LH, GET_DATA, GET_CKA, GET_CKB  } ubloxProcessDataState;
 
 
 void ubloxInit() {
@@ -90,53 +83,34 @@ void ubloxInit() {
 
 void ubloxParseData() {// uses publib vars
 
-  if (ubloxClass==1) { //NAV
-    if (ubloxId==2) { //POSLLH
-      
-
-/*
-      printf("TOW: %6d LA %10d LO %10d Z %d ZS %d HA %d VA %d\n",
-	     ubloxMessage.nav_posllh.iTow,
-	     ubloxMessage.nav_posllh.lon,
-	     ubloxMessage.nav_posllh.lat,
-	     ubloxMessage.nav_posllh.height,
-	     ubloxMessage.nav_posllh.hMSL,
-	     ubloxMessage.nav_posllh.hAcc,
-	     ubloxMessage.nav_posllh.vAcc);
-	     */
+  gpsData.sentences++;
+  if (ubloxClass==1) { // NAV
+    if (ubloxId==2) { // NAV:POSLLH
+      gpsData.lat = ubloxMessage.nav_posllh.lat;
+      gpsData.lon = ubloxMessage.nav_posllh.lon;
+      gpsData.height = ubloxMessage.nav_posllh.height;
+      gpsData.accuracy = ubloxMessage.nav_posllh.hAcc;
+      gpsData.fixtime = ubloxMessage.nav_posllh.iTow;
     }
-    else if (ubloxId==3) { //STATUS
-/*
-      printf("TOW: %6d gpsf %d fl %02x fixstat %02x fl2 %02x ttfx %d msss %d\n",
-	     ubloxMessage.nav_status.iTow,
-	     ubloxMessage.nav_status.gpsFix,
-	     ubloxMessage.nav_status.flags,
-	     ubloxMessage.nav_status.fixStat,
-	     ubloxMessage.nav_status.flags2,
-	     ubloxMessage.nav_status.ttfx,
-	     ubloxMessage.nav_status.msss);
-	     */
+    else if (ubloxId==3) { //NAV:STATUS
+      switch (ubloxMessage.nav_status.gpsFix) {
+        case 2: 
+          gpsData.state = GPS_FIX2D;
+          break;
+        case 3:
+          gpsData.state = GPS_FIX3D;
+          break;
+        default:
+          gpsData.state = GPS_NOFIX;
+          break;
+      }
     }
-    else if (ubloxId==6) { // VELNED
-      /*
-      printf("TOW: %6d numSV %d\n",
-	     ubloxMessage.nav_sol.iTow,
-	     ubloxMessage.nav_sol.numSV);
-*/
+    else if (ubloxId==6) { // NAV:SOL
+      gpsData.sats = ubloxMessage.nav_sol.numSV;
     }
-    else if (ubloxId==18) { // VELNED
-      /*
-        printf("TOW: %6d velN %d E %d D %d speed %d gspeed %d, hdg %d sacc %d hacc %d\n",
-	     ubloxMessage.nav_velned.iTow,
-	     ubloxMessage.nav_velned.velN,
-	     ubloxMessage.nav_velned.velE,
-	     ubloxMessage.nav_velned.velD,
-	     ubloxMessage.nav_velned.speed,
-	     ubloxMessage.nav_velned.gSpeed,
-	     ubloxMessage.nav_velned.heading,
-	     ubloxMessage.nav_velned.sAcc,
-	     ubloxMessage.nav_velned.cAcc);
-	      */
+    else if (ubloxId==18) { // NAV:VELNED
+      gpsData.course = ubloxMessage.nav_velned.heading;
+      gpsData.speed = ubloxMessage.nav_velned.gSpeed;
     }
     else {
       //printf("NAV? %d\n",ubloxId);
@@ -190,7 +164,10 @@ int ubloxProcessData(unsigned char data) {
   case GET_DATA:
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
-    ubloxMessage.raw[ubloxDataLength++] = data;
+    // next will discard data if it exceed out biggest parsed msg
+    if (ubloxDataLength < sizeof(ubloxMessage)) {
+      ubloxMessage.raw[ubloxDataLength++] = data;
+    }
     if (ubloxDataLength >= ubloxExpectedDataLength) {
       ubloxProcessDataState = GET_CKA;
     }
@@ -204,6 +181,10 @@ int ubloxProcessData(unsigned char data) {
     break;
   case GET_CKB:
     if (ubloxCKB == data) {
+      if (gpsData.state == GPS_DETECTING) {
+          Serial.println("UBLOX OK!");
+          gpsData.state = GPS_NOFIX;
+      }
       ubloxParseData();
       parsed = 1;
     }
@@ -213,3 +194,4 @@ int ubloxProcessData(unsigned char data) {
   return parsed;
 }
 
+#endif
