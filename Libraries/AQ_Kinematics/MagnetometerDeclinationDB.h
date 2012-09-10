@@ -25,7 +25,7 @@
   #define PGM_UINT8(p) (*p)
   #define MAGDB_PROGMEM
   #define memcpy_P memcpy
-  typedef prog_char char;
+  typedef char prog_char;
 #else
   #define PGM_UINT8(p) (uint8_t)pgm_read_byte_far(p)
   #define MAGDB_PROGMEM PROGMEM
