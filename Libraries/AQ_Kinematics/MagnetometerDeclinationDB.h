@@ -23,7 +23,7 @@
 
 #ifdef AeroQuadSTM32
   #define PGM_UINT8(p) (*p)
-  #define MAGGB_PROGMEM
+  #define MAGDB_PROGMEM
 #else
   #define PGM_UINT8(p) (uint8_t)pgm_read_byte_far(p)
   #define MAGDB_PROGMEM PROGMEM
