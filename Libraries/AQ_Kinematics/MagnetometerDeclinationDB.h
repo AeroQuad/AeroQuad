@@ -21,6 +21,9 @@
 #ifndef _AQ_DECLINATION_DB_
 #define _AQ_DECLINATION_DB_
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
 
 // 1 byte - 4 bits for value + 1 bit for sign + 3 bits for repeats => 8 bits
 struct row_value {
