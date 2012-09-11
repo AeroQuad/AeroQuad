@@ -645,9 +645,10 @@ void sendSerialTelemetry() {
       PrintValueComma(gpsData.height);
       PrintValueComma(gpsData.course);
       PrintValueComma(gpsData.speed);
+      PrintValueComma(gpsData.sats);
+      PrintValueComma(gpsData.fixtime);
       PrintValueComma(gpsData.sentences);
       PrintValueComma(gpsData.idlecount);
-      PrintValueComma(gpsData.sats);
       SERIAL_PRINTLN();
     #else
     #endif    

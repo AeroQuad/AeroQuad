@@ -148,7 +148,7 @@ unsigned long getGpsSpeed() {
 }
 
 unsigned long getGpsFixTime() {
-  return gpsData.speed;
+  return gpsData.fixtime;
 }
 
 unsigned long getGpsAltitude() {

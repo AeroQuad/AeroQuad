@@ -20,85 +20,113 @@ void nmeaInit() {
   gpsProcessDataState = WAIT_START;
 }
 
-// Grab a number from NMEA sentence with optional decimals
-// *p is adjusted for characters extracted
-// out,decimals,decimalcount can be NULL - in this case data is discarded
-// return 1 if a number was successfully extracted, 0 otherwise
-
-int nmeaGetIntDotInt(char **s, long *out, long *decimals, int *decimalcount) {
+int nmeaGetScaledInt( char **s, long *out, int decimals ) {
 
   long val=0;
   int  ret=0;
-  int  d = 0;
 
+  // read whole numbers (prior to dot)
   while (((**s)>='0') && ((**s) <= '9')) {
     val *= 10;
     val = val + (*((*s)++) - '0');
     ret=1;
   }
-  if (out) *out = val;
+  
   if ((**s)=='.') {
+    // we have decimals
     (*s)++;
-    val=0;
-    while (((**s)>='0') && ((**s) <= '9')) {
+    while  (decimals--) {
       val *= 10;
-      val = val + (*((*s)++) - '0');
-      d++;
-      ret=1;
+      if (((**s)>='0') && ((**s) <= '9')) {
+        val += (*((*s)++) - '0');
+        ret = 1;
+      }
     }
   }
+  else {
+    while  (decimals--) {
+      val *= 10;
+    }
+  } 
 
-  if (decimals) *decimals = val;
+  // take off the decimals we did not care about
+  while (((**s)>='0') && ((**s) <= '9')) {
+    (*s)++;
+  }
 
-  if (decimalcount) *decimalcount = d;
-
+  if (ret && out) *out=val;
+  
   return ret;
 }
 
 // Get coordinate from NMEA
 // input: string "[d]ddmm.mmmm,[NESW]"
 int nmeaGetCoord(char **s, long *outp) {
-  long min,deg,out;
-  int decimals;
-  if (nmeaGetIntDotInt(s,&deg,&min,&decimals)) {
-    out = (deg / 100) * 10000000;
-    while (decimals < 5) {
-      min = 10 * min;
-      decimals++;
-    }
-    while (decimals > 5) {
-      min = min/10;
-      decimals--;
-    }
-    // convert from minutes to degrees
-    out += ((deg % 100) * 100000 + min) * 100 / 60;
+  long raw,deg;
+  if (nmeaGetScaledInt(s,&raw,5)) {
+    deg = raw / 10000000 * 10000000; // whole degrees
+    raw = raw - deg;                 // minutes
+    raw = raw * 100 / 60;            // minutes to fractional degrees
+    deg = deg + raw;
     if (**s == ',') {
       (*s)++;
-      if ((**s == 'S') || (**s == 'E')) {
-	out=-out;
+      if ((**s == 'S') || (**s == 'W')) {
+        deg=-deg;
       }
       (*s)++;
-      if (outp) *outp=out;
+      if (outp) *outp = deg;
       return 1;
     }
   }
   return 0;
 }
 
-
 void nmeaProcessSentence(){
 
+  gpsData.sentences++;
   char *p = sentenceBuffer;
   if (!strncmp(p,"GPGGA,",6)) {
-    long fixtime,lat=0,lon=0;
+    long work,workd; int decs;
     p+=6;
 
-    nmeaGetIntDotInt(&p,&fixtime,NULL,NULL);
+    nmeaGetScaledInt(&p, &work, 3);
+    gpsData.fixtime = work;
     if (*(p++) != ',') return;
-    nmeaGetCoord(&p,&lat);
-    if (*(p++) != ',') return;
-    nmeaGetCoord(&p,&lon);
 
+    nmeaGetCoord(&p,&work);
+    gpsData.lat = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetCoord(&p,&work);
+    gpsData.lon = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p,&work,0); //fix quality
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p,&work,0); // num sats
+    gpsData.sats = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p,&work,3); //hdop
+    gpsData.accuracy = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p,&work,3); //altitude
+    gpsData.accuracy = work;
+    if (*(p++) != ',') return;
+
+
+  }
+  else if (!strncmp(p,"GPGSA,",6)) {
+    long work,workd;
+    p+=6;
+    
+    p++;
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p,&work,0);
+    gpsData.state = work;
   }
 
 }
