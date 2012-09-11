@@ -26,6 +26,14 @@
 
 struct gpsData gpsData; // This is accessed by the parser functions directly !
 
+// default to all protocols
+
+#if (!defined(USEGPS_UBLOX) && ! defined(USEGPS_NMEA)) 
+  #define USEGPS_UBLOX
+  #define USEGPS_NMEA
+#endif
+
+
 #ifdef USEGPS_UBLOX
 #include <ublox.h>
 #endif
@@ -43,15 +51,19 @@ GeodeticPosition currentPosition;
 
 float cosLatitude = 0.7; // @ ~ 45 N/S, this will be adjusted to home loc 
 
-
+struct gpsType {
+  const char *name;
+  void (*init)();
+  int  (*processData)(unsigned char);
+};
 
 const unsigned long gpsBaudRates[] = { 9600L, 19200L, 38400L, 57600L, 115200L};
-const int gpsTypes[] = {
+const struct gpsType gpsTypes[] = {
 #ifdef USEGPS_UBLOX
-   GPS_UBLOX,
+  { "UBlox", ubloxInit, ubloxProcessData },
 #endif
 #ifdef USEGPS_NMEA
-   GPS_NMEA,
+  { "NMEA", nmeaInit, nmeaProcessData },
 #endif
 };
 
@@ -76,18 +88,7 @@ void initializeGpsPlugin() {
   gpsData.sats = 0;
   gpsData.fixtime = 0xFFFFFFFF;
   GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);  
-  switch (gpsData.type) {
-#ifdef USEGPS_UBLOX
-    case GPS_UBLOX:
-      ubloxInit();
-      break;
-#endif
-#ifdef USEGPS_NMEA
-    case GPS_NMEA:
-      nmeaInit();
-      break;
-#endif
-  }
+  gpsTypes[gpsData.type].init();
 }
 
 void initializeGps() {
@@ -103,18 +104,7 @@ void updateGps() {
   while (GPS_SERIAL.available()) {
     unsigned char c = GPS_SERIAL.read();
     int ret=0;
-    switch (gpsData.type) {
-#ifdef USEGPS_UBLOX
-      case GPS_UBLOX:
-        ret = ubloxProcessData(c);
-        break;
-#endif
-#ifdef USEGPS_NMEA
-      case GPS_NMEA:
-        ret = nmeaProcessData(c);
-        break;
-#endif
-    }
+    ret = gpsTypes[gpsData.type].processData(c);
     if (ret) {
       gpsData.idlecount=0;
       currentPosition.latitude=gpsData.lat;
@@ -123,19 +113,21 @@ void updateGps() {
     }
   }
    
-  if (gpsData.idlecount > ((gpsData.state == GPS_DETECTING)?GPS_MAXIDLE_DETECTING:GPS_MAXIDLE)) {
-    gpsData.state = GPS_DETECTING;
+  if (gpsData.idlecount > ((gpsData.state == GPS_DETECTING) ? GPS_MAXIDLE_DETECTING : GPS_MAXIDLE)) {
     gpsData.idlecount=0; 
-    // advance baudrate and/or type
-    gpsData.baudrate++;
-    if (gpsData.baudrate >= GPS_NUMBAUDRATES) {
-      gpsData.baudrate = 0;
-      gpsData.type++;
-      if (gpsData.type >= GPS_NUMTYPES) {
-        gpsData.type=0;
+    if (gpsData.state == GPS_DETECTING) {
+      // advance baudrate and/or type
+      gpsData.baudrate++;
+      if (gpsData.baudrate >= GPS_NUMBAUDRATES) {
+	gpsData.baudrate = 0;
+	gpsData.type++;
+	if (gpsData.type >= GPS_NUMTYPES) {
+	  gpsData.type = 0;
+	}
       }
+      GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);  
     }
-    GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);  
+    gpsData.state = GPS_DETECTING;
     initializeGpsPlugin();  
     Serial.print('G');
     Serial.print(gpsData.type);
