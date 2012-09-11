@@ -141,7 +141,7 @@ boolean haveAGpsLock() {
 }
 
 long getCourse() {
-  return gpsData.course;
+  return gpsData.course / 1000; // to whole degrees
 }
 unsigned long getGpsSpeed() {
   return gpsData.speed;

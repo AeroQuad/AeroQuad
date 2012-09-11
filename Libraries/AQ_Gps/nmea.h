@@ -86,7 +86,7 @@ void nmeaProcessSentence(){
   gpsData.sentences++;
   char *p = sentenceBuffer;
   if (!strncmp(p,"GPGGA,",6)) {
-    long work,workd; int decs;
+    long work;
     p+=6;
 
     nmeaGetScaledInt(&p, &work, 3);
@@ -113,13 +113,11 @@ void nmeaProcessSentence(){
     if (*(p++) != ',') return;
 
     nmeaGetScaledInt(&p,&work,3); //altitude
-    gpsData.accuracy = work;
+    gpsData.height = work;
     if (*(p++) != ',') return;
-
-
   }
   else if (!strncmp(p,"GPGSA,",6)) {
-    long work,workd;
+    long work;
     p+=6;
     
     p++;
@@ -128,7 +126,34 @@ void nmeaProcessSentence(){
     nmeaGetScaledInt(&p,&work,0);
     gpsData.state = work;
   }
+  else if (!strncmp(p,"GPRMC,",6)) {
+    long work;
+    p+=6;
 
+    nmeaGetScaledInt(&p, &work, 3);
+    gpsData.fixtime = work;
+    if (*(p++) != ',') return;
+    
+    p++; // fix status - ignored
+    if (*(p++) != ',') return;
+
+    nmeaGetCoord(&p,&work);
+    gpsData.lat = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetCoord(&p,&work);
+    gpsData.lon = work;
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p, &work, 3); // speed in knots
+    work = work * 5144 / 10000; // to mm/s
+    gpsData.speed = work;
+
+    if (*(p++) != ',') return;
+
+    nmeaGetScaledInt(&p, &work, 3); // heading
+    gpsData.course = work;
+  }
 }
 
 int nmeaProcessData(unsigned char data) {

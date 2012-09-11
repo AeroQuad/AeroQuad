@@ -645,6 +645,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gpsData.height);
       PrintValueComma(gpsData.course);
       PrintValueComma(gpsData.speed);
+      PrintValueComma(gpsData.accuracy);
       PrintValueComma(gpsData.sats);
       PrintValueComma(gpsData.fixtime);
       PrintValueComma(gpsData.sentences);
