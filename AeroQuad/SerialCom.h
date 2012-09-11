@@ -833,7 +833,7 @@ void printVehicleState(const char *sensorName, unsigned long state, const char *
 
 void reportVehicleState() {
   // Tell Configurator how many vehicle state values to expect
-  SERIAL_PRINTLN(14);
+  SERIAL_PRINTLN(15);
   SERIAL_PRINT("Software Version: ");
   SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
   SERIAL_PRINT("Board Type: ");
@@ -904,6 +904,15 @@ void reportVehicleState() {
   printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled");
   printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
   printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
+#ifdef UseGPS
+  SERIAL_PRINT("GPS: ");
+  SERIAL_PRINT((gpsData.state==GPS_DETECTING)?"Scanning ":"Detected ");
+  SERIAL_PRINT(gpsTypes[gpsData.type].name);
+  SERIAL_PRINT("@");
+  SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
+#else
+    SERIAL_PRINTLN("GPS: Disabled");
+#endif
 }
 
 #ifdef SlowTelemetry
