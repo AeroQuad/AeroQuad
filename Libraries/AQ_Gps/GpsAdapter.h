@@ -129,10 +129,6 @@ void updateGps() {
     }
     gpsData.state = GPS_DETECTING;
     initializeGpsPlugin();  
-    Serial.print('G');
-    Serial.print(gpsData.type);
-    Serial.print(':');
-    Serial.println(gpsBaudRates[gpsData.baudrate]);
   }
 }
   

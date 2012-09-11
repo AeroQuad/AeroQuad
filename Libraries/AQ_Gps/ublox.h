@@ -188,7 +188,6 @@ int ubloxProcessData(unsigned char data) {
   case GET_CKB:
     if (ubloxCKB == data) {
       if (gpsData.state == GPS_DETECTING) {
-          Serial.println("UBLOX OK!");
           gpsData.state = GPS_NOFIX;
       }
       ubloxParseData();
