@@ -33,6 +33,7 @@
 	#define LED_Red    Port2Pin('E', 5)
 	#define LED_Yellow LED_Red
 
+	#define BATT_ANALOG_INPUT	Port2Pin('C', 0)
 	#define A1       Port2Pin('B',0)
 	#define A2       Port2Pin('C',4)
 	#define A3       Port2Pin('B',1)
@@ -66,7 +67,6 @@
 
 		#define BATT_R_HIGH       10.0	// kOhm
 		#define BATT_R_LOW        1.5		// kOhm
-		#define BATT_ANALOG_INPUT	Port2Pin('C', 0)
 		#define BATT_DIODE_LOSS		0.0
 		#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, (BATT_AREF * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
 	#endif
@@ -112,9 +112,13 @@
 		pinMode(LED_Yellow, OUTPUT);
 		digitalWrite(LED_Yellow, LOW);
 
-	  #ifdef BattMonitor
 	    pinMode(BATT_ANALOG_INPUT, INPUT_ANALOG);
-	  #endif
+	    pinMode(A1, INPUT_ANALOG);
+	    pinMode(A2, INPUT_ANALOG);
+	    pinMode(A3, INPUT_ANALOG);
+	    pinMode(A4, INPUT_ANALOG);
+	    pinMode(A5, INPUT_ANALOG);
+	    pinMode(A6, INPUT_ANALOG);
 
 	  #ifdef DEBUG_INIT
 	    long t0 = micros();
