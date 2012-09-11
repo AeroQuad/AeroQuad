@@ -60,7 +60,7 @@ union ublox_message {
   struct ublox_NAV_POSLLH nav_posllh;
   struct ublox_NAV_VELNED nav_velned;
   struct ublox_NAV_SOL nav_sol;
-  unsigned char raw[];
+  unsigned char raw[52];
 } ubloxMessage;
 
 unsigned short ubloxExpectedDataLength;

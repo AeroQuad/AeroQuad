@@ -89,31 +89,46 @@ void nmeaProcessSentence(){
     long work;
     p+=6;
 
-    nmeaGetScaledInt(&p, &work, 3);
-    gpsData.fixtime = work;
+    if (nmeaGetScaledInt(&p, &work, 3)) {
+      gpsData.fixtime = work;
+    }
+
     if (*(p++) != ',') return;
 
-    nmeaGetCoord(&p,&work);
-    gpsData.lat = work;
+    if (nmeaGetCoord(&p,&work)) {
+      gpsData.lat = work;
+    }
+
     if (*(p++) != ',') return;
 
-    nmeaGetCoord(&p,&work);
-    gpsData.lon = work;
+    if (nmeaGetCoord(&p,&work)) {
+      gpsData.lon = work;
+    }
+
     if (*(p++) != ',') return;
 
     nmeaGetScaledInt(&p,&work,0); //fix quality
     if (*(p++) != ',') return;
 
-    nmeaGetScaledInt(&p,&work,0); // num sats
-    gpsData.sats = work;
+    if (nmeaGetScaledInt(&p,&work,0)) { // num sats
+      gpsData.sats = work;
+    }
+    else {
+      gpsData.sats = work;
+    }
+
     if (*(p++) != ',') return;
 
-    nmeaGetScaledInt(&p,&work,3); //hdop
-    gpsData.accuracy = work;
+    if (nmeaGetScaledInt(&p,&work,3)) { //hdop
+      gpsData.accuracy = work;
+    }
+
     if (*(p++) != ',') return;
 
-    nmeaGetScaledInt(&p,&work,3); //altitude
-    gpsData.height = work;
+    if (nmeaGetScaledInt(&p,&work,3)) { //altitude
+      gpsData.height = work;
+    }
+
     if (*(p++) != ',') return;
   }
   else if (!strncmp(p,"GPGSA,",6)) {
@@ -130,29 +145,37 @@ void nmeaProcessSentence(){
     long work;
     p+=6;
 
-    nmeaGetScaledInt(&p, &work, 3);
-    gpsData.fixtime = work;
+    if (nmeaGetScaledInt(&p, &work, 3)) {
+      gpsData.fixtime = work;
+    }
+
     if (*(p++) != ',') return;
     
     p++; // fix status - ignored
     if (*(p++) != ',') return;
 
-    nmeaGetCoord(&p,&work);
-    gpsData.lat = work;
-    if (*(p++) != ',') return;
-
-    nmeaGetCoord(&p,&work);
-    gpsData.lon = work;
-    if (*(p++) != ',') return;
-
-    nmeaGetScaledInt(&p, &work, 3); // speed in knots
-    work = work * 5144 / 10000; // to mm/s
-    gpsData.speed = work;
+    if (nmeaGetCoord(&p,&work)) {
+      gpsData.lat = work;
+    }
 
     if (*(p++) != ',') return;
 
-    nmeaGetScaledInt(&p, &work, 3); // heading
-    gpsData.course = work;
+    if (nmeaGetCoord(&p,&work)) {
+      gpsData.lon = work;
+    }
+
+    if (*(p++) != ',') return;
+
+    if (nmeaGetScaledInt(&p, &work, 3)) { // speed in knots
+      work = work * 5144 / 10000; // to mm/s
+      gpsData.speed = work;
+    }
+
+    if (*(p++) != ',') return;
+
+    if (nmeaGetScaledInt(&p, &work, 3)) { // heading
+      gpsData.course = work;
+    }
   }
 }
 
