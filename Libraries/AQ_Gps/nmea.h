@@ -89,21 +89,15 @@ void nmeaProcessSentence(){
     long work;
     p+=6;
 
-    if (nmeaGetScaledInt(&p, &work, 3)) {
-      gpsData.fixtime = work;
-    }
+    gpsData.fixtime = (nmeaGetScaledInt(&p, &work, 3)) ? work : GPS_INVALID_FIX_TIME;
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetCoord(&p,&work)) {
-      gpsData.lat = work;
-    }
+    gpsData.lat = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetCoord(&p,&work)) {
-      gpsData.lon = work;
-    }
+    gpsData.lon = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
 
     if (*(p++) != ',') return;
 
@@ -114,20 +108,16 @@ void nmeaProcessSentence(){
       gpsData.sats = work;
     }
     else {
-      gpsData.sats = work;
+      gpsData.sats = 0;
     }
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetScaledInt(&p,&work,3)) { //hdop
-      gpsData.accuracy = work;
-    }
+    gpsData.accuracy = (nmeaGetScaledInt(&p,&work,3)) ? work : GPS_INVALID_ACCURACY; //hdop
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetScaledInt(&p,&work,3)) { //altitude
-      gpsData.height = work;
-    }
+    gpsData.height = (nmeaGetScaledInt(&p,&work,3)) ? work : GPS_INVALID_ALTITUDE;
 
     if (*(p++) != ',') return;
   }
@@ -145,37 +135,26 @@ void nmeaProcessSentence(){
     long work;
     p+=6;
 
-    if (nmeaGetScaledInt(&p, &work, 3)) {
-      gpsData.fixtime = work;
-    }
+    gpsData.fixtime = (nmeaGetScaledInt(&p, &work, 3)) ? work : GPS_INVALID_FIX_TIME;
 
     if (*(p++) != ',') return;
     
     p++; // fix status - ignored
     if (*(p++) != ',') return;
 
-    if (nmeaGetCoord(&p,&work)) {
-      gpsData.lat = work;
-    }
+    gpsData.lat = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetCoord(&p,&work)) {
-      gpsData.lon = work;
-    }
+    gpsData.lon = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetScaledInt(&p, &work, 3)) { // speed in knots
-      work = work * 5144 / 10000; // to mm/s
-      gpsData.speed = work;
-    }
+    gpsData.speed = (nmeaGetScaledInt(&p, &work, 3)) ? work * 5144 / 10000 : GPS_INVALID_SPEED;
 
     if (*(p++) != ',') return;
 
-    if (nmeaGetScaledInt(&p, &work, 3)) { // heading
-      gpsData.course = work;
-    }
+    gpsData.course = (nmeaGetScaledInt(&p, &work, 3)) ? work : 0;
   }
 }
 
