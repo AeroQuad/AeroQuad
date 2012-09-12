@@ -57,8 +57,8 @@ void mtk16Init() {
 void mtk16ParseData() {// uses publib vars
   if (mtk16DataLength == 32) {
     gpsData.sentences++;
-    gpsData.lat = mtk16Message.msg.latitude;
-    gpsData.lon = mtk16Message.msg.longitude;
+    gpsData.lat = mtk16Message.msg.latitude * 10;
+    gpsData.lon = mtk16Message.msg.longitude * 10;
     gpsData.height = mtk16Message.msg.altitude;
     gpsData.accuracy = mtk16Message.msg.hdop;
     gpsData.fixtime = mtk16Message.msg.utc_time;
