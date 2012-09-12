@@ -31,6 +31,7 @@ struct gpsData gpsData; // This is accessed by the parser functions directly !
 #if (!defined(USEGPS_UBLOX) && ! defined(USEGPS_NMEA)) 
   #define USEGPS_UBLOX
   #define USEGPS_NMEA
+  #define USEGPS_MTK16
 #endif
 
 
@@ -40,6 +41,10 @@ struct gpsData gpsData; // This is accessed by the parser functions directly !
 
 #ifdef USEGPS_NMEA
 #include <nmea.h>
+#endif
+
+#ifdef USEGPS_MTK16
+#include <mtk16.h>
 #endif
 
 #define MIN_NB_SATS_IN_USE 6
@@ -64,6 +69,9 @@ const struct gpsType gpsTypes[] = {
 #endif
 #ifdef USEGPS_NMEA
   { "NMEA", nmeaInit, nmeaProcessData },
+#endif
+#ifdef USEGPS_MTK16
+  { "MTK16", mtk16Init, mtk16ProcessData },
 #endif
 };
 
