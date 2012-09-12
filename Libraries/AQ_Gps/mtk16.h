@@ -18,7 +18,7 @@ struct mtk16_fix {
 
 union mtk16_message {
   struct mtk16_fix msg;
-  unsigned char raw[33];
+  unsigned char raw[32];
 } mtk16Message;
 
 unsigned short mtk16DataLength;
@@ -81,7 +81,13 @@ int mtk16ProcessData(unsigned char data) {
     mtk16CKA = data;
     mtk16CKB = mtk16CKA;
     mtk16ExpectedDataLength = data;
-    mtk16ProcessDataState = MTK16_GET_DATA;
+    if (mtk16ExpectedDataLength > sizeof(mtk16Message)) {
+      // discard overlong message
+      mtk16ProcessDataState = MTK16_WAIT_SYNC1;
+    }
+    else {
+      mtk16ProcessDataState = MTK16_GET_DATA;
+    }
     break;
   case MTK16_GET_DATA:
     mtk16CKA += data;
