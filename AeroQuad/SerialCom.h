@@ -907,7 +907,9 @@ void reportVehicleState() {
 #ifdef UseGPS
   SERIAL_PRINT("GPS: ");
   SERIAL_PRINT((gpsData.state==GPS_DETECTING)?"Scanning ":"Detected ");
-  SERIAL_PRINT(gpsTypes[gpsData.type].name);
+  if (gpsData.state != GPS_DETECTING) {
+    SERIAL_PRINT(gpsTypes[gpsData.type].name);
+  }
   SERIAL_PRINT("@");
   SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
 #else

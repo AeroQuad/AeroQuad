@@ -130,11 +130,8 @@ int mtk16ProcessData(unsigned char data) {
     break;
   case MTK16_GET_CKB:
     if (mtk16CKB == data) {
-      if (gpsData.state == GPS_DETECTING) {
-          gpsData.state = GPS_NOFIX;
-      }
-      mtk16ParseData();
       parsed = 1;
+      mtk16ParseData();
     }
     mtk16ProcessDataState = MTK16_WAIT_SYNC1;
     break;

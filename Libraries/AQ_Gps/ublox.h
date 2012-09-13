@@ -187,11 +187,8 @@ int ubloxProcessData(unsigned char data) {
     break;
   case GET_CKB:
     if (ubloxCKB == data) {
-      if (gpsData.state == GPS_DETECTING) {
-          gpsData.state = GPS_NOFIX;
-      }
-      ubloxParseData();
       parsed = 1;
+      ubloxParseData();
     }
     ubloxProcessDataState = WAIT_SYNC1;
     break;

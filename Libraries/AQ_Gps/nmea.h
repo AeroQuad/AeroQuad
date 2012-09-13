@@ -201,7 +201,6 @@ int nmeaProcessData(unsigned char data) {
     gpsProcessDataState=WAIT_START;
     break;
   }
-  
   return parsed;
 }
 

@@ -100,8 +100,6 @@
 //#define UseGPSNavigator		// EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
 
 #define GPS_SERIAL Serial1
-#define USEGPS_UBLOX
-#define USEGPS_NMEA
 
 //
 // *******************************************************************************************************************************
