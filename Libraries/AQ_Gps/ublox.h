@@ -132,6 +132,9 @@ int ubloxProcessData(unsigned char data) {
     if (data == 0x62) {
       ubloxProcessDataState = GET_CLASS;
     }
+    else if (data == 0xb5) {
+      // ubloxProcessDataState = GET_SYNC2;
+    }
     else {
       ubloxProcessDataState = WAIT_SYNC1;
     }
