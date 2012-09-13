@@ -109,7 +109,7 @@ struct gpsConfigEntry {
 static const unsigned char UBX_5HZ[] = {0xb5,0x62,0x06,0x08,0x06,0x00,0xc8,0x00,0x01,0x00,0x01,0x00,0xde,0x6a};
 
 struct gpsConfigEntry gpsConfigEntries[] = {
-  { (unsigned char *)"$PUBX,41,1,0003,0002,38400,0*25\r\n", 0 },
+  { (unsigned char *)"$PUBX,41,1,0003,0003,38400,0*24\r\n", 0 },
   { UBX_5HZ, sizeof(UBX_5HZ) }
 };
 
