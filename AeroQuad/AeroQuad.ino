@@ -55,22 +55,6 @@
  #define REAR_YAW_CORRECTION 1.17
 #endif
 
-//
-// In order to use the DIYDrone libraries, this have to be declared here this way
-// @see Kenny9999 for details
-//
-#if defined(UseGPS)
-  // needed here to use DIYDrone GPS libraries
-  #include <FastSerial.h>
-  #include <AP_Common.h>
-  #include <AP_GPS.h>
-  
-  FastSerialPort0(Serial);
-  FastSerialPort1(Serial1);
-  FastSerialPort2(Serial2);
-  FastSerialPort3(Serial3);
-#endif
-
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -1310,6 +1294,10 @@ void process100HzTask() {
   #ifdef SlowTelemetry
     updateSlowTelemetry100Hz();
   #endif
+
+  #if defined(UseGPS)
+    updateGps();
+  #endif      
 }
 
 /*******************************************************************
@@ -1331,7 +1319,6 @@ void process50HzTask() {
   #endif
 
   #if defined(UseGPS)
-    readGps();
     if (haveAGpsLock() && !isHomeBaseInitialized()) {
       initHomeBase();
     }
@@ -1340,6 +1327,13 @@ void process50HzTask() {
   #if defined(CameraControl)
     moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
   #endif      
+
+    #ifdef MAX7456_OSD
+    #ifdef OSD50HZ
+      updateOSD();
+    #endif
+    #endif
+    
 }
 
 /*******************************************************************
@@ -1385,7 +1379,9 @@ void process10HzTask3() {
     #endif
 
     #ifdef MAX7456_OSD
+    #ifndef OSD50HZ
       updateOSD();
+    #endif
     #endif
     
     #if defined(UseGPS) || defined(BattMonitor)
