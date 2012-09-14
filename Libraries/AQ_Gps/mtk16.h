@@ -1,9 +1,29 @@
+/*
+  AeroQuad v3.x - Sep 2012
+  www.AeroQuad.com
+  Copyright (c) 2012 AeroQuad developers.  All rights reserved.
+  An Open Source Arduino based multicopter.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /* simple MTK binary v1.6 parser */
 
 #ifndef _AQ_mtk16_H_
 #define _AQ_mtk16_H_
 
-/* MTK INIT STRINGS 
+/* MTK INIT STRINGS
 
 #define MTK_SET_BINARY "$PGCMD,16,0,0,0,0,0*6A\r\n"
 #define MTK_SET_NMEA   "$PGCMD,16,1,1,1,1,1*6B\r\n"
@@ -62,13 +82,13 @@ unsigned char  mtk16CKA,mtk16CKB;
 enum mtk16State{ MTK16_WAIT_SYNC1, MTK16_WAIT_SYNC2, MTK16_GET_LEN, MTK16_GET_DATA, MTK16_GET_CKA, MTK16_GET_CKB  } mtk16ProcessDataState;
 
 void mtk16Init() {
-  
+
   mtk16ProcessDataState = MTK16_WAIT_SYNC1;
 }
 
 // Copy data to gspData structure from received binary packet
 void mtk16ParseData() {
-  
+
   if (mtk16DataLength == 32) {
     gpsData.sentences++;
     gpsData.lat = mtk16Message.msg.latitude * 10;
@@ -77,7 +97,7 @@ void mtk16ParseData() {
     gpsData.accuracy = mtk16Message.msg.hdop;
     gpsData.fixtime = mtk16Message.msg.utc_time;
     switch (mtk16Message.msg.fix_type) {
-    case 2: 
+    case 2:
       gpsData.state = GPS_FIX2D;
       break;
     case 3:
@@ -90,14 +110,14 @@ void mtk16ParseData() {
     gpsData.sats = mtk16Message.msg.satellites;
     gpsData.course = mtk16Message.msg.ground_course;
     gpsData.speed = mtk16Message.msg.ground_speed;
-  } 
+  }
 }
 
 // Parse data from GPS
 int mtk16ProcessData(unsigned char data) {
-  
+
   int parsed = 0;
-  
+
   switch (mtk16ProcessDataState) {
   case MTK16_WAIT_SYNC1:
     if (data == 0xd0) {

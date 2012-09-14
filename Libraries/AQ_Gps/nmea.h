@@ -1,4 +1,24 @@
-/* simple UBLOX parser */
+/*
+  AeroQuad v3.x - Sep 2012
+  www.AeroQuad.com
+  Copyright (c) 2012 AeroQuad developers.  All rights reserved.
+  An Open Source Arduino based multicopter.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* simple NMEA parser */
 
 #ifndef _AQ_nmea_H_
 #define _AQ_nmea_H_
@@ -15,7 +35,7 @@ static const char nib2hex[16] = { '0','1','2','3','4','5','6','7','8','9','A','B
 
 // initialize parser
 void nmeaInit() {
-  
+
   gpsProcessDataState = WAIT_START;
 }
 
@@ -34,7 +54,7 @@ int nmeaGetScaledInt( char **s, long *out, int decimals ) {
     val = val + (*((*s)++) - '0');
     ret=1;
   }
-  
+
   if ((**s)=='.') {
     // we have decimals
     (*s)++;
@@ -50,7 +70,7 @@ int nmeaGetScaledInt( char **s, long *out, int decimals ) {
     while  (decimals--) {
       val *= 10;
     }
-  } 
+  }
 
   // take off the decimals we did not care about
   while (((**s)>='0') && ((**s) <= '9')) {
@@ -65,7 +85,7 @@ int nmeaGetScaledInt( char **s, long *out, int decimals ) {
   }
 
   if (ret && out) *out=val;
-  
+
   return ret;
 }
 
@@ -126,7 +146,7 @@ void nmeaProcessSentence(){
   else if (!strncmp(p,"GPGSA,",6)) {
     long work;
     p+=6;
-    
+
     p++; // validity info, ignored
     if (*(p++) != ',') return;
 
@@ -154,7 +174,7 @@ void nmeaProcessSentence(){
 }
 
 int nmeaProcessData(unsigned char data) {
-  int parsed = 0;  
+  int parsed = 0;
 
   switch (gpsProcessDataState) {
   case WAIT_START:
