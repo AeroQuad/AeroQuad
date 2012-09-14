@@ -36,6 +36,7 @@ static const char *STR_MTK38400 =      "$PMTK251,38400*27\r\n";
   #define MTK_CONFIGS  CONFIG_MTKPINNINGOFF, CONFIG_MTK38400, CONFIG_MTK5HZ
 #endif
 
+// MTK diydrones v1.6 binary packet format
 struct __attribute__((packed)) mtk16_fix {
   int32_t         latitude;
   int32_t         longitude;
@@ -60,13 +61,14 @@ unsigned char  mtk16CKA,mtk16CKB;
 
 enum mtk16State{ MTK16_WAIT_SYNC1, MTK16_WAIT_SYNC2, MTK16_GET_LEN, MTK16_GET_DATA, MTK16_GET_CKA, MTK16_GET_CKB  } mtk16ProcessDataState;
 
-
 void mtk16Init() {
   
   mtk16ProcessDataState = MTK16_WAIT_SYNC1;
 }
 
-void mtk16ParseData() {// uses publib vars
+// Copy data to gspData structure from received binary packet
+void mtk16ParseData() {
+  
   if (mtk16DataLength == 32) {
     gpsData.sentences++;
     gpsData.lat = mtk16Message.msg.latitude * 10;
@@ -91,6 +93,7 @@ void mtk16ParseData() {// uses publib vars
   } 
 }
 
+// Parse data from GPS
 int mtk16ProcessData(unsigned char data) {
   
   int parsed = 0;

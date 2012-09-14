@@ -10,6 +10,7 @@ static const unsigned char UBX_5HZ[] = {0xb5,0x62,0x06,0x08,0x06,0x00,0xc8,0x00,
 
 #define UBLOX_CONFIGS UBLOX_5HZ,UBLOX_38400
 
+// UBLOX binary message definitions
 struct ublox_NAV_STATUS { // 01 03 (16)
   uint32_t iTow;
   uint8_t  gpsFix;
@@ -75,19 +76,15 @@ unsigned short ubloxDataLength;
 unsigned short ubloxClass,ubloxId;
 unsigned char  ubloxCKA,ubloxCKB;
 
-struct fixdata {
-  long lat,lon;
-  unsigned char fixtype;
-};
-
 enum ubloxState{ WAIT_SYNC1, WAIT_SYNC2, GET_CLASS, GET_ID, GET_LL, GET_LH, GET_DATA, GET_CKA, GET_CKB  } ubloxProcessDataState;
 
-
+// Initialize parser
 void ubloxInit() {
   
   ubloxProcessDataState = WAIT_SYNC1;
 }
 
+// process complete binary packet
 void ubloxParseData() {// uses publib vars
 
   gpsData.sentences++;
@@ -125,6 +122,7 @@ void ubloxParseData() {// uses publib vars
   } 
 }
 
+// process serial data
 int ubloxProcessData(unsigned char data) {
   
   int parsed = 0;
@@ -180,7 +178,7 @@ int ubloxProcessData(unsigned char data) {
   case GET_DATA:
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
-    // next will discard data if it exceed out biggest parsed msg
+    // next will discard data if it exceeds our biggest known msg
     if (ubloxDataLength < sizeof(ubloxMessage)) {
       ubloxMessage.raw[ubloxDataLength++] = data;
     }

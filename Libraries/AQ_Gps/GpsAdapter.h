@@ -27,7 +27,6 @@
 struct gpsData gpsData; // This is accessed by the parser functions directly !
 
 // default port
-
 #ifndef GPS_SERIAL
   #ifdef AeroQuadSTM32
     #define GPS_SERIAL Serial2
@@ -35,8 +34,8 @@ struct gpsData gpsData; // This is accessed by the parser functions directly !
     #define GPS_SERIAL Serial1
   #endif
 #endif
-// default to all protocols
 
+// default to all protocols
 #if (!defined(UseGPSUBLOX) && !defined(UseGPSNMEA) && !defined(UseGPSMTK16))
   #define UseGPSUBLOX
   #define UseGPSNMEA
@@ -119,6 +118,8 @@ struct gpsConfigEntry gpsConfigEntries[] = {
   { NULL, 0 }
 };
 
+// Send initialization strings to GPS one by one,
+// it supports both string and binary packets
 void gpsSendConfig() {
 
   if (gpsConfigEntries[gpsConfigsSent].data) {
@@ -139,6 +140,7 @@ void gpsSendConfig() {
   }
 }
 
+// Initialize GPS subsystem (called once after powerup)
 void initializeGps() {
 
     gpsData.baudrate = 0;
@@ -149,6 +151,8 @@ void initializeGps() {
     initializeGpsData();
  }
 
+// Read data from GPS, this should be called at 100Hz to make sure no data is lost
+// due to overflowing serial input buffer
 void updateGps() {
 
   gpsData.idlecount++;
@@ -157,12 +161,12 @@ void updateGps() {
     unsigned char c = GPS_SERIAL.read();
     int ret=0;
 
-    // If we are detecting run all parsers, stopping if any reports parsing success
+    // If we are detecting run all parsers, stopping if any reports success
     if (gpsData.state == GPS_DETECTING) {
       for (gpsData.type=0; (gpsData.type < GPS_NUMTYPES); gpsData.type++) {
         ret = gpsTypes[gpsData.type].processData(c);
         if (ret) {
-          // found device start sending configs strings
+          // found GPS device start sending configuration
           gpsConfigsSent = 0;
           gpsConfigTimer = 1;
           break;
@@ -170,12 +174,14 @@ void updateGps() {
       }
     }
     else {
+      // Normal operation just execute the detected parser
       ret = gpsTypes[gpsData.type].processData(c);
     }
 
+    // Upon a successfully parsed sentence, zero the idlecounter and update position data
     if (ret) {
       if (gpsData.state == GPS_DETECTING) {
-         gpsData.state = GPS_NOFIX;
+         gpsData.state = GPS_NOFIX; // make sure to lose detecting state (state may not have been updated by parser)
       }
       gpsData.idlecount=0;
       currentPosition.latitude=gpsData.lat;
@@ -184,6 +190,7 @@ void updateGps() {
     }
   }
 
+  // Schedule confg sending if needed
   if (gpsConfigTimer) {
     if (gpsConfigTimer==1) {
       gpsSendConfig();
@@ -191,7 +198,7 @@ void updateGps() {
     gpsConfigTimer--;
   }
 
-  // Check for inactivity, we have two timeouts, using shorter when scanning
+  // Check for inactivity, we have two timeouts depending on scan status
   if (gpsData.idlecount > ((gpsData.state == GPS_DETECTING) ? GPS_MAXIDLE_DETECTING : GPS_MAXIDLE)) {
     gpsData.idlecount=0;
     if (gpsData.state == GPS_DETECTING) {
@@ -202,10 +209,16 @@ void updateGps() {
       }
       GPS_SERIAL.begin(gpsBaudRates[gpsData.baudrate]);
     }
+
+    // ensure detection state (if we lost connection to GPS)
     gpsData.state = GPS_DETECTING;
+
+    //  reinitialize all parsers
     for (gpsData.type=0; (gpsData.type < GPS_NUMTYPES); gpsData.type++) {
       gpsTypes[gpsData.type].init();
     }
+
+    // zero GPS state
     initializeGpsData();
   }
 }
