@@ -235,7 +235,7 @@ void readSerialCommand() {
       break;
 
     case 'V': // GPS
-      #if defined (UseGPS)
+      #if defined (UseGPSNavigator)
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
@@ -624,7 +624,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'v': // Send GPS PIDs
-    #if defined (UseGPS)
+    #if defined (UseGPSNavigator)
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
@@ -637,6 +637,22 @@ void sendSerialTelemetry() {
     #endif
     queryType = 'X';
     break;
+  case 'y': // send GPS info
+    #if defined (UseGPS)
+      PrintValueComma(gpsData.state);
+      PrintValueComma(gpsData.lat);
+      PrintValueComma(gpsData.lon);
+      PrintValueComma(gpsData.height);
+      PrintValueComma(gpsData.course);
+      PrintValueComma(gpsData.speed);
+      PrintValueComma(gpsData.accuracy);
+      PrintValueComma(gpsData.sats);
+      PrintValueComma(gpsData.fixtime);
+      PrintValueComma(gpsData.sentences);
+      PrintValueComma(gpsData.idlecount);
+      SERIAL_PRINTLN();
+    #else
+    #endif    
 
   case 'x': // Stop sending messages
     break;
@@ -817,7 +833,7 @@ void printVehicleState(const char *sensorName, unsigned long state, const char *
 
 void reportVehicleState() {
   // Tell Configurator how many vehicle state values to expect
-  SERIAL_PRINTLN(14);
+  SERIAL_PRINTLN(15);
   SERIAL_PRINT("Software Version: ");
   SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
   SERIAL_PRINT("Board Type: ");
@@ -888,6 +904,17 @@ void reportVehicleState() {
   printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled");
   printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
   printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
+#ifdef UseGPS
+  SERIAL_PRINT("GPS: ");
+  SERIAL_PRINT((gpsData.state==GPS_DETECTING)?"Scanning ":"Detected ");
+  if (gpsData.state != GPS_DETECTING) {
+    SERIAL_PRINT(gpsTypes[gpsData.type].name);
+  }
+  SERIAL_PRINT("@");
+  SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
+#else
+    SERIAL_PRINTLN("GPS: Disabled");
+#endif
 }
 
 #ifdef SlowTelemetry
@@ -955,8 +982,8 @@ void reportVehicleState() {
         telemetryBuffer.data.course    = getCourse()/10; // degrees
         telemetryBuffer.data.speed     = getGpsSpeed()*36/1000;              // km/h
         telemetryBuffer.data.heading   = (short)(trueNorthHeading*RAD2DEG); // degrees
-        telemetryBuffer.data.gpsinfo   = (gpsHDOP<0xfff)?gpsHDOP:0x0fff;
-        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((nbSatelitesInUse<15)?nbSatelitesInUse:15)) << 12);
+        telemetryBuffer.data.gpsinfo   = 0;
+        telemetryBuffer.data.gpsinfo  |= (((unsigned short)((gpsData.sats<15)?gpsData.sats:15)) << 12);
       #else
         telemetryBuffer.data.latitude  = 0;
         telemetryBuffer.data.longitude = 0;
