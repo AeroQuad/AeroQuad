@@ -147,7 +147,7 @@ void nmeaProcessSentence(){
 
     gpsData.lon = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
 
-    gpsData.speed = (nmeaGetScaledInt(&p, &work, 3)) ? work * 5144 / 10000 : GPS_INVALID_SPEED;
+    gpsData.speed = (nmeaGetScaledInt(&p, &work, 3)) ? work * 5144 / 100000 : GPS_INVALID_SPEED; // kt -> cm/s
 
     gpsData.course = (nmeaGetScaledInt(&p, &work, 3)) ? work : 0;
   }
