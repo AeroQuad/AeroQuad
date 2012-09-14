@@ -3,7 +3,7 @@
 #ifndef _AQ_mtk16_H_
 #define _AQ_mtk16_H_
 
-/* MTK INIT STRINGS */
+/* MTK INIT STRINGS 
 
 #define MTK_SET_BINARY "$PGCMD,16,0,0,0,0,0*6A\r\n"
 #define MTK_SET_NMEA   "$PGCMD,16,1,1,1,1,1*6B\r\n"
@@ -18,11 +18,23 @@
 
 #define MTK_SBAS_ON  "$PMTK313,1*2E\r\n"
 #define MTK_SBAS_OFF "$PMTK313,0*2F\r\n"
+ */
 
-#define MTK_WAAS_ON  "$PSRF151,1*3F\r\n"
-#define MTK_WAAS_OFF "$PSRF151,0*3E\r\n"
+static const char *STR_MTKPINNINGOFF = "$PMTK397,0*23\r\n";
+static const char *STR_MTK5HZ =        "$PMTK220,200*2C\r\n";
+static const char *STR_MTKBINARY =     "$PGCMD,16,0,0,0,0,0*6A\r\n";
+static const char *STR_MTK38400 =      "$PMTK251,38400*27\r\n";
 
-#define MTK_PINNING_OFF "$PMTK397,0*23\r\n"
+#define CONFIG_MTKPINNINGOFF {(byte *)STR_MTKPINNINGOFF, 0}
+#define CONFIG_MTK38400      {(byte *)STR_MTK38400, 0}
+#define CONFIG_MTK5HZ        {(byte *)STR_MTK5HZ, 0}
+#define CONFIG_MTKBINARY     {(byte *)STR_MTKBINARY, 0}
+
+#ifdef UseGPSMTKBINARY
+  #define MTK_CONFIGS  CONFIG_MTKPINNINGOFF, CONFIG_MTK38400, CONFIG_MTK5HZ, CONFIG_MTKBINARY
+#else
+  #define MTK_CONFIGS  CONFIG_MTKPINNINGOFF, CONFIG_MTK38400, CONFIG_MTK5HZ
+#endif
 
 struct __attribute__((packed)) mtk16_fix {
   int32_t         latitude;

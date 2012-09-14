@@ -100,8 +100,12 @@
 // *******************************************************************************************************************************
 // GPS Options
 // *******************************************************************************************************************************
-#define UseGPS		      // Enables GPS (for mega v2.0/v2.1 & AeroQuad32) 
-//#define UseGPSNavigator       // EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
+#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 & AeroQuad32)
+
+// Device specific settings
+//#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
+
+//#define UseGPSNavigator   // EXPERIMENTAL NEEDS UseGPS TO BE DEFINED, enables GPS Position Hold, auto return to home if no mission or execute mission
 
 
 //

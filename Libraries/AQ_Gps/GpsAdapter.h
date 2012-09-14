@@ -109,30 +109,33 @@ void initializeGpsData() {
   gpsData.fixtime = 0xFFFFFFFF;
 }
 
-static const char *CONFIG_MTKPINNINGOFF = "$PMTK397,0*23\r\n";
-
 struct gpsConfigEntry gpsConfigEntries[] = {
-  { (byte *)CONFIG_MTKPINNINGOFF, strlen(CONFIG_MTKPINNINGOFF)},
-
+#ifdef UseGPSMTK16
+  MTK_CONFIGS,
+#endif
 #ifdef UseGPSUBLOX
   UBLOX_CONFIGS,
 #endif
+  { NULL, 0 }
 };
 
-#define GPS_NUMCONFIGS (sizeof(gpsConfigEntries)/sizeof(struct gpsConfigEntry))
-
 void gpsSendConfig() {
-  if (gpsConfigsSent < GPS_NUMCONFIGS) {
+
+  if (gpsConfigEntries[gpsConfigsSent].data) {
     if (gpsConfigEntries[gpsConfigsSent].len) {
       for (int i=0; i<gpsConfigEntries[gpsConfigsSent].len; i++) {
         GPS_SERIAL.write(gpsConfigEntries[gpsConfigsSent].data[i]);
       }
+      gpsConfigTimer=gpsConfigEntries[gpsConfigsSent].len;
     }
     else {
       GPS_SERIAL.print((char*)gpsConfigEntries[gpsConfigsSent].data);
+      gpsConfigTimer=strlen((char*)gpsConfigEntries[gpsConfigsSent].data);
+    }
+    if (gpsConfigTimer<10) {
+      gpsConfigTimer=10;
     }
     gpsConfigsSent++;
-    gpsConfigTimer=10;
   }
 }
 
@@ -188,7 +191,7 @@ void updateGps() {
     gpsConfigTimer--;
   }
 
-  // Check for inactivity, we have two timeouts a short
+  // Check for inactivity, we have two timeouts, using shorter when scanning
   if (gpsData.idlecount > ((gpsData.state == GPS_DETECTING) ? GPS_MAXIDLE_DETECTING : GPS_MAXIDLE)) {
     gpsData.idlecount=0;
     if (gpsData.state == GPS_DETECTING) {
@@ -204,7 +207,6 @@ void updateGps() {
       gpsTypes[gpsData.type].init();
     }
     initializeGpsData();
-
   }
 }
 
