@@ -1,4 +1,3 @@
-
 /*
   AeroQuad v3.0 - May 2011
   www.AeroQuad.com

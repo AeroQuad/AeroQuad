@@ -32,7 +32,7 @@ byte countToInitHome = 0;
 unsigned long previousFixTime = 0;
 
 static boolean isNewGpsPosition() {
-  return (previousFixTime != getGpsFixTime());
+  return (haveAGpsLock() && (previousFixTime != getGpsFixTime()));
 }
 
 static void clearNewGpsPosition() {
