@@ -26,24 +26,33 @@
 
 struct gpsData gpsData; // This is accessed by the parser functions directly !
 
+// default port
+
+#ifndef GPS_SERIAL
+  #ifdef AeroQuadSTM32
+    #define GPS_SERIAL Serial2
+  #else
+    #define GPS_SERIAL Serial1
+  #endif
+#endif
 // default to all protocols
 
-#if (!defined(USEGPS_UBLOX) && ! defined(USEGPS_NMEA))
-  #define USEGPS_UBLOX
-  #define USEGPS_NMEA
-  #define USEGPS_MTK16
+#if (!defined(UseGPSUBLOX) && !defined(UseGPSNMEA) && !defined(UseGPSMTK16))
+  #define UseGPSUBLOX
+  #define UseGPSNMEA
+  #define UseGPSMTK16
 #endif
 
 
-#ifdef USEGPS_UBLOX
+#ifdef UseGPSUBLOX
 #include <ublox.h>
 #endif
 
-#ifdef USEGPS_NMEA
+#ifdef UseGPSNMEA
 #include <nmea.h>
 #endif
 
-#ifdef USEGPS_MTK16
+#ifdef UseGPSMTK16
 #include <mtk16.h>
 #endif
 
@@ -65,16 +74,15 @@ struct gpsType {
 byte  gpsConfigsSent;  // number of cfg msgs sent
 byte  gpsConfigTimer;  // 0 = no more work, 1 = send now, >1 wait
 
-
 const unsigned long gpsBaudRates[] = { 9600L, 19200L, 38400L, 57600L, 115200L};
 const struct gpsType gpsTypes[] = {
-#ifdef USEGPS_UBLOX
+#ifdef UseGPSUBLOX
   { "UBlox", ubloxInit, ubloxProcessData },
 #endif
-#ifdef USEGPS_NMEA
+#ifdef UseGPSNMEA
   { "NMEA", nmeaInit, nmeaProcessData },
 #endif
-#ifdef USEGPS_MTK16
+#ifdef UseGPSMTK16
   { "MTK16", mtk16Init, mtk16ProcessData },
 #endif
 };
@@ -84,7 +92,7 @@ const struct gpsType gpsTypes[] = {
 
 // Timeout for GPS
 #define GPS_MAXIDLE_DETECTING 200 // 2 seconds at 100Hz
-#define GPS_MAXIDLE 1000          // 10 seconds at 100Hz
+#define GPS_MAXIDLE 500           // 5 seconds at 100Hz
 
 void initializeGpsData() {
 
@@ -101,16 +109,14 @@ void initializeGpsData() {
   gpsData.fixtime = 0xFFFFFFFF;
 }
 
-struct gpsConfigEntry {
-  const unsigned char *data;
-  const unsigned char len;
-};
-
-static const unsigned char UBX_5HZ[] = {0xb5,0x62,0x06,0x08,0x06,0x00,0xc8,0x00,0x01,0x00,0x01,0x00,0xde,0x6a};
+static const char *CONFIG_MTKPINNINGOFF = "$PMTK397,0*23\r\n";
 
 struct gpsConfigEntry gpsConfigEntries[] = {
-  { (unsigned char *)"$PUBX,41,1,0003,0003,38400,0*24\r\n", 0 },
-  { UBX_5HZ, sizeof(UBX_5HZ) }
+  { (byte *)CONFIG_MTKPINNINGOFF, strlen(CONFIG_MTKPINNINGOFF)},
+
+#ifdef UseGPSUBLOX
+  UBLOX_CONFIGS,
+#endif
 };
 
 #define GPS_NUMCONFIGS (sizeof(gpsConfigEntries)/sizeof(struct gpsConfigEntry))

@@ -72,4 +72,9 @@ struct gpsData {
     uint32_t idlecount; // how many times gpsUpdate has been called without getting a valid message
 };
 
+struct gpsConfigEntry {
+  const unsigned char *data;
+  const unsigned char len;
+};
+
 #endif

@@ -3,6 +3,13 @@
 #ifndef _AQ_ublox_H_
 #define _AQ_ublox_H_
 
+static const unsigned char UBX_5HZ[] = {0xb5,0x62,0x06,0x08,0x06,0x00,0xc8,0x00,0x01,0x00,0x01,0x00,0xde,0x6a};
+
+#define UBLOX_5HZ   {UBX_5HZ,sizeof(UBX_5HZ)}
+#define UBLOX_38400 {(unsigned char *)"$PUBX,41,1,0003,0003,38400,0*24\r\n",0}
+
+#define UBLOX_CONFIGS UBLOX_5HZ,UBLOX_38400
+
 struct ublox_NAV_STATUS { // 01 03 (16)
   uint32_t iTow;
   uint8_t  gpsFix;
