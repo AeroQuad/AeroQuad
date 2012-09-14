@@ -38,8 +38,8 @@
 float trueNorthHeading = 0.0;
 float compassDeclination = 0.0;
 
-float filter1 = 1.0 / (1.0 + 0.0002);
-float filter2 = 1 - filter1;
+float headingCompFilter1 = 1.0 / (1.0 + 0.0002);
+float headingCompFilter2 = 1 - headingCompFilter1;
 int headingGyroZero = 0;
 float localHeading = 0.0;
 
@@ -75,7 +75,7 @@ void calculateHeading() {
   }
 
   // Complementry filter from http://chiefdelphi.com/media/papers/2010
-  localHeading = (filter1 * adjustedGyroHeading) + (filter2 * getAbsoluteHeading());
+  localHeading = (headingCompFilter1 * adjustedGyroHeading) + (headingCompFilter2 * getAbsoluteHeading());
 
   trueNorthHeading = localHeading;
   #if defined UseGPS

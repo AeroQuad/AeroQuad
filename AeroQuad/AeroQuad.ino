@@ -1058,9 +1058,6 @@
   #if !defined(HeadingMagHold)
     #error We need the magnetometer to use the GPS
   #endif 
-//  #if defined LASTCHANNEL 6
-//    #error We need 7 receiver channel to use GPS navigator
-//  #endif
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
 #endif
@@ -1133,11 +1130,11 @@
 
 
 
-/**
+/*******************************************************************
  * Main setup function, called one time at bootup
  * initialize all system and sub system of the
  * Aeroquad
- */
+ ******************************************************************/
 void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
@@ -1145,7 +1142,6 @@ void setup() {
 
   initCommunication();
 
-  // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
     initializeEEPROM();
@@ -1154,7 +1150,6 @@ void setup() {
 
   initPlatform();
 
-  // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
@@ -1190,15 +1185,11 @@ void setup() {
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
 
-  // Battery Monitor
   #ifdef BattMonitor
-    // batteryMonitorAlarmVoltage updated in readEEPROM()
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
   #endif
   
-
-  // Camera stabilization setup
   #if defined(CameraControl)
     initializeCameraStabilization();
     vehicleState |= CAMERASTABLE_ENABLED;
@@ -1250,8 +1241,6 @@ void setup() {
     initializeHeadingFusion();
   #endif
 
-
-  
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
@@ -1259,9 +1248,10 @@ void setup() {
 
 
 /*******************************************************************
-  100Hz task
-*******************************************************************/
+ * 100Hz task
+ ******************************************************************/
 void process100HzTask() {
+  
   G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
   hundredHZpreviousTime = currentTime;
   
@@ -1272,11 +1262,18 @@ void process100HzTask() {
     filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
   }
     
-  /* calculate kinematics */
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+  
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS] - runtimeZBias;
+    if (!runtimaZBiasInitialized) {
+      runtimeZBias = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+      runtimaZBiasInitialized = true;
+    }
+    estimatedZVelocity += zVelocity;
+    estimatedZVelocity = (velocityCompFilter1 * zVelocity) + (velocityCompFilter2 * estimatedZVelocity);
+  #endif    
 
-
-  // Evaluate are here because we want it to be synchronized with the processFlightControl
   #if defined(AltitudeHoldBaro)
     measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
@@ -1284,14 +1281,14 @@ void process100HzTask() {
     }
   #endif
         
-  // Combines external pilot commands and measured sensor data to generate motor commands
   processFlightControl();
   
+  
   #if defined(BinaryWrite)
-      if (fastTransfer == ON) {
-        // write out fastTelemetry to Configurator or openLog
-        fastTelemetry();
-      }
+    if (fastTransfer == ON) {
+      // write out fastTelemetry to Configurator or openLog
+      fastTelemetry();
+    }
   #endif      
   
   #ifdef SlowTelemetry
@@ -1303,10 +1300,9 @@ void process100HzTask() {
   #endif      
 }
 
-
 /*******************************************************************
-  50Hz task
-*******************************************************************/
+ * 50Hz task
+ ******************************************************************/
 void process50HzTask() {
   G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
   fiftyHZpreviousTime = currentTime;
@@ -1341,8 +1337,8 @@ void process50HzTask() {
 }
 
 /*******************************************************************
-  10Hz task
-*******************************************************************/
+ * 10Hz task
+ ******************************************************************/
 void process10HzTask1() {
   #if defined(HeadingMagHold)
     G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
@@ -1356,8 +1352,8 @@ void process10HzTask1() {
 }
 
 /*******************************************************************
-  low priority 10Hz task 2
-*******************************************************************/
+ * low priority 10Hz task 2
+ ******************************************************************/
 void process10HzTask2() {
   G_Dt = (currentTime - lowPriorityTenHZpreviousTime) / 1000000.0;
   lowPriorityTenHZpreviousTime = currentTime;
@@ -1372,8 +1368,8 @@ void process10HzTask2() {
 }
 
 /*******************************************************************
-  low priority 10Hz task 3
-*******************************************************************/
+ * low priority 10Hz task 3
+ ******************************************************************/
 void process10HzTask3() {
     G_Dt = (currentTime - lowPriorityTenHZpreviousTime2) / 1000000.0;
     lowPriorityTenHZpreviousTime2 = currentTime;
@@ -1397,6 +1393,9 @@ void process10HzTask3() {
     #endif
 }
 
+/*******************************************************************
+ * 1Hz task 
+ ******************************************************************/
 void process1HzTask() {
   #ifdef MavLink
     G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
@@ -1407,8 +1406,8 @@ void process1HzTask() {
 }
 
 /*******************************************************************
-  Main loop funtions
-*******************************************************************/
+ * Main loop funtions
+ ******************************************************************/
 void loop () {
   
   currentTime = micros();
@@ -1448,7 +1447,6 @@ void loop () {
     // ================================================================
     // 1Hz task loop
     // ================================================================
-
     if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
       process1HzTask();
     }
