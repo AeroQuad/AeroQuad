@@ -171,7 +171,7 @@ void readSerialCommand() {
         magBias[ZAXIS]  = readFloatSerial();
         writeEEPROM();
       #else
-        for(int c=0;c<3;c++) {
+        for(byte i = 0; i < 3; i++) {
           readFloatSerial();
         }
       #endif
@@ -184,9 +184,9 @@ void readSerialCommand() {
         batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
       #else
-        readFloatSerial();
-        readFloatSerial();
-        readFloatSerial();
+        for(byte i = 0; i < 3; i++) {
+          readFloatSerial();
+        }
       #endif
       break;
 
@@ -197,10 +197,9 @@ void readSerialCommand() {
         waypoint[missionNbPoint].longitude = readIntegerSerial();
         waypoint[missionNbPoint].altitude = readIntegerSerial();
       #else
-        readIntegerSerial();
-        readIntegerSerial();
-        readIntegerSerial();
-        readIntegerSerial();
+        for(byte i = 0; i < 4; i++) {
+          readFloatSerial();
+        }
       #endif
       break;
     case 'P': //  read Camera values
@@ -219,8 +218,9 @@ void readSerialCommand() {
         servoMaxRoll = readFloatSerial();
         servoMaxYaw = readFloatSerial();
       #else
-        for (byte values = 0; values < 13; values++)
+        for (byte i = 0; i < 13; i++) {
           readFloatSerial();
+		}
       #endif
       break;
 
@@ -241,7 +241,7 @@ void readSerialCommand() {
         readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
       #else
-        for (byte values = 0; values < 6; values++) {
+        for (byte i = 0; i < 6; i++) {
           readFloatSerial();
         }
       #endif
@@ -345,10 +345,10 @@ void PrintPID(unsigned char IDPid)
 float GetHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-	  float heading = trueNorthHeading;
-	  if (heading < 0){
+	float heading = trueNorthHeading;
+	if (heading < 0){
       heading += (2.0 * M_PI);
-	  }
+	}
   	return heading;
   #else
     return(gyroHeading);
@@ -399,7 +399,7 @@ void sendSerialTelemetry() {
       #endif
       PrintPID(ZDAMPENING_PID_IDX);
     #else
-      for(byte i=0; i<10; i++) {
+      for(byte i = 0; i < 10; i++) {
         PrintValueComma(0);
       }
     #endif
