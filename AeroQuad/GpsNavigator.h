@@ -29,12 +29,23 @@
 #define MIN_NB_GPS_READ_TO_INIT_HOME 15  
 byte countToInitHome = 0;
 
+unsigned long previousFixTime = 0;
+
+static boolean isNewGpsPosition() {
+  return (haveAGpsLock() && (previousFixTime != getGpsFixTime()));
+}
+
+static void clearNewGpsPosition() {
+  previousFixTime = getGpsFixTime();
+}
+  
 boolean isHomeBaseInitialized() {
   return homePosition.latitude != GPS_INVALID_ANGLE;
 }
 
 void initHomeBase() {
-  if (isGpsHaveANewPosition) {
+  if (isNewGpsPosition()) {
+    clearNewGpsPosition();
     if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
       countToInitHome++;
     }
@@ -273,7 +284,7 @@ void initHomeBase() {
    */
   void processPositionHold() {
     
-    if (!isGpsHaveANewPosition) {
+    if (!isNewGpsPosition()) {
       return;
     }
     
@@ -287,7 +298,7 @@ void initHomeBase() {
 
     gpsYawAxisCorrection = 0;  
     
-    isGpsHaveANewPosition = false;
+    clearNewGpsPosition();
   }
   
     /** 
@@ -295,7 +306,7 @@ void initHomeBase() {
    */
   void processNavigation() {
     
-    if (!isGpsHaveANewPosition) {
+    if (!isNewGpsPosition()) {
       return;
     }
     
@@ -313,7 +324,7 @@ void initHomeBase() {
 
     computeHeadingCorrection();
     
-    isGpsHaveANewPosition = false;
+    clearNewGpsPosition();
   }
 
   
@@ -324,7 +335,7 @@ void initHomeBase() {
 
     if (haveAGpsLock()) {
       
-      if (isGpsHaveANewPosition) {
+      if (isNewGpsPosition()) {
         computeCurrentSpeedInCmPerSec();
       }
       
@@ -336,9 +347,7 @@ void initHomeBase() {
         processPositionHold();
       }
       
-      if (isGpsHaveANewPosition) {
-        isGpsHaveANewPosition = false;
-      }
+      clearNewGpsPosition();
 
     }
   }

@@ -30,14 +30,13 @@
 
 byte osdGPSState=0;
 #define GPS_DONAV 0x80 // display navigation info next time
-#define GPS_NOFIX 0x40 // no fix displayed
-#define GPS_NONAV 0x20 // nav info hidden (no fix or no target)
+#define GPS_NONAV 0x40 // nav info hidden (no fix or no target)
 
 void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheadingrad, unsigned int numsats) {
 
   short magheading = (int)(magheadingrad*RAD2DEG);
   if (osdGPSState & GPS_DONAV) {
-    if ((home.latitude==GPS_INVALID_ANGLE) || (pos.latitude==GPS_INVALID_ANGLE)) {
+    if ((home.latitude == GPS_INVALID_ANGLE) || (gpsData.state < GPS_FIX2D)) {
       if (!(osdGPSState&GPS_NONAV)) {
         // clear info
         writeChars(NULL, 2, 0, GPS_HA_ROW, GPS_HA_COL);
@@ -92,30 +91,30 @@ void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long 
   }
   else {
     // update position and speed
-    if (pos.latitude == GPS_INVALID_ANGLE) {
-      if (!(osdGPSState&GPS_NOFIX)) {
-        char buf[29];
-        snprintf(buf,29,"Waiting for GPS fix (%d/%d)",numsats,6);
-        writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
-        osdGPSState|=GPS_NOFIX;
-      }
+    if (gpsData.state==GPS_DETECTING) {
+      char buf[29];
+      snprintf(buf,29,"Detecting GPS");
+      writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
+    } else if (gpsData.state==GPS_NOFIX) {
+      char buf[29];
+      snprintf(buf,29,"Waiting for GPS fix (%d/%d)",numsats,6);
+      writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
     } else {
       char buf[29];
 #ifdef USUnits
       speed=speed*36/1609; // convert from cm/s to mph 
-      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\031",numsats,
+      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld%3ld\031",numsats,
                (pos.latitude>=0)?'N':'S',labs(pos.latitude)/10000000L,labs(pos.latitude)%10000000L/10,
                (pos.longitude>=0)?'E':'W',labs(pos.longitude)/10000000L,labs(pos.longitude)%10000000L/10,
 	       speed);
 #else
       speed=speed*36/1000; // convert from cm/s to kmh 
-      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld %3ld\030",numsats,
+      snprintf(buf,29,"%d:%c%02ld.%06ld%c%03ld.%06ld%3ld\030",numsats,
                (pos.latitude>=0)?'N':'S',labs(pos.latitude)/10000000L,labs(pos.latitude)%10000000L/10,
                (pos.longitude>=0)?'E':'W',labs(pos.longitude)/10000000L,labs(pos.longitude)%10000000L/10,
 	       speed);
 #endif
       writeChars(buf, 28, 0, GPS_ROW, GPS_COL);
-      osdGPSState&=~GPS_NOFIX;
     }
   }
   osdGPSState^=GPS_DONAV;
