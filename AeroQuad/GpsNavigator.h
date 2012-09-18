@@ -87,7 +87,7 @@ void initHomeBase() {
   #define GPS_SPEED_SMOOTH_VALUE 0.5
   #define GPS_COURSE_SMOOTH_VALUE 0.5
   
-  #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 200.0
+  #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 300.0
   #define POSITION_HOLD_SPEED 60.0  
   #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
   #define NAVIGATION_SPEED 250.0  // m/s * 100 // 3 m/s = 10.8km/h
@@ -224,9 +224,11 @@ void initHomeBase() {
     maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
     maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
     
-    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
-    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]);
-    
+//    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
+//    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]);
+    gpsRollAxisCorrection = filterSmooth(updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]), gpsRollAxisCorrection, 0.5);
+    gpsPitchAxisCorrection = filterSmooth(updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]), gpsPitchAxisCorrection, 0.5);
+
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
   }

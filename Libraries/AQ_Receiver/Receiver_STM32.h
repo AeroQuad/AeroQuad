@@ -40,11 +40,7 @@
 	AUX2     6	5
 	AUX3     7	7
 */
-
-	//static byte ReceiverChannelMap[] = {3, 2, 0, 1, 4, 6, 5, 7}; // mapping for ala42 F1
-	//static byte ReceiverChannelMap[] = {2, 0, 3, 1, 6, 4, 7, 5}; // mapping for ala42 F4
-	static byte ReceiverChannelMap[] = {3, 1, 0, 2, 4, 6, 5, 7}; // mapping for ala42 AQ32
-	//static byte ReceiverChannelMap[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
+	static byte ReceiverChannelMap[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
 
 
 	///////////////////////////////////////////////////////////////////////////////
