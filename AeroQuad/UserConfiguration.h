@@ -158,6 +158,8 @@
 //#define MAV_SYSTEM_ID 100	// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 				// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
+//#define CONFIG_BAUDRATE 115200 // override baudrate for serial port (configurator/mavvlink/wirelesstelemetry)
+
 //
 // *******************************************************************************************************************************
 // Optional audio channel telemetry (for ground station tracking purposes)
