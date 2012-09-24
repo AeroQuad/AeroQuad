@@ -61,6 +61,12 @@ void readSerialPID(unsigned char PIDid) {
   pid->integratedError = 0;
 }
 
+void skipSerialValues(byte number) {
+  for(byte i=0; i<number; i++) {
+    readFloatSerial();
+  }
+}
+
 void readSerialCommand() {
   // Check for serial message
   if (SERIAL_AVAILABLE()) {
@@ -171,9 +177,7 @@ void readSerialCommand() {
         magBias[ZAXIS]  = readFloatSerial();
         writeEEPROM();
       #else
-        for(byte i = 0; i < 3; i++) {
-          readFloatSerial();
-        }
+        skipSerialValues(3);
       #endif
       break;
 
@@ -184,9 +188,7 @@ void readSerialCommand() {
         batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
       #else
-        for(byte i = 0; i < 3; i++) {
-          readFloatSerial();
-        }
+        skipSerialValues(3);
       #endif
       break;
 
@@ -218,9 +220,7 @@ void readSerialCommand() {
         servoMaxRoll = readFloatSerial();
         servoMaxYaw = readFloatSerial();
       #else
-        for (byte i = 0; i < 13; i++) {
-          readFloatSerial();
-		}
+        skipSerialValues(13);
       #endif
       break;
 
@@ -229,8 +229,7 @@ void readSerialCommand() {
         maxRangeFinderRange = readFloatSerial();
         minRangeFinderRange = readFloatSerial();
       #else
-        readFloatSerial();
-        readFloatSerial();
+        skipSerialValues(2);
       #endif
       break;
 
@@ -241,9 +240,7 @@ void readSerialCommand() {
         readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
       #else
-        for (byte i = 0; i < 6; i++) {
-          readFloatSerial();
-        }
+        skipSerialValues(9);
       #endif
       break;
 
@@ -256,11 +253,11 @@ void readSerialCommand() {
       break;
 
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
-        validateCalibrateCommand(1);
+      validateCalibrateCommand(1);
       break;
 
     case '2': // Calibrate ESC's by setting Throttle low on all channels
-        validateCalibrateCommand(2);
+      validateCalibrateCommand(2);
       break;
 
     case '3': // Test ESC calibration
@@ -278,8 +275,9 @@ void readSerialCommand() {
 
     case '5': // Send individual motor commands (motor, command)
       if (validateCalibrateCommand(5)) {
-        for (byte motor = 0; motor < LASTMOTOR; motor++)
+        for (byte motor = 0; motor < LASTMOTOR; motor++) {
           motorConfiguratorCommand[motor] = (int)readFloatSerial();
+        }
       }
       break;
 
@@ -342,6 +340,13 @@ void PrintPID(unsigned char IDPid)
   PrintValueComma(PID[IDPid].D);
 }
 
+void PrintDummyValues(byte number) {
+  for(byte i=0; i<number; i++) {
+    PrintValueComma(0);
+  }
+}
+
+
 float GetHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -399,9 +404,7 @@ void sendSerialTelemetry() {
       #endif
       PrintPID(ZDAMPENING_PID_IDX);
     #else
-      for(byte i = 0; i < 10; i++) {
-        PrintValueComma(0);
-      }
+      PrintDummyValues(10);
     #endif
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -506,12 +509,11 @@ void sendSerialTelemetry() {
     #ifdef BattMonitor
       PrintValueComma(batteryMonitorAlarmVoltage);
       PrintValueComma(batteryMonitorThrottleTarget);
-      SERIAL_PRINTLN(batteryMonitorGoingDownTime);
+      PrintValueComma(batteryMonitorGoingDownTime);
     #else
-      PrintValueComma(0);
-      PrintValueComma(0);
-      SERIAL_PRINTLN(0);
+      PrintDummyValues(3);
     #endif
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
@@ -523,13 +525,10 @@ void sendSerialTelemetry() {
         PrintValueComma(waypoint[index].longitude);
         PrintValueComma(waypoint[index].altitude);
       }
-      SERIAL_PRINTLN();
     #else
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-      SERIAL_PRINTLN(0);
+      PrintDummyValues(4);
     #endif
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
@@ -547,13 +546,11 @@ void sendSerialTelemetry() {
       PrintValueComma(servoMinYaw);
       PrintValueComma(servoMaxPitch);
       PrintValueComma(servoMaxRoll);
-      SERIAL_PRINTLN(servoMaxYaw);
+      PrintValueComma(servoMaxYaw);
     #else
-      for (byte index=0; index < 12; index++) {
-        PrintValueComma(0);
-      }
-      SERIAL_PRINTLN(0);
+      PrintDummyValues(13);
     #endif
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
@@ -584,18 +581,17 @@ void sendSerialTelemetry() {
       PrintValueComma(0);
       PrintValueComma(0);
     #endif
+
     for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
       PrintValueComma(receiverCommand[channel]);
     }
-    for (byte channel = 0; channel < (8 - LASTCHANNEL); channel++) {// max of 8 transmitter channel supported
-      PrintValueComma(0); // zero out unused transmitter channels
-    }
+    PrintDummyValues(8 - LASTCHANNEL); // max of 8 transmitter channel supported
+
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       PrintValueComma(motorCommand[motor]);
     }
-    for (byte motor = 0; motor < (8 - (LASTMOTOR)); motor++) {// max of 8 motor outputs supported
-      PrintValueComma(0); // zero out unused motor channels
-    }
+    PrintDummyValues(8 - LASTMOTOR); // max of 8 motor outputs supported
+
     #ifdef BattMonitor
       PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
     #else
@@ -628,13 +624,11 @@ void sendSerialTelemetry() {
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
-      SERIAL_PRINTLN();
       queryType = 'X';
     #else
-      for (byte values=0; values < 5; values++)
-        PrintValueComma(0);
-      SERIAL_PRINTLN(0);
+      PrintDummyValues(9);
     #endif
+    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'y': // send GPS info
@@ -650,9 +644,10 @@ void sendSerialTelemetry() {
       PrintValueComma(gpsData.fixtime);
       PrintValueComma(gpsData.sentences);
       PrintValueComma(gpsData.idlecount);
-      SERIAL_PRINTLN();
     #else
+      PrintDummyValues(11);
     #endif    
+    SERIAL_PRINTLN();
 
   case 'x': // Stop sending messages
     break;
@@ -866,8 +861,9 @@ void reportVehicleState() {
   #elif defined(AeroQuad_Mini)
     SERIAL_PRINTLN("Mini");
   #elif defined(AeroQuadSTM32)
-    SERIAL_PRINTLN("STM32");
+    SERIAL_PRINTLN(STM32_BOARD_TYPE);
   #endif
+
   SERIAL_PRINT("Flight Config: ");
   #if defined(quadPlusConfig)
     SERIAL_PRINTLN("Quad +");
@@ -891,10 +887,13 @@ void reportVehicleState() {
   #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo X+");
   #endif
+
   SERIAL_PRINT("Receiver Channels: ");
   SERIAL_PRINTLN(LASTCHANNEL);
+
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);
+
   printVehicleState("Gyroscope", GYRO_DETECTED, "Detected");
   printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected");
   printVehicleState("Barometer", BARO_DETECTED, "Detected");
@@ -913,7 +912,7 @@ void reportVehicleState() {
   SERIAL_PRINT("@");
   SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
 #else
-    SERIAL_PRINTLN("GPS: Disabled");
+  SERIAL_PRINTLN("GPS: Disabled");
 #endif
 }
 
