@@ -84,8 +84,8 @@ void initHomeBase() {
   
   #define MIN_DISTANCE_TO_REACHED 3000
 
-  #define GPS_SPEED_SMOOTH_VALUE 0.5
-  #define GPS_COURSE_SMOOTH_VALUE 0.5
+//  #define GPS_SPEED_SMOOTH_VALUE 0.5
+//  #define GPS_COURSE_SMOOTH_VALUE 0.5
   
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 300.0
   #define POSITION_HOLD_SPEED 60.0  
@@ -95,10 +95,10 @@ void initHomeBase() {
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
   GeodeticPosition previousPosition = GPS_INVALID_POSITION;
-  float gpsLaggedSpeed = 0.0;
-  float gpsLaggedCourse = 0.0;
-  float currentSpeedCmPerSecRoll = 0.0; 
-  float currentSpeedCmPerSecPitch = 0.0;
+//  float gpsLaggedSpeed = 0.0;
+//  float gpsLaggedCourse = 0.0;
+//  float currentSpeedCmPerSecRoll = 0.0; 
+//  float currentSpeedCmPerSecPitch = 0.0;
   
   float distanceX = 0.0;
   float distanceY = 0.0;
@@ -157,39 +157,39 @@ void initHomeBase() {
    * Compute the distance to the destination, point to reach
    * @result is gpsDistanceToDestination
    */
-  void computeDistanceToDestination(GeodeticPosition destination) {
-    
-    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
-    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
-    gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
-  }
+//  void computeDistanceToDestination(GeodeticPosition destination) {
+//    
+//    distanceX = (float)(destination.longitude - currentPosition.longitude) * cosLatitude * 1.113195;
+//    distanceY = (float)(destination.latitude - currentPosition.latitude) * 1.113195;
+//    gpsDistanceToDestination  = sqrt(sq(distanceY) + sq(distanceX));
+//  }
 
   /**
    * Compute the current craft speed in cm per sec
    * @result are currentSpeedCmPerSecPitch and currentSpeedCmPerSecRoll
    */
-  void computeCurrentSpeedInCmPerSec() {
-  
-    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * cosLatitude * 1.113195;
-    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
-    float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
-  
-    gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
-    if (derivateDistanceX != 0 || derivateDistanceY != 0) {
-      float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
-        if (tmp < 0) {
-          tmp += 360; 
-        }
-        gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
-    }
-  
-    float courseRads = radians(gpsLaggedCourse/100);
-    currentSpeedCmPerSecRoll = sin(courseRads-trueNorthHeading)*gpsLaggedSpeed; 
-    currentSpeedCmPerSecPitch = cos(courseRads-trueNorthHeading)*gpsLaggedSpeed;
-    
-    previousPosition.latitude = currentPosition.latitude;
-    previousPosition.longitude = currentPosition.longitude;
-  }
+//  void computeCurrentSpeedInCmPerSec() {
+//  
+//    float derivateDistanceX = (float)(currentPosition.longitude - previousPosition.longitude) * cosLatitude * 1.113195;
+//    float derivateDistanceY = (float)(currentPosition.latitude - previousPosition.latitude) * 1.113195;
+//    float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
+//  
+//    gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
+//    if (derivateDistanceX != 0 || derivateDistanceY != 0) {
+//      float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
+//        if (tmp < 0) {
+//          tmp += 360; 
+//        }
+//        gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
+//    }
+//  
+//    float courseRads = radians(gpsLaggedCourse/100);
+//    currentSpeedCmPerSecRoll = sin(courseRads-trueNorthHeading)*gpsLaggedSpeed; 
+//    currentSpeedCmPerSecPitch = cos(courseRads-trueNorthHeading)*gpsLaggedSpeed;
+//    
+//    previousPosition.latitude = currentPosition.latitude;
+//    previousPosition.longitude = currentPosition.longitude;
+//  }
     
   
   /**
@@ -197,12 +197,12 @@ void initHomeBase() {
    */
   void evaluateFlightBehaviorFromDistance() {
 
-    if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold
+    if (gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {  // position hold speed corrections
 
       maxSpeedToDestination = POSITION_HOLD_SPEED;
       maxCraftAngleCorrection = MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION;
     }
-    else { // navigate
+    else { // navigate speed corrections
 
       maxSpeedToDestination = NAVIGATION_SPEED;
       maxCraftAngleCorrection = MAX_NAVIGATION_ANGLE_CORRECTION;
@@ -226,8 +226,8 @@ void initHomeBase() {
     
 //    gpsRollAxisCorrection = updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]);
 //    gpsPitchAxisCorrection = updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]);
-    gpsRollAxisCorrection = filterSmooth(updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]), gpsRollAxisCorrection, 0.5);
-    gpsPitchAxisCorrection = filterSmooth(updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]), gpsPitchAxisCorrection, 0.5);
+//    gpsRollAxisCorrection = filterSmooth(updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]), gpsRollAxisCorrection, 0.5);
+//    gpsPitchAxisCorrection = filterSmooth(updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]), gpsPitchAxisCorrection, 0.5);
 
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
@@ -258,11 +258,11 @@ void initHomeBase() {
 //      }
 //
 //    #endif
-    #if defined AltitudeHoldRangeFinder
-      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
-        sonarAltitudeToHoldTarget += 0.05;
-      }
-    #endif
+//    #if defined AltitudeHoldRangeFinder
+//      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
+//        sonarAltitudeToHoldTarget += 0.05;
+//      }
+//    #endif
     baroAltitudeToHoldTarget = missionPositionToReach.altitude;
   }
   
@@ -270,16 +270,16 @@ void initHomeBase() {
    * In navigation mode, we want the craft headed to the target, so this will 
    * compute the heading correction to have
    */
-  void computeHeadingCorrection() {
-    
-    float correctionAngle = angleToWaypoint;
-    if (correctionAngle > PI) {
-      correctionAngle = fmod(correctionAngle,PI) - PI;
-    }
-
-    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle, &PID[GPSYAW_PID_IDX]);
-    gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
-  }
+//  void computeHeadingCorrection() {
+//    
+//    float correctionAngle = angleToWaypoint;
+//    if (correctionAngle > PI) {
+//      correctionAngle = fmod(correctionAngle,PI) - PI;
+//    }
+//
+//    gpsYawAxisCorrection = -updatePID(0.0, correctionAngle, &PID[GPSYAW_PID_IDX]);
+//    gpsYawAxisCorrection = constrain(gpsYawAxisCorrection, -MAX_YAW_AXIS_CORRECTION, MAX_YAW_AXIS_CORRECTION);
+//  }
 
   /**
    * Process position hold
@@ -308,25 +308,25 @@ void initHomeBase() {
    */
   void processNavigation() {
     
-    if (!isNewGpsPosition()) {
-      return;
-    }
-    
-    // evaluate if we need to switch to another mission possition point
-    evaluateMissionPositionToReach();
-    
-    computeDistanceToDestination(missionPositionToReach);
-
-    // evaluate the flight behavior to adopt
-    evaluateFlightBehaviorFromDistance();
-
-    computeRollPitchCraftAxisCorrection();
-    
-    evaluateAltitudeCorrection();    
-
-    computeHeadingCorrection();
-    
-    clearNewGpsPosition();
+//    if (!isNewGpsPosition()) {
+//      return;
+//    }
+//    
+//    // evaluate if we need to switch to another mission possition point
+//    evaluateMissionPositionToReach();
+//    
+//    computeDistanceToDestination(missionPositionToReach);
+//
+//    // evaluate the flight behavior to adopt
+//    evaluateFlightBehaviorFromDistance();
+//
+//    computeRollPitchCraftAxisCorrection();
+//    
+//    evaluateAltitudeCorrection();    
+//
+//    computeHeadingCorrection();
+//    
+//    clearNewGpsPosition();
   }
 
   
@@ -337,9 +337,9 @@ void initHomeBase() {
 
     if (haveAGpsLock()) {
       
-      if (isNewGpsPosition()) {
-        computeCurrentSpeedInCmPerSec();
-      }
+//      if (isNewGpsPosition()) {
+//        computeCurrentSpeedInCmPerSec();
+//      }
       
 //      if (navigationState == ON) {
 //        processNavigation();
@@ -357,3 +357,14 @@ void initHomeBase() {
 
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
