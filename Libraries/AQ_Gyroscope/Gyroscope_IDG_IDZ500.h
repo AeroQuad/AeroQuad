@@ -58,7 +58,7 @@ void measureGyro() {
       gyroADC = analogRead(gyroChannel[axis]) - gyroZero[axis];
     else
       gyroADC = gyroZero[axis] - analogRead(gyroChannel[axis]);
-    gyroRate[axis] = filterSmooth(gyroADC * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC * gyroScaleFactor;
   }
  
   // Measure gyro heading
@@ -89,6 +89,9 @@ void calibrateGyro() {
       findZero[i] = analogRead(gyroChannel[calAxis]);
     gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
   }
+}
+
+void readGyroTemp()  {
 }
 
 #endif

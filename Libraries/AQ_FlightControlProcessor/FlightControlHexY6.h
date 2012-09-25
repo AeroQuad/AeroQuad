@@ -53,13 +53,12 @@ int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  const int throttleCorrection = abs(motorAxisCommandYaw*3/6);
-  motorCommand[REAR] =        (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[RIGHT] =       (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw);  
-  motorCommand[LEFT] =        (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[REAR_UNDER] =  (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[RIGHT_UNDER] = (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[LEFT_UNDER] =  (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR] =        throttle                        + (motorAxisCommandPitch*4/3) - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[RIGHT] =       throttle - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw);  
+  motorCommand[LEFT] =        throttle + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR_UNDER] =  throttle                        + (motorAxisCommandPitch*4/3) + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[RIGHT_UNDER] = throttle - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[LEFT_UNDER] =  throttle + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_Y6_MODE_H_
