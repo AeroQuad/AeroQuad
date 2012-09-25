@@ -44,23 +44,13 @@
 int lastReceiverChannel = 0;
 
 float receiverXmitFactor = 0.0;
-#ifdef ReceiverSBUS
-  int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
-  int receiverZero[3] = {0,0,0};
-  int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
-  int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
-  float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-#else
-  int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-  int receiverZero[3] = {0,0,0};
-  int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-  int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-  float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-#endif
+int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
+int receiverZero[3] = {0,0,0};
+int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
+int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
+float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 int channelCal;
 
 void initializeReceiverParam(int nbChannel = 6) {
