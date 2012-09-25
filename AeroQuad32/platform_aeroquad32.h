@@ -14,6 +14,7 @@
 
 #ifdef RECEIVER_STM32PPM
   static byte receiverPinPPM = Port2Pin('D', 15);
+#elif defined ReceiverSBUS
 #else
 	static byte receiverPin[] = {
 		Port2Pin('D', 12),
