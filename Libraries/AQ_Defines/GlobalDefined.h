@@ -32,6 +32,8 @@
 #define AUX1 5
 #define AUX2 6
 #define AUX3 7
+#define AUX4 8
+#define AUX5 9
 
 #define ON 1
 #define OFF 0
