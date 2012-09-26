@@ -234,10 +234,6 @@ void readPilotCommands() {
       gpsYawAxisCorrection = 0;
     }
   #endif
-  
-  #if defined CameraTXControl
-    processCameraTXControl();
-  #endif
 }
 
 #endif // _AQ_FLIGHT_COMMAND_READER_

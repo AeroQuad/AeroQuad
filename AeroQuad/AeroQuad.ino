@@ -48,6 +48,10 @@
   #error "Receiver SWBUS and SlowTelemetry are in conflict for Seria2, they can't be used together"
 #endif
 
+#if defined (CameraTXControl) && !defined (CameraControl)
+  #error "CameraTXControl need to have CameraControl defined"
+#endif 
+
 // Special motor config additionnal variable
 #if defined(quadXHT_FPVConfig)
  #define quadXConfig
@@ -1330,12 +1334,17 @@ void process50HzTask() {
   #if defined(CameraControl)
     moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
   #endif      
+  
+  #if defined CameraTXControl
+    processCameraTXControl();
+  #endif
 
-    #ifdef MAX7456_OSD
+
+  #ifdef MAX7456_OSD
     #ifdef OSD50HZ
       updateOSD();
     #endif
-    #endif
+  #endif
     
 }
 
