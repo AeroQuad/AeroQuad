@@ -35,11 +35,7 @@
 #define MAXCHECK MAXCOMMAND - 100
 #define MINTHROTTLE MINCOMMAND + 100
 #define LEVELOFF 100
-#ifdef ReceiverSBUS
-	#define MAX_NB_CHANNEL 10
-#else
-	#define MAX_NB_CHANNEL 8
-#endif
+#define MAX_NB_CHANNEL 10
 
 int lastReceiverChannel = 0;
 
@@ -65,10 +61,8 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[AUX1] = 1000;
   receiverCommand[AUX2] = 1000;
   receiverCommand[AUX3] = 1000;
-  #ifdef ReceiverSBUS
-    receiverCommand[AUX4] = 1000;
-    receiverCommand[AUX5] = 1000;
-  #endif
+  receiverCommand[AUX4] = 1000;
+  receiverCommand[AUX5] = 1000;
   
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverCommandSmooth[channel] = 1.0;
@@ -118,10 +112,6 @@ void setChannelValue(byte channel,int value);
 const float getReceiverSIData(byte channel) {
   return ((receiverCommand[channel] - receiverZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
 }
-
-#if defined CameraTXControl
-  void processCameraTXControl();
-#endif
 
 #endif
 

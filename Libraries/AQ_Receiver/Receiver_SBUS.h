@@ -37,6 +37,8 @@
 
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
+  
+#define SERIAL_SBUS Serial2   
 
 // 16 analog, 2 digital channels
 static unsigned int rcChannel[18] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};

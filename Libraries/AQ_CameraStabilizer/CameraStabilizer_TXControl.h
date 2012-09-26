@@ -27,11 +27,11 @@
 
 // Written by wooden
 
-#if defined (CameraControl)
-
 int servoCenterPitchTemp = 0;
 int lastServoCenterPitchTemp = 0;
 int servoActualCenter = 1367;		// CALIBRATE SERVOS BEFORE TURNING TX CONTROL ON, SET THIS TO servoPitchCenter FOUND DURING CALIBRATION
+
+//void processCameraTXControl();
 
 void processCameraTXControl() {
   if (LASTCHANNEL >= 8) {
@@ -46,6 +46,5 @@ void processCameraTXControl() {
     }
   }
 }
-#endif
 #endif
 #endif
