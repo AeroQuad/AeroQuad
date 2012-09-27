@@ -21,31 +21,40 @@
 #ifndef _AEROQUAD_RECEIVER_SBUS_H_
 #define _AEROQUAD_RECEIVER_SBUS_H_
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined (AeroQuadSTM32)
 
-#include "Arduino.h"
+#if defined (AeroQuadSTM32)
+  typedef HardwareSerial rSerial;
+  extern rSerial &Serial;
+#else
+  #include "Arduino.h"
+  #include "pins_arduino.h"
+  #include <AQMath.h>
+  #include "GlobalDefined.h"
+#endif
+
 #include "Receiver.h"
-#include "pins_arduino.h"
-#include <AQMath.h>
-#include "GlobalDefined.h"
+
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
+  
+#define SERIAL_SBUS Serial2   
 
 // 16 analog, 2 digital channels
-static unsigned int rcChannel[18] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,8,9,10,11,12,13,14,15,16,17};
+static unsigned int rcChannel[18] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};
 static unsigned int sbusIndex = 0;
 
-void initializeReceiver(int nbChannel = 8) {
-	initializeReceiverParam(nbChannel);
-    Serial2.begin(100000);
+void initializeReceiver(int nbChannel = 10) {
+  initializeReceiverParam(nbChannel);
+  SERIAL_SBUS.begin(100000);
 }
 
 void readSBUS() {
 
   static byte sbus[25] = {0};
-  while(Serial2.available()) {
+  while(SERIAL_SBUS.available()) {
   
-    int val = Serial2.read();
+    int val = SERIAL_SBUS.read();
     if(sbusIndex == 0 && val != SBUS_SYNCBYTE) {
       continue;
     }
@@ -66,6 +75,11 @@ void readSBUS() {
         rcChannel[AUX1]		= ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
         rcChannel[AUX2]		= ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
         rcChannel[AUX3]		= ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
+        rcChannel[AUX4]		= ((sbus[12]    | sbus[13]<<8) & 0x07FF);
+        rcChannel[AUX5]		= ((sbus[13]>>3 | sbus[14]<<5) & 0x07FF);
+        //rcChannel[AUX6]		= ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
+        //rcChannel[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
+
       }
     }
   }
