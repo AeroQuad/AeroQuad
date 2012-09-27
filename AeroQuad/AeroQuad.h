@@ -33,12 +33,15 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.1
 
-#if defined WirelessTelemetry && !defined MavLink
-  #define BAUD 111111 // use this to be compatible with USB and XBee connections
+#if defined CONFIG_BAUDRATE
+  #define BAUD CONFIG_BAUDRATE
 #else
-  #define BAUD 115200
+  #if defined WirelessTelemetry && !defined MavLink
+    #define BAUD 111111 // use this to be compatible with USB and XBee connections
+  #else
+    #define BAUD 115200
+  #endif
 #endif  
-
 
 /**
  * ESC calibration process global declaration
