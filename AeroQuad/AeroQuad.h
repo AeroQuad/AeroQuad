@@ -43,7 +43,6 @@
   #endif
 #endif  
 
-  #
 /**
  * ESC calibration process global declaration
  */
