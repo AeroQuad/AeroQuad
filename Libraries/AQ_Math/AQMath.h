@@ -25,8 +25,8 @@
 
 #include "Arduino.h"
 
-#define G_2_MPS2(g) (g * 9.80665)
-#define MPS2_2_G(m) (m * 0.10197162)
+#define G_2_MPS2(g) ((g) * 9.80665)
+#define MPS2_2_G(m) ((m) * 0.10197162)
 
 // Low pass filter, kept as regular C function for speed
 float filterSmooth(float currentData, float previousData, float smoothFactor);

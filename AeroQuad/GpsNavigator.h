@@ -290,7 +290,7 @@ void initHomeBase() {
       return;
     }
     
-    computeDistanceToDestination(positionHoldPointToReach);
+//    computeDistanceToDestination(positionHoldPointToReach);
     
     // evaluate the flight behavior to adopt
     maxSpeedToDestination = POSITION_HOLD_SPEED;

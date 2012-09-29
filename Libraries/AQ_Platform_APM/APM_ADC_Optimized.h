@@ -97,7 +97,7 @@ void DisableADCChipSelect() {
 }
 
 #define SPI_PRESCALER 256
-#define SPI_CLOCK_RATE_2_COUNTER_START_VALUE(f) (256-F_CPU/SPI_PRESCALER/f)
+#define SPI_CLOCK_RATE_2_COUNTER_START_VALUE(f) (256-F_CPU/SPI_PRESCALER/(f))
 
 typedef union {
 	struct {

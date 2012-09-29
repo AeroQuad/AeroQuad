@@ -22,7 +22,7 @@
 #define _AQ_DECLINATION_DB_
 
 #ifdef AeroQuadSTM32
-  #define PGM_UINT8(p) (*p)
+  #define PGM_UINT8(p) (*(p))
   #define MAGDB_PROGMEM
   #define memcpy_P memcpy
   typedef char prog_char;
