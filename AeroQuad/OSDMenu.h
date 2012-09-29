@@ -444,7 +444,7 @@ void menuHandlePidTune(byte mode, byte action) {
 
 
 // this define is used to convert a float into (char) sign, (int) integerpart, (int) per100parts
-#define PRFLOAT(x) ((x<0.0)?'-':' '),((int)abs(x)),(abs((int)(100*x))%100)
+#define PRFLOAT(x) (((x)<0.0)?'-':' '),((int)abs(x)),(abs((int)(100*(x)))%100)
 
 void menuSensorInfo(byte mode, byte action){
   switch (action) {
