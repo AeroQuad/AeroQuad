@@ -40,7 +40,7 @@
 #define NPAR 8
 
 /* Maximum degree of various polynomials. */
-#define MAXDEG (NPAR*2)
+#define MAXDEG ((NPAR)*2)
 
 #ifdef AeroQuadSTM32
   #define GEXP(x) (gexp[(x)])

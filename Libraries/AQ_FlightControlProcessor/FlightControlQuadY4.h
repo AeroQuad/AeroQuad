@@ -43,7 +43,7 @@
 #define RIGHT       MOTOR2
 #define REAR        MOTOR3
 #define REAR_UNDER  MOTOR4
-#define LASTMOTOR   MOTOR4+1
+#define LASTMOTOR   (MOTOR4+1)
 
 int motorMaxCommand[4] = {0,0,0,0};
 int motorMinCommand[4] = {0,0,0,0};
