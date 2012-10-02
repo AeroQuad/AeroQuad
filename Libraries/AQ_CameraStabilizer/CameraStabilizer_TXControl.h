@@ -27,21 +27,29 @@
 
 // Written by wooden
 
-int servoCenterPitchTemp = 0;
-int lastServoCenterPitchTemp = 0;
-int servoActualCenter = 1367;		// CALIBRATE SERVOS BEFORE TURNING TX CONTROL ON, SET THIS TO servoPitchCenter FOUND DURING CALIBRATION
+int servoCenterPitchDiff = 0;
+int servoCenterPitchDesired = 0;
+
+int servoActualCenter = 1367;		// CALIBRATE SERVOS BEFORE ENABLING TX CONTROL, SET THIS TO servoCenterPitch FOUND DURING CALIBRATION
 
 //void processCameraTXControl();
 
-void processCameraTXControl() {
-  if (LASTCHANNEL >= 8) {
-    if (receiverCommand[AUX3] == 1500) { // pot is centered, don't change pitch
-      servoCenterPitch = servoActualCenter;
-    } else {
-      servoCenterPitchTemp = map(receiverCommand[AUX3],1000,2000,servoMaxPitch,servoMinPitch);
-      if (servoCenterPitchTemp != lastServoCenterPitchTemp)  { // servo doesn't match channel reading
-        servoCenterPitch = servoCenterPitchTemp;
-        lastServoCenterPitchTemp = servoCenterPitchTemp;
+void processCameraTXControl()
+{
+  if (LASTCHANNEL >= 8)
+  {
+    if (receiverCommand[AUX3] == 1500)  // channel is centered, move servo back towards center
+    {
+      servoCenterPitchDiff = servoActualCenter - servoCenterPitch;  // diff between current and actual center
+      servoCenterPitch += servoCenterPitchDiff / 25;                // divide so it doesn't move to center too quickly
+    }
+    else
+    {
+      servoCenterPitchDesired = map(receiverCommand[AUX3],1000,2000,servoMaxPitch,servoMinPitch);
+      if (servoCenterPitch != servoCenterPitchDesired)
+      {
+        servoCenterPitchDiff = servoCenterPitchDesired - servoCenterPitch;
+        servoCenterPitch += servoCenterPitchDiff / 25;
       }
     }
   }
