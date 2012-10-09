@@ -23,6 +23,10 @@
 
 #define MAV_COMPONENT_ID MAV_COMP_ID_IMU
 
+#ifndef MAV_SYSTEM_ID
+  #define MAV_SYSTEM_ID 100
+#endif
+
 // MavLink 1.0 DKP
 #include "../mavlink/include/mavlink/v1.0/common/mavlink.h"
 
