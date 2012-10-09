@@ -23,10 +23,22 @@
 
 #define MAV_COMPONENT_ID MAV_COMP_ID_IMU
 
+#ifndef MAV_SYSTEM_ID
+  #define MAV_SYSTEM_ID 100
+#endif
+
 // MavLink 1.0 DKP
 #include "../mavlink/include/mavlink/v1.0/common/mavlink.h"
 
 #include "AeroQuad.h"
+
+int systemType;
+int autopilotType = MAV_AUTOPILOT_GENERIC;
+uint16_t len;
+int systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+int systemStatus = MAV_STATE_UNINIT;
+
+// Variables for writing and sending parameters
 
 enum parameterTypeIndicator
 {
@@ -37,22 +49,13 @@ enum parameterTypeIndicator
   NONE
 };
 
-// Variables for sending parameters
 int indexCounter = 0;
 int paramListPartIndicator = -1;
 
-// Variables for writing parameters
 int parameterChangeIndicator = -1;
 int parameterMatch = 0;
 mavlink_param_set_t set;
 char* key;
-
-
-int systemType = MAV_TYPE_QUADROTOR;
-int autopilotType = MAV_AUTOPILOT_GENERIC;
-uint16_t len;
-int systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-int systemStatus = MAV_STATE_UNINIT;
 
 int parameterType = MAVLINK_TYPE_FLOAT;
 int parameterListSize;
@@ -82,7 +85,6 @@ const char* parameterNameHeadingP = "Heading_P";
 const char* parameterNameHeadingI = "Heading_I";
 const char* parameterNameHeadingD = "Heading_D";
 const char* parameterNameHeadingConfig = "Heading_Conf";
-const char* parameterNameGyroSmooth = "Misc_GyroSmoo";
 const char* parameterNameAREF = "Misc_AREF";
 const char* parameterNameMinThrottle = "Misc_MinThr";
 const char* parameterNameTxFactor = "TX_TX Factor";
@@ -94,12 +96,14 @@ const char* parameterNameTxModeSmooth = "TX_ModeSmooth";
 const char* parameterNameTxAUX1Smooth = "TX_AUX1Smooth";
 const char* parameterNameTxAUX2Smooth = "TX_AUX2Smooth";
 const char* parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
-#if defined BattMonitor
+const char* parameterNameTxAUX4Smooth = "TX_AUX4Smooth";
+const char* parameterNameTxAUX5Smooth = "TX_AUX5Smooth";
+#if defined(BattMonitor)
   const char* parameterNameBattMonAlarmVoltage = "BatMo_AlarmVo";
   const char* parameterNameBattMonThrottleTarget = "BatMo_ThrTarg";
   const char* parameterNameBattMonGoingDownTime = "BatMo_DownTim";
 #endif
-#ifdef CameraControl
+#if defined(CameraControl)
   const char* parameterNameCamMode = "Cam_Mode";
   const char* parameterNameCamPitchMiddle = "Cam_PitchMid";
   const char* parameterNameCamRollMiddle = "Cam_RollMid";
@@ -114,13 +118,13 @@ const char* parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
   const char* parameterNameCamRollServoMax = "Cam_SerMaxRol";
   const char* parameterNameCamYawServoMax = "Cam_SerMaxYaw";
 #endif
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+#if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
   const char* parameterNameAHminThrottleAdjust = "AH_Min Adjust";
   const char* parameterNameAHmaxThrottleAdjust = "AH_Max Adjust";
   const char* parameterNameAHBumpValue = "AH_Bump Value";
   const char* parameterNameAHPanicValue = "AH_PanicValue";
 #endif
-#if defined AltitudeHoldBaro
+#if defined(AltitudeHoldBaro)
   const char* parameterNameAHBaroSmooth = "AH_SmoothFact";
   const char* parameterNameBaroP = "Baro_P";
   const char* parameterNameBaroI = "Baro_I";
@@ -130,13 +134,13 @@ const char* parameterNameTxAUX3Smooth = "TX_AUX3Smooth";
   const char* parameterNameZDampeningI = "Z Dampening_I";
   const char* parameterNameZDampeningD = "Z Dampening_D";
 #endif
-#if defined AltitudeHoldRangeFinder
+#if defined(AltitudeHoldRangeFinder)
   const char* parameterNameRangeFinderP = "Range_P";
   const char* parameterNameRangeFinderI = "Range_I";
   const char* parameterNameRangeFinderD = "Range_D";
   const char* parameterNameRangeFinderWindUpGuard = "Range_WindUp";
 #endif
-#if defined UseGPSNavigator
+#if defined(UseGPSNavigator)
   const char* parameterNameGPSRollP = "GPS Roll_P";
   const char* parameterNameGPSRollI = "GPS Roll_I";
   const char* parameterNameGPSRollD = "GPS Roll_D";
@@ -163,44 +167,59 @@ mavlink_status_t status;
 
 
 void evaluateParameterListSize() {
-	parameterListSize = 35;
+	parameterListSize = 28;
+	parameterListSize += LASTCHANNEL;
 
-  #if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && defined UseGPSNavigator
+  #if defined(AltitudeHoldBaro) && defined(AltitudeHoldRangeFinder) && defined(UseGPSNavigator)
     parameterListSize += 25;
   #endif
 
-  #if defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
+  #if defined(AltitudeHoldBaro) && defined(AltitudeHoldRangeFinder) && !defined(UseGPSNavigator)
     parameterListSize += 16;
   #endif
 
-  #if defined AltitudeHoldBaro && !defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
+  #if defined(AltitudeHoldBaro) && !defined(AltitudeHoldRangeFinder) && !defined(UseGPSNavigator)
     parameterListSize += 12;
   #endif
 
-  #if !defined AltitudeHoldBaro && defined AltitudeHoldRangeFinder && !defined UseGPSNavigator
+  #if !defined(AltitudeHoldBaro) && defined(AltitudeHoldRangeFinder) && !defined(UseGPSNavigator)
     parameterListSize += 8;
   #endif
 
-  #if defined AltitudeHoldBaro && !defined AltitudeHoldRangeFinder && defined UseGPSNavigator
+  #if defined(AltitudeHoldBaro) && !defined(AltitudeHoldRangeFinder) && defined(UseGPSNavigator)
     parameterListSize += 21;
   #endif
 
-  #if defined BattMonitor
+  #if defined(BattMonitor)
     parameterListSize += 3;
   #endif
 
-  #ifdef CameraControl
+  #if defined(CameraControl)
     parameterListSize += 13;
   #endif
-
-  if (LASTCHANNEL == 8) {
-    parameterListSize += 2;
-  }
 }
 
+void evaluateCopterType() {
+  #if defined(triConfig)
+	systemType = MAV_TYPE_TRICOPTER;
+  #endif
+
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadXHT_FPVConfig) || defined(quadY4Config)
+	systemType = MAV_TYPE_QUADROTOR;
+  #endif
+
+  #if defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config) 
+	systemType = MAV_TYPE_HEXAROTOR;
+  #endif
+
+  #if defined(octoX8Config) || defined(octoPlusConfig) || defined(octoXConfig)
+	systemType = MAV_TYPE_OCTOROTOR;
+  #endif
+}
 
 void initCommunication() {
   evaluateParameterListSize();
+  evaluateCopterType();
 }
 
 uint32_t previousFlightTimeUpdate = 0;
@@ -221,7 +240,7 @@ void sendSerialHeartbeat() {
     systemMode |= MAV_MODE_FLAG_STABILIZE_ENABLED;
   }
 
-  #ifdef UseGPSNavigator
+  #if defined(UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
       systemMode |= MAV_MODE_FLAG_GUIDED_ENABLED;
     }
@@ -244,7 +263,7 @@ void sendSerialHeartbeat() {
 
 
 void sendSerialRawIMU() {
-  #ifdef HeadingMagHold
+  #if defined(HeadingMagHold)
     mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
   #else
     mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 0, 0, 0);
@@ -261,14 +280,14 @@ void sendSerialAttitude() {
 }
 
 void sendSerialHudData() {
-  #if defined HeadingMagHold
-    #if defined AltitudeHoldBaro
+  #if defined(HeadingMagHold)
+    #if defined(AltitudeHoldBaro)
       mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
     #else
       mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverData[THROTTLE]-1000)/10, 0, 0.0);
     #endif
   #else
-    #if defined AltitudeHoldBaro
+    #if defined(AltitudeHoldBaro)
       mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverData[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
     #else
       mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverData[THROTTLE]-1000)/10, 0, 0.0);
@@ -279,10 +298,10 @@ void sendSerialHudData() {
 }
 
 void sendSerialGpsPostion() {
-  #ifdef UseGPS
+  #if defined(UseGPS)
     if (haveAGpsLock())
     {
-      #if defined AltitudeHoldBaro
+      #if defined(AltitudeHoldBaro)
         mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, currentPosition.latitude, currentPosition.longitude, getGpsAltitude() * 10, (getGpsAltitude() - baroGroundAltitude * 100) * 10 , 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
       #else
         mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, currentPosition.latitude, currentPosition.longitude, getGpsAltitude() * 10, getGpsAltitude() * 10 , 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
@@ -294,7 +313,7 @@ void sendSerialGpsPostion() {
 }
 
 void sendSerialRawPressure() {
-  #ifdef AltitudeHoldBaro
+  #if defined(AltitudeHoldBaro)
     mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, readRawPressure(), 0,0, readRawTemperature());
     len = mavlink_msg_to_send_buffer(buf, &msg);
     SERIAL_PORT.write(buf, len);
@@ -302,7 +321,7 @@ void sendSerialRawPressure() {
 }
 
 void sendSerialRcRaw() {
-  #if defined UseRSSIFaileSafe
+  #if defined(UseRSSIFaileSafe)
     mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
   #else
     mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
@@ -323,29 +342,29 @@ void sendSerialSysStatus() {
   if (ACCEL_DETECTED) {
     controlSensorsPresent |= (1<<1); // 3D accelerometer present
   }
-  #if defined HeadingMagHold
+  #if defined(HeadingMagHold)
     if (MAG_DETECTED) {
       controlSensorsPresent |= (1<<2); // compass present
     }
   #endif
 
-  #if defined AltitudeHoldBaro
+  #if defined(AltitudeHoldBaro)
     if (BARO_DETECTED) {
       controlSensorsPresent |= (1<<3); // absolute pressure sensor present
     }
   #endif
-  #if defined UseGPS
-    if (gps->valid_read) {
+  #if defined(UseGPS)
+    if (gpsData.state > 0) {
       controlSensorsPresent |= (1<<5); // GPS present
     }
   #endif
   controlSensorsPresent |= (1<<10); // 3D angular rate control
   controlSensorsPresent |= (1<<11); // attitude stabilisation
   controlSensorsPresent |= (1<<12); // yaw position
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     controlSensorsPresent |= (1<<13); // altitude control
   #endif
-  #if defined UseGPSNavigator
+  #if defined(UseGPSNavigator)
     controlSensorsPresent |= (1<<14); // X/Y position control
   #endif
   controlSensorsPresent |= (1<<15); // motor control
@@ -361,7 +380,7 @@ void sendSerialSysStatus() {
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     controlSensorEnabled |= (1<<11); // attitude stabilisation
   }
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     if (altitudeHoldState == ON) {
       controlSensorEnabled |= (1<<13); // altitude control
     }
@@ -370,7 +389,7 @@ void sendSerialSysStatus() {
   if (headingHoldConfig == ON) {
     controlSensorEnabled |= (1<<12); // yaw position
   }
-  #if defined UseGPSNavigator
+  #if defined(UseGPSNavigator)
     if (positionHoldState == ON || navigationState == ON) {
       controlSensorEnabled |= (1<<14); // X/Y position control
     }
@@ -379,7 +398,7 @@ void sendSerialSysStatus() {
   // at the moment all sensors/controllers are assumed healthy
   controlSensorsHealthy = controlSensorsPresent;
 
-  #if defined BattMonitor
+  #if defined(BattMonitor)
     mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
   #else
     mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
@@ -535,7 +554,7 @@ void sendParameterListPart2() {
   sendSerialParameter(receiverSmoothFactor[AUX1], receiver_smooth_factor_aux1, parameterListSize, indexCounter);
   indexCounter++;
 
-  if (LASTCHANNEL == 8) {
+  if (LASTCHANNEL == 8 || LASTCHANNEL == 10) {
     int8_t receiver_smooth_factor_aux2[14] = "TX_AUX2Smooth";
     sendSerialParameter(receiverSmoothFactor[AUX2], receiver_smooth_factor_aux2, parameterListSize, indexCounter);
     indexCounter++;
@@ -543,9 +562,20 @@ void sendParameterListPart2() {
     int8_t receiver_smooth_factor_aux3[14] = "TX_AUX3Smooth";
     sendSerialParameter(receiverSmoothFactor[AUX3], receiver_smooth_factor_aux3, parameterListSize, indexCounter);
     indexCounter++;
+
+    if (LASTCHANNEL == 10) {
+	    int8_t receiver_smooth_factor_aux4[14] = "TX_AUX4Smooth";
+	    sendSerialParameter(receiverSmoothFactor[AUX4], receiver_smooth_factor_aux4, parameterListSize, indexCounter);
+	    indexCounter++;
+
+	    int8_t receiver_smooth_factor_aux5[14] = "TX_AUX5Smooth";
+	    sendSerialParameter(receiverSmoothFactor[AUX5], receiver_smooth_factor_aux5, parameterListSize, indexCounter);
+	    indexCounter++;
+    }
   }
 
-  #if defined BattMonitor
+
+  #if defined(BattMonitor)
     int8_t battery_monitor_alarm_voltage[14] = "BatMo_AlarmVo";
     sendSerialParameter(batteryMonitorAlarmVoltage, battery_monitor_alarm_voltage, parameterListSize, indexCounter);
     indexCounter++;
@@ -560,7 +590,7 @@ void sendParameterListPart2() {
   #endif
 }
 void sendParameterListPart3() {
-  #if defined CameraControl
+  #if defined(CameraControl)
     int8_t camera_mode[14] = "Cam_Mode";
     sendSerialParameter(cameraMode, camera_mode, parameterListSize, indexCounter);
     indexCounter++;
@@ -614,7 +644,7 @@ void sendParameterListPart3() {
     indexCounter++;
   #endif
 
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     int8_t min_throttle_adjust[14] = "AH_Min Adjust";
     sendSerialParameter(minThrottleAdjust, min_throttle_adjust, parameterListSize, indexCounter);
     indexCounter++;
@@ -634,7 +664,7 @@ void sendParameterListPart3() {
 }
 
 void sendParameterListPart4() {
-  #if defined AltitudeHoldBaro  && !defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldBaro)  && !defined(AltitudeHoldRangeFinder)
     int8_t baro_smooth_factor[14] = "AH_SmoothFact";
     sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
     indexCounter++;
@@ -656,7 +686,7 @@ void sendParameterListPart4() {
     indexCounter += 3;
   #endif
 
-  #if defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
+  #if defined(AltitudeHoldRangeFinder) && defined(AltitudeHoldBaro)
     int8_t baro_smooth_factor[14] = "AH_SmoothFact";
     sendSerialParameter(baroSmoothFactor, baro_smooth_factor, parameterListSize, indexCounter);
     indexCounter++;
@@ -690,7 +720,7 @@ void sendParameterListPart4() {
 }
 
 void sendParameterListPart5() {
-  #if defined UseGPSNavigator && defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
+  #if defined(UseGPSNavigator) && defined(AltitudeHoldRangeFinder) && defined(AltitudeHoldBaro)
     int8_t gps_roll_p[14] = "GPS Roll_P";
     int8_t gps_roll_i[14] = "GPS Roll_I";
     int8_t gps_roll_d[14] = "GPS Roll_D";
@@ -710,7 +740,7 @@ void sendParameterListPart5() {
     indexCounter += 3;
   #endif
 
-  #if defined UseGPSNavigator && !defined AltitudeHoldRangeFinder && defined AltitudeHoldBaro
+  #if defined(UseGPSNavigator) && !defined(AltitudeHoldRangeFinder) && defined(AltitudeHoldBaro)
     int8_t gps_roll_p[14] = "GPS Roll_P";
     int8_t gps_roll_i[14] = "GPS Roll_I";
     int8_t gps_roll_d[14] = "GPS Roll_D";
@@ -730,7 +760,7 @@ void sendParameterListPart5() {
     indexCounter += 3;
   #endif
 
-  #if defined AltitudeHoldRangeFinder && !defined AltitudeHoldBaro
+  #if defined(AltitudeHoldRangeFinder) && !defined(AltitudeHoldBaro)
     int8_t range_p[14] = "Range_P";
     int8_t range_i[14] = "Range_I";
     int8_t range_d[14] = "Range_D";
@@ -896,7 +926,7 @@ int findParameter(char* key) {
     parameterToBeChangedFloat = &receiverSmoothFactor[AUX1];
     return -1;
   }
-  if (LASTCHANNEL == 8) {
+  if (LASTCHANNEL == 8 || LASTCHANNEL == 10) {
     if (checkParameterMatch(parameterNameTxAUX2Smooth, key)) {
       paramIndicator = NONE;
       parameterToBeChangedFloat = &receiverSmoothFactor[AUX2];
@@ -907,9 +937,22 @@ int findParameter(char* key) {
       parameterToBeChangedFloat = &receiverSmoothFactor[AUX3];
       return -1;
     }
+
+	if (LASTCHANNEL == 10) {
+		if (checkParameterMatch(parameterNameTxAUX4Smooth, key)) {
+			paramIndicator = NONE;
+			parameterToBeChangedFloat = &receiverSmoothFactor[AUX4];
+			return -1;
+		}
+		if (checkParameterMatch(parameterNameTxAUX5Smooth, key)) {
+			paramIndicator = NONE;
+			parameterToBeChangedFloat = &receiverSmoothFactor[AUX5];
+			return -1;
+		}
+	}
   }
 
-  #if defined BattMonitor
+  #if defined(BattMonitor)
     if (checkParameterMatch(parameterNameBattMonAlarmVoltage, key)) {
       paramIndicator = NONE;
       parameterToBeChangedFloat = &batteryMonitorAlarmVoltage;
@@ -927,7 +970,7 @@ int findParameter(char* key) {
     }
   #endif
 
-  #ifdef CameraControl
+  #if defined(CameraControl)
     if (checkParameterMatch(parameterNameCamMode, key)) {
       paramIndicator = NONE;
       parameterToBeChangedInt = &cameraMode;
@@ -980,7 +1023,7 @@ int findParameter(char* key) {
     }
   #endif
 
-  #if defined (AltitudeHoldBaro) || defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     if (checkParameterMatch(parameterNameAHminThrottleAdjust, key)) {
       paramIndicator = NONE;
       parameterToBeChangedInt = &minThrottleAdjust;
@@ -1003,7 +1046,7 @@ int findParameter(char* key) {
     }
   #endif
 
-  #if defined AltitudeHoldBaro
+  #if defined(AltitudeHoldBaro)
     if (checkParameterMatch(parameterNameAHBaroSmooth, key)) {
       paramIndicator = NONE;
       parameterToBeChangedFloat = &baroSmoothFactor;
@@ -1039,7 +1082,7 @@ int findParameter(char* key) {
     }
   #endif
 
-  #if defined AltitudeHoldRangeFinder
+  #if defined(AltitudeHoldRangeFinder)
     if (checkParameterMatch(parameterNameRangeFinderP, key)) {
       paramIndicator = P;
       return SONAR_ALTITUDE_HOLD_PID_IDX;
@@ -1058,7 +1101,7 @@ int findParameter(char* key) {
     }
   #endif
 
-  #if defined UseGPSNavigator
+  #if defined(UseGPSNavigator)
     if (checkParameterMatch(parameterNameGPSRollP, key)) {
       paramIndicator = P;
       return GPSROLL_PID_IDX;
@@ -1215,7 +1258,7 @@ void readSerialCommand() {
           // 						}
 
           if (command == MAV_CMD_NAV_RETURN_TO_LAUNCH) {
-            #if defined UseGPSNavigator
+            #if defined(UseGPSNavigator)
               //TODO	add coming home
               //result = MAV_RESULT_ACCEPTED;
             #else
@@ -1223,7 +1266,7 @@ void readSerialCommand() {
             #endif
           }
           else if (command == MAV_CMD_NAV_TAKEOFF) {
-            #if defined UseGPSNavigator
+            #if defined(UseGPSNavigator)
               //TODO	add gps takeoff
               //result = MAV_RESULT_ACCEPTED;
             #else
@@ -1231,7 +1274,7 @@ void readSerialCommand() {
             #endif
           }
           else if (command == MAV_CMD_DO_SET_HOME) {
-            #if defined UseGPS
+            #if defined(UseGPSNavigator)
               if (mavlink_msg_command_long_get_param1(&msg) == 1.0) {
                 homePosition = currentPosition;
               }
@@ -1245,7 +1288,7 @@ void readSerialCommand() {
               result = 	MAV_RESULT_UNSUPPORTED;
             #endif
           }
-          else if (command ==	MAV_CMD_PREFLIGHT_CALIBRATION) {
+          else if (command == MAV_CMD_PREFLIGHT_CALIBRATION) {
             if (!motorArmed) {
               if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
                 calibrateGyro();
@@ -1260,7 +1303,7 @@ void readSerialCommand() {
                 result = MAV_RESULT_ACCEPTED;
               }
             }
-            else result = 	MAV_RESULT_TEMPORARILY_REJECTED;
+            else result = MAV_RESULT_TEMPORARILY_REJECTED;
           }
 
           mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, command, result);
@@ -1319,7 +1362,7 @@ void readSerialCommand() {
         break;
 
       case MAVLINK_MSG_ID_MISSION_REQUEST_LIST: { //TODO needs to be tested
-        #if defined UseGPSNavigator
+        #if defined(UseGPSNavigator)
           mavlink_msg_mission_count_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, MAX_WAYPOINTS);
           len = mavlink_msg_to_send_buffer(buf, &msg);
           SERIAL_PORT.write(buf, len);
