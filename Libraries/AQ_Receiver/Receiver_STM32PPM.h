@@ -22,21 +22,9 @@
 
 #include "Receiver.h"
 #include "wirish.h"
+#include "Receiver_PPM_common.h"
 
 //#define STM32_TIMER_DEBUG // enable debug messages
-
-///////////////////////////////////////////////////////////////////////////////
-// configuration part starts here
-
-#define SERIAL_SUM_PPM_1         1,2,3,0,4,5,6,7 // PITCH,YAW,THR,ROLL... For Graupner/Spektrum
-#define SERIAL_SUM_PPM_2         0,1,3,2,4,5,6,7 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba
-#define SERIAL_SUM_PPM_3         1,0,3,2,4,5,6,7 // PITCH,ROLL,THR,YAW... For some Hitec/Sanwa/Others
-
-#if defined (SKETCH_SERIAL_SUM_PPM)
-  #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM
-#else
-  #define SERIAL_SUM_PPM SERIAL_SUM_PPM_1
-#endif
 
 static byte ReceiverChannelMap[] = {SERIAL_SUM_PPM};
 
