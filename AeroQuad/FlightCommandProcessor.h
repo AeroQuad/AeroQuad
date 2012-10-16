@@ -175,6 +175,65 @@
 
 
 
+
+void processZeroThrottleFunctionFromReceiverCommand() {
+  // Disarm motors (left stick lower left corner)
+  if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
+    commandAllMotors(MINCOMMAND);
+    motorArmed = OFF;
+    inFlight = false;
+
+    #ifdef OSD
+      notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
+    #endif
+
+    #if defined BattMonitorAutoDescent
+      batteryMonitorAlarmCounter = 0;
+      batteryMonitorStartThrottle = 0;
+      batteyMonitorThrottleCorrection = 0.0;
+    #endif
+  }    
+
+  // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
+  if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {
+    calibrateGyro();
+    computeAccelBias();
+    storeSensorsZeroToEEPROM();
+    calibrateKinematics();
+    zeroIntegralError();
+    pulseMotors(3);
+  }   
+
+  // Arm motors (left stick lower right corner)
+  if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
+
+    #ifdef OSD_SYSTEM_MENU
+      if (menuOwnsSticks) {
+        return;
+      }
+    #endif
+
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+      motorCommand[motor] = MINTHROTTLE;
+    }
+    motorArmed = ON;
+
+    #ifdef OSD
+      notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
+    #endif  
+
+    zeroIntegralError();
+
+  }
+  // Prevents accidental arming of motor output if no transmitter command received
+  if (receiverCommand[ZAXIS] > MINCHECK) {
+    safetyCheck = ON; 
+  }
+}
+
+
+
+
 /**
  * readPilotCommands
  * 
@@ -186,58 +245,7 @@ void readPilotCommands() {
   readReceiver(); 
   
   if (receiverCommand[THROTTLE] < MINCHECK) {
-    // Disarm motors (left stick lower left corner)
-    if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
-      commandAllMotors(MINCOMMAND);
-      motorArmed = OFF;
-      inFlight = false;
-
-      #ifdef OSD
-        notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
-      #endif
-
-      #if defined BattMonitorAutoDescent
-        batteryMonitorAlarmCounter = 0;
-        batteryMonitorStartThrottle = 0;
-        batteyMonitorThrottleCorrection = 0.0;
-      #endif
-    }    
-
-    // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {
-      calibrateGyro();
-      computeAccelBias();
-      storeSensorsZeroToEEPROM();
-      calibrateKinematics();
-      zeroIntegralError();
-      pulseMotors(3);
-    }   
-
-    // Arm motors (left stick lower right corner)
-    if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
-
-      #ifdef OSD_SYSTEM_MENU
-        if (menuOwnsSticks) {
-          return;
-        }
-      #endif
-
-      for (byte motor = 0; motor < LASTMOTOR; motor++) {
-        motorCommand[motor] = MINTHROTTLE;
-      }
-      motorArmed = ON;
-
-      #ifdef OSD
-        notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
-      #endif  
-
-      zeroIntegralError();
-
-    }
-    // Prevents accidental arming of motor output if no transmitter command received
-    if (receiverCommand[ZAXIS] > MINCHECK) {
-      safetyCheck = ON; 
-    }
+    processZeroThrottleFunctionFromReceiverCommand();
   }
 
   if (!inFlight) {
