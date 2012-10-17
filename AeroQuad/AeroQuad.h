@@ -36,15 +36,11 @@
 #if defined CONFIG_BAUDRATE
   #define BAUD CONFIG_BAUDRATE
 #else
-<<<<<<< HEAD
-  #define BAUD 19200
-=======
   #if defined WirelessTelemetry && !defined MavLink
     #define BAUD 111111 // use this to be compatible with USB and XBee connections
   #else
     #define BAUD 115200
   #endif
->>>>>>> f3a4890bb26168caa2133c8db8f3d59c0e4d91fb
 #endif  
 
 /**
