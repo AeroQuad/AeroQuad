@@ -582,10 +582,9 @@ void sendSerialTelemetry() {
       PrintValueComma(0);
     #endif
 
-    for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiverCommand[channel]);
+    for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
+      PrintValueComma((channel < LASTCHANNEL) ? receiverCommand[channel] : 0);
     }
-    PrintDummyValues(8 - LASTCHANNEL); // max of 8 transmitter channel supported
 
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       PrintValueComma(motorCommand[motor]);
