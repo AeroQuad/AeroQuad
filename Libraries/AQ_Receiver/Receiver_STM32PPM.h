@@ -26,9 +26,9 @@
 
 //#define STM32_TIMER_DEBUG // enable debug messages
 
-static byte ReceiverChannelMap[] = {SERIAL_SUM_PPM};
+static byte ReceiverChannelMap[PPM_CHANNELS] = {SERIAL_SUM_PPM};
 
-uint16 rawChannelValue[8] =  {1500,1500,1500,1500,1500,1500,1500,1500};
+uint16 rawChannelValue[PPM_CHANNELS] =  {1500,1500,1500,1500,1500,1500,1500,1500,1500,1500};
 byte   currentChannel;
 
 
@@ -107,19 +107,17 @@ void FrqChange()
 
   if(rising) {
     uint16_t diffTime = c - FrqData.RiseTime;
-    if ((diffTime>900) && (diffTime<2100)) {
-      if (currentChannel<8) {
-        rawChannelValue[currentChannel]=diffTime;
+    if ((diffTime > 900) && (diffTime < 2100)) {
+      if (currentChannel < PPM_CHANNELS) {
+        rawChannelValue[currentChannel] = diffTime;
         currentChannel++;
       }
-    } else if (diffTime>2500) {
-      currentChannel=0;
+    } else if (diffTime > 2500) {
+      currentChannel = 0;
     } else {
-      // glitch stop and wait next round
-      currentChannel=9;
+      // glitch; stop and wait next round
+      currentChannel = PPM_CHANNELS;
     }
-    //    Serial.print(highTime);
-    //    Serial.println();
     FrqData.RiseTime = c;
   }
   FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
