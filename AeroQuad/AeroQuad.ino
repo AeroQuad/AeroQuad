@@ -52,6 +52,14 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
+// Special motor config additionnal variable
+#if defined(quadXHT_FPVConfig)
+ #define quadXConfig
+ #define FRONT_YAW_CORRECTION 0.95
+ #define REAR_YAW_CORRECTION 1.17
+#endif
+
+
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
@@ -957,6 +965,8 @@
   #include <AnalogRSSIReader.h>
 #elif defined(UseEzUHFRSSIReader)
   #include <EzUHFRSSIReader.h>
+#elif defined(UseSBUSRSSIReader)
+  #include <SBUSRSSIReader.h>
 #endif
 
 
