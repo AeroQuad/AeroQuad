@@ -27,6 +27,8 @@
 // Show RSSI information (analog input value optionally mapped to percents.)
 #if defined (UseEzUHFRSSIReader)
   #include <EzUHFRSSIReader.h>
+#elif defined (UseSBUSRSSIReader)
+  #include <SBUSRSSIReader.h>
 #else
   #include <AnalogRSSIReader.h>
 #endif	
