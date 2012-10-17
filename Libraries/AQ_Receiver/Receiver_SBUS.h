@@ -38,11 +38,16 @@
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
   
-#define SERIAL_SBUS Serial2   
+#define SERIAL_SBUS Serial3   
 
 // 16 analog, 2 digital channels
 static unsigned int rcChannel[18] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};
 static unsigned int sbusIndex = 0;
+#if defined (UseSBUSRSSIReader)
+  static unsigned short sbusFailSafeCount = 0;
+  static unsigned long sbusFrameCount = 0;
+  static unsigned short sbusRate = 0;
+#endif
 
 void initializeReceiver(int nbChannel = 10) {
   initializeReceiverParam(nbChannel);
@@ -80,6 +85,19 @@ void readSBUS() {
         //rcChannel[AUX6]		= ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
         //rcChannel[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
 
+
+	   #ifdef UseSBUSRSSIReader
+		if (sbusRate == 0) {
+		  sbusFrameCount++;
+		}
+		if (((sbus[23] >> 3) & 0x0001)) {
+		  if ((sbusRate > 0) && (sbusFailSafeCount < sbusRate)) {
+		    sbusFailSafeCount++;
+		  }
+		} else if (sbusFailSafeCount > 0) {
+		  sbusFailSafeCount--;
+		}
+	   #endif
       }
     }
   }

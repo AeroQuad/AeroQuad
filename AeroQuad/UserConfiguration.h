@@ -40,14 +40,14 @@
 // Mega processor
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
 
 // STM32 processor
-//#define AeroQuadSTM32        // Baloo board
+#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
@@ -118,7 +118,7 @@
 //#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //
 // Advanced configuration. Please refer to the wiki for instructions.
-//#define BattCustomConfig DEFINE_BATTERY(3,BATT_ANALOG_INPUT,25.3,0,A6,66,0)
+#define BattCustomConfig DEFINE_BATTERY(0,A4,51.8,0,A3,180.3,0)
 
 //
 // *******************************************************************************************************************************
@@ -138,6 +138,7 @@
 
 //#define UseAnalogRSSIReader // Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
 //#define UseEzUHFRSSIReader // Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
+#define UseSBUSRSSIReader
 
 //
 // *******************************************************************************************************************************
@@ -181,21 +182,22 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
-//#define CameraControl
-//#define CameraTXControl  // need to have CameraControl to work
+#define CameraControl
+#define CameraTXControl  // need to have CameraControl to work
 
 //
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *************************************************************.******************************************************************
-//#define OSD
-//#define ShowRSSI                  // This REQUIRES a RSSI reader
+#define OSD
+#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
-//#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "Aeroquad"       // Show (optional) callsign
-//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+#define CALLSIGN "KF7YRK"       // Show (optional) callsign
+#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
+#define OSD50HZ
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 

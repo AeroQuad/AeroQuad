@@ -965,6 +965,8 @@
   #include <AnalogRSSIReader.h>
 #elif defined(UseEzUHFRSSIReader)
   #include <EzUHFRSSIReader.h>
+#elif defined(UseSBUSRSSIReader)
+  #include <SBUSRSSIReader.h>
 #endif
 
 
@@ -1317,7 +1319,7 @@ void process50HzTask() {
   // Reads external pilot commands and performs functions based on stick configuration
   readPilotCommands(); 
   
-  #if defined(UseAnalogRSSIReader) || defined(UseEzUHFRSSIReader)
+  #if defined(UseAnalogRSSIReader) || defined(UseEzUHFRSSIReader) || defined(UseSBUSRSSIReader)
     readRSSI();
   #endif
 
