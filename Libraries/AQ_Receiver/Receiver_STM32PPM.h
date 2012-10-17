@@ -120,7 +120,7 @@ void FrqChange()
     }
     FrqData.RiseTime = c;
   }
-  FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
+//  FrqData.TimerRegs->CCER ^= FrqData.PolarityMask; // invert polarity
 }
 
 void InitFrqMeasurement()
