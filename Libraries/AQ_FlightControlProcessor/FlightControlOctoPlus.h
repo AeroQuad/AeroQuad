@@ -47,7 +47,7 @@
 #define REAR_LEFT   MOTOR6
 #define LEFT        MOTOR7
 #define FRONT_LEFT  MOTOR8
-#define LASTMOTOR   MOTOR8+1
+#define LASTMOTOR   (MOTOR8+1)
 
 int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
 int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
