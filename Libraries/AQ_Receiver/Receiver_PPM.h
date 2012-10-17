@@ -36,13 +36,13 @@
 
 #include "Receiver_PPM_common.h"
 
-static uint8_t rcChannel[8] = {SERIAL_SUM_PPM};
-volatile uint16_t rcValue[8] = {1500,1500,1500,1500,1500,1500,1500,1500}; // interval [1000;2000]
+static uint8_t rcChannel[PPM_CHANNELS] = {SERIAL_SUM_PPM};
+volatile uint16_t rcValue[PPM_CHANNELS] = {1500,1500,1500,1500,1500,1500,1500,1500,1500,1500}; // interval [1000;2000]
 
 static void rxInt() {
   uint16_t now,diff;
   static uint16_t last = 0;
-  static uint8_t chan = 0;
+  static uint8_t chan = PPM_CHANNELS;
 
   now = micros();
   diff = now - last;
@@ -50,11 +50,12 @@ static void rxInt() {
   if(diff>3000) { 
     chan = 0;
   }
-  else {
-    if( 900 < diff && diff < 2200 && chan < 8 ) {
-	  rcValue[chan] = diff;
-	}
+  else if( 800 < diff && diff < 2200 && chan < PPM_CHANNELS ) {
+    rcValue[chan] = diff;
     chan++;
+  }
+  else {
+    chan = PPM_CHANNELS;
   }
 }
 
@@ -77,6 +78,3 @@ int getRawChannelValue(byte channel) {
 
 
 #endif
-
-
-
