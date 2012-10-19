@@ -141,7 +141,7 @@
   
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < 1600) {  // Enter in position hold state
+    else if (receiverCommand[AUX1] < 1250) {  // Enter in position hold state
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;

@@ -52,6 +52,10 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
+#if defined (OSD50HZ) && !defined (AeroQuadSTM32)
+  #error "OSD can't be updated at that speed on artduino"
+#endif
+
 
 #include <EEPROM.h>
 #include <Wire.h>
