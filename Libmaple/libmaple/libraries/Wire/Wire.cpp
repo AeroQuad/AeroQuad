@@ -237,7 +237,7 @@ uint8 TwoWire::requestFrom(uint8 address, int num_bytes) {
 		//Serial1.print("requestFrom failed at byte ");
 		//Serial1.print(rx_buf_len,10);
 		//Serial1.println();
-		return ENACKADDR;
+		return 0;
 	}
 
 	while (rx_buf_len < num_bytes) {
