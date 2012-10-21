@@ -180,12 +180,6 @@ void initializeEEPROM() {
   gyroZero[XAXIS] = 0.0;
   gyroZero[YAXIS] = 0.0;
   gyroZero[ZAXIS] = 0.0;
-//  gyroTempBiasSlope[XAXIS] = 0.0;
-//  gyroTempBiasSlope[YAXIS] = 0.0;
-//  gyroTempBiasSlope[ZAXIS] = 0.0;
-//  gyroTempBiasIntercept[XAXIS] = 0.0;
-//  gyroTempBiasIntercept[YAXIS] = 0.0;
-//  gyroTempBiasIntercept[ZAXIS] = 0.0;
   
   // Accel Cal
   accelScaleFactor[XAXIS] = 1.0;
