@@ -647,6 +647,7 @@ void sendSerialTelemetry() {
       PrintDummyValues(11);
     #endif    
     SERIAL_PRINTLN();
+    break;
 
   case 'x': // Stop sending messages
     break;
