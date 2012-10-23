@@ -168,9 +168,9 @@ void initHomeBase() {
     latitudeMovement = currentPosition.latitude - previousPosition.latitude;
     longitudeMovement = currentPosition.longitude - previousPosition.longitude;
     
-    previousPosition.latitude  = estimatedPosition.latitude;
-    previousPosition.longitude = estimatedPosition.longitude;
-    previousPosition.altitude  = estimatedPosition.altitude;
+    previousPosition.latitude  = currentPosition.latitude;
+    previousPosition.longitude = currentPosition.longitude;
+    previousPosition.altitude  = currentPosition.altitude;
     
     estimatedPreviousPosition.latitude = estimatedPosition.latitude;
     estimatedPreviousPosition.longitude = estimatedPosition.longitude;
@@ -191,6 +191,12 @@ void initHomeBase() {
     
     estimatedPosition.latitude += latitudeMovement * estimatedDelay / readingDelay;
     estimatedPosition.longitude += longitudeMovement * estimatedDelay / readingDelay;
+
+
+//    Serial.print(previousPosition.latitude);Serial.print(",");Serial.print(previousPosition.longitude);Serial.print("  ");
+//    Serial.print(currentPosition.latitude);Serial.print(",");Serial.print(currentPosition.longitude);Serial.print("  ");
+//    Serial.print(latitudeMovement);Serial.print(",");Serial.print(longitudeMovement);Serial.print("  ");
+//    Serial.print(estimatedPosition.latitude);Serial.print(",");Serial.println(estimatedPosition.longitude);
   }
 
 
@@ -248,6 +254,8 @@ void initHomeBase() {
 
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
+    
+//    Serial.print(gpsRollAxisCorrection);Serial.print(",");Serial.println(gpsPitchAxisCorrection);
   }
   
   
