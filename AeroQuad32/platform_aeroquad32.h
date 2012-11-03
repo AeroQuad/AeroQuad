@@ -1,7 +1,7 @@
 #ifndef _PLATFORM_AEROQUAD32_H_
 	#define _PLATFORM_AEROQUAD32_H_
 
-	static byte stm32_motor_mapping[] = {
+        static byte __attribute__((unused)) stm32_motor_mapping[] = {
 		Port2Pin('C',  9),
 		Port2Pin('C',  8),
 		Port2Pin('C',  7),
@@ -10,6 +10,13 @@
 		Port2Pin('B',  3),
 		Port2Pin('B',  4),
 		Port2Pin('B',  5)
+	};
+
+        static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
+	  Port2Pin('A', 15), // note this must be on separate timer device !!
+	  Port2Pin('C',  8),
+	  Port2Pin('C',  7),
+	  Port2Pin('C',  6),
 	};
 
 #ifdef RECEIVER_STM32PPM
