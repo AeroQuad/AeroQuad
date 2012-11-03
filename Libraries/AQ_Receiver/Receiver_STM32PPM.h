@@ -83,7 +83,6 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 
 void FrqChange()
 {
-  timer_gen_reg_map *timer = FrqData.TimerRegs;
   uint16_t c = *(FrqData.Timer_ccr);
   uint16_t diffTime = c - FrqData.RiseTime;
   if ((diffTime > 900) && (diffTime < 2100)) {
