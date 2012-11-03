@@ -8,76 +8,76 @@
 ////////////////////////////////////////////////////////
 // definition section
 
-#define PWM_FREQUENCY 400 // Hz
+#define PWM_FREQUENCY   400      // Hz
+#define PWM_PERIODE     (1000000/PWM_FREQUENCY)
 
-
+#ifdef MOTORS_STM32_TRI
+  #define PWM_SERVO_FREQUENCY 50 // Hz 
+  #define PWM_SERVO_PERIODE   (1000000/PWM_SERVO_FREQUENCY)
+  #define STM32_MOTOR_MAP stm32_motor_mapping_tri
+#else
+  #define STM32_MOTOR_MAP stm32_motor_mapping
+#endif
 
 ////////////////////////////////////////////////////////
 // code section
 
-#define PWM_PERIODE (1000000/PWM_FREQUENCY)
+static int _stm32_motor_number;
 
-  // private section
-  static int _stm32_motor_number;
+// global section
 
-  struct _sMotorInfo {
-	int			pin;
-    timer_dev 	*timer_device;	/**< Pin's timer device, if any. */
-    uint8 		timer_channel;  /**< Timer channel, or 0 if none. */
-  } MotorInfo[8];
+void initializeMotors(NB_Motors numbers) {
+ 
+  int motor;
 
-  void _initMotorInfo(int motor, int pin) {
-	  MotorInfo[motor].pin           = pin;
-	  MotorInfo[motor].timer_device  = PIN_MAP[pin].timer_device;
-	  MotorInfo[motor].timer_channel = PIN_MAP[pin].timer_channel;
+  _stm32_motor_number = sizeof(STM32_MOTOR_MAP)/sizeof(STM32_MOTOR_MAP[0]);
+  if(numbers < _stm32_motor_number) {
+    _stm32_motor_number = numbers;
   }
+  
+  for(motor=0; motor < _stm32_motor_number; motor++) {
 
-  // global section
+    int prescaler = rcc_dev_timer_clk_speed(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device->clk_id)/1000000 - 1;
 
-  void initializeMotors(NB_Motors numbers) {
-	_stm32_motor_number = sizeof(stm32_motor_mapping)/sizeof(stm32_motor_mapping[0]);
-	if(numbers < _stm32_motor_number) {
-		_stm32_motor_number = numbers;
-	}
+    timer_set_prescaler(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, prescaler);
 
-	int motor;
-    for(motor=0; motor < _stm32_motor_number; motor++) {
-    	_initMotorInfo(motor, stm32_motor_mapping[motor]);
-
-    	int prescaler = rcc_dev_timer_clk_speed(MotorInfo[motor].timer_device->clk_id)/1000000 - 1;
-    	timer_set_prescaler(MotorInfo[motor].timer_device, prescaler);
-    	timer_set_reload(MotorInfo[motor].timer_device, PWM_PERIODE);
-
-    	pinMode(MotorInfo[motor].pin, PWM);
+#ifdef MOTORS_STM32_TRI
+    // on Tri mode motor 0 is a servo and thus has slower update rate
+    if (motor == 0) {
+      timer_set_reload(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PWM_SERVO_PERIODE);
     }
-
-    // sync timer
-    for(motor=0; motor < _stm32_motor_number; motor++) {
-    	timer_generate_update(MotorInfo[motor].timer_device);
+    else {
+      timer_set_reload(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PWM_PERIODE);
     }
-
-    commandAllMotors(1000);
-	//Serial.println("motor init done\r\n");
+#else
+    timer_set_reload(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PWM_PERIODE);
+#endif
+    
+    pinMode(STM32_MOTOR_MAP[motor], PWM);
   }
-
-  void writeMotors(void) {
-	for(int motor=0; motor < _stm32_motor_number; motor++) {
-	   	timer_set_compare(MotorInfo[motor].timer_device, MotorInfo[motor].timer_channel,  motorCommand[motor]);
-	}
+  
+  // sync timer
+  for(motor=0; motor < _stm32_motor_number; motor++) {
+    timer_generate_update(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device);
   }
+  
+  commandAllMotors(1000);
+  //Serial.println("motor init done\r\n");
+}
 
-  void commandAllMotors(int _motorCommand) {   // Sends commands to all motors
-	for(int motor=0; motor < _stm32_motor_number; motor++) {
-	   	timer_set_compare(MotorInfo[motor].timer_device, MotorInfo[motor].timer_channel, _motorCommand);
-	}
+void writeMotors(void) { // update motor commands on timers
+
+  for(int motor=0; motor < _stm32_motor_number; motor++) {
+    timer_set_compare(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PIN_MAP[STM32_MOTOR_MAP[motor]].timer_channel,  motorCommand[motor]);
   }
+}
 
-/*
- * test commands for motor testing
-  5123.45;1010;1020;1030;1040;1050;1060;1070;1080
-  5123.45;1011;1021;1031;1041;1051;1061;1071;1081
-  5123.45;1110;1120;1130;1140;1150;1160
-  5123.45;1000;1000;1000;1000;1000;1000
-*/
+void commandAllMotors(int _motorCommand) {   // Send same command to all motors
+
+  for(int motor=0; motor < _stm32_motor_number; motor++) {
+    timer_set_compare(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PIN_MAP[STM32_MOTOR_MAP[motor]].timer_channel, _motorCommand);
+  }
+}
+
 #endif
 #endif
