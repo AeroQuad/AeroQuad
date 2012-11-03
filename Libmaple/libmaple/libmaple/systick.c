@@ -30,7 +30,7 @@
  */
 
 #include "systick.h"
-
+#include "nvic.h"
 volatile uint32 systick_uptime_millis;
 static void (*systick_user_callback)(void);
 
@@ -80,7 +80,11 @@ void systick_attach_callback(void (*callback)(void)) {
  */
 
 void __exc_systick(void) {
-    systick_uptime_millis++;
+    nvic_globalirq_disable();
+	systick_check_underflow();
+	systick_uptime_millis++;
+    nvic_globalirq_enable();
+
     if (systick_user_callback) {
         systick_user_callback();
     }

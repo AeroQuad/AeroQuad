@@ -151,7 +151,7 @@ extern const stm32_pin_info PIN_MAP[BOARD_NR_GPIO_PINS] = {
 
     {GPIOE,   NULL, NULL,  0, 0, ADCx}, /* D64/PE0  */
     {GPIOE,   NULL, NULL,  1, 0, ADCx}, /* D65/PE1  */
-    {GPIOE,   NULL, NULL,  1, 0, ADCx}, /* D66/PE2  */
+    {GPIOE,   NULL, NULL,  2, 0, ADCx}, /* D66/PE2  */
     {GPIOE,   NULL, NULL,  3, 0, ADCx}, /* D67/PE3  */
     {GPIOE,   NULL, NULL,  4, 0, ADCx}, /* D68/PE4  */
     {GPIOE,   NULL, NULL,  5, 0, ADCx}, /* D69/PE5  */
