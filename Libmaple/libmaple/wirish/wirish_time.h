@@ -63,6 +63,11 @@ static inline uint32 micros(void) {
         cycle_cnt = systick_get_count();
     } while (ms != millis());
 
+    if(systick_check_underflow()) {
+    	ms++;
+    	cycle_cnt = systick_get_count();
+    }
+
     /* SYSTICK_RELOAD_VAL is 1 less than the number of cycles it
        actually takes to complete a SysTick reload */
     res = (ms * US_PER_MS) +
