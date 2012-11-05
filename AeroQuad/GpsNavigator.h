@@ -31,7 +31,7 @@ byte countToInitHome = 0;
 
 unsigned long previousFixTime = 0;
 
-boolean isNewGpsPosition() {
+boolean haveNewGpsPosition() {
   return (haveAGpsLock() && (previousFixTime != getGpsFixTime()));
 }
 
@@ -44,7 +44,7 @@ boolean isHomeBaseInitialized() {
 }
 
 void initHomeBase() {
-  if (isNewGpsPosition()) {
+  if (haveNewGpsPosition()) {
     clearNewGpsPosition();
     if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
       countToInitHome++;
@@ -96,6 +96,7 @@ void initHomeBase() {
     
   long readingDelay = 0;  
   unsigned long previousEstimationTime = 0;
+  unsigned long previousReadingTime = 0;
   int latitudeMovement = 0;
   int longitudeMovement = 0;
   GeodeticPosition previousPosition = GPS_INVALID_POSITION;
@@ -162,8 +163,10 @@ void initHomeBase() {
 
   void computeNewPosition() {
     
-    readingDelay = getGpsFixTime() - previousFixTime;
-    previousEstimationTime = micros();
+    unsigned long time = micros();
+    readingDelay = time - previousReadingTime;
+    previousReadingTime = time;
+    previousEstimationTime = time;
     
     latitudeMovement = currentPosition.latitude - previousPosition.latitude;
     longitudeMovement = currentPosition.longitude - previousPosition.longitude;
@@ -189,14 +192,8 @@ void initHomeBase() {
     estimatedPreviousPosition.latitude = estimatedPosition.latitude;
     estimatedPreviousPosition.longitude = estimatedPosition.longitude;
     
-    estimatedPosition.latitude += latitudeMovement * estimatedDelay / readingDelay;
-    estimatedPosition.longitude += longitudeMovement * estimatedDelay / readingDelay;
-
-
-//    Serial.print(previousPosition.latitude);Serial.print(",");Serial.print(previousPosition.longitude);Serial.print("  ");
-//    Serial.print(currentPosition.latitude);Serial.print(",");Serial.print(currentPosition.longitude);Serial.print("  ");
-//    Serial.print(latitudeMovement);Serial.print(",");Serial.print(longitudeMovement);Serial.print("  ");
-//    Serial.print(estimatedPosition.latitude);Serial.print(",");Serial.println(estimatedPosition.longitude);
+    estimatedPosition.latitude += (latitudeMovement / (readingDelay / estimatedDelay));
+    estimatedPosition.longitude += (longitudeMovement / (readingDelay / estimatedDelay));
   }
 
 
@@ -254,8 +251,6 @@ void initHomeBase() {
 
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
-    
-//    Serial.print(gpsRollAxisCorrection);Serial.print(",");Serial.println(gpsPitchAxisCorrection);
   }
   
   
@@ -311,7 +306,7 @@ void initHomeBase() {
    */
   void processPositionHold() {
     
-    if (isNewGpsPosition()) {
+    if (haveNewGpsPosition()) {
       computeNewPosition();
       clearNewGpsPosition();
     }
@@ -337,7 +332,7 @@ void initHomeBase() {
    */
   void processNavigation() {
     
-    if (isNewGpsPosition()) {
+    if (haveNewGpsPosition()) {
       computeNewPosition();
       clearNewGpsPosition();
     }
