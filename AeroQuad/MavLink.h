@@ -204,7 +204,7 @@ void evaluateCopterType() {
 	systemType = MAV_TYPE_TRICOPTER;
   #endif
 
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadXHT_FPVConfig) || defined(quadY4Config)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
 	systemType = MAV_TYPE_QUADROTOR;
   #endif
 

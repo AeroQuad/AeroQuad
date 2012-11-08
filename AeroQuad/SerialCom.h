@@ -89,7 +89,7 @@ void readSerialCommand() {
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      readFloatSerial();
+      headingHoldConfig = readFloatSerial();
       break;
 
     case 'D': // Altitude hold PID
@@ -421,6 +421,7 @@ void sendSerialTelemetry() {
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverSmoothFactor[axis]);
     }
+	PrintDummyValues(10 - LASTCHANNEL);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
@@ -883,9 +884,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X8");
   #elif defined(octoXConfig)
     SERIAL_PRINTLN("Octo X");
-  // *** For next rev, updat OctoPlus config name here and in Configurator
   #elif defined(octoPlusConfig)
-    SERIAL_PRINTLN("Octo X+");
+    SERIAL_PRINTLN("Octo +");
   #endif
 
   SERIAL_PRINT("Receiver Channels: ");
