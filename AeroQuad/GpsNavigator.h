@@ -82,19 +82,17 @@ void initHomeBase() {
     10000       = 111m
   */
   
-  #define MIN_DISTANCE_TO_REACHED 3000
+  #define MIN_DISTANCE_TO_REACHED 2000
 
-  #define GPS_SPEED_SMOOTH_VALUE 0.5
-  #define GPS_COURSE_SMOOTH_VALUE 0.5
-  
   #define MAX_POSITION_HOLD_CRAFT_ANGLE_CORRECTION 300.0
-  #define POSITION_HOLD_SPEED 60.0  
+  #define POSITION_HOLD_SPEED 300.0  
   #define MAX_NAVIGATION_ANGLE_CORRECTION 300.0
-  #define NAVIGATION_SPEED 250.0  // m/s * 100 // 3 m/s = 10.8km/h
+  #define NAVIGATION_SPEED 600.0 
   
   #define MAX_YAW_AXIS_CORRECTION 200.0  
     
   long readingDelay = 0;  
+  long estimatedDelay = 0;
   unsigned long previousEstimationTime = 0;
   unsigned long previousReadingTime = 0;
   int latitudeMovement = 0;
@@ -102,10 +100,8 @@ void initHomeBase() {
   GeodeticPosition previousPosition = GPS_INVALID_POSITION;
   GeodeticPosition estimatedPosition = GPS_INVALID_POSITION;
   GeodeticPosition estimatedPreviousPosition = GPS_INVALID_POSITION;
-  float gpsLaggedSpeed = 0.0;
-  float gpsLaggedCourse = 0.0;
-  float currentSpeedCmPerSecRoll = 0.0; 
-  float currentSpeedCmPerSecPitch = 0.0;
+  float currentSpeedRoll = 0.0; 
+  float currentSpeedPitch = 0.0;
   
   float distanceToDestinationX = 0.0;
   float distanceToDestinationY = 0.0;
@@ -166,6 +162,7 @@ void initHomeBase() {
     unsigned long time = micros();
     readingDelay = time - previousReadingTime;
     previousReadingTime = time;
+    estimatedDelay = time - previousEstimationTime;
     previousEstimationTime = time;
     
     latitudeMovement = currentPosition.latitude - previousPosition.latitude;
@@ -186,7 +183,7 @@ void initHomeBase() {
   void computeEstimatedPosition() {
     
     unsigned long time = micros();
-    long estimatedDelay = time - previousEstimationTime;
+    estimatedDelay = time - previousEstimationTime;
     previousEstimationTime = time;
     
     estimatedPreviousPosition.latitude = estimatedPosition.latitude;
@@ -211,24 +208,26 @@ void initHomeBase() {
 
   /**
    * Compute the current craft speed in cm per sec
-   * @result are currentSpeedCmPerSecPitch and currentSpeedCmPerSecRoll
+   * @result are currentSpeedPitch and currentSpeedRoll
    */
-  void computeCurrentSpeedInCmPerSec() {
+  void computeCurrentSpeed() {
   
-    float derivateDistanceX = (float)(estimatedPosition.longitude - estimatedPreviousPosition.longitude) * cosLatitude * 1.113195;
-    float derivateDistanceY = (float)(estimatedPosition.latitude - estimatedPreviousPosition.latitude) * 1.113195;
-    float derivateDistance = sqrt(sq(derivateDistanceY) + sq(derivateDistanceX));
+    float currentSpeedX = (float)(estimatedPosition.longitude - estimatedPreviousPosition.longitude) * cosLatitude * 1.113195;
+    float currentSpeedY = (float)(estimatedPosition.latitude - estimatedPreviousPosition.latitude) * 1.113195;
+    float currentSpeed = sqrt(sq(currentSpeedY) + sq(currentSpeedX));
+    
+    currentSpeedX = currentSpeedX * (100000 / estimatedDelay); // normalized to about 5hz
+    currentSpeedY = currentSpeedY * (100000 / estimatedDelay); 
+    currentSpeed = currentSpeed * (100000 / estimatedDelay); 
   
-    gpsLaggedSpeed = gpsLaggedSpeed * (GPS_SPEED_SMOOTH_VALUE) + derivateDistance * (1-GPS_SPEED_SMOOTH_VALUE);
-    float tmp = degrees(atan2(derivateDistanceX, derivateDistanceY));
+    float tmp = degrees(atan2(currentSpeedX, currentSpeedY));
     if (tmp < 0) {
       tmp += 360; 
     }
-    gpsLaggedCourse = (int)((float)gpsLaggedCourse*(GPS_COURSE_SMOOTH_VALUE) + tmp*100*(1-GPS_COURSE_SMOOTH_VALUE));
-  
-    float courseRads = radians(gpsLaggedCourse/100);
-    currentSpeedCmPerSecRoll = sin(courseRads-trueNorthHeading)*gpsLaggedSpeed; 
-    currentSpeedCmPerSecPitch = cos(courseRads-trueNorthHeading)*gpsLaggedSpeed;
+
+    float courseRads = radians(tmp);
+    currentSpeedRoll = (sin(courseRads-trueNorthHeading)*currentSpeed); 
+    currentSpeedPitch = (cos(courseRads-trueNorthHeading)*currentSpeed);
   }
     
   /**
@@ -241,16 +240,25 @@ void initHomeBase() {
     float tmpsin = sin(angleToWaypoint);
     float tmpcos = cos(angleToWaypoint);
     
-    float maxSpeedRoll = (maxSpeedToDestination*tmpsin*((float)gpsDistanceToDestination)); 
-    float maxSpeedPitch = (maxSpeedToDestination*tmpcos*((float)gpsDistanceToDestination));
-    maxSpeedRoll = constrain(maxSpeedRoll, -maxSpeedToDestination, maxSpeedToDestination);
-    maxSpeedPitch = constrain(maxSpeedPitch, -maxSpeedToDestination, maxSpeedToDestination);
+    float rollSpeedDesired = ((maxSpeedToDestination*tmpsin)*(float)gpsDistanceToDestination)/100; 
+    float pitchSpeedDesired = ((maxSpeedToDestination*tmpcos)*(float)gpsDistanceToDestination)/100;
+    rollSpeedDesired = constrain(rollSpeedDesired, -maxSpeedToDestination, maxSpeedToDestination);
+    pitchSpeedDesired = constrain(pitchSpeedDesired, -maxSpeedToDestination, maxSpeedToDestination);
     
-    gpsRollAxisCorrection = filterSmooth(updatePID(maxSpeedRoll, currentSpeedCmPerSecRoll, &PID[GPSROLL_PID_IDX]), gpsRollAxisCorrection, 0.5);
-    gpsPitchAxisCorrection = filterSmooth(updatePID(maxSpeedPitch, currentSpeedCmPerSecPitch, &PID[GPSPITCH_PID_IDX]), gpsPitchAxisCorrection, 0.5);
+    int tempGpsRollAxisCorrection = updatePID(rollSpeedDesired, currentSpeedRoll, &PID[GPSROLL_PID_IDX]);
+    int tempGpsPitchAxisCorrection = updatePID(pitchSpeedDesired, currentSpeedPitch, &PID[GPSPITCH_PID_IDX]);
 
+    gpsRollAxisCorrection = filterSmooth(tempGpsRollAxisCorrection, gpsRollAxisCorrection, 0.1);
+    gpsPitchAxisCorrection = filterSmooth(tempGpsPitchAxisCorrection, gpsPitchAxisCorrection, 0.1);
+    
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
+    
+//    Serial.print(gpsData.sats);Serial.print(" ");Serial.print(gpsDistanceToDestination);Serial.print(" ");
+//    Serial.print(rollSpeedDesired);Serial.print(",");Serial.print(pitchSpeedDesired);Serial.print(" ");
+//    Serial.print(currentSpeedRoll);Serial.print(",");Serial.print(currentSpeedPitch);Serial.print(" ");
+//    Serial.print(gpsRollAxisCorrection);Serial.print(",");Serial.print(gpsPitchAxisCorrection);Serial.print(" ");
+//    Serial.println();
   }
   
   
@@ -314,7 +322,7 @@ void initHomeBase() {
       computeEstimatedPosition();
     }    
     
-    computeCurrentSpeedInCmPerSec();
+    computeCurrentSpeed();
     
     computeDistanceToDestination(positionHoldPointToReach);
     
@@ -340,7 +348,7 @@ void initHomeBase() {
       return;
     }
     
-    computeCurrentSpeedInCmPerSec();
+    computeCurrentSpeed();
     
     // evaluate if we need to switch to another mission possition point
     evaluateMissionPositionToReach();
