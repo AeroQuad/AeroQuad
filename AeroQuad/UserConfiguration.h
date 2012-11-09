@@ -57,7 +57,6 @@
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
 #define quadXConfig
-//#define quadXHT_FPVConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      
