@@ -133,7 +133,7 @@ void initHomeBase() {
       waypointIndex++;
     }
     
-    if (waypointIndex < MAX_WAYPOINTS && gpsDistanceToDestination < MIN_DISTANCE_TO_REACHED) {
+    if (waypointIndex < MAX_WAYPOINTS && distanceToDestination < MIN_DISTANCE_TO_REACHED) {
       waypointIndex++;
     }
     
@@ -197,13 +197,13 @@ void initHomeBase() {
 
   /** 
    * Compute the distance to the destination, point to reach
-   * @result is gpsDistanceToDestination
+   * @result is distanceToDestination
    */
   void computeDistanceToDestination(GeodeticPosition destination) {
     
     distanceToDestinationX = (float)(destination.longitude - estimatedPosition.longitude) * cosLatitude * 1.113195;
     distanceToDestinationY = (float)(destination.latitude  - estimatedPosition.latitude) * 1.113195;
-    gpsDistanceToDestination  = sqrt(sq(distanceToDestinationY) + sq(distanceToDestinationX));
+    distanceToDestination  = sqrt(sq(distanceToDestinationY) + sq(distanceToDestinationX));
   }
 
   /**
@@ -240,21 +240,31 @@ void initHomeBase() {
     float tmpsin = sin(angleToWaypoint);
     float tmpcos = cos(angleToWaypoint);
     
-    float rollSpeedDesired = ((maxSpeedToDestination*tmpsin)*(float)gpsDistanceToDestination)/100; 
-    float pitchSpeedDesired = ((maxSpeedToDestination*tmpcos)*(float)gpsDistanceToDestination)/100;
+    float rollSpeedDesired = ((maxSpeedToDestination*tmpsin)*(float)distanceToDestination)/1000; 
+    float pitchSpeedDesired = ((maxSpeedToDestination*tmpcos)*(float)distanceToDestination)/1000;
     rollSpeedDesired = constrain(rollSpeedDesired, -maxSpeedToDestination, maxSpeedToDestination);
     pitchSpeedDesired = constrain(pitchSpeedDesired, -maxSpeedToDestination, maxSpeedToDestination);
     
     int tempGpsRollAxisCorrection = updatePID(rollSpeedDesired, currentSpeedRoll, &PID[GPSROLL_PID_IDX]);
     int tempGpsPitchAxisCorrection = updatePID(pitchSpeedDesired, currentSpeedPitch, &PID[GPSPITCH_PID_IDX]);
 
-    gpsRollAxisCorrection = filterSmooth(tempGpsRollAxisCorrection, gpsRollAxisCorrection, 0.1);
-    gpsPitchAxisCorrection = filterSmooth(tempGpsPitchAxisCorrection, gpsPitchAxisCorrection, 0.1);
+    if (tempGpsRollAxisCorrection >= gpsRollAxisCorrection) {
+      gpsRollAxisCorrection += 1;
+    }
+    else {
+      gpsRollAxisCorrection -= 1;
+    }
+    if (tempGpsPitchAxisCorrection >= gpsPitchAxisCorrection) {
+      gpsPitchAxisCorrection += 1;
+    }
+    else {
+      gpsPitchAxisCorrection -= 1;
+    }
     
     gpsRollAxisCorrection = constrain(gpsRollAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     gpsPitchAxisCorrection = constrain(gpsPitchAxisCorrection, -maxCraftAngleCorrection, maxCraftAngleCorrection);
     
-//    Serial.print(gpsData.sats);Serial.print(" ");Serial.print(gpsDistanceToDestination);Serial.print(" ");
+//    Serial.print(gpsData.sats);Serial.print(" ");Serial.print(distanceToDestination);Serial.print(" ");
 //    Serial.print(rollSpeedDesired);Serial.print(",");Serial.print(pitchSpeedDesired);Serial.print(" ");
 //    Serial.print(currentSpeedRoll);Serial.print(",");Serial.print(currentSpeedPitch);Serial.print(" ");
 //    Serial.print(gpsRollAxisCorrection);Serial.print(",");Serial.print(gpsPitchAxisCorrection);Serial.print(" ");
@@ -340,7 +350,12 @@ void initHomeBase() {
    */
   void processNavigation() {
     
-    if (haveNewGpsPosition()) {
+    if (distanceToDestination < MIN_DISTANCE_TO_REACHED) {
+      processPositionHold();
+      evaluateMissionPositionToReach();
+      return;
+    }
+    else if (haveNewGpsPosition()) {
       computeNewPosition();
       clearNewGpsPosition();
     }

@@ -233,7 +233,7 @@ void reportVehicleState();
     boolean isGpsNavigationInitialized = false;
 
     int waypointIndex = -1;    
-    float gpsDistanceToDestination = 99999999.0;
+    float distanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS] = {
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
