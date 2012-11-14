@@ -272,6 +272,9 @@ void initializeEEPROM() {
     servoMaxPitch = 2000;
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
+    #ifdef CameraTXControl
+      servoTXChannels = 1;
+    #endif
   #endif
 }
 
@@ -371,6 +374,10 @@ void readEEPROM() {
     servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
     servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
     servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
+    #ifdef CameraTXControl
+      servoTXChannels = readFloat(SERVOTXCHANNELS_ADR);
+      servoActualCenter = readFloat(SERVOCENTERPITCH_ADR);
+    #endif
   #endif   
 }
 
@@ -480,6 +487,9 @@ void writeEEPROM(){
     writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
     writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
     writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
+    #ifdef CameraTXControl
+      writeFloat(servoTXChannels, SERVOTXCHANNELS_ADR);
+    #endif
   #endif 
   sei(); // Restart interrupts
 }

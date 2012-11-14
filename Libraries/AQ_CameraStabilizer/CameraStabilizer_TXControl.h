@@ -25,34 +25,60 @@
 
 #include "CameraStabilizer.h"
 
-// Written by wooden
-
 int servoCenterPitchDiff = 0;
 int servoCenterPitchDesired = 0;
+int servoTXChannels = 0;
 
-int servoActualCenter = 1367;		// CALIBRATE SERVOS BEFORE ENABLING TX CONTROL, SET THIS TO servoCenterPitch FOUND DURING CALIBRATION
+int servoActualCenter = 0;
 
 //void processCameraTXControl();
 
 void processCameraTXControl()
 {
-  if (LASTCHANNEL >= 8)
-  {
-    if (receiverCommand[AUX3] == 1500)  // channel is centered, move servo back towards center
+    if (servoTXChannels == 1)
     {
-      servoCenterPitchDiff = servoActualCenter - servoCenterPitch;  // diff between current and actual center
-      servoCenterPitch += servoCenterPitchDiff / 25;                // divide so it doesn't move to center too quickly
+        if (receiverCommand[AUX3] == 1500) // channel is centered -> move back to center
+        {
+            servoCenterPitchDiff = (servoActualCenter - servoCenterPitch) / 25;
+            if ((servoCenterPitchDiff > 0) && (servoCenterPitchDiff < 1))
+            {
+                servoCenterPitchDiff = 1;
+            }
+            servoCenterPitch += servoCenterPitchDiff;
+        }
+        else
+        {
+            servoCenterPitchDesired = map(receiverCommand[AUX3],1000,2000,servoMaxPitch,servoMinPitch);
+            if (servoCenterPitch != servoCenterPitchDesired)
+            {
+                servoCenterPitchDiff = (servoCenterPitchDesired - servoCenterPitch) / 25;
+                if ((servoCenterPitchDiff > 0) && (servoCenterPitchDiff < 1))
+                {
+                    servoCenterPitchDiff = 1;
+                }
+                servoCenterPitch += servoCenterPitchDiff;
+            }
+        }
     }
-    else
+    else if (servoTXChannels == 2)
     {
-      servoCenterPitchDesired = map(receiverCommand[AUX3],1000,2000,servoMaxPitch,servoMinPitch);
-      if (servoCenterPitch != servoCenterPitchDesired)
-      {
-        servoCenterPitchDiff = servoCenterPitchDesired - servoCenterPitch;
-        servoCenterPitch += servoCenterPitchDiff / 25;
-      }
+        if (receiverCommand[AUX4] == 1500) // override back to center
+        {
+            servoCenterPitchDiff = (servoActualCenter - servoCenterPitch) / 25;
+            if ((servoCenterPitchDiff > 0) && (servoCenterPitchDiff < 1))
+            {
+                servoCenterPitchDiff = 1;
+            }
+            servoCenterPitch += servoCenterPitchDiff;
+        }
+        else // move up or down at a nice rate
+        {
+            if (receiverCommand[AUX3] != 1500) // map to up or down movement
+            {
+                servoCenterPitch += (1500 - receiverCommand[AUX3]) / 50;
+            }
+        }
     }
-  }
 }
 #endif
 #endif

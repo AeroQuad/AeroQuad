@@ -333,6 +333,7 @@ typedef struct {
   float SERVOMAXPITCH_ADR;
   float SERVOMAXROLL_ADR;
   float SERVOMAXYAW_ADR;
+  float SERVOTXCHANNELS_ADR;
   // GPS mission storing
   float GPS_MISSION_NB_POINT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
