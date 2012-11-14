@@ -5,6 +5,6 @@
 // otherwise communication is done on Serial1
 // see WProgram.h for implementation details
 
-#define USE_USB_SERIAL
+//#define USE_USB_SERIAL
 
 #endif
