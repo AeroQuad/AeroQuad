@@ -1309,12 +1309,6 @@ void process100HzTask() {
   #if defined(UseGPS)
     updateGps();
   #endif      
-
-  #if defined(CameraControl)
-    #ifdef CameraControl100Hz
-      moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-    #endif
-  #endif
 }
 
 /*******************************************************************
@@ -1342,9 +1336,7 @@ void process50HzTask() {
   #endif      
   
   #if defined(CameraControl)
-    #ifndef CameraControl100Hz
-      moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-    #endif
+    moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
   #endif       
   
   #if defined CameraTXControl

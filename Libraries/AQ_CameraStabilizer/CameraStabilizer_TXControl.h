@@ -26,9 +26,8 @@
 #include "CameraStabilizer.h"
 
 int servoCenterPitchDiff = 0;
-int servoCenterPitchDesired = 0;
-int servoTXChannels = 0;
-
+unsigned int servoCenterPitchDesired = 0;
+unsigned int servoTXChannels = 0;
 int servoActualCenter = 0;
 
 //void processCameraTXControl();

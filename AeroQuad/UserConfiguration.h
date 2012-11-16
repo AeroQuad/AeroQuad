@@ -182,7 +182,6 @@
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
 #define CameraControl
-#define CameraControl100Hz
 #define CameraTXControl  // need to have CameraControl to work
 
 //
@@ -194,10 +193,10 @@
 #define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 #define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-#define CALLSIGN "KF7YRK"       // Show (optional) callsign
+#define CALLSIGN "KF7YRK"         // Show (optional) callsign
 #define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
-#define OSD50HZ					// Experimental - Runs OSD at 50Hz for faster and smoother response ON BALOO ONLY
+#define OSD50HZ			  // Experimental - Runs OSD at 50Hz for faster and smoother response ON BALOO ONLY
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 
