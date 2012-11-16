@@ -1337,7 +1337,7 @@ void process50HzTask() {
   
   #if defined(CameraControl)
     moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-  #endif      
+  #endif       
   
   #if defined CameraTXControl
     processCameraTXControl();
