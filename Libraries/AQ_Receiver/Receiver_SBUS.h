@@ -23,10 +23,7 @@
 
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined (AeroQuadSTM32)
 
-#if defined (AeroQuadSTM32)
-  typedef HardwareSerial rSerial;
-  extern rSerial &Serial;
-#else
+#if !defined (AeroQuadSTM32)
   #include "Arduino.h"
   #include "pins_arduino.h"
   #include <AQMath.h>
@@ -51,6 +48,8 @@ static unsigned int sbusIndex = 0;
 
 void initializeReceiver(int nbChannel = 10) {
   initializeReceiverParam(nbChannel);
+  pinMode(BOARD_SPI2_NSS_PIN, OUTPUT);
+  digitalWrite(BOARD_SPI2_NSS_PIN,HIGH); // GPIO PB12 /Libmaple/libmaple/wirish/boards/aeroquad32.h line 69
   SERIAL_SBUS.begin(100000);
 }
 
@@ -114,5 +113,4 @@ void setChannelValue(byte channel, int value) {
 }
 
 #endif
-
 #endif
