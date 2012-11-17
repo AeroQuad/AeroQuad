@@ -671,18 +671,24 @@ void sendSerialTelemetry() {
     break;
     
   case '$': // send BatteryMonitor voltage/current readings
-    #ifdef BattMonitor
+    #if defined (BattMonitor)
       PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
-      PrintValueComma((float)batteryData[0].current/100.0);
-      PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
+      #if defined (BM_EXTENDED)
+        PrintValueComma((float)batteryData[0].current/100.0);
+        PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
+      #endif
     #else
-      PrintDummyValues(3);
+      #if defined (BM_EXTENDED)
+        PrintDummyValues(3);
+      #else
+        PrintDummyValues(1);
+      #endif
     #endif
     SERIAL_PRINTLN();
     break;
     
   case '%': // send RSSI
-    #if defined UseAnalogRSSIReader || defined UseEzUHFRSSIReader || defined UseSBUSRSSIReader
+    #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader) || defined (UseSBUSRSSIReader)
       SERIAL_PRINTLN(rssiRawValue);
     #else
       SERIAL_PRINTLN(0);
