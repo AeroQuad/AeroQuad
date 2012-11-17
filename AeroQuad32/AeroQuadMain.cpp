@@ -1,3 +1,4 @@
+#include <../AeroQuad/UserConfiguration.h>
 #include <SerialMapping.h>
 #include <WProgram.h>
 

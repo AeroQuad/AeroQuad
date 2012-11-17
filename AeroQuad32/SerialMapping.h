@@ -5,6 +5,8 @@
 // otherwise communication is done on Serial1
 // see WProgram.h for implementation details
 
-#define USE_USB_SERIAL
+#if !defined (WirelessTelemetry)
+  #define USE_USB_SERIAL
+#endif
 
 #endif
