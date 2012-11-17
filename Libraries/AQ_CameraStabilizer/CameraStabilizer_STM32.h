@@ -29,8 +29,8 @@
 
 // Written by kha
 
-#define SERVO_FREQUENCY 50 // 50 Hz for analog servo
-// #define SERVO_FREQUENCY 300 // 300 Hz for digital high speed servo
+//#define SERVO_FREQUENCY 50 // 50 Hz for analog servo
+#define SERVO_FREQUENCY 400 // 300 Hz for digital high speed servo
 
 #define SERVO_PERIOD (1000000/SERVO_FREQUENCY)
 
