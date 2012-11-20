@@ -30,8 +30,6 @@ int servoCenterPitchDesired = 0;
 int servoTXChannels = 0;
 int servoActualCenter = 0;
 
-//void processCameraTXControl();
-
 void processCameraTXControl()
 {
     if (servoTXChannels == 1)

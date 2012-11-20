@@ -59,10 +59,10 @@
 //#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-#define hexXConfig      
+//#define hexXConfig      
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
@@ -90,9 +90,9 @@
 // For more information on how to activate theese features with your transmitter
 // Please refer to http://aeroquad.com/showwiki.php?title=Using+the+transmitters+sticks+and+switches+to+operate+your+AeroQuad
 // *******************************************************************************************************************************
-//#define HeadingMagHold				// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold				// Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro			// Enables Barometer
-#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
+//#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
 //#define AutoLanding				// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
 //
@@ -112,21 +112,21 @@
 // Battery Monitor Options
 // For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
 // *******************************************************************************************************************************
-#define BattMonitor			  // Enables Battery monitor
+//#define BattMonitor			  // Enables Battery monitor
 //#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
 //#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //
 // Advanced configuration. Please refer to the wiki for instructions.
-#define BattCustomConfig DEFINE_BATTERY(0,A4,51.8,0,A3,180.3,0)
+//#define BattCustomConfig DEFINE_BATTERY(0,A4,51.8,0,A3,180.3,0)
 
 //
 // *******************************************************************************************************************************
 // Receiver Setup
 // For more information on how to connect your receiver to your AeroQuad board please refer to http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
 // *******************************************************************************************************************************
-//#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
+#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
 //#define RemotePCReceiver	// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
-#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
+//#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
 //#define ReceiverPPM		// Use a PPM receiver
 //#define ReceiverHWPPM		// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
 
@@ -135,7 +135,7 @@
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
 
-#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+//#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
 //#define UseEzUHFRSSIReader	// Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
 //#define UseSBUSRSSIReader		
 
@@ -144,8 +144,8 @@
 // Define how many channels are connected from your R/C receiver
 // *******************************************************************************************************************************
 //#define LASTCHANNEL 6
-//#define LASTCHANNEL 8
-#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
+#define LASTCHANNEL 8
+//#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
 
 
 //
@@ -153,13 +153,13 @@
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Wireless+Connection
 // *******************************************************************************************************************************
-#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+//#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
 //#define MavLink               // Enables the MavLink protocol
 //#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 								// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
-#define CONFIG_BAUDRATE 19200 // overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
+//#define CONFIG_BAUDRATE 19200 // overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
 
 //
 // *******************************************************************************************************************************
@@ -182,21 +182,20 @@
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
 #define CameraControl
-#define CameraTXControl  // need to have CameraControl to work
+//#define CameraTXControl  // need to have CameraControl to work
 
 //
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *************************************************************.******************************************************************
-#define OSD
-#define ShowRSSI                  // This REQUIRES a RSSI reader
+//#define OSD
+//#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
-#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-#define CALLSIGN "KF7YRK"         // Show (optional) callsign
-#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+//#define CALLSIGN "AQ"             // Show (optional) callsign
+//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
-#define OSD50HZ			  // Experimental - Runs OSD at 50Hz for faster and smoother response ON BALOO ONLY
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 

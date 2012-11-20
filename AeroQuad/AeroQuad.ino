@@ -52,11 +52,6 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
-#if defined (OSD50HZ) && !defined (AeroQuadSTM32)
-  #error "OSD can't be updated at that speed on artduino"
-#endif
-
-
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
@@ -1309,6 +1304,14 @@ void process100HzTask() {
   #if defined(UseGPS)
     updateGps();
   #endif      
+  
+  #if defined(CameraControl)
+    moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
+    #if defined CameraTXControl
+      processCameraTXControl();
+    #endif
+  #endif       
+
 }
 
 /*******************************************************************
@@ -1334,22 +1337,6 @@ void process50HzTask() {
       initHomeBase();
     }
   #endif      
-  
-  #if defined(CameraControl)
-    moveCamera(kinematicsAngle[YAXIS],kinematicsAngle[XAXIS],kinematicsAngle[ZAXIS]);
-  #endif       
-  
-  #if defined CameraTXControl
-    processCameraTXControl();
-  #endif
-
-
-  #ifdef MAX7456_OSD
-    #ifdef OSD50HZ
-      updateOSD();
-    #endif
-  #endif
-    
 }
 
 /*******************************************************************
@@ -1395,9 +1382,7 @@ void process10HzTask3() {
     #endif
 
     #ifdef MAX7456_OSD
-    #ifndef OSD50HZ
       updateOSD();
-    #endif
     #endif
     
     #if defined(UseGPS) || defined(BattMonitor)
