@@ -136,7 +136,7 @@
 	    pinMode(PLED1, OUTPUT);
 	    pinMode(PLED2, OUTPUT);
 	    pinMode(PLED3, OUTPUT);
-	    pinMode(PLED3, OUTPUT);
+	    pinMode(PLED4, OUTPUT);
 
 	  #ifdef DEBUG_INIT
 	    long t0 = micros();
