@@ -49,6 +49,11 @@
 	#define A5       Port2Pin('C',2)
 	#define A6       Port2Pin('C',3)
 
+        // external LED drivers
+        #define PLED1 Port2Pin('D',  7)
+        #define PLED2 Port2Pin('E',  0)
+        #define PLED3 Port2Pin('E',  1)
+        #define PLED4 Port2Pin('D',  4) 
 
 	#include <Device_I2C.h>
 
@@ -127,6 +132,11 @@
 	    pinMode(A4, INPUT_ANALOG);
 	    pinMode(A5, INPUT_ANALOG);
 	    pinMode(A6, INPUT_ANALOG);
+
+	    pinMode(PLED1, OUTPUT);
+	    pinMode(PLED2, OUTPUT);
+	    pinMode(PLED3, OUTPUT);
+	    pinMode(PLED4, OUTPUT);
 
 	  #ifdef DEBUG_INIT
 	    long t0 = micros();
