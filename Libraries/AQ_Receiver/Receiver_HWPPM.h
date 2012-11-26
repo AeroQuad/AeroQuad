@@ -66,6 +66,7 @@ ISR(TIMER5_CAPT_vect)//interrupt.
       PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
       ppmCounter++;                     // Advance to next channel
     }
+    receiverNewData();
   }
   startPulse = stopPulse;         // Save time at pulse start
 }
@@ -79,7 +80,7 @@ void initializeReceiver(int nbChannel) {
   pinMode(A8, INPUT); // this is the original location of the first RX channel
 
   // Configure timer HW
-  TCCR5A = ((1<<WGM50)|(1<<WGM51)|(1<<COM5C1)|(1<<COM5B1)|(1<<COM5A1));
+  TCCR5A = ((1<<WGM50)|(1<<WGM51));
   TCCR5B = ((1<<WGM52)|(1<<WGM53)|(1<<CS51)|(1<<ICES5)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
   OCR5A = TIMER5_PERIOD; 
 
