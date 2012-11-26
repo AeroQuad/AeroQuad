@@ -29,9 +29,7 @@
   #include <AQMath.h>
   #include "GlobalDefined.h"
 #endif
-
 #include "Receiver.h"
-
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
   
@@ -48,8 +46,10 @@ static unsigned int sbusIndex = 0;
 
 void initializeReceiver(int nbChannel = 10) {
   initializeReceiverParam(nbChannel);
-  pinMode(BOARD_SPI2_NSS_PIN, OUTPUT);
-  digitalWrite(BOARD_SPI2_NSS_PIN,HIGH); // GPIO PB12 /Libmaple/libmaple/wirish/boards/aeroquad32.h line 69
+  #if defined (AeroQuadSTM32)
+    pinMode(BOARD_SPI2_NSS_PIN, OUTPUT);
+    digitalWrite(BOARD_SPI2_NSS_PIN,HIGH); // GPIO PB12 /Libmaple/libmaple/wirish/boards/aeroquad32.h line 69
+  #endif
   SERIAL_SBUS.begin(100000);
 }
 
