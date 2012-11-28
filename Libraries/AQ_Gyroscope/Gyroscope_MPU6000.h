@@ -85,25 +85,34 @@ void evaluateGyroRate() {
 }
 
 
-void calibrateGyro() {
+boolean calibrateGyro() {
+  
   int findZero[FINDZERO];
-
+  int diff = 0; 
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
       readMPU6000Sensors();
-      short data;
       if(axis == XAXIS) {
-    	  data = MPU6000.data.gyro.x;
-      } else if(axis == YAXIS) {
-    	  data = MPU6000.data.gyro.y;
-      } else {
-    	  data = MPU6000.data.gyro.z;
+    	findZero[i] = MPU6000.data.gyro.x;
+      } 
+	  else if(axis == YAXIS) {
+    	findZero[i] = MPU6000.data.gyro.y;
+      } 
+	  else {
+    	findZero[i] = MPU6000.data.gyro.z;
       }
-      findZero[i] = data;
       delay(10);
     }
-    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
+    int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
+	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  gyroZero[axis] = tmp;
+	} 
+	else {
+		return false; //Calibration failed.
+	}
+	
   }
+  return true;
 }
 
 #endif

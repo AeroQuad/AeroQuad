@@ -393,6 +393,32 @@ int findMedianInt(int *data, int arraySize)
   return data[arraySize/2]; // return the median value
 }
 
+int findMedianIntWithDiff(int *data, int arraySize, int * diff) 
+{
+  int temp;
+  boolean done = 0;
+  byte i;
+  
+   // Sorts numbers from lowest to highest
+  while (done != 1) 
+  {        
+    done = 1;
+    for (i=0; i<(arraySize-1); i++) 
+	{
+      if (data[i] > data[i+1]) 
+	  {     // numbers are out of order - swap
+        temp = data[i+1];
+        data[i+1] = data[i];
+        data[i] = temp;
+        done = 0;
+      }
+    }
+  }
+
+  *diff = abs(data[0] - data[arraySize-1]);
+  
+  return data[arraySize/2]; // return the median value
+}
 
 
 boolean isSwitched(float previousError, float currentError) {

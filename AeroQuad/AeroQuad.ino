@@ -1155,6 +1155,23 @@ void setup() {
   }
 
   initPlatform();
+  
+  // Initialize sensors
+  // If sensors have a common initialization routine
+  // insert it into the gyro class because it executes first
+  initializeGyro(); // defined in Gyro.h
+  while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
+  initializeAccel(); // defined in Accel.h
+  initSensorsZeroFromEEPROM();
+
+  // Calibrate sensors
+//  computeAccelBias();
+
+  #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
+    initializeMagnetometer();
+    initializeHeadingFusion();
+  #endif
 
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
@@ -1168,6 +1185,7 @@ void setup() {
   initializeReceiver(LASTCHANNEL);
   initReceiverFromEEPROM();
 
+  // Flight angle estimation
   initializeKinematics();
 
   // Integral Limit for attitude mode
@@ -1230,22 +1248,7 @@ void setup() {
 
   setupFourthOrder();
   
-  // Initialize sensors
-  // If sensors have a common initialization routine
-  // insert it into the gyro class because it executes first
-  initializeGyro(); // defined in Gyro.h
-  initializeAccel(); // defined in Accel.h
-  initSensorsZeroFromEEPROM();
 
-  // Calibrate sensors
-  calibrateGyro();
-//  computeAccelBias();
-  // Flight angle estimation
-  #ifdef HeadingMagHold
-    vehicleState |= HEADINGHOLD_ENABLED;
-    initializeMagnetometer();
-    initializeHeadingFusion();
-  #endif
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
