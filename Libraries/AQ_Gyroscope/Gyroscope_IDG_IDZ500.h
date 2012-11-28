@@ -77,18 +77,28 @@ void evaluateGyroRate() {
   // do nothing here since it's already oversample in the APM_ADC class
 }
 
-void calibrateGyro() {
+boolean calibrateGyro() {
   int findZero[FINDZERO];
   digitalWrite(AZPIN, HIGH);
   delayMicroseconds(750);
   digitalWrite(AZPIN, LOW);
   delay(8);
 
+  int diff = 0;
   for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
-    for (int i=0; i<FINDZERO; i++)
+    for (int i=0; i<FINDZERO; i++) {
       findZero[i] = analogRead(gyroChannel[calAxis]);
-    gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);
+	}
+	int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
+	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  gyroZero[calAxis] = tmp;
+	} 
+	else {
+		return false; //Calibration failed.
+	}
   }
+  
+  return true;
 }
 
 void readGyroTemp()  {

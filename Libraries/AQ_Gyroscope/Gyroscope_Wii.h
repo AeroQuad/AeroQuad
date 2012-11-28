@@ -102,20 +102,26 @@ void evaluateGyroRate() {
 */  
 }
 
-void calibrateGyro() {
+boolean calibrateGyro() {
+  
   int findZero[FINDZERO];
-    
+  int diff = 0;
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  readWiiSensors();
       findZero[i] = getWiiGyroADC(axis);
       delay(5);
     }
-    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
+    int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
+	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  gyroZero[axis] = tmp;
+	} 
+	else {
+		return false; //Calibration failed.
+	}
   }
-}
-
-void readGyroTemp()  {
+  
+  return true;
 }
 
 #endif
