@@ -66,7 +66,7 @@ ISR(TIMER5_CAPT_vect)//interrupt.
       PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
       ppmCounter++;                     // Advance to next channel
     }
-    receiverNewData();
+//    receiverNewData();
   }
   startPulse = stopPulse;         // Save time at pulse start
 }

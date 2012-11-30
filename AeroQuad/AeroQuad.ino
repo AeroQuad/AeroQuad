@@ -989,10 +989,10 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined(HMC5843)
-  #include <HeadingFusionProcessorCompFilter.h>
+  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5843.h>
 #elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
-  #include <HeadingFusionProcessorCompFilter.h>
+  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5883L.h>
 #elif defined(COMPASS_CHR6DM)
 #endif
@@ -1247,8 +1247,6 @@ void setup() {
   #endif
 
   setupFourthOrder();
-  
-
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
@@ -1352,7 +1350,9 @@ void process10HzTask1() {
      
     measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
     
+//    unsigned long time = micros();
     calculateHeading();
+//    Serial.println(micros() - time);
     
   #endif
 }
