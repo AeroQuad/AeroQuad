@@ -29,6 +29,8 @@
   #define ITG3200_ADDRESS					0x69
 #endif
 
+#define GYRO_CALIBRATION_TRESHOLD 4
+
 #define ITG3200_IDENTITY                0x68
 #define ITG3200_IDENTITY_MASK           0x7E
 #define ITG3200_MEMORY_ADDRESS			0x1D

@@ -24,6 +24,8 @@
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 
+#define GYRO_CALIBRATION_TRESHOLD 4
+
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
 int gyroChannel[3] = {0.0,0.0,0.0};
@@ -90,7 +92,7 @@ boolean calibrateGyro() {
       findZero[i] = analogRead(gyroChannel[calAxis]);
 	}
 	int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
 	  gyroZero[calAxis] = tmp;
 	} 
 	else {

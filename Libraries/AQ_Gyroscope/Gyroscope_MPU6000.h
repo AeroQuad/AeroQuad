@@ -26,6 +26,8 @@ int gyroRaw[3] = {0,0,0};
 #include <Platform_MPU6000.h>
 #include <Gyroscope.h>
 
+#define GYRO_CALIBRATION_TRESHOLD 10
+
 void initializeGyro() {
   float range = 2*1000.0;
   gyroScaleFactor = radians(range/65536.0);
@@ -104,7 +106,7 @@ boolean calibrateGyro() {
       delay(10);
     }
     int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	if (diff <= GYRO_CALIBRATION_TRESHOLD) { 
 	  gyroZero[axis] = tmp;
 	} 
 	else {
