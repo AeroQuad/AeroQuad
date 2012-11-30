@@ -50,7 +50,6 @@ boolean calibrateGyro() {
   int findZero[FINDZERO];
   int diff = 0;
 
-  Serial.println("CALIBRATION 2");
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
       sendByteI2C(ITG3200_ADDRESS, (axis * 2) + ITG3200_MEMORY_ADDRESS);
@@ -60,7 +59,7 @@ boolean calibrateGyro() {
 
 	if (axis == XAXIS) {
 	  int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	  if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
 	    gyroZero[YAXIS] = tmp;
   	  } 
 	  else {
@@ -69,7 +68,7 @@ boolean calibrateGyro() {
     }
     else if (axis == YAXIS) {
 	  int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	  if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
 	    gyroZero[XAXIS] = tmp;
   	  } 
 	  else {
@@ -78,7 +77,7 @@ boolean calibrateGyro() {
     }
     else {
 	  int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	  if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
 	    gyroZero[ZAXIS] = tmp;
   	  } 
 	  else {

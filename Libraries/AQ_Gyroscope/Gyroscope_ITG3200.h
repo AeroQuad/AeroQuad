@@ -61,7 +61,7 @@ boolean calibrateGyro() {
     }
 
     int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
-	if (diff <= 4) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
 	  gyroZero[axis] = tmp;
 	} 
 	else {
