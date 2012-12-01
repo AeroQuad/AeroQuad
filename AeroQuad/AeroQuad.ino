@@ -1344,15 +1344,15 @@ void process50HzTask() {
  * 10Hz task
  ******************************************************************/
 void process10HzTask1() {
+  
   #if defined(HeadingMagHold)
+  
     G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
     tenHZpreviousTime = currentTime;
      
     measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
     
-//    unsigned long time = micros();
     calculateHeading();
-//    Serial.println(micros() - time);
     
   #endif
 }
