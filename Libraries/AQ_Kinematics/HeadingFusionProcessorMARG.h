@@ -43,15 +43,10 @@ float lhalfT = 0.0;                					// half the sample period
 float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
 float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
   
-float lpreviousEx = 0.0;
-float lpreviousEy = 0.0;
-float lpreviousEz = 0.0;
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, float G_Dt) {
   
   float norm;
   float hx, hy, hz, bx, bz;
@@ -63,10 +58,6 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   lhalfT = G_Dt/2;
     
   // normalise the measurements
-  norm = sqrt(ax*ax + ay*ay + az*az);       
-  ax = ax / norm;
-  ay = ay / norm;
-  az = az / norm;
   norm = sqrt(mx*mx + my*my + mz*mz);          
   mx = mx / norm;
   my = my / norm;
@@ -80,7 +71,6 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   bx = sqrt((hx*hx) + (hy*hy));
   bz = hz;
 
-
   // estimated direction of gravity and flux (v and w)
   vx = 2*(lq1*lq3 - lq0*lq2);
   vy = 2*(lq0*lq1 + lq2*lq3);
@@ -88,26 +78,22 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
       
   wx = bx * 2*(0.5 - lq2*lq2 - lq3*lq3) + bz * 2*(lq1*lq3 - lq0*lq2);
   wy = bx * 2*(lq1*lq2 - lq0*lq3)       + bz * 2*(lq0*lq1 + lq2*lq3);
-  //wz = bx * 2*(lq0*lq2 + lq1*lq3)       + bz * 2*(0.5 - lq1*lq1 - lq2*lq2);
 
   // error is sum of cross product between reference direction of fields and direction measured by sensors
-  exAcc = (vy*az - vz*ay);
-  eyAcc = (vz*ax - vx*az);
-  ezAcc = (vx*ay - vy*ax);
+  exAcc = (vy*-9.8);
+  eyAcc = (-vx*-9.8);
+  ezAcc = 0.0;
     
-  //exMag = (my*wz - mz*wy);
-  //eyMag = (mz*wx - mx*wz);
   ezMag = (mx*wy - my*wx);
     
   // integral error scaled integral gain
-  lexInt = lexInt + exAcc*lkiAcc;
-  leyInt = leyInt + eyAcc*lkiAcc;
-  lezInt = lezInt + ezAcc*lkiAcc;
+  lexInt += exAcc*lkiAcc;
+  leyInt += eyAcc*lkiAcc;
+  lezInt += ezAcc*lkiAcc;
 	
   // adjusted gyroscope measurements
   gx = gx + lkpAcc*exAcc + lexInt;
   gy = gy + lkpAcc*eyAcc + leyInt;
-  //gz = gz + Kp*ez + lezInt;
   gz = gz + lkpAcc*ezAcc + ezMag*lkpMag + lezInt;
 
   
@@ -136,67 +122,24 @@ void headingEulerAngles()
   headingAngle[ZAXIS] = atan2(2 * (lq0*lq3 + lq1*lq2), 1 - 2 *(lq2*lq2 + lq3*lq3));
 }
 
-void initializeBaseHeadingParam(float rollAngle, float pitchAngle, float yawAngle) {
-  headingAngle[XAXIS] = rollAngle;
-  headingAngle[YAXIS] = pitchAngle;
-  headingAngle[ZAXIS] = yawAngle;
-}
-
-
-
-void localInitializeHeadingFusion(float ax, float ay, float az, float hdgX, float hdgY)  
+void initializeHeadingFusion()  
 {
-  float norm = 1, rollAngle, pitchAngle, pi, tmp;
   float yawAngle = atan2(hdgY, hdgX);
 
-  norm = sqrt(ax*ax + ay*ay + az*az);       
-  ax = ax / norm;
-  ay = ay / norm;
-  az = az / norm;
+  headingAngle[XAXIS] = 0.0;
+  headingAngle[YAXIS] = 0.0;
+  headingAngle[ZAXIS] = yawAngle;
 
-  tmp = atan2(ay, sqrt(ax*ax+az*az));
-  pi = radians(180);
-
-  if (az < 0) { //board up
-	tmp = -tmp;
-  } else {		//board upside down
-	if (ay >= 0) {
-	  tmp -= pi;
-	} else {
-	  tmp += pi;
-	}
-  }
-  
-  rollAngle = tmp;
-  pitchAngle = atan2(ax, sqrt(ay*ay+az*az));
-
-  initializeBaseHeadingParam(rollAngle, pitchAngle, yawAngle);
-
-  //http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-
-  lq0 = cos(rollAngle/2)*cos(pitchAngle/2)*cos(yawAngle/2) + sin(rollAngle/2)*sin(pitchAngle/2)*sin(yawAngle/2);
-  lq1 = sin(rollAngle/2)*cos(pitchAngle/2)*cos(yawAngle/2) - cos(rollAngle/2)*sin(pitchAngle/2)*sin(yawAngle/2);
-  lq2 = cos(rollAngle/2)*sin(pitchAngle/2)*cos(yawAngle/2) + sin(rollAngle/2)*cos(pitchAngle/2)*sin(yawAngle/2);
-  lq3 = cos(rollAngle/2)*cos(pitchAngle/2)*sin(yawAngle/2) - sin(rollAngle/2)*sin(pitchAngle/2)*cos(yawAngle/2);
-
-  lexInt = 0.0;
-  leyInt = 0.0;
-  lezInt = 0.0;
-	
-  lpreviousEx = 0;
-  lpreviousEy = 0;
-  lpreviousEz = 0;
+  lq0 = cos(0.0)*cos(0.0)*cos(yawAngle/2) + sin(0.0)*sin(0.0)*sin(yawAngle/2);
+  lq1 = sin(0.0)*cos(0.0)*cos(yawAngle/2) - cos(0.0)*sin(0.0)*sin(yawAngle/2);
+  lq2 = cos(0.0)*sin(0.0)*cos(yawAngle/2) + sin(0.0)*cos(0.0)*sin(yawAngle/2);
+  lq3 = cos(0.0)*cos(0.0)*sin(yawAngle/2) - sin(0.0)*sin(0.0)*cos(yawAngle/2);
 
   lkpAcc = 0.2;
   lkiAcc = 0.0005;
     
-  lkpMag = 2.0;//2.0;
-  lkiMag = 0.005;//0.005;
-}
-
-void initializeHeadingFusion()
-{
-	localInitializeHeadingFusion(0.0, 0.0, -9.8, hdgX, hdgY);
+  lkpMag = 0.2;//2.0;
+  lkiMag = 0.0005;//0.005;
 }
 
 
@@ -204,12 +147,10 @@ void initializeHeadingFusion()
 // Calculate ARG
 ////////////////////////////////////////////////////////////////////////////////
 void localCalculateHeading(float rollRate,          float pitchRate,    float yawRate,  
-                           float longitudinalAccel, float lateralAccel, float verticalAccel, 
                            float measuredMagX,      float measuredMagY, float measuredMagZ,
 				           float G_Dt) {
     
   headingUpdate(rollRate,          pitchRate,    yawRate, 
-             longitudinalAccel, lateralAccel, verticalAccel,  
              measuredMagX,      measuredMagY, measuredMagZ,
 		     G_Dt);
   headingEulerAngles();
@@ -231,15 +172,10 @@ void localCalculateHeading(float rollRate,          float pitchRate,    float ya
 
 void calculateHeading()
 {
-/*  localCalculateHeading(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 
-                     filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], 
-                     measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS],
-                     G_Dt);
-*/					 
   localCalculateHeading(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 
-                     0.0, 0.0, -9.8, 
                      measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS],
                      G_Dt);					 
+					 
 }
   
   
