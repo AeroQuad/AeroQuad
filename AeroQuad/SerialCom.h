@@ -863,10 +863,12 @@ void fastTelemetry()
 #endif // BinaryWrite
 
 void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
+  
   SERIAL_PRINT(sensorName);
   SERIAL_PRINT(": ");
-  if (!(vehicleState & state))
+  if (!(vehicleState & state)) {
     SERIAL_PRINT("Not ");
+  }
   SERIAL_PRINTLN(message);
 }
 
@@ -955,7 +957,7 @@ void reportVehicleState() {
   SERIAL_PRINT("@");
   SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
 #else
-  SERIAL_PRINTLN("GPS: Disabled");
+  SERIAL_PRINTLN("GPS: Not Enabled");
 #endif
 }
 
