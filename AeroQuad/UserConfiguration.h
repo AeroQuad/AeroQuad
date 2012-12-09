@@ -32,7 +32,7 @@
 // 328p processor
 //#define AeroQuad_v1         // Arduino Uno with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino Uno with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
+#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino Uno with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
@@ -47,7 +47,7 @@
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
 
 // STM32 processor
-#define AeroQuadSTM32        // Baloo board
+//#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
@@ -56,13 +56,13 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
@@ -90,8 +90,8 @@
 // For more information on how to activate theese features with your transmitter
 // Please refer to http://aeroquad.com/showwiki.php?title=Using+the+transmitters+sticks+and+switches+to+operate+your+AeroQuad
 // *******************************************************************************************************************************
-#define HeadingMagHold				// Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro			// Enables Barometer
+//#define HeadingMagHold				// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHoldBaro			// Enables Barometer
 //#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
 //#define AutoLanding				// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
@@ -103,9 +103,6 @@
 
 // Device specific settings
 //#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
-
-//#define UseGPSNavigator   // EXPERIMENTAL - NEEDS UseGPS TO BE DEFINED. Enables GPS Position Hold, way-point following or - if no way-points are present - auto return to home position
-
 
 //
 // *******************************************************************************************************************************
@@ -124,7 +121,7 @@
 // Receiver Setup
 // For more information on how to connect your receiver to your AeroQuad board please refer to http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
 // *******************************************************************************************************************************
-#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
+//#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
 //#define RemotePCReceiver	// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
 //#define ReceiverPPM		// Use a PPM receiver
@@ -132,7 +129,7 @@
 
 // You need to select one of these channel order definitions for PPM receiver
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
+#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
 
 //#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
@@ -143,8 +140,8 @@
 // *******************************************************************************************************************************
 // Define how many channels are connected from your R/C receiver
 // *******************************************************************************************************************************
-//#define LASTCHANNEL 6
-#define LASTCHANNEL 8
+#define LASTCHANNEL 6
+//#define LASTCHANNEL 8
 //#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
 
 
@@ -181,7 +178,7 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 //#define CameraTXControl  // need to have CameraControl to work
 
 //
@@ -193,9 +190,10 @@
 //#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "AQ"             // Show (optional) callsign
+//#define CALLSIGN "KF7YRK"         // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
+//#define OSD50HZ			  // Experimental - Runs OSD at 50Hz for faster and smoother response ON BALOO ONLY
 
 //#define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
 

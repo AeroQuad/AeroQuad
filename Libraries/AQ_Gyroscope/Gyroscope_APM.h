@@ -24,6 +24,8 @@
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 
+#define GYRO_CALIBRATION_TRESHOLD 4
+
 void initializeGyro() {
   gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 	vehicleState |= GYRO_DETECTED;
@@ -82,20 +84,26 @@ void evaluateGyroRate() {
   gyroLastMesuredTime = currentTime;
 }
 
-void calibrateGyro() {
+boolean calibrateGyro() {
+  
   int findZero[FINDZERO];
-   
+  int diff = 0; 
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  evaluateADC();
       findZero[i] = readADC(axis);
       delay(10);
     }
-    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
+    int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
+	if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  gyroZero[axis] = tmp;
+	} 
+	else {
+		return false; //Calibration failed.
+	}
   }
+  return true;
 }
 
-void readGyroTemp()  {
-}
 
 #endif

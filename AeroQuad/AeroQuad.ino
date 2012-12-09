@@ -989,10 +989,10 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined(HMC5843)
-  #include <HeadingFusionProcessorCompFilter.h>
+  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5843.h>
 #elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
-  #include <HeadingFusionProcessorCompFilter.h>
+  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5883L.h>
 #elif defined(COMPASS_CHR6DM)
 #endif
@@ -1155,6 +1155,23 @@ void setup() {
   }
 
   initPlatform();
+  
+  // Initialize sensors
+  // If sensors have a common initialization routine
+  // insert it into the gyro class because it executes first
+  initializeGyro(); // defined in Gyro.h
+  while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
+  initializeAccel(); // defined in Accel.h
+  initSensorsZeroFromEEPROM();
+
+  // Calibrate sensors
+//  computeAccelBias();
+
+  #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
+    initializeMagnetometer();
+    initializeHeadingFusion();
+  #endif
 
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
@@ -1168,6 +1185,7 @@ void setup() {
   initializeReceiver(LASTCHANNEL);
   initReceiverFromEEPROM();
 
+  // Flight angle estimation
   initializeKinematics();
 
   // Integral Limit for attitude mode
@@ -1229,23 +1247,6 @@ void setup() {
   #endif
 
   setupFourthOrder();
-  
-  // Initialize sensors
-  // If sensors have a common initialization routine
-  // insert it into the gyro class because it executes first
-  initializeGyro(); // defined in Gyro.h
-  initializeAccel(); // defined in Accel.h
-  initSensorsZeroFromEEPROM();
-
-  // Calibrate sensors
-  calibrateGyro();
-//  computeAccelBias();
-  // Flight angle estimation
-  #ifdef HeadingMagHold
-    vehicleState |= HEADINGHOLD_ENABLED;
-    initializeMagnetometer();
-    initializeHeadingFusion();
-  #endif
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
@@ -1343,7 +1344,9 @@ void process50HzTask() {
  * 10Hz task
  ******************************************************************/
 void process10HzTask1() {
+  
   #if defined(HeadingMagHold)
+  
     G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
     tenHZpreviousTime = currentTime;
      

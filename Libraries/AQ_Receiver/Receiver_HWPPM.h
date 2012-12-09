@@ -48,6 +48,8 @@ volatile int          PWM_RAW[PPM_CHANNELS] = { 3000,3000,3000,3000,3000,3000,30
 #define TIMER5_PRESCALER    8
 #define TIMER5_PERIOD       (F_CPU/TIMER5_PRESCALER/TIMER5_FREQUENCY_HZ)
 
+uint8_t rcChannel[] = {SERIAL_SUM_PPM};
+
 /****************************************************
  * Interrupt Vector
  ****************************************************/
@@ -70,7 +72,7 @@ ISR(TIMER5_CAPT_vect)//interrupt.
   startPulse = stopPulse;         // Save time at pulse start
 }
 
-static uint8_t rcChannel[] = {SERIAL_SUM_PPM};
+
 
 void initializeReceiver(int nbChannel) {
 
@@ -79,7 +81,7 @@ void initializeReceiver(int nbChannel) {
   pinMode(A8, INPUT); // this is the original location of the first RX channel
 
   // Configure timer HW
-  TCCR5A = ((1<<WGM50)|(1<<WGM51)|(1<<COM5C1)|(1<<COM5B1)|(1<<COM5A1));
+  TCCR5A = ((1<<WGM50)|(1<<WGM51));
   TCCR5B = ((1<<WGM52)|(1<<WGM53)|(1<<CS51)|(1<<ICES5)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
   OCR5A = TIMER5_PERIOD; 
 

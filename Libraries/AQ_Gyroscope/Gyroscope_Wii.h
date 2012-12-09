@@ -41,8 +41,11 @@
 //    degrees per bit = 0.00016743 / 0.5 mVolts = 0.33486295 degrees per second per bit
 //                                              = 0.00584446 radians per second per bit
 
+#define GYRO_CALIBRATION_TRESHOLD 4
+
 float wmpLowRangeToRadPerSec  = 0.001082308;
 float wmpHighRangeToRadPerSec = 0.005844461;
+  
   
 void initializeGyro() {
 	vehicleState |= GYRO_DETECTED;
@@ -102,20 +105,26 @@ void evaluateGyroRate() {
 */  
 }
 
-void calibrateGyro() {
+boolean calibrateGyro() {
+  
   int findZero[FINDZERO];
-    
+  int diff = 0;
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  readWiiSensors();
       findZero[i] = getWiiGyroADC(axis);
       delay(5);
     }
-    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
+    int tmp = findMedianIntWithDiff(findZero, FINDZERO, &diff);
+	if (diff <= GYRO_CALIBRATION_TRESHOLD) { // 4 = 0.27826087 degrees during 49*10ms measurements (490ms). 0.57deg/s difference between first and last.
+	  gyroZero[axis] = tmp;
+	} 
+	else {
+		return false; //Calibration failed.
+	}
   }
-}
-
-void readGyroTemp()  {
+  
+  return true;
 }
 
 #endif
