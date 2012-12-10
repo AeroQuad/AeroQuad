@@ -495,10 +495,10 @@ void writeEEPROM(){
 }
 
 void initSensorsZeroFromEEPROM() {
-  // Gyro initialization from EEPROM
-  gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
-  gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
-  gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
+//  // Gyro initialization from EEPROM
+//  gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
+//  gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
+//  gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
 
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
