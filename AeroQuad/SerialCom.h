@@ -156,6 +156,7 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
+      computeAccelBias();    
       storeSensorsZeroToEEPROM();
       break;
 

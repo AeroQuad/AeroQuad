@@ -1164,9 +1164,6 @@ void setup() {
   initializeAccel(); // defined in Accel.h
   initSensorsZeroFromEEPROM();
 
-  // Calibrate sensors
-//  computeAccelBias();
-
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
