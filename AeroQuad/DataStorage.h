@@ -176,11 +176,6 @@ void initializeEEPROM() {
     altitudeHoldPanicStickMovement = 250;
   #endif
   
-  // Gyro Cal
-  gyroZero[XAXIS] = 0.0;
-  gyroZero[YAXIS] = 0.0;
-  gyroZero[ZAXIS] = 0.0;
-  
   // Accel Cal
   accelScaleFactor[XAXIS] = 1.0;
   runTimeAccelBias[XAXIS] = 0.0;
@@ -495,10 +490,6 @@ void writeEEPROM(){
 }
 
 void initSensorsZeroFromEEPROM() {
-//  // Gyro initialization from EEPROM
-//  gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
-//  gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
-//  gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
 
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
@@ -512,10 +503,6 @@ void initSensorsZeroFromEEPROM() {
 }
 
 void storeSensorsZeroToEEPROM() {
-  // Store gyro data to EEPROM
-  writeFloat(gyroZero[XAXIS], GYRO_ROLL_ZERO_ADR);
-  writeFloat(gyroZero[YAXIS], GYRO_PITCH_ZERO_ADR);
-  writeFloat(gyroZero[ZAXIS], GYRO_YAW_ZERO_ADR);
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);

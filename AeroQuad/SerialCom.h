@@ -136,7 +136,6 @@ void readSerialCommand() {
       writeEEPROM();
       storeSensorsZeroToEEPROM();
       calibrateGyro();
-      computeAccelBias();
       zeroIntegralError();
       #ifdef HeadingMagHold
         initializeMagnetometer();
@@ -148,7 +147,6 @@ void readSerialCommand() {
 
     case 'J': // calibrate gyros
       calibrateGyro();
-      storeSensorsZeroToEEPROM();
       break;
 
     case 'K': // Write accel calibration values
