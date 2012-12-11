@@ -97,15 +97,15 @@ void mtk16ParseData() {
     gpsData.accuracy = mtk16Message.msg.hdop;
     gpsData.fixtime = mtk16Message.msg.utc_time;
     switch (mtk16Message.msg.fix_type) {
-    case 2:
-      gpsData.state = GPS_FIX2D;
-      break;
-    case 3:
-      gpsData.state = GPS_FIX3D;
-      break;
-    default:
-      gpsData.state = GPS_NOFIX;
-      break;
+      case 2:
+        gpsData.state = GPS_FIX2D;
+        break;
+      case 3:
+        gpsData.state = GPS_FIX3D;
+        break;
+      default:
+        gpsData.state = GPS_NOFIX;
+        break;
     }
     gpsData.sats = mtk16Message.msg.satellites;
     gpsData.course = mtk16Message.msg.ground_course;
@@ -124,6 +124,7 @@ int mtk16ProcessData(unsigned char data) {
       mtk16ProcessDataState = MTK16_WAIT_SYNC2;
     }
     break;
+	
   case MTK16_WAIT_SYNC2:
     if (data == 0xdd) {
       mtk16ProcessDataState = MTK16_GET_LEN;
@@ -133,6 +134,7 @@ int mtk16ProcessData(unsigned char data) {
       mtk16ProcessDataState = MTK16_WAIT_SYNC1;
     }
     break;
+	
   case MTK16_GET_LEN:
     mtk16CKA = data;
     mtk16CKB = mtk16CKA;
@@ -145,6 +147,7 @@ int mtk16ProcessData(unsigned char data) {
       mtk16ProcessDataState = MTK16_GET_DATA;
     }
     break;
+	
   case MTK16_GET_DATA:
     mtk16CKA += data;
     mtk16CKB += mtk16CKA;
@@ -156,13 +159,16 @@ int mtk16ProcessData(unsigned char data) {
       mtk16ProcessDataState = MTK16_GET_CKA;
     }
     break;
+	
   case MTK16_GET_CKA:
     if (mtk16CKA != data) {
       mtk16ProcessDataState = MTK16_WAIT_SYNC1;
-    } else {
+    }
+	else {
       mtk16ProcessDataState = MTK16_GET_CKB;
     }
     break;
+	
   case MTK16_GET_CKB:
     if (mtk16CKB == data) {
       parsed = 1;
@@ -170,6 +176,7 @@ int mtk16ProcessData(unsigned char data) {
     }
     mtk16ProcessDataState = MTK16_WAIT_SYNC1;
     break;
+	
   }
   return parsed;
 }
