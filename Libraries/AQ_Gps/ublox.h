@@ -120,9 +120,11 @@ void ubloxParseData() {// uses publib vars
         case 2: 
           gpsData.state = GPS_FIX2D;
           break;
+		  
         case 3:
           gpsData.state = GPS_FIX3D;
           break;
+		  
         default:
           gpsData.state = GPS_NOFIX;
           break;
@@ -134,9 +136,6 @@ void ubloxParseData() {// uses publib vars
     else if (ubloxId==18) { // NAV:VELNED
       gpsData.course = ubloxMessage.nav_velned.heading / 100; // 10E-5 to millidegrees
       gpsData.speed = ubloxMessage.nav_velned.gSpeed;
-    }
-    else {
-      //printf("NAV? %d\n",ubloxId);
     }
   } 
 }
@@ -152,6 +151,7 @@ int ubloxProcessData(unsigned char data) {
       ubloxProcessDataState = WAIT_SYNC2;
     }
     break;
+	
   case WAIT_SYNC2:
     if (data == 0x62) {
       ubloxProcessDataState = GET_CLASS;
@@ -169,18 +169,21 @@ int ubloxProcessData(unsigned char data) {
     ubloxCKB=data;
     ubloxProcessDataState = GET_ID;
     break;
+	
   case GET_ID:
     ubloxId=data;
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
     ubloxProcessDataState = GET_LL;
     break;
+	
   case GET_LL:
     ubloxExpectedDataLength = data;
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
     ubloxProcessDataState = GET_LH;
     break;
+	
   case GET_LH:
     ubloxExpectedDataLength += data << 8;
     ubloxDataLength=0;
@@ -194,6 +197,7 @@ int ubloxProcessData(unsigned char data) {
       ubloxProcessDataState = WAIT_SYNC1;
     }
     break;
+	
   case GET_DATA:
     ubloxCKA += data;
     ubloxCKB += ubloxCKA;
@@ -205,13 +209,16 @@ int ubloxProcessData(unsigned char data) {
       ubloxProcessDataState = GET_CKA;
     }
     break;
+	
   case GET_CKA:
     if (ubloxCKA != data) {
       ubloxProcessDataState = WAIT_SYNC1;
-    } else {
+    } 
+	else {
       ubloxProcessDataState = GET_CKB;
     }
     break;
+	
   case GET_CKB:
     if (ubloxCKB == data) {
       parsed = 1;
@@ -219,6 +226,7 @@ int ubloxProcessData(unsigned char data) {
     }
     ubloxProcessDataState = WAIT_SYNC1;
     break;
+	
   }
   return parsed;
 }

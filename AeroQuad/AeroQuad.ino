@@ -104,6 +104,17 @@
   void initPlatform() {
     setGyroAref(aref);
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
 
   /**
    * Measure critical sensors
@@ -149,6 +160,18 @@
   void initPlatform() {
     setGyroAref(aref);
   }
+  
+    // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -210,6 +233,15 @@
 
     Wire.begin();
     TWBR = 12;
+  }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0047340002;
+    accelScaleFactor[YAXIS] = -0.0046519994;
+    accelScaleFactor[ZAXIS] = -0.0046799998;
+    computeAccelBias();
   }
 
   /**
@@ -281,6 +313,15 @@
     TWBR = 12;
   }
 
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0371299982;
+    accelScaleFactor[YAXIS] = -0.0374319982;
+    accelScaleFactor[ZAXIS] = -0.0385979986;
+    computeAccelBias();
+  }
+
   /**
    * Measure critical sensors
    */
@@ -326,6 +367,18 @@
   void initPlatform() {
     setGyroAref(aref);
   }
+  
+    // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -416,6 +469,15 @@
 
     Wire.begin();
     TWBR = 12;
+  }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0047340002;
+    accelScaleFactor[YAXIS] = -0.0046519994;
+    accelScaleFactor[ZAXIS] = -0.0046799998;
+    computeAccelBias();
   }
 
   /**
@@ -508,6 +570,15 @@
     Wire.begin();
     TWBR = 12;
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0365570020;
+    accelScaleFactor[YAXIS] = 0.0363000011;
+    accelScaleFactor[ZAXIS] = -0.0384629964;
+    computeAccelBias();
+  }
 
   /**
    * Measure critical sensors
@@ -582,6 +653,18 @@
     Wire.begin();
     TWBR = 12;
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -641,6 +724,18 @@
        initializeWiiSensors();
      #endif
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -713,6 +808,18 @@
 
     initializeWiiSensors();
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -799,6 +906,18 @@
     kinematicsChr6dm = &chr6dm;
     compassChr6dm = &chr6dm;
   }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -890,6 +1009,18 @@
 //    tempKinematics.setGyroscope(&gyroSpecific);
     compassChr6dm = &chr6dm;
   }
+
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Accel Cal
+    accelScaleFactor[XAXIS] = 1.0;
+    runTimeAccelBias[XAXIS] = 0.0;
+    accelScaleFactor[YAXIS] = 1.0;
+    runTimeAccelBias[YAXIS] = 0.0;
+    accelScaleFactor[ZAXIS] = 1.0;
+    runTimeAccelBias[ZAXIS] = 0.0;
+  }
+
 
   /**
    * Measure critical sensors
@@ -1156,23 +1287,6 @@ void setup() {
 
   initPlatform();
   
-  // Initialize sensors
-  // If sensors have a common initialization routine
-  // insert it into the gyro class because it executes first
-  initializeGyro(); // defined in Gyro.h
-  while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
-  initializeAccel(); // defined in Accel.h
-  initSensorsZeroFromEEPROM();
-
-  // Calibrate sensors
-//  computeAccelBias();
-
-  #ifdef HeadingMagHold
-    vehicleState |= HEADINGHOLD_ENABLED;
-    initializeMagnetometer();
-    initializeHeadingFusion();
-  #endif
-
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
@@ -1181,19 +1295,33 @@ void setup() {
      initializeMotors(EIGHT_Motors);
   #endif
 
-  // Setup receiver pins for pin change interrupts
   initializeReceiver(LASTCHANNEL);
   initReceiverFromEEPROM();
-
-  // Flight angle estimation
-  initializeKinematics();
-
+  
+  // Initialize sensors
+  // If sensors have a common initialization routine
+  // insert it into the gyro class because it executes first
+  initializeGyro(); // defined in Gyro.h
+  while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
+  initializeAccel(); // defined in Accel.h
+  setupFourthOrder();
+  initSensorsZeroFromEEPROM();
+  
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
   // Set for 1/2 max attitude command (+/-0.75 radians)
   // Rate integral not used for now
   PID[ATTITUDE_XAXIS_PID_IDX].windupGuard = 0.375;
   PID[ATTITUDE_YAXIS_PID_IDX].windupGuard = 0.375;
+  
+  // Flight angle estimation
+  initializeKinematics();
+
+  #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
+    initializeMagnetometer();
+    initializeHeadingFusion();
+  #endif
   
   // Optional Sensors
   #ifdef AltitudeHoldBaro
@@ -1208,7 +1336,7 @@ void setup() {
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
-
+  
   #ifdef BattMonitor
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
     vehicleState |= BATTMONITOR_ENABLED;
@@ -1246,7 +1374,7 @@ void setup() {
      initSlowTelemetry();
   #endif
 
-  setupFourthOrder();
+  
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);

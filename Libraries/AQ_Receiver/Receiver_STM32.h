@@ -40,187 +40,127 @@
 	AUX2     6	5
 	AUX3     7	7
 */
-	static byte ReceiverChannelMap[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
+static byte ReceiverChannelMap[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
 
 
-	///////////////////////////////////////////////////////////////////////////////
-	// implementation part starts here.
-	// forward declaration, array is defined at the end of this file
-	extern voidFuncPtr PWM_in_handler[];
+///////////////////////////////////////////////////////////////////////////////
+// implementation part starts here.
+// forward declaration, array is defined at the end of this file
+extern voidFuncPtr PWM_in_handler[];
 
-	typedef struct {
-		timer_dev   *TimerDev;
-		timer_gen_reg_map *TimerRegs;
-		__io uint32	*Timer_ccr;
-		int			Low;
-		int			High;
-		uint16		HighTime;
-		uint16		RiseTime;
-		uint16		LastChange;
-		int			Channel;
-		int			TimerChannel;
-		int			PolarityMask;
-		int			Valid;
-		int			Debug;
-	} tFrqData;
+typedef struct {
+  timer_dev   *TimerDev;
+  timer_gen_reg_map *TimerRegs;
+  __io uint32	*Timer_ccr;
+  int			Low;
+  int			High;
+  uint16		HighTime;
+  uint16		RiseTime;
+  uint16		LastChange;
+  int			Channel;
+  int			TimerChannel;
+  int			PolarityMask;
+  int			Valid;
+  int			Debug;
+} tFrqData;
 
-    #define FRQInputs 8
-	volatile tFrqData FrqData[FRQInputs];
+#define FRQInputs 8
+volatile tFrqData FrqData[FRQInputs];
 
-	void FrqInit(int aChannel, int aDefault, volatile tFrqData *f, timer_dev *aTimer, int aTimerChannel)
-	{
-		aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
+void FrqInit(int aChannel, int aDefault, volatile tFrqData *f, timer_dev *aTimer, int aTimerChannel) {
 
-		f->Channel      = aChannel;
-		f->Valid        = false;
+  aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
 
-		f->TimerDev     = aTimer;
-		timer_gen_reg_map *timer = aTimer->regs.gen;
-		f->TimerRegs    = timer;
+  f->Channel      = aChannel;
+  f->Valid        = false;
 
-		f->Timer_ccr    = &timer->CCR1 + aTimerChannel;
-		f->Debug        = false;
-		f->HighTime     = aDefault;
-		f->TimerChannel = aTimerChannel;
+  f->TimerDev     = aTimer;
+  timer_gen_reg_map *timer = aTimer->regs.gen;
+  f->TimerRegs    = timer;
 
-		int TimerEnable = (1 << (4*aTimerChannel));
-		f->PolarityMask = TimerEnable << 1;
+  f->Timer_ccr    = &timer->CCR1 + aTimerChannel;
+  f->Debug        = false;
+  f->HighTime     = aDefault;
+  f->TimerChannel = aTimerChannel;
 
-		uint32 clock_speed = rcc_dev_timer_clk_speed(f->TimerDev->clk_id);
-		timer->PSC	= (clock_speed/1000000)-1;
-		timer->ARR	= 0xffff;
-		timer->CR1	= 0;
-		timer->DIER &= ~(1);
+  int TimerEnable = (1 << (4*aTimerChannel));
+  f->PolarityMask = TimerEnable << 1;
 
-		timer->CCER &= ~TimerEnable; // Disable timer
-		timer->CCER &= ~(f->PolarityMask);
+  uint32 clock_speed = rcc_dev_timer_clk_speed(f->TimerDev->clk_id);
+  timer->PSC	= (clock_speed/1000000)-1;
+  timer->ARR	= 0xffff;
+  timer->CR1	= 0;
+  timer->DIER &= ~(1);
 
-#ifdef STM32_TIMER_DEBUG
-		Serial.print("  clk ");
-		Serial.print(clock_speed/1000000, 10);
-		Serial.print("MHz ");
+  timer->CCER &= ~TimerEnable; // Disable timer
+  timer->CCER &= ~(f->PolarityMask);
 
-		Serial.print(" CCMR0 ");
-		Serial.print(timer->CCMR1, 16);
-#endif
+  volatile uint32 *mr;
+  if(aTimerChannel < 2) {
+    mr = &(timer->CCMR1);
+  }
+  else {
+    mr = &(timer->CCMR2);
+  }
+  *mr &= ~(0xFF << (8*(aTimerChannel&1)));	// prescaler 1
+  *mr |= 0x61 << (8*(aTimerChannel&1));		// 0x61 -> 6=filter, 1=inputs 1,2,3,4
 
-		volatile uint32 *mr;
-		if(aTimerChannel < 2) {
-			mr = &(timer->CCMR1);
-		} else {
-			mr = &(timer->CCMR2);
-		}
-		*mr &= ~(0xFF << (8*(aTimerChannel&1)));	// prescaler 1
-		*mr |= 0x61 << (8*(aTimerChannel&1));		// 0x61 -> 6=filter, 1=inputs 1,2,3,4
-
-		timer->CCER |= TimerEnable; // Enable
-		timer->CR1 = 1;
-
-#ifdef STM32_TIMER_DEBUG
-		Serial.print(" CCER ");
-		Serial.print(timer->CCER, 16);
-		Serial.print(" CCMR1 ");
-		Serial.print(timer->CCMR1, 16);
-		Serial.println();
-#endif
-	}
+  timer->CCER |= TimerEnable; // Enable
+  timer->CR1 = 1;
+}
 
 
-	void InitFrqMeasurement()
-	{
-#ifdef STM32_TIMER_DEBUG
-		Serial.println("InitFrqMeasurement");
-#endif
-		for(int rcLine = 0; rcLine < (int)(sizeof(receiverPin) / sizeof(receiverPin[0])); rcLine++) {
-			int pin = receiverPin[rcLine];
-			timer_dev *timer_num = PIN_MAP[pin].timer_device;
-			if(timer_num == NULL) {
-#ifdef STM32_TIMER_DEBUG
-				Serial.print("InitFrqMeasurement: invalid PWM input ");
-				Serial.print(pin);
-				Serial.println();
-#endif
-			} else {
-#ifdef STM32F2
-				gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
-#else
-				pinMode(pin, INPUT_PULLDOWN);
-#endif
+void InitFrqMeasurement() {
 
-#ifdef STM32_TIMER_DEBUG
-				timer_gen_reg_map *timer = PIN_MAP[pin].timer_device->regs.gen;
-				Serial.print("pin ");
-				Serial.print(pin);
-				Serial.print(" timerbase ");
-				Serial.print((int32)timer,16);
-				Serial.println();
-#endif
-				FrqInit(rcLine, 1500, &FrqData[rcLine], timer_num, PIN_MAP[pin].timer_channel);
-
-				timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, PWM_in_handler[rcLine]);
-			}
-		}
-#ifdef STM32_TIMER_DEBUG
-		Serial.println("InitFrqMeasurement done");
-#endif
-	}
+  for(int rcLine = 0; rcLine < (int)(sizeof(receiverPin) / sizeof(receiverPin[0])); rcLine++) {
+    int pin = receiverPin[rcLine];
+    timer_dev *timer_num = PIN_MAP[pin].timer_device;
+    if(timer_num != NULL) {
+      gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
+      FrqInit(rcLine, 1500, &FrqData[rcLine], timer_num, PIN_MAP[pin].timer_channel);
+      timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, PWM_in_handler[rcLine]);
+    }
+  }
+}
 
 
-	void PWMInvertPolarity(volatile tFrqData *f)
-	{
-		f->TimerRegs->CCER ^= f->PolarityMask; // invert polarity
-	}
+void PWMInvertPolarity(volatile tFrqData *f) {
+  f->TimerRegs->CCER ^= f->PolarityMask; // invert polarity
+}
 
+void FrqChange(volatile tFrqData *f) {
 
-	void FrqChange(volatile tFrqData *f)
-	{
-		timer_gen_reg_map *timer = f->TimerRegs;
-		uint16_t c = *(f->Timer_ccr);
-		bool rising = (timer->CCER & f->PolarityMask) == 0;
+  timer_gen_reg_map *timer = f->TimerRegs;
+  uint16_t c = *(f->Timer_ccr);
+  bool rising = (timer->CCER & f->PolarityMask) == 0;
 
-		if(f->Valid) {
-			if(f->Debug && f->Channel == 6) {
-				Serial.print(f->Channel);
-				Serial.print(rising ? " r " : " f ");
-				Serial.print((int)c);
-				Serial.print(" ");
-				uint16_t delta = c - f->LastChange;
-				Serial.print((int)delta);
-				Serial.println();
-				f->LastChange = c;
-			}
+  if(f->Valid) {
+    if(rising) {
+      f->RiseTime = c;
+    } 
+    else {
+      uint16_t highTime = c - f->RiseTime;
+      if(highTime > 900 && highTime < 2100) {
+        f->HighTime = highTime;
+      } 
+      else {
+        f->Valid = false;
+      }
+    }
+  } 
+  else if(rising) {
+    // rising edge, store start time
+    f->RiseTime = c;
+    f->Valid = true;
+  }
 
-			if(rising) {
-				// rising edge, store start time
-				f->RiseTime = c;
-				//Serial.print("  r ");
-				//Serial.println(f->RiseTime, 10);
-			} else {
-				uint16_t highTime = c - f->RiseTime;
-				if(highTime > 900 && highTime < 2100) {
-					f->HighTime = highTime;
-				} else {
-					f->Valid = false;
-				}
-				//Serial.print("  f ");
-				//Serial.println(f->HighTime, 10);
-			}
-		} else {
-			if(rising) {
-				// rising edge, store start time
-				f->RiseTime = c;
-				f->Valid = true;
-			}
-		}
+  PWMInvertPolarity(f);
+}
 
-		PWMInvertPolarity(f);
-	}
-
-	// hide the class details from the interrupt handler
-	void IrqChangeValue(int chan)
-	{
-		FrqChange(&FrqData[chan]);
-	}
+// hide the class details from the interrupt handler
+void IrqChangeValue(int chan) {
+  FrqChange(&FrqData[chan]);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
