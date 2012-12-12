@@ -70,7 +70,8 @@ void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
   volatile uint32 *mr;
   if(aTimerChannel < 2) {
     mr = &(timer->CCMR1);
-  } else {
+  } 
+  else {
     mr = &(timer->CCMR2);
   }
   *mr &= ~(0xFF << (8*(aTimerChannel&1)));	// prescaler 1
@@ -90,9 +91,11 @@ void FrqChange()
       rawChannelValue[currentChannel] = diffTime;
       currentChannel++;
     }
-  } else if (diffTime > 2500) {
+  } 
+  else if (diffTime > 2500) {
     currentChannel = 0;
-  } else {
+  } 
+  else {
     // glitch; stop and wait next round
     currentChannel = PPM_CHANNELS;
   }
@@ -101,21 +104,13 @@ void FrqChange()
 
 void InitFrqMeasurement()
 {
-
   int pin = receiverPinPPM;
   timer_dev *timer_num = PIN_MAP[pin].timer_device;
 
   currentChannel=8;
-  if(timer_num == NULL) {
-  } else {
-#ifdef STM32F2
+  if(timer_num != NULL) {
     gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
-#else
-    pinMode(pin, INPUT_PULLDOWN);
-#endif
-
     FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
-
     timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
   }
 

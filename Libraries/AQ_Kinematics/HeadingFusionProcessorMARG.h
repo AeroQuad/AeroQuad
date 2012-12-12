@@ -50,7 +50,7 @@ void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, f
   
   float norm;
   float hx, hy, hz, bx, bz;
-  float vx, vy, vz, wx, wy;//, wz;
+  float vx, vy, wx, wy;//, wz;
   float q0i, q1i, q2i, q3i;
   float exAcc, eyAcc, ezAcc;
   float ezMag;
@@ -74,7 +74,6 @@ void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, f
   // estimated direction of gravity and flux (v and w)
   vx = 2*(lq1*lq3 - lq0*lq2);
   vy = 2*(lq0*lq1 + lq2*lq3);
-  vz = lq0*lq0 - lq1*lq1 - lq2*lq2 + lq3*lq3;
       
   wx = bx * 2*(0.5 - lq2*lq2 - lq3*lq3) + bz * 2*(lq1*lq3 - lq0*lq2);
   wy = bx * 2*(lq1*lq2 - lq0*lq3)       + bz * 2*(lq0*lq1 + lq2*lq3);
