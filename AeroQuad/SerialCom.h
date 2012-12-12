@@ -151,11 +151,11 @@ void readSerialCommand() {
 
     case 'K': // Write accel calibration values
       accelScaleFactor[XAXIS] = readFloatSerial();
-      runTimeAccelBias[XAXIS] = readFloatSerial();
+      readFloatSerial();
       accelScaleFactor[YAXIS] = readFloatSerial();
-      runTimeAccelBias[YAXIS] = readFloatSerial();
+      readFloatSerial();
       accelScaleFactor[ZAXIS] = readFloatSerial();
-      runTimeAccelBias[ZAXIS] = readFloatSerial();
+      readFloatSerial();
       computeAccelBias();    
       storeSensorsZeroToEEPROM();
       break;
