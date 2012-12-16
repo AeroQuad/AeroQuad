@@ -63,6 +63,7 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
 
 // heading mag hold declaration
 #ifdef HeadingMagHold
+  #include <Compass.h>
   #define HMC5883L
 #endif
 
@@ -131,6 +132,12 @@ void initializePlatformSpecificAccelCalibration() {
   accelScaleFactor[XAXIS] = 0.0011970000;
   accelScaleFactor[YAXIS] = -0.0012050000;
   accelScaleFactor[ZAXIS] = -0.0011770000;
+  #ifdef HeadingMagHold
+    magBias[XAXIS]  = 152.000000;
+    magBias[YAXIS]  = 24.000000;
+    magBias[ZAXIS]  = 16.500000;
+  #endif
+
 }
 
 unsigned long previousMeasureCriticalSensorsTime = 0;

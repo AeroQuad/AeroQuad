@@ -178,14 +178,6 @@ void initializeEEPROM() {
   
   initializePlatformSpecificAccelCalibration();
 
-  #ifdef HeadingMagHold
-    magScale[XAXIS] = 1.0;
-    magBias[XAXIS] = 0.0;
-    magScale[YAXIS] = 1.0;
-    magBias[YAXIS] = 0.0;
-    magScale[ZAXIS] = 1.0;
-    magBias[ZAXIS] = 0.0;
-  #endif
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
@@ -297,11 +289,8 @@ void readEEPROM() {
   // Mag calibration
   #ifdef HeadingMagHold
     magBias[XAXIS]  = readFloat(XAXIS_MAG_BIAS_ADR);
-    magScale[XAXIS] = readFloat(XAXIS_MAG_SCALE_FACTOR_ADR);
     magBias[YAXIS]  = readFloat(YAXIS_MAG_BIAS_ADR);
-    magScale[YAXIS] = readFloat(YAXIS_MAG_SCALE_FACTOR_ADR);
     magBias[ZAXIS]  = readFloat(ZAXIS_MAG_BIAS_ADR);
-    magScale[ZAXIS] = readFloat(ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   
   // Battery Monitor
@@ -329,12 +318,6 @@ void readEEPROM() {
   accelOneG = readFloat(ACCEL_1G_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 
-  // Range Finder
-  #if defined (AltitudeHoldRangeFinder)
-//    maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);  // @Kenny @todo, remove this!
-//    minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
-  #endif     
-  
   #if defined (UseGPSNavigator)
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
@@ -410,11 +393,8 @@ void writeEEPROM(){
   
   #ifdef HeadingMagHold
     writeFloat(magBias[XAXIS], XAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[XAXIS], XAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[YAXIS], YAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[ZAXIS], ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
