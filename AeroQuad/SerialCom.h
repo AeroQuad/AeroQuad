@@ -356,11 +356,11 @@ void PrintDummyValues(byte number) {
 float GetHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-	float heading = trueNorthHeading;
-	if (heading < 0){
+    float heading = trueNorthHeading;
+    if (heading < 0) { 
       heading += (2.0 * M_PI);
-	}
-  	return heading;
+    }
+    return heading;
   #else
     return(gyroHeading);
   #endif

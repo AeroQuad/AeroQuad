@@ -416,6 +416,7 @@
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro    
+    #include <Compass.h>
     #define BMP085 
   #endif
   #ifdef AltitudeHoldRangeFinder
@@ -472,9 +473,14 @@
   // called when eeprom is initialized
   void initializePlatformSpecificAccelCalibration() {
     // Kenny default value, a real accel calibration is strongly recommended
-    accelScaleFactor[XAXIS] = 0.0047340002;
-    accelScaleFactor[YAXIS] = -0.0046519994;
-    accelScaleFactor[ZAXIS] = -0.0046799998;
+    accelScaleFactor[XAXIS] = 0.0046449995;
+    accelScaleFactor[YAXIS] = -0.0047950000;
+    accelScaleFactor[ZAXIS] = -0.0047549996;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 60.000000;
+      magBias[YAXIS]  = -39.000000;
+      magBias[ZAXIS]  = -7.500000;
+    #endif
   }
 
   /**
@@ -513,6 +519,7 @@
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro
+    #include <Compass.h>
     #define BMP085
   #endif
   #ifdef AltitudeHoldRangeFinder
@@ -574,6 +581,11 @@
     accelScaleFactor[XAXIS] = 0.0365570020;
     accelScaleFactor[YAXIS] = 0.0363000011;
     accelScaleFactor[ZAXIS] = -0.0384629964;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 1.500000;
+      magBias[YAXIS]  = 205.500000;
+      magBias[ZAXIS]  = -33.000000;
+    #endif
   }
 
   /**
@@ -659,6 +671,11 @@
     runTimeAccelBias[YAXIS] = 0.0;
     accelScaleFactor[ZAXIS] = 1.0;
     runTimeAccelBias[ZAXIS] = 0.0;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 0.0;
+      magBias[YAXIS]  = 0.0;
+      magBias[ZAXIS]  = 0.0;
+    #endif
   }
 
 
@@ -769,6 +786,7 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
+    #include <Compass.h>
     #define HMC5843
   #endif
 
@@ -814,6 +832,11 @@
     runTimeAccelBias[YAXIS] = 0.0;
     accelScaleFactor[ZAXIS] = 1.0;
     runTimeAccelBias[ZAXIS] = 0.0;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 0.0;
+      magBias[YAXIS]  = 0.0;
+      magBias[ZAXIS]  = 0.0;
+    #endif
   }
 
 
@@ -1304,6 +1327,7 @@ void setup() {
   initializeAccel(); // defined in Accel.h
   if (firstTimeBoot) {
     computeAccelBias();
+    writeEEPROM();
   }
   setupFourthOrder();
   initSensorsZeroFromEEPROM();
@@ -1374,8 +1398,6 @@ void setup() {
   #ifdef SlowTelemetry
      initSlowTelemetry();
   #endif
-
-  
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
