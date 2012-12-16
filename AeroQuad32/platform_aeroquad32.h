@@ -131,7 +131,6 @@ void initializePlatformSpecificAccelCalibration() {
   accelScaleFactor[XAXIS] = 0.0011970000;
   accelScaleFactor[YAXIS] = -0.0012050000;
   accelScaleFactor[ZAXIS] = -0.0011770000;
-  computeAccelBias();
 }
 
 unsigned long previousMeasureCriticalSensorsTime = 0;

@@ -177,13 +177,6 @@ void initializeEEPROM() {
   #endif
   
   initializePlatformSpecificAccelCalibration();
-//  // Accel Cal
-//  accelScaleFactor[XAXIS] = 1.0;
-//  runTimeAccelBias[XAXIS] = 0.0;
-//  accelScaleFactor[YAXIS] = 1.0;
-//  runTimeAccelBias[YAXIS] = 0.0;
-//  accelScaleFactor[ZAXIS] = 1.0;
-//  runTimeAccelBias[ZAXIS] = 0.0;
 
   #ifdef HeadingMagHold
     magScale[XAXIS] = 1.0;
