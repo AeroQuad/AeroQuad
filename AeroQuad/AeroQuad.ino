@@ -241,7 +241,6 @@
     accelScaleFactor[XAXIS] = 0.0047340002;
     accelScaleFactor[YAXIS] = -0.0046519994;
     accelScaleFactor[ZAXIS] = -0.0046799998;
-    computeAccelBias();
   }
 
   /**
@@ -319,7 +318,6 @@
     accelScaleFactor[XAXIS] = 0.0371299982;
     accelScaleFactor[YAXIS] = -0.0374319982;
     accelScaleFactor[ZAXIS] = -0.0385979986;
-    computeAccelBias();
   }
 
   /**
@@ -477,7 +475,6 @@
     accelScaleFactor[XAXIS] = 0.0047340002;
     accelScaleFactor[YAXIS] = -0.0046519994;
     accelScaleFactor[ZAXIS] = -0.0046799998;
-    computeAccelBias();
   }
 
   /**
@@ -577,7 +574,6 @@
     accelScaleFactor[XAXIS] = 0.0365570020;
     accelScaleFactor[YAXIS] = 0.0363000011;
     accelScaleFactor[ZAXIS] = -0.0384629964;
-    computeAccelBias();
   }
 
   /**
@@ -1278,13 +1274,15 @@ void setup() {
   digitalWrite(LED_Green, LOW);
 
   initCommunication();
-
+  
   readEEPROM(); // defined in DataStorage.h
+  boolean firstTimeBoot = false;
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
     initializeEEPROM();
     writeEEPROM();
+    firstTimeBoot = true;
   }
-
+  
   initPlatform();
   
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
@@ -1304,6 +1302,9 @@ void setup() {
   initializeGyro(); // defined in Gyro.h
   while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
   initializeAccel(); // defined in Accel.h
+  if (firstTimeBoot) {
+    computeAccelBias();
+  }
   setupFourthOrder();
   initSensorsZeroFromEEPROM();
   

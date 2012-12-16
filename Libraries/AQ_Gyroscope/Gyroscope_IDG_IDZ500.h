@@ -24,7 +24,7 @@
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 
-#define GYRO_CALIBRATION_TRESHOLD 8
+#define GYRO_CALIBRATION_TRESHOLD 4
 
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
