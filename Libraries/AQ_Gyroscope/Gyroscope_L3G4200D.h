@@ -30,7 +30,7 @@
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 
-#define GYRO_CALIBRATION_TRESHOLD 8
+#define GYRO_CALIBRATION_TRESHOLD 4
 
 #define GYRO_ADDRESS 0x69
 
