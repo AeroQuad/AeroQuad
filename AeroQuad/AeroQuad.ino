@@ -410,13 +410,13 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
+    #include <Compass.h>
 //    #define SPARKFUN_5883L_BOB
     #define HMC5843
   #endif
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro    
-    #include <Compass.h>
     #define BMP085 
   #endif
   #ifdef AltitudeHoldRangeFinder
@@ -514,12 +514,12 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
+    #include <Compass.h>
     #define SPARKFUN_9DOF_5883L
   #endif
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro
-    #include <Compass.h>
     #define BMP085
   #endif
   #ifdef AltitudeHoldRangeFinder
