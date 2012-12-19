@@ -132,8 +132,8 @@ void initializeHeadingFusion()
   lq2 = cos(0.0)*sin(0.0)*cos(yawAngle/2) + sin(0.0)*cos(0.0)*sin(yawAngle/2);
   lq3 = cos(0.0)*cos(0.0)*sin(yawAngle/2) - sin(0.0)*sin(0.0)*cos(yawAngle/2);
 
-  lkpMag = 2.0;//2.0;
-  lkiMag = 0.005;//0.005;
+  lkpMag = 0.2;//2.0;
+  lkiMag = 0.0005;//0.005;
 }
 
 
