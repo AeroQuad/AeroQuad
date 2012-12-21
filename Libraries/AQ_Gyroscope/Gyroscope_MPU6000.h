@@ -112,7 +112,6 @@ boolean calibrateGyro() {
 	else {
 		return false; //Calibration failed.
 	}
-	
   }
   return true;
 }

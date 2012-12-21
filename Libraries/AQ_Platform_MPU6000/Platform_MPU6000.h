@@ -91,154 +91,139 @@
 
 
 typedef struct {
-	short x;
-	short y;
-	short z;
+  short x;
+  short y;
+  short z;
 } tAxis;
 
 union uMPU6000 {
-	unsigned char rawByte[];
-	unsigned short rawWord[];
-	struct {
-		tAxis accel;
-		short temperature;
-		tAxis gyro;
-	} data;
+  unsigned char rawByte[];
+  unsigned short rawWord[];
+  struct {
+	tAxis accel;
+	short temperature;
+	tAxis gyro;
+  } data;
 } MPU6000;
 
 
 #ifdef MPU6000_I2C
-	#ifndef MPU6000_I2C_ADDRESS
-		#define MPU6000_I2C_ADDRESS 0x68
-	#endif
+  #ifndef MPU6000_I2C_ADDRESS
+	#define MPU6000_I2C_ADDRESS 0x68
+  #endif
 #else
-	#include <HardwareSPIExt.h>
-	HardwareSPIExt spiMPU6000(4);
+  #include <HardwareSPIExt.h>
+  HardwareSPIExt spiMPU6000(4);
 #endif
 
 void MPU6000_SpiLowSpeed()
 {
-#ifndef MPU6000_I2C
+  #ifndef MPU6000_I2C
 	spiMPU6000.begin(SPI_562_500KHZ, MSBFIRST, 3);
-#endif
+  #endif
 }
 
 void MPU6000_SpiHighSpeed()
 {
-#ifndef MPU6000_I2C
+  #ifndef MPU6000_I2C
 	spiMPU6000.end();
     spiMPU6000.begin(SPI_9MHZ, MSBFIRST, 3);
-#endif
+  #endif
 }
 
 void MPU6000_WriteReg(int addr, byte data)
 {
-#ifdef MPU6000_I2C
+  #ifdef MPU6000_I2C
 	updateRegisterI2C(MPU6000_I2C_ADDRESS, addr, data);
-#else
+  #else
 	spiMPU6000.Write(addr, data);
-#endif
-    delay(1);
+  #endif
+  delay(1);
 }
 
 byte MPU6000_ReadReg(int addr)
 {
-#ifdef MPU6000_I2C
+  #ifdef MPU6000_I2C
 	sendByteI2C(MPU6000_I2C_ADDRESS, addr);
 	byte data = readByteI2C(MPU6000_I2C_ADDRESS);
-#else
+  #else
 	byte data = spiMPU6000.Read(addr);
-#endif
-    delay(1);
-    return data;
+  #endif
+  delay(1);
+  return data;
 }
 
 bool initializeMPU6000SensorsDone = false;
 void initializeMPU6000Sensors()
 {
-	if(initializeMPU6000SensorsDone) {
-		return;
-	}
-	initializeMPU6000SensorsDone = true;
+  if(initializeMPU6000SensorsDone) {
+	return;
+  }
+  initializeMPU6000SensorsDone = true;
 
-#ifdef DEBUG_INIT
-	Serial.println("initializeMPU6000Sensors");
-#endif
-	MPU6000_SpiLowSpeed();
+  MPU6000_SpiLowSpeed();
 
-	unsigned char val;
+  unsigned char val;
 
-	val = MPU6000_ReadReg(MPUREG_WHOAMI);
-	if((val&0x7E) == 0x68) {
-		vehicleState |= GYRO_DETECTED;
-		vehicleState |= ACCEL_DETECTED;
-#ifdef DEBUG_INIT
-		Serial.println("MPU6000 found");
-#endif
-	} else {
-#ifdef DEBUG_INIT
-		Serial.println("MPU6000 not found");
-#endif
-		return;
-	}
+  val = MPU6000_ReadReg(MPUREG_WHOAMI);
+  if((val&0x7E) == 0x68) {
+	vehicleState |= GYRO_DETECTED;
+	vehicleState |= ACCEL_DETECTED;
+  } 
+  else {
+	return;
+  }
 
-    // Chip reset
-    MPU6000_WriteReg(MPUREG_PWR_MGMT_1, BIT_H_RESET);
-    delay(100);  // Startup time delay
+  // Chip reset
+  MPU6000_WriteReg(MPUREG_PWR_MGMT_1, BIT_H_RESET);
+  delay(100);  // Startup time delay
 
-#ifndef MPU6000_I2C
+  #ifndef MPU6000_I2C
     // Disable I2C bus
     MPU6000_WriteReg(MPUREG_USER_CTRL, BIT_I2C_IF_DIS);
-#endif
+  #endif
 
-    // Wake Up device and select GyroZ clock (better performance)
-    MPU6000_WriteReg(MPUREG_PWR_MGMT_1, MPU_CLK_SEL_PLLGYROZ);
-    MPU6000_WriteReg(MPUREG_PWR_MGMT_2, 0);
+  // Wake Up device and select GyroZ clock (better performance)
+  MPU6000_WriteReg(MPUREG_PWR_MGMT_1, MPU_CLK_SEL_PLLGYROZ);
+  MPU6000_WriteReg(MPUREG_PWR_MGMT_2, 0);
+
+  // SAMPLE RATE
+  MPU6000_WriteReg(MPUREG_SMPLRT_DIV,0x00);     // Sample rate = 1kHz
+
+  // FS & DLPF   FS=1000º/s, DLPF = 42Hz (low pass filter)
+  MPU6000_WriteReg(MPUREG_CONFIG, BITS_DLPF_CFG_42HZ);
+  MPU6000_WriteReg(MPUREG_GYRO_CONFIG,BITS_FS_1000DPS);  // Gyro scale 1000º/s
+  MPU6000_WriteReg(MPUREG_ACCEL_CONFIG,0x08);   // Accel scale +-4g (4096LSB/g)
 
 
-	// SAMPLE RATE
-    MPU6000_WriteReg(MPUREG_SMPLRT_DIV,0x00);     // Sample rate = 1kHz
-
-	// FS & DLPF   FS=1000º/s, DLPF = 42Hz (low pass filter)
-    MPU6000_WriteReg(MPUREG_CONFIG, BITS_DLPF_CFG_42HZ);
-    MPU6000_WriteReg(MPUREG_GYRO_CONFIG,BITS_FS_1000DPS);  // Gyro scale 1000º/s
-    //Serial.print("MPUREG_GYRO_CONFIG read 0x");
-    //Serial.println(MPU6000_ReadReg(MPUREG_GYRO_CONFIG), 16);
-
-    MPU6000_WriteReg(MPUREG_ACCEL_CONFIG,0x08);   // Accel scale +-4g (4096LSB/g)
-
-    // INT CFG => Interrupt on Data Ready
-    //MPU6000_WriteReg(MPUREG_INT_ENABLE,BIT_RAW_RDY_EN);        // INT: Raw data ready
-    //MPU6000_WriteReg(MPUREG_INT_PIN_CFG,BIT_INT_ANYRD_2CLEAR); // INT: Clear on any read
-
-    // switch to high clock rate
-    MPU6000_SpiHighSpeed();
-};
+  // switch to high clock rate
+  MPU6000_SpiHighSpeed();
+}
 
 
 void MPU6000SwapData(unsigned char *data, int datalen)
 {
-	datalen /= 2;
-	while(datalen--) {
-		unsigned char t = data[0];
-		data[0] = data[1];
-		data[1] = t;
-		data += 2;
-	}
+  datalen /= 2;
+  while(datalen--) {
+    unsigned char t = data[0];
+    data[0] = data[1];
+    data[1] = t;
+    data += 2;
+  }
 }
 
 void readMPU6000Sensors()
 {
-#ifdef MPU6000_I2C
-	sendByteI2C(MPU6000_I2C_ADDRESS, MPUREG_ACCEL_XOUT_H);
+  #ifdef MPU6000_I2C
+    sendByteI2C(MPU6000_I2C_ADDRESS, MPUREG_ACCEL_XOUT_H);
     Wire.requestFrom(MPU6000_I2C_ADDRESS, sizeof(MPU6000));
     for(byte i=0; i<sizeof(MPU6000)/sizeof(short); i++) {
-    	MPU6000.rawWord[i] = readWordI2C();
+      MPU6000.rawWord[i] = readWordI2C();
     }
-#else
-	spiMPU6000.Read(MPUREG_ACCEL_XOUT_H, MPU6000.rawByte, sizeof(MPU6000));
-	MPU6000SwapData(MPU6000.rawByte, sizeof(MPU6000));
-#endif
+  #else
+    spiMPU6000.Read(MPUREG_ACCEL_XOUT_H, MPU6000.rawByte, sizeof(MPU6000));
+    MPU6000SwapData(MPU6000.rawByte, sizeof(MPU6000));
+  #endif
 }
 
 int readMPU6000Count=0;
@@ -247,19 +232,19 @@ int readMPU6000GyroCount=0;
 
 void readMPU6000Accel()
 {
-	readMPU6000AccelCount++;
-	if(readMPU6000AccelCount != readMPU6000Count) {
-		readMPU6000Sensors();
-		readMPU6000Count++;
-	}
+  readMPU6000AccelCount++;
+  if(readMPU6000AccelCount != readMPU6000Count) {
+    readMPU6000Sensors();
+    readMPU6000Count++;
+  }
 }
 
 void readMPU6000Gyro()
 {
-	readMPU6000GyroCount++;
-	if(readMPU6000GyroCount != readMPU6000Count) {
-		readMPU6000Sensors();
-		readMPU6000GyroCount++;
-	}
+  readMPU6000GyroCount++;
+  if(readMPU6000GyroCount != readMPU6000Count) {
+    readMPU6000Sensors();
+    readMPU6000GyroCount++;
+  }
 }
 #endif

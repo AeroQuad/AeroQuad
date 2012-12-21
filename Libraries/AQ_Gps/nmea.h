@@ -84,7 +84,9 @@ int nmeaGetScaledInt( char **s, long *out, int decimals ) {
     ret=0; // no comma -> fail
   }
 
-  if (ret && out) *out=val;
+  if (ret && out) {
+    *out=val;
+  }
 
   return ret;
 }
@@ -129,29 +131,24 @@ void nmeaProcessSentence(){
     p+=6;
 
     gpsData.fixtime = (nmeaGetScaledInt(&p, &work, 3)) ? work : GPS_INVALID_FIX_TIME;
-
     gpsData.lat = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
-
     gpsData.lon = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
-
     nmeaGetScaledInt(&p, NULL,0); //fix quality
-
     gpsData.sats = (nmeaGetScaledInt(&p,&work,0)) ? work : 0;
-
     gpsData.accuracy = (nmeaGetScaledInt(&p,&work,3)) ? work : GPS_INVALID_ACCURACY; //hdop
-
     gpsData.height = (nmeaGetScaledInt(&p,&work,3)) ? work : GPS_INVALID_ALTITUDE;
-
   }
   else if (!strncmp(p,"GPGSA,",6)) {
     long work;
     p+=6;
 
     p++; // validity info, ignored
-    if (*(p++) != ',') return;
+    if (*(p++) != ',') {
+	  return;
+	}
 
     if (nmeaGetScaledInt(&p,&work,0)) {
-    gpsData.state = work;
+      gpsData.state = work;
     }
   }
   else if (!strncmp(p,"GPRMC,",6)) {
@@ -161,14 +158,13 @@ void nmeaProcessSentence(){
     gpsData.fixtime = (nmeaGetScaledInt(&p, &work, 3)) ? work : GPS_INVALID_FIX_TIME;
 
     p++; // fix status - ignored
-    if (*(p++) != ',') return;
+    if (*(p++) != ',') {
+	  return;
+	}
 
     gpsData.lat = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
-
     gpsData.lon = (nmeaGetCoord(&p,&work)) ? work : GPS_INVALID_ANGLE;
-
     gpsData.speed = (nmeaGetScaledInt(&p, &work, 3)) ? work * 5144 / 100000 : GPS_INVALID_SPEED; // kt -> cm/s
-
     gpsData.course = (nmeaGetScaledInt(&p, &work, 3)) ? work : 0;
   }
 }
@@ -184,6 +180,7 @@ int nmeaProcessData(unsigned char data) {
       sentenceCalculatedXOR = 0;
     }
     break;
+	
   case READ:
     if (data == '*') {
       sentenceBuffer[sentenceLength] = 0; // ensure NUL at end
@@ -198,6 +195,7 @@ int nmeaProcessData(unsigned char data) {
       gpsProcessDataState=WAIT_START;
     }
     break;
+	
   case READ_CS1:
     if (data == nib2hex[sentenceCalculatedXOR>>4]) {
       gpsProcessDataState = READ_CS2;
@@ -206,6 +204,7 @@ int nmeaProcessData(unsigned char data) {
       gpsProcessDataState=WAIT_START;
     }
     break;
+	
   case READ_CS2:
     if (data == nib2hex[sentenceCalculatedXOR & 0xf]) {
       parsed=1;

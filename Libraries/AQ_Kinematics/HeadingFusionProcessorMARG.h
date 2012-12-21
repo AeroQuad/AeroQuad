@@ -35,8 +35,6 @@ float compassDeclination = 0.0;
 
 float headingAngle[3] = {0.0,0.0,0.0};
 
-float lkpAcc = 0.0;                					// proportional gain governs rate of convergence to accelerometer
-float lkiAcc = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
 float lkpMag = 0.0;                					// proportional gain governs rate of convergence to magnetometer
 float lkiMag = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
 float lhalfT = 0.0;                					// half the sample period
@@ -50,7 +48,7 @@ void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, f
   
   float norm;
   float hx, hy, hz, bx, bz;
-  float vx, vy, vz, wx, wy;//, wz;
+  float vx, vy, wx, wy;//, wz;
   float q0i, q1i, q2i, q3i;
   float exAcc, eyAcc, ezAcc;
   float ezMag;
@@ -74,7 +72,6 @@ void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, f
   // estimated direction of gravity and flux (v and w)
   vx = 2*(lq1*lq3 - lq0*lq2);
   vy = 2*(lq0*lq1 + lq2*lq3);
-  vz = lq0*lq0 - lq1*lq1 - lq2*lq2 + lq3*lq3;
       
   wx = bx * 2*(0.5 - lq2*lq2 - lq3*lq3) + bz * 2*(lq1*lq3 - lq0*lq2);
   wy = bx * 2*(lq1*lq2 - lq0*lq3)       + bz * 2*(lq0*lq1 + lq2*lq3);
@@ -87,14 +84,14 @@ void headingUpdate(float gx, float gy, float gz, float mx, float my, float mz, f
   ezMag = (mx*wy - my*wx);
     
   // integral error scaled integral gain
-  lexInt += exAcc*lkiAcc;
-  leyInt += eyAcc*lkiAcc;
-  lezInt += ezAcc*lkiAcc;
+  lexInt += exAcc;
+  leyInt += eyAcc;
+  lezInt += ezAcc;
 	
   // adjusted gyroscope measurements
-  gx = gx + lkpAcc*exAcc + lexInt;
-  gy = gy + lkpAcc*eyAcc + leyInt;
-  gz = gz + lkpAcc*ezAcc + ezMag*lkpMag + lezInt;
+  gx = gx + exAcc + lexInt;
+  gy = gy + eyAcc + leyInt;
+  gz = gz + ezAcc + ezMag*lkpMag + lezInt;
 
   
   // integrate quaternion rate and normalise
@@ -135,9 +132,6 @@ void initializeHeadingFusion()
   lq2 = cos(0.0)*sin(0.0)*cos(yawAngle/2) + sin(0.0)*cos(0.0)*sin(yawAngle/2);
   lq3 = cos(0.0)*cos(0.0)*sin(yawAngle/2) - sin(0.0)*sin(0.0)*cos(yawAngle/2);
 
-  lkpAcc = 0.2;
-  lkiAcc = 0.0005;
-    
   lkpMag = 0.2;//2.0;
   lkiMag = 0.0005;//0.005;
 }

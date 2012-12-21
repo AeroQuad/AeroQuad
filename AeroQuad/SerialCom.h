@@ -136,7 +136,6 @@ void readSerialCommand() {
       writeEEPROM();
       storeSensorsZeroToEEPROM();
       calibrateGyro();
-      computeAccelBias();
       zeroIntegralError();
       #ifdef HeadingMagHold
         initializeMagnetometer();
@@ -148,16 +147,16 @@ void readSerialCommand() {
 
     case 'J': // calibrate gyros
       calibrateGyro();
-      storeSensorsZeroToEEPROM();
       break;
 
     case 'K': // Write accel calibration values
       accelScaleFactor[XAXIS] = readFloatSerial();
-      runTimeAccelBias[XAXIS] = readFloatSerial();
+      readFloatSerial();
       accelScaleFactor[YAXIS] = readFloatSerial();
-      runTimeAccelBias[YAXIS] = readFloatSerial();
+      readFloatSerial();
       accelScaleFactor[ZAXIS] = readFloatSerial();
-      runTimeAccelBias[ZAXIS] = readFloatSerial();
+      readFloatSerial();
+      computeAccelBias();    
       storeSensorsZeroToEEPROM();
       break;
 
@@ -357,11 +356,11 @@ void PrintDummyValues(byte number) {
 float GetHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-	float heading = trueNorthHeading;
-	if (heading < 0){
+    float heading = trueNorthHeading;
+    if (heading < 0) { 
       heading += (2.0 * M_PI);
-	}
-  	return heading;
+    }
+    return heading;
   #else
     return(gyroHeading);
   #endif

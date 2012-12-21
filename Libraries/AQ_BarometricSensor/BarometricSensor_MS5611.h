@@ -58,23 +58,25 @@ int64_t MS5611_offset=0;
 unsigned char MS5611crc4(unsigned short n_prom[])
 {
 	unsigned short n_rem = 0;               // crc reminder
-	unsigned short crc_read;            // original value of the crc
+	unsigned short crc_read;            	// original value of the crc
 
-	crc_read  = n_prom[7];               //save read CRC
-	n_prom[7] = (0xFF00 & (n_prom[7])); //CRC byte is replaced by 0
+	crc_read  = n_prom[7];               	//save read CRC
+	n_prom[7] = (0xFF00 & (n_prom[7])); 	//CRC byte is replaced by 0
 
-	for (int cnt = 0; cnt < 16; cnt++) {   // operation is performed on bytes
+	for (int cnt = 0; cnt < 16; cnt++) {   	// operation is performed on bytes
 	    // choose LSB or MSB
 		if (cnt%2 == 1) {
 			n_rem ^= (n_prom[cnt>>1]) & 0x00FF;
-		} else {
+		} 
+		else {
 			n_rem ^= n_prom[cnt>>1] >> 8;
 		}
 
 		for (int n_bit = 8; n_bit > 0; n_bit--) {
 			if (n_rem & (0x8000)) {
 				n_rem = (n_rem << 1) ^ 0x3000;
-			} else {
+			} 
+			else {
 				n_rem = (n_rem << 1);
 			}
 		}
@@ -93,15 +95,15 @@ int MS5611readPROM(int addr)
 		sendByteI2C(addr, MS561101BA_PROM_BASE_ADDR + 2*i);
 		if(Wire.requestFrom(addr, 2) == 2) {
 			MS5611Prom[i] = readWordI2C();
-			//print("%d  %5d\r\n", i, MS5611Prom[i]);
-		} else {
+		} 
+		else {
 			return 0;
 		}
 	}
 
 	int crc     = MS5611crc4(MS5611Prom);
 	int crcProm = MS5611Prom[7] & 0xf;
-	//print("crc calculated %d,  prom %d, crc is %s\r\n", crc, crcProm, (crc == crcProm) ? "good" : "bad");
+
 	if(crc == crcProm) {
 		return 1;
 	}
@@ -131,7 +133,8 @@ unsigned long MS5611readConversion(int addr) {
   Wire.requestFrom(addr, MS561101BA_D1D2_SIZE);
   if(Wire.available() == MS561101BA_D1D2_SIZE) {
     conversion = (readByteI2C() << 16) | (readByteI2C() << 8) | (readByteI2C() << 0);
-  } else {
+  } 
+  else {
     conversion = 0;
   }
 
@@ -139,8 +142,7 @@ unsigned long MS5611readConversion(int addr) {
 }
 
 
-void requestRawTemperature()
-{
+void requestRawTemperature() {
   sendByteI2C(MS5611_I2C_ADDRESS, MS561101BA_D2_Temperature + MS561101BA_OSR_4096);
 }
 
@@ -152,12 +154,6 @@ unsigned long readRawTemperature()
   int64_t dT     = MS5611lastRawTemperature - (((long)MS5611Prom[5]) << 8);
   MS5611_offset  = (((int64_t)MS5611Prom[2]) << 16) + ((MS5611Prom[4] * dT) >> 7);
   MS5611_sens    = (((int64_t)MS5611Prom[1]) << 15) + ((MS5611Prom[3] * dT) >> 8);
-
-
-#ifdef DEBUG_MS5611
-  Serial.print(" rT: ");
-  Serial.print(MS5611lastRawTemperature);
-#endif
 
   return MS5611lastRawTemperature;
 }
@@ -176,11 +172,6 @@ void requestRawPressure()
 float readRawPressure()
 {
   MS5611lastRawPressure = MS5611readConversion(MS5611_I2C_ADDRESS);
-#ifdef DEBUG_MS5611
-  //print(" dT: %6d  off: %6u p %6u  sens: %6d  ", (int32)dT, (unsigned int32)off, (unsigned int32)(( MS5611lastRawPressure * sens) >> 21), (int32)sens);
-  Serial.print(" rP: ");
-  Serial.print(MS5611lastRawPressure);
-#endif
 
   return (((( MS5611lastRawPressure * MS5611_sens) >> 21) - MS5611_offset) >> (15-5)) / ((float)(1<<5));
 }
@@ -214,13 +205,6 @@ void initializeBaro() {
   measureGroundBaro();
   measureGroundBaro();
 
-#if 0
-  // check if measured ground altitude is valid
-  while (abs(baroRawAltitude - baroGroundAltitude) > 10) {
-    delay(26);
-    measureGroundBaro();
-  }
-#endif
   baroAltitude = baroGroundAltitude;
 }
 
@@ -238,11 +222,13 @@ void measureBaroSum() {
       requestRawTemperature();
       pressureCount = 0;
       isReadPressure = false;
-    } else {
+    } 
+	else {
       requestRawPressure();
 	}
     pressureCount++;
-  } else { // select must equal TEMPERATURE
+  } 
+  else { // select must equal TEMPERATURE
     readRawTemperature();
     requestRawPressure();
     isReadPressure = true;
@@ -252,6 +238,7 @@ void measureBaroSum() {
 bool MS5611_first_read = true;
 
 void evaluateBaroAltitude() {
+
   if (rawPressureSumCount == 0) { // it may occur at init time that no pressure has been read yet!
     return;
   }
@@ -265,19 +252,10 @@ void evaluateBaroAltitude() {
   if(MS5611_first_read) {
     baroAltitude = baroRawAltitude;
     MS5611_first_read = false;
-  } else {
+  } 
+  else {
     baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
   }
-
-#ifdef DEBUG_MS5611_b
-  Serial.print("  p ");
-  Serial.print(pressure);
-  Serial.print("  bra ");
-  Serial.print(baroRawAltitude);
-  Serial.print("  ba ");
-  Serial.print(baroAltitude);
-  Serial.println();
-#endif
 
   rawPressureSum = 0.0;
   rawPressureSumCount = 0;

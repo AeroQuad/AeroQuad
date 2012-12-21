@@ -31,7 +31,7 @@
 #include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.1
+#define SOFTWARE_VERSION 3.2
 
 #if defined CONFIG_BAUDRATE
   #define BAUD CONFIG_BAUDRATE
@@ -295,9 +295,6 @@ typedef struct {
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
   // Gyro calibration
-  float GYRO_ROLL_ZERO_ADR;
-  float GYRO_PITCH_ZERO_ADR;
-  float GYRO_YAW_ZERO_ADR;
   float ROTATION_SPEED_FACTOR_ARD;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
@@ -308,11 +305,8 @@ typedef struct {
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
   // Mag Calibration
   float XAXIS_MAG_BIAS_ADR;
-  float XAXIS_MAG_SCALE_FACTOR_ADR;
   float YAXIS_MAG_BIAS_ADR;
-  float YAXIS_MAG_SCALE_FACTOR_ADR;
   float ZAXIS_MAG_BIAS_ADR;
-  float ZAXIS_MAG_SCALE_FACTOR_ADR;
   // Battery Monitor
   float BATT_ALARM_VOLTAGE_ADR;
   float BATT_THROTTLE_TARGET_ADR;
