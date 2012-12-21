@@ -1106,7 +1106,7 @@
   #else
     #define SERIAL_PORT Serial
   #endif
-#endif  
+#endif
 
 #ifdef SlowTelemetry
   #include <AQ_RSCode.h>
