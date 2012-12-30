@@ -644,6 +644,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+    
   case 'y': // send GPS info
     #if defined (UseGPS)
       PrintValueComma(gpsData.state);
@@ -679,10 +680,10 @@ void sendSerialTelemetry() {
     
   case '$': // send BatteryMonitor voltage/current readings
     #if defined (BattMonitor)
-      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
+      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV, displayed in Volts
       #if defined (BM_EXTENDED)
-        PrintValueComma((float)batteryData[0].current/100.0);
-	PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
+        PrintValueComma((float)batteryData[0].current/100.0); // current stored at 10mA, displayed in Amps
+	PrintValueComma((float)batteryData[0].usedCapacity/1000.0); // display in Amps
       #else
 	PrintDummyValues(2);
       #endif
