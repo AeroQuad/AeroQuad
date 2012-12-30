@@ -663,10 +663,18 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     break;
     
-  case 'z': // send rangeFinderRange
-    #if defined (AltitudeHoldRangeFinder)
-      SERIAL_PRINTLN(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+  case 'z': // send altitude sensor values
+    #if defined (AltitudeHoldBaro)
+      PrintValueComma(getBaroAltitude());
+    #else
+      PrintValueComma(0);
     #endif
+    #if defined (AltitudeHoldRangeFinder)
+      PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+    #else
+      PrintValueComma(0);
+    #endif
+    SERIAL_PRINTLN();
     break;
     
   case '$': // send BatteryMonitor voltage/current readings
