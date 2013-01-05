@@ -43,10 +43,6 @@ float lhalfT = 0.0;                					// half the sample period
 float lq0 = 0.0, lq1 = 0.0, lq2 = 0.0, lq3 = 0.0;       // quaternion elements representing the estimated orientation
 float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
   
-float lpreviousEx = 0.0;
-float lpreviousEy = 0.0;
-float lpreviousEz = 0.0;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
@@ -55,7 +51,7 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   
   float norm;
   float hx, hy, hz, bx, bz;
-  float vx, vy, vz, wx, wy;//, wz;
+  float vx, vy, vz, wx, wy;
   float q0i, q1i, q2i, q3i;
   float exAcc, eyAcc, ezAcc;
   float ezMag;
@@ -95,8 +91,6 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   eyAcc = (vz*ax - vx*az);
   ezAcc = (vx*ay - vy*ax);
     
-  //exMag = (my*wz - mz*wy);
-  //eyMag = (mz*wx - mx*wz);
   ezMag = (mx*wy - my*wx);
     
   // integral error scaled integral gain
@@ -107,7 +101,6 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   // adjusted gyroscope measurements
   gx = gx + lkpAcc*exAcc + lexInt;
   gy = gy + lkpAcc*eyAcc + leyInt;
-  //gz = gz + Kp*ez + lezInt;
   gz = gz + lkpAcc*ezAcc + ezMag*lkpMag + lezInt;
 
   
@@ -172,8 +165,6 @@ void localInitializeHeadingFusion(float ax, float ay, float az, float hdgX, floa
 
   initializeBaseHeadingParam(rollAngle, pitchAngle, yawAngle);
 
-  //http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-
   lq0 = cos(rollAngle/2)*cos(pitchAngle/2)*cos(yawAngle/2) + sin(rollAngle/2)*sin(pitchAngle/2)*sin(yawAngle/2);
   lq1 = sin(rollAngle/2)*cos(pitchAngle/2)*cos(yawAngle/2) - cos(rollAngle/2)*sin(pitchAngle/2)*sin(yawAngle/2);
   lq2 = cos(rollAngle/2)*sin(pitchAngle/2)*cos(yawAngle/2) + sin(rollAngle/2)*cos(pitchAngle/2)*sin(yawAngle/2);
@@ -183,15 +174,11 @@ void localInitializeHeadingFusion(float ax, float ay, float az, float hdgX, floa
   leyInt = 0.0;
   lezInt = 0.0;
 
-  lpreviousEx = 0;
-  lpreviousEy = 0;
-  lpreviousEz = 0;
-
   lkpAcc = 0.2;
   lkiAcc = 0.0005;
     
-  lkpMag = 2.0;//2.0;
-  lkiMag = 0.005;//0.005;
+  lkpMag = 0.2;//2.0;
+  lkiMag = 0.0005;//0.005;
 }
 
 void initializeHeadingFusion()
