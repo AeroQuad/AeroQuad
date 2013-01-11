@@ -23,68 +23,117 @@
 
 // @see http://www.arduino.cc/playground/Main/MaxSonar
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(BOARD_aeroquad32)
 
 #include "RangeFinder.h"
 
-#define ALTITUDE_RANGE_FINDER_PIN 1 // analog
-#define FRONT_RANGE_FINDER_PIN    5	// analog
-#define RIGHT_RANGE_FINDER_PIN    4	// analog
-#define REAR_RANGE_FINDER_PIN     3	// analog
-#define LEFT_RANGE_FINDER_PIN     2	// analog
+#define MB1000 0 // Maxbotix LV-MaxSonar-EZ*
+#define MB1200 1 // Maxbotix XL-MaxSonar-EZ*
 
+#define SPIKE_FILTER_MARGIN 500 // mm ; changes bigger than this need two samples to take effect
 
+struct rangeFinder {
+    byte target;      // {ALTITUDE,FRONT,RIGHT,REAR,LEFT}_RANGE_FINDER_INDEX
+    byte pin;
+    byte triggerpin;
+    byte type;
+  } rangeFinders[] = {
+     // Define your rangers here
+     // First ranger is given priority so it should be used for altitude
+     // If using more than one ranger you should connect the 'trigger' to the 'RX' pin on the ranger.
+     //
+  //    { ALTITUDE_RANGE_FINDER_INDEX, A1, 24, MB1200}, 
+    { ALTITUDE_RANGE_FINDER_INDEX, A1, 0, MB1000},
+//	  { FRONT_RANGE_FINDER_INDEX,    A2, 25, MB1000},
+//	  { RIGHT_RANGE_FINDER_INDEX,    A3, 26, MB1000},
+//	  { REAR_RANGE_FINDER_INDEX,     A4, 27, MB1000},
+//	  { LEFT_RANGE_FINDER_INDEX,     A5, 28, MB1000}
+	};
 
+// theoretical range at AIN=VCC
+short rangerScale[] = { 
+  13005, // MB10xx series
+  10240, // MB12xx series
+  };
 
-byte rangeFinderPins[5] = {ALTITUDE_RANGE_FINDER_PIN,
-						   FRONT_RANGE_FINDER_PIN,
-						   RIGHT_RANGE_FINDER_PIN,
-						   REAR_RANGE_FINDER_PIN,
-						   LEFT_RANGE_FINDER_PIN};
+// 50Hz cycles needed to wait for ranging
+byte rangerWait[] = {
+  2, // MB1000 needs 50ms i.e. wait 2 cycles (60ms)
+  4, // MB1200 needs 100ms i.e. wait 5 cycles (100ms)
+};
 
-//
-// default unit are centimeter
-//
+#define RANGER_COUNT ((sizeof(rangeFinders) / sizeof(struct rangeFinder)))
 
-// default min max range constrain
+// last reading used for 'spike' filtter
+short lastRange[RANGER_COUNT];
 
-void inititalizeRangeFinder(byte idx) {
+byte rangerWaitCycles = 0;
 
-  maxRangeFinderRange = 3.0;
-  minRangeFinderRange = 0.25;
-  vehicleState |= RANGE_ENABLED;
-  
-  pinMode(rangeFinderPins[idx], INPUT);
-}
+byte rangerSchedule = 0;
 
-/**
- * inches * 2.54 = cm
- */
-void readRangeFinderDistanceSum(byte idx) {
-  rangeFinderRangeSum[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);
-  rangeFinderSampleCount[idx]++;
-}
+void inititalizeRangeFinders() {
 
-void evaluateDistanceFromSample(byte idx) {
-  rangeFinderRange[idx] = ((float)rangeFinderRangeSum[idx] / (float)rangeFinderSampleCount[idx]) / 100;
-  if (!isInRangeOfRangeFinder(idx)) {
-    rangeFinderRange[idx] = INVALID_ALTITUDE;
+  for (byte i = 0; i < RANGER_COUNT; i++) {
+
+    rangeFinderRange[rangeFinders[i].target] = -1;
+    if (rangeFinders[i].triggerpin) {
+      digitalWrite(rangeFinders[i].triggerpin, LOW);
+      pinMode(rangeFinders[i].triggerpin, OUTPUT);
+    }
+    lastRange[i] = 32000; 
+    //    pinMode(rangeFinders[i].pin, INPUT);
   }
-  rangeFinderRangeSum[idx] = 0;
-  rangeFinderSampleCount[idx] = 0;
+  rangerWaitCycles = 10; // allow to initialize
 }
 
-/**
- * @return true if we can use safely the sonar
- */ 
-boolean isInRangeOfRangeFinder(byte idx) {
-  return ((rangeFinderRange[idx] < maxRangeFinderRange) && 
-          (rangeFinderRange[idx] > minRangeFinderRange));
+void updateRangeFinders() {
+
+  byte rangerToRead = 0;
+  byte rangerToTrigger = 0;
+
+  if (rangerWaitCycles) {
+    rangerWaitCycles--;
+    return;
+  }
+
+  if (RANGER_COUNT > 1) {
+    if ((rangerSchedule & 1) == 0) {
+      rangerToRead = 0;
+      rangerToTrigger = (rangerSchedule >> 1) + 1;
+    }
+    else {
+      rangerToRead = (rangerSchedule >> 1) + 1;
+      rangerToTrigger = 0;
+    }
+    rangerSchedule++;
+    if (((rangerSchedule>>1) + 1) >= (byte)RANGER_COUNT) {
+      rangerSchedule = 0;
+    }
+  }
+
+  if (rangeFinders[rangerToTrigger].triggerpin) {
+    digitalWrite(rangeFinders[rangerToTrigger].triggerpin, HIGH);
+  }
+
+  short range = (short)((long)analogRead(rangeFinders[rangerToRead].pin) * (long)(rangerScale[rangeFinders[rangerToRead].type]) / (1L<<ADC_NUMBER_OF_BITS));
+
+  // Following will accept the sample if it's either withing "spike margin" of last raw reading or previous accepted reading
+  // otherwise it's ignored as noise
+  
+  if ((abs(range - lastRange[rangerToRead]) < SPIKE_FILTER_MARGIN) ||
+      (abs(range * 1000.0 - rangeFinderRange[rangeFinders[rangerToRead].target]) < SPIKE_FILTER_MARGIN)) {
+    rangeFinderRange[rangeFinders[rangerToRead].target] = (float)range / 1000.0;
+  }
+  lastRange[rangerToRead] = range;
+ 
+  rangerWaitCycles = rangerWait[rangeFinders[rangerToRead].type];
+
+  if (rangeFinders[rangerToTrigger].triggerpin) {
+    digitalWrite(rangeFinders[rangerToTrigger].triggerpin, LOW);
+  }
 }
 
 #endif 
-
 #endif
 
 
