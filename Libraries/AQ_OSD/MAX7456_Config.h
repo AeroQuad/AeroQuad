@@ -39,7 +39,7 @@
 
 //Battery info - 5-16 characters long
 #define VOLTAGE_ROW 1
-#define VOLTAGE_COL 0
+#define VOLTAGE_COL 1                    // Some LCD monitors can't display this line if set to 0 see note above
 
 //Compass reading - 5 characters long
 #define COMPASS_ROW 0
@@ -47,7 +47,7 @@
 
 //Altitude reading - up to 8 characters long (32768 max)
 #define ALTITUDE_ROW 0
-#define ALTITUDE_COL 0
+#define ALTITUDE_COL 1                   // Some LCD monitors can't display this line if set to 0 see note above
 
 //Flight timer - 6 characters long
 #define TIMER_ROW 0
@@ -64,10 +64,10 @@
 #define RSSI_ROW     2
 #define RSSI_COL     24
 #define SIGNAL_QUALITY_ROW 2
-#define SIGNAL_QUALITY_COL 0
+#define SIGNAL_QUALITY_COL 1              // Some LCD monitors can't display this line if set to 0 see note above
 
 // GPS info
-#define GPS_ROW     MAX_screen_rows-2
+#define GPS_ROW     MAX_screen_rows-1     // Collides with other data if set to rows-2
 #define GPS_COL     1
 
 // GPS home arrow -- under the reticle
@@ -75,8 +75,8 @@
 #define GPS_HA_COL  14
 
 // Notify
-#define NOTIFY_ROW MAX_screen_rows-3
-#define NOTIFY_COL 1 // don't change this, it needs a full line
+#define NOTIFY_ROW MAX_screen_rows-2      // Collides with other data if set to rows-2
+#define NOTIFY_COL 1                      // don't change this, it needs a full line
 
 // Artificial horizon mode (default is attitude indicator)
 #define ARTIFICIAL_HORIZON
