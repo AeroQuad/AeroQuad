@@ -28,12 +28,7 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(float currentHeading) {  
-  int currentHeadingDeg = ((int)(currentHeading * 180/M_PI));
-
-  if (currentHeadingDeg < 0 ){ 
-   currentHeadingDeg = map(currentHeadingDeg, -179, -1,  180, 359); 
-  }
-
+  int currentHeadingDeg = fmod(((float)(currentHeading / M_PI * 180.0) + 360), 360);
 
   if (currentHeadingDeg != lastHeading) {
     char buf[6];
