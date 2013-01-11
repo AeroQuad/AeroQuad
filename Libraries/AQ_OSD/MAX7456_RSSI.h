@@ -33,9 +33,9 @@
   #include <AnalogRSSIReader.h>
 #endif	
 
-short lastRSSI = 1234; //forces update at first run
+short lastRSSI = 4321; //forces update at first run
 #if defined (UseEzUHFRSSIReader)
-  short lastQuality = 1234;  //forces update at first run
+  short lastQuality = 4321;  //forces update at first run
 #endif
 
 void displayRSSI() {
