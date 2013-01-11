@@ -28,7 +28,6 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(float currentHeading) {  
-//int currentHeadingDeg = ((int)(currentHeading / M_PI * 180.0) + 360) % 360; //Modulus not displaying 180 degrees ?
   int currentHeadingDeg = ((int)(currentHeading * 180/M_PI));
 
   if (currentHeadingDeg < 0 ){ 
