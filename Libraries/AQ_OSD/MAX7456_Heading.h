@@ -40,6 +40,7 @@ void displayHeading(float currentHeading) {
     writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
     lastHeading = currentHeadingDeg;
   }
+  
 }
 
 #endif  // #define _AQ_OSD_MAX7456_HEADING_H_
