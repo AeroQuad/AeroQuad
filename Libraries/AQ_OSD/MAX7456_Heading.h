@@ -28,7 +28,7 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(float currentHeading) {  
-  int currentHeadingDeg = fmod(((float)(currentHeading / M_PI * 180.0) + 360), 360);
+  int currentHeadingDeg = fmod(((float)(currentHeading / M_PI * 180.0) + 360), 360); // Convert radians to 0 - 360 Degrees
 
   if (currentHeadingDeg != lastHeading) {
     char buf[6];
