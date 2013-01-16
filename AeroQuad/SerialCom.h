@@ -353,7 +353,7 @@ void PrintDummyValues(byte number) {
 }
 
 
-float GetHeading()
+float getHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
     float heading = trueNorthHeading;
@@ -427,7 +427,7 @@ void sendSerialTelemetry() {
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverSmoothFactor[axis]);
     }
-	PrintDummyValues(10 - LASTCHANNEL);
+    PrintDummyValues(10 - LASTCHANNEL);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
@@ -576,14 +576,14 @@ void sendSerialTelemetry() {
   case 'r': // Vehicle attitude
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
-    SERIAL_PRINTLN(GetHeading());
+    SERIAL_PRINTLN(getHeading());
     break;
 
   case 's': // Send all flight data
     PrintValueComma(motorArmed);
     PrintValueComma(kinematicsAngle[XAXIS]);
     PrintValueComma(kinematicsAngle[YAXIS]);
-    PrintValueComma(GetHeading());
+    PrintValueComma(getHeading());
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       #if defined AltitudeHoldBaro
         PrintValueComma(getBaroAltitude());
