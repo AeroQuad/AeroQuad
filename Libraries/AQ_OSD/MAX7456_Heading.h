@@ -28,11 +28,11 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(float currentHeading) {  
-  int currentHeadingDeg = fmod(((float)(currentHeading / M_PI * 180.0) + 360), 360); // Convert radians to 0 - 360 Degrees
+  int currentHeadingDeg = (int)( 0.5 + (deg<-0.5 ? deg+360.0 : deg));      // Convert radians to 0 - 359 Degrees
 
   if (currentHeadingDeg != lastHeading) {
     char buf[6];
-    snprintf(buf,6,"\026%3d\027",currentHeadingDeg); // \026 is compass \027 is degree symbol
+    snprintf(buf,6,"\026%3d\027",currentHeadingDeg);                       // \026 is compass \027 is degree symbol
     writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
     lastHeading = currentHeadingDeg;
   }
