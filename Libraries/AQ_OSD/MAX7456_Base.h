@@ -26,10 +26,16 @@
 #define DMAH  0x05 //Holds MSB of display memory address, for setting location of a character on display
 #define DMAL  0x06 //Holds remaining 8 bits of display memory address - 480 characters displayed -> 9 bits req'd for addressing
 #define DMDI  0x07 //Display memory data in - character address or attribute byte, depending on 8b/16b mode and DMAH[1]
+#define CMM   0x08
+#define CMAH  0x09
+#define CMAL  0x0A
+#define CMDI  0x0B
 #define VM0   0x00 //Video mode 0 register - for choosing, NTSC/PAL, sync mode, OSD on/off, reset, VOUT on/off
 #define VM1   0x01 //Video mode 1 register - nothing very interesting in this one
 #define RB0   0x10 //Row 0 brightness register - 15 more follow sequentially (ending at 0x1F)
 #define STAT  0xA2 //Status register read address
+#define CMDO  0xC0 // character memory read
+#define DMDO  0XB0 // display memory read
 
 //MAX7456 commands - provided in datasheet.
 #define CLEAR_display      0x04

@@ -107,14 +107,14 @@ void initializeSPI() {
 
 void spi_writereg(byte r, byte d) {
 
-  device_spi.write(r);
+  device_spi.transfer(r);
   device_spi.transfer(d);  // use transfer to ensure we don't return until bus is free
 }
 
 byte spi_readreg(byte r) {
 
-  device_spi.write(r);
-  return(device_spi.read());
+  device_spi.transfer(r);
+  return(device_spi.transfer(0));
 }
 
 
