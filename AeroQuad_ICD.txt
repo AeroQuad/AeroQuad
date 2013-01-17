@@ -28,11 +28,11 @@ R                                       r       vehicle attitude
 S                                       s       read vehicle status
 T                                       t       read processed transmitter data
 U       range finder                    u       read range finder
-V       GPS PID                         v		read GPS PID
+V       GPS PID                         v		    read GPS PID
 W       write EEPROM values             w
 X       stop telemetry                  x       stop telemetry
 Y                                       y
-Z                                       z
+Z                                       z       read altitude values
 
 1       ESC cal high                    =       custom debug messages
 2       ESC cal low                     !       read flight software version

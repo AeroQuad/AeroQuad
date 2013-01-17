@@ -28,11 +28,8 @@
 int lastHeading = 361; // bogus to force update
 
 void displayHeading(float currentHeading) {
-  int currentHeadingDeg = ((int)(currentHeading * 180/M_PI));
-
-  if (currentHeadingDeg < 0 ){ 
-   currentHeadingDeg = map(currentHeadingDeg, -179, -1,  180, 359); 
-  }
+  float deg = degrees(currentHeading);
+  int currentHeadingDeg = (int)( 0.5 + (deg<-0.5 ? deg+360.0 : deg));
 
   if (currentHeadingDeg != lastHeading) {
     char buf[6];
