@@ -712,6 +712,16 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+
+#if defined(OSD) && defined(OSD_LOADFONT)
+  case '&': // fontload
+    if (OFF == motorArmed) {
+      max7456LoadFont();
+    }
+    queryType = 'X';
+    break;
+#endif
+
   }
 }
 
