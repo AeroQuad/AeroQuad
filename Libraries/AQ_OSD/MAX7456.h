@@ -65,6 +65,10 @@
 
 #include "MAX7456_Base.h"   // writeChars, detectVideoStandard, init
 
+#ifdef OSD_LOADFONT
+#include "MAX7456_FontLoad.h"
+#endif
+
 #include "MAX7456_Notify.h" // Notification system
 
 //////////////////////////////////////////////////////////////////////////////
