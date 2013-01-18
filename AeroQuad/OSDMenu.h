@@ -98,6 +98,9 @@ void menuHandleSimple(byte mode, byte action) {
     case 2:
       homePosition.latitude   = GPS_INVALID_ANGLE;
       homePosition.longitude  = GPS_INVALID_ANGLE;
+#if defined AltitudeHoldBaro
+      initializeBaro();
+#endif
       break;
 #endif
 /* TEMPLATE CODE FOR NEW ACTION:
