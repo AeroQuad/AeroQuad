@@ -257,13 +257,13 @@ void readPilotCommands() {
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {
         flightMode = ATTITUDE_FLIGHT_MODE;
-        lastFlightMode = ATTITUDE_FLIGHT_MODE;
+        previousFlightMode = ATTITUDE_FLIGHT_MODE;
     }
     else {
         flightMode = RATE_FLIGHT_MODE;
-        if (lastFlightMode != RATE_FLIGHT_MODE) { // reset integral error when switching from attitude to rate mode
+        if (previousFlightMode != RATE_FLIGHT_MODE) { // reset integral error when switching from attitude to rate mode
             zeroIntegralError();
-            lastFlightMode = RATE_FLIGHT_MODE;
+            previousFlightMode = RATE_FLIGHT_MODE;
         }
     }
 
