@@ -1,0 +1,789 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.eabi_attribute 27, 3
+   4              		.fpu fpv4-sp-d16
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.thumb
+  15              		.file	"flash_stm32.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.FLASH_GetStatus,"ax",%progbits
+  20              		.align	1
+  21              		.global	FLASH_GetStatus
+  22              		.thumb
+  23              		.thumb_func
+  25              	FLASH_GetStatus:
+  26              	.LFB3:
+  27              		.file 1 "/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F
+   1:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #include "libmaple.h"
+   2:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #include "util.h"
+   3:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** //#include "flash.h"
+   4:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #include "flash_stm32.h"
+   5:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+   6:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+   7:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+   8:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** typedef struct
+   9:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+  10:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 ACR;      /*!< FLASH access control register, Address offset: 0x00 */
+  11:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 KEYR;     /*!< FLASH key register,            Address offset: 0x04 */
+  12:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 OPTKEYR;  /*!< FLASH option key register,     Address offset: 0x08 */
+  13:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 SR;       /*!< FLASH status register,         Address offset: 0x0C */
+  14:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 CR;       /*!< FLASH control register,        Address offset: 0x10 */
+  15:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   __io uint32 OPTCR;    /*!< FLASH option control register, Address offset: 0x14 */
+  16:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** } FLASH_TypeDef;
+  17:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  18:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define PERIPH_BASE           ((uint32)0x40000000) /*!< Peripheral base address in the alias region
+  19:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define AHB1PERIPH_BASE       (PERIPH_BASE + 0x00020000)
+  20:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_R_BASE          (AHB1PERIPH_BASE + 0x3C00)
+  21:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH                 ((FLASH_TypeDef *) FLASH_R_BASE)
+  22:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  23:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_EOP                 ((uint32)0x00000001)  /*!< FLASH End of Operation flag */
+  24:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_OPERR               ((uint32)0x00000002)  /*!< FLASH operation Error flag */
+  25:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_WRPERR              ((uint32)0x00000010)  /*!< FLASH Write protected error flag 
+  26:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_PGAERR              ((uint32)0x00000020)  /*!< FLASH Programming Alignment error
+  27:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_PGPERR              ((uint32)0x00000040)  /*!< FLASH Programming Parallelism err
+  28:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_PGSERR              ((uint32)0x00000080)  /*!< FLASH Programming Sequence error 
+  29:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_FLAG_BSY                 ((uint32)0x00010000)  /*!< FLASH Busy flag */ 
+  30:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  31:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_PSIZE_BYTE           ((uint32)0x00000000)
+  32:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_PSIZE_HALF_WORD      ((uint32)0x00000100)
+  33:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_PSIZE_WORD           ((uint32)0x00000200)
+  34:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_PSIZE_DOUBLE_WORD    ((uint32)0x00000300)
+  35:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define CR_PSIZE_MASK              ((uint32)0xFFFFFCFF)
+  36:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  37:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define SECTOR_MASK                ((uint32)0xFFFFFF07)
+  38:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  39:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /*******************  Bits definition for FLASH_CR register  ******************/
+  40:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_PG                          ((uint32)0x00000001)
+  41:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_SER                         ((uint32)0x00000002)
+  42:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_MER                         ((uint32)0x00000004)
+  43:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_SNB_0                       ((uint32)0x00000008)
+  44:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_SNB_1                       ((uint32)0x00000010)
+  45:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_SNB_2                       ((uint32)0x00000020)
+  46:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_SNB_3                       ((uint32)0x00000040)
+  47:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_PSIZE_0                     ((uint32)0x00000100)
+  48:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_PSIZE_1                     ((uint32)0x00000200)
+  49:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_STRT                        ((uint32)0x00010000)
+  50:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_EOPIE                       ((uint32)0x01000000)
+  51:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_CR_LOCK                        ((uint32)0x80000000)
+  52:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  53:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_KEY1			((uint32)0x45670123)
+  54:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define FLASH_KEY2			((uint32)0xCDEF89AB)
+  55:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  56:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /* Delay definition */
+  57:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define EraseTimeout		((uint32)0x00000FFF)
+  58:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define ProgramTimeout		((uint32)0x0000001F)
+  59:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  60:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define VoltageRange_1        ((uint8)0x00)  /*!< Device operating range: 1.8V to 2.1V */
+  61:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define VoltageRange_2        ((uint8)0x01)  /*!<Device operating range: 2.1V to 2.7V */
+  62:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define VoltageRange_3        ((uint8)0x02)  /*!<Device operating range: 2.7V to 3.6V */
+  63:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define VoltageRange_4        ((uint8)0x03)  /*!<Device operating range: 2.7V to 3.6V + External Vp
+  64:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  65:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** #define IS_VOLTAGERANGE(RANGE)(((RANGE) == VoltageRange_1) || \
+  66:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****                                ((RANGE) == VoltageRange_2) || \
+  67:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****                                ((RANGE) == VoltageRange_3) || \
+  68:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****                                ((RANGE) == VoltageRange_4))                                        
+  69:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  70:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+  71:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Inserts a time delay.
+  72:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  None
+  73:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval None
+  74:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+  75:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** static void delay(void)
+  76:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+  77:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	__io uint32 i = 0;
+  78:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	for(i = 0xFF; i != 0; i--) { }
+  79:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+  80:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  81:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+  82:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Returns the FLASH Status.
+  83:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  None
+  84:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PROGRAM,
+  85:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                       FLASH_ERROR_WRP, FLASH_ERROR_OPERATION or FLASH_COMPLETE.
+  86:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+  87:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** FLASH_Status FLASH_GetStatus(void)
+  88:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+  28              		.loc 1 88 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33              	.LVL0:
+  89:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   FLASH_Status flashstatus = FLASH_COMPLETE;
+  90:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+  91:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   if((FLASH->SR & FLASH_FLAG_BSY) == FLASH_FLAG_BSY)
+  34              		.loc 1 91 0
+  35 0000 0B4B     		ldr	r3, .L9
+  36 0002 DA68     		ldr	r2, [r3, #12]
+  37 0004 D103     		lsls	r1, r2, #15
+  38 0006 0DD4     		bmi	.L4
+  92:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+  93:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     flashstatus = FLASH_BUSY;
+  94:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+  95:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   else
+  96:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+  97:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     if((FLASH->SR & FLASH_FLAG_WRPERR) != 0)
+  39              		.loc 1 97 0
+  40 0008 D868     		ldr	r0, [r3, #12]
+  41 000a C206     		lsls	r2, r0, #27
+  42 000c 0CD4     		bmi	.L5
+  98:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     {
+  99:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       flashstatus = FLASH_ERROR_WRP;
+ 100:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     }
+ 101:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     else
+ 102:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     {
+ 103:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       if((FLASH->SR & 0xEF) != 0)
+  43              		.loc 1 103 0
+  44 000e D968     		ldr	r1, [r3, #12]
+  45 0010 11F0EF0F 		tst	r1, #239
+  46 0014 0AD1     		bne	.L6
+  47              	.LBB4:
+  48              	.LBB5:
+ 104:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       {
+ 105:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         flashstatus = FLASH_ERROR_PROGRAM;
+ 106:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       }
+ 107:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       else
+ 108:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       {
+ 109:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         if((FLASH->SR & FLASH_FLAG_OPERR) != 0)
+  49              		.loc 1 109 0
+  50 0016 DB68     		ldr	r3, [r3, #12]
+  51 0018 13F0020F 		tst	r3, #2
+ 110:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         {
+ 111:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****           flashstatus = FLASH_ERROR_OPERATION;
+  52              		.loc 1 111 0
+  53 001c 0CBF     		ite	eq
+  54 001e 0520     		moveq	r0, #5
+  55 0020 0C20     		movne	r0, #12
+  56 0022 7047     		bx	lr
+  57              	.L4:
+  58              	.LBE5:
+  59              	.LBE4:
+  93:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     flashstatus = FLASH_BUSY;
+  60              		.loc 1 93 0
+  61 0024 0120     		movs	r0, #1
+  62 0026 7047     		bx	lr
+  63              	.L5:
+  99:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       flashstatus = FLASH_ERROR_WRP;
+  64              		.loc 1 99 0
+  65 0028 0320     		movs	r0, #3
+  66 002a 7047     		bx	lr
+  67              	.L6:
+ 105:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         flashstatus = FLASH_ERROR_PROGRAM;
+  68              		.loc 1 105 0
+  69 002c 0B20     		movs	r0, #11
+  70              	.LVL1:
+ 112:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         }
+ 113:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         else
+ 114:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         {
+ 115:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****           flashstatus = FLASH_COMPLETE;
+ 116:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****         }
+ 117:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****       }
+ 118:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     }
+ 119:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 120:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Return the FLASH Status */
+ 121:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   return flashstatus;
+ 122:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+  71              		.loc 1 122 0
+  72 002e 7047     		bx	lr
+  73              	.L10:
+  74              		.align	2
+  75              	.L9:
+  76 0030 003C0240 		.word	1073888256
+  77              		.cfi_endproc
+  78              	.LFE3:
+  80              		.section	.text.FLASH_WaitForLastOperation,"ax",%progbits
+  81              		.align	1
+  82              		.global	FLASH_WaitForLastOperation
+  83              		.thumb
+  84              		.thumb_func
+  86              	FLASH_WaitForLastOperation:
+  87              	.LFB4:
+ 123:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 124:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 125:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 126:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Waits for a Flash operation to complete or a TIMEOUT to occur.
+ 127:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  Timeout: FLASH progamming Timeout
+ 128:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
+ 129:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *   FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
+ 130:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 131:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** FLASH_Status FLASH_WaitForLastOperation(uint32 Timeout)
+ 132:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+  88              		.loc 1 132 0
+  89              		.cfi_startproc
+  90              		@ args = 0, pretend = 0, frame = 8
+  91              		@ frame_needed = 0, uses_anonymous_args = 0
+  92              	.LVL2:
+  93 0000 13B5     		push	{r0, r1, r4, lr}
+  94              	.LCFI0:
+  95              		.cfi_def_cfa_offset 16
+  96              		.cfi_offset 0, -16
+  97              		.cfi_offset 1, -12
+  98              		.cfi_offset 4, -8
+  99              		.cfi_offset 14, -4
+ 100              		.loc 1 132 0
+ 101 0002 0446     		mov	r4, r0
+ 133:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	FLASH_Status status;
+ 134:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 135:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	/* Check for the Flash Status */
+ 136:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	status = FLASH_GetStatus();
+ 102              		.loc 1 136 0
+ 103 0004 FFF7FEFF 		bl	FLASH_GetStatus
+ 104              	.LVL3:
+ 105              	.L12:
+ 137:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	/* Wait for a Flash operation to complete or a TIMEOUT to occur */
+ 138:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	while((status == FLASH_BUSY) && (Timeout != 0x00))
+ 106              		.loc 1 138 0 discriminator 1
+ 107 0008 0128     		cmp	r0, #1
+ 108 000a 0FD1     		bne	.L15
+ 109              		.loc 1 138 0 is_stmt 0 discriminator 2
+ 110 000c 64B1     		cbz	r4, .L20
+ 111              	.L16:
+ 112              	.LBB8:
+ 113              	.LBB9:
+  77:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	__io uint32 i = 0;
+ 114              		.loc 1 77 0 is_stmt 1
+ 115 000e 0023     		movs	r3, #0
+ 116 0010 0193     		str	r3, [sp, #4]
+  78:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	for(i = 0xFF; i != 0; i--) { }
+ 117              		.loc 1 78 0
+ 118 0012 FF22     		movs	r2, #255
+ 119              	.LVL4:
+ 120              	.L19:
+ 121 0014 0192     		str	r2, [sp, #4]
+ 122 0016 0198     		ldr	r0, [sp, #4]
+ 123 0018 10B1     		cbz	r0, .L21
+ 124              	.L14:
+ 125 001a 0199     		ldr	r1, [sp, #4]
+ 126 001c 4A1E     		subs	r2, r1, #1
+ 127              	.LVL5:
+ 128 001e F9E7     		b	.L19
+ 129              	.LVL6:
+ 130              	.L21:
+ 131              	.LBE9:
+ 132              	.LBE8:
+ 139:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	{
+ 140:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		delay();
+ 141:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		status = FLASH_GetStatus();
+ 133              		.loc 1 141 0
+ 134 0020 FFF7FEFF 		bl	FLASH_GetStatus
+ 135              	.LVL7:
+ 142:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		Timeout--;
+ 136              		.loc 1 142 0
+ 137 0024 013C     		subs	r4, r4, #1
+ 138              	.LVL8:
+ 139 0026 EFE7     		b	.L12
+ 140              	.L20:
+ 143:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	}
+ 144:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	if (Timeout == 0)
+ 145:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		status = FLASH_TIMEOUT;
+ 141              		.loc 1 145 0
+ 142 0028 0620     		movs	r0, #6
+ 143              	.LVL9:
+ 144 002a 02E0     		b	.L17
+ 145              	.LVL10:
+ 146              	.L15:
+ 147 002c 002C     		cmp	r4, #0
+ 148 002e 08BF     		it	eq
+ 149 0030 0620     		moveq	r0, #6
+ 150              	.LVL11:
+ 151              	.L17:
+ 146:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	/* Return the operation status */
+ 147:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	return status;
+ 148:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+ 152              		.loc 1 148 0
+ 153 0032 1CBD     		pop	{r2, r3, r4, pc}
+ 154              		.cfi_endproc
+ 155              	.LFE4:
+ 157              		.section	.text.FLASH_EraseSector,"ax",%progbits
+ 158              		.align	1
+ 159              		.global	FLASH_EraseSector
+ 160              		.thumb
+ 161              		.thumb_func
+ 163              	FLASH_EraseSector:
+ 164              	.LFB5:
+ 149:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 150:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 151:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 152:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 153:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Erases a specified FLASH Sector.
+ 154:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *
+ 155:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  FLASH_Sector: The Sector number to be erased.
+ 156:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *          This parameter can be a value between FLASH_Sector_0 and FLASH_Sector_11
+ 157:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *
+ 158:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  VoltageRange: The device voltage range which defines the erase parallelism.
+ 159:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *          This parameter can be one of the following values:
+ 160:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *            @arg VoltageRange_1: when the device voltage range is 1.8V to 2.1V,
+ 161:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                                  the operation will be done by byte (8-bit)
+ 162:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *            @arg VoltageRange_2: when the device voltage range is 2.1V to 2.7V,
+ 163:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                                  the operation will be done by half word (16-bit)
+ 164:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *            @arg VoltageRange_3: when the device voltage range is 2.7V to 3.6V,
+ 165:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                                  the operation will be done by word (32-bit)
+ 166:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *            @arg VoltageRange_4: when the device voltage range is 2.7V to 3.6V + External Vpp,
+ 167:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                                  the operation will be done by double word (64-bit)
+ 168:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *
+ 169:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PROGRAM,
+ 170:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                       FLASH_ERROR_WRP, FLASH_ERROR_OPERATION or FLASH_COMPLETE.
+ 171:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 172:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** FLASH_Status FLASH_EraseSector(uint32 FLASH_Sector, uint8 VoltageRange)
+ 173:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 165              		.loc 1 173 0
+ 166              		.cfi_startproc
+ 167              		@ args = 0, pretend = 0, frame = 0
+ 168              		@ frame_needed = 0, uses_anonymous_args = 0
+ 169              	.LVL12:
+ 170 0000 70B5     		push	{r4, r5, r6, lr}
+ 171              	.LCFI1:
+ 172              		.cfi_def_cfa_offset 16
+ 173              		.cfi_offset 4, -16
+ 174              		.cfi_offset 5, -12
+ 175              		.cfi_offset 6, -8
+ 176              		.cfi_offset 14, -4
+ 177              		.loc 1 173 0
+ 178 0002 0646     		mov	r6, r0
+ 174:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   uint32 tmp_psize = 0x0;
+ 175:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   FLASH_Status status = FLASH_COMPLETE;
+ 176:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 177:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Check the parameters */
+ 178:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   //assert_param(IS_FLASH_SECTOR(FLASH_Sector));
+ 179:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   //assert_param(IS_VOLTAGERANGE(VoltageRange));
+ 180:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 181:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   if(VoltageRange == VoltageRange_1)
+ 179              		.loc 1 181 0
+ 180 0004 41B1     		cbz	r1, .L25
+ 182:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 183:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****      tmp_psize = FLASH_PSIZE_BYTE;
+ 184:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 185:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   else if(VoltageRange == VoltageRange_2)
+ 181              		.loc 1 185 0
+ 182 0006 0129     		cmp	r1, #1
+ 183 0008 08D0     		beq	.L26
+ 186:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 187:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     tmp_psize = FLASH_PSIZE_HALF_WORD;
+ 188:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 189:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   else if(VoltageRange == VoltageRange_3)
+ 190:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 191:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     tmp_psize = FLASH_PSIZE_WORD;
+ 184              		.loc 1 191 0
+ 185 000a 0229     		cmp	r1, #2
+ 186 000c 14BF     		ite	ne
+ 187 000e 4FF44075 		movne	r5, #768
+ 188 0012 4FF40075 		moveq	r5, #512
+ 189 0016 03E0     		b	.L23
+ 190              	.L25:
+ 183:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****      tmp_psize = FLASH_PSIZE_BYTE;
+ 191              		.loc 1 183 0
+ 192 0018 0D46     		mov	r5, r1
+ 193 001a 01E0     		b	.L23
+ 194              	.L26:
+ 187:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     tmp_psize = FLASH_PSIZE_HALF_WORD;
+ 195              		.loc 1 187 0
+ 196 001c 4FF48075 		mov	r5, #256
+ 197              	.L23:
+ 198              	.LVL13:
+ 192:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 193:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   else
+ 194:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 195:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     tmp_psize = FLASH_PSIZE_DOUBLE_WORD;
+ 196:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 197:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Wait for last operation to be completed */
+ 198:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   status = FLASH_WaitForLastOperation(EraseTimeout);
+ 199              		.loc 1 198 0
+ 200 0020 40F6FF70 		movw	r0, #4095
+ 201              	.LVL14:
+ 202 0024 FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 203              	.LVL15:
+ 199:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 200:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   if(status == FLASH_COMPLETE)
+ 204              		.loc 1 200 0
+ 205 0028 0528     		cmp	r0, #5
+ 206 002a 20D1     		bne	.L24
+ 201:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 202:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     /* if the previous operation is completed, proceed to erase the sector */
+ 203:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR &= CR_PSIZE_MASK;
+ 207              		.loc 1 203 0
+ 208 002c 104C     		ldr	r4, .L28
+ 209 002e 2369     		ldr	r3, [r4, #16]
+ 210 0030 23F44070 		bic	r0, r3, #768
+ 211              	.LVL16:
+ 212 0034 2061     		str	r0, [r4, #16]
+ 204:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR |= tmp_psize;
+ 213              		.loc 1 204 0
+ 214 0036 2169     		ldr	r1, [r4, #16]
+ 215 0038 0D43     		orrs	r5, r5, r1
+ 216              	.LVL17:
+ 217 003a 2561     		str	r5, [r4, #16]
+ 205:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR &= SECTOR_MASK;
+ 218              		.loc 1 205 0
+ 219 003c 2269     		ldr	r2, [r4, #16]
+ 220 003e 22F0F803 		bic	r3, r2, #248
+ 221 0042 2361     		str	r3, [r4, #16]
+ 206:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR |= FLASH_CR_SER | FLASH_Sector;
+ 222              		.loc 1 206 0
+ 223 0044 2069     		ldr	r0, [r4, #16]
+ 224 0046 40F00201 		orr	r1, r0, #2
+ 225 004a 0E43     		orrs	r6, r6, r1
+ 226              	.LVL18:
+ 227 004c 2661     		str	r6, [r4, #16]
+ 207:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR |= FLASH_CR_STRT;
+ 228              		.loc 1 207 0
+ 229 004e 2269     		ldr	r2, [r4, #16]
+ 230 0050 42F48033 		orr	r3, r2, #65536
+ 231 0054 2361     		str	r3, [r4, #16]
+ 208:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 209:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     /* Wait for last operation to be completed */
+ 210:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     status = FLASH_WaitForLastOperation(EraseTimeout);
+ 232              		.loc 1 210 0
+ 233 0056 40F6FF70 		movw	r0, #4095
+ 234 005a FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 235              	.LVL19:
+ 211:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 212:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     /* if the erase operation is completed, disable the SER Bit */
+ 213:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR &= (~FLASH_CR_SER);
+ 236              		.loc 1 213 0
+ 237 005e 2169     		ldr	r1, [r4, #16]
+ 238 0060 21F00202 		bic	r2, r1, #2
+ 239 0064 2261     		str	r2, [r4, #16]
+ 214:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->CR &= SECTOR_MASK;
+ 240              		.loc 1 214 0
+ 241 0066 2369     		ldr	r3, [r4, #16]
+ 242 0068 23F0F801 		bic	r1, r3, #248
+ 243 006c 2161     		str	r1, [r4, #16]
+ 244              	.LVL20:
+ 245              	.L24:
+ 215:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }
+ 216:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Return the Erase Status */
+ 217:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   return status;
+ 218:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+ 246              		.loc 1 218 0
+ 247 006e 70BD     		pop	{r4, r5, r6, pc}
+ 248              	.L29:
+ 249              		.align	2
+ 250              	.L28:
+ 251 0070 003C0240 		.word	1073888256
+ 252              		.cfi_endproc
+ 253              	.LFE5:
+ 255              		.section	.text.FLASH_ErasePage,"ax",%progbits
+ 256              		.align	1
+ 257              		.global	FLASH_ErasePage
+ 258              		.thumb
+ 259              		.thumb_func
+ 261              	FLASH_ErasePage:
+ 262              	.LFB6:
+ 219:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 220:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 221:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Erases a specified FLASH page.
+ 222:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  Page_Address: The page address to be erased.
+ 223:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PG,
+ 224:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *   FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
+ 225:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 226:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** FLASH_Status FLASH_ErasePage(uint32 Page_Address)
+ 227:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 263              		.loc 1 227 0
+ 264              		.cfi_startproc
+ 265              		@ args = 0, pretend = 0, frame = 0
+ 266              		@ frame_needed = 0, uses_anonymous_args = 0
+ 267              		@ link register save eliminated.
+ 268              	.LVL21:
+ 228:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	int Page_Offset = Page_Address - 0x08000000;
+ 269              		.loc 1 228 0
+ 270 0000 00F17840 		add	r0, r0, #-134217728
+ 271              	.LVL22:
+ 229:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	uint32 FLASH_Sector;
+ 230:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 231:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	if(Page_Offset < 0x10000) {
+ 272              		.loc 1 231 0
+ 273 0004 B0F5803F 		cmp	r0, #65536
+ 274 0008 04DA     		bge	.L31
+ 232:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		FLASH_Sector = Page_Offset / 0x4000;
+ 275              		.loc 1 232 0
+ 276 000a 4FF48043 		mov	r3, #16384
+ 277 000e 90FBF3F2 		sdiv	r2, r0, r3
+ 278              	.LVL23:
+ 279 0012 06E0     		b	.L32
+ 280              	.LVL24:
+ 281              	.L31:
+ 233:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	} else if(Page_Offset < 0x20000) {
+ 282              		.loc 1 233 0
+ 283 0014 B0F5003F 		cmp	r0, #131072
+ 284 0018 02DB     		blt	.L33
+ 234:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		FLASH_Sector = 4;
+ 235:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	} else {
+ 236:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		FLASH_Sector = 4 + Page_Offset / 0x20000;
+ 285              		.loc 1 236 0
+ 286 001a 4114     		asrs	r1, r0, #17
+ 287 001c 0A1D     		adds	r2, r1, #4
+ 288              	.LVL25:
+ 289 001e 00E0     		b	.L32
+ 290              	.LVL26:
+ 291              	.L33:
+ 234:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		FLASH_Sector = 4;
+ 292              		.loc 1 234 0
+ 293 0020 0422     		movs	r2, #4
+ 294              	.L32:
+ 295              	.LVL27:
+ 237:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	}
+ 238:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	
+ 239:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	return FLASH_EraseSector(8 * FLASH_Sector, VoltageRange_4);
+ 296              		.loc 1 239 0
+ 297 0022 D000     		lsls	r0, r2, #3
+ 298              	.LVL28:
+ 299 0024 0321     		movs	r1, #3
+ 240:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+ 300              		.loc 1 240 0
+ 239:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	return FLASH_EraseSector(8 * FLASH_Sector, VoltageRange_4);
+ 301              		.loc 1 239 0
+ 302 0026 FFF7FEBF 		b	FLASH_EraseSector
+ 303              	.LVL29:
+ 304              		.cfi_endproc
+ 305              	.LFE6:
+ 307              		.section	.text.FLASH_ProgramHalfWord,"ax",%progbits
+ 308              		.align	1
+ 309              		.global	FLASH_ProgramHalfWord
+ 310              		.thumb
+ 311              		.thumb_func
+ 313              	FLASH_ProgramHalfWord:
+ 314              	.LFB7:
+ 241:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 242:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 243:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 244:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 245:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Programs a half word (16-bit) at a specified address.
+ 246:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @note   This function must be used when the device voltage range is from 2.1V to 3.6V.
+ 247:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  Address: specifies the address to be programmed.
+ 248:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *         This parameter can be any address in Program memory zone or in OTP zone.
+ 249:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  Data: specifies the data to be programmed.
+ 250:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PROGRAM,
+ 251:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   *                       FLASH_ERROR_WRP, FLASH_ERROR_OPERATION or FLASH_COMPLETE.
+ 252:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 253:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** FLASH_Status FLASH_ProgramHalfWord(uint32 Address, uint16 Data)
+ 254:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 315              		.loc 1 254 0
+ 316              		.cfi_startproc
+ 317              		@ args = 0, pretend = 0, frame = 0
+ 318              		@ frame_needed = 0, uses_anonymous_args = 0
+ 319              	.LVL30:
+ 255:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   FLASH_Status status = FLASH_BAD_ADDRESS;
+ 256:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 257:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	if (IS_FLASH_ADDRESS(Address))
+ 320              		.loc 1 257 0
+ 321 0000 134B     		ldr	r3, .L40
+ 322 0002 00F17842 		add	r2, r0, #-134217728
+ 323 0006 9A42     		cmp	r2, r3
+ 254:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 324              		.loc 1 254 0
+ 325 0008 70B5     		push	{r4, r5, r6, lr}
+ 326              	.LCFI2:
+ 327              		.cfi_def_cfa_offset 16
+ 328              		.cfi_offset 4, -16
+ 329              		.cfi_offset 5, -12
+ 330              		.cfi_offset 6, -8
+ 331              		.cfi_offset 14, -4
+ 254:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 332              		.loc 1 254 0
+ 333 000a 0546     		mov	r5, r0
+ 334 000c 0E46     		mov	r6, r1
+ 335              		.loc 1 257 0
+ 336 000e 1CD8     		bhi	.L36
+ 258:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	{
+ 259:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		/* Wait for last operation to be completed */
+ 260:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		status = FLASH_WaitForLastOperation(ProgramTimeout);
+ 337              		.loc 1 260 0
+ 338 0010 1F20     		movs	r0, #31
+ 339              	.LVL31:
+ 340 0012 FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 341              	.LVL32:
+ 261:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 262:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		if(status == FLASH_COMPLETE)
+ 342              		.loc 1 262 0
+ 343 0016 0528     		cmp	r0, #5
+ 344 0018 18D1     		bne	.L35
+ 263:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		{
+ 264:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			/* if the previous operation is completed, proceed to program the new data */
+ 265:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			FLASH->CR &= CR_PSIZE_MASK;
+ 345              		.loc 1 265 0
+ 346 001a 0E4C     		ldr	r4, .L40+4
+ 347 001c 2069     		ldr	r0, [r4, #16]
+ 348              	.LVL33:
+ 349 001e 20F44071 		bic	r1, r0, #768
+ 350 0022 2161     		str	r1, [r4, #16]
+ 266:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			FLASH->CR |= FLASH_PSIZE_HALF_WORD;
+ 351              		.loc 1 266 0
+ 352 0024 2269     		ldr	r2, [r4, #16]
+ 353 0026 42F48073 		orr	r3, r2, #256
+ 354 002a 2361     		str	r3, [r4, #16]
+ 267:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			FLASH->CR |= FLASH_CR_PG;
+ 355              		.loc 1 267 0
+ 356 002c 2069     		ldr	r0, [r4, #16]
+ 357 002e 40F00101 		orr	r1, r0, #1
+ 358 0032 2161     		str	r1, [r4, #16]
+ 268:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 269:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			*(__io uint16*)Address = Data;
+ 270:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 271:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			/* Wait for last operation to be completed */
+ 272:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   		status = FLASH_WaitForLastOperation(ProgramTimeout);
+ 359              		.loc 1 272 0
+ 360 0034 1F20     		movs	r0, #31
+ 269:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			*(__io uint16*)Address = Data;
+ 361              		.loc 1 269 0
+ 362 0036 2E80     		strh	r6, [r5, #0]	@ movhi
+ 363              		.loc 1 272 0
+ 364 0038 FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 365              	.LVL34:
+ 273:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 274:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			if(status != FLASH_TIMEOUT)
+ 366              		.loc 1 274 0
+ 367 003c 0628     		cmp	r0, #6
+ 368 003e 05D0     		beq	.L35
+ 275:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			{
+ 276:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			  /* if the program operation is completed, disable the PG Bit */
+ 277:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			  FLASH->CR &= (~FLASH_CR_PG);
+ 369              		.loc 1 277 0
+ 370 0040 2269     		ldr	r2, [r4, #16]
+ 371 0042 22F00103 		bic	r3, r2, #1
+ 372 0046 2361     		str	r3, [r4, #16]
+ 373 0048 70BD     		pop	{r4, r5, r6, pc}
+ 374              	.LVL35:
+ 375              	.L36:
+ 255:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   FLASH_Status status = FLASH_BAD_ADDRESS;
+ 376              		.loc 1 255 0
+ 377 004a 0720     		movs	r0, #7
+ 378              	.LVL36:
+ 379              	.L35:
+ 278:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 			}
+ 279:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 		}
+ 280:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 	}
+ 281:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 282:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Return the Program Status */
+ 283:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   return status;
+ 284:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+ 380              		.loc 1 284 0
+ 381 004c 70BD     		pop	{r4, r5, r6, pc}
+ 382              	.L41:
+ 383 004e 00BF     		.align	2
+ 384              	.L40:
+ 385 0050 FEFF0700 		.word	524286
+ 386 0054 003C0240 		.word	1073888256
+ 387              		.cfi_endproc
+ 388              	.LFE7:
+ 390              		.section	.text.FLASH_Unlock,"ax",%progbits
+ 391              		.align	1
+ 392              		.global	FLASH_Unlock
+ 393              		.thumb
+ 394              		.thumb_func
+ 396              	FLASH_Unlock:
+ 397              	.LFB8:
+ 285:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 286:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 287:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 288:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Unlocks the FLASH control register access
+ 289:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  None
+ 290:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval None
+ 291:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 292:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** void FLASH_Unlock(void)
+ 293:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 398              		.loc 1 293 0
+ 399              		.cfi_startproc
+ 400              		@ args = 0, pretend = 0, frame = 0
+ 401              		@ frame_needed = 0, uses_anonymous_args = 0
+ 402              		@ link register save eliminated.
+ 294:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   if((FLASH->CR & FLASH_CR_LOCK) != 0)
+ 403              		.loc 1 294 0
+ 404 0000 044B     		ldr	r3, .L44
+ 405 0002 1A69     		ldr	r2, [r3, #16]
+ 406 0004 002A     		cmp	r2, #0
+ 407 0006 04DA     		bge	.L42
+ 295:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   {
+ 296:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     /* Authorize the FLASH Registers access */
+ 297:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->KEYR = FLASH_KEY1;
+ 408              		.loc 1 297 0
+ 409 0008 0348     		ldr	r0, .L44+4
+ 298:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->KEYR = FLASH_KEY2;
+ 410              		.loc 1 298 0
+ 411 000a 00F18831 		add	r1, r0, #-2004318072
+ 297:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****     FLASH->KEYR = FLASH_KEY1;
+ 412              		.loc 1 297 0
+ 413 000e 5860     		str	r0, [r3, #4]
+ 414              		.loc 1 298 0
+ 415 0010 5960     		str	r1, [r3, #4]
+ 416              	.L42:
+ 417 0012 7047     		bx	lr
+ 418              	.L45:
+ 419              		.align	2
+ 420              	.L44:
+ 421 0014 003C0240 		.word	1073888256
+ 422 0018 23016745 		.word	1164378403
+ 423              		.cfi_endproc
+ 424              	.LFE8:
+ 426              		.section	.text.FLASH_Lock,"ax",%progbits
+ 427              		.align	1
+ 428              		.global	FLASH_Lock
+ 429              		.thumb
+ 430              		.thumb_func
+ 432              	FLASH_Lock:
+ 433              	.LFB9:
+ 299:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   }  
+ 300:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** }
+ 301:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** 
+ 302:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** /**
+ 303:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @brief  Locks the FLASH control register access
+ 304:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @param  None
+ 305:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   * @retval None
+ 306:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   */
+ 307:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** void FLASH_Lock(void)
+ 308:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c **** {
+ 434              		.loc 1 308 0
+ 435              		.cfi_startproc
+ 436              		@ args = 0, pretend = 0, frame = 0
+ 437              		@ frame_needed = 0, uses_anonymous_args = 0
+ 438              		@ link register save eliminated.
+ 309:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   /* Set the LOCK Bit to lock the FLASH Registers access */
+ 310:/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F2.c ****   FLASH->CR |= FLASH_CR_LOCK;
+ 439              		.loc 1 310 0
+ 440 0000 024B     		ldr	r3, .L47
+ 441 0002 1A69     		ldr	r2, [r3, #16]
+ 442 0004 42F00040 		orr	r0, r2, #-2147483648
+ 443 0008 1861     		str	r0, [r3, #16]
+ 444 000a 7047     		bx	lr
+ 445              	.L48:
+ 446              		.align	2
+ 447              	.L47:
+ 448 000c 003C0240 		.word	1073888256
+ 449              		.cfi_endproc
+ 450              	.LFE9:
+ 452              		.text
+ 453              	.Letext0:
+ 454              		.file 2 "../Libmaple/libmaple/libmaple/libmaple_types.h"
+ 455              		.file 3 "/Users/imchipwood/Dropbox/AeroQuadGit/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 flash_stm32.c
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:20     .text.FLASH_GetStatus:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:25     .text.FLASH_GetStatus:0000000000000000 FLASH_GetStatus
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:76     .text.FLASH_GetStatus:0000000000000030 $d
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:81     .text.FLASH_WaitForLastOperation:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:86     .text.FLASH_WaitForLastOperation:0000000000000000 FLASH_WaitForLastOperation
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:158    .text.FLASH_EraseSector:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:163    .text.FLASH_EraseSector:0000000000000000 FLASH_EraseSector
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:251    .text.FLASH_EraseSector:0000000000000070 $d
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:256    .text.FLASH_ErasePage:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:261    .text.FLASH_ErasePage:0000000000000000 FLASH_ErasePage
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:308    .text.FLASH_ProgramHalfWord:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:313    .text.FLASH_ProgramHalfWord:0000000000000000 FLASH_ProgramHalfWord
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:385    .text.FLASH_ProgramHalfWord:0000000000000050 $d
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:391    .text.FLASH_Unlock:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:396    .text.FLASH_Unlock:0000000000000000 FLASH_Unlock
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:421    .text.FLASH_Unlock:0000000000000014 $d
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:427    .text.FLASH_Lock:0000000000000000 $t
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:432    .text.FLASH_Lock:0000000000000000 FLASH_Lock
+/var/folders/7t/_0sx2fy90hqbpg38v1gnsmr40000gn/T//ccdpgLad.s:448    .text.FLASH_Lock:000000000000000c $d
+                     .debug_frame:0000000000000010 $d
+
+NO UNDEFINED SYMBOLS
