@@ -681,9 +681,9 @@ void sendSerialTelemetry() {
       PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
       #if defined (BM_EXTENDED)
         PrintValueComma((float)batteryData[0].current/100.0);
-		PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
-	  #else
-		PrintDummyValues(2);
+        PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
+      #else
+        PrintDummyValues(2);
       #endif
     #else
       PrintDummyValues(3);
@@ -1017,15 +1017,15 @@ void reportVehicleState() {
   void updateSlowTelemetry100Hz() {
 
     if (slowTelemetryByte < TELEMETRY_MSGSIZE_ECC ) {
-#ifdef SoftModem
-      if (softmodemFreeToSend()) {
-	softmodemSendByte(telemetryBuffer.bytes[slowTelemetryByte]);
-	slowTelemetryByte++;
-      }
-#else
-      Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
-      slowTelemetryByte++;
-#endif
+      #ifdef SoftModem
+        if (softmodemFreeToSend()) {
+	  softmodemSendByte(telemetryBuffer.bytes[slowTelemetryByte]);
+	  slowTelemetryByte++;
+        }
+      #else
+        Serial2.write(telemetryBuffer.bytes[slowTelemetryByte]);
+        slowTelemetryByte++;
+      #endif
     }
     else {
       slowTelemetryByte=255;
