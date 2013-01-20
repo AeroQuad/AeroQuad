@@ -27,29 +27,15 @@
 
 #include "BatteryMonitorTypes.h"
 
-byte    osdBatCounter = 0;
+byte    osdBatNo = 0;
 boolean descentWarningShown = false;
 
 void displayVoltage(byte areMotorsArmed) {
 
-  byte    osdBatNo     = osdBatCounter % numberOfBatteries;
-  boolean osdBatMinMax = osdBatCounter / numberOfBatteries / 4;
-
-  // don't show min/max when armed or we have not flown yet
-  if ((areMotorsArmed == true) || (armedTime == 0)){
-    osdBatMinMax = false;
-  }
-
-  int currentValue;
-  if (osdBatMinMax) {
-    currentValue = batteryData[osdBatNo].minVoltage/10.0;
-  }
-  else {
-    currentValue = batteryData[osdBatNo].voltage/10.0;
-  }
+  int currentValue = batteryData[osdBatNo].voltage/10;
 
   char buf[12];
-  snprintf(buf,7,"%c%2d.%1dV",(osdBatMinMax) ? '\23' : '\20', currentValue/10,currentValue%10);
+  snprintf(buf,7,"%c%2d.%1dV",'\20', currentValue/10,currentValue%10);
 
   // Following blink only symbol on warning and all on alarm
   writeChars( buf,   1, batteryIsWarning(osdBatNo)?1:0, VOLTAGE_ROW + osdBatNo, VOLTAGE_COL );
@@ -57,12 +43,7 @@ void displayVoltage(byte areMotorsArmed) {
 
   if (batteryData[osdBatNo].cPin != BM_NOPIN) {
     // current sensor installed
-    if (osdBatMinMax) {
-      currentValue = batteryData[osdBatNo].maxCurrent/10.0;
-    }
-    else {
-      currentValue = batteryData[osdBatNo].current/10.0;
-    }
+    currentValue = batteryData[osdBatNo].current/10;
 
     if (abs(currentValue)>=100) { // > 10A only display whole amps
       snprintf(buf,12,"%4dA%5ld\24  ", currentValue/10, batteryData[osdBatNo].usedCapacity/1000);
@@ -74,10 +55,7 @@ void displayVoltage(byte areMotorsArmed) {
     writeChars( buf, 11, 0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL+6 );
   }
 
-  osdBatCounter++;
-  if (osdBatCounter >= numberOfBatteries * 8) {
-    osdBatCounter = 0;
-  }
+  osdBatNo = (osdBatNo + 1) % numberOfBatteries;
 
   #if defined (BattMonitorAutoDescent)
     if (batteryAlarm && areMotorsArmed) {
@@ -93,5 +71,3 @@ void displayVoltage(byte areMotorsArmed) {
 }
 
 #endif  // #define _AQ_OSD_MAX7456_BATTMONITOR_H_
-
-

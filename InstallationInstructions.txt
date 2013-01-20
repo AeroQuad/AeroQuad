@@ -1,4 +1,4 @@
-Version 3.0 of the AeroQuad Flight Software takes advantage of the use of libraries within the Arduino IDE environment.  There are two install methods to use to make sure the AeroQuad libraries are properly deteced by the Arduino IDE.
+Version 3.x of the AeroQuad Flight Software takes advantage of the use of libraries within the Arduino IDE environment.  There are two install methods to use to make sure the AeroQuad libraries are properly deteced by the Arduino IDE.
 
 Method 1:
 - Save the AeroQuad folder into your location of choice.

@@ -27,6 +27,7 @@
 #include <AQMath.h>
 #include <Accelerometer_ADXL500.h>
 
+
 unsigned long timer;
 
 void setup() {

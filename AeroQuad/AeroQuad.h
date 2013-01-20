@@ -26,52 +26,22 @@
 #include <math.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
+#include "GpsDataType.h"
+#include "AQMath.h"
+#include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.0
+#define SOFTWARE_VERSION 3.2
 
-#define BAUD 115200
-//#define BAUD 111111 // use this to be compatible with USB and XBee connections
-//#define BAUD 57600
-
-// Analog Reference Value
-// This value provided from Configurator
-// Use a DMM to measure the voltage between AREF and GND
-// Enter the measured voltage below to define your value for aref
-// If you don't have a DMM use the following:
-// AeroQuad Shield v1.7, aref = 3.0
-// AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Read in from EEPROM
-//////////////////////////////////////////////////////
-
-/**
- * Heading and heading hold global declaration section
- */
-byte  headingHoldConfig   = 0;
-float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading             = 0; // measured heading from yaw gyro (process variable)
-float relativeHeading     = 0; // current heading the quad is set to (set point)
-byte  headingHoldState    = OFF;
-//////////////////////////////////////////////////////
-
-/**
- * battery monitor and battery monitor throttle correction global declaration section
- */
-int batteyMonitorThrottleCorrection = 0;
-#if defined (BattMonitor)
-  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
-  float batteryMonitorAlarmVoltage = 10.0;
-  int batteryMonitorStartThrottle = 0;
-  int batteryMonitorThrottleTarget = 1450;
-  unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
-  
-  #if defined BattMonitorAutoDescent
-    int batteryMonitorAlarmCounter = 0;
-    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
+#if defined CONFIG_BAUDRATE
+  #define BAUD CONFIG_BAUDRATE
+#else
+  #if defined WirelessTelemetry && !defined MavLink
+    #define BAUD 111111 // use this to be compatible with USB and XBee connections
+  #else
+    #define BAUD 115200
   #endif
-#endif
-//////////////////////////////////////////////////////
+#endif  
 
 /**
  * ESC calibration process global declaration
@@ -89,6 +59,7 @@ int testCommand = 1000;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
 #define TASK_10HZ 10
+#define TASK_1HZ 100
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
@@ -102,42 +73,46 @@ byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
+boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
+float rotationSpeedFactor = 1.0;
 
 // main loop time variable
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop time variable
+unsigned long oneHZpreviousTime = 0;
 unsigned long tenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
-void readPilotCommands(); 
-void calculateFlightError();
-void processHeading();
-void processAltitudeHold();
-void processCalibrateESC();
-void processFlightControl();
-void processAltitudeHold();
+
+
+//////////////////////////////////////////////////////
+
+
+// Analog Reference Value
+// This value provided from Configurator
+// Use a DMM to measure the voltage between AREF and GND
+// Enter the measured voltage below to define your value for aref
+// If you don't have a DMM use the following:
+// AeroQuad Shield v1.7, aref = 3.0
+// AeroQuad Shield v1.6 or below, aref = 2.8
+float aref; // Read in from EEPROM
 //////////////////////////////////////////////////////
 
 /**
- * Altitude control global declaration
+ * Heading and heading hold global declaration section
  */
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
- // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
-  int altitudeHoldBump = 90;
-  int altitudeHoldPanicStickMovement = 250;
-
-  float altitudeToHoldTarget = 0.0;
-  int altitudeHoldThrottle = 1000;
-  boolean isStoreAltitudeNeeded = false;
-  boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-#endif
-int minThrottleAdjust = -50;
-int maxThrottleAdjust = 50;
-
-float getAltitudeFromSensors();
+ 
+byte  headingHoldConfig   = 0;
+float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
+float heading             = 0; // measured heading from yaw gyro (process variable)
+float relativeHeading     = 0; // current heading the quad is set to (set point)
+byte  headingHoldState    = OFF;
+void  processHeading();
 //////////////////////////////////////////////////////
 
 
@@ -151,17 +126,126 @@ float getAltitudeFromSensors();
 #define SERIAL_FLUSH      SERIAL_PORT.flush
 #define SERIAL_BEGIN      SERIAL_PORT.begin
  
-HardwareSerial *binaryPort;
+//HardwareSerial *binaryPort;
 
 void readSerialCommand();
 void sendSerialTelemetry();
 void printInt(int data);
 float readFloatSerial();
+long readIntegerSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
 void reportVehicleState();
+//////////////////////////////////////////////////////
+
+/**
+ * battery monitor and battery monitor throttle correction global declaration section
+ */
+#if defined (BattMonitor)
+  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
+  float batteryMonitorAlarmVoltage = 10.0;
+  int batteryMonitorStartThrottle = 0;
+  int batteryMonitorThrottleTarget = 1450;
+  unsigned long batteryMonitorStartTime = 0;
+  unsigned long batteryMonitorGoingDownTime = 60000; 
+
+  
+  #if defined BattMonitorAutoDescent
+    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
+    
+    int batteryMonitorAlarmCounter = 0;
+    int batteyMonitorThrottleCorrection = 0;
+  #endif
+#endif
+//////////////////////////////////////////////////////
+
+
+
+
+/**
+ * Altitude control global declaration
+ */
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+ // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  int altitudeHoldBump = 90;
+  int altitudeHoldPanicStickMovement = 250;
+  int minThrottleAdjust = -50;
+  int maxThrottleAdjust = 50;
+  int altitudeHoldThrottle = 1000;
+  boolean isAltitudeHoldInitialized = false;
+  
+  
+  float velocityCompFilter1 = 1.0 / (1.0 + 0.3);
+  float velocityCompFilter2 = 1 - velocityCompFilter1;
+
+  boolean runtimaZBiasInitialized = false;  
+  float zVelocity = 0.0;
+  float estimatedZVelocity = 0.0;
+  float runtimeZBias = 0.0; 
+  float zDampeningThrottleCorrection = 0.0;
+
+  #if defined AltitudeHoldBaro
+    float baroAltitudeToHoldTarget = 0.0;
+  #endif  
+  #if defined AltitudeHoldRangeFinder
+    float sonarAltitudeToHoldTarget = 0.0;
+  #endif
+#endif
+//////////////////////////////////////////////////////
+
+/**
+ * Auto landing feature variables
+ */
+#if defined (AutoLanding)
+  #define BARO_AUTO_DESCENT_STATE 2
+  #define SONAR_AUTO_DESCENT_STATE 3
+  #define MOTOR_AUTO_DESCENT_STATE 4
+  
+  byte autoLandingState = OFF;
+  boolean isAutoLandingInitialized = false;
+  int autoLandingThrottleCorrection = 0;
+#endif
+
+/**
+ * GPS navigation global declaration
+ */
+#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
+#if defined (UseGPS)
+
+  #include <GpsAdapter.h>
+  
+  #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
+  GeodeticPosition homePosition = GPS_INVALID_POSITION; 
+  GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
+
+  #if defined UseGPSNavigator
+    byte navigationState = OFF;  // ON, OFF or ALTPANIC
+    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+    int missionNbPoint = 0;
+    int gpsRollAxisCorrection = 0;
+    int gpsPitchAxisCorrection = 0;
+    int gpsYawAxisCorrection = 0;
+    boolean isPositionHoldInitialized = false;
+    boolean isGpsNavigationInitialized = false;
+
+    int waypointIndex = -1;    
+    float distanceToDestination = 99999999.0;
+    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
+      
+    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
+    
+    void evaluateMissionPositionToReach();
+    void processGpsNavigation();
+  #endif
+#endif
 //////////////////////////////////////////////////////
 
 /**
@@ -190,13 +274,15 @@ typedef struct {
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
   t_NVR_PID ALTITUDE_PID_GAIN_ADR;
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
-  t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
+  t_NVR_PID GPSROLL_PID_GAIN_ADR;
+  t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+  t_NVR_PID GPSYAW_PID_GAIN_ADR;
+  t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
-  float GYROSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
@@ -207,11 +293,8 @@ typedef struct {
   float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
-  float GYRO_ROLL_ZERO_ADR;
-  float GYRO_PITCH_ZERO_ADR;
-  float GYRO_YAW_ZERO_ADR;
+  // Gyro calibration
+  float ROTATION_SPEED_FACTOR_ARD;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
   float XAXIS_ACCEL_SCALE_FACTOR_ADR;
@@ -230,6 +313,24 @@ typedef struct {
   // Range Finder
   float RANGE_FINDER_MAX_ADR;
   float RANGE_FINDER_MIN_ADR;
+  // Camera Control
+  float CAMERAMODE_ADR;
+  float MCAMERAPITCH_ADR;
+  float MCAMERAROLL_ADR;    
+  float MCAMERAYAW_ADR;
+  float SERVOCENTERPITCH_ADR;
+  float SERVOCENTERROLL_ADR;
+  float SERVOCENTERYAW_ADR;
+  float SERVOMINPITCH_ADR;
+  float SERVOMINROLL_ADR;
+  float SERVOMINYAW_ADR;
+  float SERVOMAXPITCH_ADR;
+  float SERVOMAXROLL_ADR;
+  float SERVOMAXYAW_ADR;
+  float SERVOTXCHANNELS_ADR;
+  // GPS mission storing
+  float GPS_MISSION_NB_POINT_ADR;
+  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 
 
@@ -240,15 +341,18 @@ void initReceiverFromEEPROM();
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
+long nvrReadLong(int address); // defined in DataStorage.h
+void nvrWriteLong(long value, int address); // defined in DataStorage.h
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
 void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 
 #define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
 #define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
 #define writeFloat(value, addr) nvrWriteFloat(value, GET_NVR_OFFSET(addr))
+#define readLong(addr) nvrReadLong(GET_NVR_OFFSET(addr))
+#define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
-
 
 /**
  * Debug utility global declaration
@@ -262,4 +366,3 @@ byte fastTransfer = OFF; // Used for troubleshooting
 //////////////////////////////////////////////////////
 
 #endif // _AQ_GLOBAL_HEADER_DEFINITION_H_
-
