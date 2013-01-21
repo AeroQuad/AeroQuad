@@ -19,42 +19,63 @@
 */
 
 #include <Wire.h>
-
 #include <AQMath.h>
 #include <Device_I2C.h>
-#include <Gyroscope_ITG3200.h>
 #include <GlobalDefined.h>
 
-unsigned long timer;
+/* 
+  If using a SparkFun 9DOF, use GyroScope_ITG3200_9DOF.h and ITG3200_ADDRESS_ALTERNATE
+  If using a SparkFun 6DOF, use Gyroscope_ITG3200.h and ITG3200_ADDRESS_ALTERNATE
+  otherwise, comment those both out and use only Gyroscope_ITG3200.h
+*/
+#include <Gyroscope_ITG3200.h>
+//#define ITG3200_ADDRESS_ALTERNATE
+//#include <Gyroscope_ITG3200_9DOF.h>
+
+unsigned long timer100Hz = 0;
+unsigned long timer25Hz = 0;
 
 void setup()
 {
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Gyroscope library test (ITG3200)");
 
   Wire.begin();
 
   initializeGyro();
+  if (vehicleState & GYRO_DETECTED) {
+    Serial.println("Gyroscope found");
+  } else {
+    Serial.println("!! Gyroscope not found !!");
+  }
   calibrateGyro();
-  timer = millis();
 }
 
-void loop(void) 
+void loop() 
 {
-  if((millis() - timer) > 10) // 100Hz
+  if (vehicleState & GYRO_DETECTED)
   {
-    timer = millis();
-    measureGyro();
+    measureGyroSum();
     
-    Serial.print("Roll: ");
-    Serial.print(degrees(gyroRate[XAXIS]));
-    Serial.print(" Pitch: ");
-    Serial.print(degrees(gyroRate[YAXIS]));
-    Serial.print(" Yaw: ");
-    Serial.print(degrees(gyroRate[ZAXIS]));
-    Serial.print(" Heading: ");
-    Serial.print(degrees(gyroHeading));
-    Serial.println();
+    if ((millis() - timer100Hz) > 10) // 100Hz
+    {
+      timer100Hz = millis();
+      evaluateGyroRate();
+    }
+    
+    if ((millis() - timer25Hz) > 40) // 25Hz
+    {
+      timer25Hz = millis();
+      
+      Serial.print("Roll: ");
+      Serial.print(degrees(gyroRate[XAXIS]));
+      Serial.print(" Pitch: ");
+      Serial.print(degrees(gyroRate[YAXIS]));
+      Serial.print(" Yaw: ");
+      Serial.print(degrees(gyroRate[ZAXIS]));
+      Serial.print(" Heading: ");
+      Serial.println(degrees(gyroHeading));
+    } 
   }
 }
-

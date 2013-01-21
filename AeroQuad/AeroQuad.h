@@ -63,6 +63,7 @@ int testCommand = 1000;
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
+byte lastFlightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle; // initial value configured by user
 
@@ -74,7 +75,7 @@ byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
-float rotationSpeedFactor = 1.0;
+float rotationSpeedFactor = 1.0; 
 
 // main loop time variable
 unsigned long previousTime = 0;

@@ -6,10 +6,9 @@ __attribute__(( constructor )) void premain() {
     init();
 }
 
-
-// Uncomment this if compiling on OS X
-/*extern "C"{
-	void _init(){}; // dummy _init function for support of GNU toolchain from https://launchpad.net/gcc-arm-embedded
+// uncomment this if compiling on OS X
+/*extern "C" {
+  void _init(){}; // dummy _init function for support of GNU toolchain from https://launchpad.net/gcc-arm-embedded
 }*/
 
 int main(void)
