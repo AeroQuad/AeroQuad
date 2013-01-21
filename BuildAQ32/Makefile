@@ -131,7 +131,8 @@ ifeq ($(BUILDTYPE), STM32)
 	SRCROOT := $(LIB_MAPLE_HOME)
 	SUPPORT_PATH := $(SRCROOT)/support
 	LDDIR    := $(SUPPORT_PATH)/ld
-	LDFLAGSSTM32 = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR) -Xlinker --gc-sections -lc
+    ##### uncomment the -nostartfiles portion of the next line if compiling on OS X #####
+	LDFLAGSSTM32 = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR) -Xlinker --gc-sections -lc #-nostartfiles
 
 # Set up build rules and some useful templates
 include $(SUPPORT_PATH)/make/build-rules.mk
