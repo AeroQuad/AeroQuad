@@ -18,13 +18,19 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>. 
  */
 
+/*
+  if this sketch freezes after serial monitor displays "Barometric
+  sensor library test (BMP085)," it meas the sketch never made it
+  past initializeBaro(). Check your wiring to ensure I2C is set up
+  correctly.
+ */
+
+
 #include <Wire.h>
 #include <Device_I2C.h>
 #include <AQMath.h>
-
 #include <GlobalDefined.h>
 #include <SensorsStatus.h>
-#include <BarometricSensor.h>
 #include <BarometricSensor_BMP085.h>
 
 unsigned long timer = 0;
@@ -32,6 +38,7 @@ unsigned long timer = 0;
 void setup() {
 
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Barometric sensor library test (BMP085)");
 
   Wire.begin();

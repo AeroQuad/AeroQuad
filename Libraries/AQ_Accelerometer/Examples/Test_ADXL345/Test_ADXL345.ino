@@ -23,40 +23,55 @@
 #include <GlobalDefined.h>
 #include <AQMath.h>
 
-// if using 6DOF, uncomment this one:
-#include <Accelerometer_ADXL345.h>  
-// if using 9DOF, uncomment this one:
-//#include <Accelerometer_ADXL345_9DOF.h 
+/* 
+  If using a SparkFun 9DOF, use Accelerometer_ADXL345_9DOF.h
+  otherwise, use Accelerometer_ADXL345.h
+*/
+//#include <Accelerometer_ADXL345.h>
+#include <Accelerometer_ADXL345_9DOF.h>
 
-unsigned long timer;
+unsigned long timer100Hz = 0;
+unsigned long timer25Hz = 0;
 
-void setup() {
-  
+void setup() 
+{
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Accelerometer library test (ADXL345)");
 
   Wire.begin();
   
   initializeAccel();
+  if (vehicleState & ACCEL_DETECTED) {
+    Serial.println("Accelerometer found");
+  } else {
+    Serial.println("!! Accelerometer not found !!");
+  }
   computeAccelBias();
-  // changing the scale factor is necessary to get non-0 values from this test sketch
-  // don't worry about how accurate the data is at this point, just make sure it changes as you move the board
-  accelScaleFactor[XAXIS]=accelScaleFactor[YAXIS]=accelScaleFactor[ZAXIS]=-0.038;
 }
 
-void loop() {
-  
-  if((millis() - timer) > 10) // 100Hz
+void loop() 
+{   
+  if (vehicleState & ACCEL_DETECTED)
   {
-    timer = millis();
-    measureAccel();
+    measureAccelSum();
     
-    Serial.print("Roll: ");
-    Serial.print(meterPerSecSec[XAXIS]);
-    Serial.print(" Pitch: ");
-    Serial.print(meterPerSecSec[YAXIS]);
-    Serial.print(" Yaw: ");
-    Serial.print(meterPerSecSec[ZAXIS]);
-    Serial.println();
+    if ((millis() - timer100Hz) > 10) // 100Hz
+    {
+      timer100Hz = millis();
+      evaluateMetersPerSec();
+    }
+      
+    if ((millis() - timer25Hz) > 40) // 25Hz
+    {
+      timer25Hz = millis();
+      
+      Serial.print("Roll: ");
+      Serial.print(meterPerSecSec[XAXIS]);
+      Serial.print(" Pitch: ");
+      Serial.print(meterPerSecSec[YAXIS]);
+      Serial.print(" Yaw: ");
+      Serial.println(meterPerSecSec[ZAXIS]);
+    }
   }
 }
