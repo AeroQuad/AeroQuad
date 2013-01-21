@@ -63,6 +63,7 @@ int testCommand = 1000;
 #define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
 
 byte flightMode = RATE_FLIGHT_MODE;
+byte lastFlightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle; // initial value configured by user
 
