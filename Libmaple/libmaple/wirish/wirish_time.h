@@ -54,8 +54,8 @@ static inline uint32 millis(void) {
  * @see millis()
  */
 static inline uint32 micros(void) {
-    uint32 ms;
-    uint32 cycle_cnt;
+    volatile uint32 ms;
+    volatile uint32 cycle_cnt;
     uint32 res;
 
     do {
