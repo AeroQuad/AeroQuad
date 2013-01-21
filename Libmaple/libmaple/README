@@ -1,0 +1,134 @@
+
+                   _ _ _                           _
+                  | (_) |__  _ __ ___   __ _ _ __ | | ___
+                  | | | '_ \| '_ ` _ \ / _` | '_ \| |/ _ \
+                  | | | |_) | | | | | | (_| | |_) | |  __/
+                  |_|_|_.__/|_| |_| |_|\__,_| .__/|_|\___|
+                                            |_|               by LeafLabs!
+                                                              leaflabs.com
+
+
+The latest version of this repository can be found here:
+
+    https://github.com/leaflabs/libmaple
+
+General information
+------------------------------------------------------------------------------
+
+libmaple is a library for programming ST's STM32 line of Cortex M3
+microcontrollers.  It has a pure C layer, libmaple proper, which does
+most of the work, and a C++ layer, Wirish, which provides high-level
+convenience functions and a Wiring/Arduino-compatible interface.
+
+libmaple's primary purpose is for use with LeafLabs' Maple line of
+microcontroller development boards (hence the name). However, it is
+portable across a variety of medium- and high-density STM32F1xx chips.
+For example, libmaple has successfully been ported to the ST Discovery
+kits.
+
+Using libmaple
+------------------------------------------------------------------------------
+
+The easiest way to use libmaple is in concert with the Maple IDE.
+Maple IDE, a sister project from LeafLabs, is an Arduino IDE fork
+usable for programming Maple boards, which includes libmaple and a
+compilation and upload toolchain:
+
+    http://leaflabs.com/docs/maple-ide-install.html
+
+Additionally, a HOWTO on setting up this library for use from the
+command line in a Unix environment is available in our online HTML
+documentation:
+
+    http://leaflabs.com/docs/unix-toolchain.html
+
+Documentation, Etc.
+------------------------------------------------------------------------------
+
+HTML documentation for the latest release of libmaple/Maple IDE is
+available here:
+
+    http://leaflabs.com/docs/
+
+libmaple is well documented via Doxygen comments.  The HTML
+documentation referenced above (which also includes the Doxygen
+output) is automatically generated from the source files in the
+leaflabs-docs repository.  In order to obtain the leaflabs-docs
+repository, visit:
+
+    http://github.com/leaflabs/leaflabs-docs/
+
+Our bugtracker is available at:
+
+    http://code.google.com/p/leaflabs/issues/list
+
+For changes that block official releases, see our wiki:
+
+    http://wiki.leaflabs.com/index.php?title=Blocking_Changes
+
+Repository Layout
+------------------------------------------------------------------------------
+
+/build/
+
+    Compiler output
+
+/contrib/
+
+    Community-contributed resources.  LeafLabs doesn't maintain the
+    contents of this directory, so it may get stale.
+
+/examples/
+
+    Example code and test programs. Copy these to /main.cpp to compile them.
+
+/libmaple/
+
+    This is the meat of the library.  C only, no C++.  The
+    Arduino-like compatibility layer (in C++) is in /wirish/.
+
+/libraries/
+
+    Special-purpose libraries that don't merit inclusion in the
+    /libmaple/ and /wirish/ directories, which are intended for
+    general use.  Arduino-compatible libraries go here.
+
+/LICENSE
+
+    Licensing and copyright information.
+
+/main.cpp.example
+
+    main.cpp is required for a successful build but is non-existent by
+    default; use this file as a template for building your program. By
+    default, just blinks an LED.
+
+/Makefile
+
+    libmaple build instructions for GNU Make.
+
+/notes/
+
+    Unstructured text notes that may be useful.
+
+/README
+
+    This file.
+
+/support/
+
+    Support files and scripts for various purposes.
+
+    gdb/              GDB scripts.
+    ld/               Linker scripts.
+    make/             Additional scripts used by the top-level Makefile.
+    openocd/          OpenOCD scripts for JTAG debugging.
+    scripts/          Miscellany.
+    doxygen/          Doxygen configuration.
+    stm32loader.py    Script for uploading via the built-in USART bootloader.
+
+/wirish/
+
+    Extra wrappers and functionality around the lower level code in
+    /libmaple/. These files implement an Arduino "Wiring"-like
+    library.

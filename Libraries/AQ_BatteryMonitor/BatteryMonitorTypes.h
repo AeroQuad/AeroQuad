@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0.1 - February 2012
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
-  Copyright (c) 2012 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
 
   This program is free software: you can redistribute it and/or modify
@@ -48,15 +48,13 @@ extern boolean            batteryAlarm;      // any battery in alarm state used 
 extern boolean            batteryWarning;    // any battery in warning state
 
 // Helper macros to make battery definitions cleaner
-
-// for defining battery with voltage and optional current sensors
 #ifdef BM_EXTENDED
-#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE*100.0),(VBIAS*100.0),0,0,(CPIN),(CSCALE*10.0),(CBIAS*10.0),0,0,0}
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(short)((VSCALE)*100.0),(short)((VBIAS)*100.0),0,0,(CPIN),(short)((CSCALE)*10.0),(short)((CBIAS)*10.0),0,0,0}
 #else
-#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(VSCALE*100.0),(VBIAS*100.0),0}
+#define DEFINE_BATTERY(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {(VPIN),(CELLS),(short)((VSCALE)*100.0),(short)((VBIAS)*100.0),0}
 #endif
-// Function declarations
 
+// Function declarations
 boolean batteryIsAlarm(byte batteryNo);
 boolean batteryIsWarning(byte batteryNo);
 void resetBattery(byte batteryNo);

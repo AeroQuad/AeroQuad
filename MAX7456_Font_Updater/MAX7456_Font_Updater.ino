@@ -61,7 +61,7 @@ volatile int  incomingByte;
 byte charbuf[54]; // for NVM_read
 
 #include <avr/pgmspace.h>
-#include "font.h"
+#include <MAX7456_Font.h>
 
 
 //////////////////////////////////////////////////////////////
