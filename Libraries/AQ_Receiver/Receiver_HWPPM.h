@@ -37,55 +37,42 @@
 #include <avr/interrupt.h>
 #include <AQMath.h>
 #include "GlobalDefined.h"
+#include "Receiver_PPM_common.h"
 
 // Channel data
 volatile unsigned int startPulse = 0;
-volatile byte         ppmCounter = 8; // ignore data until first sync pulse
-volatile int          PWM_RAW[8] = { 2200,2200,2200,2200,2200,2200,2200,2200 };
+volatile byte         ppmCounter = PPM_CHANNELS; // ignore data until first sync pulse
+volatile int          PWM_RAW[PPM_CHANNELS] = { 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000 };
 
 #define TIMER5_FREQUENCY_HZ 50
 #define TIMER5_PRESCALER    8
 #define TIMER5_PERIOD       (F_CPU/TIMER5_PRESCALER/TIMER5_FREQUENCY_HZ)
+
+uint8_t rcChannel[] = {SERIAL_SUM_PPM};
 
 /****************************************************
  * Interrupt Vector
  ****************************************************/
 ISR(TIMER5_CAPT_vect)//interrupt.
 {
-  if ((1 << ICES5) & TCCR5B) {
-    // Triggered at rising edge
-    startPulse = ICR5;         // Save time at pulse start
+  unsigned int stopPulse = ICR5;
+  
+  // Compensate for timer overflow if needed
+  unsigned int pulseWidth = ((startPulse > stopPulse) ? TIMER5_PERIOD : 0) + stopPulse - startPulse;
+
+  if (pulseWidth > 5000) {      // Verify if this is the sync pulse (2.5ms)
+    ppmCounter = 0;             // -> restart the channel counter
   }
   else {
-    // Triggered at dropping edge; measure pulse length
-    unsigned int stopPulse = ICR5;
-    // Note: compensate for timer overflow if needed
-    unsigned int pulseWidth = ((startPulse > stopPulse) ? TIMER5_PERIOD : 0) + stopPulse - startPulse;
-
-    if (pulseWidth > 5000) {      // Verify if this is the sync pulse
-      ppmCounter = 0;             // -> restart the channel counter
-    }
-    else {
-      if (ppmCounter < 8) { // channels 9- will get ignored here
-        PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
-        ppmCounter++;                     // Advance to next channel
-      }
+    if (ppmCounter < PPM_CHANNELS) { // extra channels will get ignored here
+      PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
+      ppmCounter++;                     // Advance to next channel
     }
   }
-  TCCR5B ^= (1 << ICES5); // Switch edge
+  startPulse = stopPulse;         // Save time at pulse start
 }
 
-#define SERIAL_SUM_PPM_1         1,2,3,0,4,5,6,7 // PITCH,YAW,THR,ROLL... For Graupner/Spektrum
-#define SERIAL_SUM_PPM_2         0,1,3,2,4,5,6,7 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba
-#define SERIAL_SUM_PPM_3         1,0,3,2,4,5,6,7 // PITCH,ROLL,THR,YAW... For some Hitec/Sanwa/Others
 
-#if defined (SKETCH_SERIAL_SUM_PPM)
-  #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM
-#else	
-  #define SERIAL_SUM_PPM SERIAL_SUM_PPM_1
-#endif
-
-static uint8_t rcChannel[8] = {SERIAL_SUM_PPM};
 
 void initializeReceiver(int nbChannel) {
 
@@ -94,7 +81,7 @@ void initializeReceiver(int nbChannel) {
   pinMode(A8, INPUT); // this is the original location of the first RX channel
 
   // Configure timer HW
-  TCCR5A = ((1<<WGM50)|(1<<WGM51)|(1<<COM5C1)|(1<<COM5B1)|(1<<COM5A1));
+  TCCR5A = ((1<<WGM50)|(1<<WGM51));
   TCCR5B = ((1<<WGM52)|(1<<WGM53)|(1<<CS51)|(1<<ICES5)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
   OCR5A = TIMER5_PERIOD; 
 
@@ -106,8 +93,7 @@ int getRawChannelValue(byte channel) {
   uint8_t oldSREG = SREG;
   cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
 
-  // Apply receiver calibration adjustment
-  int receiverRawValue = ((PWM_RAW[rcChannel[channel]]+800)/2);
+  int receiverRawValue = ((PWM_RAW[rcChannel[channel]])/2);
 
   SREG = oldSREG;
   
@@ -115,6 +101,4 @@ int getRawChannelValue(byte channel) {
 }
 
 #endif
-
-
 

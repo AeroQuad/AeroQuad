@@ -34,6 +34,9 @@ float gyroSmoothFactor = 1.0;
 float gyroScaleFactor = 0.0;
 float gyroHeading = 0.0;
 unsigned long gyroLastMesuredTime = 0;
+float gyroTempBiasSlope[3] = {0.0,0.0,0.0};
+float gyroTempBiasIntercept[3] = {0.0,0.0,0.0};
+
 
 void measureGyroSum();
 void evaluateGyroRate();
@@ -95,6 +98,8 @@ void calibrateGyro() {
   gyroZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
 }
 
+void readGyroTemp()  {
+}
 
 #endif  // #ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_
 

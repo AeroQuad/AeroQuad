@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0.1 - February 2012
+  AeroQuad v3.0 - May 2011
   www.AeroQuad.com
-  Copyright (c) 2012 Ted Carancho.  All rights reserved.
+  Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -57,6 +57,8 @@ float kiMag = 0.0;                					// integral gain governs rate of converge
 float halfT = 0.0;                					// half the sample period
 float q0 = 0.0, q1 = 0.0, q2 = 0.0, q3 = 0.0;       // quaternion elements representing the estimated orientation
 float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
+
+float trueNorthHeading = 0.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // margUpdate
@@ -157,7 +159,7 @@ void eulerAngles(void)
 {
   kinematicsAngle[XAXIS]  = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
   kinematicsAngle[YAXIS] = asin(2 * (q0*q2 - q1*q3));
-  kinematicsAngle[ZAXIS]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
+  trueNorthHeading = kinematicsAngle[ZAXIS]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
 }
 
   
@@ -180,8 +182,8 @@ void initializeKinematics(float hdgX, float hdgY)
   kpAcc = 0.2;
   kiAcc = 0.0005;
     
-  kpMag = 2.0;
-  kiMag = 0.005;
+  kpMag = 0.2;//2.0;
+  kiMag = 0.0005;//0.005;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,4 +210,3 @@ void calibrateKinematics() {}
 
 
 #endif
-

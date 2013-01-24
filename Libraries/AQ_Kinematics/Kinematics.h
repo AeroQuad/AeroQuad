@@ -38,9 +38,11 @@ float earthAccel[3] = {0.0,0.0,0.0};
 
 float accelCutoff = 0.0;
 
-void initializeBaseKinematicsParam(float hdgX, float hdgY) {
-  for (byte axis = XAXIS; axis <= ZAXIS; axis++)
+void initializeBaseKinematicsParam() {
+
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     kinematicsAngle[axis] = 0.0;
+  }
   gyroAngle[XAXIS] = 0;
   gyroAngle[YAXIS] = 0;
 }
@@ -48,7 +50,6 @@ void initializeBaseKinematicsParam(float hdgX, float hdgY) {
 void initializeKinematics(float hdgX, float hdgY);
 void calculateKinematics(float rollRate,           float pitchRate,     float yawRate,       
                          float longitudinalAccel,  float lateralAccel,  float verticalAccel, 
-                         float oneG,               float magX,          float magY,
                          float G_Dt);
 float getGyroUnbias(byte axis);
 void calibrateKinematics();

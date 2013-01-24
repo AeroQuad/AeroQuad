@@ -27,14 +27,17 @@
 
 int lastHeading = 361; // bogus to force update
 
-void displayHeading(int currentHeading) {
+void displayHeading(float currentHeading) {
+  float deg = degrees(currentHeading);
+  int currentHeadingDeg = (int)( 0.5 + (deg<-0.5 ? deg+360.0 : deg));
 
-  if (currentHeading != lastHeading) {
+  if (currentHeadingDeg != lastHeading) {
     char buf[6];
-    snprintf(buf,6,"\6%3d\7",currentHeading); // \6 is compass \7 is degree symbol
+    snprintf(buf,6,"\026%3d\027",currentHeadingDeg); // \026 is compass \027 is degree symbol
     writeChars( buf, 5, 0, COMPASS_ROW, COMPASS_COL );
-    lastHeading = currentHeading;
+    lastHeading = currentHeadingDeg;
   }
+  
 }
 
 #endif  // #define _AQ_OSD_MAX7456_HEADING_H_

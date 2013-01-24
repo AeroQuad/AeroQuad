@@ -31,22 +31,22 @@
 #define MIDCOMMAND 1500
 #define MAXCOMMAND 2000
 #define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
+#define MINCHECK (MINCOMMAND + 100)
+#define MAXCHECK (MAXCOMMAND - 100)
+#define MINTHROTTLE (MINCOMMAND + 100)
 #define LEVELOFF 100
-#define MAX_NB_CHANNEL 8
+#define MAX_NB_CHANNEL 10
 
 int lastReceiverChannel = 0;
 
 float receiverXmitFactor = 0.0;
-int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
 int receiverZero[3] = {0,0,0};
-int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
+int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
+float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 int channelCal;
 
 void initializeReceiverParam(int nbChannel = 6) {
@@ -58,9 +58,11 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[ZAXIS] = 1500;
   receiverCommand[THROTTLE] = 1000;
   receiverCommand[MODE] = 1000;
-  receiverCommand[AUX] = 1000;
-  receiverCommand[AUX+1] = 1000;
-  receiverCommand[AUX+2] = 1000;
+  receiverCommand[AUX1] = 1000;
+  receiverCommand[AUX2] = 1000;
+  receiverCommand[AUX3] = 1000;
+  receiverCommand[AUX4] = 1000;
+  receiverCommand[AUX5] = 1000;
   
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverCommandSmooth[channel] = 1.0;
