@@ -2,7 +2,7 @@ AeroQuad Flight Software Source Code 3.1 Beta 1
 ========================================
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
 
-Version 3.1 Beta 1 Release Notes (7/1/2012)
+Version 3.1 Release Notes (1/23/2013)
 ----------------------------------------
 * Waypoint following (Waypoints uploaded from Configurator)
 * Auto Descent/Land (Must be tuned for your individual setup)
