@@ -26,6 +26,7 @@
 float setHeading          = 0;
 unsigned long headingTime = micros();
 
+
 /**
  * processHeading
  *
@@ -38,7 +39,7 @@ void processHeading()
   if (headingHoldConfig == ON) {
 
     #if defined(HeadingMagHold)
-      heading = degrees(kinematicsAngle[ZAXIS]);
+      heading = degrees(trueNorthHeading);
     #else
       heading = degrees(gyroHeading);
     #endif
@@ -59,7 +60,14 @@ void processHeading()
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
       
-      if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
+      #if defined (UseGPSNavigator)
+        if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
+            ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
+      #else
+        if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || 
+            (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
+      #endif
+      
         
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
@@ -97,7 +105,13 @@ void processHeading()
     }
   }
   // NEW SI Version
-  const float commandedYaw = constrain(getReceiverSIData(ZAXIS) + radians(headingHold), -PI, PI);
+  #if defined (UseGPSNavigator) 
+    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
+  #else
+    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
+  #endif
+  
+  const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);
   motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }
 

@@ -1,24 +1,24 @@
 /*
-  AeroQuad v3.0.1 - February 2012
-  www.AeroQuad.com
-  Copyright (c) 2012 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based multicopter.
+ AeroQuad v3.0 - December 2011
+ www.AeroQuad.com
+ Copyright (c) 2011 Ted Carancho.  All rights reserved.
+ An Open Source Arduino based multicopter.
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-/* Menu system implementation, usable with OSD */
+/* Menu system implementation, usable with OSD or SerialLCD */
 
 #ifndef _AQ_OSD_MENU_
 #define _AQ_OSD_MENU_
@@ -41,6 +41,7 @@ extern const struct MenuItem menuData[];
 #define MENU_EXIT     4 // stick left action
 #define MENU_CALLBACK 5 // timed callback
 #define MENU_ABORT    6 // cleanup now (motors armed), only needs to be handled if cleanups are needed
+#define MENU_HIJACK   7 // handler should interrept sticks completely !!
 
 #define MENU_NOFUNC   0
 
@@ -48,6 +49,10 @@ extern const struct MenuItem menuData[];
 #define MENU_SYM_UP   '\016'
 #define MENU_SYM_DOWN '\017'
 
+#define MENU_STICK_CENTER  1500  // center value
+#define MENU_STICK_NEUTRAL 100   // less than this from center is neutral
+#define MENU_STICK_ACTIVE  200   // over this is select
+#define MENU_STICK_REPEAT  400   // autorepeat at extreme values
 
 byte  menuInFunc = 0;       // tells if a handler func is active
                             // 0 - we're in base menu
@@ -56,6 +61,7 @@ byte  menuInFunc = 0;       // tells if a handler func is active
 byte  menuEntry  = 255;     // Active menu entry
 byte  menuAtExit = 0;       // are we at the exit at the top
 byte  stickWaitNeutral = 1; // wait for stick to center
+byte  menuOwnsSticks = 0;   // menu code will handle stick input (prevents arming)
 
 // DATA that menu functions can freely use to store state
 byte  menuFuncData[10];  // 10 bytes of data for funcs to use as they wish...
@@ -75,7 +81,9 @@ void menuHandleSimple(byte mode, byte action) {
   if (action == MENU_INIT) {
     switch (mode) {
     case 0:
+#ifdef OSD
       armedTime = 0;
+#endif
       break;
 #ifdef BattMonitor
     case 1:
@@ -84,6 +92,15 @@ void menuHandleSimple(byte mode, byte action) {
       }
       notifyOSD(OSD_NOCLEAR|OSD_CENTER, "Battery state reset!");
       menuInFunc = 10;
+      break;
+#endif
+#ifdef UseGPS
+    case 2:
+      homePosition.latitude   = GPS_INVALID_ANGLE;
+      homePosition.longitude  = GPS_INVALID_ANGLE;
+#if defined AltitudeHoldBaro
+      initializeBaro();
+#endif
       break;
 #endif
 /* TEMPLATE CODE FOR NEW ACTION:
@@ -147,6 +164,7 @@ void menuHandleConfirm(byte mode, byte action) {
         // Initialize EEPROM with default values
         notifyOSD(OSD_NOCLEAR|OSD_CENTER, "initializing EEPROM");
         initializeEEPROM(); // defined in DataStorage.h
+        writeEEPROM(); // defined in DataStorage.h
         calibrateGyro();
         computeAccelBias();
         zeroIntegralError();
@@ -217,16 +235,16 @@ void menuHandleCam(byte mode, byte action) {
       int val = (action == MENU_UP) ? 10 : -10;
       switch (menuFuncData[1]) {
       case 0:
-        setMode(action==MENU_UP?1:0);
+        cameraMode = (action==MENU_UP)?1:0;
         break;
       case 1:
-        setCenterPitch(constrain(getCenterPitch() + val, getServoMinPitch(), getServoMaxPitch()));
+        servoCenterPitch = constrain(servoCenterPitch + val, servoMinPitch, servoMaxPitch);
         break;
       case 2:
-        setCenterRoll(constrain(getCenterRoll() + val, getServoMinRoll(), getServoMaxRoll()));
+        servoCenterRoll = constrain(servoCenterRoll + val, servoMinRoll, servoMaxRoll);
         break;
       case 3:
-        setCenterYaw(constrain(getCenterYaw() + val, getServoMinYaw(), getServoMaxYaw()));
+        servoCenterYaw = constrain(servoCenterYaw + val, servoMinYaw, servoMaxYaw);
         break;
       }
     }
@@ -234,7 +252,7 @@ void menuHandleCam(byte mode, byte action) {
   }
 
   if (menuFuncData[1] == 0) {
-    notifyOSDmenu(OSD_NOCLEAR | OSD_CURSOR, menuFuncData[0] ? 18 : 1, menuFuncData[0] ? 18 : 16, "%cStabilizer mode: %1d", MENU_SYM_BOTH, getMode());
+    notifyOSDmenu(OSD_NOCLEAR | OSD_CURSOR, menuFuncData[0] ? 18 : 1, menuFuncData[0] ? 18 : 16, "%cStabilizer mode: %1d", MENU_SYM_BOTH, cameraMode);
   }
   else {
     notifyOSDmenu(OSD_NOCLEAR|OSD_CURSOR,
@@ -243,9 +261,9 @@ void menuHandleCam(byte mode, byte action) {
       (menuFuncData[1] == 1)?"Pitch":
       (menuFuncData[1] == 2)?"Roll ":
       "Yaw  ",
-      (menuFuncData[1] == 1) ? getCenterPitch():
-      (menuFuncData[1] == 2) ? getCenterRoll():
-      getCenterYaw());
+      (menuFuncData[1] == 1) ? servoCenterPitch:
+      (menuFuncData[1] == 2) ? servoCenterRoll:
+      servoCenterYaw);
   }
 }
 #endif
@@ -295,9 +313,16 @@ void menuEditFloat(float *f, byte i, byte d, byte pos, byte action, float min, f
   *f = constrain(*f, min, max);
 }
 
-const char *pidNames[10] = {
+const char *pidNames[] = {
   "RRoll", "RPitc", "RYaw ", "ARoll", "APitc",
-  "Headi", "AGRol", "AGPit", "Altit", "ZDamp"};
+  "Headi", "AGRol", "AGPit", "B_Alt", "S_Alt",
+  "ZDamp",
+#ifdef UseGPS
+  "GPS_P", "GPS_R", "GPS_Y"
+#endif
+};
+
+#define PIDCOUNT  (sizeof(pidNames)/sizeof(char*))
 
 void menuHandlePidTune(byte mode, byte action) {
 
@@ -350,7 +375,7 @@ void menuHandlePidTune(byte mode, byte action) {
 
   case MENU_UP:
     if (menuFuncData[0] == 0) {
-      if (menuFuncData[1] < 9) menuFuncData[1]++;
+      if (menuFuncData[1] < (PIDCOUNT-1)) menuFuncData[1]++;
     }
     else if (menuFuncData[0] == 1) {
       if (menuFuncData[2] < 2) menuFuncData[2]++;
@@ -397,7 +422,7 @@ void menuHandlePidTune(byte mode, byte action) {
       cl = 5;
       cr = 9;
       if (menuFuncData[1] == 0) updn = MENU_SYM_UP;
-      if (menuFuncData[1] == 9) updn = MENU_SYM_DOWN;
+      if (menuFuncData[1] == (PIDCOUNT-1)) updn = MENU_SYM_DOWN;
     }
     else if (menuFuncData[0] == 1) {
       // selecting P/I/D
@@ -422,7 +447,7 @@ void menuHandlePidTune(byte mode, byte action) {
 
 
 // this define is used to convert a float into (char) sign, (int) integerpart, (int) per100parts
-#define PRFLOAT(x) ((x<0.0)?'-':' '),((int)abs(x)),(((int)(100*abs(x)))%100)
+#define PRFLOAT(x) (((x)<0.0)?'-':' '),((int)abs(x)),(abs((int)(100*(x)))%100)
 
 void menuSensorInfo(byte mode, byte action){
   switch (action) {
@@ -444,7 +469,17 @@ void menuSensorInfo(byte mode, byte action){
       #if defined(HeadingMagHold)
         case 2: // Mag
           notifyOSD(OSD_NOCLEAR,"Mag: X%5d Y%5d Z%5d",
-                  getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
+		  getMagnetometerData(XAXIS),getMagnetometerData(YAXIS),getMagnetometerData(ZAXIS));
+          break;
+      #endif
+      #if defined(AltitudeHoldRangeFinder)
+        case 3: // Rangers
+          notifyOSD(OSD_NOCLEAR,"US:a%df%dr%dr%dl%d cm",
+                  (int)(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[FRONT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[RIGHT_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[REAR_RANGE_FINDER_INDEX]*100),
+                  (int)(rangeFinderRange[LEFT_RANGE_FINDER_INDEX]*100));
           break;
       #endif
     }
@@ -455,6 +490,144 @@ void menuSensorInfo(byte mode, byte action){
   }
 }
 
+void menuHideOSD(byte mode, byte action){
+
+  menuInFunc=0;
+  menuEntry=255;
+  notifyOSD(OSD_NOCLEAR,NULL);
+  hideOSD();
+}
+
+#ifdef CameraControl
+short savedCenterYaw, savedCenterPitch, savedCenterRoll;
+byte  savedCameraMode;
+
+// #define POWERSAVE 10 // enable to shut off servos after idle
+#if defined (POWERSAVE)
+  byte idleCounter = POWERSAVE;
+#endif
+
+#define ZOOMPIN 24
+
+
+void menuCameraPTZ(byte mode, byte action){
+
+  if (action == MENU_INIT) {
+    hideOSD();
+    menuOwnsSticks = 1;
+    savedCenterYaw   = servoCenterYaw;
+    savedCenterPitch = servoCenterPitch;
+    savedCenterRoll  = servoCenterRoll;
+    savedCameraMode  = cameraMode;
+    cameraMode       = 0; // disable stabilizer
+    menuFuncDataFloat = 0.0;
+		#if defined (POWERSAVE)
+		idleCounter = POWERSAVE;
+		#endif
+  }
+  else if ((action == MENU_CALLBACK) || (action == MENU_ABORT)) {
+    digitalWrite(ZOOMPIN, LOW); // Zoom off
+    pinMode(ZOOMPIN, INPUT);
+		#if defined (POWERSAVE)
+			TCCR1A |= ((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // make sure servos are enabled
+	  #endif
+    menuInFunc = 0;    
+  }
+  else if (action == MENU_HIJACK) {
+    const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
+    const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
+    short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+
+    if (roll < -MENU_STICK_REPEAT) {
+      unhideOSD();
+      menuOwnsSticks = 0;
+      menuInFunc  = 40; // Callback after 4sec
+
+      pinMode(ZOOMPIN, OUTPUT);
+      digitalWrite(ZOOMPIN, LOW); // Zoom out
+
+      // restore position
+//      servoCenterYaw   = savedCenterYaw;
+//      servoCenterPitch = savedCenterPitch;
+//      servoCenterRoll = savedCenterRoll;
+      cameraMode  = savedCameraMode;
+
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "exiting PTZ mode");
+      return;
+    }
+
+    if (abs(yaw) > 50) {
+      if (yaw>0) { 
+        yaw-=50;
+      }
+      else {
+        yaw+=50;
+      }
+      servoCenterYaw = constrain(servoCenterYaw + (yaw/10), servoMinYaw, servoMaxYaw);
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
+    }
+
+    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
+      menuFuncDataFloat = receiverCommand[THROTTLE];
+      servoCenterPitch = constrain(3000 - menuFuncDataFloat, servoMinPitch, servoMaxPitch);
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
+    }
+
+    if (roll > MENU_STICK_REPEAT) {
+      // elevator
+      if (pitch < -MENU_STICK_REPEAT) {
+        // DOWN
+        servoCenterRoll = servoMinRoll;
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // UP
+        servoCenterRoll = servoMaxRoll;
+      } else {
+        // STOP
+        servoCenterRoll = savedCenterRoll;
+      }
+  		#if defined (POWERSAVE)
+    		idleCounter = POWERSAVE;
+  		#endif
+
+    } 
+    else {
+      // zoom
+      if (pitch < -MENU_STICK_REPEAT) {
+        // zoom out
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, LOW);
+      }
+      else if (pitch > MENU_STICK_REPEAT) {
+        // zoom in
+        pinMode(ZOOMPIN, OUTPUT);
+        digitalWrite(ZOOMPIN, HIGH);
+      } else {
+        // release zoom
+        digitalWrite(ZOOMPIN, LOW); // this is needed to remove the 'internal pullup'
+        pinMode(ZOOMPIN, INPUT);
+      }
+    }
+    #if defined (POWERSAVE)
+    	if (idleCounter == POWERSAVE) {
+    	    idleCounter--;
+    					TCCR1A |= ((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // Enable servos
+    	} else if (idleCounter>0) {
+    		idleCounter--;
+    		if (idleCounter == 0) {
+    			TCCR1A &= ~((1<<COM1A1)|(1<<COM1B1)|(1<<COM1C1)); // shut off servo ppm
+    		}
+    	}
+  	#endif
+
+  }
+}
+#endif
+
 // MENU STRUCTURE TABLE
 //
 // One line in this table corresponds to one entry on the menu.
@@ -462,10 +635,10 @@ void menuSensorInfo(byte mode, byte action){
 // Entry format:
 //  { LEVEL, TEXT, HANDLER, MODE},
 // Where
-//  LEVEL   - this defines the tree structure 0 == root level 
+//  LEVEL   - this defines the tree structure 0 == root level
 //  TEXT    - displayed text should be no more than ~16 characters
 //  HADNLER - handler function to be called for this item (or MENU_NOFUNC for submenu)
-//  MODE    - data passed to handler function to allow sharing them 
+//  MODE    - data passed to handler function to allow sharing them
 
 const struct MenuItem menuData[] = {
 #if 0
@@ -489,6 +662,9 @@ const struct MenuItem menuData[] = {
 #ifdef BattMonitor
   {1,   "Reset battery stats",menuHandleSimple,  1},
 #endif
+#ifdef UseGPS
+  {1,   "Reset Home",         menuHandleSimple,  2},
+#endif
   {1,   "OSD",                MENU_NOFUNC,       0},
   {2,     "Reset flightime",  menuHandleSimple,  0},
   {0, "Setup",                MENU_NOFUNC,       0},
@@ -502,6 +678,13 @@ const struct MenuItem menuData[] = {
 #if defined(HeadingMagHold)
   {2,     "Mag Data",         menuSensorInfo,    2},
 #endif
+#if defined(AltitudeHoldRangeFinder)
+  {2,     "Ranger Data",      menuSensorInfo,    3},
+#endif
+#ifdef CameraControl
+  {0, "Camera PTZ mode",      menuCameraPTZ,     0},
+#endif
+  {0, "Exit and hide OSD",    menuHideOSD,       0},
   };
 
 #define menuNumEntries (sizeof(menuData) / sizeof(MenuItem))
@@ -523,12 +706,7 @@ byte  menuIsLast(byte entry) {
   return 1;
 }
 
-#define MENU_STICK_CENTER  1500  // center value
-#define MENU_STICK_NEUTRAL 100   // less than this from center is neutral
-#define MENU_STICK_ACTIVE  200   // over this is select
-#define MENU_STICK_REPEAT  400   // autorepeat at extreme values
-
-#define MENU_CALLFUNC(entry, action) menuData[entry].function(menuData[entry].mode,action);
+#define MENU_CALLFUNC(entry, action) menuData[entry].function(menuData[entry].mode,action)
 
 void menuShow(byte entry) {
 
@@ -554,7 +732,7 @@ void menuUp() {
   }
 
   if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry,MENU_UP)
+    MENU_CALLFUNC(menuEntry,MENU_UP);
     return;
   }
 
@@ -578,7 +756,7 @@ void menuDown() {
     return;
   }
   if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry, MENU_DOWN)
+    MENU_CALLFUNC(menuEntry, MENU_DOWN);
     return;
   }
   if (menuAtExit) {
@@ -600,11 +778,12 @@ void menuSelect() {
 
   if (255==menuEntry) {
     // enable menu
+    unhideOSD(); // make sure OSD is visible
     menuAtExit=0;
     menuEntry=0;
   }
   else if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry,MENU_SELECT)
+    MENU_CALLFUNC(menuEntry,MENU_SELECT);
     if (menuInFunc) return; // redisplay menu if we exited from handler
   }
   else if (menuAtExit) {
@@ -619,7 +798,7 @@ void menuSelect() {
   }
   else if (menuData[menuEntry].function != MENU_NOFUNC) {
     menuInFunc = 1;
-    MENU_CALLFUNC(menuEntry, MENU_INIT)
+    MENU_CALLFUNC(menuEntry, MENU_INIT);
     return;
   }
   else if (menuData[menuEntry].level < menuData[menuEntry + 1].level) {
@@ -634,13 +813,13 @@ void menuExit() {
   if (255 == menuEntry)
     return;
 
-  if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
-    menuEntry = 255;
-  }
-  else if (menuInFunc) {
-    MENU_CALLFUNC(menuEntry, MENU_EXIT)
+  if (menuInFunc) {
+    MENU_CALLFUNC(menuEntry, MENU_EXIT);
     if (menuInFunc)
       return;
+  }
+  else if ((0 == menuEntry) || (0 == menuData[menuEntry].level)) {
+    menuEntry = 255;
   }
   else {
     // leave submenu
@@ -657,12 +836,22 @@ void menuExit() {
 
 void updateOSDMenu() {
 
+  // check for special HiJack mode
+  if ((menuEntry!=255) && menuOwnsSticks  && menuInFunc) {
+
+    MENU_CALLFUNC(menuEntry, MENU_HIJACK);
+    if (menuInFunc == 0) {
+      menuShow(menuEntry);
+    }
+    return;
+  }
+
   // check if armed, menu is only operational when not armed
   if (motorArmed == true) {
     if (menuEntry != 255) {
       // BAIL OUT of menu if armed
       if (menuInFunc) {
-        MENU_CALLFUNC(menuEntry, MENU_ABORT)
+        MENU_CALLFUNC(menuEntry, MENU_ABORT);
       }
       notifyOSD(0, NULL); // clear menuline
       menuInFunc = 0;
@@ -676,7 +865,7 @@ void updateOSDMenu() {
     menuInFunc--;
     if (menuInFunc == 1) {
       // call the callback when counter hits 1
-      MENU_CALLFUNC(menuEntry, MENU_CALLBACK)
+      MENU_CALLFUNC(menuEntry, MENU_CALLBACK);
       // show the menu entry if the handler function 'exited'
       if (menuInFunc == 0) {
         menuShow(menuEntry);

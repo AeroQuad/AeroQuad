@@ -29,7 +29,10 @@
   #define ITG3200_ADDRESS					0x69
 #endif
 
-#define ITG3200_IDENTITY 0x69
+#define GYRO_CALIBRATION_TRESHOLD 4
+
+#define ITG3200_IDENTITY                0x68
+#define ITG3200_IDENTITY_MASK           0x7E
 #define ITG3200_MEMORY_ADDRESS			0x1D
 #define ITG3200_BUFFER_SIZE				6
 #define ITG3200_RESET_ADDRESS			0x3E
@@ -39,17 +42,16 @@
 #define ITG3200_OSCILLATOR_ADDR			0x3E
 #define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
 #define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
+#define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
-
-
+float gyroTempBias[3] = {0.0,0.0,0.0};
 void measureSpecificGyroADC(int *gyroADC);
 void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(int *gyroADC);
 
 void initializeGyro() {
-
-  if (readWhoI2C(ITG3200_ADDRESS) == ITG3200_IDENTITY) {
+  if ((readWhoI2C(ITG3200_ADDRESS) & ITG3200_IDENTITY_MASK) == ITG3200_IDENTITY) {
 	vehicleState |= GYRO_DETECTED;
   }
 	
@@ -59,17 +61,15 @@ void initializeGyro() {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
 
-
 void measureGyro() {
-
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
 
   int gyroADC[3];
   measureSpecificGyroADC(gyroADC);
-
+  
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+	gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
  
   // Measure gyro heading
@@ -81,7 +81,6 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
   
@@ -91,7 +90,6 @@ void measureGyroSum() {
 }
 
 void evaluateGyroRate() {
-
   int gyroADC[3];
   evaluateSpecificGyroRate(gyroADC);
   gyroSample[XAXIS] = 0;
@@ -100,7 +98,7 @@ void evaluateGyroRate() {
   gyroSampleCount = 0;
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
-    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
   }
   
   // Measure gyro heading
