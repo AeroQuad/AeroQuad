@@ -18,42 +18,45 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>
-#include <Platform_CHR6DM.h> 
-#include <AQMath.h>
-#include <Device_I2C.h>
-#include <Gyroscope_CHR6DM.h>
+#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
+
 #include <GlobalDefined.h>
+#include <AQMath.h>
+
+//Uncomment the following two lines when testing the mag on v2.1 shield
+//#define SPARKFUN_9DOF_5883L
+//#include <Magnetometer_HMC5883L.h>
+
+//Uncomment the following line when testing the mag on v2.0 shield
+#include <Magnetometer_HMC5843.h>
 
 unsigned long timer;
 
-
-void setup()
-{
-  Serial.begin(115200);
-  Serial.println("Gyroscope library test (CHR6DM)");
-
-  calibrateGyro();
+void setup() {
   
-  timer = millis();
+  Serial.begin(115200);
+  Serial.println("Magnetometer library test (HMC58xx)");
+  
+  Wire.begin();
+  initializeMagnetometer();
 }
 
-void loop(void) 
-{
+void loop() {
+  
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    measureGyro();
+    measureMagnetometer(0.0,0.0);
     
     Serial.print("Roll: ");
-    Serial.print(degrees(gyroRate[XAXIS]));
+    Serial.print(getMagnetometerRawData(XAXIS));
     Serial.print(" Pitch: ");
-    Serial.print(degrees(gyroRate[YAXIS]));
+    Serial.print(getMagnetometerRawData(YAXIS));
     Serial.print(" Yaw: ");
-    Serial.print(degrees(gyroRate[ZAXIS]));
+    Serial.print(getMagnetometerRawData(ZAXIS));
     Serial.print(" Heading: ");
-    Serial.print(degrees(gyroHeading));
+    Serial.print(getAbsoluteHeading());
     Serial.println();
   }
 }
-

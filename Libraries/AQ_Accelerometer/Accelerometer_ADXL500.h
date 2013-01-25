@@ -22,6 +22,7 @@
 #define _AEROQUAD_ACCELEROMETER_IDG500_H_
 
 #include <Accelerometer.h>
+#include <SensorsStatus.h>
 
 void initializeAccel() {
   vehicleState |= ACCEL_DETECTED;

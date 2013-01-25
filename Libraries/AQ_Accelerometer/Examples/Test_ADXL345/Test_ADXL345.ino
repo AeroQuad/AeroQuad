@@ -26,7 +26,7 @@
 // if using 6DOF, uncomment this one:
 #include <Accelerometer_ADXL345.h>  
 // if using 9DOF, uncomment this one:
-//#include <Accelerometer_ADXL345_9DOF.h 
+//#include <Accelerometer_ADXL345_9DOF.h> 
 
 unsigned long timer;
 
