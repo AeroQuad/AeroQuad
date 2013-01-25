@@ -69,7 +69,7 @@
   #define NB_MOTOR_CONFIG SIX_Motors
 #else
   #define NB_MOTOR 8
-  #define NB_MOTOR_CONFIG HEIGHT_Motors
+  #define NB_MOTOR_CONFIG EIGHT_Motors
 #endif
 
 

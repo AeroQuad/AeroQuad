@@ -23,6 +23,7 @@
 
 #include <Accelerometer.h>
 #include <Platform_Wii.h>
+#include <SensorsStatus.h>
 
 void initializeAccel() {
   vehicleState |= ACCEL_DETECTED;

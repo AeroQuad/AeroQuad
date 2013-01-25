@@ -23,6 +23,7 @@
 #define _AEROQUAD_MAGNETOMETER_HMC58XX_H_
 
 #include "Compass.h"
+#include <SensorsStatus.h>
 
 #include "Arduino.h"
 

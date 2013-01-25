@@ -24,6 +24,7 @@
 #include <Platform_CHR6DM.h>
 #include <AQMath.h>
 #include <SensorsStatus.h>
+#include <GlobalDefined.h>
 
 #define FINDZERO 49
 
