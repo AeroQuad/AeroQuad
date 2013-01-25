@@ -21,7 +21,6 @@
 #include <AQMath.h>
 #include <GlobalDefined.h>
 
-
 //Choose how many channels you have available (6, 8 or 10)
 
 //#define LASTCHANNEL 6
@@ -50,6 +49,7 @@ void setup() {
   Serial.println("Receiver library test");
 
   initializeReceiver(LASTCHANNEL);   
+  receiverXmitFactor = 1.0;
 }
 
 void loop() {
