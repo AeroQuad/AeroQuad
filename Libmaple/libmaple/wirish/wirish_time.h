@@ -54,13 +54,15 @@ static inline uint32 millis(void) {
  * @see millis()
  */
 static inline uint32 micros(void) {
-    volatile uint32 ms;
-    volatile uint32 cycle_cnt;
+    uint32 ms;
+    uint32 cycle_cnt;
     uint32 res;
 
     do {
         ms = millis();
         cycle_cnt = systick_get_count();
+        asm volatile("nop"); //allow interrupt to fire
+        asm volatile("nop");
     } while (ms != millis());
 
     if(systick_check_underflow()) {
