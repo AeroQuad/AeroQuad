@@ -132,7 +132,7 @@ ifeq ($(BUILDTYPE), STM32)
 	SUPPORT_PATH := $(SRCROOT)/support
 	LDDIR    := $(SUPPORT_PATH)/ld
 ##### Uncomment the -nostartfiles if compiling on OS X #####
-	LDFLAGSSTM32 = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)  -Xlinker --gc-sections -lc #-nostartfiles
+	LDFLAGSSTM32 = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)  -Xlinker --gc-sections -lc -nostartfiles
 
 # Set up build rules and some useful templates
 include $(SUPPORT_PATH)/make/build-rules.mk
@@ -293,7 +293,7 @@ CFLAGS += -fdata-sections
 CFLAGS += -funsigned-char
 CFLAGS += -funsigned-bitfields
 CFLAGS += -fsingle-precision-constant
-//CFLAGS += -fpack-struct
+#CFLAGS += -fpack-struct
 CFLAGS += -fshort-enums
 CFLAGS += -Wall
 CFLAGS += -Wstrict-prototypes
