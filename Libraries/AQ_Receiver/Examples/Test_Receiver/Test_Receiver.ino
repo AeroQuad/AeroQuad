@@ -27,7 +27,7 @@
 #define LASTCHANNEL 8
 //#define LASTCHANNEL 10
 
-// Uncomment only one of the following lines depending on the receiver type you are using
+// Uncomment only one of the following receiver types depending on the type you are using
 // see http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
   
 //PPM receivers
@@ -35,11 +35,18 @@
 //#include <Receiver_HWPPM.h> // for AeroQuad shield v1.x with Arduino Mega and shield v2.x with hardware mod                       
                               
 //PWM receivers
-#include <Receiver_MEGA.h>   // for AeroQuad shield v1.x with Arduino Mega and shield v2.x using a standard PWM receiver
+//#include <Receiver_MEGA.h>   // for AeroQuad shield v1.x with Arduino Mega and shield v2.x using a standard PWM receiver
 //#include <Receiver_328p.h> // for AeroQuad shield v1.x with Arduino Due/Uno and mini shield v1.0 using a standard PWM receiver
 
 //Futaba sBus
-//#include <Receiver_SBUS.h> // for sBus receiver
+#define sBus // for sBus receiver
+
+// -------------  End of configuration ----------------- //
+
+
+#if defined(sBus)
+  #include <Receiver_SBUS.h>
+#endif
 
 unsigned long timer;
 
@@ -57,6 +64,11 @@ void loop() {
   if((millis() - timer) > 50) // 20Hz
   {
     timer = millis();
+   
+    #if defined(sBus)
+      readSBUS();
+    #endif
+    
     readReceiver();
     
     Serial.print("Throttle: ");
