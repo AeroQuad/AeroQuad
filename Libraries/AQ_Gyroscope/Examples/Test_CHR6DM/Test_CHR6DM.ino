@@ -45,7 +45,7 @@ void loop(void)
     timer = millis();
     measureGyro();
     
-	Serial.print("Roll: ");
+    Serial.print("Roll: ");
     Serial.print(degrees(gyroRate[XAXIS]));
     Serial.print(" Pitch: ");
     Serial.print(degrees(gyroRate[YAXIS]));
