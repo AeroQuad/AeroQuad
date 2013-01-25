@@ -6,6 +6,9 @@ __attribute__(( constructor )) void premain() {
     init();
 }
 
+extern "C"{
+        void _init(){};
+}
 
 // Uncomment this if compiling on OS X
 /*extern "C"{
