@@ -23,8 +23,6 @@
 #include <AQMath.h>
 
 #include <GlobalDefined.h>
-#include <SensorsStatus.h>
-#include <BarometricSensor.h>
 #include <BarometricSensor_BMP085.h>
 
 unsigned long timer = 0;

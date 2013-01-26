@@ -22,8 +22,13 @@
 #include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
 
 #include <GlobalDefined.h>
-#include <SensorsStatus.h>
 #include <AQMath.h>
+
+//Uncomment the following two lines when testing the mag on v2.1 shield
+//#define SPARKFUN_9DOF_5883L
+//#include <Magnetometer_HMC5883L.h>
+
+//Uncomment the following line when testing the mag on v2.0 shield
 #include <Magnetometer_HMC5843.h>
 
 unsigned long timer;
@@ -31,7 +36,7 @@ unsigned long timer;
 void setup() {
   
   Serial.begin(115200);
-  Serial.println("Magnetometer library test (HMC5843)");
+  Serial.println("Magnetometer library test (HMC58xx)");
   
   Wire.begin();
   initializeMagnetometer();
@@ -42,7 +47,6 @@ void loop() {
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    //accel.measure();
     measureMagnetometer(0.0,0.0);
     
     Serial.print("Roll: ");
@@ -51,6 +55,8 @@ void loop() {
     Serial.print(getMagnetometerRawData(YAXIS));
     Serial.print(" Yaw: ");
     Serial.print(getMagnetometerRawData(ZAXIS));
+    Serial.print(" Heading: ");
+    Serial.print(getAbsoluteHeading());
     Serial.println();
   }
 }
