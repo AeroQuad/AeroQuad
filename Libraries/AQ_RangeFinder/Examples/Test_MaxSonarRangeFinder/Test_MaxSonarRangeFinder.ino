@@ -18,21 +18,19 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#define ADC_NUMBER_OF_BITS 10
+
 #include <SensorsStatus.h>
 #include <MaxSonarRangeFinder.h>
 
 void setup() {
   Serial.begin(115200);
-  inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+  inititalizeRangeFinders();
 }
 
 void loop() {
   
-  for (int i = 0; i < 20;i++) {
-    readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
-    delay(10);
-  }
-  evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
+  updateRangeFinders();
   
   Serial.print("Distance = ");
   Serial.println(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
