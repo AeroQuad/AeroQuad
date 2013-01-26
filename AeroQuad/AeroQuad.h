@@ -55,7 +55,7 @@ int testCommand = 1000;
  */
 #define RATE_FLIGHT_MODE 0
 #define ATTITUDE_FLIGHT_MODE 1
-
+byte previousFlightMode = ATTITUDE_FLIGHT_MODE;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
 #define TASK_10HZ 10
