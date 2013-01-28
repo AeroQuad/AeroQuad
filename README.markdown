@@ -1,14 +1,17 @@
-AeroQuad Flight Software Source Code 3.1 Beta 1
+AeroQuad Flight Software Source Code 3.2
 ========================================
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
 
-Version 3.1 Release Notes (1/23/2013)
+Version 3.2 Release Notes (1/27/2012)
+* Unified release with Configurator for official support of AQ32 Flight Control Board
+
+Version 3.1 Beta 1 Release Notes (7/1/2012)
 ----------------------------------------
-* Waypoint following (Waypoints uploaded from Configurator)
-* Auto Descent/Land (Must be tuned for your individual setup)
-* GPS Position Hold
-* GPS Return to Home
-* Obstacle detection
+* Waypoint following (Waypoints uploaded from Configurator) - EXPERIMENTAL
+* Auto Descent/Land (Must be tuned for your individual setup) - EXPERIMENTAL
+* GPS Position Hold - EXPERIMENTAL
+* GPS Return to Home - EXPERIMENTAL
+* Obstacle detection - EXPERIMENTAL
  * Uses ultrasonic sensors to detect if objects are nearby and displays on the OSD
 * Telemetry over audio channel of your video transmitter
  * Requires telemetry modem soon to come to AeroQuad store)
