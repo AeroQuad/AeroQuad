@@ -47,8 +47,8 @@ volatile static uint8_t PCintLast[3];
 // Channel data
 typedef struct {
   byte edge;
-  unsigned long riseTime;
-  unsigned long fallTime;
+  uint16_t riseTime;
+  uint16_t fallTime;
   unsigned int lastGoodWidth;
 } tPinTimingData;
 volatile static tPinTimingData pinData[9];
@@ -58,8 +58,8 @@ static void MegaPcIntISR() {
   uint8_t curr;
   uint8_t mask;
   uint8_t pin;
-  uint32_t currentTime;
-  uint32_t time;
+  uint16_t currentTime;
+  uint16_t time;
 
   curr = *portInputRegister(11);
   mask = curr ^ PCintLast[0];
@@ -70,7 +70,7 @@ static void MegaPcIntISR() {
     return;
   }
 
-  currentTime = micros();
+  currentTime = TCNT5;
 
   // mask is pcint pins that have changed.
   for (uint8_t i=0; i < 8; i++) {
@@ -79,7 +79,7 @@ static void MegaPcIntISR() {
       pin = i;
       // for each pin changed, record time of change
       if (bit & PCintLast[0]) {
-        time = currentTime - pinData[pin].fallTime;
+        time = (currentTime - pinData[pin].fallTime)/2;
         pinData[pin].riseTime = currentTime;
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
           pinData[pin].edge = RISING_EDGE;
@@ -87,7 +87,7 @@ static void MegaPcIntISR() {
           pinData[pin].edge = FALLING_EDGE; // invalid rising edge detected
       }
       else {
-        time = currentTime - pinData[pin].riseTime;
+        time = (currentTime - pinData[pin].riseTime)/2;
         pinData[pin].fallTime = currentTime;
         if ((time >= MINONWIDTH) && (time <= MAXONWIDTH) && (pinData[pin].edge == RISING_EDGE)) {
           pinData[pin].lastGoodWidth = time;
@@ -114,6 +114,10 @@ void initializeReceiver(int nbChannel = 6) {
 
   initializeReceiverParam(nbChannel);
   
+  // Configure timer HW, just run 0-ffff at 2MHz
+  TCCR5A = 0;
+  TCCR5B = (1<<CS51); //Prescaler set to 8, that give us a resolution of 0.5us, read page 134 of data sheet
+
   DDRK = 0;
   PORTK = 0;
   PCMSK2 |=(1<<lastReceiverChannel)-1;
