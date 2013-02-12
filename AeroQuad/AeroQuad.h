@@ -26,12 +26,29 @@
 #include <math.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
-#include "GpsDataType.h"
+//#include "GpsDataType.h"
 #include "AQMath.h"
 #include "Receiver.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.2
+
+typedef void(*FonctionPointer)();
+
+#define quadXConfig     0
+#define quadPlusConfig  1
+#define hexPlusConfig   2
+#define hexXConfig      3
+#define triConfig       4
+#define quadY4Config    5
+#define hexY6Config     6
+#define octoX8Config    7
+#define octoPlusConfig	8	
+#define octoXConfig	9
+	
+byte motorConfig = triConfig;
+byte LASTMOTOR = 0;
+	
 
 #if defined CONFIG_BAUDRATE
   #define BAUD CONFIG_BAUDRATE
@@ -330,7 +347,7 @@ typedef struct {
   float SERVOTXCHANNELS_ADR;
   // GPS mission storing
   float GPS_MISSION_NB_POINT_ADR;
-  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+//  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 
 

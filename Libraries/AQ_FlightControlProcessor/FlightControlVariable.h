@@ -27,9 +27,16 @@
   #define YAW_DIRECTION 1
 #endif
 
+#include <Motors.h>
+
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
+
+int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
+int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
+int motorConfiguratorCommand[8] = {0,0,0,0,0,0,0,0};
+
 
 #endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_VARIABLE_H_
 

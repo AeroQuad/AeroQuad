@@ -40,8 +40,8 @@
 #else
   #define MOTORPIN0    3
   #define MOTORPIN1    9
-  #define MOTORPIN2   10
-  #define MOTORPIN3   11
+  #define MOTORPIN2    10
+  #define MOTORPIN3    11
   #define DIGITAL_SERVO_TRI_PINMODE  pinMode(3,OUTPUT); //also right servo for BI COPTER
   #define DIGITAL_SERVO_TRI_HIGH     PORTD |= 1<<3;
   #define DIGITAL_SERVO_TRI_LOW      PORTD &= ~(1<<3);
@@ -105,7 +105,7 @@ ISR(TIMER0_COMPA_vect) {
 }
 
 
-void initializeMotors(NB_Motors numbers) {
+void initializeMotors(byte numbers) {
   
   numberOfMotors = numbers;
 
