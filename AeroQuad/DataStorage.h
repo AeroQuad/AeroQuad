@@ -204,7 +204,6 @@ void initializeEEPROM() {
 
   flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
-  aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
   // Battery Monitor
   #ifdef BattMonitor
@@ -313,7 +312,6 @@ void readEEPROM() {
   }
     
   minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
-  aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
@@ -382,13 +380,6 @@ void writeEEPROM(){
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
     writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
-  #else
-    writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
-    writeFloat(90, ALTITUDE_BUMP_ADR);
-    writeFloat(250, ALTITUDE_PANIC_ADR);
-    writeFloat(-50, ALTITUDE_MIN_THROTTLE_ADR);
-    writeFloat(50, ALTITUDE_MAX_THROTTLE_ADR);
-    writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
   
   #ifdef HeadingMagHold
@@ -406,7 +397,6 @@ void writeEEPROM(){
   }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
-  writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(accelOneG, ACCEL_1G_ADR);
@@ -423,9 +413,6 @@ void writeEEPROM(){
   #if defined (AltitudeHoldRangeFinder)
     writeFloat(maxRangeFinderRange, RANGE_FINDER_MAX_ADR);
     writeFloat(minRangeFinderRange, RANGE_FINDER_MIN_ADR);
-  #else
-    writeFloat(0, RANGE_FINDER_MAX_ADR);
-    writeFloat(0, RANGE_FINDER_MIN_ADR);
   #endif
   
   #if defined (UseGPSNavigator)

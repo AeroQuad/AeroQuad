@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
