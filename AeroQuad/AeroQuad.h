@@ -109,17 +109,6 @@ unsigned long hundredHZpreviousTime = 0;
 
 //////////////////////////////////////////////////////
 
-
-// Analog Reference Value
-// This value provided from Configurator
-// Use a DMM to measure the voltage between AREF and GND
-// Enter the measured voltage below to define your value for aref
-// If you don't have a DMM use the following:
-// AeroQuad Shield v1.7, aref = 3.0
-// AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Read in from EEPROM
-//////////////////////////////////////////////////////
-
 /**
  * Heading and heading hold global declaration section
  */
@@ -289,27 +278,15 @@ typedef struct {
   t_NVR_PID HEADING_PID_GAIN_ADR;
   t_NVR_PID LEVEL_GYRO_ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
-  t_NVR_PID ALTITUDE_PID_GAIN_ADR;
-  t_NVR_PID ZDAMP_PID_GAIN_ADR;
-  t_NVR_PID GPSROLL_PID_GAIN_ADR;
-  t_NVR_PID GPSPITCH_PID_GAIN_ADR;
-  t_NVR_PID GPSYAW_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
-  float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
   float ACCEL_1G_ADR;
-  float ALTITUDE_MAX_THROTTLE_ADR;
-  float ALTITUDE_MIN_THROTTLE_ADR;
-  float ALTITUDE_SMOOTH_ADR;
-  float ALTITUDE_WINDUP_ADR;
-  float ALTITUDE_BUMP_ADR;
-  float ALTITUDE_PANIC_ADR;
   // Gyro calibration
   float ROTATION_SPEED_FACTOR_ARD;
   // Accel Calibration
@@ -319,35 +296,59 @@ typedef struct {
   float YAXIS_ACCEL_SCALE_FACTOR_ADR;
   float ZAXIS_ACCEL_BIAS_ADR;
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
-  // Mag Calibration
-  float XAXIS_MAG_BIAS_ADR;
-  float YAXIS_MAG_BIAS_ADR;
-  float ZAXIS_MAG_BIAS_ADR;
-  // Battery Monitor
-  float BATT_ALARM_VOLTAGE_ADR;
-  float BATT_THROTTLE_TARGET_ADR;
-  float BATT_DOWN_TIME_ADR;
-  // Range Finder
-  float RANGE_FINDER_MAX_ADR;
-  float RANGE_FINDER_MIN_ADR;
-  // Camera Control
-  float CAMERAMODE_ADR;
-  float MCAMERAPITCH_ADR;
-  float MCAMERAROLL_ADR;    
-  float MCAMERAYAW_ADR;
-  float SERVOCENTERPITCH_ADR;
-  float SERVOCENTERROLL_ADR;
-  float SERVOCENTERYAW_ADR;
-  float SERVOMINPITCH_ADR;
-  float SERVOMINROLL_ADR;
-  float SERVOMINYAW_ADR;
-  float SERVOMAXPITCH_ADR;
-  float SERVOMAXROLL_ADR;
-  float SERVOMAXYAW_ADR;
-  float SERVOTXCHANNELS_ADR;
-  // GPS mission storing
-  float GPS_MISSION_NB_POINT_ADR;
-//  GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+
+  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    t_NVR_PID ALTITUDE_PID_GAIN_ADR;
+    t_NVR_PID ZDAMP_PID_GAIN_ADR;
+    float ALTITUDE_MAX_THROTTLE_ADR;
+    float ALTITUDE_MIN_THROTTLE_ADR;
+    float ALTITUDE_SMOOTH_ADR;
+    float ALTITUDE_WINDUP_ADR;
+    float ALTITUDE_BUMP_ADR;
+    float ALTITUDE_PANIC_ADR;
+  #endif    
+  #if defined AltitudeHoldRangeFinder
+    // Range Finder
+    float RANGE_FINDER_MAX_ADR;
+    float RANGE_FINDER_MIN_ADR;
+  #endif
+  #if defined(HeadingMagHold)
+    // Mag Calibration
+    float XAXIS_MAG_BIAS_ADR;
+    float YAXIS_MAG_BIAS_ADR;
+    float ZAXIS_MAG_BIAS_ADR;
+  #endif
+  #if defined(BattMonitor)
+    // Battery Monitor
+    float BATT_ALARM_VOLTAGE_ADR;
+    float BATT_THROTTLE_TARGET_ADR;
+    float BATT_DOWN_TIME_ADR;
+  #endif
+  #if defined(CameraControl)
+    // Camera Control
+    float CAMERAMODE_ADR;
+    float MCAMERAPITCH_ADR;
+    float MCAMERAROLL_ADR;    
+    float MCAMERAYAW_ADR;
+    float SERVOCENTERPITCH_ADR;
+    float SERVOCENTERROLL_ADR;
+    float SERVOCENTERYAW_ADR;
+    float SERVOMINPITCH_ADR;
+    float SERVOMINROLL_ADR;
+    float SERVOMINYAW_ADR;
+    float SERVOMAXPITCH_ADR;
+    float SERVOMAXROLL_ADR;
+    float SERVOMAXYAW_ADR;
+    float SERVOTXCHANNELS_ADR;
+  #endif
+  #if defined UseGPSNavigator
+    // GPS mission storing
+    t_NVR_PID GPSROLL_PID_GAIN_ADR;
+    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+    t_NVR_PID GPSYAW_PID_GAIN_ADR;
+    float GPS_MISSION_NB_POINT_ADR;
+    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+  #endif
 } t_NVR_Data;  
 
 
