@@ -110,7 +110,7 @@ void readSerialCommand() {
       break;
 
     case 'E': // Receive sensor filtering values
-      aref = readFloatSerial();
+      readFloatSerial(); // @todo Kenny999 fix this
       minArmedThrottle = readFloatSerial();
       break;
 
@@ -417,7 +417,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'e': // miscellaneous config values
-    PrintValueComma(aref);
+    PrintValueComma(0); // @todo Kenny9999 Fix this
     SERIAL_PRINTLN(minArmedThrottle);
     queryType = 'X';
     break;
