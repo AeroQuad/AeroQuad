@@ -65,7 +65,7 @@
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
 
-void initializeMotors(NB_Motors numbers) {
+void initializeMotors(byte numbers) {
   numberOfMotors = numbers;
 
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
