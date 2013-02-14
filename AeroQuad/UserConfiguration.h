@@ -30,8 +30,8 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 // 328p processor
-//#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0

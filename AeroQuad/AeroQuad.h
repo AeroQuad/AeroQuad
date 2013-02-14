@@ -31,22 +31,10 @@
 #include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.2
+#define SOFTWARE_VERSION 4.0
 
 typedef void(*FonctionPointer)();
 
-#define quadXConfig     0
-#define quadPlusConfig  1
-#define hexPlusConfig   2
-#define hexXConfig      3
-#define triConfig       4
-#define quadY4Config    5
-#define hexY6Config     6
-#define octoX8Config    7
-#define octoPlusConfig	8	
-#define octoXConfig	9
-	
-byte motorConfig = triConfig;
 byte LASTMOTOR = 0;
 	
 
