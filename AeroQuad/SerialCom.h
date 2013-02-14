@@ -927,27 +927,7 @@ void reportVehicleState() {
   #endif
 
   SERIAL_PRINT("Flight Config: ");
-  #if defined(quadPlusConfig)
-    SERIAL_PRINTLN("Quad +");
-  #elif defined(quadXConfig)
-    SERIAL_PRINTLN("Quad X");
-  #elif defined (quadY4Config)
-    SERIAL_PRINTLN("Quad Y4");
-  #elif defined (triConfig)
-    SERIAL_PRINTLN("Tri");
-  #elif defined(hexPlusConfig)
-    SERIAL_PRINTLN("Hex +");
-  #elif defined(hexXConfig)
-    SERIAL_PRINTLN("Hex X");
-  #elif defined(hexY6Config)
-    SERIAL_PRINTLN("Hex Y6");
-  #elif defined(octoX8Config)
-    SERIAL_PRINTLN("Octo X8");
-  #elif defined(octoXConfig)
-    SERIAL_PRINTLN("Octo X");
-  #elif defined(octoPlusConfig)
-    SERIAL_PRINTLN("Octo +");
-  #endif
+  SERIAL_PRINTLN(flightConfig);
 
   SERIAL_PRINT("Receiver Channels: ");
   SERIAL_PRINTLN(LASTCHANNEL);

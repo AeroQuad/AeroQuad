@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
@@ -88,27 +88,26 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  // Motor declaration
+  #define CHANGE_YAW_DIRECTION
+  #include <Motors_PWM_Timer.h>
+//  #include <Motors_328p.h>
+  #include "FlightControlQuadX.h"
+  #include "FlightControlQuadPlus.h"
+  #include "FlightControlHexPlus.h"
+  #include "FlightControlHexX.h"
+  #include "FlightControlTri.h"
+  #include "FlightControlQuadY4.h"
+  #include "FlightControlHexY6.h"
 
-  // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #define HMC5843
-  #endif
+  FonctionPointer applyMotorCommand[7] = {applyMotorCommandQuadX,
+                                          applyMotorCommandQuadPlus,
+                                          applyMotorCommandHexPlus,
+                                          applyMotorCommandHexX,
+                                          applyMotorCommandTri,
+                                          applyMotorCommandY4,
+                                          applyMotorCommandY6}; 
 
-  // Battery Monitor declaration
-  #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15, 0.9, BM_NOPIN, 0, 0)
-  #else
-    #undef BattMonitorAutoDescent
-    #undef POWERED_BY_VIN        
-  #endif
-
-  #undef AltitudeHoldBaro
-  #undef AltitudeHoldRangeFinder
-  #undef CameraControl
-  #undef OSD
-  #undef UseGPS
-  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_v18 specific initialization need here
@@ -160,8 +159,8 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #define CHANGE_YAW_DIRECTION
-  #include <Motors_TRI.h>
+//  #define CHANGE_YAW_DIRECTION
+  #include <Motors_328p.h>
   #include "FlightControlQuadX.h"
   #include "FlightControlQuadPlus.h"
   #include "FlightControlHexPlus.h"
@@ -179,26 +178,6 @@
                                           applyMotorCommandY6}; 
 
 
-  // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #define HMC5843
-  #endif
-  
-  // Battery Monitor declaration
-  #ifdef BattMonitor
-    #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
-  #else
-    #undef BattMonitorAutoDescent
-    #undef POWERED_BY_VIN        
-  #endif
-
-  // unsupported in mini
-  #undef AltitudeHoldBaro
-  #undef AltitudeHoldRangeFinder  
-  #undef CameraControl
-  #undef OSD
-  #undef UseGPS
-  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_Mini specific initialization need here
@@ -213,7 +192,8 @@
     Wire.begin();
     TWBR = 12;
     
-    switch (motorConfig) 
+    flightConfig = quadXConfig;
+    switch (flightConfig) 
     {
       case hexY6Config :
       case hexPlusConfig :
