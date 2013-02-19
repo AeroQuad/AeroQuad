@@ -35,52 +35,109 @@
 #define MAXCHECK (MAXCOMMAND - 100)
 #define MINTHROTTLE (MINCOMMAND + 100)
 #define LEVELOFF 100
-#define MAX_NB_CHANNEL 10
 
-int lastReceiverChannel = 0;
+#define RECEIVER_PPM 0
+#define RECEIVER_PWM 1
 
-float receiverXmitFactor = 0.0;
-int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
-int receiverZero[3] = {0,0,0};
-int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
-int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
-float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-int channelCal;
+byte receiverTypeUsed = RECEIVER_PPM;
 
-void initializeReceiverParam(int nbChannel = 6) {
+#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
+
   
-  lastReceiverChannel = nbChannel;
+  #define LASTCHANNEL 5
+  #define MAX_NB_CHANNEL 5
+  int lastReceiverChannel = 5;
 
-  receiverCommand[XAXIS] = 1500;
-  receiverCommand[YAXIS] = 1500;
-  receiverCommand[ZAXIS] = 1500;
-  receiverCommand[THROTTLE] = 1000;
-  receiverCommand[MODE] = 1000;
-  receiverCommand[AUX1] = 1000;
-  receiverCommand[AUX2] = 1000;
-  receiverCommand[AUX3] = 1000;
-  receiverCommand[AUX4] = 1000;
-  receiverCommand[AUX5] = 1000;
+  float receiverXmitFactor = 0.0;
+  int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0};
+  int receiverZero[3] = {0,0,0};
+  int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0};
+  int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0};
+  float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0};
+  float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0};
+  float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0};
+  int channelCal;
   
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverCommandSmooth[channel] = 1.0;
-  }
-  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
-    receiverZero[channel] = 1500;
-  }
+  void initializeReceiverPPM();
+  void initializeReceiverPWM();
+  
+  void initializeReceiverParam() {
+  
+    lastReceiverChannel = 5;
+
+    receiverCommand[XAXIS] = 1500;
+    receiverCommand[YAXIS] = 1500;
+    receiverCommand[ZAXIS] = 1500;
+    receiverCommand[THROTTLE] = 1000;
+    receiverCommand[MODE] = 1000;
+  
+    for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+      receiverCommandSmooth[channel] = 1.0;
+    }
+    for (byte channel = XAXIS; channel < THROTTLE; channel++) {
+      receiverZero[channel] = 1500;
+    }
 	
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverSlope[channel] = 1;
-  }	
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverOffset[channel] = 1;
+    for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+      receiverSlope[channel] = 1;
+    }	
+    for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+      receiverOffset[channel] = 1;
+    }
+    for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+      receiverSmoothFactor[channel] = 1; 
+    }
   }
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverSmoothFactor[channel] = 1; 
+  
+  void initializeReceiver() 
+  {
+    initializeReceiverParam();
+	switch (receiverTypeUsed)
+	{
+	  case RECEIVER_PPM: 
+	    initializeReceiverPPM();
+		break;
+	  case RECEIVER_PWM: 
+	  default:
+	    initializeReceiverPWM();
+	}
   }
-}
+  
+  int getRawChannelValuePPM(byte channel);
+  int getRawChannelValuePWM(byte channel);
+  
+  int getRawChannelValue(byte channel)
+  {
+	switch (receiverTypeUsed)
+	{
+	  case RECEIVER_PPM: 
+	    return getRawChannelValuePPM(channel);
+	  case RECEIVER_PWM: 
+	  default:
+	    return getRawChannelValuePWM(channel);
+	}
+  }
+  
+  
+  
+#else
+
+  #define LASTCHANNEL 12
+  #define MAX_NB_CHANNEL 12
+  int lastReceiverChannel = 12;
+
+  float receiverXmitFactor = 0.0;
+  int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
+  int receiverZero[3] = {0,0,0};
+  int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
+  int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
+  float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  int channelCal;
+#endif
+
+
   
 int getRawChannelValue(byte channel);  
 void readReceiver();
