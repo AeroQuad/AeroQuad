@@ -130,9 +130,8 @@ SIGNAL(PCINT2_vect) {
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for XAXIS, YAXIS, ZAXIS, THROTTLE, MODE, AUX
 
 
-void initializeReceiver(int nbChannel = 6) {
+void initializeReceiverPWM() {
 
-  initializeReceiverParam(nbChannel);
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
@@ -140,7 +139,7 @@ void initializeReceiver(int nbChannel = 6) {
   }
 }
 
-int getRawChannelValue(byte channel) {
+int getRawChannelValuePWM(byte channel) {
   byte pin = receiverPin[channel];
   uint8_t oldSREG = SREG;
   cli();
@@ -150,6 +149,50 @@ int getRawChannelValue(byte channel) {
   
   return receiverRawValue;
 }
+
+
+#define SERIAL_SUM_PPM             0,1,3,2,4 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba/Turnigy9xFrsky
+#define PPM_PIN_INTERRUPT()          attachInterrupt(0, rxInt, RISING) //PIN 0
+
+static uint8_t rcChannel[MAX_NB_CHANNEL] = {SERIAL_SUM_PPM};
+volatile uint16_t rcValue[MAX_NB_CHANNEL] = {1500,1500,1500,1500,1500}; // interval [1000;2000]
+
+static void rxInt() {
+  uint16_t now,diff;
+  static uint16_t last = 0;
+  static uint8_t chan = MAX_NB_CHANNEL;
+
+  now = micros();
+  diff = now - last;
+  last = now;
+  if(diff>3000) { 
+    chan = 0;
+  }
+  else if( 800 < diff && diff < 2200 && chan < MAX_NB_CHANNEL ) {
+    rcValue[chan] = diff;
+    chan++;
+  }
+  else {
+    chan = MAX_NB_CHANNEL;
+  }
+}
+
+void initializeReceiverPPM() {
+
+  PPM_PIN_INTERRUPT();
+}
+
+int getRawChannelValuePPM(byte channel) {
+  uint8_t oldSREG;
+  oldSREG = SREG;
+  cli(); // Let's disable interrupts
+
+  int rawChannelValue = rcValue[rcChannel[channel]];
+  SREG = oldSREG;
+  
+  return rawChannelValue;
+}
+
 
 #endif
 

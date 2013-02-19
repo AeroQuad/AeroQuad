@@ -33,8 +33,6 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 4.0
 
-typedef void(*FonctionPointer)();
-
 byte LASTMOTOR = 0;
 	
 
