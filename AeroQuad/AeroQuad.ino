@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
@@ -156,7 +156,7 @@
   #include <Accelerometer_ADXL345.h>
 
   // Receiver declaration
-  #define RECEIVER_328P
+  #include <Receiver_328p.h>
 
   // Motor declaration
 //  #define CHANGE_YAW_DIRECTION
@@ -456,27 +456,27 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined(ReceiverHWPPM)
-  #include <Receiver_HWPPM.h>
-#elif defined(ReceiverPPM)
-  #include <Receiver_PPM.h>
-#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
-  #include <Receiver_PPM.h>
-#elif defined(RemotePCReceiver)
-  #include <Receiver_RemotePC.h>
-#elif defined(ReceiverSBUS)
-  #include <Receiver_SBUS.h>
-#elif defined(RECEIVER_328P)
-  #include <Receiver_328p.h>
-#elif defined(RECEIVER_MEGA)
-  #include <Receiver_MEGA.h>
-#elif defined(RECEIVER_APM)
-  #include <Receiver_APM.h>
-#elif defined(RECEIVER_STM32PPM)
-  #include <Receiver_STM32PPM.h>  
-#elif defined(RECEIVER_STM32)
-  #include <Receiver_STM32.h>  
-#endif
+//#if defined(ReceiverHWPPM)
+//  #include <Receiver_HWPPM.h>
+//#elif defined(ReceiverPPM)
+//  #include <Receiver_PPM.h>
+//#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
+//  #include <Receiver_PPM.h>
+//#elif defined(RemotePCReceiver)
+//  #include <Receiver_RemotePC.h>
+//#elif defined(ReceiverSBUS)
+//  #include <Receiver_SBUS.h>
+//#elif defined(RECEIVER_328P)
+//  #include <Receiver_328p.h>
+//#elif defined(RECEIVER_MEGA)
+//  #include <Receiver_MEGA.h>
+//#elif defined(RECEIVER_APM)
+//  #include <Receiver_APM.h>
+//#elif defined(RECEIVER_STM32PPM)
+//  #include <Receiver_STM32PPM.h>  
+//#elif defined(RECEIVER_STM32)
+//  #include <Receiver_STM32.h>  
+//#endif
 
 #if defined(UseAnalogRSSIReader) 
   #include <AnalogRSSIReader.h>
@@ -686,7 +686,7 @@ void setup() {
 
   initializeMotors(LASTMOTOR);
 
-  initializeReceiver(LASTCHANNEL);
+  initializeReceiver();
   initReceiverFromEEPROM();
   
   // Initialize sensors

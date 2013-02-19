@@ -21,6 +21,9 @@
 #ifndef _AEROQUAD_GLOBAL_DEFINES_H_
 #define _AEROQUAD_GLOBAL_DEFINES_H_
 
+typedef void(*FonctionPointer)();
+
+#define PWM2RAD 0.002 
 
 // More AQ relative than generic... have to be think again
 // Basic axis definitions
