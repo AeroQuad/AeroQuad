@@ -24,7 +24,7 @@
 #if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
 
 #include "Arduino.h"
-#include "Receiver.h"
+#include "Receiver_Base_328p.h"
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
@@ -151,6 +151,10 @@ int getRawChannelValuePWM(byte channel) {
 }
 
 
+
+//
+// PPM receiver function definition
+//
 #define SERIAL_SUM_PPM             0,1,3,2,4 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba/Turnigy9xFrsky
 #define PPM_PIN_INTERRUPT()          attachInterrupt(0, rxInt, RISING) //PIN 0
 
