@@ -85,29 +85,12 @@
   #include <Accelerometer_BMA180.h>
 
   // Receiver declaration
-  #define RECEIVER_328P
+  #include <Receiver_328p.h>
 
   // Motor declaration
-  // Motor declaration
-  #define CHANGE_YAW_DIRECTION
-  #include <Motors_PWM_Timer.h>
-//  #include <Motors_328p.h>
-  #include "FlightControlQuadX.h"
-  #include "FlightControlQuadPlus.h"
-  #include "FlightControlHexPlus.h"
-  #include "FlightControlHexX.h"
-  #include "FlightControlTri.h"
-  #include "FlightControlQuadY4.h"
-  #include "FlightControlHexY6.h"
-
-  FonctionPointer applyMotorCommand[7] = {applyMotorCommandQuadX,
-                                          applyMotorCommandQuadPlus,
-                                          applyMotorCommandHexPlus,
-                                          applyMotorCommandHexX,
-                                          applyMotorCommandTri,
-                                          applyMotorCommandY4,
-                                          applyMotorCommandY6}; 
-
+//  #define CHANGE_YAW_DIRECTION
+  #include <Motors_328p.h>
+  #include <FlightControlProcessor328p.h>
 
   /**
    * Put AeroQuad_v18 specific initialization need here
@@ -161,23 +144,7 @@
   // Motor declaration
 //  #define CHANGE_YAW_DIRECTION
   #include <Motors_328p.h>
-  #include "FlightControlQuadX.h"
-  #include "FlightControlQuadPlus.h"
-  #include "FlightControlHexPlus.h"
-  #include "FlightControlHexX.h"
-  #include "FlightControlTri.h"
-  #include "FlightControlQuadY4.h"
-  #include "FlightControlHexY6.h"
-
-  FonctionPointer applyMotorCommand[7] = {applyMotorCommandQuadX,
-                                          applyMotorCommandQuadPlus,
-                                          applyMotorCommandHexPlus,
-                                          applyMotorCommandHexX,
-                                          applyMotorCommandTri,
-                                          applyMotorCommandY4,
-                                          applyMotorCommandY6}; 
-
-
+  #include <FlightControlProcessor328p.h>
 
   /**
    * Put AeroQuad_Mini specific initialization need here
@@ -192,6 +159,7 @@
     Wire.begin();
     TWBR = 12;
     
+    receiverTypeUsed = receiver_PWM;
     flightConfig = quadXConfig;
     switch (flightConfig) 
     {
@@ -927,6 +895,7 @@ void process1HzTask() {
     oneHZpreviousTime = currentTime;
     
     sendSerialHeartbeat();   
+    
   #endif
 }
 
@@ -944,7 +913,7 @@ void loop () {
   // 100Hz task loop
   // ================================================================
   if (deltaTime >= 10000) {
-    
+        
     frameCounter++;
     
     process100HzTask();

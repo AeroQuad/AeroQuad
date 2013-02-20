@@ -25,16 +25,16 @@
 #include "Arduino.h"
 
 enum FlightConfig {
- quadXConfig,
- quadPlusConfig,  
- hexPlusConfig,   
- hexXConfig,      
- triConfig,       
- quadY4Config,    
- hexY6Config,     
- octoX8Config,    
- octoPlusConfig,		
- octoXConfig	
+  quadXConfig,
+  quadPlusConfig,  
+  hexPlusConfig,   
+  hexXConfig,      
+  triConfig,       
+  quadY4Config,    
+  hexY6Config,     
+  octoX8Config,    
+  octoPlusConfig,		
+  octoXConfig	
 };
 
 volatile FlightConfig flightConfig = quadXConfig;
