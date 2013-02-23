@@ -146,7 +146,7 @@ void readSerialCommand() {
       break;
 
     case 'J': // calibrate gyros
-      calibrateGyro();
+//      calibrateGyro();
       break;
 
     case 'K': // Write accel calibration values
@@ -175,8 +175,8 @@ void readSerialCommand() {
         magBias[YAXIS]  = readFloatSerial();
         magBias[ZAXIS]  = readFloatSerial();
         writeEEPROM();
-      #else
-        skipSerialValues(3);
+//      #else
+//        skipSerialValues(3);
       #endif
       break;
 
@@ -186,8 +186,8 @@ void readSerialCommand() {
         batteryMonitorThrottleTarget = readFloatSerial();
         batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
-      #else
-        skipSerialValues(3);
+//      #else
+//        skipSerialValues(3);
       #endif
       break;
 
@@ -197,10 +197,10 @@ void readSerialCommand() {
         waypoint[missionNbPoint].latitude = readIntegerSerial();
         waypoint[missionNbPoint].longitude = readIntegerSerial();
         waypoint[missionNbPoint].altitude = readIntegerSerial();
-      #else
-        for(byte i = 0; i < 4; i++) {
-          readFloatSerial();
-        }
+//      #else
+//        for(byte i = 0; i < 4; i++) {
+//          readFloatSerial();
+//        }
       #endif
       break;
     case 'P': //  read Camera values
@@ -221,12 +221,12 @@ void readSerialCommand() {
         #ifdef CameraTXControl
           servoTXChannels = readFloatSerial();
         #endif
-      #else
-        #ifdef CameraTXControl
-          skipSerialValues(14)
-        #else
-          skipSerialValues(13);
-        #endif
+//      #else
+//        #ifdef CameraTXControl
+//          skipSerialValues(14)
+//        #else
+//          skipSerialValues(13);
+//        #endif
       #endif
       break;
 
@@ -234,8 +234,8 @@ void readSerialCommand() {
       #if defined (AltitudeHoldRangeFinder)
         maxRangeFinderRange = readFloatSerial();
         minRangeFinderRange = readFloatSerial();
-      #else
-        skipSerialValues(2);
+//      #else
+//        skipSerialValues(2);
       #endif
       break;
 
@@ -245,8 +245,8 @@ void readSerialCommand() {
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
-      #else
-        skipSerialValues(9);
+//      #else
+//        skipSerialValues(9);
       #endif
       break;
 
@@ -355,7 +355,7 @@ void PrintDummyValues(byte number) {
 
 float getHeading()
 {
-  #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+  #if defined(HeadingMagHold)
     float heading = trueNorthHeading;
     if (heading < 0) { 
       heading += (2.0 * M_PI);
