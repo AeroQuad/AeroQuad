@@ -18,33 +18,19 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GLOBAL_DEFINES_H_
-#define _AEROQUAD_GLOBAL_DEFINES_H_
+#ifndef _AEROQUAD_RECEIVER_TYPE_H_
+#define _AEROQUAD_RECEIVER_TYPE_H_
 
-#include "Arduino.h"
+enum ReceiverType {
+  receiver_PPM,
+  receiver_PWM,  
+  receiver_SBUS,   
+  receiver_HWPPM
+};
 
-#define PWM2RAD 0.002 
-
-// More AQ relative than generic... have to be think again
-// Basic axis definitions
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX1 5
-#define AUX2 6
-#define AUX3 7
-#define AUX4 8
-#define AUX5 9
-
-#define ON 1
-#define OFF 0
-
-#define ALTPANIC 2
-
-
-typedef void (*functionPtr)();
-typedef int  (*intFunctionPtrByte)(byte);
+ReceiverType receiverTypeUsed = receiver_PWM;
 
 #endif
+
+
+

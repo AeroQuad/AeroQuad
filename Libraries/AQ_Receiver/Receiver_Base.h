@@ -18,33 +18,39 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GLOBAL_DEFINES_H_
-#define _AEROQUAD_GLOBAL_DEFINES_H_
+#ifndef _AEROQUAD_RECEIVER_BASE_H_
+#define _AEROQUAD_RECEIVER_BASE_H_
 
 #include "Arduino.h"
 
+#include "ReceiverType.h"
+
+#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
+  #define MAX_NB_CHANNEL 5
+#else
+  #define MAX_NB_CHANNEL 12
+#endif
+
 #define PWM2RAD 0.002 
 
-// More AQ relative than generic... have to be think again
-// Basic axis definitions
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX1 5
-#define AUX2 6
-#define AUX3 7
-#define AUX4 8
-#define AUX5 9
 
-#define ON 1
-#define OFF 0
+// Receiver variables
+#define TIMEOUT 25000
+#define MINCOMMAND 1000
+#define MIDCOMMAND 1500
+#define MAXCOMMAND 2000
+#define MINDELTA 200
+#define MINCHECK (MINCOMMAND + 100)
+#define MAXCHECK (MAXCOMMAND - 100)
+#define MINTHROTTLE (MINCOMMAND + 100)
+#define LEVELOFF 100
 
-#define ALTPANIC 2
-
-
-typedef void (*functionPtr)();
-typedef int  (*intFunctionPtrByte)(byte);
+float receiverXmitFactor = 0.0;
+int receiverZero[3] = {1500,1500,1500};
+int channelCal = 0;
+byte LASTCHANNEL = 5;
 
 #endif
+
+
+

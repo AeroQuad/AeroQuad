@@ -90,8 +90,8 @@
   // Motor declaration
 //  #define CHANGE_YAW_DIRECTION
   #include <Motors_328p.h>
-  #include <FlightControlProcessor328p.h>
-
+  
+  #include <FlightConfig328p.h>
   /**
    * Put AeroQuad_v18 specific initialization need here
    */
@@ -104,6 +104,19 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    receiverTypeUsed = receiver_PWM;
+    flightConfig = quadXConfig;
+    switch (flightConfig) 
+    {
+      case hexY6Config :
+      case hexPlusConfig :
+      case hexXConfig :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
@@ -144,11 +157,13 @@
   // Motor declaration
 //  #define CHANGE_YAW_DIRECTION
   #include <Motors_328p.h>
-  #include <FlightControlProcessor328p.h>
-
+  
+  #include <FlightConfig328p.h>
+  
   /**
    * Put AeroQuad_Mini specific initialization need here
    */
+  // 30,408 -> 30,038
   void initPlatform() {
 
     pinMode(LED_Red, OUTPUT);
@@ -654,7 +669,9 @@ void setup() {
 
   initializeMotors(LASTMOTOR);
 
-  initializeReceiver();
+//  initializeReceiver();
+  (*initializeReceiver[receiverTypeUsed])();
+
   initReceiverFromEEPROM();
   
   // Initialize sensors
