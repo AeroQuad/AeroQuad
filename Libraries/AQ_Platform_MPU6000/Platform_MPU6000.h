@@ -177,7 +177,12 @@ void initializeMPU6000Sensors()
   // Chip reset
   MPU6000_WriteReg(MPUREG_PWR_MGMT_1, BIT_H_RESET);
   delay(100);  // Startup time delay
-
+  
+  // Enable auxiliary I2C bus bypass
+  // *NOT* Necessary for all setups, but some sensor boards have magnetometer attached to the auxiliary I2C bus
+  // and without this settings magnetometer won't be accessible.
+  MPU6000_WriteReg(MPUREG_INT_PIN_CFG, 0x02); // I2C _BYPASS _EN 1
+  
   #ifndef MPU6000_I2C
     // Disable I2C bus
     MPU6000_WriteReg(MPUREG_USER_CTRL, BIT_I2C_IF_DIS);
