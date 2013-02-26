@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
@@ -92,6 +92,7 @@
   #include <Motors_328p.h>
   
   #include <FlightConfig328p.h>
+  
   /**
    * Put AeroQuad_v18 specific initialization need here
    */
@@ -155,7 +156,7 @@
   #include <Receiver_328p.h>
 
   // Motor declaration
-//  #define CHANGE_YAW_DIRECTION
+  #define CHANGE_YAW_DIRECTION
   #include <Motors_328p.h>
   
   #include <FlightConfig328p.h>
@@ -163,7 +164,6 @@
   /**
    * Put AeroQuad_Mini specific initialization need here
    */
-  // 30,408 -> 30,038
   void initPlatform() {
 
     pinMode(LED_Red, OUTPUT);
@@ -175,7 +175,7 @@
     TWBR = 12;
     
     receiverTypeUsed = receiver_PWM;
-    flightConfig = quadXConfig;
+    flightConfig = triConfig;
     switch (flightConfig) 
     {
       case hexY6Config :
