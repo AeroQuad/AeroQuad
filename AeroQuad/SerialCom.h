@@ -927,7 +927,7 @@ void reportVehicleState() {
   #endif
 
   SERIAL_PRINT("Flight Config: ");
-  SERIAL_PRINTLN(flightConfig);
+  SERIAL_PRINTLN(flightConfigType);
 
   SERIAL_PRINT("Receiver Channels: ");
   SERIAL_PRINTLN(LASTCHANNEL);

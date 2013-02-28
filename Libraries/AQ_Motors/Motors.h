@@ -23,7 +23,7 @@
 #define _AEROQUAD_MOTORS_H_
 
 #include "Arduino.h"
-#include "FlightConfig.h"
+#include "FlightConfigType.h"
 
 #define MOTOR1 0
 #define MOTOR2 1

@@ -25,19 +25,19 @@
 #include "Arduino.h"
 
 #include "FlightControlQuadX.h"
-  #include "FlightControlQuadPlus.h"
-  #include "FlightControlHexPlus.h"
-  #include "FlightControlHexX.h"
-  #include "FlightControlTri.h"
-  #include "FlightControlQuadY4.h"
-  #include "FlightControlHexY6.h"
+#include "FlightControlQuadPlus.h"
+#include "FlightControlHexPlus.h"
+#include "FlightControlHexX.h"
+#include "FlightControlTri.h"
+#include "FlightControlQuadY4.h"
+#include "FlightControlHexY6.h"
 
-  functionPtr applyMotorCommand[] = {applyMotorCommandQuadX,
-                                     applyMotorCommandQuadPlus,
-                                     applyMotorCommandHexPlus,
-                                     applyMotorCommandHexX,
-                                     applyMotorCommandTri,
-                                     applyMotorCommandY4,
-                                     applyMotorCommandY6};
+functionPtr applyMotorCommand[] = {applyMotorCommandQuadX,
+                                   applyMotorCommandQuadPlus,
+                                   applyMotorCommandHexPlus,
+                                   applyMotorCommandHexX,
+                                   applyMotorCommandTri,
+                                   applyMotorCommandY4,
+                                   applyMotorCommandY6};
 
 #endif

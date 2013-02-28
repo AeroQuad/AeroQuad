@@ -311,7 +311,7 @@ void processFlightControl() {
   // ********************** Calculate Motor Commands *************************
   if (motorArmed && safetyCheck) {
 //    applyMotorCommand();
-    (*applyMotorCommand[flightConfig])();
+    (*applyMotorCommand[flightConfigType])();
   } 
 
   // *********************** process min max motor command *******************
