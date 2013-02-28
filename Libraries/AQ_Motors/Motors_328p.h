@@ -75,7 +75,7 @@ ISR(TIMER0_COMPA_vect) {
       state = 0;
     }
   }
-  else if (flightConfig == triConfig) {
+  else if (flightConfigType == triConfig) {
     static uint8_t count;
     if (state == 0) {
       DIGITAL_SERVO_TRI_HIGH
@@ -133,7 +133,7 @@ ISR(TIMER0_COMPB_vect) { //the same with digital PIN 6 and OCR0B counter
 void initializeMotors(byte numbers) {
 
   numberOfMotors = numbers;
-  if (flightConfig == triConfig) {
+  if (flightConfigType == triConfig) {
     initializeServo();
   }
   
@@ -152,7 +152,7 @@ void initializeMotors(byte numbers) {
 
 void writeMotors() {
 
-  if (flightConfig == triConfig) {
+  if (flightConfigType == triConfig) {
     atomicServo = (motorCommand[MOTOR1]-1000)/4;
   }
   else {
@@ -171,7 +171,7 @@ void writeMotors() {
 
 void commandAllMotors(int command) {
 
-  if (flightConfig == triConfig) {
+  if (flightConfigType == triConfig) {
     atomicServo = (command-1000)/4;
   }
   else {

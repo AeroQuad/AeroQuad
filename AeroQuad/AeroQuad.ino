@@ -107,8 +107,8 @@
     TWBR = 12;
     
     receiverTypeUsed = receiver_PWM;
-    flightConfig = quadXConfig;
-    switch (flightConfig) 
+    flightConfigType = quadXConfig;
+    switch (flightConfigType) 
     {
       case hexY6Config :
       case hexPlusConfig :

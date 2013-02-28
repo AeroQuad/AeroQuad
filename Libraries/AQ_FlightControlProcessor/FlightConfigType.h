@@ -24,34 +24,19 @@
 
 #include "Arduino.h"
 
-#include "FlightControlQuadX.h"
-#include "FlightControlQuadPlus.h"
-#include "FlightControlHexPlus.h"
-#include "FlightControlHexX.h"
-#include "FlightControlTri.h"
-#include "FlightControlQuadY4.h"
-#include "FlightControlHexY6.h"
-#include "FlightControlOctoX8.h"
-#include "FlightControlOctoPlus.h"
-#include "FlightControlOctoX.h"
+enum FlightConfigType {
+  quadXConfig,
+  quadPlusConfig,  
+  hexPlusConfig,   
+  hexXConfig,      
+  triConfig,       
+  quadY4Config,    
+  hexY6Config,     
+  octoX8Config,    
+  octoPlusConfig,		
+  octoXConfig	
+};
 
-functionPtr applyMotorCommand[] = {applyMotorCommandQuadX,
-                                   applyMotorCommandQuadPlus,
-                                   applyMotorCommandHexPlus,
-                                   applyMotorCommandHexX,
-                                   applyMotorCommandTri,
-                                   applyMotorCommandY4,
-                                   applyMotorCommandY6,
-								   applyMotorCommandX8,
-								   applyMotorCommandOctoPlus,
-								   FlightControlOctoX};
+volatile FlightConfigType flightConfigType = quadXConfig;
 
 #endif
-
-
-
-
-
-
-
-
