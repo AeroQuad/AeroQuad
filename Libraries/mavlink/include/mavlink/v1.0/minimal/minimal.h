@@ -27,19 +27,6 @@ extern "C" {
 
 #define MAVLINK_ENABLED_MINIMAL
 
-
-
-// MAVLINK VERSION
-
-#ifndef MAVLINK_VERSION
-#define MAVLINK_VERSION 2
-#endif
-
-#if (MAVLINK_VERSION == 0)
-#undef MAVLINK_VERSION
-#define MAVLINK_VERSION 2
-#endif
-
 // ENUM DEFINITIONS
 
 
@@ -139,6 +126,19 @@ enum MAV_STATE
 	MAV_STATE_POWEROFF=7, /* System just initialized its power-down sequence, will shut down now. | */
 	MAV_STATE_ENUM_END=8, /*  | */
 };
+#endif
+
+
+
+// MAVLINK VERSION
+
+#ifndef MAVLINK_VERSION
+#define MAVLINK_VERSION 2
+#endif
+
+#if (MAVLINK_VERSION == 0)
+#undef MAVLINK_VERSION
+#define MAVLINK_VERSION 2
 #endif
 
 // MESSAGE DEFINITIONS

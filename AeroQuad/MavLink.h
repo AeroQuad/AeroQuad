@@ -32,11 +32,11 @@
 
 #include "AeroQuad.h"
 
-int systemType;
+int systemType = MAV_TYPE_GENERIC;
 int autopilotType = MAV_AUTOPILOT_GENERIC;
 uint16_t len;
-int systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-int systemStatus = MAV_STATE_UNINIT;
+int systemMode = MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
+int systemStatus = MAV_STATE_BOOT;
 
 // Variables for writing and sending parameters
 
@@ -234,7 +234,8 @@ void updateFlightTime() {
 }
 
 void sendSerialHeartbeat() {
-  systemMode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+
+  systemMode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     systemMode |= MAV_MODE_FLAG_STABILIZE_ENABLED;
@@ -245,8 +246,6 @@ void sendSerialHeartbeat() {
       systemMode |= MAV_MODE_FLAG_GUIDED_ENABLED;
     }
   #endif
-
-  systemMode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
   if (motorArmed) {
     systemMode |= MAV_MODE_FLAG_SAFETY_ARMED;
@@ -347,7 +346,6 @@ void sendSerialSysStatus() {
       controlSensorsPresent |= (1<<2); // compass present
     }
   #endif
-
   #if defined(AltitudeHoldBaro)
     if (BARO_DETECTED) {
       controlSensorsPresent |= (1<<3); // absolute pressure sensor present
@@ -358,8 +356,11 @@ void sendSerialSysStatus() {
       controlSensorsPresent |= (1<<5); // GPS present
     }
   #endif
+
   controlSensorsPresent |= (1<<10); // 3D angular rate control
-  controlSensorsPresent |= (1<<11); // attitude stabilisation
+  if(ACCEL_DETECTED) {
+	controlSensorsPresent |= (1<<11); // attitude stabilisation
+  }
   controlSensorsPresent |= (1<<12); // yaw position
   #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     controlSensorsPresent |= (1<<13); // altitude control
@@ -380,20 +381,20 @@ void sendSerialSysStatus() {
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     controlSensorEnabled |= (1<<11); // attitude stabilisation
   }
+  if (headingHoldConfig == ON) {
+	  controlSensorEnabled |= (1<<12); // yaw position
+  }
   #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     if (altitudeHoldState == ON) {
       controlSensorEnabled |= (1<<13); // altitude control
     }
   #endif
-  controlSensorEnabled |= (1<<15); // motor control
-  if (headingHoldConfig == ON) {
-    controlSensorEnabled |= (1<<12); // yaw position
-  }
   #if defined(UseGPSNavigator)
-    if (positionHoldState == ON || navigationState == ON) {
-      controlSensorEnabled |= (1<<14); // X/Y position control
-    }
+	if (positionHoldState == ON || navigationState == ON) {
+		controlSensorEnabled |= (1<<14); // X/Y position control
+	}
   #endif
+  controlSensorEnabled |= (1<<15); // motor control
 
   // at the moment all sensors/controllers are assumed healthy
   controlSensorsHealthy = controlSensorsPresent;
@@ -401,7 +402,7 @@ void sendSerialSysStatus() {
   #if defined(BattMonitor)
     mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
   #else
-    mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);  // system_dropped_packets
+    mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);
   #endif
 
   len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -1368,8 +1369,12 @@ void readSerialCommand() {
           SERIAL_PORT.write(buf, len);
 
           for (byte index = 0; index < MAX_WAYPOINTS; index++) {
-            if (index != missionNbPoint) mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
-            else mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
+            if (index != missionNbPoint) {
+				mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
+			}
+            else {
+				mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, index, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, MIN_DISTANCE_TO_REACHED, 0, 0, waypoint[index].longitude, waypoint[index].latitude, waypoint[index].altitude);
+			}
             len = mavlink_msg_to_send_buffer(buf, &msg);
             SERIAL_PORT.write(buf, len);
           }
