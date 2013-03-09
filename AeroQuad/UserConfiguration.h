@@ -183,6 +183,7 @@
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "KF7YRK"         // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//#define ShowLandingIndicator      // Display the landing indicator calculated via barometer
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
 //#define OSD_LOADFONT              // Include MAX7456 font into binary, give & on serial to upload
 
