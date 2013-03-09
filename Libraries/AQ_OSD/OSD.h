@@ -42,6 +42,9 @@
 #ifdef AltitudeHoldRangeFinder
   void displayRanger();
 #endif
+#ifdef ShowVariometerIndicator
+  void displayVariometer(byte flightMode);
+#endif
 
 void initializeOSD();
 void updateOSD();
