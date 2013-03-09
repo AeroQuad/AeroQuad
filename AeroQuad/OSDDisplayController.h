@@ -48,6 +48,13 @@ void updateOSD() {
     }
   #endif
 
+  #ifdef ShowLandingIndicator
+    if (OSDsched&0x55) {
+      byte extendedFlightMode = flightMode;
+      displayVariometer(extendedFlightMode);
+    }
+  #endif
+
   if (OSDsched&0x02) {
     displayFlightTime(motorArmed);
     #if defined AltitudeHoldBaro
