@@ -118,7 +118,7 @@ void processAltitudeHold()
 }
 
 const float getdeltaAltitude() {
-  return baroAltitude - lastbaroAltitude;  					      			//using filtered data (baroAltitude and lastbaroAltitude)
+  return baroAltitude - lastbaroAltitude;  			//using filtered data (baroAltitude and lastbaroAltitude)
 }
 
 /**********************************************************
@@ -151,19 +151,19 @@ float digitalSmooth(float rawIn, float *sensSmoothArray){     	// "float *sensSm
  **********************************************************/
 // called in 50 Hz slice
 
-float deltaAltitudeRateFeet( float time_increment ) {	          // returns feet per second
+float deltaAltitudeRateFeet( float time_increment ) {	        // returns feet per second
   static float smoothArray[filterSamples];                      // array for holding smoothed values for New Altitude 
 
   #define metersToFeet	3.28084                                 // convert to feet per second to call it something
-	                                                              // were not planning on displaying a number so matters not
-  float delta_Factor = metersToFeet * time_increment;     			// called in 50 Hz slice
+	                                                        // were not planning on displaying a number so matters not
+  float delta_Factor = metersToFeet * time_increment;     	// called in 50 Hz slice
 
   float climbFallRate = ( baroAltitude - lastbaroAltitude ) * delta_Factor;		
 
-  climbFallRate = digitalSmooth(climbFallRate, smoothArray);		// so our eyes don't vibrate out of our skull
+  climbFallRate = digitalSmooth(climbFallRate, smoothArray);	// so our eyes don't vibrate out of our skull
   lastbaroAltitude = baroAltitude;
 
-  return climbFallRate;														              // return smoothed, despiked climbFallRate
+  return climbFallRate;				              // return smoothed, despiked climbFallRate
 }
 
 #endif
