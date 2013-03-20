@@ -126,21 +126,21 @@ const float getdeltaAltitude() {
  **********************************************************/
 
 float digitalSmooth(float rawIn, float *sensSmoothArray){     	// "float *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
-  static float total = 0.0;												      	      // total values after all processing
-  static int i, k = 0;									        		      			// loop variables
-  static boolean done = false;							          					// used to find first total
+  static float total = 0.0;					// total values after all processing
+  static int i, k = 0;						// loop variables
+  static boolean done = false;					// used to find first total
 
-  if (!done) {															                  	// FIND FIRST TOTAL
+  if (!done) {							// FIND FIRST TOTAL
 	for (k=0; k < filterSamples; k++){
 		total += sensSmoothArray[k];
 	}
 	done = true;
   }
 
-  i = (i + 1) % filterSamples;												          // increment counter and roll over if necc.
-																		                            // % (modulo operator) rolls over variable
-  total -= sensSmoothArray[i];										  	          // drop last valve from total
-  sensSmoothArray[i] = rawIn;										           	    // input new data into the oldest slot
+  i = (i + 1) % filterSamples;					// increment counter and roll over if necc.
+								// % (modulo operator) rolls over variable
+  total -= sensSmoothArray[i];					// drop last valve from total
+  sensSmoothArray[i] = rawIn;					// input new data into the oldest slot
   total += rawIn;                                               // add new value to total
   
   return total / filterSamples;
@@ -163,7 +163,7 @@ float deltaAltitudeRateFeet( float time_increment ) {	        // returns feet pe
   climbFallRate = digitalSmooth(climbFallRate, smoothArray);	// so our eyes don't vibrate out of our skull
   lastbaroAltitude = baroAltitude;
 
-  return climbFallRate;				              // return smoothed, despiked climbFallRate
+  return climbFallRate;				              	// return smoothed, despiked climbFallRate
 }
 
 #endif
