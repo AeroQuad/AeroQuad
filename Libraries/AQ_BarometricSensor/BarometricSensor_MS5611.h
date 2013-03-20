@@ -245,9 +245,7 @@ void evaluateBaroAltitude() {
 
   pressure = rawPressureSum / rawPressureSumCount;
 
-  lastbaroAltitude = baroAltitude;						// needed for baroAltitude feet per second function
-
-  baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor));	// returns absolute baroAltitude in meters
+  baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
   // use calculation below in case you need a smaller binary file for CPUs having just 32KB flash ROM
   // baroRawAltitude = (101325.0-pressure)/4096*346;
 
