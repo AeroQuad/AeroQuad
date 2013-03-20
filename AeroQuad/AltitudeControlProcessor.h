@@ -118,7 +118,7 @@ void processAltitudeHold()
 }
 
 const float getdeltaAltitude() {
-  return baroAltitude - lastbaroAltitude;  			//using filtered data (baroAltitude and lastbaroAltitude)
+  return baroAltitude - lastbaroAltitude;  			// using filtered data (baroAltitude and lastbaroAltitude)
 }
 
 /**********************************************************
