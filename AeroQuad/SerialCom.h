@@ -675,6 +675,13 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(0); 
     #endif 
     break;
+
+  case '^': // Report Variometer
+      PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+      PrintValueComma(baroAltitude);
+      PrintValueComma(lastbaroAltitude);
+      SERIAL_PRINTLN(climbFallRate);
+    break;
     
   case '$': // send BatteryMonitor voltage/current readings
     #if defined (BattMonitor)
