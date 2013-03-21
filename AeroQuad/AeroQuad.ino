@@ -845,8 +845,8 @@ void process50HzTask() {
     }
   #endif      
 
- #if defined(AltitudeHoldBaro)
-    climbFallRate = deltaAltitudeRateFeet(50.0);   		// update altitude rate in feet per second
+  #if defined(AltitudeHoldBaro)
+    climbFallRate = deltaAltitudeRateMeters(50.0);   		// update altitude rate in meters per second 50 Hz slice
   #endif
 }
 
