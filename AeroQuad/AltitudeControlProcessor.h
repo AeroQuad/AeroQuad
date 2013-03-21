@@ -33,10 +33,13 @@
 #define INVALID_THROTTLE_CORRECTION -1000
 #define ALTITUDE_BUMP_SPEED 0.01
 
+<<<<<<< HEAD
 #define numberofSamplestoFilter 23			// filterSamples should  be an odd number, no smaller than 3									// filterSamples should  be an odd number, no smaller than 3
 float lastbaroAltitude = 0.0;
 
 
+=======
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 /**
  * processAltitudeHold
  * 
@@ -115,12 +118,36 @@ void processAltitudeHold()
   else {
     throttle = receiverCommand[THROTTLE];
   }
+  
+  
+  // compute baro velocity rate
+  #if defined(AltitudeHoldBaro)
+    climbFallRate = deltaAltitudeRateFeet(50.0);   		// update altitude rate in feet per second
+  #endif
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+#if defined(AltitudeHoldBaro)
+
+#define metersToFeet	3.28084                                 // convert to feet per second to call it something
+#define filterSamples 23  	                                // filterSamples should  be an odd number, no smaller than 3
+float lastbaroAltitude = 0.0;
+
+
+const float getDeltaAltitude() {
+  return baroAltitude - lastbaroAltitude;  			// using filtered data (baroAltitude and lastbaroAltitude)
+}
+
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 /**********************************************************
  ********************** digitalSmooth *********************
  **********************************************************/
 
+<<<<<<< HEAD
 float digitalSmooth(float rawIn, float *baroSmoothArray){			// some storage for holding out barometer samples
   static float sumSamplestoFilter = 0.0;					// total samples after all processing
   static int thisBaroSample, currentSampleSlot = 0;				// loop variables
@@ -131,6 +158,18 @@ float digitalSmooth(float rawIn, float *baroSmoothArray){			// some storage for 
 		sumSamplestoFilter += baroSmoothArray[currentSampleSlot];
 	}
 	done = true;
+=======
+float digitalSmooth(float rawIn, float *sensSmoothArray) {     	// "float *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+  static float total = 0.0;					// total values after all processing
+  static int i, k = 0;						// loop variables
+  static boolean done = false;					// used to find first total
+
+  if (!done) {							// FIND FIRST TOTAL
+    for (k=0; k < filterSamples; k++) {
+      total += sensSmoothArray[k];
+    }
+    done = true;
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
   }
 
   thisBaroSample = (thisBaroSample + 1) % numberofSamplestoFilter;		// increment counter and roll over when needed
@@ -145,6 +184,7 @@ float digitalSmooth(float rawIn, float *baroSmoothArray){			// some storage for 
 /**********************************************************
  *************** Determine vertical rate (+/-) ************
  **********************************************************/
+<<<<<<< HEAD
 // this routine must be called in 50 Hz slice
 
 float deltaAltitudeRateMeters( float time_increment ) {	 			// returns meters per second
@@ -156,7 +196,18 @@ float deltaAltitudeRateMeters( float time_increment ) {	 			// returns meters pe
   lastbaroAltitude = baroAltitude;
 
   return climbFallRate;								// return smoothed, despiked climbFallRate
+=======
+void deltaAltitudeRateFeet( float time_increment ) {	        // returns feet per second
+  static float smoothArray[filterSamples];                      // array for holding smoothed values for New Altitude 
+	                                                        // were not planning on displaying a number so matters not
+  float delta_Factor = metersToFeet * time_increment;     	// called in 50 Hz slice
+  float climbFallRate = ( baroAltitude - lastbaroAltitude ) * delta_Factor;		
+  climbFallRate = digitalSmooth(climbFallRate, smoothArray);	// so our eyes don't vibrate out of our skull
+  lastbaroAltitude = baroAltitude;
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 }
+
+#endif
 
 #endif
 
