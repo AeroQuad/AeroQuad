@@ -55,7 +55,7 @@ static char VO_reticle[1] = {228};						// right pointing arrow character
 static const byte VO_COLUMN = 28;						// column where the variometer line is printed
 static byte VO_AHoldline = 0;
 
-static float safedeltaAltitudeSeconds = 0.3048;					// reasonable change in altitude in meters per second to land softly
+static float safeclimbFallRate = 0.3048;					// reasonable change in altitude in meters per second to land softly
 static float safeattitudeAngle = 0.12;						// how level to assume we're not moving excessively
 static float scaleVariometer = 1.00;						// scale to top and bottom of center pointer
 
@@ -75,11 +75,11 @@ void displayVariometer(float climbFallRate) {
 
     VO_reticle[0] = 13;								// set center pointer up-down arrow icon
 	 
-    if (climbFallRate > safedeltaAltitudeSeconds) {
+    if (climbFallRate > safeclimbFallRate) {
       VO_reticle[0] = 14;							// set center pointer to up arrow icon
     }
 
-    if (climbFallRate < -safedeltaAltitudeSeconds) {
+    if (climbFallRate < -safeclimbFallRate) {
       VO_reticle[0] = 15;							// set center pointer to down arrow icon
     }
 
