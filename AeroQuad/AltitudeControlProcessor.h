@@ -33,6 +33,13 @@
 #define INVALID_THROTTLE_CORRECTION -1000
 #define ALTITUDE_BUMP_SPEED 0.01
 
+<<<<<<< HEAD
+#define numberofSamplestoFilter 23			// filterSamples should  be an odd number, no smaller than 3									// filterSamples should  be an odd number, no smaller than 3
+float lastbaroAltitude = 0.0;
+
+
+=======
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 /**
  * processAltitudeHold
  * 
@@ -119,6 +126,8 @@ void processAltitudeHold()
   #endif
 }
 
+<<<<<<< HEAD
+=======
 
 
 
@@ -133,10 +142,23 @@ const float getDeltaAltitude() {
   return baroAltitude - lastbaroAltitude;  			// using filtered data (baroAltitude and lastbaroAltitude)
 }
 
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 /**********************************************************
  ********************** digitalSmooth *********************
  **********************************************************/
 
+<<<<<<< HEAD
+float digitalSmooth(float rawIn, float *baroSmoothArray){			// some storage for holding out barometer samples
+  static float sumSamplestoFilter = 0.0;					// total samples after all processing
+  static int thisBaroSample, currentSampleSlot = 0;				// loop variables
+  static boolean done = false;							// used to find totalfilterSamples
+
+  if (!done) {																// find total samples while storing
+	for (currentSampleSlot=0; currentSampleSlot < numberofSamplestoFilter; currentSampleSlot++){
+		sumSamplestoFilter += baroSmoothArray[currentSampleSlot];
+	}
+	done = true;
+=======
 float digitalSmooth(float rawIn, float *sensSmoothArray) {     	// "float *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
   static float total = 0.0;					// total values after all processing
   static int i, k = 0;						// loop variables
@@ -147,20 +169,34 @@ float digitalSmooth(float rawIn, float *sensSmoothArray) {     	// "float *sensS
       total += sensSmoothArray[k];
     }
     done = true;
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
   }
 
-  i = (i + 1) % filterSamples;					// increment counter and roll over if necc.
-								// % (modulo operator) rolls over variable
-  total -= sensSmoothArray[i];					// drop last valve from total
-  sensSmoothArray[i] = rawIn;					// input new data into the oldest slot
-  total += rawIn;                                               // add new value to total
+  thisBaroSample = (thisBaroSample + 1) % numberofSamplestoFilter;		// increment counter and roll over when needed
+										// % (modulo operator) rolls over variable
+  sumSamplestoFilter -= baroSmoothArray[thisBaroSample];			// drop last value from total
+  baroSmoothArray[thisBaroSample] = rawIn;					// input new data into the oldest slot
+  sumSamplestoFilter += rawIn;							// add new value to total
   
-  return total / filterSamples;
+  return sumSamplestoFilter/numberofSamplestoFilter;
 }
 
 /**********************************************************
  *************** Determine vertical rate (+/-) ************
  **********************************************************/
+<<<<<<< HEAD
+// this routine must be called in 50 Hz slice
+
+float deltaAltitudeRateMeters( float time_increment ) {	 			// returns meters per second
+  static float smoothArray[numberofSamplestoFilter];				// array for holding smoothed values for New Altitude 
+
+  float climbFallRate = (baroAltitude-lastbaroAltitude)*time_increment;		// called in 50 Hz slice
+
+  climbFallRate = digitalSmooth(climbFallRate, smoothArray);			// so our eyes don't vibrate out of our skull
+  lastbaroAltitude = baroAltitude;
+
+  return climbFallRate;								// return smoothed, despiked climbFallRate
+=======
 void deltaAltitudeRateFeet( float time_increment ) {	        // returns feet per second
   static float smoothArray[filterSamples];                      // array for holding smoothed values for New Altitude 
 	                                                        // were not planning on displaying a number so matters not
@@ -168,6 +204,7 @@ void deltaAltitudeRateFeet( float time_increment ) {	        // returns feet per
   float climbFallRate = ( baroAltitude - lastbaroAltitude ) * delta_Factor;		
   climbFallRate = digitalSmooth(climbFallRate, smoothArray);	// so our eyes don't vibrate out of our skull
   lastbaroAltitude = baroAltitude;
+>>>>>>> 7ceb250e89430a92431002856b9890e5ffba49c3
 }
 
 #endif
