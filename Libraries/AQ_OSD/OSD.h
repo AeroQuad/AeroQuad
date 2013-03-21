@@ -43,7 +43,7 @@
   void displayRanger();
 #endif
 #ifdef ShowVariometerIndicator
-  void displayVariometer(float climb_fallRate);
+  void displayVariometer(float climbFallRate);
 #endif
 
 void initializeOSD();
