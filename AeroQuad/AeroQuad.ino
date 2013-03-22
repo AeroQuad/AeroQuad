@@ -844,10 +844,6 @@ void process50HzTask() {
       initHomeBase();
     }
   #endif      
-
-  #if defined(AltitudeHoldBaro)
-    climbFallRate = deltaAltitudeRateMeters(50.0);   		// update altitude rate in meters per second 50
-  #endif
 }
 
 /*******************************************************************
