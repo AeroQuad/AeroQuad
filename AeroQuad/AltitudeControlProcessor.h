@@ -33,7 +33,7 @@
 #define INVALID_THROTTLE_CORRECTION -1000
 #define ALTITUDE_BUMP_SPEED 0.01
 
-float deltaAltitudeRateMeters( float time_increment );
+
 
 /**
  * processAltitudeHold
@@ -116,12 +116,13 @@ void processAltitudeHold()
  
   // compute baro velocity rate
   #if defined(AltitudeHoldBaro)
-    climbFallRate = deltaAltitudeRateMeters(50.0); 			// update altitude rate in meters per secon
+    deltaAltitudeRateMeters(50.0); 			// update altitude rate in meters per secon
   #endif
 }
 
 
 #if defined(AltitudeHoldBaro)
+
 #define numberofSamplestoFilter 23					// numberofSamplestoFilter should  be an odd number, no smaller than 3											// filterSamples should  be an odd number, no smaller than 3
 float lastbaroAltitude = 0.0;
 
@@ -134,7 +135,7 @@ float digitalSmooth(float rawIn, float *baroSmoothArray){		// some storage for h
   static int thisBaroSample, currentSampleSlot = 0;			// loop variables
   static boolean done = false;						// used to find totalfilterSamples
 
-if (!done) {								// find total samples while storing
+  if (!done) {								// find total samples while storing
     for (currentSampleSlot=0; currentSampleSlot < numberofSamplestoFilter; currentSampleSlot++){
       sumSamplestoFilter += baroSmoothArray[currentSampleSlot];
     }
@@ -155,15 +156,13 @@ if (!done) {								// find total samples while storing
  **********************************************************/
 // this routine must be called in 50 Hz slice
 
-float deltaAltitudeRateMeters( float time_increment ) {	 		// returns meters per second
+float deltaAltitudeRateMeters( float timeIncrement ) {	 		// returns meters per second
   static float smoothArray[numberofSamplestoFilter];			// array for holding smoothed values for New Altitude 
 
-  float climbFallRate = (baroAltitude-lastbaroAltitude)*time_increment;	// called in 50 Hz slice (time_increment)
+  climbFallRate = (baroAltitude-lastbaroAltitude)*timeIncrement;	// called in 50 Hz slice (timeIncrement)
 
   climbFallRate = digitalSmooth(climbFallRate, smoothArray);		// so our eyes don't vibrate out of our skull
   lastbaroAltitude = baroAltitude;
-
-  return climbFallRate;							// return smoothed, despiked climbFallRate
 }
 
 #endif
