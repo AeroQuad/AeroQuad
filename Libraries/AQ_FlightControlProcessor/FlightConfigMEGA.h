@@ -19,8 +19,8 @@
 */
 
 
-#ifndef _AEROQUAD_FLIGHT_CONFIG_H_
-#define _AEROQUAD_FLIGHT_CONFIG_H_
+#ifndef _AEROQUAD_FLIGHT_CONFIG_MEGA_H_
+#define _AEROQUAD_FLIGHT_CONFIG_MEGA_H_
 
 #include "Arduino.h"
 
@@ -44,7 +44,7 @@ functionPtr applyMotorCommand[] = {applyMotorCommandQuadX,
                                    applyMotorCommandY6,
 								   applyMotorCommandX8,
 								   applyMotorCommandOctoPlus,
-								   FlightControlOctoX};
+								   applyMotorCommandOctoX};
 
 #endif
 

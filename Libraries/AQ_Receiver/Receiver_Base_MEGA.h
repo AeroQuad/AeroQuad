@@ -18,20 +18,20 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_RECEIVER_BASE_328p_H_
-#define _AEROQUAD_RECEIVER_BASE_328p_H_
+#ifndef _AEROQUAD_RECEIVER_BASE_MEGA_H_
+#define _AEROQUAD_RECEIVER_BASE_MEGA_H_
 
 #include "Arduino.h"
 #include "Receiver_Base.h"
 
 int lastReceiverChannel = 5;
 
-int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0};
-int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000};
-int receiverCommandSmooth[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
-float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
-float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
-float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
+int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000,1000,1000,1000,1000,1000,1000,1000};
+int receiverCommandSmooth[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
 void initializeReceiverPPM();
 void initializeReceiverPWM();
