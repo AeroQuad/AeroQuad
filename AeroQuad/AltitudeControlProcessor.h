@@ -116,7 +116,7 @@ void processAltitudeHold()
  
   // compute baro velocity rate
   #if defined(AltitudeHoldBaro)
-    deltaAltitudeRateMeters(50.0); 			// update altitude rate in meters per secon
+    deltaAltitudeRateMeters(50.0); 					// update altitude rate in meters per secon
   #endif
 }
 
@@ -156,7 +156,7 @@ float digitalSmooth(float rawIn, float *baroSmoothArray){		// some storage for h
  **********************************************************/
 // this routine must be called in 50 Hz slice
 
-void deltaAltitudeRateMeters( float timeIncrement ) {	 		// rmeters per second using 50Hz slice
+void deltaAltitudeRateMeters( float timeIncrement ) {	 		// meters per second using 50Hz slice
   static float smoothArray[numberofSamplestoFilter];			// array for holding smoothed values for New Altitude 
 
   climbFallRate = (baroAltitude-lastbaroAltitude)*timeIncrement;	// called in 50 Hz slice (timeIncrement)
