@@ -175,8 +175,8 @@
     TWBR = 12;
     
     receiverTypeUsed = receiver_PWM;
-    flightConfig = triConfig;
-    switch (flightConfig) 
+    flightConfigType = triConfig;
+    switch (flightConfigType) 
     {
       case hexY6Config :
       case hexPlusConfig :
@@ -219,11 +219,15 @@
   #include <Accelerometer_BMA180.h>
 
   // Receiver Declaration
-  #define RECEIVER_MEGA
+  // Receiver declaration
+  #include <Receiver_MEGA.h>
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
-
+//  #define CHANGE_YAW_DIRECTION
+  #include <Motors_MEGA.h>
+  
+  #include <FlightConfigMEGA.h>
+  
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #include <Compass.h>
@@ -284,6 +288,19 @@
 
     Wire.begin();
     TWBR = 12;
+    
+        receiverTypeUsed = receiver_PWM;
+    flightConfigType = quadXConfig;
+    switch (flightConfigType) 
+    {
+      case hexY6Config :
+      case hexPlusConfig :
+      case hexXConfig :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
@@ -322,11 +339,14 @@
   // Accelerometer declaration
   #include <Accelerometer_ADXL345_9DOF.h>
 
-  // Receiver Declaration
-  #define RECEIVER_MEGA
+  // Receiver declaration
+  #include <Receiver_MEGA.h>
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+//  #define CHANGE_YAW_DIRECTION
+  #include <Motors_MEGA.h>
+  
+  #include <FlightConfigMEGA.h>
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -389,6 +409,19 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    receiverTypeUsed = receiver_PWM;
+    flightConfigType = quadXConfig;
+    switch (flightConfigType) 
+    {
+      case hexY6Config :
+      case hexPlusConfig :
+      case hexXConfig :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
