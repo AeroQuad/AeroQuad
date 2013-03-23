@@ -21,8 +21,6 @@
 #ifndef _AEROQUAD_RECEIVER_328p_H_
 #define _AEROQUAD_RECEIVER_328p_H_
 
-#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
-
 #include "Arduino.h"
 #include "Receiver_Base_328p.h"
 
@@ -196,9 +194,6 @@ int getRawChannelValuePPM(byte channel) {
   
   return rawChannelValue;
 }
-
-
-#endif
 
 #endif
 

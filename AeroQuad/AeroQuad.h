@@ -181,6 +181,7 @@ void reportVehicleState();
 
   #if defined AltitudeHoldBaro
     float baroAltitudeToHoldTarget = 0.0;
+    float climbFallRate = 0.0;
     void deltaAltitudeRateMeters( float timeIncrement );
   #endif  
   #if defined AltitudeHoldRangeFinder
