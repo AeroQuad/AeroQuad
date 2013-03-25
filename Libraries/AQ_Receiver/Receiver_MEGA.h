@@ -22,7 +22,7 @@
 #define _AEROQUAD_RECEIVER_MEGA_H_
 
 #include "Arduino.h"
-#include "Receiver_Base_328p.h"
+#include "Receiver_Base_MEGA.h"
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0

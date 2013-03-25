@@ -229,6 +229,7 @@
   #include <FlightConfigMEGA.h>
   
   // heading mag hold declaration
+//  #define HeadingMagHold
   #ifdef HeadingMagHold
     #include <Compass.h>
 //    #define SPARKFUN_5883L_BOB
@@ -236,6 +237,7 @@
   #endif
 
   // Altitude declaration
+//  #define AltitudeHoldBaro
   #ifdef AltitudeHoldBaro    
     #define BMP085 
   #endif
@@ -262,6 +264,8 @@
   #ifndef UseGPS
     #undef UseGPSNavigator
   #endif
+  
+
 
   /**
    * Put AeroQuadMega_v2 specific initialization need here
@@ -529,106 +533,81 @@
 //********************************************************
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
-//#if defined(HMC5843)
-//  #include <HeadingFusionProcessorMARG.h>
-//  #include <Magnetometer_HMC5843.h>
-//#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
-//  #include <HeadingFusionProcessorMARG.h>
-//  #include <Magnetometer_HMC5883L.h>
-//#endif
+#if defined(HMC5843)
+  #include <HeadingFusionProcessorMARG.h>
+  #include <Magnetometer_HMC5843.h>
+#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
+  #include <HeadingFusionProcessorMARG.h>
+  #include <Magnetometer_HMC5883L.h>
+#endif
 
 //********************************************************
 //******* ALTITUDE HOLD BAROMETER DECLARATION ************
 //********************************************************
-//#if defined(BMP085)
-//  #include <BarometricSensor_BMP085.h>
-//#elif defined(MS5611)
-// #include <BarometricSensor_MS5611.h>
-//#endif
-//#if defined(XLMAXSONAR)
-//  #include <MaxSonarRangeFinder.h>
-//#endif 
+#if defined(BMP085)
+  #include <BarometricSensor_BMP085.h>
+#elif defined(MS5611)
+ #include <BarometricSensor_MS5611.h>
+#endif
+#if defined(XLMAXSONAR)
+  #include <MaxSonarRangeFinder.h>
+#endif 
 
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************
 //********************************************************
-//#ifdef BattMonitor
-//  #include <BatteryMonitor.h>
-//  #ifndef BattCustomConfig
-//    #define BattCustomConfig BattDefaultConfig
-//  #endif
-//  struct BatteryData batteryData[] = {BattCustomConfig};
-//#endif
+#ifdef BattMonitor
+  #include <BatteryMonitor.h>
+  #ifndef BattCustomConfig
+    #define BattCustomConfig BattDefaultConfig
+  #endif
+  struct BatteryData batteryData[] = {BattCustomConfig};
+#endif
 
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
 //********************************************************
 // used only on mega for now
-//#if defined(CameraControl_STM32)
-//  #include <CameraStabilizer_STM32.h>
-//#elif defined(CameraControl)
-//  #include <CameraStabilizer_Aeroquad.h>
-//#endif
-//
-//#if defined (CameraTXControl)
-//  #include <CameraStabilizer_TXControl.h>
-//#endif
+#if defined(CameraControl_STM32)
+  #include <CameraStabilizer_STM32.h>
+#elif defined(CameraControl)
+  #include <CameraStabilizer_Aeroquad.h>
+#endif
 
-//********************************************************
-//******** FLIGHT CONFIGURATION DECLARATION **************
-//********************************************************
-//#if defined(quadXConfig)
-//  #include "FlightControlQuadX.h"
-//#elif defined(quadPlusConfig)
-//  #include "FlightControlQuadPlus.h"
-//#elif defined(hexPlusConfig)
-//  #include "FlightControlHexPlus.h"
-//#elif defined(hexXConfig)
-//  #include "FlightControlHexX.h"
-//#elif defined(triConfig)
-//  #include "FlightControlTri.h"
-//#elif defined(quadY4Config)
-//  #include "FlightControlQuadY4.h"
-//#elif defined(hexY6Config)
-//  #include "FlightControlHexY6.h"
-//#elif defined(octoX8Config)
-//  #include "FlightControlOctoX8.h"
-//#elif defined(octoXConfig)
-//  #include "FlightControlOctoX.h"
-//#elif defined(octoPlusConfig)
-//  #include "FlightControlOctoPlus.h"
-//#endif
+#if defined (CameraTXControl)
+  #include <CameraStabilizer_TXControl.h>
+#endif
 
 //********************************************************
 //****************** GPS DECLARATION *********************
 //********************************************************
-//#if defined(UseGPS)
-//  #if !defined(HeadingMagHold)
-//    #error We need the magnetometer to use the GPS
-//  #endif 
-//  #include <GpsAdapter.h>
-//  #include "GpsNavigator.h"
-//#endif
+#if defined(UseGPS)
+  #if !defined(HeadingMagHold)
+    #error We need the magnetometer to use the GPS
+  #endif 
+  #include <GpsAdapter.h>
+  #include "GpsNavigator.h"
+#endif
 
 //********************************************************
 //****************** OSD DEVICE DECLARATION **************
 //********************************************************
-//#ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
-//  #include <Device_SPI.h>
-//  #include "OSDDisplayController.h"
-//  #include "MAX7456.h"
-//#endif
-//
-//#if defined(SERIAL_LCD)
-//  #include "SerialLCD.h"
-//#endif
-//
-//#ifdef OSD_SYSTEM_MENU
-//  #if !defined(MAX7456_OSD) && !defined(SERIAL_LCD)
-//    #error "Menu cannot be used without OSD or LCD"
-//  #endif
-//  #include "OSDMenu.h"
-//#endif
+#ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
+  #include <Device_SPI.h>
+  #include "OSDDisplayController.h"
+  #include "MAX7456.h"
+#endif
+
+#if defined(SERIAL_LCD)
+  #include "SerialLCD.h"
+#endif
+
+#ifdef OSD_SYSTEM_MENU
+  #if !defined(MAX7456_OSD) && !defined(SERIAL_LCD)
+    #error "Menu cannot be used without OSD or LCD"
+  #endif
+  #include "OSDMenu.h"
+#endif
 
 
 //********************************************************
