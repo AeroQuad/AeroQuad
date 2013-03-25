@@ -2,7 +2,7 @@
 
 #define _PLATFORM_AEROQUAD32_H_
 
-static byte __attribute__((unused)) stm32_motor_mapping[] = {
+/*static byte __attribute__((unused)) stm32_motor_mapping[] = {
   Port2Pin('C',  9),
   Port2Pin('C',  8),
   Port2Pin('C',  7),
@@ -18,14 +18,14 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
   Port2Pin('C',  8),
   Port2Pin('C',  7),
   Port2Pin('C',  6),
-};
+};*/
 
-#ifdef RECEIVER_STM32PPM
-  static byte receiverPinPPM = Port2Pin('D', 15);
+//#ifdef RECEIVER_STM32PPM
+//  static byte receiverPinPPM = Port2Pin('D', 15);
 #elif defined ReceiverSBUS
   // Do nothing
-#else
-  static byte receiverPin[] = {
+//#else
+/*  static byte receiverPin[] = {
     Port2Pin('D', 12),
     Port2Pin('D', 13),
     Port2Pin('D', 14),
@@ -34,8 +34,9 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
     Port2Pin('E', 11),
     Port2Pin('E', 13),
     Port2Pin('E', 14)
-  };
-#endif
+  };*/
+//#endif
+
 
 #define STM32_BOARD_TYPE "aeroquad32"
 #define LED_Green  Port2Pin('E', 6)
