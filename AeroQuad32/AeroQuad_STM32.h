@@ -24,6 +24,8 @@
 
   // Motor declaration
   #include <Motors_STM32.h>
+  
+  #include <FlightConfigMEGA.h>
 
 
   #ifdef CameraControl
