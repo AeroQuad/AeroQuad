@@ -193,7 +193,7 @@ voidFuncPtr PWM_in_handler[] = { PWM_in_0, PWM_in_1, PWM_in_2, PWM_in_3, PWM_in_
 ///////////////////////////////////////////////////////////////////////////////
 // interface part starts here
 
-void initializeReceiverPWM(int nbChannel = 8) {
+void initializeReceiverPWM() {
 
 	InitFrqMeasurementPWM();
 }
@@ -317,7 +317,7 @@ void InitFrqMeasurementPPM()
 ///////////////////////////////////////////////////////////////////////////////
 // interface part starts here
 
-void initializeReceiverPPM(int nbChannel = 8) {
+void initializeReceiverPPM() {
   
   InitFrqMeasurementPPM();
 }

@@ -293,10 +293,15 @@
     Wire.begin();
     TWBR = 12;
     
-        receiverTypeUsed = receiver_PWM;
+    receiverTypeUsed = receiver_PWM;
     flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
+      case octoX8Config :
+      case octoPlusConfig :
+      case octoXConfig :
+        LASTMOTOR = 8;
+        break;
       case hexY6Config :
       case hexPlusConfig :
       case hexXConfig :
@@ -418,6 +423,11 @@
     flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
+      case octoX8Config :
+      case octoPlusConfig :
+      case octoXConfig :
+        LASTMOTOR = 8;
+        break;
       case hexY6Config :
       case hexPlusConfig :
       case hexXConfig :
