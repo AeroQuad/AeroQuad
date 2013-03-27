@@ -265,6 +265,8 @@ void readPilotCommands() {
     if (previousFlightMode != flightMode) {
       zeroIntegralError();
       previousFlightMode = flightMode;
+      if (flightMode == SIMPLE_FLIGHT_MODE)
+    	  simpleModeInitialize = true;
     }
 
 

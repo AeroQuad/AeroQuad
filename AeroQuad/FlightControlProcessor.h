@@ -55,7 +55,11 @@ void calculateFlightError()
 	// Replace rate mode for now until we figure out how to assign new functions to transmitter channels through Configurator
     //motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
     //motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
-	float heading = getHeading();
+	if (simpleModeInitialize) {
+	  simpleModeStartHeading = trueNorthHeading;
+	  simpleModeInitialize = false;
+	}
+	float heading = trueNorthHeading - simpleModeStartHeading;
 	int rollInput = receiverCommand[XAXIS] - receiverZero[XAXIS];
 	int pitchInput = receiverCommand[YAXIS] - receiverZero[YAXIS];
 	float rollCommand = rollInput * cos(heading) - pitchInput * sin(heading);
