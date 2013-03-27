@@ -58,13 +58,11 @@ void processAltitudeHold()
           sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
         }
         altitudeHoldThrottleCorrection = updatePID(sonarAltitudeToHoldTarget, rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX], &PID[SONAR_ALTITUDE_HOLD_PID_IDX]);
-        altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       }
     #endif
     #if defined AltitudeHoldBaro
       if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
         altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, getBaroAltitude(), &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
-        altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       }
     #endif        
     if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
@@ -75,7 +73,6 @@ void processAltitudeHold()
     // ZDAMPENING COMPUTATIONS
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       float zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
     #endif
 
     
@@ -108,7 +105,7 @@ void processAltitudeHold()
         #endif
       }
     }
-    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
+    throttle = constrain((altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection), minThrottleAdjust, maxThrottleAdjust);
   }
   else {
     throttle = receiverCommand[THROTTLE];

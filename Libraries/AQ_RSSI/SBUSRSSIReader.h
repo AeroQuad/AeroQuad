@@ -27,7 +27,6 @@
 
 long sbusFrameCountLast = 0;
 short rssiRawValue = 0; // forces update at first run
-float rssiTemp = 0;
 
 
 void readRSSI() {
@@ -46,7 +45,7 @@ void readRSSI() {
       sbusFrameCount = 0;
     }
   } 
-  rssiTemp = (1 - ((float)sbusFailSafeCount / sbusRate)) * 100;
+  float rssiTemp = (1 - ((float)sbusFailSafeCount / sbusRate)) * 100;
   rssiRawValue = rssiTemp;
 }
 
