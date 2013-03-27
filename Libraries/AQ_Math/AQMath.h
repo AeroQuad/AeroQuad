@@ -100,6 +100,13 @@ void vectorAdd(int length, float vectorC[], float vectorA[], float vectorB[]);
 void vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[]);
 
 ////////////////////////////////////////////////////////////////////////////////
+//  Normalize the vector
+//  This assumes that result is an array of 3 floats
+////////////////////////////////////////////////////////////////////////////////
+
+void vectorNormalize(float *result);
+
+////////////////////////////////////////////////////////////////////////////////
 //  Matrix Multiply
 //  Multiply matrix A times matrix B, matrix A dimension m x n, matrix B dimension n x p
 //  Result placed in matrix C, dimension m x p

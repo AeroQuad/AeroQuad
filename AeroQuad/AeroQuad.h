@@ -244,6 +244,15 @@ void reportVehicleState();
     
     void evaluateMissionPositionToReach();
     void processGpsNavigation();
+
+    float fromVector[3], toVector[3], presentPosition[3];
+    float presentPositionEast[3], presentPositionNorth[3];
+    float zVector[3] = {0.0, 0.0, 1.0};
+    float normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
+    GeodeticPosition fromWaypoint, toWaypoint, currentPosition;
+    float desiredHeading, currentHeading;
+    float trackAngleError, crossTrackError;
+    const float earthRadius = 6371000.0; // meters
   #endif
 #endif
 //////////////////////////////////////////////////////

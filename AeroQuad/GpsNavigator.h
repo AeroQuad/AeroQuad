@@ -70,8 +70,101 @@ void initHomeBase() {
   }
 }
 
-
 #if defined UseGPSNavigator
+
+float rad(float degrees) {
+  return degrees * 0.0174532925;
+}
+
+float deg(float radians) {
+  return radians * 57.2957795;
+}
+
+float calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
+  // from http://www.movable-type.co.uk/scripts/latlong.html
+  float lat1 = rad(currentWP.latitude);
+  float lat2 = rad(nextWP.latitude);
+  float lon1 = rad(currentWP.longitude);
+  float lon2 = rad(nextWP.longitude);
+  return acos(sin(lat1)*sin(lat2)+cos(lat1)*cos(lat2)*cos(lon2-lon1))*earthRadius;
+}
+
+float (float currentHeading, float desiredHeading) {
+  if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
+    return currentHeading -= 360.0;
+  if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
+    return currentHeading += 360.0;
+  if ((desiredHeading > -90.0) && ((desiredHeading + 180.0) < curentHeading))
+    return currentHeading -= 360.0;
+  if ((desiredHeading < 90.0) && (currentHeading < (desiredHeading - 180.0)))
+    return currentHeading += 360.0;
+  return currentHeading;
+}
+
+void positionVector(float *vector, GeodeticPosition position) {
+  float lat = rad(position.latitude);
+  float lon = rad(position.longitude);
+  vector[0] = cos(lat) * cos(lon);
+  vector[1] = cos(lat) * sin(lon);
+  vector[2] = sin(lat);
+}
+
+  /**
+ * Process navigation
+ */
+void processNavigation() {
+  // Convert lat/lon to ECEF
+  positionVector(fromVector, fromWaypoint);
+  positionVector(toVector, toWaypoint);
+  positionVector(presentPosition, currentPosition);
+
+  // Calculate track angle error
+  vectorCrossProduct(presentPositionEast, zVector, presentPosition);
+  vectorNormalize(presentPositionEast);
+  vectorCrossProduct(presentPositionNorth, presentPosition, presentPositionEast);
+  vectorNormalize(presentPositionNorth);
+  vectorCrossProduct(normalVector, fromVector, toVector);
+  vectorNormalize(normalVector);
+  negNormalVector[0] = -normalVector[0];
+  negNormalVector[1] = -normalVector[1];
+  negNormalVector[2] = -normalVector[2];
+  desiredHeading = deg(atan2(vectorDotProduct(3, normalVector, presentPositionNorth), vectorDotProduct(3, negNormalVector, presentPositionEast)));
+  currentHeading = adjustHeading(trueNorthHeading, desiredHeading);
+  trackAngleError = desiredHeading - currentHeading;
+
+  // Calculate cross track error
+  vectorCrossProduct(normalPerpendicularVector, presentPosition, normalVector);
+  vectorNormalize(normalPerpendicularVector);
+  vectorCrossProduct(alongPathVector, normalVector, normalPerpendicularVector);
+  vectorNormalize(alongPathVector);
+  crossTrackError = earthRadius * atan2(vectorDotProduct(3, negNormalVector, presentPosition), vectorDotProduct(3, alongPathVector, presentPosition));
+
+  // Need to figure out how to command heading and if we need to consider roll
+}
+
+void processPositionHold()
+{
+  // Under Construction
+}
+
+/**
+ * Compute everything need to make adjustment to the craft attitude to go to the point to reach
+ */
+void processGpsNavigation() {
+
+  if (haveAGpsLock()) {
+
+    if (navigationState == ON) {
+      processNavigation();
+    }
+    else if (positionHoldState == ON ) {
+      processPositionHold();
+    }
+  }
+}
+#endif
+
+#if defined UseGPSNavigatorOld
 
   /*
     Because we are using lat and lon to do our distance errors here's a quick chart:
