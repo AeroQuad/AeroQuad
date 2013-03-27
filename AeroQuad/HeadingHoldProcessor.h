@@ -38,7 +38,7 @@ void processHeading()
 {
   if (headingHoldConfig == ON) {
 
-    #if defined(HeadingMagHold)
+    #if defined(HeadingMagHold) && !defined(useGyroForHeadingHold)
       heading = degrees(trueNorthHeading);
     #else
       heading = degrees(gyroHeading);
