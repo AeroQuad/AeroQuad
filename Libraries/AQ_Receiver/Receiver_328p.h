@@ -125,7 +125,7 @@ SIGNAL(PCINT2_vect) {
 }
 
 // defines arduino pins used for receiver in arduino pin numbering schema
-static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for XAXIS, YAXIS, ZAXIS, THROTTLE, MODE, AUX
+static byte receiverPin[5] = {2, 5, 6, 4, 7}; // pins used for XAXIS, YAXIS, ZAXIS, THROTTLE, MODE, AUX
 
 
 void initializeReceiverPWM() {

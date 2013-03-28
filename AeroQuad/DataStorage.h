@@ -195,7 +195,7 @@ void initializeEEPROM() {
   minArmedThrottle = 1150;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
-  for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+  for (byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     receiverSlope[channel] = 1.0;
     receiverOffset[channel] = 0.0;
     receiverSmoothFactor[channel] = 1.0;
@@ -390,7 +390,7 @@ void writeEEPROM(){
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
 
-  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+  for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
     writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
@@ -479,7 +479,7 @@ void storeSensorsZeroToEEPROM() {
 void initReceiverFromEEPROM() {
   receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
-  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+  for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
     receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
     receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);

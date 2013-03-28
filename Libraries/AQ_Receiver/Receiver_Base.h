@@ -48,7 +48,6 @@
 float receiverXmitFactor = 0.0;
 int receiverZero[3] = {1500,1500,1500};
 int channelCal = 0;
-byte LASTCHANNEL = 5;
 
 #endif
 
