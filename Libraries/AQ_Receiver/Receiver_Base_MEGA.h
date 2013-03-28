@@ -36,12 +36,11 @@ float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.
 void initializeReceiverPPM();
 void initializeReceiverPWM();
 void initializeReceiverSBUS();
-
-void terminateReceiverSBUS();
+//void terminateReceiverSBUS();
 
 void readReceiver();
 
-functionPtr initializeReceiver[] = {initializeReceiverPPM,initializeReceiverPWM,initialieReceiverSBUS};
+functionPtr initializeReceiver[] = {initializeReceiverPPM,initializeReceiverPWM,initializeReceiverSBUS};
 
 int getRawChannelValuePPM(byte channel);
 int getRawChannelValuePWM(byte channel);
