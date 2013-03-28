@@ -33,21 +33,17 @@ float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 
-void initializeReceiverPPM();
-void initializeReceiverPWM();
-void initializeReceiverSBUS();
-
-void terminateReceiverSBUS();
-
 void readReceiver();
 
-functionPtr initializeReceiver[] = {initializeReceiverPPM,initializeReceiverPWM,initializeReceiverSBUS};
+void initializeReceiverPPM();
+void initializeReceiverPWM();
+
+functionPtr initializeReceiver[] = {initializeReceiverPPM,initializeReceiverPWM};
 
 int getRawChannelValuePPM(byte channel);
 int getRawChannelValuePWM(byte channel);
-int getRawChannelValueSBUS(byte channel);
 
-intFunctionPtrByte getRawChannelValue[] = {getRawChannelValuePPM,getRawChannelValuePWM, getRawChannelValueSBUS};
+intFunctionPtrByte getRawChannelValue[] = {getRawChannelValuePPM,getRawChannelValuePWM};
 
 
 void readReceiver()

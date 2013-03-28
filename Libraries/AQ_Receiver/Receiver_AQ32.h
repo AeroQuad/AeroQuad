@@ -331,15 +331,22 @@ int getRawChannelValuePPM(const byte channel) {
 
 
 //
-// SBUS
+// SBUS receiver
 //
-static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};
+
+#define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
+#define SERIAL_SBUS Serial3
+
+static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {0,1,2,3,4,5,6,7,8,9,10,11};
 static unsigned int sbusIndex = 0;
 // sbus rssi reader variables
 static unsigned short sbusFailSafeCount = 0;
 static unsigned long sbusFrameCount = 0;
 static unsigned short sbusRate = 0;
-boolean UseSBUSRSSIReader;
+boolean useSbusRSSIReader = false;
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementation part starts here.
@@ -376,7 +383,7 @@ void readSBUS()
                 //rawChannelValue[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
                 
                 
-                if (UseSBUSRSSIReader) {
+                if (useSbusRSSIReader) {
                     if (sbusRate == 0) {
                         sbusFrameCount++;
                     }
@@ -405,9 +412,9 @@ void initializeReceiverSBUS() {
 
 // use this to switch from one receiver type to another?
 // re-enables serial port for other uses
-void terminateReceiverSBUS() {
-    SERIAL_SBUS.end();
-}
+//void terminateReceiverSBUS() {
+    //SERIAL_SBUS.end();
+//}
 
 int getRawChannelValueSBUS(const byte channel) {
     if (channel == XAXIS) {

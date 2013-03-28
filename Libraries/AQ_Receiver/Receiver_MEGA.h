@@ -180,20 +180,26 @@ int getRawChannelValuePPM(byte channel) {
 // SBUS receiver function definition
 //
 
-#define SERIAL_SBUS Serial3 // how to make this changeable?
+#define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
+#define SERIAL_SBUS Serial3
 
-static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};
-static unsigned int rcChannel[18] = {XAXIS,YAXIS,THROTTLE,ZAXIS,MODE,AUX1,AUX2,AUX3,AUX4,AUX5,10,11,12,13,14,15,16,17};
+int rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500,1500,1500,1500};
+static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {0,1,2,3,4,5,6,7,8,9,10,11};
 static unsigned int sbusIndex = 0;
 // sbus rssi reader variables
 static unsigned short sbusFailSafeCount = 0;
 static unsigned long sbusFrameCount = 0;
 static unsigned short sbusRate = 0;
-boolean UseSBUSRSSIReader;
+boolean useSbusRSSIReader = false;
 
 
-void readSBUS() {
-    
+
+
+///////////////////////////////////////////////////////////////////////////////
+// implementation part starts here.
+
+void readSBUS()
+{
     static byte sbus[25] = {0};
     while(SERIAL_SBUS.available()) {
         
@@ -210,21 +216,21 @@ void readSBUS() {
             // check stop bit before updating buffers
             if (sbus[24] == 0x0) {
                 
-                rcChannel[XAXIS]	= ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
-                rcChannel[YAXIS]	= ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
-                rcChannel[THROTTLE] = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);	// throttle
-                rcChannel[ZAXIS]	= ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);					// yaw
-                rcChannel[MODE]		= ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
-                rcChannel[AUX1]		= ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
-                rcChannel[AUX2]		= ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
-                rcChannel[AUX3]		= ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
-                rcChannel[AUX4]		= ((sbus[12]    | sbus[13]<<8) & 0x07FF);
-                rcChannel[AUX5]		= ((sbus[13]>>3 | sbus[14]<<5) & 0x07FF);
-                //rcChannel[AUX6]		= ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
-                //rcChannel[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
+                rawChannelValue[XAXIS]      = ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
+                rawChannelValue[YAXIS]      = ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
+                rawChannelValue[THROTTLE]   = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);	// throttle
+                rawChannelValue[ZAXIS]      = ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);					// yaw
+                rawChannelValue[MODE]       = ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
+                rawChannelValue[AUX1]       = ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
+                rawChannelValue[AUX2]       = ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
+                rawChannelValue[AUX3]       = ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
+                rawChannelValue[AUX4]       = ((sbus[12]    | sbus[13]<<8) & 0x07FF);
+                rawChannelValue[AUX5]       = ((sbus[13]>>3 | sbus[14]<<5) & 0x07FF);
+                //rawChannelValue[AUX6]		= ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
+                //rawChannelValue[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
                 
                 
-                if (UseSBUSRSSIReader) {
+                if (useSbusRSSIReader) {
                     if (sbusRate == 0) {
                         sbusFrameCount++;
                     }
@@ -241,24 +247,25 @@ void readSBUS() {
     }
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // interface part starts here
 
-void initializeReceiverSBUS(){
+void initializeReceiverSBUS() {
     SERIAL_SBUS.begin(100000);
 }
 
 // use this to switch from one receiver type to another?
 // re-enables serial port for other uses
-void terminateReceiverSBUS() {
-    SERIAL_SBUS.end();
-}
+//void terminateReceiverSBUS() {
+    //SERIAL_SBUS.end();
+//}
 
-int getRawChannelValueSBUS(byte channel) {
+int getRawChannelValueSBUS(const byte channel) {
     if (channel == XAXIS) {
         readSBUS();
 	}
-	return rcChannel[ReceiverChannelMapSBUS[channel]];
+	return rawChannelValue[ReceiverChannelMapSBUS[channel]];
 }
 
 
