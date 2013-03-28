@@ -24,7 +24,7 @@
 #include "Arduino.h"
 #include "Receiver_Base.h"
 
-int lastReceiverChannel = 5;
+byte lastReceiverChannel = MAX_NB_CHANNEL;
 
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000};

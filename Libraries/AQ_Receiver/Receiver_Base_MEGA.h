@@ -24,7 +24,8 @@
 #include "Arduino.h"
 #include "Receiver_Base.h"
 
-int lastReceiverChannel = 5;
+
+byte lastReceiverChannel = 8;
 
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000,1000,1000,1000,1000,1000,1000,1000};
@@ -36,7 +37,6 @@ float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.
 void initializeReceiverPPM();
 void initializeReceiverPWM();
 void initializeReceiverSBUS();
-//void terminateReceiverSBUS();
 
 void readReceiver();
 
