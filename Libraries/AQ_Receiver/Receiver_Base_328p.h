@@ -33,6 +33,9 @@ float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
 
+byte receiverChannelMap[MAX_NB_CHANNEL] = {XAXIS,YAXIS,ZAXIS,THROTTLE,MODE};
+
+
 void readReceiver();
 
 void initializeReceiverPPM();

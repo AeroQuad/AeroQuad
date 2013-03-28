@@ -33,6 +33,7 @@ int receiverCommandSmooth[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+byte receiverChannelMap[MAX_NB_CHANNEL] = {XAXIS,YAXIS,ZAXIS,THROTTLE,MODE,AUX1,AUX2,AUX3,AUX4,AUX5};
 
 void initializeReceiverPPM();
 void initializeReceiverPWM();

@@ -30,7 +30,6 @@
 #define MAXONWIDTH 2075
 #define MINOFFWIDTH 12000
 #define MAXOFFWIDTH 24000
-//#define MAX_NO_SIGNAL_COUNTER 10
 
 #include "pins_arduino.h"
 #include <AQMath.h>
