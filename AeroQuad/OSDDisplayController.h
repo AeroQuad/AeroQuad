@@ -51,7 +51,7 @@ void updateOSD() {
 
   #ifdef ShowLandingIndicator
     if (OSDsched&0x55) {
-      displayVariometer(climb_fallRate);
+//      displayVariometer(climb_fallRate);
     }
   #endif
 
