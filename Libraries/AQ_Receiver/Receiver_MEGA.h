@@ -129,55 +129,74 @@ int getRawChannelValuePWM(byte channel) {
 
 
 
-//
+//////////////////////////////////////////////
 // PPM receiver function definition
-//
-#define SERIAL_SUM_PPM               0,1,3,2,4,5,6,7,8,9,10,11 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba/Turnigy9xFrsky
-#define PPM_PIN_INTERRUPT()          attachInterrupt(4, rxInt, RISING) //PIN 19, also used for Spektrum satellite option
+//////////////////////////////////////////////
 
-static uint8_t rcChannel[MAX_NB_CHANNEL] = {SERIAL_SUM_PPM};
-volatile uint16_t rcValue[MAX_NB_CHANNEL] = {1500,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500};
+// Channel data
+volatile unsigned int startPulse = 0;
+volatile byte         ppmCounter = MAX_NB_CHANNEL; // ignore data until first sync pulse
+volatile int          PWM_RAW[MAX_NB_CHANNEL] = { 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000 };
 
-static void rxInt() {
-  uint16_t now,diff;
-  static uint16_t last = 0;
-  static uint8_t chan = MAX_NB_CHANNEL;
+#define TIMER5_FREQUENCY_HZ 50
+#define TIMER5_PRESCALER    8
+#define TIMER5_PERIOD       (F_CPU/TIMER5_PRESCALER/TIMER5_FREQUENCY_HZ)
 
-  now = micros();
-  diff = now - last;
-  last = now;
-  if(diff>3000) { 
-    chan = 0;
-  }
-  else if( 800 < diff && diff < 2200 && chan < MAX_NB_CHANNEL ) {
-    rcValue[chan] = diff;
-    chan++;
+uint8_t rcChannel[] = {0,1,3,2,4,5,6,7,8,9,10,11,12};
+
+/****************************************************
+ * Interrupt Vector
+ ****************************************************/
+ISR(TIMER5_CAPT_vect)//interrupt.
+{
+  unsigned int stopPulse = ICR5;
+  
+  // Compensate for timer overflow if needed
+  unsigned int pulseWidth = ((startPulse > stopPulse) ? TIMER5_PERIOD : 0) + stopPulse - startPulse;
+
+  if (pulseWidth > 5000) {      // Verify if this is the sync pulse (2.5ms)
+    ppmCounter = 0;             // -> restart the channel counter
   }
   else {
-    chan = MAX_NB_CHANNEL;
+    if (ppmCounter < lastReceiverChannel) { // extra channels will get ignored here
+      PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
+      ppmCounter++;                     // Advance to next channel
+    }
   }
+  startPulse = stopPulse;         // Save time at pulse start
 }
+
+
 
 void initializeReceiverPPM() {
 
-  PPM_PIN_INTERRUPT();
+  pinMode(48, INPUT); // ICP5
+  pinMode(A8, INPUT); // this is the original location of the first RX channel
+
+  // Configure timer HW
+  TCCR5A = ((1<<WGM50)|(1<<WGM51));
+  TCCR5B = ((1<<WGM52)|(1<<WGM53)|(1<<CS51)|(1<<ICES5)); //Prescaler set to 8, that give us a resolution of 2us, read page 134 of data sheet
+  OCR5A = TIMER5_PERIOD; 
+
+  TIMSK5 |= (1<<ICIE5); //Timer interrupt mask
 }
+
 
 int getRawChannelValuePPM(byte channel) {
-  uint8_t oldSREG;
-  oldSREG = SREG;
-  cli(); // Let's disable interrupts
+  uint8_t oldSREG = SREG;
+  cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
 
-  int rawChannelValue = rcValue[rcChannel[channel]];
+  int receiverRawValue = ((PWM_RAW[rcChannel[channel]])/2);
+
   SREG = oldSREG;
   
-  return rawChannelValue;
+  return receiverRawValue;
 }
 
 
-//
+//////////////////////////////////////////////
 // SBUS receiver function definition
-//
+//////////////////////////////////////////////
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
 #define SERIAL_SBUS Serial3

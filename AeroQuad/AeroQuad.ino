@@ -54,6 +54,77 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
+#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (AeroQuadSTM32)
+  
+  #define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+  #define AltitudeHoldBaro		// Enables Barometer
+  #define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
+  #define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
+  
+  //
+  // *******************************************************************************************************************************
+  // GPS Options
+  // *******************************************************************************************************************************
+  #define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
+
+  // Device specific settings
+  //#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
+
+  //
+  // *******************************************************************************************************************************
+  // Battery Monitor Options
+  // For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
+  // *******************************************************************************************************************************
+  //#define BattMonitor			  // Enables Battery monitor
+  //#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
+  //#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
+  //
+  // Advanced configuration. Please refer to the wiki for instructions.
+  //#define BattCustomConfig DEFINE_BATTERY(0,A4,51.8,0,A3,180.3,0)
+  
+  
+  //#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+  //#define UseEzUHFRSSIReader	// Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
+  //#define UseSBUSRSSIReader		
+
+
+
+  //
+  // *******************************************************************************************************************************
+  // Optional telemetry (for debug or ground station tracking purposes)
+  // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Wireless+Connection
+  // *******************************************************************************************************************************
+  //#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+  
+  //#define MavLink               // Enables the MavLink protocol
+  //#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+  								// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
+  
+  //#define CONFIG_BAUDRATE 19200 // overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
+  
+  //  #define SlowTelemetry			// Enables audio channel telemetry on Serial2
+  //  #define SoftModem             // Enable usage of DAC as modem on AQ32 instead of Serial 2
+  //  #define SOFTMODEM_FSKv2       // Enable non standard FSK frequencies used by FSKv2 module (TCM3105 at 8Mhz)
+
+  #define CameraControl
+  #define CameraTXControl  // need to have CameraControl to work
+
+  #define OSD
+  #define ShowRSSI                  // This REQUIRES a RSSI reader
+  #define PAL                       // uncomment this to default to PAL video
+  #define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+  #define CALLSIGN "AQ"             // Show (optional) callsign
+  #define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+  #define ShowLandingIndicator      // Display the landing indicator calculated via barometer
+  #define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
+//  #define OSD_LOADFONT              // Include MAX7456 font into binary, give & on serial to upload
+
+  #define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
+
+//  #define SERIAL_LCD Serial3  
+
+#endif
+
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
@@ -293,7 +364,7 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PWM;
+    receiverTypeUsed = receiver_PPM;
     flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
@@ -419,7 +490,7 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PWM;
+    receiverTypeUsed = receiver_PPM;
     flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {

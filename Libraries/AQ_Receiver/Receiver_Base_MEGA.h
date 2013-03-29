@@ -25,7 +25,7 @@
 #include "Receiver_Base.h"
 
 
-byte lastReceiverChannel = 8;
+volatile byte lastReceiverChannel = 8;
 
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000,1000,1000,1000,1000,1000,1000,1000};
