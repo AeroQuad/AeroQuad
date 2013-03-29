@@ -35,10 +35,10 @@
 
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-//#define AeroQuadMega_v21	// Arduino Mega with AeroQuad Shield v2.1
+#define AeroQuadMega_v21	// Arduino Mega with AeroQuad Shield v2.1
 
 // STM32 processor
-#define AeroQuadSTM32        // Baloo board
+//#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
@@ -90,7 +90,7 @@
 // *******************************************************************************************************************************
 // GPS Options
 // *******************************************************************************************************************************
-//#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
+#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
 
 // Device specific settings
 //#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
