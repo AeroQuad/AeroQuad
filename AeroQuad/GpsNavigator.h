@@ -80,6 +80,7 @@ float deg(float radians) {
   return radians * 57.2957795;
 }
 
+/*
 float calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
   // from http://www.movable-type.co.uk/scripts/latlong.html
   float lat1 = rad(currentWP.latitude);
@@ -88,8 +89,9 @@ float calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
   float lon2 = rad(nextWP.longitude);
   return acos(sin(lat1)*sin(lat2)+cos(lat1)*cos(lat2)*cos(lon2-lon1))*earthRadius;
 }
+*/
 
-float (float currentHeading, float desiredHeading) {
+float adjustHeading(float currentHeading, float desiredHeading) {
   if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
     return currentHeading -= 360.0;
   if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
@@ -109,13 +111,27 @@ void positionVector(float *vector, GeodeticPosition position) {
   vector[2] = sin(lat);
 }
 
-  /**
+/**
+ * Evaluate the next leg in the route to follow
+ */
+boolean updateRoute() {
+  waypointIndex++;
+  if (waypointIndex > (waypointCount-1))
+    return false;
+  else {
+      fromWaypoint = waypoint[waypointIndex];
+      toWaypoint = waypoint[waypointIndex+1];
+      positionVector(fromVector, fromWaypoint);
+      positionVector(toVector, toWaypoint);
+      return true
+  }
+}
+
+/**
  * Process navigation
  */
 void processNavigation() {
   // Convert lat/lon to ECEF
-  positionVector(fromVector, fromWaypoint);
-  positionVector(toVector, toWaypoint);
   positionVector(presentPosition, currentPosition);
 
   // Calculate track angle error
@@ -130,6 +146,7 @@ void processNavigation() {
   negNormalVector[2] = -normalVector[2];
   desiredHeading = deg(atan2(vectorDotProduct(3, normalVector, presentPositionNorth), vectorDotProduct(3, negNormalVector, presentPositionEast)));
   currentHeading = adjustHeading(trueNorthHeading, desiredHeading);
+  // We'll use trackAngleError when we have velocity information, use desiredHeading for now
   trackAngleError = desiredHeading - currentHeading;
 
   // Calculate cross track error
@@ -139,12 +156,33 @@ void processNavigation() {
   vectorNormalize(alongPathVector);
   crossTrackError = earthRadius * atan2(vectorDotProduct(3, negNormalVector, presentPosition), vectorDotProduct(3, alongPathVector, presentPosition));
 
-  // Need to figure out how to command heading and if we need to consider roll
+  // Calculate distance to next waypoint
+  vectorCrossProduct(normalRangeVector, presentPosition, toVector);
+  vectorNormalize(normalRangeVector);
+  vectorCrossproduct(rangeVector, toVector, normalRangeVector);
+  vectorNormalize(rangeVector);
+  distanceToNextWaypoint = earthRadius * atan2(vectorDotProduct(3, rangeVector, presentPosition), vectorDotProduct(3, presentPosition, toVector));
+
+  if (distanceToNextWaypoint < waypointCatptureDistance) {
+    boolean finishedRoute = updateRoute()
+    if (finishedRoute)
+      positionHoldState = ON;
+  }
+
+  crossTrack = constrain(crossTrackFactor * crossTrackError, -90.0, 90.0);
+  groundTrackHeading = (trackAngleFactor * desiredHeading) + crossTrack;
+  gpsPitchAxisCorrection = 75;
+  // AeroQuad will fly route using predetermined forward pitch and heading (in HeadingHoldProcessor.h)
 }
 
 void processPositionHold()
 {
-  // Under Construction
+  // Need to figure out how to set positionHoldPointToReach
+  gpsRollAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * cos(trueNorthHeading) - (missionPositionToReach.latitude - currentPosition.latitude) * sin(trueNorthHeading);
+  gpsRollAxisCorrection *= positionHoldFactor;
+  gpsPitchAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * sin(trueNorthHeading) + (missionPositionToReach.latitude - currentPosition.latitude) * cos(heading);
+  gpsPitchAxisCorrection *= positionHoldFactor;
+  gpsYawAxisCorrection = 0;
 }
 
 /**
@@ -163,6 +201,13 @@ void processGpsNavigation() {
   }
 }
 #endif
+
+
+
+
+
+
+
 
 #if defined UseGPSNavigatorOld
 

@@ -60,7 +60,7 @@ void processHeading()
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
       
-      #if defined (UseGPSNavigator)
+      #if defined (UseGPSNavigatorOld)
         if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
             ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
       #else
@@ -90,10 +90,21 @@ void processHeading()
           }
         }
         else {
-        // No new yaw input, calculate current heading vs. desired heading heading hold
-        // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
-          headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
+          #if defined (UseGPSNavigatorOld)
+            if (navigationState == ON) {
+              heading = updateHeading(trueNorthHeading);
+              headingHold = updatePID(groundTrackHeading, heading, &PID[HEADING_HOLD_PID_IDX]);
+            }
+            else {
+              headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
+              headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
+            }
+          #else
+            // No new yaw input, calculate current heading vs. desired heading heading hold
+            // Relative heading is always centered around zero
+            headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
+            headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
+          #endif
         }
       }
     }
@@ -105,7 +116,7 @@ void processHeading()
     }
   }
   // NEW SI Version
-  #if defined (UseGPSNavigator) 
+  #if defined (UseGPSNavigatorOld)
     float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
   #else
     float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
