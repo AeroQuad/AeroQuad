@@ -148,6 +148,9 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
+  
+  flightConfigType = quadXConfig;
+  receiverTypeUsed = receiver_PPM;
 
   #if defined (AltitudeHoldBaro)
     PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
@@ -269,6 +272,8 @@ void readEEPROM() {
   readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
   rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  
+  readVehicleConfigFromEEPROM();
   
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
@@ -484,6 +489,16 @@ void initReceiverFromEEPROM() {
     receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
     receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
   }
+}
+
+void storeVehicleConfigToEEPROM() {
+  writeFloat(flightConfigType, FLIGHT_CONFIG_TYPE_ADR);
+  writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
+}
+
+void readVehicleConfigFromEEPROM() {
+  flightConfigType = (FlightConfigType)readFloat(FLIGHT_CONFIG_TYPE_ADR);
+  receiverTypeUsed = (ReceiverType)readFloat(RECEIVER_CONFIG_TYPE_ADR);
 }
 
 #endif // _AQ_DATA_STORAGE_H_

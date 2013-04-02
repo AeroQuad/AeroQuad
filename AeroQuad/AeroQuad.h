@@ -284,7 +284,9 @@ typedef struct {
   float YAXIS_ACCEL_SCALE_FACTOR_ADR;
   float ZAXIS_ACCEL_BIAS_ADR;
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
-
+  float FLIGHT_CONFIG_TYPE_ADR;
+  float RECEIVER_CONFIG_TYPE_ADR;
+  
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     t_NVR_PID ALTITUDE_PID_GAIN_ADR;
     t_NVR_PID ZDAMP_PID_GAIN_ADR;
@@ -344,6 +346,8 @@ void readEEPROM();
 void initSensorsZeroFromEEPROM();
 void storeSensorsZeroToEEPROM();
 void initReceiverFromEEPROM();
+void storeVehicleConfigToEEPROM();
+void readVehicleConfigFromEEPROM();
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
