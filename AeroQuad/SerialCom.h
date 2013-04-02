@@ -229,6 +229,12 @@ void readSerialCommand() {
 //        #endif
       #endif
       break;
+      
+    case 'Q':
+      flightConfigType = (FlightConfigType)readIntegerSerial();
+      receiverTypeUsed = (ReceiverType)readIntegerSerial();
+      storeVehicleConfigToEEPROM();
+      break;
 
     case 'U': // Range Finder
       #if defined (AltitudeHoldRangeFinder)
@@ -644,6 +650,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+    
   case 'y': // send GPS info
     #if defined (UseGPS)
       PrintValueComma(gpsData.state);

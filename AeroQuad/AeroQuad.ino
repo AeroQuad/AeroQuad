@@ -56,6 +56,8 @@
 
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (AeroQuadSTM32)
   
+  #define USE_400HZ_ESC			// For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
+  
   #define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
   #define AltitudeHoldBaro		// Enables Barometer
   #define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
