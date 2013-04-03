@@ -321,9 +321,9 @@ void sendSerialRawPressure() {
 
 void sendSerialRcRaw() {
   #if defined(UseRSSIFaileSafe)
-    mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
+    mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[receiverChannelMap[THROTTLE]], receiverCommand[receiverChannelMap[XAXIS]], receiverCommand[receiverChannelMap[YAXIS]], receiverCommand[receiverChannelMap[ZAXIS]], receiverCommand[receiverChannelMap[MODE]], receiverCommand[receiverChannelMap[AUX1]], receiverCommand[receiverChannelMap[AUX2]], receiverCommand[receiverChannelMap[AUX3]], rssiRawValue * 2.55);
   #else
-    mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[THROTTLE], receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 0);
+    mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBoot, 0, receiverCommand[receiverChannelMap[THROTTLE]], receiverCommand[receiverChannelMap[XAXIS]], receiverCommand[receiverChannelMap[YAXIS]], receiverCommand[receiverChannelMap[ZAXIS]], receiverCommand[receiverChannelMap[MODE]], receiverCommand[receiverChannelMap[AUX1]], receiverCommand[receiverChannelMap[AUX2]], receiverCommand[receiverChannelMap[AUX3]], 0);
   #endif
   len = mavlink_msg_to_send_buffer(buf, &msg);
   SERIAL_PORT.write(buf, len);

@@ -534,9 +534,9 @@ void menuCameraPTZ(byte mode, byte action){
     menuInFunc = 0;    
   }
   else if (action == MENU_HIJACK) {
-    const short roll  = receiverCommand[XAXIS] - MENU_STICK_CENTER;  // adjust all to -500 - +500
-    const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
-    short yaw   = receiverCommand[ZAXIS] - MENU_STICK_CENTER;
+    const short roll  = receiverCommand[receiverChannelMap[XAXIS]] - MENU_STICK_CENTER;  // adjust all to -500 - +500
+    const short pitch = receiverCommand[receiverChannelMap[YAXIS]] - MENU_STICK_CENTER;
+    short yaw   = receiverCommand[receiverChannelMap[ZAXIS]] - MENU_STICK_CENTER;
 
     if (roll < -MENU_STICK_REPEAT) {
       unhideOSD();
@@ -569,8 +569,8 @@ void menuCameraPTZ(byte mode, byte action){
   		#endif
     }
 
-    if (abs(receiverCommand[THROTTLE] - menuFuncDataFloat) > 2) {
-      menuFuncDataFloat = receiverCommand[THROTTLE];
+    if (abs(receiverCommand[receiverChannelMap[THROTTLE]] - menuFuncDataFloat) > 2) {
+      menuFuncDataFloat = receiverCommand[receiverChannelMap[THROTTLE]];
       servoCenterPitch = constrain(3000 - menuFuncDataFloat, servoMinPitch, servoMaxPitch);
   		#if defined (POWERSAVE)
     		idleCounter = POWERSAVE;
@@ -874,8 +874,8 @@ void updateOSDMenu() {
     }
   }
 
-  const short roll  = receiverCommand[XAXIS]  - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
-  const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
+  const short roll  = receiverCommand[receiverChannelMap[XAXIS]] - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
+  const short pitch = receiverCommand[receiverChannelMap[YAXIS]] - MENU_STICK_CENTER;
 
   if (abs(roll) < MENU_STICK_NEUTRAL) {
     if (abs(pitch) < MENU_STICK_NEUTRAL) {
