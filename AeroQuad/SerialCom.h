@@ -603,7 +603,7 @@ void sendSerialTelemetry() {
     #endif
 
     for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
-      PrintValueComma((channel < lastReceiverChannel) ? receiverCommand[channel] : 0);
+      PrintValueComma((channel < lastReceiverChannel) ? receiverCommand[receiverChannelMap[channel]] : 0);
     }
 
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
@@ -622,7 +622,7 @@ void sendSerialTelemetry() {
 
   case 't': // Send processed transmitter values
     for (byte axis = 0; axis < lastReceiverChannel; axis++) {
-      PrintValueComma(receiverCommand[axis]);
+      PrintValueComma(receiverCommand[receiverChannelMap[axis]]);
     }
     SERIAL_PRINTLN();
     break;

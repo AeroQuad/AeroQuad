@@ -58,14 +58,14 @@ void processHeading()
     }
 
     // Apply heading hold only when throttle high enough to start flight
-    if (receiverCommand[THROTTLE] > MINCHECK ) { 
+    if (receiverCommand[receiverChannelMap[THROTTLE]] > MINCHECK ) { 
       
       #if defined (UseGPSNavigator)
-        if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
-            ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
+        if (( (receiverCommand[receiverChannelMap[ZAXIS]] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
+            ( (receiverCommand[receiverChannelMap[ZAXIS]] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
       #else
-        if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || 
-            (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
+        if ((receiverCommand[receiverChannelMap[ZAXIS]] > (MIDCOMMAND + 25)) || 
+            (receiverCommand[receiverChannelMap[ZAXIS]] < (MIDCOMMAND - 25))) {
       #endif
       
         
@@ -106,9 +106,9 @@ void processHeading()
   }
   // NEW SI Version
   #if defined (UseGPSNavigator) 
-    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
+    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
   #else
-    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
+    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
   #endif
   
   const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);
