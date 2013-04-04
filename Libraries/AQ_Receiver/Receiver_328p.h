@@ -130,7 +130,7 @@ static byte receiverPin[5] = {2, 5, 6, 4, 7}; // pins used for XAXIS, YAXIS, ZAX
 
 void initializeReceiverPWM() {
 
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+  for (byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
     attachPinChangeInterrupt(receiverPin[channel]);
