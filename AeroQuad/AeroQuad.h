@@ -286,6 +286,8 @@ typedef struct {
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
   float FLIGHT_CONFIG_TYPE_ADR;
   float RECEIVER_CONFIG_TYPE_ADR;
+  float NB_RECEIVER_CHANNEL_ADR;
+  float RECEIVER_CHANNEL_MAP_ADR[MAX_NB_CHANNEL];
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     t_NVR_PID ALTITUDE_PID_GAIN_ADR;

@@ -116,7 +116,7 @@ void readSerialCommand() {
 
     case 'F': // Receive transmitter smoothing values
       receiverXmitFactor = readFloatSerial();
-      for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+      for(byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
         receiverSmoothFactor[channel] = readFloatSerial();
       }
       break;
@@ -233,6 +233,7 @@ void readSerialCommand() {
     case 'Q':
       flightConfigType = (FlightConfigType)readIntegerSerial();
       receiverTypeUsed = (ReceiverType)readIntegerSerial();
+      nbReceiverChannel = readIntegerSerial();
       storeVehicleConfigToEEPROM();
       break;
 
@@ -430,16 +431,16 @@ void sendSerialTelemetry() {
 
   case 'f': // Send transmitter smoothing values
     PrintValueComma(receiverXmitFactor);
-    for (byte axis = XAXIS; axis < lastReceiverChannel; axis++) {
+    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
       PrintValueComma(receiverSmoothFactor[axis]);
     }
-    PrintDummyValues(10 - lastReceiverChannel);
+    PrintDummyValues(10 - nbReceiverChannel);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
   case 'g': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < lastReceiverChannel; axis++) {
+    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
       Serial.print(receiverSlope[axis], 6);
       Serial.print(',');
     }
@@ -448,7 +449,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'h': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < lastReceiverChannel; axis++) {
+    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
       Serial.print(receiverOffset[axis], 6);
       Serial.print(',');
     }
@@ -603,7 +604,7 @@ void sendSerialTelemetry() {
     #endif
 
     for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
-      PrintValueComma((channel < lastReceiverChannel) ? receiverCommand[receiverChannelMap[channel]] : 0);
+      PrintValueComma((channel < nbReceiverChannel) ? receiverCommand[receiverChannelMap[channel]] : 0);
     }
 
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
@@ -621,7 +622,7 @@ void sendSerialTelemetry() {
     break;
 
   case 't': // Send processed transmitter values
-    for (byte axis = 0; axis < lastReceiverChannel; axis++) {
+    for (byte axis = 0; axis < nbReceiverChannel; axis++) {
       PrintValueComma(receiverCommand[receiverChannelMap[axis]]);
     }
     SERIAL_PRINTLN();
@@ -945,7 +946,7 @@ void reportVehicleState() {
   SERIAL_PRINTLN(flightConfigType);
 
   SERIAL_PRINT("Receiver Channels: ");
-  SERIAL_PRINTLN(lastReceiverChannel);
+  SERIAL_PRINTLN(nbReceiverChannel);
 
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);
