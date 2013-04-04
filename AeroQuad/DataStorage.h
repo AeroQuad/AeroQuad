@@ -496,12 +496,19 @@ void storeVehicleConfigToEEPROM() {
   writeFloat(flightConfigType, FLIGHT_CONFIG_TYPE_ADR);
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
   writeFloat(nbReceiverChannel, NB_RECEIVER_CHANNEL_ADR);
+  for (byte i = 0; i < nbReceiverChannel;i++) {
+    writeFloat(receiverChannelMap[i], RECEIVER_CHANNEL_MAP_ADR[i]);    
+  }
 }
 
 void readVehicleConfigFromEEPROM() {
   flightConfigType = (FlightConfigType)readFloat(FLIGHT_CONFIG_TYPE_ADR);
   receiverTypeUsed = (ReceiverType)readFloat(RECEIVER_CONFIG_TYPE_ADR);
   nbReceiverChannel = readFloat(NB_RECEIVER_CHANNEL_ADR);
+  for (byte i = 0; i < nbReceiverChannel;i++) {
+    receiverChannelMap[i] = readFloat(RECEIVER_CHANNEL_MAP_ADR[i]);    
+  }
+
 }
 
 #endif // _AQ_DATA_STORAGE_H_
