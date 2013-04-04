@@ -151,6 +151,7 @@ void initializeEEPROM() {
   
   flightConfigType = quadXConfig;
   receiverTypeUsed = receiver_PPM;
+  nbReceiverChannel = 5;
 
   #if defined (AltitudeHoldBaro)
     PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
@@ -494,11 +495,13 @@ void initReceiverFromEEPROM() {
 void storeVehicleConfigToEEPROM() {
   writeFloat(flightConfigType, FLIGHT_CONFIG_TYPE_ADR);
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
+  writeFloat(nbReceiverChannel, NB_RECEIVER_CHANNEL_ADR);
 }
 
 void readVehicleConfigFromEEPROM() {
   flightConfigType = (FlightConfigType)readFloat(FLIGHT_CONFIG_TYPE_ADR);
   receiverTypeUsed = (ReceiverType)readFloat(RECEIVER_CONFIG_TYPE_ADR);
+  nbReceiverChannel = readFloat(NB_RECEIVER_CHANNEL_ADR);
 }
 
 #endif // _AQ_DATA_STORAGE_H_

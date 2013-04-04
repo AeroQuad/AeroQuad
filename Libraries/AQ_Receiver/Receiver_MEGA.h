@@ -108,10 +108,10 @@ void initializeReceiverPWM() {
 
   DDRK = 0;
   PORTK = 0;
-  PCMSK2 |=(1<<lastReceiverChannel)-1;
+  PCMSK2 |=(1<<nbReceiverChannel)-1;
   PCICR |= 0x1 << 2;
 
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+  for (byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
   }
 }
@@ -158,7 +158,7 @@ ISR(TIMER5_CAPT_vect)//interrupt.
     ppmCounter = 0;             // -> restart the channel counter
   }
   else {
-    if (ppmCounter < lastReceiverChannel) { // extra channels will get ignored here
+    if (ppmCounter < nbReceiverChannel) { // extra channels will get ignored here
       PWM_RAW[ppmCounter] = pulseWidth; // Store measured pulse length
       ppmCounter++;                     // Advance to next channel
     }

@@ -24,7 +24,7 @@
 #include "Arduino.h"
 #include "Receiver_Base.h"
 
-byte lastReceiverChannel = MAX_NB_CHANNEL;
+byte nbReceiverChannel = MAX_NB_CHANNEL;
 
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000};
@@ -51,7 +51,7 @@ intFunctionPtrByte getRawChannelValue[] = {getRawChannelValuePPM,getRawChannelVa
 
 void readReceiver()
 {
-  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
+  for(byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
 
     // Apply receiver calibration adjustment
 	receiverData[channel] = (receiverSlope[channel] * (*getRawChannelValue[receiverTypeUsed])(channel)) + receiverOffset[channel];
@@ -64,7 +64,7 @@ void readReceiver()
     receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
   }	
   // No xmitFactor reduction applied for throttle, mode and AUX
-  for (byte channel = THROTTLE; channel < lastReceiverChannel; channel++) {
+  for (byte channel = THROTTLE; channel < nbReceiverChannel; channel++) {
     receiverCommand[channel] = receiverCommandSmooth[channel];
   }
 }
