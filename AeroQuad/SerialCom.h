@@ -894,6 +894,9 @@ void reportVehicleState() {
   SERIAL_PRINT("Flight Config: ");
   SERIAL_PRINTLN(flightConfigType);
 
+  SERIAL_PRINT("Yaw Config: ");
+  SERIAL_PRINTLN(YAW_DIRECTION);
+
   SERIAL_PRINT("Receiver Type: ");
   SERIAL_PRINTLN(receiverTypeUsed);
 

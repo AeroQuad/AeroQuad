@@ -247,9 +247,10 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = RECEIVER_PWM;
-    flightConfigType = TRI;
-    nbReceiverChannel = 5;
+//    YAW_DIRECTION = -1;
+//    receiverTypeUsed = RECEIVER_PWM;
+//    flightConfigType = TRI;
+//    nbReceiverChannel = 5;
     switch (flightConfigType) 
     {
       case HEX_Y6 :
