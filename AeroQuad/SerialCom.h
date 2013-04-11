@@ -116,9 +116,6 @@ void readSerialCommand() {
 
     case 'F': // Receive transmitter smoothing values
       receiverXmitFactor = readFloatSerial();
-      for(byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
-        receiverSmoothFactor[channel] = readFloatSerial();
-      }
       break;
 
     case 'G': // Receive transmitter calibration values
@@ -214,8 +211,8 @@ void readSerialCommand() {
     #endif
       
     case 'Q':
-      flightConfigType = (FlightConfigType)readIntegerSerial();
-      receiverTypeUsed = (ReceiverType)readIntegerSerial();
+      flightConfigType = readIntegerSerial();
+      receiverTypeUsed = readIntegerSerial();
       nbReceiverChannel = readIntegerSerial();
       storeVehicleConfigToEEPROM();
       break;
@@ -410,9 +407,6 @@ void sendSerialTelemetry() {
 
   case 'f': // Send transmitter smoothing values
     PrintValueComma(receiverXmitFactor);
-    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
-      PrintValueComma(receiverSmoothFactor[axis]);
-    }
     PrintDummyValues(10 - nbReceiverChannel);
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -900,7 +894,10 @@ void reportVehicleState() {
   SERIAL_PRINT("Flight Config: ");
   SERIAL_PRINTLN(flightConfigType);
 
-  SERIAL_PRINT("Receiver Channels: ");
+  SERIAL_PRINT("Receiver Type: ");
+  SERIAL_PRINTLN(receiverTypeUsed);
+
+  SERIAL_PRINT("Receiver Nb Channels: ");
   SERIAL_PRINTLN(nbReceiverChannel);
 
   SERIAL_PRINT("Motors: ");

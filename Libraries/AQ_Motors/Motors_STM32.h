@@ -9,7 +9,7 @@
 // definition section
 
 #if defined (USE_400HZ_ESC)
-  #define PWM_FREQUENCY 400   // in Hz
+  #define PWM_FREQUENCYPWM_FREQUENCY 400   // in Hz
 #else
   #define PWM_FREQUENCY 300   // in Hz
 #endif
@@ -35,13 +35,12 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
 };
 
 
-//#ifdef MOTORS_STM32_TRI
-  #define PWM_SERVO_FREQUENCY 50 // Hz 
-  #define PWM_SERVO_PERIODE   (1000000/PWM_SERVO_FREQUENCY)
-  #define STM32_MOTOR_MAP_TRI stm32_motor_mapping_tri
-//#else
-  #define STM32_MOTOR_MAP stm32_motor_mapping
-//#endif
+
+#define PWM_SERVO_FREQUENCY 50 // Hz 
+
+#define PWM_SERVO_PERIODE   (1000000/PWM_SERVO_FREQUENCY)
+#define STM32_MOTOR_MAP_TRI stm32_motor_mapping_tri
+#define STM32_MOTOR_MAP stm32_motor_mapping
 
 ////////////////////////////////////////////////////////
 // code section

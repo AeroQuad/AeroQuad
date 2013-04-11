@@ -26,7 +26,6 @@
 #include <math.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
-//#include "GpsDataType.h"
 #include "AQMath.h"
 #include "Receiver_Base.h"
 
