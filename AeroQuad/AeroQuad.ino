@@ -183,9 +183,9 @@
     flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
-      case hexY6Config :
-      case hexPlusConfig :
-      case hexXConfig :
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
         LASTMOTOR = 6;
         break;
       default:
@@ -247,14 +247,14 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PWM;
-    flightConfigType = triConfig;
+    receiverTypeUsed = RECEIVER_PWM;
+    flightConfigType = TRI;
     nbReceiverChannel = 5;
     switch (flightConfigType) 
     {
-      case hexY6Config :
-      case hexPlusConfig :
-      case hexXConfig :
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
         LASTMOTOR = 6;
         break;
       default:
@@ -376,9 +376,9 @@
       case octoXConfig :
         LASTMOTOR = 8;
         break;
-      case hexY6Config :
-      case hexPlusConfig :
-      case hexXConfig :
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
         LASTMOTOR = 6;
         break;
       default:
@@ -502,9 +502,9 @@
       case octoXConfig :
         LASTMOTOR = 8;
         break;
-      case hexY6Config :
-      case hexPlusConfig :
-      case hexXConfig :
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
         LASTMOTOR = 6;
         break;
       default:
@@ -564,7 +564,7 @@
 //  #include <Receiver_HWPPM.h>
 //#elif defined(ReceiverPPM)
 //  #include <Receiver_PPM.h>
-//#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
+//#elif defined(AeroQuad_Mini) && (defined(HEX_PLUS) || defined(HEX_X) || defined(HEX_Y6))
 //  #include <Receiver_PPM.h>
 //#elif defined(RemotePCReceiver)
 //  #include <Receiver_RemotePC.h>
@@ -595,7 +595,7 @@
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-//#if defined(triConfig)
+//#if defined(TRI)
 //  #if defined (MOTOR_STM32)
 //    #define MOTORS_STM32_TRI
 //    #include <Motors_STM32.h>    

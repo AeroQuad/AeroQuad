@@ -24,19 +24,17 @@
 
 #include "Arduino.h"
 
-enum FlightConfigType {
-  quadXConfig,
-  quadPlusConfig,  
-  hexPlusConfig,   
-  hexXConfig,      
-  triConfig,       
-  quadY4Config,    
-  hexY6Config,     
-  octoX8Config,    
-  octoPlusConfig,		
-  octoXConfig	
-};
+#define QUAD_X     0
+#define QUAD_PLUS  1  
+#define HEX_PLUS   2   
+#define HEX_X      3      
+#define TRI       4
+#define QUAD_Y4    5    
+#define HEX_Y6     6
+#define OCTO_X8    7 
+#define OCTO_PLUS  8	
+#define OCTO_X	    9
 
-volatile FlightConfigType flightConfigType = quadXConfig;
+volatile int8_t flightConfigType = QUAD_X;
 
 #endif

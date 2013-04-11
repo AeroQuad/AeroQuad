@@ -149,8 +149,8 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
   
-  flightConfigType = quadXConfig;
-  receiverTypeUsed = receiver_PPM;
+  flightConfigType = QUAD_X;
+  receiverTypeUsed = RECEIVER_PPM;
   nbReceiverChannel = 5;
 
   #if defined (AltitudeHoldBaro)
@@ -202,9 +202,7 @@ void initializeEEPROM() {
   for (byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     receiverSlope[channel] = 1.0;
     receiverOffset[channel] = 0.0;
-    receiverSmoothFactor[channel] = 1.0;
   }
-  receiverSmoothFactor[ZAXIS] = 0.5;
 
   flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
@@ -399,7 +397,6 @@ void writeEEPROM(){
   for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
     writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
-    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
@@ -488,7 +485,6 @@ void initReceiverFromEEPROM() {
   for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
     receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
     receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
-    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
   }
 }
 
@@ -502,8 +498,8 @@ void storeVehicleConfigToEEPROM() {
 }
 
 void readVehicleConfigFromEEPROM() {
-  flightConfigType = (FlightConfigType)readFloat(FLIGHT_CONFIG_TYPE_ADR);
-  receiverTypeUsed = (ReceiverType)readFloat(RECEIVER_CONFIG_TYPE_ADR);
+  flightConfigType = readFloat(FLIGHT_CONFIG_TYPE_ADR);
+  receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
   nbReceiverChannel = readFloat(NB_RECEIVER_CHANNEL_ADR);
   for (byte i = 0; i < nbReceiverChannel;i++) {
     receiverChannelMap[i] = readFloat(RECEIVER_CHANNEL_MAP_ADR[i]);    
