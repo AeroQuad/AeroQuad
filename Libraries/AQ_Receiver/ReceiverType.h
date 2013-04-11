@@ -21,14 +21,12 @@
 #ifndef _AEROQUAD_RECEIVER_TYPE_H_
 #define _AEROQUAD_RECEIVER_TYPE_H_
 
-enum ReceiverType {
-  receiver_PPM,
-  receiver_PWM,  
-  receiver_SBUS,   
-  receiver_HWPPM
-};
+#define RECEIVER_PPM 0
+#define RECEIVER_PWM 1 
+#define RECEIVER_SBUS 2   
+#define RECEIVER_HWPPM 3
 
-ReceiverType receiverTypeUsed = receiver_PWM;
+int8_t receiverTypeUsed = RECEIVER_PWM;
 
 #endif
 
