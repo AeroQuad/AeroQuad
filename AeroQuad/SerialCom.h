@@ -211,10 +211,11 @@ void readSerialCommand() {
     #endif
       
     case 'Q':
-      flightConfigType = readIntegerSerial();
-      receiverTypeUsed = readIntegerSerial();
-      nbReceiverChannel = readIntegerSerial();
-      storeVehicleConfigToEEPROM();
+      flightConfigType = readFloatSerial();
+      receiverTypeUsed = readFloatSerial();
+      YAW_DIRECTION = readFloatSerial();
+      nbReceiverChannel = readFloatSerial();
+      writeEEPROM();
       break;
 
     #if defined (AltitudeHoldRangeFinder)
@@ -568,7 +569,7 @@ void sendSerialTelemetry() {
     #endif
 
     for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
-      PrintValueComma((channel < nbReceiverChannel) ? receiverCommand[receiverChannelMap[channel]] : 0);
+      PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
     }
 
     for (byte motor = 0; motor < LASTMOTOR; motor++) {

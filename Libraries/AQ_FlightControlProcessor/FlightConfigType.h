@@ -28,12 +28,12 @@
 #define QUAD_PLUS  1  
 #define HEX_PLUS   2   
 #define HEX_X      3      
-#define TRI       4
+#define TRI        4
 #define QUAD_Y4    5    
 #define HEX_Y6     6
 #define OCTO_X8    7 
 #define OCTO_PLUS  8	
-#define OCTO_X	    9
+#define OCTO_X	   9
 
 volatile int8_t flightConfigType = QUAD_X;
 
