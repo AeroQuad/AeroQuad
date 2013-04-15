@@ -758,8 +758,8 @@ void setup() {
   boolean firstTimeBoot = false;
   if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
     initializeEEPROM();
-    initializePlatformSpecificAccelCalibration();
     writeEEPROM();
+    storeSensorsZeroToEEPROM();
     firstTimeBoot = true;
   }
   
