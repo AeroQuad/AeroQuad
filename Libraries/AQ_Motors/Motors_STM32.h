@@ -8,11 +8,11 @@
 ////////////////////////////////////////////////////////
 // definition section
 
-#if defined (USE_400HZ_ESC)
-  #define PWM_FREQUENCYPWM_FREQUENCY 400   // in Hz
-#else
-  #define PWM_FREQUENCY 300   // in Hz
-#endif
+//#if defined (USE_400HZ_ESC)
+  #define PWM_FREQUENCY 400   // in Hz
+//#else
+  //#define PWM_FREQUENCY 300   // in Hz
+//#endif
 #define PWM_PERIODE     (1000000/PWM_FREQUENCY)
 
 
@@ -53,7 +53,7 @@ void initializeMotors(byte numbers) {
  
   int motor;
   
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     
 	_stm32_motor_number = sizeof(STM32_MOTOR_MAP_TRI)/sizeof(STM32_MOTOR_MAP_TRI[0]);
     if(numbers < _stm32_motor_number) {
@@ -113,7 +113,7 @@ void initializeMotors(byte numbers) {
 
 void writeMotors(void) { // update motor commands on timers
 
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     for(int motor=0; motor < _stm32_motor_number; motor++) {
       timer_set_compare(PIN_MAP[STM32_MOTOR_MAP_TRI[motor]].timer_device, PIN_MAP[STM32_MOTOR_MAP_TRI[motor]].timer_channel,  motorCommand[motor]);
     }
@@ -128,7 +128,7 @@ void writeMotors(void) { // update motor commands on timers
 
 void commandAllMotors(int _motorCommand) {   // Send same command to all motors
 
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     for(int motor=0; motor < _stm32_motor_number; motor++) {
       timer_set_compare(PIN_MAP[STM32_MOTOR_MAP_TRI[motor]].timer_device, PIN_MAP[STM32_MOTOR_MAP_TRI[motor]].timer_channel, _motorCommand);
     }
