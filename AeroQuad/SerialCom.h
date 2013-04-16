@@ -217,6 +217,23 @@ void readSerialCommand() {
       nbReceiverChannel = readFloatSerial();
       writeEEPROM();
       break;
+      
+    case 'R':
+      for (byte channel = 0; channel < nbReceiverChannel; channel++)
+      {
+        receiverChannelMap[channel] = readFloatSerial();
+      }
+      writeEEPROM();
+      break;
+
+    case 'S':
+      for (byte channel = 0; channel < nbReceiverChannel; channel++)
+      {
+        receiverChannelMap[channel] = channel;
+      }
+      writeEEPROM();
+      break;
+      
 
     #if defined (AltitudeHoldRangeFinder)
       case 'U': // Range Finder
@@ -903,6 +920,13 @@ void reportVehicleState() {
 
   SERIAL_PRINT("Receiver Nb Channels: ");
   SERIAL_PRINTLN(nbReceiverChannel);
+  
+  SERIAL_PRINT("Receiver Channels map: ");
+  for (byte channel = 0; channel < nbReceiverChannel-1; channel++)
+  {
+    PrintValueComma(receiverChannelMap[channel]);
+  }
+  SERIAL_PRINTLN(receiverChannelMap[nbReceiverChannel-1]);
 
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);
