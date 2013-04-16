@@ -90,22 +90,20 @@ void initPlatform() {
     SerialUSB.begin();
   #endif
   
-  receiverTypeUsed = receiver_PWM;
-  flightConfigType = quadXConfig;
   switch (flightConfigType) 
   {
-    case octoX8Config :
-    case octoPlusConfig :
-    case octoXConfig :
-      LASTMOTOR = 8;
-      break;
-    case hexY6Config :
-    case hexPlusConfig :
-    case hexXConfig :
-      LASTMOTOR = 6;
-      break;
+    case OCTO_X :
+    case OCTO_PLUS :
+    case OCTO_X8 :
+	  LASTMOTOR = 8;
+	  break;
+    case HEX_Y6 :
+    case HEX_PLUS :
+    case HEX_X :
+	  LASTMOTOR = 6;
+	  break;
     default:
-      LASTMOTOR = 4;
+	  LASTMOTOR = 4;
   }
 }
 

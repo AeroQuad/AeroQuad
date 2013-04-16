@@ -52,7 +52,7 @@ void initializeServo() {
 ISR(TIMER0_COMPA_vect) {
 
   static uint8_t state = 0;
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     static uint8_t count;
     if (state == 0) {
       //http://billgrundmann.wordpress.com/2009/03/03/to-use-or-not-use-writedigital/
@@ -107,7 +107,7 @@ ISR(TIMER0_COMPA_vect) {
 void initializeMotors(byte numbers) {
 
   numberOfMotors = numbers;
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     initializeServo();
   }
   else {
@@ -130,7 +130,7 @@ void initializeMotors(byte numbers) {
 
 void writeMotors() {
 
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     atomicServo = (motorCommand[MOTOR1]-1000)/4;
   }
   else {
@@ -151,7 +151,7 @@ void writeMotors() {
 
 void commandAllMotors(int command) {
 
-  if (flightConfigType == triConfig) {
+  if (flightConfigType == TRI) {
     atomicServo = (command-1000)/4;
   }
   else {
