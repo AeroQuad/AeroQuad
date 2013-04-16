@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
@@ -179,8 +179,6 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PWM;
-    flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
       case HEX_Y6 :
@@ -247,10 +245,6 @@
     Wire.begin();
     TWBR = 12;
     
-//    YAW_DIRECTION = -1;
-//    receiverTypeUsed = RECEIVER_PWM;
-//    flightConfigType = TRI;
-//    nbReceiverChannel = 5;
     switch (flightConfigType) 
     {
       case HEX_Y6 :
@@ -298,7 +292,6 @@
   #include <Receiver_MEGA.h>
 
   // Motor declaration
-//  #define CHANGE_YAW_DIRECTION
   #include <Motors_MEGA.h>
   
   #include <FlightConfigMEGA.h>
@@ -368,13 +361,11 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PPM;
-    flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
-      case octoX8Config :
-      case octoPlusConfig :
-      case octoXConfig :
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
         LASTMOTOR = 8;
         break;
       case HEX_Y6 :
@@ -427,7 +418,6 @@
   #include <Receiver_MEGA.h>
 
   // Motor declaration
-//  #define CHANGE_YAW_DIRECTION
   #include <Motors_MEGA.h>
   
   #include <FlightConfigMEGA.h>
@@ -494,13 +484,11 @@
     Wire.begin();
     TWBR = 12;
     
-    receiverTypeUsed = receiver_PPM;
-    flightConfigType = quadXConfig;
     switch (flightConfigType) 
     {
-      case octoX8Config :
-      case octoPlusConfig :
-      case octoXConfig :
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
         LASTMOTOR = 8;
         break;
       case HEX_Y6 :
