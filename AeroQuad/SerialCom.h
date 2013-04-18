@@ -114,19 +114,21 @@ void readSerialCommand() {
       minArmedThrottle = readFloatSerial();
       break;
 
-    case 'F': // Receive transmitter smoothing values
-      receiverXmitFactor = readFloatSerial();
-      break;
-
     case 'G': // Receive transmitter calibration values
-      channelCal = (int)readFloatSerial();
-      receiverSlope[channelCal] = readFloatSerial();
+      for (int channel = 0; channel < nbReceiverChannel; channel++) {
+        receiverMinValue[receiverChannelMap[channel]] = readFloatSerial();
+        receiverMaxValue[receiverChannelMap[channel]] = readFloatSerial();
+      }
+      writeEEPROM();
       break;
-
+    
     case 'H': // Receive transmitter calibration values
-      channelCal = (int)readFloatSerial();
-      receiverOffset[channelCal] = readFloatSerial();
+      for (byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
+        receiverMinValue[channel] = 1000;
+        receiverMaxValue[channel] = 2000;
+      }
       break;
+    
 
     case 'I': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
@@ -252,14 +254,6 @@ void readSerialCommand() {
         break;
     #endif
 
-//    case 'W': // Write all user configurable values to EEPROM
-//      writeEEPROM(); // defined in DataStorage.h
-//      zeroIntegralError();
-//      break;
-
-//    case 'X': // Stop sending messages
-//      break;
-
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
       validateCalibrateCommand(1);
       break;
@@ -289,12 +283,6 @@ void readSerialCommand() {
       }
       break;
 
-//    case 'Z': // fast telemetry transfer <--- get rid if this?
-//      if (readFloatSerial() == 1.0)
-//        fastTransfer = ON;
-//      else
-//        fastTransfer = OFF;
-//      break;
     }
   }
 }
@@ -418,33 +406,7 @@ void sendSerialTelemetry() {
 
 
   case 'e': // miscellaneous config values
-//    PrintValueComma(0); // @todo Kenny9999 Fix this
     SERIAL_PRINTLN(minArmedThrottle);
-    queryType = 'X';
-    break;
-
-  case 'f': // Send transmitter smoothing values
-    PrintValueComma(receiverXmitFactor);
-    PrintDummyValues(10 - nbReceiverChannel);
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'g': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
-      Serial.print(receiverSlope[axis], 6);
-      Serial.print(',');
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'h': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < nbReceiverChannel; axis++) {
-      Serial.print(receiverOffset[axis], 6);
-      Serial.print(',');
-    }
-    SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
@@ -754,112 +716,6 @@ long readIntegerSerial() {
 void comma() {
   SERIAL_PRINT(',');
 }
-
-
-//#ifdef BinaryWrite
-//void printInt(int data) {
-//  byte msb, lsb;
-//
-//  msb = data >> 8;
-//  lsb = data & 0xff;
-//
-//  binaryPort->write(msb);
-//  binaryPort->write(lsb);
-//}
-//
-//void sendBinaryFloat(float data) {
-//  union binaryFloatType {
-//    byte floatByte[4];
-//    float floatVal;
-//  } binaryFloat;
-//
-//  binaryFloat.floatVal = data;
-//  binaryPort->write(binaryFloat.floatByte[3]);
-//  binaryPort->write(binaryFloat.floatByte[2]);
-//  binaryPort->write(binaryFloat.floatByte[1]);
-//  binaryPort->write(binaryFloat.floatByte[0]);
-//}
-//
-//void sendBinaryuslong(unsigned long data) {
-//  union binaryuslongType {
-//    byte uslongByte[4];
-//    unsigned long uslongVal;
-//  } binaryuslong;
-//
-//  binaryuslong.uslongVal = data;
-//  binaryPort->write(binaryuslong.uslongByte[3]);
-//  binaryPort->write(binaryuslong.uslongByte[2]);
-//  binaryPort->write(binaryuslong.uslongByte[1]);
-//  binaryPort->write(binaryuslong.uslongByte[0]);
-//}
-//
-//
-//void fastTelemetry()
-//{
-//  // **************************************************************
-//  // ***************** Fast Transfer Of Sensor Data ***************
-//  // **************************************************************
-//  // AeroQuad.h defines the output rate to be 10ms
-//  // Since writing to UART is done by hardware, unable to measure data rate directly
-//  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
-//  // If float = 4 bytes, then 3600 floats/second
-//  // If 10 ms output rate, then 36 floats/10ms
-//  // Number of floats written using sendBinaryFloat is 15
-//
-//  if (motorArmed == ON) {
-//    #ifdef OpenlogBinaryWrite
-//       printInt(21845); // Start word of 0x5555
-//       sendBinaryuslong(currentTime);
-//        printInt((int)flightMode);
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(gyroRate[axis]);
-//       }
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(meterPerSecSec[axis]);
-//       }
-//       sendBinaryFloat(accelOneG);
-//       #ifdef HeadingMagHold
-//          sendBinaryFloat(hdgX);
-//          sendBinaryFloat(hdgY);
-//		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//		       #if defined(HeadingMagHold)
-//			      sendBinaryFloat(getMagnetometerData(axis));
-//		       #endif
-//          }
-//       #else
-//         sendBinaryFloat(0.0);
-//         sendBinaryFloat(0.0);
-//         sendBinaryFloat(0.0);
-//       #endif
-//        for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//          sendBinaryFloat(kinematicsAngle[axis]);
-//        }
-//        printInt(32767); // Stop word of 0x7FFF
-//    #else
-//       printInt(21845); // Start word of 0x5555
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(gyroRate[axis]);
-//       }
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(meterPerSecSec[axis]);
-//       }
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++)
-//       #if defined(HeadingMagHold)
-//         sendBinaryFloat(getMagnetometerData(axis));
-//       #else
-//         sendBinaryFloat(0);
-//       #endif
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(getGyroUnbias(axis));
-//       }
-//       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-//         sendBinaryFloat(kinematicsAngle[axis]);
-//       }
-//       printInt(32767); // Stop word of 0x7FFF
-//    #endif
-//  }
-//}
-//#endif // BinaryWrite
 
 void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
   

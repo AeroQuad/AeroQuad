@@ -269,7 +269,6 @@ typedef struct {
   
   float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
-  float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
