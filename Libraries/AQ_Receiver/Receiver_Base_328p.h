@@ -25,12 +25,9 @@
 #include "Receiver_Base.h"
 
 byte nbReceiverChannel = MAX_NB_CHANNEL;
-
-int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {1500,1500,1500,1000,1000};
-float receiverSlope[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
-float receiverOffset[MAX_NB_CHANNEL] = {1.0,1.0,1.0,1.0,1.0};
-
+int receiverMinValue[MAX_NB_CHANNEL] = {1000,1000,1000,1000,1000};
+int receiverMaxValue[MAX_NB_CHANNEL] = {2000,2000,2000,2000,2000};
 byte receiverChannelMap[MAX_NB_CHANNEL] = {XAXIS,YAXIS,ZAXIS,THROTTLE,MODE};
 
 
@@ -52,16 +49,7 @@ void readReceiver()
   for(byte channel = XAXIS; channel < nbReceiverChannel; channel++) {
 
     // Apply receiver calibration adjustment
-	receiverData[channel] = (receiverSlope[channel] * (*getRawChannelValue[receiverTypeUsed])(channel)) + receiverOffset[channel];
-  }
-  
-  // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
-    receiverCommand[channel] = ((receiverData[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-  }	
-  // No xmitFactor reduction applied for throttle, mode and AUX
-  for (byte channel = THROTTLE; channel < nbReceiverChannel; channel++) {
-    receiverCommand[channel] = receiverData[channel];
+	receiverCommand[channel] = map(((*getRawChannelValue[receiverTypeUsed])(channel)),receiverMinValue[channel],receiverMaxValue[channel],1000,2000);
   }
 }
   
