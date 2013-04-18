@@ -196,13 +196,12 @@ void initializeEEPROM() {
     #endif
   }
     
-  receiverXmitFactor = 1.0;
   minArmedThrottle = 1150;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
-    receiverSlope[channel] = 1.0;
-    receiverOffset[channel] = 0.0;
+    receiverMinValue[channel] = 1000;
+    receiverMaxValue[channel] = 2000;
   }
 
   flightMode = RATE_FLIGHT_MODE;
@@ -407,11 +406,10 @@ void writeEEPROM(){
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
 
   for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
-    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
-    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
+    writeFloat(receiverMinValue[channel],  RECEIVER_DATA[channel].slope);
+    writeFloat(receiverMaxValue[channel], RECEIVER_DATA[channel].offset);
   }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
@@ -495,11 +493,10 @@ void storeSensorsZeroToEEPROM() {
 }
 
 void initReceiverFromEEPROM() {
-  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
   for(byte channel = XAXIS; channel < MAX_NB_CHANNEL; channel++) {
-    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
-    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
+    receiverMinValue[channel] = readFloat(RECEIVER_DATA[channel].slope);
+    receiverMaxValue[channel] = readFloat(RECEIVER_DATA[channel].offset);
   }
 }
 
