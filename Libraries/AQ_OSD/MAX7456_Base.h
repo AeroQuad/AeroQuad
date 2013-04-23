@@ -108,6 +108,13 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
   spi_osd_deselect();
 }
 
+void clearOSD() {
+  spi_osd_select();
+  spi_writereg(DMM, 0x04 );
+  delayMicroseconds(25);
+  spi_osd_deselect();
+}
+
 void detectVideoStandard() {
 
   // First set the default

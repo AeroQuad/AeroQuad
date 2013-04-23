@@ -31,14 +31,16 @@
   #include <SBUSRSSIReader.h>
 #else
   #include <AnalogRSSIReader.h>
-#endif	
+#endif
 
 short lastRSSI = 4321; //forces update at first run
 #if defined (UseEzUHFRSSIReader)
   short lastQuality = 4321;  //forces update at first run
 #endif
 
-void displayRSSI() {
+void displayRSSI(byte row, byte col, boolean reinit) {
+
+  if (reinit) lastRSSI=4321;
 
   if (rssiRawValue != lastRSSI) {
     lastRSSI = rssiRawValue;
@@ -48,7 +50,7 @@ void displayRSSI() {
       writeChars(buf, 5, 0, RSSI_ROW, RSSI_COL);
     #else
       snprintf(buf, 6, "\372%3u%%", rssiRawValue);
-      writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, RSSI_ROW, RSSI_COL);
+      writeChars(buf, 5, (RSSI_WARN>rssiRawValue)?1:0, row, col);
     #endif
   }
   #if defined (UseEzUHFRSSIReader)
@@ -59,7 +61,7 @@ void displayRSSI() {
 	  signalQualityRawValue = lastQuality;
 	}
   #endif
-  
+
 }
 
 #endif  // #define _AQ_OSD_MAX7456_RSSI_H_

@@ -30,7 +30,7 @@
 byte    osdBatNo = 0;
 boolean descentWarningShown = false;
 
-void displayVoltage(byte areMotorsArmed) {
+void displayVoltage(byte row, byte col, boolean reinit, byte areMotorsArmed) {
 
   int currentValue = batteryData[osdBatNo].voltage/10;
 
@@ -38,8 +38,8 @@ void displayVoltage(byte areMotorsArmed) {
   snprintf(buf,7,"%c%2d.%1dV",'\20', currentValue/10,currentValue%10);
 
   // Following blink only symbol on warning and all on alarm
-  writeChars( buf,   1, batteryIsWarning(osdBatNo)?1:0, VOLTAGE_ROW + osdBatNo, VOLTAGE_COL );
-  writeChars( buf+1, 5, batteryIsAlarm(osdBatNo)?1:0,   VOLTAGE_ROW + osdBatNo, VOLTAGE_COL + 1 );
+  writeChars( buf,   1, batteryIsWarning(osdBatNo)?1:0, row + osdBatNo, VOLTAGE_col );
+  writeChars( buf+1, 5, batteryIsAlarm(osdBatNo)?1:0,   row + osdBatNo, VOLTAGE_col + 1 );
 
   if (batteryData[osdBatNo].cPin != BM_NOPIN) {
     // current sensor installed
@@ -52,7 +52,7 @@ void displayVoltage(byte areMotorsArmed) {
       snprintf(buf,12,"%c%1d.%1dA%5ld\24  ", currentValue<0?'-':' ',abs(currentValue/10),abs(currentValue%10),batteryData[osdBatNo].usedCapacity/1000);
     }
 
-    writeChars( buf, 11, 0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL+6 );
+    writeChars( buf, 11, 0, row+osdBatNo, col+6 );
   }
 
   osdBatNo = (osdBatNo + 1) % numberOfBatteries;

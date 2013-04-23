@@ -45,11 +45,16 @@ static const byte AH_COLUMNS[6] = {8,10,12,17,19,21};  // columns where the roll
 byte AHoldline[6] = {0,0,0,0,0,0};
 byte lastFlightMode = 9;
 
-void displayArtificialHorizon(float roll, float pitch, byte flightMode) {
+void displayArtificialHorizon(boolean reinit, float roll, float pitch, byte flightMode) {
+
+  if (reinit) {
+    memset(AHoldline,0,6);
+    lastFlightMode = 9;
+  }
 
   for (byte i=0; i<6; i++) {
     byte row = constrain(
-			 AH_CENTRE + 
+			 AH_CENTRE +
 			 (14.5 - (float)AH_COLUMNS[i]) * 12 * 1.4 * roll +
 			 (pitch/AH_MAX_PITCH_ANGLE*(AH_CENTRE-AH_TOP_PIXEL)),
 			 AH_TOP_PIXEL, AH_BOTTOM_PIXEL);

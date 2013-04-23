@@ -29,7 +29,7 @@ unsigned long prevTime = 0;           // previous time since start when OSD.upda
 unsigned int prevArmedTimeSecs = 111; // bogus to force update
 unsigned long armedTime = 0;          // time motors have spent armed
 
-void displayFlightTime(byte areMotorsArmed) {
+void displayFlightTime(byte row, byte col, boolean reinit, byte areMotorsArmed) {
   if (areMotorsArmed == ON) {
     armedTime += ( currentTime-prevTime );
   }

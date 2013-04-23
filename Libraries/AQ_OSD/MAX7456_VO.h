@@ -63,18 +63,18 @@ static float scaleVariometer = 1.00;						// scale to top and bottom of center p
  ************* Landing Assist DisplayLanding **************
  **********************************************************/
 
-void displayVariometer(float climbFallRate) {
+void displayVariometer(byte row, byte col, boolean reinit, float climbFallRate) {
   if (((kinematicsAngle[XAXIS] > safeattitudeAngle)||(kinematicsAngle[XAXIS] < -safeattitudeAngle))||
       ((kinematicsAngle[YAXIS] > safeattitudeAngle)||(kinematicsAngle[YAXIS] < -safeattitudeAngle)))
-  { 
+  {
     VO_reticle[0] = 227;							// we're not level enough to land ie probably moving ??
-    writeChars( VO_reticle, 1, 1, VO_RETICLE_ROW, VO_RETICLE_COL -1);		// display center pointer flashing at artificial horizon
+    writeChars( VO_reticle, 1, 1, row, col -1);		// display center pointer flashing at artificial horizon
   }
-  else {  
-    writeChars( NULL, 1, 1, VO_RETICLE_ROW, VO_RETICLE_COL -1);			// erase center pointer flashing at artificial horizon
+  else {
+    writeChars( NULL, 1, 1, row, col -1);			// erase center pointer flashing at artificial horizon
 
     VO_reticle[0] = 13;								// set center pointer up-down arrow icon
-	 
+ 
     if (climbFallRate > safeclimbFallRate) {
       VO_reticle[0] = 14;							// set center pointer to up arrow icon
     }
@@ -83,23 +83,23 @@ void displayVariometer(float climbFallRate) {
       VO_reticle[0] = 15;							// set center pointer to down arrow icon
     }
 
-    writeChars( VO_reticle, 1, 0, VO_RETICLE_ROW, VO_RETICLE_COL );		// display variometer center pointer
+    writeChars( VO_reticle, 1, 0, row, col );		// display variometer center pointer
   }
 
 /**********************************************************
  ****************** Draw Altitude Difference **************
  **********************************************************/
 
-  byte row = constrain(								// resolution .10  -4.5 to +4.5 meters per second
+  byte vrow = constrain(								// resolution .10  -4.5 to +4.5 meters per second
   AH_CENTRE + (14.5 - (float)VO_COLUMN) * 12 * 1.4 * ( climbFallRate/scaleVariometer ) +
     (( climbFallRate/scaleVariometer )/VO_MAX_PITCH_ANGLE*(VO_CENTRE-VO_TOP_PIXEL)),VO_TOP_PIXEL, VO_BOTTOM_PIXEL)-1;
 
-  if ((row/18) != VO_AHoldline) {						// erase existing character if not on center row
+  if ((vrow/18) != VO_AHoldline) {						// erase existing character if not on center row
     writeChars( NULL, 1, 0, VO_AHoldline, VO_COLUMN );
-    VO_AHoldline = row/18;
+    VO_AHoldline = vrow/18;
   }
 
-  char VO_RollLine = LINE_ROW_0 + (row % 18);
+  char VO_RollLine = LINE_ROW_0 + (vrow % 18);
   writeChars( &VO_RollLine, 1, 0, VO_AHoldline, VO_COLUMN );			// display variometer value as a bar graph line
 }
 

@@ -22,33 +22,34 @@
 #define _AQ_OSD_H_
 
 #ifdef BattMonitor
-  void displayVoltage(byte areMotorsArmed);
+  void displayVoltage(byte row, byte col, boolean reinit, byte areMotorsArmed);
 #endif
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-  void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altitudeHoldState);
+  void displayAltitude(byte row, byte col, boolean reinit, float readedAltitude, float desiredAltitudeToKeep, boolean altitudeHoldState);
 #endif
 #ifdef HeadingMagHold
-  void displayHeading(float currentHeading);
+  void displayHeading(byte row, byte col, boolean reinit, float currentHeading);
 #endif
 #ifdef ShowRSSI
-  void displayRSSI();
+void displayRSSI(byte row, byte col, boolean reinit);
 #endif
 #ifdef ShowAttitudeIndicator
-  void displayArtificialHorizon(float roll, float pitch, byte flightMode);
+void displayArtificialHorizon(boolean reinit, float roll, float pitch, byte flightMode);
 #endif
 #ifdef UseGPS
-  void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheading,unsigned int numsats);
+  void displayGPS(byte row, byte col, boolean reinit, struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheading,unsigned int numsats);
 #endif
 #ifdef AltitudeHoldRangeFinder
-  void displayRanger();
+void displayRanger(byte row, byte col, boolean reinit);
 #endif
 #ifdef ShowVariometerIndicator
-  void displayVariometer(float climbFallRate);
+  void displayVariometer(byte row, byte col, boolean reinit, float climbFallRate);
 #endif
 
 void initializeOSD();
 void updateOSD();
-void displayFlightTime(byte areMotorsArmed);
+void clearOSD();
+void displayFlightTime(byte row, byte col, boolean reinit, byte areMotorsArmed);
 byte displayNotify();
 
 void hideOSD();

@@ -29,7 +29,7 @@ int lastAltitude     = 12345;     // bogus initial values to force update
 int lastHoldAltitude = 12345;
 byte lastHoldState   = 6;
 
-void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altHoldState) {
+void displayAltitude(byte row, byte col, boolean reinit, float readedAltitude, float desiredAltitudeToKeep, boolean altHoldState) {
   #ifdef USUnits
     int currentAltitude = readedAltitude*3.281;
     int currentHoldAltitude = desiredAltitudeToKeep*3.281;
@@ -50,7 +50,7 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
         snprintf(buf,7,"\011%4dm",currentAltitude/10);
       }
     #endif
-    writeChars( buf, 6, 0, ALTITUDE_ROW, ALTITUDE_COL );
+    writeChars( buf, 6, 0, row, col );
     lastAltitude = currentAltitude;
   }
 
@@ -93,7 +93,7 @@ void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean 
   }
 
   if (isWriteNeeded) {
-    writeChars( buf, 6, 0, ALTITUDE_ROW, ALTITUDE_COL+6 );
+    writeChars( buf, 6, 0, row, col + 6 );
   }
 }
 

@@ -23,30 +23,104 @@
 
 #include "OSD.h"
 
+typedef struct OSDItem {
+  short type;
+  short row;
+  short col;
+} OSDItem;
+
+#define OSD_ITEMS_PER_SCREEN 8
+typedef OSDItem OSDConfig[OSD_ITEMS_PER_SCREEN];
+
+#define OSD_NUMBER_OF_SCREENS 2
+OSDConfig OSDscreen[OSD_NUMBER_OF_SCREENS] = {
+  {{3,0,0},{0,0,0},{1,1,1},{0,0,0},{0,0,0},{2,2,1},{0,0,0},{0,0,0}},
+  {{0,0,0},{0,0,0},{1,10,10},{0,0,0},{0,0,0},{2,12,12},{0,0,0},{0,0,0}}};
+
 byte OSDsched = 0;
+byte OSDlastScreen = 255;
+byte OSDcurrentScreen = 0;
+unsigned long OSDreinitNeeded = 0xffffffff;
+
+byte foobar=0;
 
 void updateOSD() {
-  // OSD is updated fully in 8 rounds
-  // 1,3,5,7 - Attitude Indicator - updated at 5Hz
-  // 1,3,5,7 - Variometer Indicator - updated at 5Hz
-  // 2       - Altitude, Heading, Timer, RSSI - updated at 1.25Hz
-  // 4       - Battery info
-  // 6,8     - GPS (internally 2 phases: Position & Navigation
+  byte firstitem=0, lastitem=0;
+  // NOTE: items are updated according to follwing order on 8 rounds
+  // item0 rounds 0,2,4,6 // meant for AI
+  // item1 rounds 1,5
+  // item2,3,4 round 3
+  // item5,6,7 round 7
+  foobar++;
+  OSDcurrentScreen =(foobar>>6);
 
   // Check notify first, if it did something we dont't have time for other stuff
   if (displayNotify()) {
     return;
   }
 
-  #ifdef ShowAttitudeIndicator
-    if (OSDsched&0x55) {
-      byte extendedFlightMode = flightMode;
-      #if defined UseGPSNavigator
-        if (ON == positionHoldState) extendedFlightMode = 2;
-        if (ON == navigationState) extendedFlightMode = 3;
-      #endif
-      displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
+  if (!(OSDsched & 1)) { // rounds 0,2,4,6
+    firstitem = 0;
+    lastitem = 0;
+  }
+  else if (!(OSDsched & 2)) { // round 1,5
+    firstitem = 1;
+    lastitem = 1;
+  }
+  else if (OSDsched == 3) { // round 3
+    firstitem = 2;
+    lastitem = 4;
+  }
+  else { // round 7
+    firstitem = 5;
+    lastitem = 7;
+  }
+
+  OSDsched = (OSDsched+1) & 7;
+
+  if (OSDcurrentScreen != OSDlastScreen) {
+    clearOSD();
+    OSDreinitNeeded = 0xffffffff;
+    OSDlastScreen = OSDcurrentScreen;
+  }
+
+  if ((OSDcurrentScreen >= 0) && (OSDcurrentScreen < OSD_NUMBER_OF_SCREENS)) {
+    for ( byte item = firstitem; item < (lastitem + 1); item++) {
+      byte  type = OSDscreen[OSDcurrentScreen][item].type;
+      if (type) {
+        short row = OSDscreen[OSDcurrentScreen][item].row;
+        short col = OSDscreen[OSDcurrentScreen][item].col;
+        boolean reinit = (OSDreinitNeeded & (1<<type));
+	if (reinit) {
+	  OSDreinitNeeded &= ~(1 << type);
+	}
+	switch (type) {
+	case 1:
+	  displayRSSI(row,col,reinit);
+	  break;
+	case 2:
+	  displayHeading(row,col,reinit,trueNorthHeading);
+	  break;
+	case 3:
+	  {
+	    byte extendedFlightMode = flightMode;
+#if defined UseGPSNavigator
+	    if (ON == positionHoldState) extendedFlightMode = 2;
+	    if (ON == navigationState) extendedFlightMode = 3;
+#endif
+	    displayArtificialHorizon(reinit, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
+	  }
+	  break;
+
+	}
+      }
     }
+  }
+}
+
+#if 0
+  #ifdef ShowAttitudeIndicator
+    if (OSDsched&0x55) 
   #endif
 
   #ifdef ShowLandingIndicator
@@ -98,5 +172,6 @@ void updateOSD() {
     OSDsched = 0x01;
   }
 }
+#endif
 
 #endif
