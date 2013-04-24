@@ -53,11 +53,7 @@ byte DISABLE_display     = 0;
 
 boolean OSDDisabled=0;
 
-#ifdef PAL
 boolean PALvideo = 1;
-#else
-boolean PALvideo = 0;
-#endif
 
 void hideOSD() {
 
@@ -182,7 +178,7 @@ boolean detectVideoStandard(boolean forcereset) {
     spi_osd_deselect();
 
     // show notification of active video format
-    notifyOSD(OSD_NOW, "VIDEO: %s", (DISABLE_display) ? "PAL" : "NTSC");
+    notifyOSD(OSD_NOW, "VIDEO: %s", (PALvideo) ? "PAL" : "NTSC");
 
   }
 
