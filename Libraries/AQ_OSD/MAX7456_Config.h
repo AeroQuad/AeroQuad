@@ -54,11 +54,6 @@
 #define TIMER_COL 23
 
 //Callsign
-#if defined CALLSIGN
-  const char *callsign = CALLSIGN;
-  #define CALLSIGN_ROW 2
-  #define CALLSIGN_COL (29-strlen(callsign))
-#endif
 
 // RSSI monitor
 #define RSSI_ROW     2

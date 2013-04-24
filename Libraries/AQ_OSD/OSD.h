@@ -46,6 +46,9 @@ void displayRanger(byte row, byte col, boolean reinit);
   void displayVariometer(byte row, byte col, boolean reinit, float climbFallRate);
 #endif
 
+void displayCallSign(byte row, byte col, boolean reinit);
+
+boolean detectVideoStandard(boolean forcereset);
 void initializeOSD();
 void updateOSD();
 void clearOSD();

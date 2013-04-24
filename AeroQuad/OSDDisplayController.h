@@ -34,17 +34,27 @@ typedef OSDItem OSDConfig[OSD_ITEMS_PER_SCREEN];
 
 #define OSD_NUMBER_OF_SCREENS 2
 OSDConfig OSDscreen[OSD_NUMBER_OF_SCREENS] = {
-  {{3,0,0},{0,0,0},{1,1,1},{0,0,0},{0,0,0},{2,2,1},{0,0,0},{0,0,0}},
-  {{0,0,0},{0,0,0},{1,10,10},{0,0,0},{0,0,0},{2,12,12},{0,0,0},{0,0,0}}};
+  {{1,0,0},{0,0,0},{3,1,1},{0,0,0},{0,0,0},{2,2,1},{0,0,0},{0,0,0}},
+  {{0,0,0},{0,0,0},{3,10,10},{0,0,0},{0,0,0},{2,12,12},{0,0,0},{0,0,0}}};
 
 byte OSDsched = 0;
-byte OSDlastScreen = 255;
+byte OSDlastScreen = 0;
 byte OSDcurrentScreen = 0;
 unsigned long OSDreinitNeeded = 0xffffffff;
 
 byte foobar=0;
 
 void updateOSD() {
+  if (detectVideoStandard(false)) {
+    OSDreinitNeeded = 0xffffffff; // Force redraw as display was cleared
+    OSDlastScreen = OSDcurrentScreen;
+  }
+  else if (OSDcurrentScreen != OSDlastScreen) {
+    clearOSD();
+    OSDreinitNeeded = 0xffffffff;
+    OSDlastScreen = OSDcurrentScreen;
+  }
+
   byte firstitem=0, lastitem=0;
   // NOTE: items are updated according to follwing order on 8 rounds
   // item0 rounds 0,2,4,6 // meant for AI
@@ -78,12 +88,6 @@ void updateOSD() {
 
   OSDsched = (OSDsched+1) & 7;
 
-  if (OSDcurrentScreen != OSDlastScreen) {
-    clearOSD();
-    OSDreinitNeeded = 0xffffffff;
-    OSDlastScreen = OSDcurrentScreen;
-  }
-
   if ((OSDcurrentScreen >= 0) && (OSDcurrentScreen < OSD_NUMBER_OF_SCREENS)) {
     for ( byte item = firstitem; item < (lastitem + 1); item++) {
       byte  type = OSDscreen[OSDcurrentScreen][item].type;
@@ -96,12 +100,6 @@ void updateOSD() {
 	}
 	switch (type) {
 	case 1:
-	  displayRSSI(row,col,reinit);
-	  break;
-	case 2:
-	  displayHeading(row,col,reinit,trueNorthHeading);
-	  break;
-	case 3:
 	  {
 	    byte extendedFlightMode = flightMode;
 #if defined UseGPSNavigator
@@ -111,67 +109,51 @@ void updateOSD() {
 	    displayArtificialHorizon(reinit, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
 	  }
 	  break;
-
+	case 2:
+	  displayHeading(row,col,reinit,trueNorthHeading);
+	  break;
+	case 3:
+	  displayRSSI(row,col,reinit);
+	  break;
+	case 4:
+	  displayFlightTime(row,col,reinit,motorArmed);
+	  break;
+	case 5:
+	  displayAltitude(row,col,reinit,getBaroAltitude(), baroAltitudeToHoldTarget, altitudeHoldState);
+	  break;
+	case 6:
+	  //	  displayVariometer(row,col,reinit,climb_fallRate);
+	  break;
+	case 7:
+#ifdef BattMonitor
+	  displayVoltage(row,col,reinit,motorArmed);
+#endif
+	  break;
+	case 8:
+#ifdef UseGPS
+	  displayGPS(row,col,reinit,currentPosition, haveAGpsLock()?missionPositionToReach:currentPosition, haveAGpsLock()?getGpsSpeed():0, haveAGpsLock()?getCourse():0, trueNorthHeading, gpsData.sats);
+#endif
+	  break;
+	case 9:
+#ifdef AltitudeHoldRangeFinder
+	  if (motorArmed) {
+	  displayRanger(col,row,reinit);
+	}
+#endif
+	  break;
+	case 10:
+	  displayCallSign(row,col,reinit);
+	  break;
+	case 11:
+	  break;
+	case 12:
+	  break;
+	default:
+	  break;
 	}
       }
     }
   }
 }
-
-#if 0
-  #ifdef ShowAttitudeIndicator
-    if (OSDsched&0x55) 
-  #endif
-
-  #ifdef ShowLandingIndicator
-    if (OSDsched&0x55) {
-//      displayVariometer(climb_fallRate);
-    }
-  #endif
-
-  if (OSDsched&0x02) {
-    displayFlightTime(motorArmed);
-    #if defined AltitudeHoldBaro
-      displayAltitude(getBaroAltitude(), baroAltitudeToHoldTarget, altitudeHoldState);
-    #endif
-    #ifdef HeadingMagHold
-      displayHeading(trueNorthHeading);
-    #endif
-    #ifdef ShowRSSI
-      displayRSSI();
-    #endif
-  }
-
-  if (OSDsched&0x08) {
-    #ifdef BattMonitor
-      displayVoltage(motorArmed);
-    #endif
-  }
-
-  if (OSDsched&0x20) {
-    #ifdef UseGPS
-      if (haveAGpsLock()) {
-        displayGPS(currentPosition, missionPositionToReach, getGpsSpeed(), getCourse(), trueNorthHeading, gpsData.sats);
-      }
-      else {
-        displayGPS(currentPosition, currentPosition, 0, 0, trueNorthHeading, gpsData.sats);
-      }
-    #endif
-  }
-
-  if (OSDsched&0x80) {
-    #ifdef AltitudeHoldRangeFinder
-      if (motorArmed) {
-        displayRanger();
-      }
-    #endif
-  }
-
-  OSDsched <<= 1;
-  if (!OSDsched) {
-    OSDsched = 0x01;
-  }
-}
-#endif
 
 #endif

@@ -53,8 +53,14 @@ byte DISABLE_display     = 0;
 
 boolean OSDDisabled=0;
 
+#ifdef PAL
+boolean PALvideo = 1;
+#else
+boolean PALvideo = 0;
+#endif
+
 void hideOSD() {
-  
+
   if (!OSDDisabled) {
     spi_osd_select();
     spi_writereg( VM0, DISABLE_display );
@@ -99,7 +105,7 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
   for ( byte i = 0; i < len; i++ ) {
     spi_writereg(DMDI, (!buf || strlen(buf)<i)?0:buf[i] );
   }
-
+  
   // Send escape 11111111 to exit autoincrement mode
   if (len!=1) {
     spi_writereg(DMDI, END_string );
@@ -115,28 +121,33 @@ void clearOSD() {
   spi_osd_deselect();
 }
 
-void detectVideoStandard() {
+void displayCallSign(byte row, byte col, boolean reinit) {
 
-  // First set the default
-  boolean pal = false;
-  #ifdef PAL
-    pal = true;
-  #endif
-  #ifdef AUTODETECT_VIDEO_STANDARD
-    // if autodetect enabled modify the default if signal is present on either standard
-    // otherwise default is preserved
-    spi_osd_select();
-    byte stat=spi_readreg(STAT);
-    if (stat & 0x01) {
-      pal = true;
-    }
-    if (stat & 0x02) {
-      pal = false;
-    }
-    spi_osd_deselect();
-  #endif
+  if (reinit) {
+    static const char *callsign = CALLSIGN;
+    writeChars(callsign,strlen(callsign),0,row,col);
+  }
+}
 
-  if (pal) {
+boolean detectVideoStandard(boolean forcereset) {
+
+  boolean ret = forcereset;
+  // if autodetect enabled modify the default if signal is present on either standard
+  // otherwise default is preserved
+  spi_osd_select();
+  byte stat=spi_readreg(STAT);
+  spi_osd_deselect();
+
+  if ((stat & 0x01) & (!PALvideo)) {
+    PALvideo = true;
+    ret = true;
+  }
+  if ((stat & 0x02) & (PALvideo)) {
+    PALvideo = false;
+    ret = true;
+  }
+
+  if (PALvideo) {
     MAX_screen_size=480;
     MAX_screen_rows=16;
     ENABLE_display=0x48;
@@ -152,36 +163,36 @@ void detectVideoStandard() {
     MAX7456_reset=0x02;
     DISABLE_display=0x00;
   }
+
+  if (ret) {
+    //Soft reset the MAX7456 - clear display memory
+    spi_osd_select();
+    spi_writereg( VM0, MAX7456_reset );
+    spi_osd_deselect();
+    delayMicroseconds( 150 ); //Only takes ~100us typically
+
+    //Set white level to 90% for all rows
+    spi_osd_select();
+    for( byte i = 0; i < MAX_screen_rows; i++ ) {
+      spi_writereg( RB0 + i, WHITE_level_90 );
+    }
+
+    //ensure device is enabled
+    spi_writereg( VM0, ENABLE_display );
+    spi_osd_deselect();
+
+    // show notification of active video format
+    notifyOSD(OSD_NOW, "VIDEO: %s", (DISABLE_display) ? "PAL" : "NTSC");
+
+  }
+
+  return ret;
 }
 
 void initializeOSD() {
 
-  detectVideoStandard();
+  detectVideoStandard(true);
 
-  //Soft reset the MAX7456 - clear display memory
-  spi_osd_select();
-  spi_writereg( VM0, MAX7456_reset );
-  spi_osd_deselect();
-  delay( 1 ); //Only takes ~100us typically
-
-  //Set white level to 90% for all rows
-  spi_osd_select();
-  for( byte i = 0; i < MAX_screen_rows; i++ ) {
-    spi_writereg( RB0 + i, WHITE_level_90 );
-  }
-
-  //ensure device is enabled
-  spi_writereg( VM0, ENABLE_display );
-  delay(100);
-  //finished writing
-  spi_osd_deselect();
-
-  #if defined CALLSIGN
-    writeChars(callsign,strlen(callsign),0,CALLSIGN_ROW,CALLSIGN_COL);
-  #endif
-
-  // show notification of active video format
-  notifyOSD(OSD_NOW, "VIDEO: %s", (DISABLE_display) ? "PAL" : "NTSC");
 }
 
 #endif  // #define _AQ_OSD_MAX7456_BASE_H_

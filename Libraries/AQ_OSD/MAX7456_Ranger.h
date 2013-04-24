@@ -52,7 +52,7 @@ void fillBarGraph(char *buf, byte bufsize, byte bars, byte right) {
   }
 }
 
-void displayRanger() {
+void displayRanger(byte row, byte col, boolean reinit) {
   byte writeit=1;
   char buf[28];
   memset(buf,' ',28);
@@ -84,7 +84,7 @@ void displayRanger() {
       range = (45-range)/3;
     }
     fillBarGraph(buf+8, 5, range, 0);
-    fillBarGraph(buf+15, 5, range, 1);    
+    fillBarGraph(buf+15, 5, range, 1);
     writeit=1;
     needClear|=2;
   } else {

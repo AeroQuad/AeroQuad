@@ -32,7 +32,7 @@ byte osdGPSState=0;
 #define GPS_DONAV 0x80 // display navigation info next time
 #define GPS_NONAV 0x40 // nav info hidden (no fix or no target)
 
-void displayGPS(struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheadingrad, unsigned int numsats) {
+void displayGPS(byte row, byte col, boolean reinit, struct GeodeticPosition pos, struct GeodeticPosition home, long speed, long course, float magheadingrad, unsigned int numsats) {
 
   short magheading = (int)(magheadingrad*RAD2DEG);
   if (osdGPSState & GPS_DONAV) {
