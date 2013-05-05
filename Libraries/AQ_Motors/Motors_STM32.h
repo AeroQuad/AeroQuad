@@ -28,10 +28,10 @@ static byte __attribute__((unused)) stm32_motor_mapping[] = {
 };
 
 static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
-  Port2Pin('A', 15), // note this must be on separate timer device !!
+  Port2Pin('C',  9),
   Port2Pin('C',  8),
   Port2Pin('C',  7),
-  Port2Pin('C',  6),
+  Port2Pin('A', 15), // note this must be on separate timer device !!
 };
 
 

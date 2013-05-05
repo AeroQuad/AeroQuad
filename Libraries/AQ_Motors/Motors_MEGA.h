@@ -26,79 +26,57 @@
 
 #include "Motors.h"
 
-#define MOTORPIN0    2
-#define MOTORPIN1    3
-#define MOTORPIN2    5
-#define MOTORPIN3    6
-#define MOTORPIN4    7
-#define MOTORPIN5    8
-#define MOTORPIN6    11
-#define MOTORPIN7    12
-  
-#define DIGITAL_SERVO_TRI_PINMODE  pinMode(2,OUTPUT); //PIN 2 //also right servo for BI COPTER
-#define DIGITAL_SERVO_TRI_HIGH     PORTE |= 1<<4;
-#define DIGITAL_SERVO_TRI_LOW      PORTE &= ~(1<<4);
+//#if defined (USE_400HZ_ESC)
+  #define PWM_FREQUENCY 400   // in Hz
+//#else
+//  #define PWM_FREQUENCY 300   // in Hz
+//#endif  
 
-volatile uint8_t atomicServo = 125;
-  
-void initializeServo() {
-  DIGITAL_SERVO_TRI_PINMODE
-  TCCR0A = 0; // normal counting mode
-  TIMSK0 |= (1<<OCIE0A); // Enable CTC interrupt
-}
-  
+  #define PWM_SERVO_FREQUENCY 50   // in Hz
 
-// 6 motors ISR
-ISR(TIMER0_COMPA_vect) {
 
-  static uint8_t state = 0;
+#define PWM_PRESCALER 8
+#define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)
+#define PWM_SERVO_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_SERVO_FREQUENCY)
+
+
+void writeMotors()
+{
+
+  OCR3B = motorCommand[MOTOR1] * 2 ;
+  OCR3C = motorCommand[MOTOR2] * 2 ;
+  OCR3A = motorCommand[MOTOR3] * 2 ;
   if (flightConfigType == TRI) {
-    static uint8_t count;
-    if (state == 0) {
-      //http://billgrundmann.wordpress.com/2009/03/03/to-use-or-not-use-writedigital/
-      DIGITAL_SERVO_TRI_HIGH
-      OCR0A+= 250; // 1000 us
-      state++ ;
-    } 
-	else if (state == 1) {
-      OCR0A+= atomicServo; // 1000 + [0-1020] us
-      state++;
-    } 
-	else if (state == 2) {
-      DIGITAL_SERVO_TRI_LOW
-      OCR0A+= 250; // 1000 us
-      state++;
-    } 
-	else if (state == 3) {
-      state++;
-    } 
-	else if (state == 4) {
-      state++;
-      OCR0A+= 250; // 1000 us
-    } 
-	else if (state == 5) {
-      state++;
-    } 
-	else if (state == 6) {
-      state++;
-      OCR0A+= 250; // 1000 us
-    } 
-	else if (state == 7) {
-      state++;
-    } 
-	else if (state == 8) {
-      count = 10; // 12 x 1000 us
-      state++;
-      OCR0A+= 250; // 1000 us
-    } 
-	else if (state == 9) {
-      if (count > 0) {
-	    count--;
-	  }
-      else {
-	    state = 0;
-	  }
-      OCR0A+= 250;
+    OCR4B = motorCommand[MOTOR4] * 2 ;
+  }
+  else {
+    OCR4A = motorCommand[MOTOR4] * 2 ;
+    if (numberOfMotors == 6 || numberOfMotors == 8) {
+      OCR4B = motorCommand[MOTOR5] * 2 ;
+      OCR4C = motorCommand[MOTOR6] * 2 ;
+    }
+    if (numberOfMotors == 8) {
+      OCR1A = motorCommand[MOTOR7] * 2 ;
+      OCR1B = motorCommand[MOTOR8] * 2 ;
+    }
+  }
+}
+void commandAllMotors(int command) {
+  OCR3B = command * 2 ;
+  OCR3C = command * 2 ;
+  OCR3A = command * 2 ;
+  if (flightConfigType == TRI) {
+    OCR4B = command * 2 ;
+  }
+  else {
+    OCR4A = command * 2 ;
+    if (numberOfMotors == 6 || numberOfMotors == 8) {
+      OCR4B = command * 2 ;
+      OCR4C = command * 2 ;
+    }
+    if (numberOfMotors == 8) {
+      OCR1A = command * 2 ;
+      OCR1B = command * 2 ;
     }
   }
 }
@@ -107,68 +85,52 @@ ISR(TIMER0_COMPA_vect) {
 void initializeMotors(byte numbers) {
 
   numberOfMotors = numbers;
+
+  DDRE = DDRE | B00111000;     // Set ports to output PE3-5, OC3A, OC3B, OC3C
   if (flightConfigType == TRI) {
-    initializeServo();
+    DDRH = DDRH | B00010000;   // Set port to output PH4, OC4B
+  } else {
+    DDRH = DDRH | B00001000;   // Set port to output PH3, OC4A
+    if (numberOfMotors == 6) { 
+      DDRH = DDRH | B00111000;   // Set ports to output PH3-5, OC4A, OC4B, OC4C
+    }
+    if (numberOfMotors == 8) {
+      DDRB = DDRB | B01100000;   // PB5-6, OC1A, OC1B
+    }
   }
-  else {
-    pinMode(MOTORPIN0, OUTPUT);
+  // Init PWM Timer 3                                       // WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM
+  TCCR3A = (1<<WGM31)|(1<<COM3A1)|(1<<COM3B1)|(1<<COM3C1);  // Clear OCnA/OCnB/OCnC on compare match, set OCnA/OCnB/OCnC at BOTTOM (non-inverting mode)
+  TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);                 // Prescaler set to 8, that gives us a resolution of 0.5us
+  ICR3 = PWM_COUNTER_PERIOD;                                // Clock_speed / ( Prescaler * desired_PWM_Frequency) #defined above.
+  
+  // Init PWM Timer 4 for ESC or servo (on TRI)
+  if (flightConfigType == TRI) {
+    TCCR4A = (1<<WGM41)|(1<<COM4B1);
+    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+    ICR4 = PWM_SERVO_COUNTER_PERIOD;
+  } else {
+    TCCR4A = (1<<WGM41)|(1<<COM4A1);
+    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+    ICR4 = PWM_COUNTER_PERIOD;
   }
-  pinMode(MOTORPIN1, OUTPUT);
-  pinMode(MOTORPIN2, OUTPUT);
-  pinMode(MOTORPIN3, OUTPUT);
-  if (numberOfMotors == 6 || numberOfMotors == 8) {
-    pinMode(MOTORPIN4, OUTPUT);
-    pinMode(MOTORPIN5, OUTPUT);
+ 
+  if ((numberOfMotors == 6) || (numberOfMotors == 8)) {
+    // Init PWM Timer 4
+    TCCR4A = (1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1);
+    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+    ICR4 = PWM_COUNTER_PERIOD;
   }
-  if (numberOfMotors == 8) {
-    pinMode(MOTORPIN6, OUTPUT);
-    pinMode(MOTORPIN7, OUTPUT);
+ 
+  if (numberOfMotors == 8){
+    // Init PWM Timer 1
+    TCCR1A = (1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
+    TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11);
+    ICR1 = PWM_COUNTER_PERIOD;
   }
-    
-  commandAllMotors(1000);
+
+  commandAllMotors(1000);                                     // Initialise motors to 1000us (stopped)
+
 }
-
-void writeMotors() {
-
-  if (flightConfigType == TRI) {
-    atomicServo = (motorCommand[MOTOR1]-1000)/4;
-  }
-  else {
-    analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
-  }
-  analogWrite(MOTORPIN1, motorCommand[MOTOR2] / 8);
-  analogWrite(MOTORPIN2, motorCommand[MOTOR3] / 8);
-  analogWrite(MOTORPIN3, motorCommand[MOTOR4] / 8); 
-  if (numberOfMotors == 6 || numberOfMotors == 8) {
-    analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
-    analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
-  }
-  if (numberOfMotors == 8) {
-    analogWrite(MOTORPIN6, motorCommand[MOTOR7] / 8);
-    analogWrite(MOTORPIN7, motorCommand[MOTOR8] / 8);
-  }
-}
-
-void commandAllMotors(int command) {
-
-  if (flightConfigType == TRI) {
-    atomicServo = (command-1000)/4;
-  }
-  else {
-    analogWrite(MOTORPIN0, command / 8);
-  }
-  analogWrite(MOTORPIN1, command / 8);
-  analogWrite(MOTORPIN2, command / 8);
-  analogWrite(MOTORPIN3, command / 8);
-  if (numberOfMotors == 6 || numberOfMotors == 8) {
-    analogWrite(MOTORPIN4, command / 8);
-    analogWrite(MOTORPIN5, command / 8);
-  }
-  if (numberOfMotors == 8) {
-    analogWrite(MOTORPIN6, command / 8);
-    analogWrite(MOTORPIN7, command / 8);
-  }
-}  
 
 
 #endif

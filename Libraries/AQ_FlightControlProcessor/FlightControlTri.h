@@ -36,10 +36,10 @@
 
 #include "FlightControlVariable.h"
 
-//#define SERVO       MOTOR1
-//#define FRONT_LEFT  MOTOR2
-//#define FRONT_RIGHT MOTOR3
-//#define REAR        MOTOR4
+//#define FRONT_LEFT  MOTOR1
+//#define FRONT_RIGHT MOTOR2
+//#define REAR        MOTOR3
+//#define SERVO       MOTOR4
 //#define LASTMOTOR   (MOTOR4+1)
 
 #define TRI_YAW_CONSTRAINT_MIN 1100
@@ -50,11 +50,11 @@
 
 
 void applyMotorCommandTri() {
-  motorCommand[MOTOR2] = throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3;
-  motorCommand[MOTOR3] = throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3;
-  motorCommand[MOTOR4] = throttle + motorAxisCommandPitch*4/3;
+  motorCommand[MOTOR1] = throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3;
+  motorCommand[MOTOR2] = throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3;
+  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch*4/3;
   const float yawMotorCommand = constrain(motorAxisCommandYaw,-MAX_RECEIVER_OFFSET-abs(receiverCommand[ZAXIS]),+MAX_RECEIVER_OFFSET+abs(receiverCommand[ZAXIS]));
-  motorCommand[MOTOR1] = constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * yawMotorCommand, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX);
+  motorCommand[MOTOR4] = constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * yawMotorCommand, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_
