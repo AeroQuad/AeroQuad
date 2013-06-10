@@ -169,14 +169,47 @@ void spi_slave_enable(spi_dev *dev, spi_mode mode, uint32 flags) {
 uint32 spi_tx(spi_dev *dev, const void *buf, uint32 len) {
     uint32 txed = 0;
     uint8 byte_frame = spi_dff(dev) == SPI_DFF_8_BIT;
+    byte_frame = 1;
     while (spi_is_tx_empty(dev) && (txed < len)) {
         if (byte_frame) {
-            dev->regs->DR = ((const uint8*)buf)[txed++];
+            *(uint8*)&(dev->regs->DR) = ((const uint8*)buf)[txed++];
         } else {
             dev->regs->DR = ((const uint16*)buf)[txed++];
         }
     }
     return txed;
+}
+
+/**
+ * @brief blocking SPI byte transmit.
+ * @param dev SPI port to use for transmission
+ * @param buf Buffer to transmit.  The sizeof buf's elements are
+ *            inferred from dev's data frame format (i.e., are
+ *            correctly treated as 8-bit or 16-bit quantities).
+ * @param len Maximum number of elements to transmit.
+ * @return Number of elements transmitted.
+ */
+void spi_tx_bytebuffer(spi_dev *dev, const uint8 *buf, uint32 len) {
+    uint32 txed = 0;
+    spi_reg_map *r = dev->regs;
+    //volatile uint32* sr = bb_perip(&(r->SR), SPI_SR_TXE_BIT);
+    while (txed < len) {
+    	uint8 data  = buf[txed++];
+        asm volatile("nop");
+        asm volatile("nop");
+        while (!(r->SR & SPI_SR_TXE))
+        //while (!*sr)
+        	;
+
+        *(uint8*)&(r->DR) = data;
+    }
+}
+
+void spi_tx_byte(spi_dev *dev, const uint8 data) {
+    while (spi_is_tx_empty(dev) == 0)
+        	;
+
+    *(uint8*)&(dev->regs->DR) = data;
 }
 
 /**
@@ -249,7 +282,16 @@ void spi_rx_dma_disable(spi_dev *dev) {
 static void spi_reconfigure(spi_dev *dev, uint32 cr1_config) {
     spi_irq_disable(dev, SPI_INTERRUPTS_ALL);
     spi_peripheral_disable(dev);
+#if defined (STM32F3)
+    if(cr1_config & SPI_CR1_DFF_16_BIT) {
+    	dev->regs->CR2 = (dev->regs->CR2 & 0xf0ff) | 0x0700; // 16 bit mode
+    } else {
+    	dev->regs->CR2 = (dev->regs->CR2 & 0xf0ff) | 0x1700; //  8 bit mode
+    }
+    dev->regs->CR1 = cr1_config & ~SPI_CR1_DFF_16_BIT;
+#else
     dev->regs->CR1 = cr1_config;
+#endif
     spi_peripheral_enable(dev);
 }
 

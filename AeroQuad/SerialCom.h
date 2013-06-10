@@ -644,6 +644,18 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+
+  case 'w':
+    #ifdef EnableLogging
+      logEnd();
+      SERIAL_PRINT("stopped SDCard logging, wrote ");
+      SERIAL_PRINT(logGetBytesWritten());
+      SERIAL_PRINT(" bytes, last filename used ");
+      SERIAL_PRINTLN(logGetFilename());
+    #endif
+    queryType='X';
+    break;
+
   case 'y': // send GPS info
     #if defined (UseGPS)
       PrintValueComma(gpsData.state);

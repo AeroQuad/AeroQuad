@@ -183,6 +183,10 @@ void processZeroThrottleFunctionFromReceiverCommand() {
     motorArmed = OFF;
     inFlight = false;
 
+    #ifdef EnableLogging
+      logEnd();
+    #endif
+
     #ifdef OSD
       notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
     #endif
@@ -217,6 +221,12 @@ void processZeroThrottleFunctionFromReceiverCommand() {
       motorCommand[motor] = MINTHROTTLE;
     }
     motorArmed = ON;
+
+    #ifdef EnableLogging
+      logEnd();
+      logInit();
+      logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
+    #endif
 
     #ifdef OSD
       notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
@@ -257,9 +267,11 @@ void readPilotCommands() {
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {
         flightMode = ATTITUDE_FLIGHT_MODE;
+        simpleModeInitialize = false;
     }
     else {
-        flightMode = RATE_FLIGHT_MODE;
+        //flightMode = RATE_FLIGHT_MODE;
+        flightMode = SIMPLE_FLIGHT_MODE;
     }
     
     if (previousFlightMode != flightMode) {

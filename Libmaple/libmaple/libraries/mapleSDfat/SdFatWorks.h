@@ -465,12 +465,13 @@ class SdVolume {
   /** \return The number of FAT structures on the volume. */
   uint8_t fatCount(void) /*const*/ {
 
-	  SerialDebug.print("#fatCount_ ");
-	  SerialDebug.print((int)&fatCount_);
-	  SerialDebug.print(" # ");
-	  SerialDebug.print((int)fatCount_);
-	  SerialDebug.print("#");
-	  return fatCount_;}
+	  //SerialDebug.print("#fatCount_ ");
+	  //SerialDebug.print((int)&fatCount_);
+	  //SerialDebug.print(" # ");
+	  //SerialDebug.print((int)fatCount_);
+	  //SerialDebug.print("#");
+	  return fatCount_;
+  }
   /** \return The logical block number for the start of the first FAT. */
   uint32_t fatStartBlock(void) const {return fatStartBlock_;}
   /** \return The FAT type of the volume. Values are 12, 16 or 32. */

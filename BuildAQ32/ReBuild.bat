@@ -1,2 +1,2 @@
-make clean && make -j4
+make clean && make
 pause

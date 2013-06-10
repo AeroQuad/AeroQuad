@@ -204,7 +204,7 @@ uint32 rcc_dev_clk_speed(rcc_clk_id id) {
  * @return Clock speed for the given clock ID
  */
 uint32 rcc_dev_timer_clk_speed(rcc_clk_id id) {
-    return rcc_dev_clk_speed(RCC_APB2); // 72 MHz for all counter
+	return rcc_dev_clk_speed_table[RCC_APB2]; // 72 MHz for all counter
 }
 
 /**

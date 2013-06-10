@@ -57,9 +57,10 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
 #define PLED4 Port2Pin('D',  4) 
 
 #include <Device_I2C.h>
-
 #include <Gyroscope_MPU6000.h>
 #include <Accelerometer_MPU6000.h>
+#include "log.h"
+#include "log.c"
 
 // heading mag hold declaration
 #ifdef HeadingMagHold
@@ -123,6 +124,11 @@ void initPlatform() {
 
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();
+  #endif
+
+  #ifdef EnableLogging
+    logInit();
+    logPrintF("starting logging...\r\n");
   #endif
 }
 
