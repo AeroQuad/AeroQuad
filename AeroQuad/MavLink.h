@@ -1005,53 +1005,53 @@ void readSerialCommand() {
           uint8_t result = 0;
           uint8_t command = mavlink_msg_command_long_get_command(&msg);
 		  
-		  switch(command) {
-		    // (yet) unsupported commands/features
-		    case MAV_CMD_NAV_WAYPOINT: //16
-			case MAV_CMD_NAV_LOITER_UNLIM: //17
-			case MAV_CMD_NAV_LOITER_TURNS: //18
-			case MAV_CMD_NAV_LOITER_TIME: //19
-			case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
-			case MAV_CMD_NAV_LAND: //21
-			case MAV_CMD_NAV_TAKEOFF: //22
-			case MAV_CMD_NAV_ROI: //80
-			case MAV_CMD_NAV_PATHPLANNING: //81
-			case MAV_CMD_NAV_LAST: //95
-			case MAV_CMD_CONDITION_DELAY: //112
-			case MAV_CMD_CONDITION_CHANGE_ALT: //113
-			case MAV_CMD_CONDITION_DISTANCE: //114
-			case MAV_CMD_CONDITION_YAW: //115
-			case MAV_CMD_CONDITION_LAST: //159
-			case MAV_CMD_DO_SET_MODE: //176
-			case MAV_CMD_DO_JUMP: //177
-			case MAV_CMD_DO_CHANGE_SPEED: //178
-			case MAV_CMD_DO_SET_PARAMETER: //180
-			case MAV_CMD_DO_SET_RELAY: //181
-			case MAV_CMD_DO_REPEAT_RELAY: //182
-			case MAV_CMD_DO_SET_SERVO: //183
-			case MAV_CMD_DO_REPEAT_SERVO: //184
-			case MAV_CMD_DO_CONTROL_VIDEO: //200
-			case MAV_CMD_DO_LAST: //240
-			case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
-			case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
-			case MAV_CMD_OVERRIDE_GOTO: //252
-			case MAV_CMD_MISSION_START: //300
-			  result = MAV_RESULT_UNSUPPORTED;
-			  break;
+	  switch(command) {
+	  // (yet) unsupported commands/features
+	    case MAV_CMD_NAV_WAYPOINT: //16
+	    case MAV_CMD_NAV_LOITER_UNLIM: //17
+	    case MAV_CMD_NAV_LOITER_TURNS: //18
+	    case MAV_CMD_NAV_LOITER_TIME: //19
+	    case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
+	    case MAV_CMD_NAV_LAND: //21
+	    case MAV_CMD_NAV_TAKEOFF: //22
+	    case MAV_CMD_NAV_ROI: //80
+	    case MAV_CMD_NAV_PATHPLANNING: //81
+	    case MAV_CMD_NAV_LAST: //95
+	    case MAV_CMD_CONDITION_DELAY: //112
+	    case MAV_CMD_CONDITION_CHANGE_ALT: //113
+	    case MAV_CMD_CONDITION_DISTANCE: //114
+	    case MAV_CMD_CONDITION_YAW: //115
+	    case MAV_CMD_CONDITION_LAST: //159
+	    case MAV_CMD_DO_SET_MODE: //176
+	    case MAV_CMD_DO_JUMP: //177
+	    case MAV_CMD_DO_CHANGE_SPEED: //178
+	    case MAV_CMD_DO_SET_PARAMETER: //180
+	    case MAV_CMD_DO_SET_RELAY: //181
+	    case MAV_CMD_DO_REPEAT_RELAY: //182
+	    case MAV_CMD_DO_SET_SERVO: //183
+	    case MAV_CMD_DO_REPEAT_SERVO: //184
+	    case MAV_CMD_DO_CONTROL_VIDEO: //200
+	    case MAV_CMD_DO_LAST: //240
+	    case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
+	    case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
+	    case MAV_CMD_OVERRIDE_GOTO: //252
+	    case MAV_CMD_MISSION_START: //300
+	      result = MAV_RESULT_UNSUPPORTED;
+	      break;
 		  
-			case MAV_CMD_COMPONENT_ARM_DISARM: //400, needs some security checks to prevent accidential arming/disarming
+	    case MAV_CMD_COMPONENT_ARM_DISARM: //400, needs some security checks to prevent accidential arming/disarming
 			
-			//  if (mavlink_msg_command_long_get_param1(&msg) == 1.0) {
-			//	motorArmed = ON;
-			//  }
-			//  else if (mavlink_msg_command_long_get_param1(&msg) == 0.0) {
-			//    motorArmed = OFF;
-			//  }
-			//  result = MAV_RESULT_ACCEPTED;
-			  result = MAV_RESULT_UNSUPPORTED;
-			  break;
-			
-			case MAV_CMD_DO_SET_HOME: //179
+	      //  if (mavlink_msg_command_long_get_param1(&msg) == 1.0) {
+	      //	motorArmed = ON;
+	      //  }
+	      //  else if (mavlink_msg_command_long_get_param1(&msg) == 0.0) {
+	      //    motorArmed = OFF;
+	      //  }
+	      //  result = MAV_RESULT_ACCEPTED;
+	      result = MAV_RESULT_UNSUPPORTED;
+	      break;
+		
+	    case MAV_CMD_DO_SET_HOME: //179
             #if defined(UseGPSNavigator)
               if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
                 homePosition = currentPosition;
@@ -1065,10 +1065,10 @@ void readSerialCommand() {
             #else
               result = 	MAV_RESULT_UNSUPPORTED;
             #endif
-			  break;
+              break;
             
 			
-			case MAV_CMD_PREFLIGHT_CALIBRATION: //241
+	    case MAV_CMD_PREFLIGHT_CALIBRATION: //241
               if (!motorArmed) {
                 if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
                   calibrateGyro();
@@ -1084,21 +1084,21 @@ void readSerialCommand() {
                 }
               }
               else result = MAV_RESULT_TEMPORARILY_REJECTED;
-			  break;
+	      break;
 			  
-			case MAV_CMD_PREFLIGHT_STORAGE: //245
-			  if (!motorArmed) {
+            case MAV_CMD_PREFLIGHT_STORAGE: //245
+              if (!motorArmed) {
                 if (mavlink_msg_command_long_get_param1(&msg) == 0.0f) {
-				  paramListPartIndicator = indexCounter = 0;
-				}
-				else if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
-				  mavlink_msg_param_set_decode(&msg, &set);
-				  key = (char*) set.param_id;
-				  parameterMatch = findParameter(key);
-				  parameterChangeIndicator = 0;
-				}
-			  }	
-			  break;
+		  paramListPartIndicator = indexCounter = 0;
+		}
+		else if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
+		  mavlink_msg_param_set_decode(&msg, &set);
+		  key = (char*) set.param_id;
+		  parameterMatch = findParameter(key);
+		  parameterChangeIndicator = 0;
+		}
+	      }	
+	      break;
           }
 		  
           mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, command, result);
