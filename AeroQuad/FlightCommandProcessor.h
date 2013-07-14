@@ -225,7 +225,7 @@ void processZeroThrottleFunctionFromReceiverCommand() {
     #ifdef EnableLogging
       logEnd();
       logInit();
-      logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
+      //logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
     #endif
 
     #ifdef OSD

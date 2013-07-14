@@ -1437,9 +1437,6 @@ void process100HzTask() {
     measureBaroSum();
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
-    #ifdef EnableLogging
-      logPrintF("%d,%d,%d,%f,%d,%f,%f\r\n", receiverCommand[THROTTLE], throttle, altitudeHoldState, pressure, MS5611lastRawTemperature, baroRawAltitude, baroAltitude);
-    #endif
     }
   #endif
         
