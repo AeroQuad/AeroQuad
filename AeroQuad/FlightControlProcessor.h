@@ -52,12 +52,26 @@ void calculateFlightError()
     motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
+	// Replace rate mode for now until we figure out how to assign new functions to transmitter channels through Configurator
+    //motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
+    //motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
+	if (simpleModeInitialize) {
+	  simpleModeStartHeading = trueNorthHeading;
+	  simpleModeInitialize = false;
+	}
+	float heading = trueNorthHeading - simpleModeStartHeading;
+	int rollInput = receiverCommand[XAXIS] - receiverZero[XAXIS];
+	int pitchInput = receiverCommand[YAXIS] - receiverZero[YAXIS];
+	float rollCommand = rollInput * cos(heading) - pitchInput * sin(heading);
+	float pitchCommand = rollInput * sin(heading) + pitchInput * cos(heading);
+	float rollAttitudeCmd  = updatePID(rollCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+	float pitchAttitudeCmd = updatePID(pitchCommand * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+	motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+	motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
 }
 
-/**
+/**F
  * processCalibrateESC
  * 
  * Proces esc calibration command with the help of the configurator

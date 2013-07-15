@@ -1060,6 +1060,7 @@
 //********************************************************
 
 #ifdef AeroQuadSTM32
+  #define EnableLogging
   #include "AeroQuad_STM32.h"
 #endif
 
@@ -1433,14 +1434,13 @@ void process100HzTask() {
   #endif    
 
   #if defined(AltitudeHoldBaro)
-    measureBaroSum(); 
+    measureBaroSum();
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
     }
   #endif
         
   processFlightControl();
-  
   
   #if defined(BinaryWrite)
     if (fastTransfer == ON) {

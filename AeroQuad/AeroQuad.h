@@ -55,6 +55,7 @@ int testCommand = 1000;
  */
 #define RATE_FLIGHT_MODE 0
 #define ATTITUDE_FLIGHT_MODE 1
+#define SIMPLE_FLIGHT_MODE 2
 byte previousFlightMode = ATTITUDE_FLIGHT_MODE;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
@@ -65,6 +66,9 @@ byte previousFlightMode = ATTITUDE_FLIGHT_MODE;
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle; // initial value configured by user
+
+byte simpleModeInitialize = true;
+float simpleModeStartHeading = 0.0;
 
 float G_Dt = 0.002; 
 int throttle = 1000;

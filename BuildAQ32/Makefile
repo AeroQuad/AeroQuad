@@ -166,7 +166,7 @@ EXTRAINCDIRS += $(LIBDIR)/AQ_Accelerometer $(LIBDIR)/AQ_BarometricSensor $(LIBDI
  $(LIBDIR)/AQ_OSD  $(LIBDIR)/AQ_Platform_APM $(LIBDIR)/AQ_Platform_CHR6DM \
  $(LIBDIR)/AQ_Platform_MPU6000 $(LIBDIR)/AQ_Platform_Wii $(LIBDIR)/AQ_RangeFinder \
  $(LIBDIR)/AQ_Receiver $(LIBDIR)/AQ_SPI $(LIBDIR)/AQ_RSSI $(LIBDIR)/AQ_SoftModem \
- $(LIBDIR)/AQ_RSCode
+ $(LIBDIR)/AQ_RSCode $(LIBMAPLEDIR)/FatFS
 
 
 # Processor frequency.
@@ -213,6 +213,7 @@ SRCDIR     = $(BASEDIR)/AeroQuad
 LIBDIR     = $(BASEDIR)/Libraries
 SRCDIRAQ32 = $(BASEDIR)/AeroQuad32
 MCDIR      = $(SRCDIRAQ32)/MapleCompatibility
+LIBMAPLEDIR = $(BASEDIR)/Libmaple/libmaple/libraries
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = $(TARGETSOURCE).cpp

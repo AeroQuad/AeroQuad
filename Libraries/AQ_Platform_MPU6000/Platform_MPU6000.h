@@ -28,6 +28,7 @@
 
 #include "Arduino.h"
 #include <SensorsStatus.h>
+#include <log.h>
 
 //#define MPU6000_I2C	// insert this define before #include <Platform_MPU6000.h> when you use a I2C based MPU6050
 
@@ -224,6 +225,10 @@ void readMPU6000Sensors()
     spiMPU6000.Read(MPUREG_ACCEL_XOUT_H, MPU6000.rawByte, sizeof(MPU6000));
     MPU6000SwapData(MPU6000.rawByte, sizeof(MPU6000));
   #endif
+    logPrintF("mpu6000;%5d;%5d;%5d;%5d;%5d;%5d;%5d\r\n",
+            MPU6000.data.accel.x, MPU6000.data.accel.y, MPU6000.data.accel.z,
+            MPU6000.data.gyro.x, MPU6000.data.gyro.y, MPU6000.data.gyro.z,
+            MPU6000.data.temperature);
 }
 
 int readMPU6000Count=0;
@@ -239,12 +244,21 @@ void readMPU6000Accel()
   }
 }
 
+//void readMPU6000Gyro()
+//{
+//  readMPU6000GyroCount++;
+//  if(readMPU6000GyroCount != readMPU6000Count) {
+//    readMPU6000Sensors();
+//    readMPU6000GyroCount++;
+//  }
+//}
+
 void readMPU6000Gyro()
 {
-  readMPU6000GyroCount++;
-  if(readMPU6000GyroCount != readMPU6000Count) {
-    readMPU6000Sensors();
-    readMPU6000GyroCount++;
-  }
+     readMPU6000GyroCount++;
+     if(readMPU6000GyroCount != readMPU6000Count) {
+         readMPU6000Sensors();
+         readMPU6000Count++; // this line is changed
+     }
 }
 #endif
