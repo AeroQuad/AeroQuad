@@ -60,7 +60,7 @@ void processHeading()
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
       
-      #if defined (UseGPSNavigatorOld)
+      #if defined (UseGPSNavigator)
         if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
             ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
       #else
@@ -90,9 +90,8 @@ void processHeading()
           }
         }
         else {
-          #if defined (UseGPSNavigatorOld)
+          #if defined (UseGPSNavigator)
             if (navigationState == ON) {
-              heading = updateHeading(trueNorthHeading);
               headingHold = updatePID(groundTrackHeading, heading, &PID[HEADING_HOLD_PID_IDX]);
             }
             else {

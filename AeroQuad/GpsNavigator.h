@@ -91,12 +91,45 @@ float calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
 }
 */
 
+#define MIN_DISTANCE_TO_REACHED 2000
+/**
+ * Evaluate the position to reach depending of the state of the mission
+ */
+void evaluateMissionPositionToReach() {
+
+  if (waypointIndex == -1) { // if mission have not been started
+    waypointIndex++;
+  }
+
+  if (waypointIndex < MAX_WAYPOINTS && distanceToDestination < MIN_DISTANCE_TO_REACHED) {
+    waypointIndex++;
+  }
+
+  if (waypointIndex >= MAX_WAYPOINTS ||
+      waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
+
+    missionPositionToReach.latitude = homePosition.latitude;
+    missionPositionToReach.longitude = homePosition.longitude;
+    missionPositionToReach.altitude = homePosition.altitude;
+  }
+  else {
+
+    missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
+    missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
+    missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
+
+    if (missionPositionToReach.altitude > 2000.0) {
+      missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
+    }
+  }
+}
+
 float adjustHeading(float currentHeading, float desiredHeading) {
   if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
     return currentHeading -= 360.0;
   if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
     return currentHeading += 360.0;
-  if ((desiredHeading > -90.0) && ((desiredHeading + 180.0) < curentHeading))
+  if ((desiredHeading > -90.0) && ((desiredHeading + 180.0) < currentHeading))
     return currentHeading -= 360.0;
   if ((desiredHeading < 90.0) && (currentHeading < (desiredHeading - 180.0)))
     return currentHeading += 360.0;
@@ -123,7 +156,7 @@ boolean updateRoute() {
       toWaypoint = waypoint[waypointIndex+1];
       positionVector(fromVector, fromWaypoint);
       positionVector(toVector, toWaypoint);
-      return true
+      return true;
   }
 }
 
@@ -132,7 +165,7 @@ boolean updateRoute() {
  */
 void processNavigation() {
   // Convert lat/lon to ECEF
-  positionVector(presentPosition, currentPosition);
+  positionVector(presentPosition, currentLocation);
 
   // Calculate track angle error
   vectorCrossProduct(presentPositionEast, zVector, presentPosition);
@@ -159,20 +192,23 @@ void processNavigation() {
   // Calculate distance to next waypoint
   vectorCrossProduct(normalRangeVector, presentPosition, toVector);
   vectorNormalize(normalRangeVector);
-  vectorCrossproduct(rangeVector, toVector, normalRangeVector);
+  vectorCrossProduct(rangeVector, toVector, normalRangeVector);
   vectorNormalize(rangeVector);
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProduct(3, rangeVector, presentPosition), vectorDotProduct(3, presentPosition, toVector));
 
-  if (distanceToNextWaypoint < waypointCatptureDistance) {
-    boolean finishedRoute = updateRoute()
+  if (distanceToNextWaypoint < waypointCaptureDistance) {
+    boolean finishedRoute = updateRoute();
     if (finishedRoute)
       positionHoldState = ON;
   }
 
-  crossTrack = constrain(crossTrackFactor * crossTrackError, -90.0, 90.0);
-  groundTrackHeading = (trackAngleFactor * desiredHeading) + crossTrack;
-  gpsPitchAxisCorrection = 75;
-  // AeroQuad will fly route using predetermined forward pitch and heading (in HeadingHoldProcessor.h)
+  crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  groundTrackHeading = desiredHeading + crossTrack;
+
+  // not used
+  gpsRollAxisCorrection = 0;
+  gpsPitchAxisCorrection = 0;
+  gpsYawAxisCorrection = 0;
 }
 
 void processPositionHold()

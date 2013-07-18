@@ -258,6 +258,14 @@ void readSerialCommand() {
     case 'X': // Stop sending messages
       break;
 
+    case 'Y': // Stop sending messages
+    #if defined (UseGPSNavigator)
+      navigatorSerialCommand = readFloatSerial();
+    #else
+      skipSerialValues(1);
+    #endif
+    break;
+
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
       validateCalibrateCommand(1);
       break;
@@ -369,6 +377,10 @@ float getHeading()
 void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
+    PrintValueComma(navigatorSerialCommand);
+    PrintValueComma(desiredHeading);
+    PrintValueComma(crossTrack);
+    SERIAL_PRINTLN(groundTrackHeading);
     break;
 
   case 'a': // Send roll and pitch rate mode PID values

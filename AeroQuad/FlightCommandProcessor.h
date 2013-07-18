@@ -128,7 +128,7 @@
     }
 
 
-    if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
+    if ((receiverCommand[AUX2] < 1750) || (navigatorSerialCommand == ON)) {  // Enter in execute mission state, if none, go back home, override the position hold
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -141,7 +141,7 @@
   
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < 1250) {  // Enter in position hold state
+    else if ((receiverCommand[AUX1] < 1250) || (navigatorSerialCommand == OFF)) {  // Enter in position hold state
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;

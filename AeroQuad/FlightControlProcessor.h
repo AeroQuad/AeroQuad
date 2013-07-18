@@ -59,11 +59,11 @@ void calculateFlightError()
 	  simpleModeStartHeading = trueNorthHeading;
 	  simpleModeInitialize = false;
 	}
-	float heading = trueNorthHeading - simpleModeStartHeading;
+	float simpleModeHeading = trueNorthHeading - simpleModeStartHeading;
 	int rollInput = receiverCommand[XAXIS] - receiverZero[XAXIS];
 	int pitchInput = receiverCommand[YAXIS] - receiverZero[YAXIS];
-	float rollCommand = rollInput * cos(heading) - pitchInput * sin(heading);
-	float pitchCommand = rollInput * sin(heading) + pitchInput * cos(heading);
+	float rollCommand = rollInput * cos(simpleModeHeading) - pitchInput * sin(simpleModeHeading);
+	float pitchCommand = rollInput * sin(simpleModeHeading) + pitchInput * cos(simpleModeHeading);
 	float rollAttitudeCmd  = updatePID(rollCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
 	float pitchAttitudeCmd = updatePID(pitchCommand * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
 	motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);

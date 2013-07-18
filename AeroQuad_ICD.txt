@@ -31,7 +31,7 @@ U       range finder                    u       read range finder
 V       GPS PID                         v		    read GPS PID
 W       write EEPROM values             w
 X       stop telemetry                  x       stop telemetry
-Y                                       y
+Y       GPS Navigator                   y				read GPS position
 Z                                       z       read altitude values
 
 1       ESC cal high                    =       custom debug messages
