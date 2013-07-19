@@ -54,7 +54,7 @@ struct gpsData gpsData; // This is accessed by the parser functions directly !
 #include <mtk16.h>
 #endif
 
-#define MIN_NB_SATS_IN_USE 6
+#define MIN_NB_SATS_IN_USE 3 //6
 
 #define GPS2RAD (1.0/572957795.0)
 #define RAD2DEG 57.2957795

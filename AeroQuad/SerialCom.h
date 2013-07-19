@@ -260,7 +260,10 @@ void readSerialCommand() {
 
     case 'Y': // Stop sending messages
     #if defined (UseGPSNavigator)
-      navigatorSerialCommand = readFloatSerial();
+      if (readFloatSerial() > 0.0)
+        navigatorSerialCommand = ON;
+      else
+        navigatorSerialCommand = OFF;
     #else
       skipSerialValues(1);
     #endif
@@ -377,10 +380,17 @@ float getHeading()
 void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    PrintValueComma(navigatorSerialCommand);
-    PrintValueComma(desiredHeading);
-    PrintValueComma(crossTrack);
-    SERIAL_PRINTLN(groundTrackHeading);
+    if ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
+      SERIAL_PRINT("Enabled: Des:");
+    else
+      SERIAL_PRINT("Disabled: Des:");
+    SERIAL_PRINT(desiredHeading);
+    SERIAL_PRINT(" cTrk:");
+    SERIAL_PRINT(crossTrack);
+    SERIAL_PRINT(" Cmd:");
+    SERIAL_PRINT(groundTrackHeading);
+    SERIAL_PRINT(" trkAng:");
+    SERIAL_PRINTLN(trackAngleError);
     break;
 
   case 'a': // Send roll and pitch rate mode PID values

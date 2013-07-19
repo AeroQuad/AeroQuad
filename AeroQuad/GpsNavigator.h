@@ -80,6 +80,26 @@ float deg(float radians) {
   return radians * 57.2957795;
 }
 
+float adjustHeading(float currentHeading, float desiredHeading) {
+  if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
+    return currentHeading -= 360.0;
+  if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
+    return currentHeading += 360.0;
+  if ((desiredHeading > -90.0) && ((desiredHeading + 180.0) < currentHeading))
+    return currentHeading -= 360.0;
+  if ((desiredHeading < 90.0) && (currentHeading < (desiredHeading - 180.0)))
+    return currentHeading += 360.0;
+  return currentHeading;
+}
+
+void positionVector(float *vector, GeodeticPosition position) {
+  float lat = rad((float)position.latitude/10000000.0);
+  float lon = rad((float)position.longitude/10000000.0);
+  vector[0] = cos(lat) * cos(lon);
+  vector[1] = cos(lat) * sin(lon);
+  vector[2] = sin(lat);
+
+}
 /*
 float calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
   // from http://www.movable-type.co.uk/scripts/latlong.html
@@ -118,30 +138,15 @@ void evaluateMissionPositionToReach() {
     missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
     missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
 
+    fromWaypoint = waypoint[waypointIndex];
+    toWaypoint = waypoint[waypointIndex+1];
+    positionVector(fromVector, fromWaypoint);
+    positionVector(toVector, toWaypoint);
+
     if (missionPositionToReach.altitude > 2000.0) {
       missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
     }
   }
-}
-
-float adjustHeading(float currentHeading, float desiredHeading) {
-  if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
-    return currentHeading -= 360.0;
-  if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
-    return currentHeading += 360.0;
-  if ((desiredHeading > -90.0) && ((desiredHeading + 180.0) < currentHeading))
-    return currentHeading -= 360.0;
-  if ((desiredHeading < 90.0) && (currentHeading < (desiredHeading - 180.0)))
-    return currentHeading += 360.0;
-  return currentHeading;
-}
-
-void positionVector(float *vector, GeodeticPosition position) {
-  float lat = rad(position.latitude);
-  float lon = rad(position.longitude);
-  vector[0] = cos(lat) * cos(lon);
-  vector[1] = cos(lat) * sin(lon);
-  vector[2] = sin(lat);
 }
 
 /**
@@ -165,7 +170,7 @@ boolean updateRoute() {
  */
 void processNavigation() {
   // Convert lat/lon to ECEF
-  positionVector(presentPosition, currentLocation);
+  positionVector(presentPosition, currentPosition);
 
   // Calculate track angle error
   vectorCrossProduct(presentPositionEast, zVector, presentPosition);
