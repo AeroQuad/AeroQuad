@@ -32,7 +32,7 @@
 
 #define GYRO_CALIBRATION_TRESHOLD 4
 
-#define GYRO_ADDRESS 0x69
+#define GYRO_ADDRESS 0x68
 
 
 #define GYRO_RATE 2000
