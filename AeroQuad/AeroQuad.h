@@ -253,10 +253,12 @@ void reportVehicleState();
     float normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
     GeodeticPosition fromWaypoint, toWaypoint, currentLocation;
     float desiredHeading, currentHeading, groundTrackHeading;
-    float trackAngleError, crossTrackError, crossTrack;
+    float trackAngleError, crossTrackError, crossTrack, alongPathDistance;
     int waypointCount;
     float distanceToNextWaypoint = 99999999.0;
-    const float earthRadius = 6371000.0; // meters
+    //const float earthRadius = 6371.0; // km
+    //const float earthRadius = 6378100.0; // meters
+    const float earthRadius  = 20925524.9; //feet
     const float waypointCaptureDistance = 10.0; // meters
     float positionHoldFactor = 1.0;
 
@@ -265,7 +267,13 @@ void reportVehicleState();
     float crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
     byte navigatorSerialCommand = OFF;
 
-    void evaluateMissionPositionToReach();
+    // make local when working
+    float distanceFromStartToPosition;
+    float bearingFromStartToPosition;
+    float bearingFromStartToNextWP;
+
+
+    bool evaluateMissionPositionToReach();
     void processGpsNavigation();
 
   #endif

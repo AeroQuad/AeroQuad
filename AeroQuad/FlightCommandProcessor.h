@@ -135,7 +135,9 @@
         gpsYawAxisCorrection = 0;
         isGpsNavigationInitialized = true;
       }
-  
+
+      loadNewRoute();
+
       positionHoldState = OFF;         // disable the position hold while navigating
       isPositionHoldInitialized = false;
   

@@ -258,7 +258,7 @@ void readSerialCommand() {
     case 'X': // Stop sending messages
       break;
 
-    case 'Y': // Stop sending messages
+    case 'Y': // Debug Nav Commands
     #if defined (UseGPSNavigator)
       if (readFloatSerial() > 0.0)
         navigatorSerialCommand = ON;
@@ -378,6 +378,7 @@ float getHeading()
 }
 
 void sendSerialTelemetry() {
+
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     if ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
@@ -385,12 +386,22 @@ void sendSerialTelemetry() {
     else
       SERIAL_PRINT("Disabled: Des:");
     SERIAL_PRINT(desiredHeading);
-    SERIAL_PRINT(" cTrk:");
-    SERIAL_PRINT(crossTrack);
-    SERIAL_PRINT(" Cmd:");
+    SERIAL_PRINT(" Cur:");
+    SERIAL_PRINT(currentHeading);
+    SERIAL_PRINT(" trkA:");
+    SERIAL_PRINT(trackAngleError);
+    SERIAL_PRINT(" trkG:");
     SERIAL_PRINT(groundTrackHeading);
-    SERIAL_PRINT(" trkAng:");
-    SERIAL_PRINTLN(trackAngleError);
+    //SERIAL_PRINT(" bFromTo:");
+    //SERIAL_PRINT(bearingFromStartToNextWP);
+    //SERIAL_PRINT(" bFromCurr:");
+    //SERIAL_PRINT(bearingFromStartToPosition);
+    //SERIAL_PRINT(" dFromCurr:");
+    //SERIAL_PRINT(distanceFromStartToPosition);
+    SERIAL_PRINT(" xTk:");
+    SERIAL_PRINTLN(crossTrackError);
+    //SERIAL_PRINT(" dist:");
+    //SERIAL_PRINTLN(alongPathDistance);
     break;
 
   case 'a': // Send roll and pitch rate mode PID values
@@ -691,8 +702,9 @@ void sendSerialTelemetry() {
       PrintValueComma(gpsData.fixtime);
       PrintValueComma(gpsData.sentences);
       PrintValueComma(gpsData.idlecount);
+      PrintValueComma((long)crossTrackError*100);
     #else
-      PrintDummyValues(11);
+      PrintDummyValues(12);
     #endif    
     SERIAL_PRINTLN();
     break;
