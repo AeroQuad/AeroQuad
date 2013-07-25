@@ -67,8 +67,7 @@ void processHeading()
         if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || 
             (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
       #endif
-      
-        
+
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
         headingHold = 0;

@@ -257,14 +257,13 @@ void reportVehicleState();
     int waypointCount;
     double distanceToNextWaypoint = 99999999.0;
     const double earthRadius = 6378100.0; // meters
-    //const double earthRadius  = 20925524.9; //feet
     const double waypointCaptureDistance = 2.0; // meters
     float positionHoldFactor = 1.0;
-
     #define MAXCROSSTRACKANGLE 90 // make this EEPROM value?
     #define MAXCROSSTRACKDISTANCE 15 // (meters) make this EEPROM value?
     double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
     byte navigatorSerialCommand = OFF;
+    bool isRouteInitialized = false;
 
     // make local when working
     float distanceFromStartToPosition;

@@ -197,6 +197,7 @@ void readSerialCommand() {
         waypoint[missionNbPoint].latitude = readIntegerSerial();
         waypoint[missionNbPoint].longitude = readIntegerSerial();
         waypoint[missionNbPoint].altitude = readIntegerSerial();
+        isRouteInitialized = false;
       #else
         for(byte i = 0; i < 4; i++) {
           readFloatSerial();
@@ -363,7 +364,6 @@ void PrintDummyValues(byte number) {
   }
 }
 
-
 float getHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -391,7 +391,11 @@ void sendSerialTelemetry() {
     SERIAL_PRINT(" xTk:");
     SERIAL_PRINT(crossTrackError);
     SERIAL_PRINT(" trkG:");
-    SERIAL_PRINTLN(groundTrackHeading);
+    SERIAL_PRINT(groundTrackHeading);
+    SERIAL_PRINT(" dstNxtWP:");
+    SERIAL_PRINT(distanceToNextWaypoint);
+    SERIAL_PRINT(" WP:");
+    SERIAL_PRINTLN(waypointIndex);
     break;
 
   case 'a': // Send roll and pitch rate mode PID values

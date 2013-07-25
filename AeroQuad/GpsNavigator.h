@@ -58,9 +58,8 @@ void initHomeBase() {
       // Set reference location for Equirectangular projection used for coordinates
       setProjectionLocation(currentPosition);
       
-
       #if defined UseGPSNavigator
-        evaluateMissionPositionToReach();
+      isRouteInitialized = false;
       #else
         missionPositionToReach.latitude = homePosition.latitude;
         missionPositionToReach.longitude = homePosition.longitude;
@@ -104,27 +103,24 @@ void positionVector(double *vector, GeodeticPosition position) {
 /**
  * Evaluate the position to reach depending of the state of the mission
  */
-bool evaluateMissionPositionToReach() { // TODO: rename this
+bool updateWaypoints() { // returns false if next waypoint available, true if at end of route
 
   if (waypointIndex == -1) { // if mission have not been started
     waypointIndex++;
   }
 
-  /*
-  if (waypointIndex < MAX_WAYPOINTS && distanceToDestination < MIN_DISTANCE_TO_REACHED) {
+  if ((waypointIndex < MAX_WAYPOINTS) && (distanceToNextWaypoint < waypointCaptureDistance)) {
     waypointIndex++;
   }
 
   if (waypointIndex >= MAX_WAYPOINTS ||
       waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
-
     missionPositionToReach.latitude = homePosition.latitude;
     missionPositionToReach.longitude = homePosition.longitude;
     missionPositionToReach.altitude = homePosition.altitude;
     return true; // finished route
   }
   else {
-*/
     missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
     missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
     missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
@@ -143,12 +139,12 @@ bool evaluateMissionPositionToReach() { // TODO: rename this
       missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
     }
     return false;
-  //}
+  }
 }
 
 void loadNewRoute() {
   waypointIndex = -1;
-  evaluateMissionPositionToReach();
+  updateWaypoints();
 }
 
 /**
@@ -183,13 +179,13 @@ void processNavigation() {
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
 
   if (distanceToNextWaypoint < waypointCaptureDistance) {
-    boolean finishedRoute = evaluateMissionPositionToReach();
-    if (finishedRoute)
+    bool routeisFinished = updateWaypoints();
+    if (routeisFinished)
       positionHoldState = ON;
   }
 
   crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
-  groundTrackHeading = desiredHeading + crossTrack;
+  groundTrackHeading = desiredHeading + crossTrack; // TODO: update to fix issue aroudn +/-180
 
   // not used
   gpsRollAxisCorrection = 0;

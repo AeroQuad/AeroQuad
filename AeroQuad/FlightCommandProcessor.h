@@ -136,7 +136,10 @@
         isGpsNavigationInitialized = true;
       }
 
-      loadNewRoute();
+      if (!isRouteInitialized) {
+          loadNewRoute();
+          isRouteInitialized = true;
+      }
 
       positionHoldState = OFF;         // disable the position hold while navigating
       isPositionHoldInitialized = false;
@@ -156,6 +159,7 @@
       }
   
       isGpsNavigationInitialized = false;  // disable navigation
+      isRouteInitialized = false;
       navigationState = OFF;
   
       positionHoldState = ON;
