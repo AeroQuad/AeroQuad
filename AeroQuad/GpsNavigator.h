@@ -72,15 +72,15 @@ void initHomeBase() {
 
 #if defined UseGPSNavigator
 
-float rad(float degrees) {
+double rad(double degrees) {
   return degrees * 0.0174532925;
 }
 
-float deg(float radians) {
+double deg(double radians) {
   return radians * 57.2957795;
 }
 
-float adjustHeading(float currentHeading, float desiredHeading) {
+double adjustHeading(double currentHeading, double desiredHeading) {
   if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
     return currentHeading -= 360.0;
   if ((desiredHeading > 90.0) && ((desiredHeading - 180.0) > currentHeading))
@@ -92,63 +92,13 @@ float adjustHeading(float currentHeading, float desiredHeading) {
   return currentHeading;
 }
 
-void positionVector(float *vector, GeodeticPosition position) {
-  float lat = rad((float)position.latitude/10000000.0);
-  float lon = rad((float)position.longitude/10000000.0);
+void positionVector(double *vector, GeodeticPosition position) {
+  double lat = (double)position.latitude * GPS2RAD;
+  double lon = (double)position.longitude * GPS2RAD;
   vector[0] = cos(lat) * cos(lon);
   vector[1] = cos(lat) * sin(lon);
   vector[2] = sin(lat);
 }
-
-/*
-float calculateDistance(GeodeticPosition fromWaypoint, GeodeticPosition toWaypoint) {
-  // from http://www.movable-type.co.uk/scripts/latlong.html
-  float dLat = rad((toWaypoint.latitude - fromWaypoint.latitude)/10000000.0);
-  float dLon = rad((toWaypoint.longitude - fromWaypoint.longitude)/10000000.0);
-  float lat1 = rad(fromWaypoint.latitude/10000000.0);
-  float lat2 = rad(toWaypoint.latitude/10000000.0);
-  float a = sin(dLat/2.0) * sin(dLat/2.0) + sin(dLon/2.0) * sin(dLon/2.0) * cos(lat1) * cos(lat2);
-  return earthRadius * 2.0 * atan2(sqrt(a), sqrt(1-a));
-}
-
-double calculateDistance(GeodeticPosition currentWP, GeodeticPosition nextWP) {
-  // from http://www.movable-type.co.uk/scripts/latlong.html
-  // Use this for double precision values
-  double lat1 = rad(currentWP.latitude/10000000.0);
-  double lat2 = rad(nextWP.latitude/10000000.0);
-  double lon1 = rad(currentWP.longitude/10000000.0);
-  double lon2 = rad(nextWP.longitude/10000000.0);
-  return acos((sin(lat1)*sin(lat2))+(cos(lat1)*cos(lat2)*cos(lon2-lon1)))*earthRadius;
-}
-
-float calculateBearing(GeodeticPosition currentWP, GeodeticPosition nextWP) {
-  // from http://www.movable-type.co.uk/scripts/latlong.html
-  float lat1 = rad(currentWP.latitude/10000000.0);
-  float lat2 = rad(nextWP.latitude/10000000.0);
-  float lon1 = rad(currentWP.longitude/10000000.0);
-  float lon2 = rad(nextWP.longitude/10000000.0);
-  float y = cos(lon2-lon1) * cos(lat2);
-  float x = (cos(lat1)*sin(lat2)) - (sin(lat1)*cos(lat2)*cos(lon2-lon1));
-  return deg(atan2(y,x));
-}
-
-float calculateCrossTrack(float distanceFromStartToPosition, float bearingFromStartToPosition, float bearingFromStartToEnd) {
-  // from http://www.movable-type.co.uk/scripts/latlong.html
-  return earthRadius * asin(sin(distanceFromStartToPosition/earthRadius) * sin(rad(bearingFromStartToPosition-bearingFromStartToEnd)));
-}
-
-float calculateAlongPathDistance(float distanceFromStartToPosition, float crossTrackDistance) {
-  // from http://www.movable-type.co.uk/scripts/latlong.html
-  return earthRadius * acos(cos(distanceFromStartToPosition/earthRadius) / cos(crossTrackDistance/earthRadius));
-}
-*/
-
-/**
- * @return true if there is a mission to execute
- */
-//boolean haveMission() {
-//  return missionNbPoint != 0;
-//}
 
 #define MIN_DISTANCE_TO_REACHED 2000
 /**
@@ -179,9 +129,15 @@ bool evaluateMissionPositionToReach() { // TODO: rename this
     missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
     missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
 
-    fromWaypoint = waypoint[0];
-    toWaypoint = waypoint[1];
-
+    fromWaypoint = waypoint[waypointIndex];
+    toWaypoint = waypoint[waypointIndex+1];
+    positionVector(fromVector, fromWaypoint);
+    positionVector(toVector, toWaypoint);
+    vectorCrossProductDbl(normalVector, fromVector, toVector);
+    vectorNormalize(normalVector);
+    negNormalVector[0] = -normalVector[0];
+    negNormalVector[1] = -normalVector[1];
+    negNormalVector[2] = -normalVector[2];
 
     if (missionPositionToReach.altitude > 2000.0) {
       missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
@@ -200,43 +156,31 @@ void loadNewRoute() {
  */
 void processNavigation() {
   // Convert lat/lon to ECEF
-  positionVector(fromVector, fromWaypoint);
-  positionVector(toVector, toWaypoint);
   positionVector(presentPosition, currentPosition);
 
   // Calculate track angle error
-  vectorCrossProduct(presentPositionEast, zVector, presentPosition);
+  vectorCrossProductDbl(presentPositionEast, zVector, presentPosition);
   vectorNormalize(presentPositionEast);
-  vectorCrossProduct(presentPositionNorth, presentPosition, presentPositionEast);
+  vectorCrossProductDbl(presentPositionNorth, presentPosition, presentPositionEast);
   vectorNormalize(presentPositionNorth);
-  vectorCrossProduct(normalVector, fromVector, toVector);
-  vectorNormalize(normalVector);
-  negNormalVector[0] = -normalVector[0];
-  negNormalVector[1] = -normalVector[1];
-  negNormalVector[2] = -normalVector[2];
-  desiredHeading = deg(atan2(vectorDotProduct(3, normalVector, presentPositionNorth), vectorDotProduct(3, negNormalVector, presentPositionEast)));
+  desiredHeading = deg(atan2(vectorDotProductDbl(normalVector, presentPositionNorth), vectorDotProductDbl(negNormalVector, presentPositionEast)));
   currentHeading = adjustHeading(heading, desiredHeading);
   // We'll use trackAngleError when we have velocity information, use desiredHeading for now
   trackAngleError = desiredHeading - currentHeading;
 
   // Calculate cross track error
-  vectorCrossProduct(normalPerpendicularVector, presentPosition, normalVector);
+  vectorCrossProductDbl(normalPerpendicularVector, presentPosition, normalVector);
   vectorNormalize(normalPerpendicularVector);
-  vectorCrossProduct(alongPathVector, normalVector, normalPerpendicularVector);
+  vectorCrossProductDbl(alongPathVector, normalVector, normalPerpendicularVector);
   vectorNormalize(alongPathVector);
-  crossTrackError = earthRadius * atan2(vectorDotProduct(3, negNormalVector, presentPosition), vectorDotProduct(3, alongPathVector, presentPosition));
-  //distanceFromStartToPosition = calculateDistance(fromWaypoint, currentPosition);
-  //bearingFromStartToPosition = calculateBearing(fromWaypoint, currentPosition);
-  //bearingFromStartToNextWP = calculateBearing(fromWaypoint, toWaypoint);
-  //crossTrackError = calculateCrossTrack(distanceFromStartToPosition, bearingFromStartToPosition, bearingFromStartToNextWP);
-  //alongPathDistance = calculateAlongPathDistance(distanceFromStartToPosition, crossTrackError);
+  crossTrackError = earthRadius * atan2(vectorDotProductDbl(negNormalVector, presentPosition), vectorDotProductDbl(alongPathVector, presentPosition));
 
   // Calculate distance to next waypoint
-  vectorCrossProduct(normalRangeVector, presentPosition, toVector);
+  vectorCrossProductDbl(normalRangeVector, presentPosition, toVector);
   vectorNormalize(normalRangeVector);
-  vectorCrossProduct(rangeVector, toVector, normalRangeVector);
+  vectorCrossProductDbl(rangeVector, toVector, normalRangeVector);
   vectorNormalize(rangeVector);
-  distanceToNextWaypoint = earthRadius * atan2(vectorDotProduct(3, rangeVector, presentPosition), vectorDotProduct(3, presentPosition, toVector));
+  distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
 
   if (distanceToNextWaypoint < waypointCaptureDistance) {
     boolean finishedRoute = evaluateMissionPositionToReach();
@@ -244,8 +188,8 @@ void processNavigation() {
       positionHoldState = ON;
   }
 
-  crossTrack = crossTrackFactor * crossTrackError;
-  groundTrackHeading = constrain(desiredHeading + crossTrack, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  groundTrackHeading = desiredHeading + crossTrack;
 
   // not used
   gpsRollAxisCorrection = 0;

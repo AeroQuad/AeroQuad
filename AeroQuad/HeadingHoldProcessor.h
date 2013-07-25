@@ -114,13 +114,9 @@ void processHeading()
       PID[HEADING_HOLD_PID_IDX].integratedError = 0;
     }
   }
+
   // NEW SI Version
-  #if defined (UseGPSNavigatorOld)
-    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
-  #else
-    float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
-  #endif
-  
+  float receiverSiData = (receiverCommand[ZAXIS] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
   const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);
   motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }

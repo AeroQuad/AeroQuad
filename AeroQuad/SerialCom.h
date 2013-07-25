@@ -388,20 +388,10 @@ void sendSerialTelemetry() {
     SERIAL_PRINT(desiredHeading);
     SERIAL_PRINT(" Cur:");
     SERIAL_PRINT(currentHeading);
-    SERIAL_PRINT(" trkA:");
-    SERIAL_PRINT(trackAngleError);
-    SERIAL_PRINT(" trkG:");
-    SERIAL_PRINT(groundTrackHeading);
-    //SERIAL_PRINT(" bFromTo:");
-    //SERIAL_PRINT(bearingFromStartToNextWP);
-    //SERIAL_PRINT(" bFromCurr:");
-    //SERIAL_PRINT(bearingFromStartToPosition);
-    //SERIAL_PRINT(" dFromCurr:");
-    //SERIAL_PRINT(distanceFromStartToPosition);
     SERIAL_PRINT(" xTk:");
-    SERIAL_PRINTLN(crossTrackError);
-    //SERIAL_PRINT(" dist:");
-    //SERIAL_PRINTLN(alongPathDistance);
+    SERIAL_PRINT(crossTrackError);
+    SERIAL_PRINT(" trkG:");
+    SERIAL_PRINTLN(groundTrackHeading);
     break;
 
   case 'a': // Send roll and pitch rate mode PID values
@@ -702,9 +692,8 @@ void sendSerialTelemetry() {
       PrintValueComma(gpsData.fixtime);
       PrintValueComma(gpsData.sentences);
       PrintValueComma(gpsData.idlecount);
-      PrintValueComma((long)crossTrackError*100);
     #else
-      PrintDummyValues(12);
+      PrintDummyValues(11);
     #endif    
     SERIAL_PRINTLN();
     break;

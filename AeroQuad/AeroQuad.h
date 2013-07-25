@@ -246,25 +246,24 @@ void reportVehicleState();
     GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
     
     /* New updated GPS Navigation variables */
-    float fromVector[3], toVector[3], presentPosition[3];
-    float presentPositionEast[3], presentPositionNorth[3];
-    float normalRangeVector[3], rangeVector[3];
-    float zVector[3] = {0.0, 0.0, 1.0};
-    float normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
+    double fromVector[3], toVector[3], presentPosition[3];
+    double presentPositionEast[3], presentPositionNorth[3];
+    double normalRangeVector[3], rangeVector[3];
+    double zVector[3] = {0.0, 0.0, 1.0};
+    double normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
     GeodeticPosition fromWaypoint, toWaypoint, currentLocation;
-    float desiredHeading, currentHeading, groundTrackHeading;
-    float trackAngleError, crossTrackError, crossTrack, alongPathDistance;
+    double desiredHeading, currentHeading, groundTrackHeading;
+    double trackAngleError, crossTrackError, crossTrack, alongPathDistance;
     int waypointCount;
-    float distanceToNextWaypoint = 99999999.0;
-    //const float earthRadius = 6371.0; // km
-    //const float earthRadius = 6378100.0; // meters
-    const float earthRadius  = 20925524.9; //feet
-    const float waypointCaptureDistance = 10.0; // meters
+    double distanceToNextWaypoint = 99999999.0;
+    const double earthRadius = 6378100.0; // meters
+    //const double earthRadius  = 20925524.9; //feet
+    const double waypointCaptureDistance = 2.0; // meters
     float positionHoldFactor = 1.0;
 
     #define MAXCROSSTRACKANGLE 90 // make this EEPROM value?
     #define MAXCROSSTRACKDISTANCE 15 // (meters) make this EEPROM value?
-    float crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
+    double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
     byte navigatorSerialCommand = OFF;
 
     // make local when working
