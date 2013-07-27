@@ -73,9 +73,8 @@ void processAltitudeHold()
     }
     
     // ZDAMPENING COMPUTATIONS
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      float zDampeningThrottleCorrection = -updatePID(0.0, estimatedZVelocity, &PID[ZDAMPENING_PID_IDX]);
-      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    #if defined AltitudeHoldBaro
+      float zDampeningThrottleCorrection = -updatePID(0.0, _velocity_z, &PID[ZDAMPENING_PID_IDX]);
     #endif
 
     

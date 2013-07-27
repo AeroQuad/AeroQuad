@@ -32,7 +32,7 @@
 // This class is responsible for calculating vehicle attitude
 byte kinematicsType = 0;
 float kinematicsAngle[3] = {0.0,0.0,0.0};
-float gyroAngle[2] = {0.0,0.0};
+//float gyroAngle[2] = {0.0,0.0};
 float correctedRateVector[3] = {0.0,0.0,0.0};
 float earthAccel[3] = {0.0,0.0,0.0};
 
@@ -43,8 +43,8 @@ void initializeBaseKinematicsParam() {
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     kinematicsAngle[axis] = 0.0;
   }
-  gyroAngle[XAXIS] = 0;
-  gyroAngle[YAXIS] = 0;
+//  gyroAngle[XAXIS] = 0;
+//  gyroAngle[YAXIS] = 0;
 }
 
 void initializeKinematics(float hdgX, float hdgY);

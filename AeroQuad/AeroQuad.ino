@@ -1152,8 +1152,10 @@
 //********************************************************
 #if defined(BMP085)
   #include <BarometricSensor_BMP085.h>
+  #include <VelocityProcessor.h>
 #elif defined(MS5611)
  #include <BarometricSensor_MS5611.h>
+ #include <VelocityProcessor.h>
 #endif
 #if defined(XLMAXSONAR)
   #include <MaxSonarRangeFinder.h>
@@ -1350,6 +1352,7 @@ void setup() {
   
   // Optional Sensors
   #ifdef AltitudeHoldBaro
+    initVelocityProcessor();
     initializeBaro();
     vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
@@ -1422,21 +1425,15 @@ void process100HzTask() {
     
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS] - runtimeZBias;
-    if (!runtimaZBiasInitialized) {
-      runtimeZBias = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-      runtimaZBiasInitialized = true;
-    }
-    estimatedZVelocity += zVelocity;
-    estimatedZVelocity = (velocityCompFilter1 * zVelocity) + (velocityCompFilter2 * estimatedZVelocity);
-  #endif    
-
-  #if defined(AltitudeHoldBaro)
+  #if defined AltitudeHoldBaro// || defined AltitudeHoldRangeFinder  
+    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
     measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
     }
+
+    computeVelocityErrorWithBaroAltitude(getBaroAltitude());
+    computeVelocity(filteredZAccel,G_Dt);
   #endif
         
   processFlightControl();
