@@ -88,8 +88,6 @@ void computeVelocity(float filteredAccelZ, float dt)
 	_velocity_z += velocity_increase;
 	
 	_hist_position_estimate_z.add(_position_base_z);
-	
-	Serial.println(_velocity_z);
 }
 
 
