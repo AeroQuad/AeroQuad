@@ -259,11 +259,10 @@ void reportVehicleState();
     const double earthRadius = 6378100.0; // meters
     const double waypointCaptureDistance = 2.0; // meters
     float positionHoldFactor = 1.0;
-    #define MAXCROSSTRACKANGLE 90 // make this EEPROM value?
-    #define MAXCROSSTRACKDISTANCE 15 // (meters) make this EEPROM value?
-    double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
-    byte navigatorSerialCommand = OFF;
+    byte navigatorSerialCommand = OFF; // TODO: remove when autopilot working
     bool isRouteInitialized = false;
+    float navigatorHeadingGain = 1.0;
+    float normalHeadingGain = 3.0; // TODO: should we create a PID for autopilot?
 
     // make local when working
     float distanceFromStartToPosition;

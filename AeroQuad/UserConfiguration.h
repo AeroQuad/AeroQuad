@@ -38,7 +38,7 @@
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega processor
-//#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
+//#define AeroQua//dMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21	// Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -56,10 +56,10 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-#define hexXConfig
+//#define hexXConfig
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
@@ -110,7 +110,7 @@
 // Battery Monitor Options
 // For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
 // *******************************************************************************************************************************
-#define BattMonitor			  // Enables Battery monitor
+//#define BattMonitor			  // Enables Battery monitor
 //#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
 //#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //

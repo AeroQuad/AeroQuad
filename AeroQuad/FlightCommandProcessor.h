@@ -24,29 +24,18 @@
 #ifndef _AQ_FLIGHT_COMMAND_READER_
 #define _AQ_FLIGHT_COMMAND_READER_
 
+// If AUX1>MAXSWITCH then altitude hold is off
+// If AUX1<MAXSWITCH and AUX1>MINSWITCH then altitude hold and autopilot(if enabled) is on
+// if AUX1<MINSWITCH then altitude hold and position hold(if enabled) is on
 
-
+// Need to figure out how to enable return to home
+// Maybe AUX1 sets altitude hold, position hold and return to home
+// Then AUX2 enables/disables autopilot, AUX1 return to home overrides autopilot
 
 #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-  boolean isPositionHoldEnabledByUser() {
-    #if defined (UseGPSNavigator)
-      if ((receiverCommand[AUX1] < 1750) || (receiverCommand[AUX2] < 1750)) {
-        return true;
-      }
-      return false;
-    #else
-      if (receiverCommand[AUX1] < 1750) {
-        return true;
-      }
-      return false;
-    #endif
-  }
-#endif
-
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
   void processAltitudeHoldStateFromReceiverCommand() {
-    if (isPositionHoldEnabledByUser()) {
-      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+    if (receiverCommand[AUX1] < MAXSWITCH) {
+      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with mandatory override of Altitude hold
         if (!isAltitudeHoldInitialized) {
           #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget = getBaroAltitude();
@@ -74,7 +63,7 @@
 
 #if defined (AutoLanding)
   void processAutoLandingStateFromReceiverCommand() {
-    if (receiverCommand[AUX3] < 1750) {
+    if (receiverCommand[AUX3] < MAXSWITCH) {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isAutoLandingInitialized) {
           autoLandingState = BARO_AUTO_DESCENT_STATE;
@@ -98,17 +87,10 @@
       autoLandingState = OFF;
       autoLandingThrottleCorrection = 0;
       isAutoLandingInitialized = false;
-      #if defined (UseGPSNavigator)
-        if ((receiverCommand[AUX1] > 1750) && (receiverCommand[AUX2] > 1750)) {
-          altitudeHoldState = OFF;
-          isAltitudeHoldInitialized = false;
-        }
-      #else
-        if (receiverCommand[AUX1] > 1750) {
-          altitudeHoldState = OFF;
-          isAltitudeHoldInitialized = false;
-        }
-      #endif
+      if (receiverCommand[AUX1] > SWITCHMAX) {
+        altitudeHoldState = OFF;
+        isAltitudeHoldInitialized = false;
+      }
     }
   }
 #endif
@@ -128,12 +110,14 @@
     }
 
 
-    if ((receiverCommand[AUX2] < 1750) || (navigatorSerialCommand == ON)) {  // Enter in execute mission state, if none, go back home, override the position hold
+    if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable autopilot
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
         isGpsNavigationInitialized = true;
+        // Soften heading changes
+        normalHeadingGain = PID[HEADING_HOLD_PID_IDX].P;
       }
 
       if (!isRouteInitialized) {
@@ -146,7 +130,7 @@
   
       navigationState = ON;
     }
-    else if ((receiverCommand[AUX1] < 1250) || (navigatorSerialCommand == OFF)) {  // Enter in position hold state
+    else if (receiverCommand[AUX1] < MINSWITCH) {  // Enable position hold
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -270,23 +254,22 @@ void readPilotCommands() {
     }
   }
 
-    // Check Mode switch for Acro or Stable
-    if (receiverCommand[MODE] > 1500) {
-        flightMode = ATTITUDE_FLIGHT_MODE;
-        simpleModeInitialize = false;
-    }
-    else {
-        //flightMode = RATE_FLIGHT_MODE;
-        flightMode = SIMPLE_FLIGHT_MODE;
-    }
-    
-    if (previousFlightMode != flightMode) {
-      zeroIntegralError();
-      previousFlightMode = flightMode;
-      if (flightMode == SIMPLE_FLIGHT_MODE)
-    	  simpleModeInitialize = true;
-    }
+  // Check Mode switch for Acro or Stable
+  if (receiverCommand[MODE] > MIDCOMMAND) {
+      flightMode = ATTITUDE_FLIGHT_MODE;
+      simpleModeInitialize = false;
+  }
+  else {
+      //flightMode = RATE_FLIGHT_MODE;
+      flightMode = SIMPLE_FLIGHT_MODE;
+  }
 
+  if (previousFlightMode != flightMode) {
+    zeroIntegralError();
+    previousFlightMode = flightMode;
+    if (flightMode == SIMPLE_FLIGHT_MODE)
+        simpleModeInitialize = true;
+  }
 
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     processAltitudeHoldStateFromReceiverCommand();

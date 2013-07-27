@@ -56,10 +56,10 @@ void initHomeBase() {
       // Set the magnetometer declination when we get the home position set
       setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
       // Set reference location for Equirectangular projection used for coordinates
-      setProjectionLocation(currentPosition);
+      setProjectionLocation(currentPosition); // Do we need this anymore?
       
       #if defined UseGPSNavigator
-      isRouteInitialized = false;
+        isRouteInitialized = false;
       #else
         missionPositionToReach.latitude = homePosition.latitude;
         missionPositionToReach.longitude = homePosition.longitude;
@@ -150,8 +150,14 @@ void loadNewRoute() {
 /**
  * Process navigation
  */
+
 void processNavigation() {
-  // Convert lat/lon to ECEF
+  #define MAXBANKANGLE 10 // (degrees)
+  #define MAXCROSSTRACKANGLE 90 // (degrees)
+  #define MAXCROSSTRACKDISTANCE 15 // (meters)
+  const double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
+
+  // Convert lat/lon to ECI unit vector
   positionVector(presentPosition, currentPosition);
 
   // Calculate track angle error
@@ -161,7 +167,6 @@ void processNavigation() {
   vectorNormalize(presentPositionNorth);
   desiredHeading = deg(atan2(vectorDotProductDbl(normalVector, presentPositionNorth), vectorDotProductDbl(negNormalVector, presentPositionEast)));
   currentHeading = adjustHeading(heading, desiredHeading);
-  // We'll use trackAngleError when we have velocity information, use desiredHeading for now
   trackAngleError = desiredHeading - currentHeading;
 
   // Calculate cross track error
@@ -177,6 +182,8 @@ void processNavigation() {
   vectorCrossProductDbl(rangeVector, toVector, normalRangeVector);
   vectorNormalize(rangeVector);
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
+  //double distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
+  //double distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
 
   if (distanceToNextWaypoint < waypointCaptureDistance) {
     bool routeisFinished = updateWaypoints();
@@ -185,10 +192,9 @@ void processNavigation() {
   }
 
   crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
-  groundTrackHeading = desiredHeading + crossTrack; // TODO: update to fix issue aroudn +/-180
+  groundTrackHeading = desiredHeading + crossTrack; // TODO: update to fix issue around +/-180
 
-  // not used
-  gpsRollAxisCorrection = 0;
+  gpsRollAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE))/PWM2RAD;
   gpsPitchAxisCorrection = 0;
   gpsYawAxisCorrection = 0;
 }
@@ -198,7 +204,7 @@ void processPositionHold()
   // Need to figure out how to set positionHoldPointToReach
   gpsRollAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * cos(trueNorthHeading) - (missionPositionToReach.latitude - currentPosition.latitude) * sin(trueNorthHeading);
   gpsRollAxisCorrection *= positionHoldFactor;
-  gpsPitchAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * sin(trueNorthHeading) + (missionPositionToReach.latitude - currentPosition.latitude) * cos(heading);
+  gpsPitchAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * sin(trueNorthHeading) + (missionPositionToReach.latitude - currentPosition.latitude) * cos(trueNorthHeading);
   gpsPitchAxisCorrection *= positionHoldFactor;
   gpsYawAxisCorrection = 0;
 }
