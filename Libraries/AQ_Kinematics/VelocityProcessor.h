@@ -24,72 +24,42 @@
 #include "GlobalDefined.h"
 #include "AP_Buffer.h"
 
-float k1_z = 0.0;                      
-float k2_z = 0.0;                      
-float k3_z = 0.0;              
-//float accelZVelocity = 0.0;    
 float timeConstantZ = 0.1;    
-//float accelZPositionError = 0.0;
-//float accelZCorrection = 0.0;
-//float accelZVelocityIncrease = 0.0;
+float k1_z = 3 / timeConstantZ;
+float k2_z = 3 / (timeConstantZ*timeConstantZ);
+float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
+
+float computedZVelicity = 0.0;
+float zErrorPosition = 0.0;
+float zPositionCorrection = 0.0;
+float accelZCorrection = 0.0;
+float baseZPosition = 0.0;
+AP_BufferFloat_Size15 zBasePositionHistoryBuffer;
 
 void initVelocityProcessor();
 void updateVelocityProcessorGains();
 void computeVelocity(float filteredAccelZ, float dt);
-void computeVelocityErrorWithBaroAltitude(float baroAltidude);
+void computerVelocityErrorFromBaroAltitude(float baroAltitude);
 
-void initVelocityProcessor()
+
+void computerVelocityErrorFromBaroAltitude(float baroAltitude)
 {
-	updateVelocityProcessorGains();
-}
-
-void updateVelocityProcessorGains()
-{
-    if( timeConstantZ == 0 ) {
-        k1_z = k2_z = k3_z = 0;
-    }else{
-        k1_z = 3 / timeConstantZ;
-        k2_z = 3 / (timeConstantZ*timeConstantZ);
-        k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
-    }
-}
-
-//float _velocity = 0.0;
-float _velocity_z = 0.0;
-float _position_error_z = 0.0;
-float _position_correction_z = 0.0;
-float accel_correction_ef_z = 0.0;
-float velocityPreviousBaroAltitude = 0.0;
-float _position_base_z = 0.0;
-float hist_position_base_z = 0.0;
-AP_BufferFloat_Size15   _hist_position_estimate_z;
-
-void computeVelocityErrorWithBaroAltitude(float baroAltidude)
-{
-	hist_position_base_z = _hist_position_estimate_z.peek(14);
-    // calculate error in position from baro with our estimate
-    _position_error_z = baroAltidude - (hist_position_base_z + _position_correction_z);
-	velocityPreviousBaroAltitude = baroAltidude;
+	float historySum = zBasePositionHistoryBuffer.peek(14);
+    zErrorPosition = baroAltitude - (historySum + zPositionCorrection);
 }
 
 
 void computeVelocity(float filteredAccelZ, float dt)
 {
-	accel_correction_ef_z += _position_error_z * k3_z  * dt;
+	filteredAccelZ = constrain(filteredAccelZ, -10.0,10.0); // Sercurity to prevent overflow
 	
-	_velocity_z += _position_error_z * k2_z  * dt;
-	
-	_position_correction_z += _position_error_z * k1_z  * dt;
-	
-	float velocity_increase = (filteredAccelZ + accel_correction_ef_z) * dt;
-	
-	_position_base_z += (_velocity_z + velocity_increase*0.5) * dt;
-	
-	_velocity_z += velocity_increase;
-	
-	_hist_position_estimate_z.add(_position_base_z);
+	accelZCorrection += zErrorPosition * k3_z  * dt;
+	computedZVelicity += zErrorPosition * k2_z  * dt;
+	zPositionCorrection += zErrorPosition * k1_z  * dt;
+	float velocity_increase = (filteredAccelZ + accelZCorrection) * dt;
+	baseZPosition += (computedZVelicity + velocity_increase*0.5) * dt;
+	computedZVelicity += velocity_increase;
+	zBasePositionHistoryBuffer.add(baseZPosition);
 }
-
-
 
 #endif

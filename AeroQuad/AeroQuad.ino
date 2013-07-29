@@ -1352,7 +1352,6 @@ void setup() {
   
   // Optional Sensors
   #ifdef AltitudeHoldBaro
-    initVelocityProcessor();
     initializeBaro();
     vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
@@ -1425,15 +1424,15 @@ void process100HzTask() {
     
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   
-  #if defined AltitudeHoldBaro// || defined AltitudeHoldRangeFinder  
-    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+  #if defined AltitudeHoldBaro
     measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
+      computerVelocityErrorFromBaroAltitude(getBaroAltitude());
     }
-
-    computeVelocityErrorWithBaroAltitude(getBaroAltitude());
-    computeVelocity(filteredZAccel,G_Dt);
+    
+    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+    computeVelocity(filteredZAccel, G_Dt);
   #endif
         
   processFlightControl();

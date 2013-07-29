@@ -73,9 +73,14 @@ void processAltitudeHold()
     }
     
     // ZDAMPENING COMPUTATIONS
-    #if defined AltitudeHoldBaro
-      float zDampeningThrottleCorrection = -updatePID(0.0, _velocity_z, &PID[ZDAMPENING_PID_IDX]);
-    #endif
+//    #if defined AltitudeHoldBaro
+    
+      PID[ZDAMPENING_PID_IDX].P = 12;
+      PID[ZDAMPENING_PID_IDX].I = 1;
+      PID[ZDAMPENING_PID_IDX].D = 1;
+      float zDampeningThrottleCorrection = updatePID(0.0, computedZVelicity, &PID[ZDAMPENING_PID_IDX]);
+//      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+//    #endif
 
     
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
