@@ -60,13 +60,13 @@ void processHeading()
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
       
-      #if defined (UseGPSNavigator)
-        if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
-            ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
-      #else
-        if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || 
-            (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
-      #endif
+    #if defined (UseGPSNavigator)
+      if (( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) ||
+          ( (receiverCommand[ZAXIS] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
+    #else
+      if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) ||
+          (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
+    #endif
 
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
@@ -91,11 +91,11 @@ void processHeading()
         else {
           #if defined (UseGPSNavigator)
             if (navigationState == ON) {
-              PID[HEADING_HOLD_PID_IDX].P = navigatorHeadingGain; // currently init in AeroQuad.h
+              //PID[HEADING_HOLD_PID_IDX].P = navigatorHeadingGain; // currently init in AeroQuad.h
               headingHold = updatePID(groundTrackHeading, heading, &PID[HEADING_HOLD_PID_IDX]);
             }
             else {
-              PID[HEADING_HOLD_PID_IDX].P = normalHeadingGain;
+              //PID[HEADING_HOLD_PID_IDX].P = normalHeadingGain;
               headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
               headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
             }

@@ -258,11 +258,13 @@ void reportVehicleState();
     double distanceToNextWaypoint = 99999999.0;
     const double earthRadius = 6378100.0; // meters
     const double waypointCaptureDistance = 2.0; // meters
-    float positionHoldFactor = 1.0;
     byte navigatorSerialCommand = OFF; // TODO: remove when autopilot working
     bool isRouteInitialized = false;
     float navigatorHeadingGain = 1.0;
     float normalHeadingGain = 3.0; // TODO: should we create a PID for autopilot?
+    double distanceToGoAlongPath, distanceToGoPosition; // TODO: remove?
+    float posRollCommand, posPitchCommand;
+    long latDelta, lonDelta;
 
     // make local when working
     float distanceFromStartToPosition;

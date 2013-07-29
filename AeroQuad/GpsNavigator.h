@@ -79,6 +79,11 @@ double deg(double radians) {
   return radians * 57.2957795;
 }
 
+long pwm(float angle) {
+  // 0 to 90 degrees = 0 to 1500 PWM
+  return (long)angle*16.6666667;
+}
+
 double adjustHeading(double currentHeading, double desiredHeading) {
   if ((desiredHeading < -90.0) && (currentHeading > (desiredHeading + 180.0)))
     return currentHeading -= 360.0;
@@ -89,6 +94,20 @@ double adjustHeading(double currentHeading, double desiredHeading) {
   if ((desiredHeading < 90.0) && (currentHeading < (desiredHeading - 180.0)))
     return currentHeading += 360.0;
   return currentHeading;
+}
+
+void estimateVelocity(double *velVector, long gpsSpeed, long gpsBearing) {
+  // Currently this function will estimate velocity with GPS info only
+  // Future version needs to calculate velocity from accelerometers also
+  // velocity vector units are in cm/s
+  double speed = (double)gpsSpeed/100000.0;
+  double heading = (double)gpsBearing * GPS2RAD;
+  if (heading > PI)
+    heading -= 2*PI;
+
+  velVector[0] = speed*cos(heading);
+  velVector[1] = speed*sin(heading);
+  velVector[2] = 0.0; // figure out how to estimate velocity in altitude
 }
 
 void positionVector(double *vector, GeodeticPosition position) {
@@ -182,8 +201,8 @@ void processNavigation() {
   vectorCrossProductDbl(rangeVector, toVector, normalRangeVector);
   vectorNormalize(rangeVector);
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
-  //double distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
-  //double distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
+  distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
+  distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
 
   if (distanceToNextWaypoint < waypointCaptureDistance) {
     bool routeisFinished = updateWaypoints();
@@ -196,16 +215,21 @@ void processNavigation() {
 
   gpsRollAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE))/PWM2RAD;
   gpsPitchAxisCorrection = 0;
-  gpsYawAxisCorrection = 0;
+  gpsYawAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE))/PWM2RAD;
 }
 
 void processPositionHold()
 {
-  // Need to figure out how to set positionHoldPointToReach
-  gpsRollAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * cos(trueNorthHeading) - (missionPositionToReach.latitude - currentPosition.latitude) * sin(trueNorthHeading);
-  gpsRollAxisCorrection *= positionHoldFactor;
-  gpsPitchAxisCorrection = (positionHoldPointToReach.longitude - currentPosition.longitude) * sin(trueNorthHeading) + (missionPositionToReach.latitude - currentPosition.latitude) * cos(trueNorthHeading);
-  gpsPitchAxisCorrection *= positionHoldFactor;
+  const long maxPosAngle = pwm(10.0); // Calculate desired degrees in PWM
+  latDelta = positionHoldPointToReach.latitude - currentPosition.latitude;
+  lonDelta = positionHoldPointToReach.longitude - currentPosition.longitude;
+
+  posRollCommand = -updatePID(0, lonDelta*cos(trueNorthHeading) - latDelta*sin(trueNorthHeading), &PID[GPSROLL_PID_IDX]);
+  gpsRollAxisCorrection = constrain(posRollCommand, -maxPosAngle, maxPosAngle);
+
+  posPitchCommand = -updatePID(0, lonDelta*sin(trueNorthHeading) + latDelta*cos(trueNorthHeading), &PID[GPSPITCH_PID_IDX]);
+  gpsPitchAxisCorrection = constrain(posPitchCommand, -maxPosAngle, maxPosAngle);
+
   gpsYawAxisCorrection = 0;
 }
 

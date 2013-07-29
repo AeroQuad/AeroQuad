@@ -388,14 +388,31 @@ void sendSerialTelemetry() {
     SERIAL_PRINT(desiredHeading);
     SERIAL_PRINT(" Cur:");
     SERIAL_PRINT(currentHeading);
-    SERIAL_PRINT(" xTk:");
-    SERIAL_PRINT(crossTrackError);
+    //SERIAL_PRINT(" xTk:");
+    //SERIAL_PRINT(crossTrackError);
     SERIAL_PRINT(" trkG:");
     SERIAL_PRINT(groundTrackHeading);
-    SERIAL_PRINT(" dstNxtWP:");
-    SERIAL_PRINT(distanceToNextWaypoint);
-    SERIAL_PRINT(" WP:");
-    SERIAL_PRINTLN(waypointIndex);
+    //SERIAL_PRINT(" dstNxtWP:");
+    //SERIAL_PRINT(distanceToNextWaypoint);
+    //SERIAL_PRINT(" dstToGoAP:");
+    //SERIAL_PRINT(distanceToGoAlongPath);
+    //SERIAL_PRINT(" dstToGoPos");
+    //SERIAL_PRINT(distanceToGoPosition);
+    //SERIAL_PRINT(" WP:");
+    //SERIAL_PRINT(waypointIndex);
+    SERIAL_PRINT(" latDelta:");
+    SERIAL_PRINT(latDelta);
+    SERIAL_PRINT(" lonDelta:");
+    SERIAL_PRINT(lonDelta);
+    SERIAL_PRINT(" rollCmd:");
+    SERIAL_PRINT(posRollCommand);
+    SERIAL_PRINT(" pitchCmd:");
+    SERIAL_PRINT(posPitchCommand);
+    SERIAL_PRINT(" gpsRollAxisCorrection:");
+    SERIAL_PRINT(gpsRollAxisCorrection);
+    SERIAL_PRINT(" gpsPitchAxisCorrection:");
+    SERIAL_PRINT(gpsPitchAxisCorrection);
+    SERIAL_PRINTLN();
     break;
 
   case 'a': // Send roll and pitch rate mode PID values

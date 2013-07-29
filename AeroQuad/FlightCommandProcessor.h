@@ -25,8 +25,8 @@
 #define _AQ_FLIGHT_COMMAND_READER_
 
 // If AUX1>MAXSWITCH then altitude hold is off
-// If AUX1<MAXSWITCH and AUX1>MINSWITCH then altitude hold and autopilot(if enabled) is on
-// if AUX1<MINSWITCH then altitude hold and position hold(if enabled) is on
+// If AUX1<MAXSWITCH and AUX1>MINSWITCH then altitude hold and position hold(if enabled) is on
+// if AUX1<MINSWITCH then altitude hold and autopilot(if enabled) is on
 
 // Need to figure out how to enable return to home
 // Maybe AUX1 sets altitude hold, position hold and return to home
@@ -110,7 +110,7 @@
     }
 
 
-    if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable autopilot
+    if (receiverCommand[AUX1] < MINSWITCH) {  // Enable autopilot
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -130,7 +130,7 @@
   
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < MINSWITCH) {  // Enable position hold
+    else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -140,6 +140,9 @@
         positionHoldPointToReach.longitude = currentPosition.longitude;
         positionHoldPointToReach.altitude = getBaroAltitude();
         isPositionHoldInitialized = true;
+        PID[GPSROLL_PID_IDX].integratedError = 0;
+        PID[GPSPITCH_PID_IDX].integratedError = 0;
+        PID[GPSYAW_PID_IDX].integratedError = 0;
       }
   
       isGpsNavigationInitialized = false;  // disable navigation
@@ -272,7 +275,7 @@ void readPilotCommands() {
   }
 
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    processAltitudeHoldStateFromReceiverCommand();
+    //processAltitudeHoldStateFromReceiverCommand();
   #endif
   
   #if defined (AutoLanding)
