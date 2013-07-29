@@ -231,6 +231,14 @@ void processPositionHold()
   gpsPitchAxisCorrection = constrain(posPitchCommand, -maxPosAngle, maxPosAngle);
 
   gpsYawAxisCorrection = 0;
+
+  PIDdata velPID; // TODO: add to EEPROM
+  velPID.P = 1.0;
+  velPID.I = 0.0;
+  velPID.D = 0.0;
+  estimateVelocity(velocityVector, gpsData.speed, gpsData.course);
+  velRollCommand = updatePID(0, velocityVector[0], &velPID); // cm/s
+  velPitchCommand = updatePID(0, velocityVector[1], &velPID); // cm/s
 }
 
 /**

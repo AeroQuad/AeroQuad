@@ -263,8 +263,12 @@ void reportVehicleState();
     float navigatorHeadingGain = 1.0;
     float normalHeadingGain = 3.0; // TODO: should we create a PID for autopilot?
     double distanceToGoAlongPath, distanceToGoPosition; // TODO: remove?
-    float posRollCommand, posPitchCommand;
-    long latDelta, lonDelta;
+    float posRollCommand, posPitchCommand; // TODO: remove?
+    long latDelta, lonDelta; // TODO: remove?
+
+    double velocityVector[3];
+    int velRollCommand = 0;
+    int velPitchCommand = 0;
 
     // make local when working
     float distanceFromStartToPosition;
