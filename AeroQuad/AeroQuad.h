@@ -267,8 +267,13 @@ void reportVehicleState();
     long latDelta, lonDelta; // TODO: remove?
 
     double velocityVector[3];
+    float velX = 0.0, velY = 0.0, velZ = 0.0;
     int velRollCommand = 0;
     int velPitchCommand = 0;
+    double estSpeed, estCourse;
+    double previousLat = 0.0;
+    double previousLon = 0.0;
+    double gpsVelocity[3], accVelocity[3];
 
     // make local when working
     float distanceFromStartToPosition;

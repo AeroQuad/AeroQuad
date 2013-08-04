@@ -96,18 +96,58 @@ double adjustHeading(double currentHeading, double desiredHeading) {
   return currentHeading;
 }
 
-void estimateVelocity(double *velVector, long gpsSpeed, long gpsBearing) {
-  // Currently this function will estimate velocity with GPS info only
-  // Future version needs to calculate velocity from accelerometers also
-  // velocity vector units are in cm/s
-  double speed = (double)gpsSpeed/100000.0;
-  double heading = (double)gpsBearing * GPS2RAD;
-  if (heading > PI)
-    heading -= 2*PI;
 
-  velVector[0] = speed*cos(heading);
-  velVector[1] = speed*sin(heading);
-  velVector[2] = 0.0; // figure out how to estimate velocity in altitude
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  // from http://www.movable-type.co.uk/scripts/latlong.html
+  return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(lon2-lon1)) * earthRadius;
+}
+
+double calculateCourse(double lat1, double lon1, double lat2, double lon2) {
+  // from http://www.movable-type.co.uk/scripts/latlong.html
+  // assume all units are radians
+  double y = sin(lon2-lon1) * cos(lat2);
+  double x = cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(lon2-lon1);
+  return atan2(y, x);
+}
+
+void estimateGPSVelocity() {
+  // This function is current placed in the 1Hz task to provide m/s velocity estimation
+  // 1 Hz updates were chosen because uBlox6 GPS is setup for 1Hz update rate
+  double currentLat = (double)currentPosition.latitude * GPS2RAD;
+  double currentLon = (double)currentPosition.longitude * GPS2RAD;
+  double deltaDist = calculateDistance(previousLat, previousLon, currentLat, currentLon);
+  estSpeed = deltaDist/(double)G_Dt*100.0; // units in cm/s
+  estCourse = deg(calculateCourse(previousLat, previousLon, currentLat, currentLon));
+  previousLat = currentLat;
+  previousLon = currentLon;
+}
+
+void estimateVelocity() {
+  const double smoothFactor = 0.3;
+  const double blendFactor = 0.3;
+
+  double gpsCourse = (double)gpsData.course/10.0E2;
+  if (gpsCourse>180.0) gpsCourse -= 360.0;
+  gpsCourse = rad(gpsCourse);
+  gpsVelocity[0] = (double)getGpsSpeed()*cos(gpsCourse); //Vnorth
+  gpsVelocity[1] = (double)getGpsSpeed()*sin(gpsCourse); //Veast
+  gpsVelocity[2] = 0.0; // figure out how to estimate velocity in altitude later
+
+  // estimate X, Y, Z velocities
+  for (int axis=XAXIS; axis<=ZAXIS; axis++) {
+    smoothedAcc[axis] =  filterSmooth(acc[axis] * G_Dt * 980.665, smoothedAcc[axis], smoothFactor); // cm/s
+  }
+
+  accVelocity[0] = smoothedAcc[XAXIS]*cos(trueNorthHeading) - smoothedAcc[YAXIS]*sin(trueNorthHeading);
+  accVelocity[1] = smoothedAcc[XAXIS]*sin(trueNorthHeading) + smoothedAcc[YAXIS]*cos(trueNorthHeading);
+  accVelocity[2] = 0.0;
+
+  for (int axis=XAXIS; axis <=ZAXIS; axis++) {
+    if (getGpsSpeed() <= 1)
+      velocityVector[axis] = 0.0;
+    else
+      velocityVector[axis] = filterSmooth(accVelocity[axis], gpsVelocity[axis], blendFactor);
+  }
 }
 
 void positionVector(double *vector, GeodeticPosition position) {
@@ -236,9 +276,9 @@ void processPositionHold()
   velPID.P = 1.0;
   velPID.I = 0.0;
   velPID.D = 0.0;
-  estimateVelocity(velocityVector, gpsData.speed, gpsData.course);
-  velRollCommand = updatePID(0, velocityVector[0], &velPID); // cm/s
-  velPitchCommand = updatePID(0, velocityVector[1], &velPID); // cm/s
+  //estimateVelocity(velocityVector, gpsData.speed, gpsData.course);
+  velRollCommand = updatePID(0, velocityVector[XAXIS], &velPID); // cm/s
+  velPitchCommand = updatePID(0, velocityVector[YAXIS], &velPID); // cm/s
 }
 
 /**

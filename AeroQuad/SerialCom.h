@@ -381,17 +381,17 @@ void sendSerialTelemetry() {
 
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    if ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
-      SERIAL_PRINT("Enabled: Des:");
-    else
-      SERIAL_PRINT("Disabled: Des:");
-    SERIAL_PRINT(desiredHeading);
-    SERIAL_PRINT(" Cur:");
-    SERIAL_PRINT(currentHeading);
+    // ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
+    //  SERIAL_PRINT("Enabled: Des:");
+    //else
+    //  SERIAL_PRINT("Disabled: Des:");
+    //SERIAL_PRINT(desiredHeading);
+    //SERIAL_PRINT(" Cur:");
+    //SERIAL_PRINT(currentHeading);
     //SERIAL_PRINT(" xTk:");
     //SERIAL_PRINT(crossTrackError);
-    SERIAL_PRINT(" trkG:");
-    SERIAL_PRINT(groundTrackHeading);
+    //SERIAL_PRINT(" trkG:");
+    //SERIAL_PRINT(groundTrackHeading);
     //SERIAL_PRINT(" dstNxtWP:");
     //SERIAL_PRINT(distanceToNextWaypoint);
     //SERIAL_PRINT(" dstToGoAP:");
@@ -400,18 +400,38 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(distanceToGoPosition);
     //SERIAL_PRINT(" WP:");
     //SERIAL_PRINT(waypointIndex);
-    SERIAL_PRINT(" latDelta:");
-    SERIAL_PRINT(latDelta);
-    SERIAL_PRINT(" lonDelta:");
-    SERIAL_PRINT(lonDelta);
-    SERIAL_PRINT(" rollCmd:");
-    SERIAL_PRINT(posRollCommand);
-    SERIAL_PRINT(" pitchCmd:");
-    SERIAL_PRINT(posPitchCommand);
-    SERIAL_PRINT(" gpsRollAxisCorrection:");
-    SERIAL_PRINT(gpsRollAxisCorrection);
-    SERIAL_PRINT(" gpsPitchAxisCorrection:");
-    SERIAL_PRINT(gpsPitchAxisCorrection);
+    SERIAL_PRINT(" Course:");
+    SERIAL_PRINT((double)gpsData.course/10.0E2);
+    //SERIAL_PRINT(" estCourse:");
+    //SERIAL_PRINT(estCourse);
+    SERIAL_PRINT(" Speed:");
+    SERIAL_PRINT(gpsData.speed);
+    //SERIAL_PRINT(" estSpeed:");
+    //SERIAL_PRINT(estSpeed);
+    SERIAL_PRINT(" velGpsN:");
+    SERIAL_PRINT(gpsVelocity[0]);
+    SERIAL_PRINT(" velGpsE:");
+    SERIAL_PRINT(gpsVelocity[1]);
+    //SERIAL_PRINT(" velY:");
+    //SERIAL_PRINT(velocityVector[YAXIS]);
+    //SERIAL_PRINT(" velZ:");
+    //SERIAL_PRINT(velocityVector[ZAXIS]);
+    //SERIAL_PRINT(" latDelta:");
+    //SERIAL_PRINT(latDelta);
+    //SERIAL_PRINT(" lonDelta:");
+    //SERIAL_PRINT(lonDelta);
+    //SERIAL_PRINT(" rollCmd:");
+    //SERIAL_PRINT(posRollCommand);
+    //SERIAL_PRINT(" pitchCmd:");
+    //SERIAL_PRINT(posPitchCommand);
+    //SERIAL_PRINT(" gpsRollAxisCorrection:");
+    //SERIAL_PRINT(gpsRollAxisCorrection);
+    //SERIAL_PRINT(" gpsPitchAxisCorrection:");
+    //SERIAL_PRINT(gpsPitchAxisCorrection);
+    //SERIAL_PRINT(" velRoll:");
+    //SERIAL_PRINT(velRollCommand);
+    //SERIAL_PRINT(" velPitch:");
+    //SERIAL_PRINT(velPitchCommand);
     SERIAL_PRINTLN();
     break;
 

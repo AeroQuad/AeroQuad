@@ -136,6 +136,9 @@ void ubloxParseData() {// uses publib vars
     else if (ubloxId==18) { // NAV:VELNED
       gpsData.course = ubloxMessage.nav_velned.heading / 100; // 10E-5 to millidegrees
       gpsData.speed = ubloxMessage.nav_velned.gSpeed;
+      gpsData.velN = ubloxMessage.nav_velned.velN;
+      gpsData.velE = ubloxMessage.nav_velned.velE;
+      gpsData.velD = ubloxMessage.nav_velned.velD;
     }
   } 
 }

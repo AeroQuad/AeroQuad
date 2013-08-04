@@ -1439,6 +1439,10 @@ void process100HzTask() {
       evaluateBaroAltitude();
     }
   #endif
+
+  #ifdef UseGPS
+    estimateVelocity();
+  #endif
         
   processFlightControl();
   
@@ -1506,6 +1510,9 @@ void process10HzTask1() {
     calculateHeading();
     
   #endif
+  #if defined(UseGPS)
+      estimateGPSVelocity();
+  #endif
 }
 
 /*******************************************************************
@@ -1552,11 +1559,13 @@ void process10HzTask3() {
  * 1Hz task 
  ******************************************************************/
 void process1HzTask() {
+  G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
+  oneHZpreviousTime = currentTime;
   #ifdef MavLink
-    G_Dt = (currentTime - oneHZpreviousTime) / 1000000.0;
-    oneHZpreviousTime = currentTime;
-    
     sendSerialHeartbeat();   
+  #endif
+  #ifdef UseGPS
+    estimateGPSVelocity();
   #endif
 }
 
