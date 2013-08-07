@@ -39,10 +39,10 @@ AP_BufferFloat_Size15 zBasePositionHistoryBuffer;
 void initVelocityProcessor();
 void updateVelocityProcessorGains();
 void computeVelocity(float filteredAccelZ, float dt);
-void computerVelocityErrorFromBaroAltitude(float baroAltitude);
+void computeVelocityErrorFromBaroAltitude(float baroAltitude);
 
 
-void computerVelocityErrorFromBaroAltitude(float baroAltitude)
+void computeVelocityErrorFromBaroAltitude(float baroAltitude)
 {
 	float historySum = zBasePositionHistoryBuffer.peek(14);
     zErrorPosition = baroAltitude - (historySum + zPositionCorrection);
@@ -51,7 +51,7 @@ void computerVelocityErrorFromBaroAltitude(float baroAltitude)
 
 void computeVelocity(float filteredAccelZ, float dt)
 {
-	filteredAccelZ = constrain(filteredAccelZ, -10.0,10.0); // Sercurity to prevent overflow
+	filteredAccelZ = constrain(filteredAccelZ, -9.0,9.0); // Sercurity to prevent overflow
 	
 	accelZCorrection += zErrorPosition * k3_z  * dt;
 	computedZVelicity += zErrorPosition * k2_z  * dt;

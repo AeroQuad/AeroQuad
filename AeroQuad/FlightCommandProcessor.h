@@ -49,7 +49,7 @@
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (!isAltitudeHoldInitialized) {
           #if defined AltitudeHoldBaro
-            baroAltitudeToHoldTarget = getBaroAltitude();
+            baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif

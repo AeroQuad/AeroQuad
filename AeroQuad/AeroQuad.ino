@@ -1425,14 +1425,26 @@ void process100HzTask() {
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   
   #if defined AltitudeHoldBaro
+    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+    computeVelocity(filteredZAccel, G_Dt);
+    zVelocitySum+=computedZVelicity;
+    zVelocityCount++;
+   
     measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
-      computerVelocityErrorFromBaroAltitude(getBaroAltitude());
+      computeVelocityErrorFromBaroAltitude(getBaroAltitude());
+      
+      zVelocity = filterSmooth(zVelocitySum / zVelocityCount,previousZVelocity,0.1);
+      previousZVelocity = zVelocity;
+      zVelocitySum = 0.0;
+      zVelocityCount = 0;
+      
+      float estimatedBaroAltitude = ((previousBaroAltitude+getBaroAltitude())/2) + (zVelocity / 50.0);
+      estimatedAltitude = ((getBaroAltitude()*0.5) + (estimatedBaroAltitude*0.5));
+      
+      previousBaroAltitude = getBaroAltitude();
     }
-    
-    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
-    computeVelocity(filteredZAccel, G_Dt);
   #endif
         
   processFlightControl();

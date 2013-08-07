@@ -1,8 +1,5 @@
 // -*- tab-width: 4; Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/// @file	AP_Buffer.h
-/// @brief	fifo buffer template class
-
 #ifndef __AP_BUFFER_H__
 #define __AP_BUFFER_H__
 

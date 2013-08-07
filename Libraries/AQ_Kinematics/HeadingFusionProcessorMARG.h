@@ -72,8 +72,7 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   hx = mx * 2*(0.5 - lq2*lq2 - lq3*lq3) + my * 2*(lq1*lq2 - lq0*lq3)       + mz * 2*(lq1*lq3 + lq0*lq2);
   hy = mx * 2*(lq1*lq2 + lq0*lq3)       + my * 2*(0.5 - lq1*lq1 - lq3*lq3) + mz * 2*(lq2*lq3 - lq0*lq1);
   hz = mx * 2*(lq1*lq3 - lq0*lq2)       + my * 2*(lq2*lq3 + lq0*lq1)       + mz * 2*(0.5 - lq1*lq1 - lq2*lq2);
-    
-  bx = sqrt((hx*hx) + (hy*hy));
+  bx = sqrt(hx * hx + hy * hy);
   bz = hz;
 
 
