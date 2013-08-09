@@ -220,7 +220,7 @@ void initializeEEPROM() {
   #endif
   
   #if defined (UseGPSNavigator)
-    missionNbPoint = 0;
+    missionNbPoint = -1;
     PID[GPSROLL_PID_IDX].P = 0.8;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;

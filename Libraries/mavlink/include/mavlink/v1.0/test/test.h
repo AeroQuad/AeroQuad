@@ -27,6 +27,10 @@ extern "C" {
 
 #define MAVLINK_ENABLED_TEST
 
+// ENUM DEFINITIONS
+
+
+
 
 
 // MAVLINK VERSION
@@ -39,10 +43,6 @@ extern "C" {
 #undef MAVLINK_VERSION
 #define MAVLINK_VERSION 3
 #endif
-
-// ENUM DEFINITIONS
-
-
 
 // MESSAGE DEFINITIONS
 #include "./mavlink_msg_test_types.h"
