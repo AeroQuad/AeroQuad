@@ -229,7 +229,7 @@ void reportVehicleState();
     byte navigationState = OFF;  // ON, OFF or ALTPANIC
     byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-    int missionNbPoint = 0;
+    int missionNbPoint = -1; // Index of last waypoint, -1 if no waypoint present
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
     int gpsYawAxisCorrection = 0;
