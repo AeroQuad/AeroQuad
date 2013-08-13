@@ -32,7 +32,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "AeroQuad.h"
 
-const int autopilotType = MAV_AUTOPILOT_AEROQUAD;
+const int autopilotType = MAV_AUTOPILOT_GENERIC;
 int systemType = MAV_TYPE_GENERIC;
 uint8_t baseMode = MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 uint32_t customMode = 0; // for future use
@@ -1141,10 +1141,10 @@ void readSerialCommand() {
 		//try to get a new message
 		if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
 			// Handle message
-			uint8_t result = 0;
-			uint16_t command = 0;
 			float x = 0, y = 0, z = 0;
+			uint8_t result = MAV_RESULT_UNSUPPORTED;
 			uint8_t isCurrentWaypoint = 0;
+
 			switch(msg.msgid) {
 
 			case MAVLINK_MSG_ID_COMMAND_LONG:
@@ -1153,47 +1153,56 @@ void readSerialCommand() {
 
 				switch(commandPacket.command) {
 					// (yet) unsupported commands/features
-				case MAV_CMD_NAV_WAYPOINT: //16
-				case MAV_CMD_NAV_LOITER_UNLIM: //17
-				case MAV_CMD_NAV_LOITER_TURNS: //18
-				case MAV_CMD_NAV_LOITER_TIME: //19
-				case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
-				case MAV_CMD_NAV_LAND: //21
-				case MAV_CMD_NAV_TAKEOFF: //22
-				case MAV_CMD_NAV_ROI: //80
-				case MAV_CMD_NAV_PATHPLANNING: //81
-				case MAV_CMD_NAV_LAST: //95
-				case MAV_CMD_CONDITION_DELAY: //112
-				case MAV_CMD_CONDITION_CHANGE_ALT: //113
-				case MAV_CMD_CONDITION_DISTANCE: //114
-				case MAV_CMD_CONDITION_YAW: //115
-				case MAV_CMD_CONDITION_LAST: //159
-				case MAV_CMD_DO_SET_MODE: //176
-				case MAV_CMD_DO_JUMP: //177
-				case MAV_CMD_DO_CHANGE_SPEED: //178
-				case MAV_CMD_DO_SET_PARAMETER: //180
-				case MAV_CMD_DO_SET_RELAY: //181
-				case MAV_CMD_DO_REPEAT_RELAY: //182
-				case MAV_CMD_DO_SET_SERVO: //183
-				case MAV_CMD_DO_REPEAT_SERVO: //184
-				case MAV_CMD_DO_CONTROL_VIDEO: //200
-				case MAV_CMD_DO_LAST: //240
-				case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
-				case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
-				case MAV_CMD_OVERRIDE_GOTO: //252
-				case MAV_CMD_MISSION_START: //300
-					result = MAV_RESULT_UNSUPPORTED;
-					break;
+					//case MAV_CMD_NAV_WAYPOINT: //16
+					//case MAV_CMD_NAV_LOITER_UNLIM: //17
+					//case MAV_CMD_NAV_LOITER_TURNS: //18
+					//case MAV_CMD_NAV_LOITER_TIME: //19
+					//case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
+					//case MAV_CMD_NAV_LAND: //21
+					//case MAV_CMD_NAV_TAKEOFF: //22
+					//case MAV_CMD_NAV_ROI: //80
+					//case MAV_CMD_NAV_PATHPLANNING: //81
+					//case MAV_CMD_NAV_LAST: //95
+					//case MAV_CMD_CONDITION_DELAY: //112
+					//case MAV_CMD_CONDITION_CHANGE_ALT: //113
+					//case MAV_CMD_CONDITION_DISTANCE: //114
+					//case MAV_CMD_CONDITION_YAW: //115
+					//case MAV_CMD_CONDITION_LAST: //159
+					//case MAV_CMD_DO_SET_MODE: //176
+					//case MAV_CMD_DO_JUMP: //177
+					//case MAV_CMD_DO_CHANGE_SPEED: //178
+					//case MAV_CMD_DO_SET_PARAMETER: //180
+					//case MAV_CMD_DO_SET_RELAY: //181
+					//case MAV_CMD_DO_REPEAT_RELAY: //182
+					//case MAV_CMD_DO_SET_SERVO: //183
+					//case MAV_CMD_DO_REPEAT_SERVO: //184
+					//case MAV_CMD_DO_CONTROL_VIDEO: //200
+					//case MAV_CMD_DO_LAST: //240
+					//case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
+					//case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
+					//case MAV_CMD_OVERRIDE_GOTO: //252
+					//case MAV_CMD_MISSION_START: //300
+					//	result = MAV_RESULT_UNSUPPORTED;
+					//	break;
 
-					//TODO not working yet
 				case MAV_CMD_COMPONENT_ARM_DISARM: //400, toggle between armed/disarmed
 					if (commandPacket.param1 == 1.0f) {
-						armMotors();
-						result = MAV_RESULT_ACCEPTED;
+						if(motorArmed) {
+							armMotors();
+							result = MAV_RESULT_ACCEPTED;
+						}
+						else {
+							result = MAV_RESULT_TEMPORARILY_REJECTED;
+						}
 					}
 					else if (commandPacket.param1 == 0.0f) {
-						disarmMotors();
-						result = MAV_RESULT_ACCEPTED;
+						if(!motorArmed) {
+							disarmMotors();
+							result = MAV_RESULT_ACCEPTED;
+						}
+						else {
+							result = MAV_RESULT_TEMPORARILY_REJECTED;
+						}
 					}
 					else {
 						result = MAV_RESULT_UNSUPPORTED;
@@ -1276,10 +1285,26 @@ void readSerialCommand() {
 				default:
 					result = MAV_RESULT_UNSUPPORTED;
 					break;
+				}
 
-					mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, command, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+				mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, commandPacket.command, result);
+				len = mavlink_msg_to_send_buffer(buf, &msg);
+				SERIAL_PORT.write(buf, len);
+				break;
+
+			case MAVLINK_MSG_ID_SET_MODE: // set the base mode (only arming/disarming makes sense for now)
+				__mavlink_set_mode_t modePacket;
+				mavlink_msg_set_mode_decode(&msg, &modePacket);
+
+				if(modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+					if(!motorArmed) {
+						armMotors();
+					}
+				}
+				else if(!(modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
+					if(motorArmed) {
+						disarmMotors();
+					}
 				}
 				break;
 

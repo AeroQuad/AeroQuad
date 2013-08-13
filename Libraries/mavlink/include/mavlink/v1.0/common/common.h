@@ -48,8 +48,7 @@ enum MAV_AUTOPILOT
 	MAV_AUTOPILOT_UDB=10, /* UAV Dev Board | */
 	MAV_AUTOPILOT_FP=11, /* FlexiPilot | */
 	MAV_AUTOPILOT_PX4=12, /* PX4 Autopilot - http://pixhawk.ethz.ch/px4/ | */
-	MAV_AUTOPILOT_AEROQUAD=13, /* AeroQuad, http://aeroquad.com */
-	MAV_AUTOPILOT_ENUM_END=14, /*  | */
+	MAV_AUTOPILOT_ENUM_END=13, /*  | */
 };
 #endif
 
