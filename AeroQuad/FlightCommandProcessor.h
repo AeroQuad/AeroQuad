@@ -167,74 +167,81 @@
 #endif
 
 
+void armMotors() {
+  #ifdef OSD_SYSTEM_MENU
+    if (menuOwnsSticks) {
+      return;
+    }
+  #endif
 
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    motorCommand[motor] = MINTHROTTLE;
+  }
+  motorArmed = ON;
+  
+  #ifdef EnableLogging
+    logEnd();
+    logInit();
+    //logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
+  #endif
+
+  #ifdef OSD
+    notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
+  #endif  
+
+  zeroIntegralError();
+}
+
+void disarmMotors() {
+  commandAllMotors(MINCOMMAND);
+  motorArmed = OFF;
+  inFlight = false;
+
+  #ifdef EnableLogging
+    logEnd();
+  #endif
+
+  #ifdef OSD
+    notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
+  #endif
+
+  #if defined BattMonitorAutoDescent
+    batteryMonitorAlarmCounter = 0;
+    batteryMonitorStartThrottle = 0;
+    batteyMonitorThrottleCorrection = 0.0;
+  #endif
+}
+
+void zeroGyroAccel() {
+  calibrateGyro();
+  computeAccelBias();
+  storeSensorsZeroToEEPROM();
+  calibrateKinematics();
+  zeroIntegralError();
+  pulseMotors(3);
+}
 
 void processZeroThrottleFunctionFromReceiverCommand() {
   // Disarm motors (left stick lower left corner)
   if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
-    commandAllMotors(MINCOMMAND);
-    motorArmed = OFF;
-    inFlight = false;
-
-    #ifdef EnableLogging
-      logEnd();
-    #endif
-
-    #ifdef OSD
-      notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
-    #endif
-
-    #if defined BattMonitorAutoDescent
-      batteryMonitorAlarmCounter = 0;
-      batteryMonitorStartThrottle = 0;
-      batteyMonitorThrottleCorrection = 0.0;
-    #endif
+	disarmMotors();
   }    
 
   // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
   if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {
-    calibrateGyro();
-    computeAccelBias();
-    storeSensorsZeroToEEPROM();
-    calibrateKinematics();
-    zeroIntegralError();
-    pulseMotors(3);
+	zeroGyroAccel();
   }   
 
   // Arm motors (left stick lower right corner)
   if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
-
-    #ifdef OSD_SYSTEM_MENU
-      if (menuOwnsSticks) {
-        return;
-      }
-    #endif
-
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-    motorArmed = ON;
-
-    #ifdef EnableLogging
-      logEnd();
-      logInit();
-      //logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
-    #endif
-
-    #ifdef OSD
-      notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
-    #endif  
-
-    zeroIntegralError();
-
+	armMotors();
   }
+
   // Prevents accidental arming of motor output if no transmitter command received
   if (receiverCommand[ZAXIS] > MINCHECK) {
     safetyCheck = ON; 
   }
 }
-
-
 
 
 /**
