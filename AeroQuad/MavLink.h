@@ -61,6 +61,55 @@ int waypointIndexToBeRequested = -1; // Index of single waypoint to be requested
 int waypointLastRequestedIndex = -1; // Index of the most recent requested waypoint
 int waypointIndexToBeSent = -1; // Index of waypoint to be sent
 
+// Variables for transmitter calibration
+// default channel order in QGroundControl is:
+// 1=roll, 2=pitch, 3=yaw, 4=throttle, 5=mode sw, 6-8=aux 1-3
+const char* parameterNameTxMode = "RC_TYPE";
+const char* parameterNameCh1Min = "RC1_MIN";
+const char* parameterNameCh2Min = "RC2_MIN";
+const char* parameterNameCh3Min = "RC3_MIN";
+const char* parameterNameCh4Min = "RC4_MIN";
+const char* parameterNameCh5Min = "RC5_MIN";
+const char* parameterNameCh6Min = "RC6_MIN";
+const char* parameterNameCh7Min = "RC7_MIN";
+const char* parameterNameCh8Min = "RC8_MIN";
+const char* parameterNameCh1Max = "RC1_MAX";
+const char* parameterNameCh2Max = "RC2_MAX";
+const char* parameterNameCh3Max = "RC3_MAX";
+const char* parameterNameCh4Max = "RC4_MAX";
+const char* parameterNameCh5Max = "RC5_MAX";
+const char* parameterNameCh6Max = "RC6_MAX";
+const char* parameterNameCh7Max = "RC7_MAX";
+const char* parameterNameCh8Max = "RC8_MAX";
+const char* parameterNameCh1Trim = "RC1_TRIM";
+const char* parameterNameCh2Trim = "RC2_TRIM";
+const char* parameterNameCh3Trim = "RC3_TRIM";
+const char* parameterNameCh4Trim = "RC4_TRIM";
+const char* parameterNameCh5Trim = "RC5_TRIM";
+const char* parameterNameCh6Trim = "RC6_TRIM";
+const char* parameterNameCh7Trim = "RC7_TRIM";
+const char* parameterNameCh8Trim = "RC8_TRIM";
+const char* parameterNameCh1Rev = "RC1_REV";
+const char* parameterNameCh2Rev = "RC2_REV";
+const char* parameterNameCh3Rev = "RC3_REV";
+const char* parameterNameCh4Rev = "RC4_REV";
+const char* parameterNameCh5Rev = "RC5_REV";
+const char* parameterNameCh6Rev = "RC6_REV";
+const char* parameterNameCh7Rev = "RC7_REV";
+const char* parameterNameCh8Rev = "RC8_REV";
+const char* parameterNameRcMapRoll = "RC_MAP_ROLL";
+const char* parameterNameRcMapPitch = "RC_MAP_PITCH";
+const char* parameterNameRcMapYaw = "RC_MAP_YAW";
+const char* parameterNameRcMapThrottle = "RC_MAP_THROTTLE";
+const char* parameterNameRcMapMode = "RC_MAP_MODE_SW";
+const char* parameterNameRcMapAux1 = "RC_MAP_AUX1";
+const char* parameterNameRcMapAux2 = "RC_MAP_AUX2";
+const char* parameterNameRcMapAux3 = "RC_MAP_AUX3";
+
+int rev = 0; // for now channels can't be reversed, so use constant value for all channels
+int txMode = 2; // setting TX mode does not have an effect in AQ now, so keep default (Mode 2)
+int rcMap = 0; //dummy value
+
 // Variables for writing and sending parameters
 enum parameterTypeIndicator
 {
@@ -111,8 +160,10 @@ const char* parameterNameHeadingD = "HeadingHold_D";
 const char* parameterNameMinThrottle = "Misc_Min Thr";
 #if defined(BattMonitor)
 const char* parameterNameBattMonAlarmVoltage = "BattMon_AlarmV";
+#if defined(BattMonitorAutoDescent)
 const char* parameterNameBattMonThrottleTarget = "BattMon_ThrTarg";
 const char* parameterNameBattMonGoingDownTime = "BattMon_DownTim";
+#endif
 #endif
 #if defined(CameraControl)
 const char* parameterNameCamMode = "Cam_Mode";
@@ -201,7 +252,11 @@ void evaluateParameterListSize() {
 #endif
 
 #if defined(BattMonitor)
-	parameterListSize += 3;
+	parameterListSize += 1;
+
+#if defined(BattMonitorAutoDescent)
+	parameterListSize += 2;
+#endif
 #endif
 
 #if defined(CameraControl)
@@ -562,11 +617,13 @@ void sendParameterListPart2() {
 	sendSerialParameter(batteryMonitorAlarmVoltage, parameterNameBattMonAlarmVoltage, parameterListSize, indexCounter);
 	indexCounter++;
 
+#if defined(BattMonitorAutoDescent)
 	sendSerialParameter(batteryMonitorThrottleTarget, parameterNameBattMonThrottleTarget, parameterListSize, indexCounter);
 	indexCounter++;
 
 	sendSerialParameter(batteryMonitorGoingDownTime, parameterNameBattMonGoingDownTime, parameterListSize, indexCounter);
 	indexCounter++;
+#endif
 #endif
 
 #if defined(CameraControl)
@@ -785,6 +842,211 @@ int findParameter(char* key) {
 		parameterInt = &minArmedThrottle;
 		return -1;
 	}
+	if (checkParameterMatch(parameterNameTxMode, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &txMode;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh1Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[0];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh2Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[1];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh3Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[2];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh4Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[3];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh5Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[4];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh6Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[5];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh7Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[6];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh8Min, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMinValue[7];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh1Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[0];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh2Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[1];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh3Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[2];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh4Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[3];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh5Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[4];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh6Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[5];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh7Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[6];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh8Max, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverMaxValue[7];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh1Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[0];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh2Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[1];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh3Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[2];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh4Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[3];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh5Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[4];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh6Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[5];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh7Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[6];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh8Trim, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &receiverTrimValue[7];
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh1Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh2Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh3Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh4Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh5Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh6Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh7Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameCh8Rev, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rev;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapRoll, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapPitch, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapYaw, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapThrottle, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapMode, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}	
+	if (checkParameterMatch(parameterNameRcMapAux1, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapAux2, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
+	if (checkParameterMatch(parameterNameRcMapAux3, key)) {
+		PIDIndicator = NONE;
+		parameterInt = &rcMap;
+		return -1;
+	}
 
 #if defined(BattMonitor)
 	if (checkParameterMatch(parameterNameBattMonAlarmVoltage, key)) {
@@ -793,6 +1055,8 @@ int findParameter(char* key) {
 		setBatteryCellVoltageThreshold(set.param_value);
 		return -1;
 	}
+
+#if defined(BattMonitorAutoDescent)
 	if (checkParameterMatch(parameterNameBattMonThrottleTarget, key)) {
 		PIDIndicator = NONE;
 		parameterInt = &batteryMonitorThrottleTarget;
@@ -803,6 +1067,7 @@ int findParameter(char* key) {
 		parameterULong = &batteryMonitorGoingDownTime;
 		return -1;
 	}
+#endif
 #endif
 
 #if defined(CameraControl)
@@ -1129,9 +1394,18 @@ void receiveWaypoint() { // request waypoints one by one from GCS
 	}
 }
 
-//TODO not working yet
+//TODO verify
 bool calculateTransmitterCalibrationValues() {
-	return false;
+	for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+		int diff = receiverMaxValue[channel] - receiverMinValue[channel];
+
+		if(diff < 100) return false;
+
+		tempReceiverOffset[channel] = 1000 - receiverMinValue[channel] * (1000 / diff);
+		tempReceiverSlope[channel] = 1000 / diff;
+	}
+
+	return true;
 }
 
 void readSerialCommand() {
@@ -1244,9 +1518,9 @@ void readSerialCommand() {
 							// transmitter calibration
 							if(calculateTransmitterCalibrationValues()) {
 
-								for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-									receiverOffset[axis] = tempReceiverOffset[axis];
-									receiverSlope[axis] = tempReceiverSlope[axis];
+								for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+									receiverOffset[channel] = tempReceiverOffset[channel];
+									receiverSlope[channel] = tempReceiverSlope[channel];
 								}
 								writeEEPROM();
 								result = MAV_RESULT_ACCEPTED;
@@ -1263,14 +1537,32 @@ void readSerialCommand() {
 							zeroIntegralError();
 							result = MAV_RESULT_ACCEPTED;
 						}
+						if(commandPacket.param6 == 1.0f) {
+							//initalize EEPROM
+							initializeEEPROM();
+							writeEEPROM();
+							storeSensorsZeroToEEPROM();
+							calibrateGyro();
+							zeroIntegralError();
+#ifdef HeadingMagHold
+							initializeMagnetometer();
+#endif
+#ifdef AltitudeHoldBaro
+							initializeBaro();
+#endif
+							result = MAV_RESULT_ACCEPTED;
+						}
 					}
-					else result = MAV_RESULT_TEMPORARILY_REJECTED;
+					else {
+						result = MAV_RESULT_TEMPORARILY_REJECTED;
+					}
 					break;
 
 				case MAV_CMD_PREFLIGHT_STORAGE: //245, reading/writing of parameter list requested by GCS while in Preflight mode
 					if (!motorArmed) {
 						if (mavlink_msg_command_long_get_param1(&msg) == 0.0f) {
 							paramListPartIndicator = indexCounter = 0;
+							result = MAV_RESULT_ACCEPTED;
 						}
 						else if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
 							mavlink_msg_param_set_decode(&msg, &set);
@@ -1278,8 +1570,12 @@ void readSerialCommand() {
 							parameterMatch = findParameter(key);
 							parameterChangeIndicator = 0;
 							changeAndSendParameter();
+							result = MAV_RESULT_ACCEPTED;
 						}
-					}	
+					}
+					else {
+						result = MAV_RESULT_TEMPORARILY_REJECTED;
+					}
 					break;
 
 				default:
@@ -1379,6 +1675,26 @@ void readSerialCommand() {
 					parameterMatch = findParameter(key);
 					parameterChangeIndicator = 0;
 					changeAndSendParameter();
+
+					// Check if we received the last parameter needed for transmitter calibration
+					if(key == parameterNameRcMapAux3) {
+						if(calculateTransmitterCalibrationValues()) {
+							for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+								receiverOffset[channel] = tempReceiverOffset[channel];
+								receiverSlope[channel] = tempReceiverSlope[channel];
+							}
+							writeEEPROM();
+
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibration successful");
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							SERIAL_PORT.write(buf, len);
+						}
+						else {
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Calibration failed");
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							SERIAL_PORT.write(buf, len);
+						}
+					}
 				}
 				break;
 
