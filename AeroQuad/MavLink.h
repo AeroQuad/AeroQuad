@@ -1510,10 +1510,14 @@ void readSerialCommand() {
 							result = MAV_RESULT_ACCEPTED;
 						}
 						if(commandPacket.param3 == 1.0f) {
+#if defined(AltitudeHoldBaro) 
 							// reset baro altitude
 							measureGroundBaro();
 							baroAltitude = baroGroundAltitude;
 							result = MAV_RESULT_ACCEPTED;
+#else
+							result = MAV_RESULT_UNSUPPORTED;
+#endif
 						}
 						if (commandPacket.param4 == 1.0f) {
 							// transmitter calibration
@@ -1545,10 +1549,10 @@ void readSerialCommand() {
 							storeSensorsZeroToEEPROM();
 							calibrateGyro();
 							zeroIntegralError();
-#ifdef HeadingMagHold
+#if defined(HeadingMagHold)
 							initializeMagnetometer();
 #endif
-#ifdef AltitudeHoldBaro
+#if defined(AltitudeHoldBaro)
 							initializeBaro();
 #endif
 							result = MAV_RESULT_ACCEPTED;
@@ -1819,6 +1823,7 @@ void readSerialCommand() {
 				break;
 
 			case MAVLINK_MSG_ID_MISSION_WRITE_PARTIAL_LIST:
+#if defined(UseGPSNavigator)
 				mavlink_mission_write_partial_list_t waypointPartialListPacket;
 				mavlink_msg_mission_write_partial_list_decode(&msg, &waypointPartialListPacket);
 
@@ -1836,6 +1841,7 @@ void readSerialCommand() {
 				waypointReceiving = true;
 				waypointIndexToBeRequested = waypointPartialListPacket.start_index;
 				waypointIndexToBeRequestedLast = waypointPartialListPacket.end_index;
+#endif
 				break;
 
 			case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:  // delete all waypoints of AQ
