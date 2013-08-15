@@ -1254,6 +1254,7 @@ int findParameter(char* key) {
 		return GPSYAW_PID_IDX;
 	}
 #endif
+
 	return -2; // No parameter found, should not happen
 }
 
@@ -1764,16 +1765,6 @@ void readSerialCommand() {
 
 			case MAVLINK_MSG_ID_MISSION_ITEM: // add a waypoint from GCS to the waypoint list of AQ
 #if defined(UseGPSNavigator)
-				if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) { // all waypoints received, send ACK message
-					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-
-					waypointReceiving = false;
-					isRouteInitialized = false;
-					break;
-				}     
-
 				result = MAV_MISSION_ACCEPTED;
 
 				__mavlink_mission_item_t waypointPacket;
@@ -1791,7 +1782,7 @@ void readSerialCommand() {
 					len = mavlink_msg_to_send_buffer(buf, &msg);
 					SERIAL_PORT.write(buf, len);
 
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Error");
+					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Error - Timeout");
 					len = mavlink_msg_to_send_buffer(buf, &msg);
 					SERIAL_PORT.write(buf, len);
 					break;
@@ -1814,6 +1805,16 @@ void readSerialCommand() {
 				waypointTimeLastReceived = millis();
 				waypointTimeLastRequested = 0;
 				waypointIndexToBeRequested++;
+
+				if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) { // all waypoints received, send ACK message
+					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
+					len = mavlink_msg_to_send_buffer(buf, &msg);
+					SERIAL_PORT.write(buf, len);
+
+					waypointReceiving = false;
+					isRouteInitialized = false;
+					break;
+				}     
 #endif
 				break;
 
@@ -1883,7 +1884,7 @@ void readSerialCommand() {
 
 	uint32_t tnow = millis();
 
-	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested) {
+	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 500) {
 		waypointTimeLastRequested = tnow;
 		receiveWaypoint();
 	}
