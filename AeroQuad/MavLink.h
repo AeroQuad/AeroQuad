@@ -50,8 +50,8 @@ bool waypointReceiving = false;
 unsigned long waypointTimeLastSent = 0;
 unsigned long waypointTimeLastReceived = 0;
 unsigned long waypointTimeLastRequested = 0;
-unsigned long waypointSendTimeout = 1000; // 1 second
-unsigned long waypointReceiveTimeout = 1000;
+unsigned long waypointSendTimeout = 2000; // 2000ms = 2 seconds
+unsigned long waypointReceiveTimeout = 2000;
 
 const uint8_t navFrame = MAV_FRAME_GLOBAL_RELATIVE_ALT;
 
@@ -725,6 +725,7 @@ bool checkParameterMatch(const char* parameterName, char* key) {
 /// <param name="key">Name of parameter to be matched</param>
 /// <returns>Index of matching parameter, -1 if parameter has no index, -2 if no parameter matched</returns>
 int findParameter(char* key) {
+
 	PIDIndicator = NONE;
 	parameterFloat = NULL;
 	parameterByte = NULL;
@@ -1254,8 +1255,13 @@ int findParameter(char* key) {
 		return GPSYAW_PID_IDX;
 	}
 #endif
+	//TODO: requesting TX related parameters fails randomly, need to figure out why
+	// No parameter found, should not happen
+	//mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "no match");
+	//len = mavlink_msg_to_send_buffer(buf, &msg);
+	//SERIAL_PORT.write(buf, len);
 
-	return -2; // No parameter found, should not happen
+	return -2;
 }
 
 void changeAndSendParameter() {
@@ -1395,7 +1401,7 @@ void receiveWaypoint() { // request waypoints one by one from GCS
 	}
 }
 
-//TODO verify
+//TODO: verify
 bool calculateTransmitterCalibrationValues() {
 	for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
 		int diff = receiverMaxValue[channel] - receiverMinValue[channel];
@@ -1500,7 +1506,6 @@ void readSerialCommand() {
 #endif
 					break;
 
-					//TODO not working yet
 				case MAV_CMD_PREFLIGHT_CALIBRATION: //241, calibration of acc/gyro/transmitter
 					if (!motorArmed) {
 						if (commandPacket.param1 == 1.0f) {
@@ -1621,9 +1626,10 @@ void readSerialCommand() {
 				parameterMatch = findParameter(key);
 
 				if(parameterMatch == -2) {
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Read failed");
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+					//TODO: requesting TX related parameters fails randomly, need to figure out why
+					//mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Read failed");
+					//len = mavlink_msg_to_send_buffer(buf, &msg);
+					//SERIAL_PORT.write(buf, len);
 					break;
 				}
 				if (PIDIndicator == P) {
@@ -1748,7 +1754,9 @@ void readSerialCommand() {
 				mavlink_msg_mission_count_decode(&msg, &waypointListPacket);
 
 				if(waypointListPacket.count > MAX_WAYPOINTS) {
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_WARNING, "Max. 16 waypoints allowed!");
+					//If this happens, GCS tries to send more waypoints than allowed nevertheless and fails with time out error
+					// but all allowed waypoints are correctly uploaded
+					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Max. 16 waypoints allowed!");
 					len = mavlink_msg_to_send_buffer(buf, &msg);
 					SERIAL_PORT.write(buf, len);
 
@@ -1773,11 +1781,6 @@ void readSerialCommand() {
 
 				__mavlink_mission_item_t waypointPacket;
 				mavlink_msg_mission_item_decode(&msg, &waypointPacket);
-
-				waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointPacket.x;
-				waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointPacket.y;
-				waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointPacket.z;
-				missionNbPoint++;
 
 				// Check if receiving waypoints (mission upload expected)
 				if (!waypointReceiving) {
@@ -1804,6 +1807,11 @@ void readSerialCommand() {
 					SERIAL_PORT.write(buf, len);
 					break;
 				}
+
+				waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointPacket.x;
+				waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointPacket.y;
+				waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointPacket.z;
+				missionNbPoint++;
 
 				// Update waypoint receiving state machine
 				waypointTimeLastReceived = millis();
@@ -1890,7 +1898,7 @@ void readSerialCommand() {
 
 	uint32_t tnow = millis();
 
-	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 500) {
+	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 200) {
 		waypointTimeLastRequested = tnow;
 		receiveWaypoint();
 	}
