@@ -4,6 +4,7 @@
 #include "string.h"
 #include "checksum.h"
 #include "mavlink_types.h"
+#include "mavlink_conversions.h"
 
 #ifndef MAVLINK_HELPER
 #define MAVLINK_HELPER
@@ -550,7 +551,7 @@ MAVLINK_HELPER void _mavlink_send_uart(mavlink_channel_t chan, const char *buf, 
 #ifdef MAVLINK_SEND_UART_BYTES
 	/* this is the more efficient approach, if the platform
 	   defines it */
-	MAVLINK_SEND_UART_BYTES(chan, (uint8_t *)buf, len);
+	MAVLINK_SEND_UART_BYTES(chan, (const uint8_t *)buf, len);
 #else
 	/* fallback to one byte at a time */
 	uint16_t i;
