@@ -199,11 +199,7 @@ void initializeEEPROM() {
     receiverSlope[channel] = 1.0;
     receiverOffset[channel] = 0.0;
     receiverSmoothFactor[channel] = 1.0;
-	receiverMinValue[channel] = 1500; 
-	receiverMaxValue[channel] = 1500;
-	receiverTrimValue[channel] = 1500;
   }
-  receiverSmoothFactor[ZAXIS] = 0.5;
 
   flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
@@ -406,9 +402,6 @@ void writeEEPROM(){
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
     writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
-	writeFloat(receiverMinValue[channel], RECEIVER_DATA[channel].min);
-	writeFloat(receiverMaxValue[channel], RECEIVER_DATA[channel].max);
-	writeFloat(receiverTrimValue[channel], RECEIVER_DATA[channel].trim);
   }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
@@ -502,9 +495,6 @@ void initReceiverFromEEPROM() {
     receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
     receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
     receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
-	receiverMinValue[channel] = readFloat(RECEIVER_DATA[channel].min);
-	receiverMaxValue[channel] = readFloat(RECEIVER_DATA[channel].max);
-	receiverTrimValue[channel] = readFloat(RECEIVER_DATA[channel].trim);
   }
 }
 
