@@ -39,6 +39,16 @@ uint32_t customMode = 0; // for future use
 uint8_t systemStatus = MAV_STATE_BOOT;
 uint16_t len;
 
+// Variables for accel calibration
+bool isCalibratingAccel = false;
+
+float tempAccelScaleFactor[3] = {0.0,0.0,0.0};
+
+unsigned long accelCalibrationLastTimeRequested = 0;
+
+int accelCalibrationTimeout = 25000; // 25 seconds
+int accelCalibrationStep = 1; // calibration needs to be performed in 6 different positions
+
 // Variables for transmitter calibration
 float tempReceiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float tempReceiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -1499,6 +1509,7 @@ void readSerialCommand() {
 			float x = 0, y = 0, z = 0;
 			uint8_t result = MAV_RESULT_UNSUPPORTED;
 			uint8_t isCurrentWaypoint = 0;
+			bool suppressCommandAckMsg = false;
 
 			switch(msg.msgid) {
 
@@ -1598,16 +1609,89 @@ void readSerialCommand() {
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
 						}
+						if (commandPacket.param4 == 1.0f) {
+							// Start accel calibration procedure
+							if(!isCalibratingAccel) {
+								accelCalibrationLastTimeRequested = millis();
+								isCalibratingAccel = true;
+								accelCalibrationStep = 1;
+
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration started");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
+						}
+						if (commandPacket.param4 == 2.0f) {
+							// Cancel accel calibration procedure
+							if(isCalibratingAccel) {
+								isCalibratingAccel = false;
+								accelCalibrationStep = 1;
+
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration cancelled");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
+						}
 						if (commandPacket.param5 == 1.0f) {
-							// accel calibration
-							computeAccelBias();
-							storeSensorsZeroToEEPROM();
-							calibrateKinematics();
-							zeroIntegralError();
-							result = MAV_RESULT_ACCEPTED;
+							// Perform actual accel calibration step
+							if(isCalibratingAccel) {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating...");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+
+								const char* statusText;
+								//TODO: add calibration logic here
+								if(accelCalibrationStep == 1) {
+									statusText = "Completed step 1";
+								}
+								else if(accelCalibrationStep == 2) {
+									statusText = "Completed step 2";
+								}
+								else if(accelCalibrationStep == 3) {
+									statusText = "Completed step 3";
+								}
+								else if(accelCalibrationStep == 4) {
+									statusText = "Completed step 4";
+								}
+								else if(accelCalibrationStep == 5) {
+									statusText = "Completed step 5";
+								}
+								else if(accelCalibrationStep == 6) {
+									statusText = "Completed step 6";
+								}
+
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, statusText);
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+
+								accelCalibrationLastTimeRequested = millis();
+								accelCalibrationStep++;
+								// Suppress command ack message to prevent the statustext above from disappearing
+								suppressCommandAckMsg = true;
+
+								// Accel calibration done
+								if(accelCalibrationStep > 6) {
+									//TODO: uncomment when logic implemented
+									//accelScaleFactor[XAXIS] = tempAccelScaleFactor[XAXIS];
+									//accelScaleFactor[YAXIS] = tempAccelScaleFactor[YAXIS];
+									//accelScaleFactor[ZAXIS] = tempAccelScaleFactor[ZAXIS];
+									//computeAccelBias();    
+									//storeSensorsZeroToEEPROM();
+
+									isCalibratingAccel = false;
+
+									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
+									len = mavlink_msg_to_send_buffer(buf, &msg);
+									SERIAL_PORT.write(buf, len);
+								}
+							}
 						}
 						if(commandPacket.param6 == 1.0f) {
-							//initalize EEPROM
+							// Initalize EEPROM to default values
 							initializeEEPROM();
 							writeEEPROM();
 							storeSensorsZeroToEEPROM();
@@ -1645,9 +1729,11 @@ void readSerialCommand() {
 					break;
 				}
 
-				mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, commandPacket.command, result);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
+				if(!suppressCommandAckMsg) {
+					mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, commandPacket.command, result);
+					len = mavlink_msg_to_send_buffer(buf, &msg);
+					SERIAL_PORT.write(buf, len);
+				}
 				break;
 
 			case MAVLINK_MSG_ID_SET_MODE: // set the base mode (only arming/disarming makes sense for now)
@@ -1756,12 +1842,12 @@ void readSerialCommand() {
 							}
 							writeEEPROM();
 
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibration successfully");
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Transmitter calibration successfully");
 							len = mavlink_msg_to_send_buffer(buf, &msg);
 							SERIAL_PORT.write(buf, len);
 						}
 						else {
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Calibration failed");
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Transmitter calibration failed");
 							len = mavlink_msg_to_send_buffer(buf, &msg);
 							SERIAL_PORT.write(buf, len);
 						}
@@ -1952,11 +2038,20 @@ void readSerialCommand() {
 
 	system_dropped_packets += status.packet_rx_drop_count;
 
-	if (!waypointReceiving && !waypointSending) {
+	if (!isCalibratingAccel && !waypointReceiving && !waypointSending) {
 		return;
 	}
 
 	uint32_t tnow = millis();
+
+	// stop accel calibration if timeout
+	if (isCalibratingAccel && (tnow - accelCalibrationLastTimeRequested) > accelCalibrationTimeout) {
+		isCalibratingAccel = false;
+
+		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Accel calibration Timeout - Please restart.");
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		SERIAL_PORT.write(buf, len);
+	}
 
 	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 200) {
 		waypointTimeLastRequested = tnow;
