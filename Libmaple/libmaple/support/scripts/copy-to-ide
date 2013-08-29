@@ -6,8 +6,8 @@
 
 DEST=$1
 
-DEST_CORES=$DEST/hardware/leaflabs/cores/maple
-DEST_LIBS=$DEST/libraries
+DEST_CORES=/Applications/MapleIDE.app/Contents/Resources/Java/hardware/leaflabs/cores/maple
+DEST_LIBS=/Applications/MapleIDE.app/Contents/Resources/Java/libraries
 
 LMAPLE_SRC="LICENSE
     ./libmaple/*.h

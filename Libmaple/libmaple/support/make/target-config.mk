@@ -8,6 +8,7 @@ ifeq ($(BOARD), maple)
    DENSITY := STM32_MEDIUM_DENSITY
    FLASH_SIZE := 131072
    SRAM_SIZE := 20480
+   MCU_FAMILY := STM32F1
 endif
 
 ifeq ($(BOARD), maple_native)
@@ -18,6 +19,7 @@ ifeq ($(BOARD), maple_native)
    DENSITY := STM32_HIGH_DENSITY
    FLASH_SIZE := 524288
    SRAM_SIZE := 65536
+   MCU_FAMILY := STM32F1
 endif
 
 ifeq ($(BOARD), maple_mini)
@@ -28,6 +30,7 @@ ifeq ($(BOARD), maple_mini)
    DENSITY := STM32_MEDIUM_DENSITY
    FLASH_SIZE := 131072
    SRAM_SIZE := 20480
+   MCU_FAMILY := STM32F1
 endif
 
 ifeq ($(BOARD), maple_RET6)
@@ -38,6 +41,7 @@ ifeq ($(BOARD), maple_RET6)
    DENSITY := STM32_HIGH_DENSITY
    FLASH_SIZE := 524288
    SRAM_SIZE := 65536
+   MCU_FAMILY := STM32F1
 endif
 
 ifeq ($(BOARD), aeroquad32f1)

@@ -6,6 +6,8 @@
 	tSerial &Serial = SERIAL_VAR;
 
 	#define ADC_NUMBER_OF_BITS	12
+	// ADC czy tu czasem nie chodzi o odczyty z GYRO i ACC 
+	// nie zmieniam tego
 
 	// Receiver Declaration
 	#if defined (ReceiverPPM) || defined (ReceiverHWPPM)
@@ -32,6 +34,8 @@
 		#include "platform_freeflight.h"
 	#elif defined(BOARD_discovery_f4)
 		#include "platform_discoveryf4.h"
+	#elif defined(BOARD_maple_mini) // mam nadzieje że wywoła się nasze gówno :)
+		#include "platform_maple_mini.h"
 	#else
 		#error "No motor pinout defined for this STM32 board"
 	#endif
