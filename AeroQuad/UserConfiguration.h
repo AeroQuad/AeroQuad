@@ -64,8 +64,8 @@
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Config
-//#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
-//#define octoXConfig			// EXPERIMENTAL: not completely re-tested
+//#define octoPlusConfig
+//#define octoXConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION

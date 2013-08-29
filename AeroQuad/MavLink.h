@@ -32,6 +32,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "AeroQuad.h"
 
+///* Variables for vehicle configuration and status *///
 const int autopilotType = MAV_AUTOPILOT_GENERIC;
 int systemType = MAV_TYPE_GENERIC;
 uint8_t baseMode = MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
@@ -45,7 +46,7 @@ bool isCalibratingMag = false;
 float measuredMagMin[3] = {0.0,0.0,0.0};
 float measuredMagMax[3] = {0.0,0.0,0.0};
 
-int magCalibrationTimeout = 25000; // 25 seconds
+int magCalibrationTimeout = 40000; // 40 seconds
 
 unsigned long magCalibrationTimeStarted = 0;
 
@@ -71,7 +72,7 @@ unsigned long accelCalibrationLastTimeRequested = 0;
 int accelRawData[3][100]; // Contains raw accel data (each of the 3 axes is measured 100 times)
 float accelMeanData[3][6]; // Contains the mean values for each of the 3 axes in each of the 6 calibration posistions
 
-int accelCalibrationTimeout = 35000; // 35 seconds
+int accelCalibrationTimeout = 25000; // 25 seconds
 
 ///* Variables for transmitter calibration *///
 float tempReceiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -1539,11 +1540,12 @@ void resetAccelCalibrationStatus() {
 }
 //TODO: finish
 void calculateAndStoreAccelCalibrationValues() {
-	//accelScaleFactor[XAXIS] = tempAccelScaleFactor[XAXIS];
-	//accelScaleFactor[YAXIS] = tempAccelScaleFactor[YAXIS];
-	//accelScaleFactor[ZAXIS] = tempAccelScaleFactor[ZAXIS];
-	//computeAccelBias();    
-	//storeSensorsZeroToEEPROM();
+	accelScaleFactor[XAXIS] = (accelMeanData[4][XAXIS] - (accelMeanData[4][XAXIS] - (((accelMeanData[4][XAXIS] - accelMeanData[5][XAXIS]) / 19.613) * 9.8065))) / 9.8065;
+	accelScaleFactor[YAXIS] = (accelMeanData[2][YAXIS] - (accelMeanData[2][YAXIS] - (((accelMeanData[2][YAXIS] - accelMeanData[3][YAXIS]) / 19.613) * 9.8065))) / 9.8065;
+	accelScaleFactor[ZAXIS] = (accelMeanData[1][ZAXIS] - (accelMeanData[1][ZAXIS] - (((accelMeanData[1][ZAXIS] - accelMeanData[3][ZAXIS]) / 19.613) * 9.8065))) / 9.8065;
+
+	computeAccelBias();    
+	storeSensorsZeroToEEPROM();
 }
 
 //TODO: finish
@@ -1649,7 +1651,13 @@ void readSerialCommand() {
 							// gyro calibration
 							calibrateGyro();
 							storeSensorsZeroToEEPROM();
-							result = MAV_RESULT_ACCEPTED;
+
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Gyro calibration successfully");
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							SERIAL_PORT.write(buf, len);
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
 						}
 						if (commandPacket.param2 == 0.0f) {
 							// cancel mag calibration
@@ -1660,10 +1668,15 @@ void readSerialCommand() {
 								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration cancelled");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
-
-								//TODO: finish	
-								suppressCommandAckMsg = true;
 							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration not started yet");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
 #else
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
@@ -1678,10 +1691,15 @@ void readSerialCommand() {
 								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration started");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
-
-								//TODO: finish
-								suppressCommandAckMsg = true;
 							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration already started");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
 #else
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
@@ -1689,8 +1707,23 @@ void readSerialCommand() {
 						if (commandPacket.param2 == 2.0f) {
 							// finish mag calibration
 #if defined HeadingMagHold
-							//TODO: finish
-							result = MAV_RESULT_ACCEPTED;
+							if(isCalibratingMag) {
+								isCalibratingMag = false;
+
+								//TODO: finish
+
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration successfully");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start mag calibration first");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
 #else
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
@@ -1700,7 +1733,13 @@ void readSerialCommand() {
 							// reset baro altitude
 							measureGroundBaro();
 							baroAltitude = baroGroundAltitude;
-							result = MAV_RESULT_ACCEPTED;
+
+							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Altitude reset successfully");
+							len = mavlink_msg_to_send_buffer(buf, &msg);
+							SERIAL_PORT.write(buf, len);
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
 #else
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
@@ -1716,6 +1755,12 @@ void readSerialCommand() {
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration already started");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
 							// Suppress command ack message to prevent the statustext above from disappearing
 							suppressCommandAckMsg = true;
 						}
@@ -1729,6 +1774,12 @@ void readSerialCommand() {
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration not started yet");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
 							// Suppress command ack message to prevent the statustext above from disappearing
 							suppressCommandAckMsg = true;
 						}
@@ -1786,7 +1837,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -1847,7 +1898,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -1908,7 +1959,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -1969,7 +2020,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -2030,7 +2081,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -2091,7 +2142,7 @@ void readSerialCommand() {
 								}
 							}
 							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first!");
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
 								SERIAL_PORT.write(buf, len);
 							}
@@ -2462,6 +2513,12 @@ void readSerialCommand() {
 
 	if (!isCalibratingMag && !isCalibratingAccel && !waypointReceiving && !waypointSending) {
 		return;
+	}
+
+	if(isCalibratingMag) {
+		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Calibrating magnetometer...");
+		len = mavlink_msg_to_send_buffer(buf, &msg);
+		SERIAL_PORT.write(buf, len);
 	}
 
 	uint32_t tnow = millis();
