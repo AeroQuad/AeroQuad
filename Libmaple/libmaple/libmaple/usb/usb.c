@@ -485,4 +485,11 @@ uint16 usbGetPending() {
   return countTx;
 }
 
+void usbEnableBlockingTx(void) {
+}
+
+
+void usbDisableBlockingTx(void) {
+}
+
 #endif

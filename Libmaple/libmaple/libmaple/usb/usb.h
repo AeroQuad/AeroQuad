@@ -84,6 +84,9 @@ uint8 usbIsConfigured(void);
 uint16 usbGetPending(void);
 
 void usbSendHello(void);
+void usbEnableBlockingTx(void);
+void usbDisableBlockingTx(void);
+
 
 #ifdef __cplusplus
 } // extern "C"

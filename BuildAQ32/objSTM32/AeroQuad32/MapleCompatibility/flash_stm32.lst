@@ -1,0 +1,649 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 4
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"flash_stm32.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.FLASH_GetStatus,"ax",%progbits
+  19              		.align	1
+  20              		.global	FLASH_GetStatus
+  21              		.thumb
+  22              		.thumb_func
+  24              	FLASH_GetStatus:
+  25              	.LFB3:
+  26              		.file 1 "/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c"
+   1:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #include "libmaple.h"
+   2:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #include "util.h"
+   3:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #include "flash.h"
+   4:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #include "flash_stm32.h"
+   5:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+   6:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #ifndef __get_bits	
+   7:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** // add macros missing in maple 0.0.12
+   8:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define __set_bits(addr, mask)   (*(volatile uint32*)(addr) |= (uint32)(mask))
+   9:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define __clear_bits(addr, mask) (*(volatile uint32*)(addr) &= (uint32)~(mask))
+  10:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define __get_bits(addr, mask)   (*(volatile uint32*)(addr) & (uint32)(mask))
+  11:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  12:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define __read(reg)              (*(volatile uint32*)(reg))
+  13:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define __write(reg, value)      (*(volatile uint32*)(reg) = (value))
+  14:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #endif
+  15:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  16:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #undef FLASH_BASE
+  17:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_BASE		0x40022000
+  18:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_SR		(FLASH_BASE + 0x0C)
+  19:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	//	 FLASH_ACR		+ 0x00
+  20:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_KEYR		(FLASH_BASE + 0x04)
+  21:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	//	 FLASH_OPTKEYR	+ 0x08
+  22:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_CR		(FLASH_BASE + 0x10)
+  23:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_AR		(FLASH_BASE + 0x14)
+  24:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	//	 FLASH_RESERVED	+ 0x18
+  25:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	//	 FLASH_OBR		+ 0x1C
+  26:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	//	 FLASH_WRPR		+ 0x20
+  27:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  28:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_FLAG_BSY		((uint32)0x00000001)  /*!< FLASH Busy flag */
+  29:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_FLAG_PGERR	((uint32)0x00000004)  /*!< FLASH Program error flag */
+  30:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_FLAG_WRPRTERR	((uint32)0x00000010)  /*!< FLASH Write protected error flag */
+  31:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_FLAG_EOP		((uint32)0x00000020)  /*!< FLASH End of Operation flag */
+  32:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_FLAG_OPTERR	((uint32)0x00000001)  /*!< FLASH Option Byte error flag */
+  33:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  34:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /* Flash Control Register bits */
+  35:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_PG_Set			((uint32)0x00000001)
+  36:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_PG_Reset			((uint32)0x00001FFE)
+  37:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_PER_Set			((uint32)0x00000002)
+  38:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_PER_Reset		((uint32)0x00001FFD)
+  39:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_MER_Set			((uint32)0x00000004)
+  40:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_MER_Reset		((uint32)0x00001FFB)
+  41:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_OPTPG_Set		((uint32)0x00000010)
+  42:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_OPTPG_Reset		((uint32)0x00001FEF)
+  43:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_OPTER_Set		((uint32)0x00000020)
+  44:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** //#define CR_OPTER_Reset		((uint32)0x00001FDF)
+  45:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_STRT_Set			((uint32)0x00000040)
+  46:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define CR_LOCK_Set			((uint32)0x00000080)
+  47:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  48:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_KEY1			((uint32)0x45670123)
+  49:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define FLASH_KEY2			((uint32)0xCDEF89AB)
+  50:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  51:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /* Delay definition */
+  52:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define EraseTimeout		((uint32)0x00000FFF)
+  53:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** #define ProgramTimeout		((uint32)0x0000001F)
+  54:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  55:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+  56:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Inserts a time delay.
+  57:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  None
+  58:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval None
+  59:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+  60:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** static void delay(void)
+  61:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+  62:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	__io uint32 i = 0;
+  63:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	for(i = 0xFF; i != 0; i--) { }
+  64:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+  65:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  66:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+  67:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Returns the FLASH Status.
+  68:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  None
+  69:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PG,
+  70:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   *   FLASH_ERROR_WRP or FLASH_COMPLETE
+  71:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+  72:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** FLASH_Status FLASH_GetStatus(void)
+  73:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+  27              		.loc 1 73 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  74:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if(__get_bits(FLASH_SR, FLASH_FLAG_BSY) == FLASH_FLAG_BSY)
+  32              		.loc 1 74 0
+  33 0000 0B4B     		ldr	r3, .L8
+  34 0002 1A68     		ldr	r2, [r3, #0]
+  35 0004 D007     		lsls	r0, r2, #31
+  36 0006 0CD4     		bmi	.L4
+  75:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_BUSY;
+  76:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  77:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if(__get_bits(FLASH_SR, FLASH_FLAG_PGERR) != 0)
+  37              		.loc 1 77 0
+  38 0008 1A68     		ldr	r2, [r3, #0]
+  39 000a 5107     		lsls	r1, r2, #29
+  40 000c 0BD4     		bmi	.L5
+  78:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_ERROR_PG;
+  79:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  80:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if(__get_bits(FLASH_SR, FLASH_FLAG_WRPRTERR) != 0 )
+  41              		.loc 1 80 0
+  42 000e 1A68     		ldr	r2, [r3, #0]
+  43 0010 D206     		lsls	r2, r2, #27
+  44 0012 0AD4     		bmi	.L6
+  45              	.LBB4:
+  46              	.LBB5:
+  81:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_ERROR_WRP;
+  82:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  83:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if(__get_bits(FLASH_SR, FLASH_FLAG_OPTERR) != 0 )
+  47              		.loc 1 83 0
+  48 0014 1B68     		ldr	r3, [r3, #0]
+  49 0016 13F0010F 		tst	r3, #1
+  84:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_ERROR_OPT;
+  50              		.loc 1 84 0
+  51 001a 0CBF     		ite	eq
+  52 001c 0520     		moveq	r0, #5
+  53 001e 0420     		movne	r0, #4
+  54 0020 7047     		bx	lr
+  55              	.L4:
+  56              	.LBE5:
+  57              	.LBE4:
+  75:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_BUSY;
+  58              		.loc 1 75 0
+  59 0022 0120     		movs	r0, #1
+  60 0024 7047     		bx	lr
+  61              	.L5:
+  78:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_ERROR_PG;
+  62              		.loc 1 78 0
+  63 0026 0220     		movs	r0, #2
+  64 0028 7047     		bx	lr
+  65              	.L6:
+  81:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		return FLASH_ERROR_WRP;
+  66              		.loc 1 81 0
+  67 002a 0320     		movs	r0, #3
+  85:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  86:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	return FLASH_COMPLETE;
+  87:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+  68              		.loc 1 87 0
+  69 002c 7047     		bx	lr
+  70              	.L9:
+  71 002e 00BF     		.align	2
+  72              	.L8:
+  73 0030 0C200240 		.word	1073881100
+  74              		.cfi_endproc
+  75              	.LFE3:
+  77              		.section	.text.FLASH_WaitForLastOperation,"ax",%progbits
+  78              		.align	1
+  79              		.global	FLASH_WaitForLastOperation
+  80              		.thumb
+  81              		.thumb_func
+  83              	FLASH_WaitForLastOperation:
+  84              	.LFB4:
+  88:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  89:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+  90:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Waits for a Flash operation to complete or a TIMEOUT to occur.
+  91:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  Timeout: FLASH progamming Timeout
+  92:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
+  93:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   *   FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
+  94:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+  95:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** FLASH_Status FLASH_WaitForLastOperation(uint32 Timeout)
+  96:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** { 
+  85              		.loc 1 96 0
+  86              		.cfi_startproc
+  87              		@ args = 0, pretend = 0, frame = 8
+  88              		@ frame_needed = 0, uses_anonymous_args = 0
+  89              	.LVL0:
+  90 0000 73B5     		push	{r0, r1, r4, r5, r6, lr}
+  91              	.LCFI0:
+  92              		.cfi_def_cfa_offset 24
+  93              		.cfi_offset 0, -24
+  94              		.cfi_offset 1, -20
+  95              		.cfi_offset 4, -16
+  96              		.cfi_offset 5, -12
+  97              		.cfi_offset 6, -8
+  98              		.cfi_offset 14, -4
+  99              		.loc 1 96 0
+ 100 0002 0446     		mov	r4, r0
+ 101              	.LBB8:
+ 102              	.LBB9:
+  62:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	__io uint32 i = 0;
+ 103              		.loc 1 62 0
+ 104 0004 0025     		movs	r5, #0
+ 105              	.LBE9:
+ 106              	.LBE8:
+  97:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	FLASH_Status status;
+  98:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+  99:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Check for the Flash Status */
+ 100:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	status = FLASH_GetStatus();
+ 107              		.loc 1 100 0
+ 108 0006 FFF7FEFF 		bl	FLASH_GetStatus
+ 109              	.LVL1:
+ 110              	.LBB12:
+ 111              	.LBB10:
+  63:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	for(i = 0xFF; i != 0; i--) { }
+ 112              		.loc 1 63 0
+ 113 000a FF26     		movs	r6, #255
+ 114              	.LBE10:
+ 115              	.LBE12:
+ 101:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Wait for a Flash operation to complete or a TIMEOUT to occur */
+ 102:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	while((status == FLASH_BUSY) && (Timeout != 0x00))
+ 116              		.loc 1 102 0
+ 117 000c 0BE0     		b	.L11
+ 118              	.LVL2:
+ 119              	.L15:
+ 120              	.LBB13:
+ 121              	.LBB11:
+  62:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	__io uint32 i = 0;
+ 122              		.loc 1 62 0
+ 123 000e 0195     		str	r5, [sp, #4]
+  63:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	for(i = 0xFF; i != 0; i--) { }
+ 124              		.loc 1 63 0
+ 125 0010 0196     		str	r6, [sp, #4]
+ 126 0012 02E0     		b	.L12
+ 127              	.L13:
+ 128 0014 019B     		ldr	r3, [sp, #4]
+ 129 0016 013B     		subs	r3, r3, #1
+ 130              	.LVL3:
+ 131 0018 0193     		str	r3, [sp, #4]
+ 132              	.LVL4:
+ 133              	.L12:
+ 134 001a 019B     		ldr	r3, [sp, #4]
+ 135 001c 002B     		cmp	r3, #0
+ 136 001e F9D1     		bne	.L13
+ 137              	.LBE11:
+ 138              	.LBE13:
+ 103:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	{
+ 104:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		delay();
+ 105:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		status = FLASH_GetStatus();
+ 139              		.loc 1 105 0
+ 140 0020 FFF7FEFF 		bl	FLASH_GetStatus
+ 141              	.LVL5:
+ 106:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		Timeout--;
+ 142              		.loc 1 106 0
+ 143 0024 013C     		subs	r4, r4, #1
+ 144              	.LVL6:
+ 145              	.L11:
+ 102:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	while((status == FLASH_BUSY) && (Timeout != 0x00))
+ 146              		.loc 1 102 0 discriminator 1
+ 147 0026 0128     		cmp	r0, #1
+ 148 0028 03D1     		bne	.L14
+ 102:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	while((status == FLASH_BUSY) && (Timeout != 0x00))
+ 149              		.loc 1 102 0 is_stmt 0 discriminator 2
+ 150 002a 002C     		cmp	r4, #0
+ 151 002c EFD1     		bne	.L15
+ 107:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	}
+ 108:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if (Timeout == 0)
+ 109:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		status = FLASH_TIMEOUT;
+ 152              		.loc 1 109 0 is_stmt 1
+ 153 002e 0620     		movs	r0, #6
+ 154              	.LVL7:
+ 155 0030 02E0     		b	.L16
+ 156              	.LVL8:
+ 157              	.L14:
+ 158 0032 002C     		cmp	r4, #0
+ 159 0034 08BF     		it	eq
+ 160 0036 0620     		moveq	r0, #6
+ 161              	.LVL9:
+ 162              	.L16:
+ 110:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Return the operation status */
+ 111:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	return status;
+ 112:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+ 163              		.loc 1 112 0
+ 164 0038 7CBD     		pop	{r2, r3, r4, r5, r6, pc}
+ 165              		.cfi_endproc
+ 166              	.LFE4:
+ 168              		.section	.text.FLASH_ErasePage,"ax",%progbits
+ 169              		.align	1
+ 170              		.global	FLASH_ErasePage
+ 171              		.thumb
+ 172              		.thumb_func
+ 174              	FLASH_ErasePage:
+ 175              	.LFB5:
+ 113:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 114:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+ 115:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Erases a specified FLASH page.
+ 116:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  Page_Address: The page address to be erased.
+ 117:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PG,
+ 118:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   *   FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
+ 119:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+ 120:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** FLASH_Status FLASH_ErasePage(uint32 Page_Address)
+ 121:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 176              		.loc 1 121 0
+ 177              		.cfi_startproc
+ 178              		@ args = 0, pretend = 0, frame = 0
+ 179              		@ frame_needed = 0, uses_anonymous_args = 0
+ 180              	.LVL10:
+ 181 0000 38B5     		push	{r3, r4, r5, lr}
+ 182              	.LCFI1:
+ 183              		.cfi_def_cfa_offset 16
+ 184              		.cfi_offset 3, -16
+ 185              		.cfi_offset 4, -12
+ 186              		.cfi_offset 5, -8
+ 187              		.cfi_offset 14, -4
+ 122:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	FLASH_Status status = FLASH_COMPLETE;
+ 123:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Check the parameters */
+ 124:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	ASSERT(IS_FLASH_ADDRESS(Page_Address));
+ 188              		.loc 1 124 0
+ 189 0002 154B     		ldr	r3, .L25
+ 190 0004 00F17842 		add	r2, r0, #-134217728
+ 191 0008 9A42     		cmp	r2, r3
+ 121:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 192              		.loc 1 121 0
+ 193 000a 0546     		mov	r5, r0
+ 194              		.loc 1 124 0
+ 195 000c 04D9     		bls	.L19
+ 196              		.loc 1 124 0 is_stmt 0 discriminator 1
+ 197 000e 1348     		ldr	r0, .L25+4
+ 198              	.LVL11:
+ 199 0010 7C21     		movs	r1, #124
+ 200 0012 134A     		ldr	r2, .L25+8
+ 201 0014 FFF7FEFF 		bl	_fail
+ 202              	.LVL12:
+ 203              	.L19:
+ 125:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Wait for last operation to be completed */
+ 126:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	status = FLASH_WaitForLastOperation(EraseTimeout);
+ 204              		.loc 1 126 0 is_stmt 1
+ 205 0018 40F6FF70 		movw	r0, #4095
+ 206 001c FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 207              	.LVL13:
+ 127:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   
+ 128:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if(status == FLASH_COMPLETE)
+ 208              		.loc 1 128 0
+ 209 0020 0528     		cmp	r0, #5
+ 210 0022 18D1     		bne	.L20
+ 129:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	{
+ 130:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		/* if the previous operation is completed, proceed to erase the page */
+ 131:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__set_bits(FLASH_CR, CR_PER_Set);
+ 211              		.loc 1 131 0
+ 212 0024 0F4C     		ldr	r4, .L25+12
+ 132:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__write(FLASH_AR, Page_Address);
+ 133:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__set_bits(FLASH_CR, CR_STRT_Set);
+ 134:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 135:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		/* Wait for last operation to be completed */
+ 136:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		status = FLASH_WaitForLastOperation(EraseTimeout);
+ 213              		.loc 1 136 0
+ 214 0026 40F6FF70 		movw	r0, #4095
+ 215              	.LVL14:
+ 131:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__set_bits(FLASH_CR, CR_PER_Set);
+ 216              		.loc 1 131 0
+ 217 002a 2368     		ldr	r3, [r4, #0]
+ 218 002c 43F00203 		orr	r3, r3, #2
+ 219 0030 2360     		str	r3, [r4, #0]
+ 132:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__write(FLASH_AR, Page_Address);
+ 220              		.loc 1 132 0
+ 221 0032 0D4B     		ldr	r3, .L25+16
+ 222 0034 1D60     		str	r5, [r3, #0]
+ 133:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__set_bits(FLASH_CR, CR_STRT_Set);
+ 223              		.loc 1 133 0
+ 224 0036 2368     		ldr	r3, [r4, #0]
+ 225 0038 43F04003 		orr	r3, r3, #64
+ 226 003c 2360     		str	r3, [r4, #0]
+ 227              		.loc 1 136 0
+ 228 003e FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 229              	.LVL15:
+ 137:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		if(status != FLASH_TIMEOUT)
+ 230              		.loc 1 137 0
+ 231 0042 0628     		cmp	r0, #6
+ 232 0044 04D0     		beq	.L21
+ 138:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		{
+ 139:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			/* if the erase operation is completed, disable the PER Bit */
+ 140:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			__clear_bits(FLASH_CR, ~CR_PER_Reset);
+ 233              		.loc 1 140 0
+ 234 0046 2268     		ldr	r2, [r4, #0]
+ 235 0048 41F6FD73 		movw	r3, #8189
+ 236 004c 1340     		ands	r3, r3, r2
+ 237 004e 2360     		str	r3, [r4, #0]
+ 238              	.L21:
+ 141:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		}
+ 142:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		__write(FLASH_SR, (FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR));
+ 239              		.loc 1 142 0
+ 240 0050 064B     		ldr	r3, .L25+20
+ 241 0052 3422     		movs	r2, #52
+ 242 0054 1A60     		str	r2, [r3, #0]
+ 243              	.LVL16:
+ 244              	.L20:
+ 143:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	}
+ 144:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	/* Return the Erase Status */
+ 145:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	return status;
+ 146:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+ 245              		.loc 1 146 0
+ 246 0056 38BD     		pop	{r3, r4, r5, pc}
+ 247              	.L26:
+ 248              		.align	2
+ 249              	.L25:
+ 250 0058 FEFF0700 		.word	524286
+ 251 005c 00000000 		.word	.LC0
+ 252 0060 53000000 		.word	.LC1
+ 253 0064 10200240 		.word	1073881104
+ 254 0068 14200240 		.word	1073881108
+ 255 006c 0C200240 		.word	1073881100
+ 256              		.cfi_endproc
+ 257              	.LFE5:
+ 259              		.section	.text.FLASH_ProgramHalfWord,"ax",%progbits
+ 260              		.align	1
+ 261              		.global	FLASH_ProgramHalfWord
+ 262              		.thumb
+ 263              		.thumb_func
+ 265              	FLASH_ProgramHalfWord:
+ 266              	.LFB6:
+ 147:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 148:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+ 149:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Programs a half word at a specified address.
+ 150:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  Address: specifies the address to be programmed.
+ 151:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  Data: specifies the data to be programmed.
+ 152:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
+ 153:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   *   FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT. 
+ 154:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+ 155:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** FLASH_Status FLASH_ProgramHalfWord(uint32 Address, uint16 Data)
+ 156:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 267              		.loc 1 156 0
+ 268              		.cfi_startproc
+ 269              		@ args = 0, pretend = 0, frame = 0
+ 270              		@ frame_needed = 0, uses_anonymous_args = 0
+ 271              	.LVL17:
+ 157:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	FLASH_Status status = FLASH_BAD_ADDRESS;
+ 158:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 159:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	if (IS_FLASH_ADDRESS(Address))
+ 272              		.loc 1 159 0
+ 273 0000 114B     		ldr	r3, .L34
+ 274 0002 00F17842 		add	r2, r0, #-134217728
+ 275 0006 9A42     		cmp	r2, r3
+ 156:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 276              		.loc 1 156 0
+ 277 0008 70B5     		push	{r4, r5, r6, lr}
+ 278              	.LCFI2:
+ 279              		.cfi_def_cfa_offset 16
+ 280              		.cfi_offset 4, -16
+ 281              		.cfi_offset 5, -12
+ 282              		.cfi_offset 6, -8
+ 283              		.cfi_offset 14, -4
+ 156:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 284              		.loc 1 156 0
+ 285 000a 0546     		mov	r5, r0
+ 286 000c 0E46     		mov	r6, r1
+ 287              		.loc 1 159 0
+ 288 000e 18D8     		bhi	.L30
+ 160:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	{
+ 161:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		/* Wait for last operation to be completed */
+ 162:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		status = FLASH_WaitForLastOperation(ProgramTimeout);
+ 289              		.loc 1 162 0
+ 290 0010 1F20     		movs	r0, #31
+ 291              	.LVL18:
+ 292 0012 FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 293              	.LVL19:
+ 163:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		if(status == FLASH_COMPLETE)
+ 294              		.loc 1 163 0
+ 295 0016 0528     		cmp	r0, #5
+ 296 0018 14D1     		bne	.L28
+ 164:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		{
+ 165:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			/* if the previous operation is completed, proceed to program the new data */
+ 166:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			__set_bits(FLASH_CR, CR_PG_Set);
+ 297              		.loc 1 166 0
+ 298 001a 0C4C     		ldr	r4, .L34+4
+ 167:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			*(__io uint16*)Address = Data;
+ 168:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			/* Wait for last operation to be completed */
+ 169:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			status = FLASH_WaitForLastOperation(ProgramTimeout);
+ 299              		.loc 1 169 0
+ 300 001c 1F20     		movs	r0, #31
+ 301              	.LVL20:
+ 166:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			__set_bits(FLASH_CR, CR_PG_Set);
+ 302              		.loc 1 166 0
+ 303 001e 2368     		ldr	r3, [r4, #0]
+ 304 0020 43F00103 		orr	r3, r3, #1
+ 305 0024 2360     		str	r3, [r4, #0]
+ 167:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			*(__io uint16*)Address = Data;
+ 306              		.loc 1 167 0
+ 307 0026 2E80     		strh	r6, [r5, #0]	@ movhi
+ 308              		.loc 1 169 0
+ 309 0028 FFF7FEFF 		bl	FLASH_WaitForLastOperation
+ 310              	.LVL21:
+ 170:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			if(status != FLASH_TIMEOUT)
+ 311              		.loc 1 170 0
+ 312 002c 0628     		cmp	r0, #6
+ 313 002e 04D0     		beq	.L29
+ 171:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			{
+ 172:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 				/* if the program operation is completed, disable the PG Bit */
+ 173:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 				__clear_bits(FLASH_CR, ~CR_PG_Reset);
+ 314              		.loc 1 173 0
+ 315 0030 2268     		ldr	r2, [r4, #0]
+ 316 0032 41F6FE73 		movw	r3, #8190
+ 317 0036 1340     		ands	r3, r3, r2
+ 318 0038 2360     		str	r3, [r4, #0]
+ 319              	.L29:
+ 174:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			}
+ 175:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 			__write(FLASH_SR, (FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR));
+ 320              		.loc 1 175 0
+ 321 003a 054B     		ldr	r3, .L34+8
+ 322 003c 3422     		movs	r2, #52
+ 323 003e 1A60     		str	r2, [r3, #0]
+ 324 0040 70BD     		pop	{r4, r5, r6, pc}
+ 325              	.LVL22:
+ 326              	.L30:
+ 157:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	FLASH_Status status = FLASH_BAD_ADDRESS;
+ 327              		.loc 1 157 0
+ 328 0042 0720     		movs	r0, #7
+ 329              	.LVL23:
+ 330              	.L28:
+ 176:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 		}
+ 177:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	}
+ 178:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	return status;
+ 179:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+ 331              		.loc 1 179 0
+ 332 0044 70BD     		pop	{r4, r5, r6, pc}
+ 333              	.L35:
+ 334 0046 00BF     		.align	2
+ 335              	.L34:
+ 336 0048 FEFF0700 		.word	524286
+ 337 004c 10200240 		.word	1073881104
+ 338 0050 0C200240 		.word	1073881100
+ 339              		.cfi_endproc
+ 340              	.LFE6:
+ 342              		.section	.text.FLASH_Unlock,"ax",%progbits
+ 343              		.align	1
+ 344              		.global	FLASH_Unlock
+ 345              		.thumb
+ 346              		.thumb_func
+ 348              	FLASH_Unlock:
+ 349              	.LFB7:
+ 180:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 181:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+ 182:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Unlocks the FLASH Program Erase Controller.
+ 183:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  None
+ 184:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval None
+ 185:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+ 186:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** void FLASH_Unlock(void)
+ 187:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 350              		.loc 1 187 0
+ 351              		.cfi_startproc
+ 352              		@ args = 0, pretend = 0, frame = 0
+ 353              		@ frame_needed = 0, uses_anonymous_args = 0
+ 354              		@ link register save eliminated.
+ 188:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   /* Authorize the FPEC Access */
+ 189:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   __write(FLASH_KEYR, FLASH_KEY1);
+ 355              		.loc 1 189 0
+ 356 0000 034B     		ldr	r3, .L37
+ 357 0002 044A     		ldr	r2, .L37+4
+ 358 0004 1A60     		str	r2, [r3, #0]
+ 190:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   __write(FLASH_KEYR, FLASH_KEY2);
+ 359              		.loc 1 190 0
+ 360 0006 02F18832 		add	r2, r2, #-2004318072
+ 361 000a 1A60     		str	r2, [r3, #0]
+ 362 000c 7047     		bx	lr
+ 363              	.L38:
+ 364 000e 00BF     		.align	2
+ 365              	.L37:
+ 366 0010 04200240 		.word	1073881092
+ 367 0014 23016745 		.word	1164378403
+ 368              		.cfi_endproc
+ 369              	.LFE7:
+ 371              		.section	.text.FLASH_Lock,"ax",%progbits
+ 372              		.align	1
+ 373              		.global	FLASH_Lock
+ 374              		.thumb
+ 375              		.thumb_func
+ 377              	FLASH_Lock:
+ 378              	.LFB8:
+ 191:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** }
+ 192:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 
+ 193:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** /**
+ 194:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @brief  Locks the FLASH Program Erase Controller.
+ 195:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @param  None
+ 196:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   * @retval None
+ 197:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   */
+ 198:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** void FLASH_Lock(void)
+ 199:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** {
+ 379              		.loc 1 199 0
+ 380              		.cfi_startproc
+ 381              		@ args = 0, pretend = 0, frame = 0
+ 382              		@ frame_needed = 0, uses_anonymous_args = 0
+ 383              		@ link register save eliminated.
+ 200:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c ****   /* Set the Lock Bit to lock the FPEC and the FCR */
+ 201:/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32F1.c **** 	__set_bits(FLASH_CR, CR_LOCK_Set);
+ 384              		.loc 1 201 0
+ 385 0000 024B     		ldr	r3, .L40
+ 386 0002 1A68     		ldr	r2, [r3, #0]
+ 387 0004 42F08002 		orr	r2, r2, #128
+ 388 0008 1A60     		str	r2, [r3, #0]
+ 389 000a 7047     		bx	lr
+ 390              	.L41:
+ 391              		.align	2
+ 392              	.L40:
+ 393 000c 10200240 		.word	1073881104
+ 394              		.cfi_endproc
+ 395              	.LFE8:
+ 397              		.section	.rodata.str1.1,"aMS",%progbits,1
+ 398              	.LC0:
+ 399 0000 2F557365 		.ascii	"/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/Map"
+ 399      72732F72 
+ 399      61737461 
+ 399      62616E64 
+ 399      6974612F 
+ 400 0033 6C65436F 		.ascii	"leCompatibility/flash_stm32F1.c\000"
+ 400      6D706174 
+ 400      6962696C 
+ 400      6974792F 
+ 400      666C6173 
+ 401              	.LC1:
+ 402 0053 49535F46 		.ascii	"IS_FLASH_ADDRESS(Page_Address)\000"
+ 402      4C415348 
+ 402      5F414444 
+ 402      52455353 
+ 402      28506167 
+ 403              		.text
+ 404              	.Letext0:
+ 405              		.file 2 "../Libmaple/libmaple/libmaple/libmaple_types.h"
+ 406              		.file 3 "/Users/rastabandita/Desktop/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.h"
+ 407              		.file 4 "../Libmaple/libmaple/libmaple/util.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 flash_stm32.c
+/var/tmp//ccX91KdC.s:19     .text.FLASH_GetStatus:0000000000000000 $t
+/var/tmp//ccX91KdC.s:24     .text.FLASH_GetStatus:0000000000000000 FLASH_GetStatus
+/var/tmp//ccX91KdC.s:73     .text.FLASH_GetStatus:0000000000000030 $d
+/var/tmp//ccX91KdC.s:78     .text.FLASH_WaitForLastOperation:0000000000000000 $t
+/var/tmp//ccX91KdC.s:83     .text.FLASH_WaitForLastOperation:0000000000000000 FLASH_WaitForLastOperation
+/var/tmp//ccX91KdC.s:169    .text.FLASH_ErasePage:0000000000000000 $t
+/var/tmp//ccX91KdC.s:174    .text.FLASH_ErasePage:0000000000000000 FLASH_ErasePage
+/var/tmp//ccX91KdC.s:250    .text.FLASH_ErasePage:0000000000000058 $d
+/var/tmp//ccX91KdC.s:260    .text.FLASH_ProgramHalfWord:0000000000000000 $t
+/var/tmp//ccX91KdC.s:265    .text.FLASH_ProgramHalfWord:0000000000000000 FLASH_ProgramHalfWord
+/var/tmp//ccX91KdC.s:336    .text.FLASH_ProgramHalfWord:0000000000000048 $d
+/var/tmp//ccX91KdC.s:343    .text.FLASH_Unlock:0000000000000000 $t
+/var/tmp//ccX91KdC.s:348    .text.FLASH_Unlock:0000000000000000 FLASH_Unlock
+/var/tmp//ccX91KdC.s:366    .text.FLASH_Unlock:0000000000000010 $d
+/var/tmp//ccX91KdC.s:372    .text.FLASH_Lock:0000000000000000 $t
+/var/tmp//ccX91KdC.s:377    .text.FLASH_Lock:0000000000000000 FLASH_Lock
+/var/tmp//ccX91KdC.s:393    .text.FLASH_Lock:000000000000000c $d
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+_fail

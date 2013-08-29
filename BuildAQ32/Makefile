@@ -42,12 +42,12 @@
 BUILDTYPE ?= STM32
 #BUILDTYPE ?= XMEGA
 
-BOARD ?= aeroquad32
+#BOARD ?= aeroquad32
 #BOARD ?= aeroquad32f1
 #BOARD ?= aeroquad32mini
 #BOARD	= discovery_f4
 #BOARD ?= freeflight
-
+ BOARD ?= maple_mini
 V=1
 
 ADDITIONALDEFINES = 

@@ -189,13 +189,15 @@ rcc_clk_domain rcc_dev_clk(rcc_clk_id id) {
  * @param id Clock ID of the peripheral whose clock domain speed to return
  * @return Clock speed for the given clock ID
  */
+
+static const uint32 rcc_dev_clk_speed_table[] = {
+    [RCC_AHB]  = 72000000,
+    [RCC_APB1] = 36000000,
+    [RCC_APB2] = 72000000
+  };
+
 uint32 rcc_dev_clk_speed(rcc_clk_id id) {
-    static const uint32 rcc_dev_clk_speed_table[] = {
-        [RCC_AHB]  = 72000000,
-        [RCC_APB1] = 36000000,
-        [RCC_APB2] = 72000000
-	  };
-    return rcc_dev_clk_speed_table[rcc_dev_clk(id)];
+	return rcc_dev_clk_speed_table[rcc_dev_clk(id)];
 }
 
 /**

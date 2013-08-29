@@ -1,12 +1,12 @@
 # Try "make help" for more information on BOARD and MEMORY_TARGET;
 # these default to a Maple Flash build.
 #BOARD ?= maple
-BOARD ?= aeroquad32
+#BOARD ?= aeroquad32
 #BOARD ?= aeroquad32f1
 #BOARD ?= discovery_f4
 #BOARD ?= aeroquad32mini
 #BOARD ?= freeflight
-
+BOARD ?= maple_mini
 #V=1
 
 .DEFAULT_GOAL := sketch
@@ -77,15 +77,19 @@ endif
 #GLOBAL_FLAGS += -DDISABLEUSB
 #GLOBAL_FLAGS += -DUSB_DISC_OD
 		   
-GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m \
-		   -nostdlib -ffunction-sections -fdata-sections	     \
-		   -Wl,--gc-sections $(GLOBAL_FLAGS)
+MCU_DEF=cortex-m3
+ifeq ($(MCU), STM32F406VG)
+	MCU_DEF=cortex-m4
+endif
+GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=$(MCU_DEF) -mthumb \
+	   		-nostdlib -ffunction-sections -fdata-sections	     \
+   		   -Wl,--gc-sections $(GLOBAL_FLAGS)
 GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall $(GLOBAL_FLAGS)
-GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb		     \
+GLOBAL_ASFLAGS  := -mcpu=$(MCU_DEF) -march=armv7-m -mthumb		     \
 		   -x assembler-with-cpp $(GLOBAL_FLAGS)
 LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
-            -mcpu=cortex-m3 -mthumb -Xlinker     \
-            --gc-sections --print-gc-sections --march=armv7-m -Wall
+           -mcpu=$(MCU_DEF) -mthumb -Xlinker     \
+           --gc-sections --print-gc-sections --march=armv7-m -Wall
 
 ##
 ## Build rules and useful templates
