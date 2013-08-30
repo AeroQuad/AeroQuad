@@ -69,10 +69,11 @@ bool isAccelCalibrationStep6Done = false;
 
 unsigned long accelCalibrationLastTimeRequested = 0;
 
-int accelRawData[3][100]; // Contains raw accel data (each of the 3 axes is measured 100 times)
+#define NumberOfAccelSamples 100
+int accelRawData[3][NumberOfAccelSamples]; // Contains raw accel data (each of the 3 axes is measured 100 times)
 float accelMeanData[3][6]; // Contains the mean values for each of the 3 axes in each of the 6 calibration posistions
 
-int accelCalibrationTimeout = 25000; // 25 seconds
+int accelCalibrationTimeout = 40000; // 40 seconds
 
 ///* Variables for transmitter calibration *///
 float tempReceiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -1540,17 +1541,32 @@ void resetAccelCalibrationStatus() {
 }
 //TODO: finish
 void calculateAndStoreAccelCalibrationValues() {
-	accelScaleFactor[XAXIS] = (accelMeanData[4][XAXIS] - (accelMeanData[4][XAXIS] - (((accelMeanData[4][XAXIS] - accelMeanData[5][XAXIS]) / 19.613) * 9.8065))) / 9.8065;
-	accelScaleFactor[YAXIS] = (accelMeanData[2][YAXIS] - (accelMeanData[2][YAXIS] - (((accelMeanData[2][YAXIS] - accelMeanData[3][YAXIS]) / 19.613) * 9.8065))) / 9.8065;
-	accelScaleFactor[ZAXIS] = (accelMeanData[1][ZAXIS] - (accelMeanData[1][ZAXIS] - (((accelMeanData[1][ZAXIS] - accelMeanData[3][ZAXIS]) / 19.613) * 9.8065))) / 9.8065;
+	accelScaleFactor[XAXIS] = 9.8065 / (accelMeanData[XAXIS][4] - (accelMeanData[XAXIS][4] - (((accelMeanData[XAXIS][4] - accelMeanData[XAXIS][5]) / 19.613) * 9.8065))); 
+	accelScaleFactor[YAXIS] = 9.8065 / (accelMeanData[YAXIS][2] - (accelMeanData[YAXIS][2] - (((accelMeanData[YAXIS][2] - accelMeanData[YAXIS][3]) / 19.613) * 9.8065)));
+	accelScaleFactor[ZAXIS] = 9.8065 / (accelMeanData[ZAXIS][1] - (accelMeanData[ZAXIS][1] - (((accelMeanData[ZAXIS][1] - accelMeanData[ZAXIS][0]) / 19.613) * 9.8065)));
 
 	computeAccelBias();    
 	storeSensorsZeroToEEPROM();
+	writeEEPROM();
+	zeroIntegralError();
+}
+
+void resetMagCalibrationValues() {
+	for (int16_t axis = XAXIS; axis <= ZAXIS; axis++) {
+		measuredMagMax[axis] = 0;
+		measuredMagMin[axis] = 0;
+	}
+
 }
 
 //TODO: finish
 void calculateAndStoreMagCalibrationValues() {
+	magBias[XAXIS] = measuredMagMax[XAXIS] + ((measuredMagMax[XAXIS] + measuredMagMin[XAXIS]) / 2);
+	magBias[YAXIS] = measuredMagMax[YAXIS] + ((measuredMagMax[YAXIS] + measuredMagMin[YAXIS]) / 2);
+	magBias[ZAXIS] = measuredMagMax[ZAXIS] + ((measuredMagMax[ZAXIS] + measuredMagMin[ZAXIS]) / 2);
 
+	writeEEPROM();
+	zeroIntegralError();
 }
 
 void readSerialCommand() {
@@ -1659,7 +1675,31 @@ void readSerialCommand() {
 							// Suppress command ack message to prevent the statustext above from disappearing
 							suppressCommandAckMsg = true;
 						}
-						if (commandPacket.param2 == 0.0f) {
+						if (commandPacket.param2 == 1.0f) {
+							// start mag calibration
+#if defined HeadingMagHold
+							if(!isCalibratingMag) {
+								isCalibratingMag = true;
+								resetMagCalibrationValues();
+								magCalibrationTimeStarted = millis();
+
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration started");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+							else {
+								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration already started");
+								len = mavlink_msg_to_send_buffer(buf, &msg);
+								SERIAL_PORT.write(buf, len);
+							}
+
+							// Suppress command ack message to prevent the statustext above from disappearing
+							suppressCommandAckMsg = true;
+#else
+							result = MAV_RESULT_UNSUPPORTED;
+#endif
+						}
+						if (commandPacket.param2 == 2.0f) {
 							// cancel mag calibration
 #if defined HeadingMagHold
 							if(isCalibratingMag) {
@@ -1681,36 +1721,13 @@ void readSerialCommand() {
 							result = MAV_RESULT_UNSUPPORTED;
 #endif
 						}
-						if (commandPacket.param2 == 1.0f) {
-							// start mag calibration
-#if defined HeadingMagHold
-							if(!isCalibratingMag) {
-								isCalibratingMag = true;
-								magCalibrationTimeStarted = millis();
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration already started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
-#else
-							result = MAV_RESULT_UNSUPPORTED;
-#endif
-						}
-						if (commandPacket.param2 == 2.0f) {
+						if (commandPacket.param2 == 3.0f) {
 							// finish mag calibration
 #if defined HeadingMagHold
 							if(isCalibratingMag) {
 								isCalibratingMag = false;
 
-								//TODO: finish
+								calculateAndStoreMagCalibrationValues();
 
 								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration successfully");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -1768,7 +1785,6 @@ void readSerialCommand() {
 							// Cancel accel calibration procedure
 							if(isCalibratingAccel) {
 								isCalibratingAccel = false;
-								resetAccelCalibrationStatus();
 
 								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration cancelled");
 								len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -1792,27 +1808,31 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
+
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
 									accelSample[XAXIS] = 0;
+
 									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
 									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+									accelSample[YAXIS] = 0;
+
 									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
 									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+									accelSample[ZAXIS] = 0;
+
 									accelSampleCount = 0;
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -1853,27 +1873,31 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
+
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
 									accelSample[XAXIS] = 0;
+
 									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
 									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+									accelSample[YAXIS] = 0;
+
 									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
 									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+									accelSample[ZAXIS] = 0;
+
 									accelSampleCount = 0;
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -1914,27 +1938,31 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
+
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
 									accelSample[XAXIS] = 0;
+
 									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
 									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+									accelSample[YAXIS] = 0;
+
 									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
 									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+									accelSample[ZAXIS] = 0;
+
 									accelSampleCount = 0;
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -1975,27 +2003,31 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
+
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
 									accelSample[XAXIS] = 0;
+
 									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
 									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+									accelSample[YAXIS] = 0;
+
 									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
 									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+									accelSample[ZAXIS] = 0;
+
 									accelSampleCount = 0;
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -2036,27 +2068,31 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
+
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
 									accelSample[XAXIS] = 0;
+
 									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
 									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+									accelSample[YAXIS] = 0;
+
 									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
 									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+									accelSample[ZAXIS] = 0;
+
 									accelSampleCount = 0;
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -2097,7 +2133,7 @@ void readSerialCommand() {
 
 								int accelRawDataSum[3] = {0, 0, 0};
 								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									measureAccelSum();
 									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
 									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
@@ -2112,12 +2148,12 @@ void readSerialCommand() {
 								}
 
 								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / 100.0;
-								accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / 100.0;
-								accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / 100.0;
+								accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+								accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
 								// Clear raw data
-								for (int16_t i = 0; i < 100; i++) {
+								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
 									accelRawData[XAXIS][i] = 0;
 									accelRawData[YAXIS][i] = 0;
 									accelRawData[ZAXIS][i] = 0;
@@ -2516,7 +2552,32 @@ void readSerialCommand() {
 	}
 
 	if(isCalibratingMag) {
-		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Calibrating magnetometer...");
+		float rawXaxis = getMagnetometerRawData(XAXIS);
+		float rawYaxis = getMagnetometerRawData(YAXIS);
+		float rawZaxis = getMagnetometerRawData(ZAXIS);
+
+		if (rawXaxis > measuredMagMax[XAXIS]) {
+			measuredMagMax[XAXIS] = rawXaxis;
+		}
+		else if (rawXaxis < measuredMagMin[XAXIS]) {
+			measuredMagMin[XAXIS] = rawXaxis; 
+		}
+
+		if (rawYaxis > measuredMagMax[YAXIS]) {
+			measuredMagMax[YAXIS] = rawYaxis;
+		}
+		else if (rawYaxis < measuredMagMin[YAXIS]) {
+			measuredMagMin[YAXIS] = rawYaxis; 
+		}
+
+		if (rawZaxis > measuredMagMax[ZAXIS]) {
+			measuredMagMax[ZAXIS] = rawZaxis;
+		}
+		else if (rawZaxis < measuredMagMin[ZAXIS]) {
+			measuredMagMin[ZAXIS] = rawZaxis; 
+		}
+
+		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating magnetometer...");
 		len = mavlink_msg_to_send_buffer(buf, &msg);
 		SERIAL_PORT.write(buf, len);
 	}
@@ -2579,6 +2640,14 @@ void sendSerialTelemetry() {
 		sendSerialVehicleData();
 		sendQueuedParameters();
 	}
+
+	//TODO: remove
+	mavlink_msg_debug_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, measuredMagMax[XAXIS]);
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	SERIAL_PORT.write(buf, len);
+	mavlink_msg_debug_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 1, measuredMagMin[YAXIS]);
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	SERIAL_PORT.write(buf, len);
 }
 
 #endif //#define _AQ_MAVLINK_H_
