@@ -1,7 +1,7 @@
 /*
-AeroQuad v3.x - July 2012
+AeroQuad v3.x - 2013
 www.AeroQuad.com
-Copyright (c) 2011 Ted Carancho.  All rights reserved.
+Copyright (c) 2013 Ted Carancho.  All rights reserved.
 An Open Source Arduino based multicopter.
 
 This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #ifndef _AQ_MAVLINK_H_
 #define _AQ_MAVLINK_H_
 
+mavlink_channel_t chan = MAVLINK_COMM_0;
+
 #define MAV_COMPONENT_ID MAV_COMP_ID_ALL
 
 #ifndef MAV_SYSTEM_ID
@@ -28,7 +30,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // MavLink 1.0 DKP
-#include "../mavlink/include/mavlink/v1.0/common/mavlink.h"
+#include "../AQ_MAVLink/include/mavlink/v1.0/common/mavlink.h"
 
 #include "AeroQuad.h"
 
@@ -38,7 +40,6 @@ int systemType = MAV_TYPE_GENERIC;
 uint8_t baseMode = MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 uint32_t customMode = 0; // for future use
 uint8_t systemStatus = MAV_STATE_BOOT;
-uint16_t len;
 
 ///* Variables for mag calibration *///
 bool isCalibratingMag = false;
@@ -259,15 +260,14 @@ byte *parameterByte;
 int *parameterInt;
 unsigned long *parameterULong;
 
-static uint16_t millisecondsSinceBootWhileArmed = 0;
 long system_dropped_packets = 0;
 
 mavlink_message_t msg;
-uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 mavlink_status_t status;
 
 
 void evaluateParameterListSize() {
+
 	parameterListSize = 27;
 
 #if defined(AltitudeHoldBaro) && defined(AltitudeHoldRangeFinder) && defined(UseGPSNavigator)
@@ -322,19 +322,11 @@ void evaluateCopterType() {
 }
 
 void initCommunication() {
+	mavlink_system.sysid = MAV_SYSTEM_ID;
+	mavlink_system.compid = MAV_COMPONENT_ID;
+
 	evaluateParameterListSize();
 	evaluateCopterType();
-}
-
-uint32_t previousFlightTimeUpdate = 0;
-void updateFlightTime() {
-
-	if (motorArmed) {
-		uint16_t timeDiff = millis() - previousFlightTimeUpdate;
-
-		previousFlightTimeUpdate += timeDiff;
-		millisecondsSinceBootWhileArmed += timeDiff;
-	}
 }
 
 void sendSerialHeartbeat() {
@@ -359,25 +351,19 @@ void sendSerialHeartbeat() {
 		systemStatus = MAV_STATE_STANDBY;
 	}
 
-	mavlink_msg_heartbeat_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, systemType, autopilotType, baseMode, 0, systemStatus);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_heartbeat_send(chan, systemType, autopilotType, baseMode, customMode, systemStatus);
 }
 
 void sendSerialRawIMU() {
 #if defined(HeadingMagHold)
-	mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
+	mavlink_msg_raw_imu_send(chan, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], getMagnetometerRawData(XAXIS), getMagnetometerRawData(YAXIS), getMagnetometerRawData(ZAXIS));
 #else
-	mavlink_msg_raw_imu_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 0, 0, 0);
+	mavlink_msg_raw_imu_send(chan, 0, meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], 0, 0, 0);
 #endif
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialAttitude() {
-	mavlink_msg_attitude_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
 }
 
 void sendSerialHudData() {
@@ -386,26 +372,24 @@ void sendSerialHudData() {
 #if defined(AltitudeHoldBaro)
 #if defined (UseGPS)
 	if(gpsData.state > GPS_NOFIX) {
-		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+		mavlink_msg_vfr_hud_send(chan, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
 	}
 	else {
-		mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+		mavlink_msg_vfr_hud_send(chan, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
 	}
 #else
-	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
 #endif
 #else
-	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, 0, 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE]-1000)/10, 0, 0.0);
 #endif
 #else
 #if defined(AltitudeHoldBaro)
-	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, 0, (receiverCommand[THROTTLE]-1000)/10, getBaroAltitude(), 0.0);
 #else
-	mavlink_msg_vfr_hud_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, 0.0, 0.0, 0, (receiverCommand[THROTTLE]-1000)/10, 0, 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, 0, (receiverCommand[THROTTLE]-1000)/10, 0, 0.0);
 #endif
 #endif
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialGpsPostion() {
@@ -413,12 +397,10 @@ void sendSerialGpsPostion() {
 	if (haveAGpsLock())
 	{
 #if defined(AltitudeHoldBaro)
-		mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getBaroAltitude(), 65535, getGpsSpeed(), getCourse(), ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getBaroAltitude(), 65535, getGpsSpeed(), getCourse(), ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
 #else
-		mavlink_msg_global_position_int_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
 #endif
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
 	}
 #endif
 }
@@ -427,54 +409,42 @@ void sendSerialGpsPostion() {
 void sendSerialNavControllerOutput() {
 #if defined(UseGPSNavigator)
 	if(waypointIndex > -1) {
-		mavlink_msg_nav_controller_output_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, gpsRollAxisCorrection, gpsPitchAxisCorrection, gpsYawAxisCorrection, desiredHeading, distanceToNextWaypoint, (missionPositionToReach.altitude / 10 - getBaroAltitude()), 0, crossTrackError);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_nav_controller_output_send(chan, gpsRollAxisCorrection, gpsPitchAxisCorrection, gpsYawAxisCorrection, desiredHeading, distanceToNextWaypoint, (missionPositionToReach.altitude / 10 - getBaroAltitude()), 0, crossTrackError);
 	}
 #endif
 }
 
 void sendSerialMotorOutput() {
-	mavlink_msg_servo_output_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, motorCommand[MOTOR1], motorCommand[MOTOR2], motorCommand[MOTOR3], motorCommand[MOTOR4], motorCommand[MOTOR5], motorCommand[MOTOR6],motorCommand[MOTOR7], motorCommand[MOTOR8]);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_servo_output_raw_send(chan, millis(), 0, motorCommand[MOTOR1], motorCommand[MOTOR2], motorCommand[MOTOR3], motorCommand[MOTOR4], motorCommand[MOTOR5], motorCommand[MOTOR6],motorCommand[MOTOR7], motorCommand[MOTOR8]);
 }
 
 void sendSerialRawPressure() {
 #if defined(AltitudeHoldBaro)
-	mavlink_msg_raw_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, readRawPressure(), 0,0, readRawTemperature());
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_raw_pressure_send(chan, millis(), readRawPressure(), 0,0, readRawTemperature());
 #endif
 }
 
 void sendSerialScaledPressure() {
 #if defined(AltitudeHoldBaro)
-	mavlink_msg_scaled_pressure_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, pressure, 0, readRawTemperature());
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_scaled_pressure_send(chan, millis(), pressure, 0, readRawTemperature());
 #endif
 }
 
 void sendSerialRcRaw() {
 #if defined(UseRSSIFaileSafe)
-	mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[THROTTLE], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
+	mavlink_msg_rc_channels_raw_send(chan, millis(), 0, receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[THROTTLE], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], rssiRawValue * 2.55);
 #else
-	mavlink_msg_rc_channels_raw_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[THROTTLE], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 255);
+	mavlink_msg_rc_channels_raw_send(chan, millis(), 0, receiverCommand[XAXIS], receiverCommand[YAXIS], receiverCommand[THROTTLE], receiverCommand[ZAXIS], receiverCommand[MODE], receiverCommand[AUX1], receiverCommand[AUX2], receiverCommand[AUX3], 255);
 #endif
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialRcScaled() {
 	// RC values scaled from "1000 - 2000" to "-10000 - 10000"
 #if defined(UseRSSIFaileSafe)
-	mavlink_msg_rc_channels_scaled_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, (receiverCommand[XAXIS] - 1500) * 20, (receiverCommand[YAXIS] - 1500) * 20, (receiverCommand[THROTTLE] - 1500) * 20, (receiverCommand[ZAXIS] - 1500) * 20, (receiverCommand[MODE] - 1500) * 20, (receiverCommand[AUX1] - 1500) * 20, (receiverCommand[AUX2] - 1500) * 20, (receiverCommand[AUX3] - 1500) * 20, rssiRawValue * 2.55);
+	mavlink_msg_rc_channels_scaled_send(chan, millis(), 0, (receiverCommand[XAXIS] - 1500) * 20, (receiverCommand[YAXIS] - 1500) * 20, (receiverCommand[THROTTLE] - 1500) * 20, (receiverCommand[ZAXIS] - 1500) * 20, (receiverCommand[MODE] - 1500) * 20, (receiverCommand[AUX1] - 1500) * 20, (receiverCommand[AUX2] - 1500) * 20, (receiverCommand[AUX3] - 1500) * 20, rssiRawValue * 2.55);
 #else
-	mavlink_msg_rc_channels_scaled_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, (receiverCommand[XAXIS] - 1500) * 20, (receiverCommand[YAXIS] - 1500) * 20, (receiverCommand[THROTTLE] - 1500) * 20, (receiverCommand[ZAXIS] - 1500) * 20, (receiverCommand[MODE] - 1500) * 20, (receiverCommand[AUX1] - 1500) * 20, (receiverCommand[AUX2] - 1500) * 20, (receiverCommand[AUX3] - 1500) * 20, 255);
+	mavlink_msg_rc_channels_scaled_send(chan, millis(), 0, (receiverCommand[XAXIS] - 1500) * 20, (receiverCommand[YAXIS] - 1500) * 20, (receiverCommand[THROTTLE] - 1500) * 20, (receiverCommand[ZAXIS] - 1500) * 20, (receiverCommand[MODE] - 1500) * 20, (receiverCommand[AUX1] - 1500) * 20, (receiverCommand[AUX2] - 1500) * 20, (receiverCommand[AUX3] - 1500) * 20, 255);
 #endif
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialSysStatus() {
@@ -549,71 +519,52 @@ void sendSerialSysStatus() {
 
 #if defined(BattMonitor)
 #if defined(BM_EXTENDED)
-	mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
+	mavlink_msg_sys_status_send(chan, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current*1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
 #else
-	mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, -1, -1, system_dropped_packets, 0, 0, 0, 0, 0);
+	mavlink_msg_sys_status_send(chan, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, -1, -1, system_dropped_packets, 0, 0, 0, 0, 0);
 #endif
 #else
-	mavlink_msg_sys_status_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);
+	mavlink_msg_sys_status_send(chan, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);
 #endif
-
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
 }
 
 void sendSerialPID(int IDPid, const char id_p[], const char id_i[], const char id_d[], const char id_windUp[], int listsize, int index) {
 
 	int counter = 0;
 	if (id_p != 0) {
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_p, PID[IDPid].P, parameterType, listsize, index);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_param_value_send(chan, id_p, PID[IDPid].P, parameterType, listsize, index);
 		counter++;
 	}
 
 	if (id_i != 0) {
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_i, PID[IDPid].I, parameterType, listsize, index + counter);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_param_value_send(chan, id_i, PID[IDPid].I, parameterType, listsize, index + counter);
 		counter++;
 	}
 
 	if (id_d != 0) {
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_d, PID[IDPid].D, parameterType, listsize, index + counter);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_param_value_send(chan, id_d, PID[IDPid].D, parameterType, listsize, index + counter);
 		counter++;
 	}
 
 	if (id_windUp != 0) {
-		mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, id_windUp, PID[IDPid].windupGuard, parameterType, listsize, index + counter);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_param_value_send(chan, id_windUp, PID[IDPid].windupGuard, parameterType, listsize, index + counter);
 	}
 }
 
 void sendSerialParameter(float parameterID, const char parameterName[], int listsize, int index) {
-	mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_param_value_send(chan, (char*)parameterName, parameterID, parameterType, listsize, index);
 }
 
 void sendSerialParameter(int parameterID, const char parameterName[], int listsize, int index) {
-	mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_param_value_send(chan, (char*)parameterName, parameterID, parameterType, listsize, index);
 }
 
 void sendSerialParameter(byte parameterID, const char parameterName[], int listsize, int index) {
-	mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_param_value_send(chan, (char*)parameterName, parameterID, parameterType, listsize, index);
 }
 
 void sendSerialParameter(unsigned long parameterID, const char parameterName[], int listsize, int index) {
-	mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, (char*)parameterName, parameterID, parameterType, listsize, index);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_param_value_send(chan, (char*)parameterName, parameterID, parameterType, listsize, index);
 }
 
 void sendParameterListPart1() {
@@ -1379,9 +1330,7 @@ void changeAndSendParameter() {
 		if(parameterMatch == -2) { // no parameter matched, should not happen
 			parameterChangeIndicator = -1;
 
-			mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Write failed");
-			len = mavlink_msg_to_send_buffer(buf, &msg);
-			SERIAL_PORT.write(buf, len);
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Write failed");
 			return;
 		}
 
@@ -1391,9 +1340,7 @@ void changeAndSendParameter() {
 				PID[parameterMatch].P = set.param_value;
 				writeEEPROM();
 				// Report back new value
-				mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
+				mavlink_msg_param_value_send(chan, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
 			}
 		}
 		else if (PIDIndicator == I) {
@@ -1401,9 +1348,7 @@ void changeAndSendParameter() {
 				PID[parameterMatch].I = set.param_value;
 				writeEEPROM();
 				// Report back new value
-				mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
+				mavlink_msg_param_value_send(chan, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
 			}
 		}
 		else if (PIDIndicator == D) {
@@ -1411,9 +1356,7 @@ void changeAndSendParameter() {
 				PID[parameterMatch].D = set.param_value;
 				writeEEPROM();
 				// Report back new value
-				mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
+				mavlink_msg_param_value_send(chan, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
 			}
 		}
 		else if (PIDIndicator == windUpGuard) {
@@ -1421,9 +1364,7 @@ void changeAndSendParameter() {
 				PID[parameterMatch].windupGuard = set.param_value;
 				writeEEPROM();
 				// Report back new value
-				mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].windupGuard, parameterType, parameterListSize, -1);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
+				mavlink_msg_param_value_send(chan, key, PID[parameterMatch].windupGuard, parameterType, parameterListSize, -1);
 			}
 		}
 		else if (PIDIndicator == NONE) {
@@ -1432,9 +1373,7 @@ void changeAndSendParameter() {
 					*parameterFloat = set.param_value;
 					writeEEPROM();
 					// Report back new value
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterFloat, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+					mavlink_msg_param_value_send(chan, key, *parameterFloat, parameterType, parameterListSize, -1);
 				}
 			}
 			else if (parameterByte != NULL) {
@@ -1442,9 +1381,7 @@ void changeAndSendParameter() {
 					*parameterByte = (byte)set.param_value;
 					writeEEPROM();
 					// Report back new value
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterByte, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+					mavlink_msg_param_value_send(chan, key, (float)*parameterByte, parameterType, parameterListSize, -1);
 				}
 			}
 			else if (parameterInt != NULL) {
@@ -1452,9 +1389,7 @@ void changeAndSendParameter() {
 					*parameterInt = (int)set.param_value;
 					writeEEPROM();
 					// Report back new value
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterInt, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+					mavlink_msg_param_value_send(chan, key, (float)*parameterInt, parameterType, parameterListSize, -1);
 				}
 			}
 			else if (parameterULong != NULL) {
@@ -1462,17 +1397,13 @@ void changeAndSendParameter() {
 					*parameterULong = (unsigned long)set.param_value;
 					writeEEPROM();
 					// Report back new value
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterULong, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
+					mavlink_msg_param_value_send(chan, key, (float)*parameterULong, parameterType, parameterListSize, -1);
 				}
 			}
 		}
 		parameterChangeIndicator = -1;
 
-		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Write successful");
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Write successful");
 	}
 }
 
@@ -1491,9 +1422,7 @@ void sendQueuedParameters() {
 		else if(paramListPartIndicator == 3) {
 			sendParameterListPart4();
 
-			mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "All parameters received");
-			len = mavlink_msg_to_send_buffer(buf, &msg);
-			SERIAL_PORT.write(buf, len);
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "All parameters received");
 		}
 		paramListPartIndicator++;
 	}
@@ -1506,9 +1435,7 @@ void receiveWaypoint() { // request waypoints one by one from GCS
 	if (waypointLastRequestedIndex != waypointIndexToBeRequested) {
 		waypointLastRequestedIndex = waypointIndexToBeRequested;
 
-		mavlink_msg_mission_request_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, waypointIndexToBeRequested);
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_mission_request_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, waypointIndexToBeRequested);
 	}
 }
 
@@ -1569,979 +1496,857 @@ void calculateAndStoreMagCalibrationValues() {
 	zeroIntegralError();
 }
 
-void readSerialCommand() {
-	while(SERIAL_PORT.available() > 0) {
+void handleMessage(mavlink_message_t msg) {
+	float x = 0, y = 0, z = 0;
+	uint8_t result = MAV_RESULT_UNSUPPORTED;
+	uint8_t isCurrentWaypoint = 0;
+	bool suppressCommandAckMsg = false;
 
-		uint8_t c = SERIAL_PORT.read();
-		//try to get a new message
-		if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
-			// Handle message
-			float x = 0, y = 0, z = 0;
-			uint8_t result = MAV_RESULT_UNSUPPORTED;
-			uint8_t isCurrentWaypoint = 0;
-			bool suppressCommandAckMsg = false;
+	switch(msg.msgid) {
 
-			switch(msg.msgid) {
+	case MAVLINK_MSG_ID_COMMAND_LONG:
+		mavlink_command_long_t commandsendet;
+		mavlink_msg_command_long_decode(&msg, &commandsendet);
 
-			case MAVLINK_MSG_ID_COMMAND_LONG:
-				mavlink_command_long_t commandPacket;
-				mavlink_msg_command_long_decode(&msg, &commandPacket);
+		switch(commandsendet.command) {
+			// (yet) unsupported commands/features
+			//case MAV_CMD_NAV_WAYPOINT: //16
+			//case MAV_CMD_NAV_LOITER_UNLIM: //17
+			//case MAV_CMD_NAV_LOITER_TURNS: //18
+			//case MAV_CMD_NAV_LOITER_TIME: //19
+			//case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
+			//case MAV_CMD_NAV_LAND: //21
+			//case MAV_CMD_NAV_TAKEOFF: //22
+			//case MAV_CMD_NAV_ROI: //80
+			//case MAV_CMD_NAV_PATHPLANNING: //81
+			//case MAV_CMD_NAV_LAST: //95
+			//case MAV_CMD_CONDITION_DELAY: //112
+			//case MAV_CMD_CONDITION_CHANGE_ALT: //113
+			//case MAV_CMD_CONDITION_DISTANCE: //114
+			//case MAV_CMD_CONDITION_YAW: //115
+			//case MAV_CMD_CONDITION_LAST: //159
+			//case MAV_CMD_DO_SET_MODE: //176
+			//case MAV_CMD_DO_JUMP: //177
+			//case MAV_CMD_DO_CHANGE_SPEED: //178
+			//case MAV_CMD_DO_SET_PARAMETER: //180
+			//case MAV_CMD_DO_SET_RELAY: //181
+			//case MAV_CMD_DO_REPEAT_RELAY: //182
+			//case MAV_CMD_DO_SET_SERVO: //183
+			//case MAV_CMD_DO_REPEAT_SERVO: //184
+			//case MAV_CMD_DO_CONTROL_VIDEO: //200
+			//case MAV_CMD_DO_LAST: //240
+			//case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
+			//case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
+			//case MAV_CMD_OVERRIDE_GOTO: //252
+			//case MAV_CMD_MISSION_START: //300
+			//	result = MAV_RESULT_UNSUPPORTED;
+			//	break;
 
-				switch(commandPacket.command) {
-					// (yet) unsupported commands/features
-					//case MAV_CMD_NAV_WAYPOINT: //16
-					//case MAV_CMD_NAV_LOITER_UNLIM: //17
-					//case MAV_CMD_NAV_LOITER_TURNS: //18
-					//case MAV_CMD_NAV_LOITER_TIME: //19
-					//case MAV_CMD_NAV_RETURN_TO_LAUNCH: //20
-					//case MAV_CMD_NAV_LAND: //21
-					//case MAV_CMD_NAV_TAKEOFF: //22
-					//case MAV_CMD_NAV_ROI: //80
-					//case MAV_CMD_NAV_PATHPLANNING: //81
-					//case MAV_CMD_NAV_LAST: //95
-					//case MAV_CMD_CONDITION_DELAY: //112
-					//case MAV_CMD_CONDITION_CHANGE_ALT: //113
-					//case MAV_CMD_CONDITION_DISTANCE: //114
-					//case MAV_CMD_CONDITION_YAW: //115
-					//case MAV_CMD_CONDITION_LAST: //159
-					//case MAV_CMD_DO_SET_MODE: //176
-					//case MAV_CMD_DO_JUMP: //177
-					//case MAV_CMD_DO_CHANGE_SPEED: //178
-					//case MAV_CMD_DO_SET_PARAMETER: //180
-					//case MAV_CMD_DO_SET_RELAY: //181
-					//case MAV_CMD_DO_REPEAT_RELAY: //182
-					//case MAV_CMD_DO_SET_SERVO: //183
-					//case MAV_CMD_DO_REPEAT_SERVO: //184
-					//case MAV_CMD_DO_CONTROL_VIDEO: //200
-					//case MAV_CMD_DO_LAST: //240
-					//case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: //242
-					//case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: //246
-					//case MAV_CMD_OVERRIDE_GOTO: //252
-					//case MAV_CMD_MISSION_START: //300
-					//	result = MAV_RESULT_UNSUPPORTED;
-					//	break;
-
-				case MAV_CMD_COMPONENT_ARM_DISARM: //400, toggle between armed/disarmed
-					if (commandPacket.param1 == 1.0f) {
-						if(motorArmed) {
-							armMotors();
-							result = MAV_RESULT_ACCEPTED;
-						}
-						else {
-							result = MAV_RESULT_TEMPORARILY_REJECTED;
-						}
-					}
-					else if (commandPacket.param1 == 0.0f) {
-						if(!motorArmed) {
-							disarmMotors();
-							result = MAV_RESULT_ACCEPTED;
-						}
-						else {
-							result = MAV_RESULT_TEMPORARILY_REJECTED;
-						}
-					}
-					else {
-						result = MAV_RESULT_UNSUPPORTED;
-					}
-					break;
-
-				case MAV_CMD_DO_SET_HOME: //179, resetting GPS home position
-#if defined(UseGPSNavigator)
-					if (commandPacket.param1 == 1.0f) {
-						initHomeBase();
-					}
-					else {
-						homePosition.latitude = 1.0e7f * commandPacket.param5;
-						homePosition.longitude = 1.0e7f * commandPacket.param6;
-						homePosition.altitude = 1.0e2f * commandPacket.param7;
-					}
+		case MAV_CMD_COMPONENT_ARM_DISARM: //400, toggle between armed/disarmed
+			if (commandsendet.param1 == 1.0f) {
+				if(motorArmed) {
+					armMotors();
 					result = MAV_RESULT_ACCEPTED;
+				}
+				else {
+					result = MAV_RESULT_TEMPORARILY_REJECTED;
+				}
+			}
+			else if (commandsendet.param1 == 0.0f) {
+				if(!motorArmed) {
+					disarmMotors();
+					result = MAV_RESULT_ACCEPTED;
+				}
+				else {
+					result = MAV_RESULT_TEMPORARILY_REJECTED;
+				}
+			}
+			else {
+				result = MAV_RESULT_UNSUPPORTED;
+			}
+			break;
+
+		case MAV_CMD_DO_SET_HOME: //179, resetting GPS home position
+#if defined(UseGPSNavigator)
+			if (commandsendet.param1 == 1.0f) {
+				initHomeBase();
+			}
+			else {
+				homePosition.latitude = 1.0e7f * commandsendet.param5;
+				homePosition.longitude = 1.0e7f * commandsendet.param6;
+				homePosition.altitude = 1.0e2f * commandsendet.param7;
+			}
+			result = MAV_RESULT_ACCEPTED;
+#else
+			result = MAV_RESULT_UNSUPPORTED;
+#endif
+			break;
+
+		case MAV_CMD_PREFLIGHT_CALIBRATION: //241, calibration of acc/gyro/mag/transmitter
+			if (!motorArmed) {
+				if (commandsendet.param1 == 1.0f) {
+					// gyro calibration
+					calibrateGyro();
+					storeSensorsZeroToEEPROM();
+
+					mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Gyro calibration successfully");
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param2 == 1.0f) {
+					// start mag calibration
+#if defined HeadingMagHold
+					if(!isCalibratingMag) {
+						isCalibratingMag = true;
+						resetMagCalibrationValues();
+						magCalibrationTimeStarted = millis();
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mag calibration started");
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mag calibration already started");
+					}
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
 #else
 					result = MAV_RESULT_UNSUPPORTED;
 #endif
-					break;
-
-				case MAV_CMD_PREFLIGHT_CALIBRATION: //241, calibration of acc/gyro/mag/transmitter
-					if (!motorArmed) {
-						if (commandPacket.param1 == 1.0f) {
-							// gyro calibration
-							calibrateGyro();
-							storeSensorsZeroToEEPROM();
-
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Gyro calibration successfully");
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							SERIAL_PORT.write(buf, len);
-
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
-						}
-						if (commandPacket.param2 == 1.0f) {
-							// start mag calibration
+				}
+				if (commandsendet.param2 == 2.0f) {
+					// cancel mag calibration
 #if defined HeadingMagHold
-							if(!isCalibratingMag) {
-								isCalibratingMag = true;
-								resetMagCalibrationValues();
-								magCalibrationTimeStarted = millis();
+					if(isCalibratingMag) {
+						isCalibratingMag = false;
 
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration already started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mag calibration cancelled");
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mag calibration not started yet");
+					}
 
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
 #else
-							result = MAV_RESULT_UNSUPPORTED;
+					result = MAV_RESULT_UNSUPPORTED;
 #endif
-						}
-						if (commandPacket.param2 == 2.0f) {
-							// cancel mag calibration
+				}
+				if (commandsendet.param2 == 3.0f) {
+					// finish mag calibration
 #if defined HeadingMagHold
-							if(isCalibratingMag) {
-								isCalibratingMag = false;
+					if(isCalibratingMag) {
+						isCalibratingMag = false;
 
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration cancelled");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration not started yet");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
+						calculateAndStoreMagCalibrationValues();
 
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mag calibration successfully");
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start mag calibration first");
+					}
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
 #else
-							result = MAV_RESULT_UNSUPPORTED;
+					result = MAV_RESULT_UNSUPPORTED;
 #endif
-						}
-						if (commandPacket.param2 == 3.0f) {
-							// finish mag calibration
-#if defined HeadingMagHold
-							if(isCalibratingMag) {
-								isCalibratingMag = false;
-
-								calculateAndStoreMagCalibrationValues();
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mag calibration successfully");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start mag calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
-#else
-							result = MAV_RESULT_UNSUPPORTED;
-#endif
-						}
-						if(commandPacket.param3 == 1.0f) {
+				}
+				if(commandsendet.param3 == 1.0f) {
 #if defined(AltitudeHoldBaro) 
-							// reset baro altitude
-							measureGroundBaro();
-							baroAltitude = baroGroundAltitude;
+					// reset baro altitude
+					measureGroundBaro();
+					baroAltitude = baroGroundAltitude;
 
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Altitude reset successfully");
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							SERIAL_PORT.write(buf, len);
+					mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Altitude reset successfully");
 
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
 #else
-							result = MAV_RESULT_UNSUPPORTED;
+					result = MAV_RESULT_UNSUPPORTED;
 #endif
+				}
+				if (commandsendet.param4 == 1.0f) {
+					// Start accel calibration procedure
+					if(!isCalibratingAccel) {
+						accelCalibrationLastTimeRequested = millis();
+						isCalibratingAccel = true;
+						resetAccelCalibrationStatus();
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration started");
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration already started");
+					}
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param4 == 2.0f) {
+					// Cancel accel calibration procedure
+					if(isCalibratingAccel) {
+						isCalibratingAccel = false;
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration cancelled");
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration not started yet");
+					}
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 1.0f) {
+					// Perform accel calibration step 1
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 1)...");
+
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
+
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
+
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelSample[YAXIS] = 0;
+
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSample[ZAXIS] = 0;
+
+							accelSampleCount = 0;
 						}
-						if (commandPacket.param4 == 1.0f) {
-							// Start accel calibration procedure
-							if(!isCalibratingAccel) {
-								accelCalibrationLastTimeRequested = millis();
-								isCalibratingAccel = true;
-								resetAccelCalibrationStatus();
 
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration already started");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
 						}
-						if (commandPacket.param4 == 2.0f) {
-							// Cancel accel calibration procedure
-							if(isCalibratingAccel) {
-								isCalibratingAccel = false;
 
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration cancelled");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration not started yet");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed step 1");
 
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep1Done = true;
+
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
+
+							isCalibratingAccel = false;
+
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
 						}
-						if (commandPacket.param5 == 1.0f) {
-							// Perform accel calibration step 1
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 1)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 2.0f) {
+					// Perform accel calibration step 2
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 2)...");
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
 
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
 
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelSample[YAXIS] = 0;
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelSample[YAXIS] = 0;
 
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSample[ZAXIS] = 0;
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSample[ZAXIS] = 0;
 
-									accelSampleCount = 0;
-								}
-
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed step 1");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep1Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+							accelSampleCount = 0;
 						}
-						if (commandPacket.param5 == 2.0f) {
-							// Perform accel calibration step 2
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 2)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
-
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelSample[YAXIS] = 0;
-
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSample[ZAXIS] = 0;
-
-									accelSampleCount = 0;
-								}
-
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed step 2");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep2Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
 						}
-						if (commandPacket.param5 == 3.0f) {
-							// Perform accel calibration step 3
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 3)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed step 2");
 
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep2Done = true;
 
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelSample[YAXIS] = 0;
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
 
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSample[ZAXIS] = 0;
+							isCalibratingAccel = false;
 
-									accelSampleCount = 0;
-								}
-
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed Step 3");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep3Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
 						}
-						if (commandPacket.param5 == 4.0f) {
-							// Perform accel calibration step 4
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 4)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 3.0f) {
+					// Perform accel calibration step 3
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 3)...");
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
 
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
 
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelSample[YAXIS] = 0;
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelSample[YAXIS] = 0;
 
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSample[ZAXIS] = 0;
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSample[ZAXIS] = 0;
 
-									accelSampleCount = 0;
-								}
-
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed Step 4");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep4Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+							accelSampleCount = 0;
 						}
-						if (commandPacket.param5 == 5.0f) {
-							// Perform accel calibration step 5
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 5)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
 
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
-
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelSample[YAXIS] = 0;
-
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSample[ZAXIS] = 0;
-
-									accelSampleCount = 0;
-								}
-
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
-
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed Step 5");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep5Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
 						}
-						if (commandPacket.param5 == 6.0f) {
-							// Perform accel calibration step 6
-							if(isCalibratingAccel) {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating (Step 6)...");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
 
-								int accelRawDataSum[3] = {0, 0, 0};
-								// Measure 100 samples of each axis
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									measureAccelSum();
-									accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-									accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-									accelSample[XAXIS] = 0;
-									accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-									accelSample[YAXIS] = 0;
-									accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-									accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-									accelSample[ZAXIS] = 0;
-									accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-									accelSampleCount = 0;
-								}
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 3");
 
-								// Calculate and store mean values for each axis
-								accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-								accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep3Done = true;
 
-								// Clear raw data
-								for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-									accelRawData[XAXIS][i] = 0;
-									accelRawData[YAXIS][i] = 0;
-									accelRawData[ZAXIS][i] = 0;
-								}
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
 
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Completed Step 6");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
+							isCalibratingAccel = false;
 
-								accelCalibrationLastTimeRequested = millis();
-								isAccelCalibrationStep6Done = true;
-
-								// Check if all steps completed
-								if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-									calculateAndStoreAccelCalibrationValues();
-
-									isCalibratingAccel = false;
-
-									mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Accel calibration successfully");
-									len = mavlink_msg_to_send_buffer(buf, &msg);
-									SERIAL_PORT.write(buf, len);
-								}
-							}
-							else {
-								mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Start Accel calibration first");
-								len = mavlink_msg_to_send_buffer(buf, &msg);
-								SERIAL_PORT.write(buf, len);
-							}
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
 						}
-						if(commandPacket.param6 == 1.0f) {
-							// Initalize EEPROM to default values
-							initializeEEPROM();
-							writeEEPROM();
-							storeSensorsZeroToEEPROM();
-							calibrateGyro();
-							zeroIntegralError();
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 4.0f) {
+					// Perform accel calibration step 4
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 4)...");
+
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
+
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
+
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelSample[YAXIS] = 0;
+
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSample[ZAXIS] = 0;
+
+							accelSampleCount = 0;
+						}
+
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
+						}
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 4");
+
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep4Done = true;
+
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
+
+							isCalibratingAccel = false;
+
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
+						}
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 5.0f) {
+					// Perform accel calibration step 5
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 5)...");
+
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
+
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
+
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelSample[YAXIS] = 0;
+
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSample[ZAXIS] = 0;
+
+							accelSampleCount = 0;
+						}
+
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
+						}
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 5");
+
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep5Done = true;
+
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
+
+							isCalibratingAccel = false;
+
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
+						}
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 6.0f) {
+					// Perform accel calibration step 6
+					if(isCalibratingAccel) {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 6)...");
+
+						int accelRawDataSum[3] = {0, 0, 0};
+						// Measure 100 samples of each axis
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							measureAccelSum();
+							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
+							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
+							accelSample[XAXIS] = 0;
+							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
+							accelSample[YAXIS] = 0;
+							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
+							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
+							accelSample[ZAXIS] = 0;
+							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
+							accelSampleCount = 0;
+						}
+
+						// Calculate and store mean values for each axis
+						accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+						accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+						// Clear raw data
+						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+							accelRawData[XAXIS][i] = 0;
+							accelRawData[YAXIS][i] = 0;
+							accelRawData[ZAXIS][i] = 0;
+						}
+
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 6");
+
+						accelCalibrationLastTimeRequested = millis();
+						isAccelCalibrationStep6Done = true;
+
+						// Check if all steps completed
+						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+							calculateAndStoreAccelCalibrationValues();
+
+							isCalibratingAccel = false;
+
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
+						}
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
+					}
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if(commandsendet.param6 == 1.0f) {
+					// Initalize EEPROM to default values
+					initializeEEPROM();
+					writeEEPROM();
+					storeSensorsZeroToEEPROM();
+					calibrateGyro();
+					zeroIntegralError();
 #if defined(HeadingMagHold)
-							initializeMagnetometer();
+					initializeMagnetometer();
 #endif
 #if defined(AltitudeHoldBaro)
-							initializeBaro();
+					initializeBaro();
 #endif
-							result = MAV_RESULT_ACCEPTED;
-						}
-						if(commandPacket.param7 == 1.0f) {
-							// Initalize transmitter calibration parameters to default values
-							for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-								receiverSlope[channel] = 1.0;
-								receiverOffset[channel] = 0.0;
-								receiverSmoothFactor[channel] = 1.0;
-							}
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Transmitter calibration parameters initialized");
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							SERIAL_PORT.write(buf, len);
-
-							// Suppress command ack message to prevent the statustext above from disappearing
-							suppressCommandAckMsg = true;
-						}
+					result = MAV_RESULT_ACCEPTED;
+				}
+				if(commandsendet.param7 == 1.0f) {
+					// Initalize transmitter calibration parameters to default values
+					for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+						receiverSlope[channel] = 1.0;
+						receiverOffset[channel] = 0.0;
+						receiverSmoothFactor[channel] = 1.0;
 					}
-					else {
-						result = MAV_RESULT_TEMPORARILY_REJECTED;
-					}
-					break;
+					mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Transmitter calibration parameters initialized");
 
-				case MAV_CMD_PREFLIGHT_STORAGE: //245, reading/writing of parameter list requested by GCS while in Preflight mode
-					if (mavlink_msg_command_long_get_param1(&msg) == 0.0f) {
-						// Read parameters from EEPROM
-						paramListPartIndicator = indexCounter = 0;
-						result = MAV_RESULT_ACCEPTED;
-					}
-					else if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
-						// Write all parameters to EEPROM
-						writeEEPROM();
-						result = MAV_RESULT_ACCEPTED;
-					}
-					break;
-
-				default:
-					result = MAV_RESULT_UNSUPPORTED;
-					break;
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
 				}
-
-				if(!suppressCommandAckMsg) {
-					mavlink_msg_command_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, commandPacket.command, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-				break;
-
-			case MAVLINK_MSG_ID_SET_MODE: // set the base mode (only arming/disarming makes sense for now)
-				__mavlink_set_mode_t modePacket;
-				mavlink_msg_set_mode_decode(&msg, &modePacket);
-
-				if(modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
-					if(!motorArmed) {
-						armMotors();
-					}
-				}
-				else if(!(modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
-					if(motorArmed) {
-						disarmMotors();
-					}
-				}
-				break;
-
-			case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:	 // sending complete parameter list to GCS
-				paramListPartIndicator = indexCounter = 0;
-				break;
-
-			case MAVLINK_MSG_ID_PARAM_REQUEST_READ:  // sending a specific parameter to GCS
-				mavlink_param_request_read_t read;
-				mavlink_msg_param_request_read_decode(&msg, &read);
-
-				key = (char*) read.param_id;
-
-				//TODO: remove/debug
-				mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, key);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-
-				parameterMatch = findParameter(key);
-
-				if(parameterMatch == -2) {
-					//TODO: requesting TX related parameters fails randomly, need to figure out why
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Read failed");
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-					break;
-				}
-				if (PIDIndicator == P) {
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-				else if (PIDIndicator == I) {
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-				else if (PIDIndicator == D) {
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-				else if (PIDIndicator == windUpGuard) {
-					mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, PID[parameterMatch].windupGuard, parameterType, parameterListSize, -1);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-				else if (PIDIndicator == NONE) {
-					if (parameterFloat != NULL) {
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, *parameterFloat, parameterType, parameterListSize, -1);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						SERIAL_PORT.write(buf, len);
-					}
-					else if (parameterByte != NULL) {
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterByte, parameterType, parameterListSize, -1);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						SERIAL_PORT.write(buf, len);
-					}
-					else if (parameterInt != NULL) {
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterInt, parameterType, parameterListSize, -1);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						SERIAL_PORT.write(buf, len);
-					}
-					else if (parameterULong != NULL) {
-						mavlink_msg_param_value_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, key, (float)*parameterULong, parameterType, parameterListSize, -1);
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						SERIAL_PORT.write(buf, len);
-					}
-				}
-				mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Read successful");
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-				break;
-
-			case MAVLINK_MSG_ID_PARAM_SET:  // set one specific onboard parameter
-				if(!motorArmed) { // added for security reason, as the software is shortly blocked by this command
-					mavlink_msg_param_set_decode(&msg, &set);
-					key = (char*) set.param_id;
-					parameterMatch = findParameter(key);
-					parameterChangeIndicator = 0;
-					changeAndSendParameter();
-
-					// Check if we received the last parameter needed for transmitter calibration
-					if(isRcCalibrationNeeded) {
-						isRcCalibrationNeeded = false;
-
-						if(calculateTransmitterCalibrationValues()) {
-							for (byte channel = XAXIS; channel < 8; channel++) {
-								receiverOffset[channel] = tempReceiverOffset[channel];
-								receiverSlope[channel] = tempReceiverSlope[channel];
-							}
-							writeEEPROM();
-
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Transmitter calibration successfully");
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							SERIAL_PORT.write(buf, len);
-						}
-						else {
-							mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Transmitter calibration failed");
-							len = mavlink_msg_to_send_buffer(buf, &msg);
-							SERIAL_PORT.write(buf, len);
-						}
-					}
-				}
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:  // requesting complete waypoint list from AQ
-#if defined(UseGPSNavigator)
-				mavlink_msg_mission_count_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, missionNbPoint + 1);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-
-				waypointTimeLastSent = millis();
-				waypointSending = true;
-				waypointReceiving = false;
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_REQUEST: // GCS requests a specific waypoint
-#if defined(UseGPSNavigator)
-				__mavlink_mission_request_t requestedWaypointPacket;
-				mavlink_msg_mission_request_decode(&msg, &requestedWaypointPacket);
-
-				waypointIndexToBeSent = requestedWaypointPacket.seq;
-
-				isCurrentWaypoint = 0;
-				if(waypointIndexToBeSent == waypointIndex) {
-					isCurrentWaypoint = 1;
-				}
-
-				// command needs scaling
-				x = waypoint[waypointIndexToBeSent].latitude / 1.0e7f;
-				y = waypoint[waypointIndexToBeSent].longitude / 1.0e7f;
-				z = waypoint[waypointIndexToBeSent].altitude / 1.0e2f;
-
-				mavlink_msg_mission_item_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, requestedWaypointPacket.seq,
-					navFrame, MAV_CMD_NAV_WAYPOINT, isCurrentWaypoint, 1, 0, waypointCaptureDistance, 0, 0, x, y, z);
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-
-				// update last waypoint comm stamp
-				waypointTimeLastSent = millis();
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_COUNT: // number of waypoints to be sent from GCS to AQ
-#if defined(UseGPSNavigator)
-				__mavlink_mission_count_t waypointListPacket;
-				mavlink_msg_mission_count_decode(&msg, &waypointListPacket);
-
-				if(waypointListPacket.count > MAX_WAYPOINTS) {
-					//If this happens, GCS tries to send more waypoints than allowed nevertheless and fails with time out error
-					// but all allowed waypoints are correctly uploaded
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Max. 16 waypoints allowed!");
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-
-					waypointListPacket.count = MAX_WAYPOINTS;
-				}
-
-				waypointsToBeRequested = waypointListPacket.count;
-				waypointTimeLastReceived = millis();
-				waypointReceiving = true;
-				waypointSending = false;
-				waypointIndexToBeRequested = 0;
-				waypointIndexToBeRequestedLast = waypointsToBeRequested - 1;
-				waypointLastRequestedIndex = -1;
-				waypointTimeLastRequested = 0;
-				missionNbPoint = -1; // reset number of waypoints
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_ITEM: // add a waypoint from GCS to the waypoint list of AQ
-#if defined(UseGPSNavigator)
-				result = MAV_MISSION_ACCEPTED;
-
-				__mavlink_mission_item_t waypointPacket;
-				mavlink_msg_mission_item_decode(&msg, &waypointPacket);
-
-				// Check if receiving waypoints (mission upload expected)
-				if (!waypointReceiving) {
-					result = MAV_MISSION_ERROR;
-					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Error - Timeout");
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-					break;
-				}
-
-				// Check if this is the requested waypoint
-				if (waypointPacket.seq != waypointIndexToBeRequested) {
-					result = MAV_MISSION_INVALID_SEQUENCE;
-					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-
-					mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Incorrect waypoint sequence");
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-					break;
-				}
-
-				waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointPacket.x;
-				waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointPacket.y;
-				waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointPacket.z;
-				missionNbPoint++;
-
-				// Update waypoint receiving state machine
-				waypointTimeLastReceived = millis();
-				waypointTimeLastRequested = 0;
-				waypointIndexToBeRequested++;
-
-				if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) { // all waypoints received, send ACK message
-					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-
-					waypointReceiving = false;
-					isRouteInitialized = false;
-					break;
-				}     
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_WRITE_PARTIAL_LIST:
-#if defined(UseGPSNavigator)
-				mavlink_mission_write_partial_list_t waypointPartialListPacket;
-				mavlink_msg_mission_write_partial_list_decode(&msg, &waypointPartialListPacket);
-
-				if (waypointPartialListPacket.start_index > missionNbPoint ||
-					waypointPartialListPacket.end_index > missionNbPoint ||
-					waypointPartialListPacket.end_index < waypointPartialListPacket.start_index) {
-						mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Mission update rejected");
-						len = mavlink_msg_to_send_buffer(buf, &msg);
-						SERIAL_PORT.write(buf, len);
-						break;
-				}
-
-				waypointTimeLastReceived = millis();
-				waypointTimeLastRequested = 0;
-				waypointReceiving = true;
-				waypointIndexToBeRequested = waypointPartialListPacket.start_index;
-				waypointIndexToBeRequestedLast = waypointPartialListPacket.end_index;
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:  // delete all waypoints of AQ
-#if defined(UseGPSNavigator)
-				for (byte location = 0; location < MAX_WAYPOINTS; location++) {
-					waypoint[location].longitude = GPS_INVALID_ANGLE;
-					waypoint[location].latitude = GPS_INVALID_ANGLE;
-					waypoint[location].altitude = GPS_INVALID_ALTITUDE;
-				}
-				isRouteInitialized = false; // reset mission status
-				missionNbPoint = -1; // reset number of waypoints
-
-				// Sending ACK message three times to make sure it's received
-				//TODO: ACK is not received by GCS, but waypoints are deleted - maybe a bug in QGroundControl?
-				for (int16_t i=0; i<3; i++) {
-					mavlink_msg_mission_ack_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SYSTEM_ID, MAV_COMPONENT_ID, MAV_MISSION_ACCEPTED);
-					len = mavlink_msg_to_send_buffer(buf, &msg);
-					SERIAL_PORT.write(buf, len);
-				}
-
-				mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Mission deleted");
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-#endif
-				break;
-
-			case MAVLINK_MSG_ID_MISSION_ACK: 
-#if defined(UseGPSNavigator)
-				// turn off waypoint sending
-				waypointSending = false;
-
-				mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Waypoint OK");
-				len = mavlink_msg_to_send_buffer(buf, &msg);
-				SERIAL_PORT.write(buf, len);
-#endif
-				break;
 			}
+			else {
+				result = MAV_RESULT_TEMPORARILY_REJECTED;
+			}
+			break;
+
+		case MAV_CMD_PREFLIGHT_STORAGE: //245, reading/writing of parameter list requested by GCS while in Preflight mode
+			if (mavlink_msg_command_long_get_param1(&msg) == 0.0f) {
+				// Read parameters from EEPROM
+				paramListPartIndicator = indexCounter = 0;
+				result = MAV_RESULT_ACCEPTED;
+			}
+			else if (mavlink_msg_command_long_get_param1(&msg) == 1.0f) {
+				// Write all parameters to EEPROM
+				writeEEPROM();
+				result = MAV_RESULT_ACCEPTED;
+			}
+			break;
+
+		default:
+			result = MAV_RESULT_UNSUPPORTED;
+			break;
+		}
+
+		if(!suppressCommandAckMsg) {
+			mavlink_msg_command_ack_send(chan, commandsendet.command, result);
+		}
+		break;
+
+	case MAVLINK_MSG_ID_SET_MODE: // set the base mode (only arming/disarming makes sense for now)
+		__mavlink_set_mode_t modesendet;
+		mavlink_msg_set_mode_decode(&msg, &modesendet);
+
+		if(modesendet.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+			if(!motorArmed) {
+				armMotors();
+			}
+		}
+		else if(!(modesendet.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
+			if(motorArmed) {
+				disarmMotors();
+			}
+		}
+		break;
+
+	case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:	 // sending complete parameter list to GCS
+		paramListPartIndicator = indexCounter = 0;
+		break;
+
+	case MAVLINK_MSG_ID_PARAM_REQUEST_READ:  // sending a specific parameter to GCS
+		mavlink_param_request_read_t read;
+		mavlink_msg_param_request_read_decode(&msg, &read);
+
+		key = (char*) read.param_id;
+
+		//TODO: remove/debug
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, key);
+
+		parameterMatch = findParameter(key);
+
+		if(parameterMatch == -2) {
+			//TODO: requesting TX related parameters fails randomly, need to figure out why
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Read failed");
+			break;
+		}
+		if (PIDIndicator == P) {
+			mavlink_msg_param_value_send(chan, key, PID[parameterMatch].P, parameterType, parameterListSize, -1);
+		}
+		else if (PIDIndicator == I) {
+			mavlink_msg_param_value_send(chan, key, PID[parameterMatch].I, parameterType, parameterListSize, -1);
+		}
+		else if (PIDIndicator == D) {
+			mavlink_msg_param_value_send(chan, key, PID[parameterMatch].D, parameterType, parameterListSize, -1);
+		}
+		else if (PIDIndicator == windUpGuard) {
+			mavlink_msg_param_value_send(chan, key, PID[parameterMatch].windupGuard, parameterType, parameterListSize, -1);
+		}
+		else if (PIDIndicator == NONE) {
+			if (parameterFloat != NULL) {
+				mavlink_msg_param_value_send(chan, key, *parameterFloat, parameterType, parameterListSize, -1);
+			}
+			else if (parameterByte != NULL) {
+				mavlink_msg_param_value_send(chan, key, (float)*parameterByte, parameterType, parameterListSize, -1);
+			}
+			else if (parameterInt != NULL) {
+				mavlink_msg_param_value_send(chan, key, (float)*parameterInt, parameterType, parameterListSize, -1);
+			}
+			else if (parameterULong != NULL) {
+				mavlink_msg_param_value_send(chan, key, (float)*parameterULong, parameterType, parameterListSize, -1);
+			}
+		}
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Read successful");
+		break;
+
+	case MAVLINK_MSG_ID_PARAM_SET:  // set one specific onboard parameter
+		if(!motorArmed) { // added for security reason, as the software is shortly blocked by this command
+			mavlink_msg_param_set_decode(&msg, &set);
+			key = (char*) set.param_id;
+			parameterMatch = findParameter(key);
+			parameterChangeIndicator = 0;
+			changeAndSendParameter();
+
+			// Check if we received the last parameter needed for transmitter calibration
+			if(isRcCalibrationNeeded) {
+				isRcCalibrationNeeded = false;
+
+				if(calculateTransmitterCalibrationValues()) {
+					for (byte channel = XAXIS; channel < 8; channel++) {
+						receiverOffset[channel] = tempReceiverOffset[channel];
+						receiverSlope[channel] = tempReceiverSlope[channel];
+					}
+					writeEEPROM();
+
+					mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Transmitter calibration successfully");
+				}
+				else {
+					mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Transmitter calibration failed");
+				}
+			}
+		}
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:  // requesting complete waypoint list from AQ
+#if defined(UseGPSNavigator)
+		mavlink_msg_mission_count_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, missionNbPoint + 1);
+
+		waypointTimeLastSent = millis();
+		waypointSending = true;
+		waypointReceiving = false;
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_REQUEST: // GCS requests a specific waypoint
+#if defined(UseGPSNavigator)
+		__mavlink_mission_request_t requestedWaypointsendet;
+		mavlink_msg_mission_request_decode(&msg, &requestedWaypointsendet);
+
+		waypointIndexToBeSent = requestedWaypointsendet.seq;
+
+		isCurrentWaypoint = 0;
+		if(waypointIndexToBeSent == waypointIndex) {
+			isCurrentWaypoint = 1;
+		}
+
+		// command needs scaling
+		x = waypoint[waypointIndexToBeSent].latitude / 1.0e7f;
+		y = waypoint[waypointIndexToBeSent].longitude / 1.0e7f;
+		z = waypoint[waypointIndexToBeSent].altitude / 1.0e2f;
+
+		mavlink_msg_mission_item_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, requestedWaypointsendet.seq,
+			navFrame, MAV_CMD_NAV_WAYPOINT, isCurrentWaypoint, 1, 0, waypointCaptureDistance, 0, 0, x, y, z);
+
+		// update last waypoint comm stamp
+		waypointTimeLastSent = millis();
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_COUNT: // number of waypoints to be sent from GCS to AQ
+#if defined(UseGPSNavigator)
+		__mavlink_mission_count_t waypointListsendet;
+		mavlink_msg_mission_count_decode(&msg, &waypointListsendet);
+
+		if(waypointListsendet.count > MAX_WAYPOINTS) {
+			//If this happens, GCS tries to send more waypoints than allowed nevertheless and fails with time out error
+			// but all allowed waypoints are correctly uploaded
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Max. 16 waypoints allowed!");
+
+			waypointListsendet.count = MAX_WAYPOINTS;
+		}
+
+		waypointsToBeRequested = waypointListsendet.count;
+		waypointTimeLastReceived = millis();
+		waypointReceiving = true;
+		waypointSending = false;
+		waypointIndexToBeRequested = 0;
+		waypointIndexToBeRequestedLast = waypointsToBeRequested - 1;
+		waypointLastRequestedIndex = -1;
+		waypointTimeLastRequested = 0;
+		missionNbPoint = -1; // reset number of waypoints
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_ITEM: // add a waypoint from GCS to the waypoint list of AQ
+#if defined(UseGPSNavigator)
+		result = MAV_MISSION_ACCEPTED;
+
+		__mavlink_mission_item_t waypointsendet;
+		mavlink_msg_mission_item_decode(&msg, &waypointsendet);
+
+		// Check if receiving waypoints (mission upload expected)
+		if (!waypointReceiving) {
+			result = MAV_MISSION_ERROR;
+			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
+
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Error - Timeout");
+			break;
+		}
+
+		// Check if this is the requested waypoint
+		if (waypointsendet.seq != waypointIndexToBeRequested) {
+			result = MAV_MISSION_INVALID_SEQUENCE;
+			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
+
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Incorrect waypoint sequence");
+			break;
+		}
+
+		waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointsendet.x;
+		waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointsendet.y;
+		waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointsendet.z;
+		missionNbPoint++;
+
+		// Update waypoint receiving state machine
+		waypointTimeLastReceived = millis();
+		waypointTimeLastRequested = 0;
+		waypointIndexToBeRequested++;
+
+		if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) { // all waypoints received, send ACK message
+			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
+
+			waypointReceiving = false;
+			isRouteInitialized = false;
+			break;
+		}     
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_WRITE_PARTIAL_LIST:
+#if defined(UseGPSNavigator)
+		mavlink_mission_write_partial_list_t waypointPartialListsendet;
+		mavlink_msg_mission_write_partial_list_decode(&msg, &waypointPartialListsendet);
+
+		if (waypointPartialListsendet.start_index > missionNbPoint ||
+			waypointPartialListsendet.end_index > missionNbPoint ||
+			waypointPartialListsendet.end_index < waypointPartialListsendet.start_index) {
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Mission update rejected");
+				break;
+		}
+
+		waypointTimeLastReceived = millis();
+		waypointTimeLastRequested = 0;
+		waypointReceiving = true;
+		waypointIndexToBeRequested = waypointPartialListsendet.start_index;
+		waypointIndexToBeRequestedLast = waypointPartialListsendet.end_index;
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:  // delete all waypoints of AQ
+#if defined(UseGPSNavigator)
+		for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+			waypoint[location].longitude = GPS_INVALID_ANGLE;
+			waypoint[location].latitude = GPS_INVALID_ANGLE;
+			waypoint[location].altitude = GPS_INVALID_ALTITUDE;
+		}
+		isRouteInitialized = false; // reset mission status
+		missionNbPoint = -1; // reset number of waypoints
+
+		// Sending ACK message three times to make sure it's received
+		//TODO: ACK is not received by GCS, but waypoints are deleted - maybe a bug in QGroundControl?
+		for (int16_t i=0; i<3; i++) {
+			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, MAV_MISSION_ACCEPTED);
+		}
+
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Mission deleted");
+#endif
+		break;
+
+	case MAVLINK_MSG_ID_MISSION_ACK: 
+#if defined(UseGPSNavigator)
+		// turn off waypoint sending
+		waypointSending = false;
+
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Waypoint OK");
+#endif
+		break;
+	}
+}
+
+void readSerialCommand() {
+	while(SERIAL_PORT.available() > 0) {
+		uint8_t c = comm_receive_ch(chan);
+		//try to get a new message
+		if (mavlink_parse_char(chan, c, &msg, &status)) {
+			// Handle message
+			handleMessage(msg);
 		}
 	}
 
@@ -2577,9 +2382,7 @@ void readSerialCommand() {
 			measuredMagMin[ZAXIS] = rawZaxis; 
 		}
 
-		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_INFO, "Calibrating magnetometer...");
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating magnetometer...");
 	}
 
 	uint32_t tnow = millis();
@@ -2588,18 +2391,14 @@ void readSerialCommand() {
 	if (isCalibratingMag && (tnow - magCalibrationTimeStarted) > magCalibrationTimeout) {
 		isCalibratingMag = false;
 
-		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Mag calibration Timeout - Please restart.");
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Mag calibration Timeout - Please restart.");
 	}
 
 	// stop accel calibration if timeout
 	if (isCalibratingAccel && (tnow - accelCalibrationLastTimeRequested) > accelCalibrationTimeout) {
 		isCalibratingAccel = false;
 
-		mavlink_msg_statustext_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, MAV_SEVERITY_ERROR, "Accel calibration Timeout - Please restart.");
-		len = mavlink_msg_to_send_buffer(buf, &msg);
-		SERIAL_PORT.write(buf, len);
+		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Accel calibration Timeout - Please restart.");
 	}
 
 	if (waypointReceiving && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 200) {
@@ -2633,8 +2432,6 @@ void sendSerialVehicleData() {
 }
 
 void sendSerialTelemetry() {
-	updateFlightTime();
-
 	if (!waypointReceiving && !waypointSending) {
 		// Don't interfere with mission transfer
 		sendSerialVehicleData();
@@ -2642,12 +2439,8 @@ void sendSerialTelemetry() {
 	}
 
 	//TODO: remove
-	mavlink_msg_debug_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 0, measuredMagMax[XAXIS]);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
-	mavlink_msg_debug_pack(MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg, millisecondsSinceBootWhileArmed, 1, measuredMagMin[YAXIS]);
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	SERIAL_PORT.write(buf, len);
+	mavlink_msg_debug_send(chan, millis(), 0, measuredMagMax[XAXIS]);
+	mavlink_msg_debug_send(chan, millis(), 1, measuredMagMin[YAXIS]);
 }
 
 #endif //#define _AQ_MAVLINK_H_
