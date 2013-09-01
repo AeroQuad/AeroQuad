@@ -21,8 +21,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #ifndef _AQ_MAVLINK_H_
 #define _AQ_MAVLINK_H_
 
-mavlink_channel_t chan = MAVLINK_COMM_0;
-
 #define MAV_COMPONENT_ID MAV_COMP_ID_ALL
 
 #ifndef MAV_SYSTEM_ID
@@ -31,8 +29,10 @@ mavlink_channel_t chan = MAVLINK_COMM_0;
 
 // MavLink 1.0 DKP
 #include "../AQ_MAVLink/include/mavlink/v1.0/common/mavlink.h"
-
+#include "GCS_MAVLink.h"
 #include "AeroQuad.h"
+
+mavlink_channel_t chan = MAVLINK_COMM_0;
 
 ///* Variables for vehicle configuration and status *///
 const int autopilotType = MAV_AUTOPILOT_GENERIC;
