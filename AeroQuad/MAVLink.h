@@ -60,20 +60,31 @@ unsigned long magCalibrationTimeStarted = 0;
 // 4 - rear down
 // 5 - front down
 bool isCalibratingAccel = false;
-
+bool isStep1Calibrating = false;
+bool isStep2Calibrating = false;
+bool isStep3Calibrating = false;
+bool isStep4Calibrating = false;
+bool isStep5Calibrating = false;
+bool isStep6Calibrating = false;
 bool isAccelCalibrationStep1Done = false;
 bool isAccelCalibrationStep2Done = false;
 bool isAccelCalibrationStep3Done = false;
 bool isAccelCalibrationStep4Done = false;
 bool isAccelCalibrationStep5Done = false;
 bool isAccelCalibrationStep6Done = false;
+bool areAllStepsCompleted = false;
 
+unsigned long accelCalibrationLastSampleTime = 0;
 unsigned long accelCalibrationLastTimeRequested = 0;
 
 #define NumberOfAccelSamples 100
+#define AccelCalibrationSampleDelay 50 // 50ms
+
 int accelRawData[3][NumberOfAccelSamples]; // Contains raw accel data (each of the 3 axes is measured 100 times)
+int accelRawDataSum[3]; // Contains sum of raw accel data of each axis
 float accelMeanData[3][6]; // Contains the mean values for each of the 3 axes in each of the 6 calibration posistions
 
+int currentSampleCounter = 0;
 int accelCalibrationTimeout = 40000; // 40 seconds
 
 ///* Variables for transmitter calibration *///
@@ -1320,7 +1331,6 @@ int findParameter(char* key) {
 		return GPSYAW_PID_IDX;
 	}
 #endif
-	//TODO: requesting TX related parameters fails randomly, need to figure out why
 	// No parameter found, should not happen
 	return -2;
 }
@@ -1459,14 +1469,30 @@ void resetAccelCalibrationStatus() {
 	isAccelCalibrationStep4Done = false;
 	isAccelCalibrationStep5Done = false;
 	isAccelCalibrationStep6Done = false;
+	isStep1Calibrating = false;
+	isStep2Calibrating = false;
+	isStep3Calibrating = false;
+	isStep4Calibrating = false;
+	isStep5Calibrating = false;
+	isStep6Calibrating = false;
 
 	for (int16_t i = 0; i < 6; i++) {
 		accelMeanData[XAXIS][i] = 0;
 		accelMeanData[YAXIS][i] = 0;
 		accelMeanData[ZAXIS][i] = 0;
 	}
+
+	for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+		accelRawData[XAXIS][i] = 0;
+		accelRawData[YAXIS][i] = 0;
+		accelRawData[ZAXIS][i] = 0;
+	}
+
+	accelRawDataSum[XAXIS] = 0;
+	accelRawDataSum[YAXIS] = 0;
+	accelRawDataSum[ZAXIS] = 0;
 }
-//TODO: finish
+
 void calculateAndStoreAccelCalibrationValues() {
 	accelScaleFactor[XAXIS] = 9.8065 / (accelMeanData[XAXIS][4] - (accelMeanData[XAXIS][4] - (((accelMeanData[XAXIS][4] - accelMeanData[XAXIS][5]) / 19.613) * 9.8065))); 
 	accelScaleFactor[YAXIS] = 9.8065 / (accelMeanData[YAXIS][2] - (accelMeanData[YAXIS][2] - (((accelMeanData[YAXIS][2] - accelMeanData[YAXIS][3]) / 19.613) * 9.8065)));
@@ -1696,56 +1722,32 @@ void handleMessage(mavlink_message_t msg) {
 					// Suppress command ack message to prevent the statustext above from disappearing
 					suppressCommandAckMsg = true;
 				}
-				if (commandsendet.param5 == 1.0f) {
-					// Perform accel calibration step 1
+				if (commandsendet.param4 == 3.0f) {
+					// Finish accel calibration procedure
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 1)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelSample[YAXIS] = 0;
-
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSample[ZAXIS] = 0;
-
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed step 1");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep1Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+						if(areAllStepsCompleted) {
 							calculateAndStoreAccelCalibrationValues();
 
+							areAllStepsCompleted = false;
 							isCalibratingAccel = false;
 
 							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
 						}
+						else {
+							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Perform all steps first");
+						}
+					}
+					else {
+						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration not started yet");
+					}
+
+					// Suppress command ack message to prevent the statustext above from disappearing
+					suppressCommandAckMsg = true;
+				}
+				if (commandsendet.param5 == 1.0f) {
+					// Perform accel calibration step 1
+					if(isCalibratingAccel) {
+						isStep1Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
@@ -1756,53 +1758,7 @@ void handleMessage(mavlink_message_t msg) {
 				if (commandsendet.param5 == 2.0f) {
 					// Perform accel calibration step 2
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 2)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelSample[YAXIS] = 0;
-
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSample[ZAXIS] = 0;
-
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed step 2");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep2Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-							calculateAndStoreAccelCalibrationValues();
-
-							isCalibratingAccel = false;
-
-							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
-						}
+						isStep2Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
@@ -1813,57 +1769,10 @@ void handleMessage(mavlink_message_t msg) {
 				if (commandsendet.param5 == 3.0f) {
 					// Perform accel calibration step 3
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 3)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelSample[YAXIS] = 0;
-
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSample[ZAXIS] = 0;
-
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 3");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep3Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-							calculateAndStoreAccelCalibrationValues();
-
-							isCalibratingAccel = false;
-
-							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
-						}
+						isStep3Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
-
 					}
 					// Suppress command ack message to prevent the statustext above from disappearing
 					suppressCommandAckMsg = true;
@@ -1871,53 +1780,7 @@ void handleMessage(mavlink_message_t msg) {
 				if (commandsendet.param5 == 4.0f) {
 					// Perform accel calibration step 4
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 4)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelSample[YAXIS] = 0;
-
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSample[ZAXIS] = 0;
-
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 4");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep4Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-							calculateAndStoreAccelCalibrationValues();
-
-							isCalibratingAccel = false;
-
-							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
-						}
+						isStep4Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
@@ -1928,53 +1791,7 @@ void handleMessage(mavlink_message_t msg) {
 				if (commandsendet.param5 == 5.0f) {
 					// Perform accel calibration step 5
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 5)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelSample[YAXIS] = 0;
-
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSample[ZAXIS] = 0;
-
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 5");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep5Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-							calculateAndStoreAccelCalibrationValues();
-
-							isCalibratingAccel = false;
-
-							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
-						}
+						isStep5Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
@@ -1985,49 +1802,7 @@ void handleMessage(mavlink_message_t msg) {
 				if (commandsendet.param5 == 6.0f) {
 					// Perform accel calibration step 6
 					if(isCalibratingAccel) {
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 6)...");
-
-						int accelRawDataSum[3] = {0, 0, 0};
-						// Measure 100 samples of each axis
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							measureAccelSum();
-							accelRawData[XAXIS][i] = (int)(accelSample[XAXIS]/accelSampleCount);
-							accelRawDataSum[XAXIS] += accelRawData[XAXIS][i];
-							accelSample[XAXIS] = 0;
-							accelRawData[YAXIS][i] = (int)(accelSample[YAXIS]/accelSampleCount);
-							accelSample[YAXIS] = 0;
-							accelRawDataSum[YAXIS] += accelRawData[YAXIS][i];
-							accelRawData[ZAXIS][i] = (int)(accelSample[ZAXIS]/accelSampleCount);
-							accelSample[ZAXIS] = 0;
-							accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][i];
-							accelSampleCount = 0;
-						}
-
-						// Calculate and store mean values for each axis
-						accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
-						accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
-
-						// Clear raw data
-						for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
-							accelRawData[XAXIS][i] = 0;
-							accelRawData[YAXIS][i] = 0;
-							accelRawData[ZAXIS][i] = 0;
-						}
-
-						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 6");
-
-						accelCalibrationLastTimeRequested = millis();
-						isAccelCalibrationStep6Done = true;
-
-						// Check if all steps completed
-						if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
-							calculateAndStoreAccelCalibrationValues();
-
-							isCalibratingAccel = false;
-
-							mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Accel calibration successfully");
-						}
+						isStep6Calibrating = true;
 					}
 					else {
 						mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Start Accel calibration first");
@@ -2117,14 +1892,10 @@ void handleMessage(mavlink_message_t msg) {
 
 		key = (char*) read.param_id;
 
-		//TODO: remove/debug
-		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, key);
-
 		parameterMatch = findParameter(key);
 
 		if(parameterMatch == -2) {
-			//TODO: requesting TX related parameters fails randomly, need to figure out why
-			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Read failed");
+			// No parameter matched, should not happen
 			break;
 		}
 		if (PIDIndicator == P) {
@@ -2354,6 +2125,381 @@ void readSerialCommand() {
 
 	if (!isCalibratingMag && !isCalibratingAccel && !waypointReceiving && !waypointSending) {
 		return;
+	}
+
+	if(isCalibratingAccel) { 
+		if(isStep1Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 1)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep1Done = true;
+				isStep1Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][0] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][0] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][0] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep1Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 1");
+			}
+		}
+		if(isStep2Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 2)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep2Done = true;
+				isStep2Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][1] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][1] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][1] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep2Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 2");
+			}
+		}
+		if(isStep3Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 3)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep3Done = true;
+				isStep3Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][2] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][2] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][2] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep1Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 3");
+			}
+		}
+		if(isStep4Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 4)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep4Done = true;
+				isStep4Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][3] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][3] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][3] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep4Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 4");
+			}
+		}
+		if(isStep5Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 5)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep5Done = true;
+				isStep5Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][4] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][4] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][4] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep5Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 5");
+			}
+		}
+		if(isStep6Calibrating) {
+			mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating (Step 6)...");
+
+			accelCalibrationLastTimeRequested = millis();
+
+			// Measure 100 samples of each axis
+			if(currentSampleCounter < NumberOfAccelSamples) {
+				if(currentSampleCounter == 0) {
+					accelRawDataSum[XAXIS] = 0;
+					accelRawDataSum[YAXIS] = 0;
+					accelRawDataSum[ZAXIS] = 0;
+				}
+
+				unsigned long currentMillis = millis();
+
+				if(currentMillis - accelCalibrationLastSampleTime > AccelCalibrationSampleDelay) {
+					accelCalibrationLastSampleTime = currentMillis;  
+					measureAccelSum();
+
+					accelRawData[XAXIS][currentSampleCounter] = (int)(accelSample[XAXIS]/accelSampleCount);
+					accelRawDataSum[XAXIS] += accelRawData[XAXIS][currentSampleCounter];
+					accelSample[XAXIS] = 0;
+
+					accelRawData[YAXIS][currentSampleCounter] = (int)(accelSample[YAXIS]/accelSampleCount);
+					accelRawDataSum[YAXIS] += accelRawData[YAXIS][currentSampleCounter];
+					accelSample[YAXIS] = 0;
+
+					accelRawData[ZAXIS][currentSampleCounter] = (int)(accelSample[ZAXIS]/accelSampleCount);
+					accelRawDataSum[ZAXIS] += accelRawData[ZAXIS][currentSampleCounter];
+					accelSample[ZAXIS] = 0;
+
+					accelSampleCount = 0;
+					currentSampleCounter++;
+				}
+			}
+			else {
+				isAccelCalibrationStep6Done = true;
+				isStep6Calibrating = false;
+				currentSampleCounter = 0;
+
+				// Calculate and store mean values for each axis
+				accelMeanData[XAXIS][5] = accelRawDataSum[XAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[YAXIS][5] = accelRawDataSum[YAXIS] / (float)NumberOfAccelSamples;
+				accelMeanData[ZAXIS][5] = accelRawDataSum[ZAXIS] / (float)NumberOfAccelSamples;
+
+				// Clear raw data
+				for (int16_t i = 0; i < NumberOfAccelSamples; i++) {
+					accelRawData[XAXIS][i] = 0;
+					accelRawData[YAXIS][i] = 0;
+					accelRawData[ZAXIS][i] = 0;
+				}
+
+				isAccelCalibrationStep6Done = true;
+
+				// Check if all steps completed
+				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
+					areAllStepsCompleted = true;
+				}
+
+				mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Completed Step 6");
+			}
+		}
 	}
 
 	if(isCalibratingMag) {
