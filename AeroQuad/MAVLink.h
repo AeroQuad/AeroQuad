@@ -416,7 +416,6 @@ void sendSerialGpsPostion() {
 #endif
 }
 
-//TODO: verify output
 void sendSerialNavControllerOutput() {
 #if defined(UseGPSNavigator)
 	if(waypointIndex > -1) {
@@ -1512,11 +1511,10 @@ void resetMagCalibrationValues() {
 
 }
 
-//TODO: finish
 void calculateAndStoreMagCalibrationValues() {
-	magBias[XAXIS] = measuredMagMax[XAXIS] + ((measuredMagMax[XAXIS] + measuredMagMin[XAXIS]) / 2);
-	magBias[YAXIS] = measuredMagMax[YAXIS] + ((measuredMagMax[YAXIS] + measuredMagMin[YAXIS]) / 2);
-	magBias[ZAXIS] = measuredMagMax[ZAXIS] + ((measuredMagMax[ZAXIS] + measuredMagMin[ZAXIS]) / 2);
+	magBias[XAXIS] = ((measuredMagMax[XAXIS] - measuredMagMin[XAXIS]) / 2) - measuredMagMax[XAXIS];
+	magBias[YAXIS] = ((measuredMagMax[YAXIS] - measuredMagMin[YAXIS]) / 2) - measuredMagMax[YAXIS];
+	magBias[ZAXIS] = ((measuredMagMax[ZAXIS] - measuredMagMin[ZAXIS]) / 2) - measuredMagMax[ZAXIS];
 
 	writeEEPROM();
 	zeroIntegralError();
@@ -2583,10 +2581,6 @@ void sendSerialTelemetry() {
 		sendSerialVehicleData();
 		sendQueuedParameters();
 	}
-
-	//TODO: remove
-	mavlink_msg_debug_send(chan, millis(), 0, measuredMagMax[XAXIS]);
-	mavlink_msg_debug_send(chan, millis(), 1, measuredMagMin[YAXIS]);
 }
 
 #endif //#define _AQ_MAVLINK_H_
