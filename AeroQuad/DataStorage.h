@@ -38,7 +38,7 @@ float nvrReadFloat(int address) {
   }
 #else
   for (int i = 0; i < 4; i++) {
-    floatOut.floatByte[i] = EEPROM.read(address + i);
+    floatOut.floatByte[i] = 0; // DUE FIXME EEPROM.read(address + i);
   }
 #endif
 
@@ -59,7 +59,7 @@ void nvrWriteFloat(float value, int address) {
   }
 #else
   for (int i = 0; i < 4; i++) {
-    EEPROM.write(address + i, floatIn.floatByte[i]);
+    // DUE FIXME EEPROM.write(address + i, floatIn.floatByte[i]);
   }
 #endif
 }
@@ -77,7 +77,7 @@ long nvrReadLong(int address) {
   }
 #else
   for (byte i = 0; i < 4; i++) {
-    longOut.longByte[i] = EEPROM.read(address + i);
+    longOut.longByte[i] = 0;// DUE FIXMEEEPROM.read(address + i);
   }
 #endif
     
@@ -99,7 +99,7 @@ void nvrWriteLong(long value, int address) {
   }
 #else
   for (int i = 0; i < 4; i++) {
-    EEPROM.write(address + i, longIn.longByte[i]);
+    // DUE FIXME EEPROM.write(address + i, longIn.longByte[i]);
   }
 #endif
 }
@@ -362,7 +362,7 @@ void readEEPROM() {
 }
 
 void writeEEPROM(){
-  cli(); // Needed so that APM sensor data does not overflow
+  // DUE FIXME cli(); // Needed so that APM sensor data does not overflow
   writePID(XAXIS, ROLL_PID_GAIN_ADR);
   writePID(YAXIS, PITCH_PID_GAIN_ADR);
   writePID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
@@ -463,7 +463,7 @@ void writeEEPROM(){
       writeFloat(servoTXChannels, SERVOTXCHANNELS_ADR);
     #endif
   #endif 
-  sei(); // Restart interrupts
+  // DUE FIXME sei(); // Restart interrupts
 }
 
 void initSensorsZeroFromEEPROM() {

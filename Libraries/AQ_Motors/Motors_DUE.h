@@ -29,10 +29,10 @@
 //#if defined (USE_400HZ_ESC)
 #define PWM_PERIOD 2500   // in us
 //#else
-//  #define PWM_FREQUENCY 3300   // in us
+//  #define PWM_PERIOD 3300   // in us
 //#endif  
 
-#define PWM_SERVO_FREQUENCY 20000   // in us
+#define PWM_SERVO_PERIOD 20000   // in us
 
 
 void writeMotors()
@@ -130,7 +130,7 @@ void initializeMotors(byte numbers) {
     configOneMotor(7, PWM_PERIOD);
     configOneMotor(6, PWM_PERIOD);
   }
-  if ((numberOfMotor == 6) || (numberOfMotors == 8)) {
+  if ((numberOfMotors == 6) || (numberOfMotors == 8)) {
     configOneMotor(5, PWM_PERIOD);
     configOneMotor(4, PWM_PERIOD);
   }

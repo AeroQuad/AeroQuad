@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
+//#error Dev branch is broke for the current development, please use official release v3.2 of flight software and configurator!
 
 #if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
  #define UseGPS
@@ -127,7 +127,7 @@
 
 #endif
 
-#include <EEPROM.h>
+//#include <EEPROM.h> // FIXME DUE
 #include <Wire.h>
 #include <GlobalDefined.h>
 #include "AeroQuad.h"
@@ -483,6 +483,129 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
+        LASTMOTOR = 8;
+        break;
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
+  }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0365570020;
+    accelScaleFactor[YAXIS] = 0.0363000011;
+    accelScaleFactor[ZAXIS] = -0.0384629964;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 1.500000;
+      magBias[YAXIS]  = 205.500000;
+      magBias[ZAXIS]  = -33.000000;
+    #endif
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyroSum();
+    measureAccelSum();
+  }
+#endif
+
+#ifdef AeroQuadDue_v3
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
+  #include <Device_I2C.h>
+
+  // Gyroscope declaration
+  #define ITG3200_ADDRESS_ALTERNATE
+  #include <Gyroscope_ITG3200_9DOF.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer_ADXL345_9DOF.h>
+
+  // Receiver declaration
+  #include <Receiver_DUE.h>
+
+  // Motor declaration
+  #include <Motors_DUE.h>
+  
+  #include <FlightConfigMEGA.h>
+
+  // heading mag hold declaration
+  #ifdef HeadingMagHold
+    #include <Compass.h>
+    #define SPARKFUN_9DOF_5883L
+  #endif
+
+  // Altitude declaration
+  #ifdef AltitudeHoldBaro
+    #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
+
+  // Battery Monitor declaration
+  #ifdef BattMonitor
+    #ifdef POWERED_BY_VIN
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+    #else
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+    #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef POWERED_BY_VIN        
+  #endif
+
+  #ifdef OSD
+    #define MAX7456_OSD
+  #endif  
+  
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
+
+  /**
+   * Put AeroQuadMega_v21 specific initialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+ //   pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+ //   pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+ //   pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+ //   pinMode(43, OUTPUT); // LED 1
+ //   pinMode(44, OUTPUT); // LED 2
+ //   pinMode(45, OUTPUT); // LED 3
+ //   pinMode(46, OUTPUT); // LED 4
+ //   digitalWrite(43, HIGH); // LED 1 on
+ //   digitalWrite(44, HIGH); // LED 2 on
+ //   digitalWrite(45, HIGH); // LED 3 on
+ //   digitalWrite(46, HIGH); // LED 4 on
+
+    Wire.begin();
+//    TWBR = 12;
     
     switch (flightConfigType) 
     {
