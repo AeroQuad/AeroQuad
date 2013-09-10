@@ -531,11 +531,11 @@
   #include <Device_I2C.h>
 
   // Gyroscope declaration
-  #define ITG3200_ADDRESS_ALTERNATE
-  #include <Gyroscope_ITG3200_9DOF.h>
-
   // Accelerometer declaration
-  #include <Accelerometer_ADXL345_9DOF.h>
+  #define MPU6000_I2C
+  #include <Platform_MPU6000.h>
+  #include <Gyroscope_MPU6000.h>
+  #include <Accelerometer_MPU6000.h>
 
   // Receiver declaration
   #include <Receiver_DUE.h>
@@ -640,10 +640,15 @@
   /**
    * Measure critical sensors
    */
-  void measureCriticalSensors() {
-    measureGyroSum();
-    measureAccelSum();
-  }
+	unsigned long previousMeasureCriticalSensorsTime = 0;
+	void measureCriticalSensors() {
+		// read sensors not faster than every 1 ms
+		if (currentTime - previousMeasureCriticalSensorsTime >= 1000) {
+			measureGyroSum();
+			measureAccelSum();
+			previousMeasureCriticalSensorsTime = currentTime;
+
+		}
 #endif
 
 
