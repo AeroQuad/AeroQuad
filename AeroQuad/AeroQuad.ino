@@ -271,7 +271,7 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(roverConfig)
     #define MOTOR_PWM_Timer
   #else
     #define MOTOR_PWM
@@ -1206,6 +1206,8 @@
   #include "FlightControlOctoX.h"
 #elif defined(octoPlusConfig)
   #include "FlightControlOctoPlus.h"
+#elif defined(roverConfig)
+  #include "RoverControl.h"
 #endif
 
 //********************************************************
@@ -1309,7 +1311,7 @@ void setup() {
   
   initPlatform();
   
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig) || defined(roverConfig)
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
      initializeMotors(SIX_Motors);
@@ -1403,6 +1405,14 @@ void setup() {
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
+
+  #if defined(roverConfig)
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+      motorCommand[motor] = MIDCOMMAND;
+    }
+    motorArmed = ON;
+    safetyCheck = ON;
+  #endif
 }
 
 
@@ -1422,6 +1432,7 @@ void process100HzTask() {
   }
     
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+  estimateAccVelocity();
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS] - runtimeZBias;
@@ -1438,10 +1449,6 @@ void process100HzTask() {
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
     }
-  #endif
-
-  #ifdef UseGPS
-    estimateVelocity();
   #endif
         
   processFlightControl();
@@ -1563,9 +1570,6 @@ void process1HzTask() {
   oneHZpreviousTime = currentTime;
   #ifdef MavLink
     sendSerialHeartbeat();   
-  #endif
-  #ifdef UseGPS
-    estimateGPSVelocity();
   #endif
 }
 

@@ -400,18 +400,18 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(distanceToGoPosition);
     //SERIAL_PRINT(" WP:");
     //SERIAL_PRINT(waypointIndex);
-    SERIAL_PRINT(" Course:");
-    SERIAL_PRINT((double)gpsData.course/10.0E2);
+    //SERIAL_PRINT(" Course:");
+    //SERIAL_PRINT((double)gpsData.course/10.0E2);
     //SERIAL_PRINT(" estCourse:");
     //SERIAL_PRINT(estCourse);
-    SERIAL_PRINT(" Speed:");
-    SERIAL_PRINT(gpsData.speed);
+    //SERIAL_PRINT(" Speed:");
+    //PrintValueComma(meterPerSecSec[XAXIS]);
     //SERIAL_PRINT(" estSpeed:");
     //SERIAL_PRINT(estSpeed);
-    SERIAL_PRINT(" velGpsN:");
-    SERIAL_PRINT(gpsVelocity[0]);
-    SERIAL_PRINT(" velGpsE:");
-    SERIAL_PRINT(gpsVelocity[1]);
+    //SERIAL_PRINT(" velGpsN:");
+    //SERIAL_PRINT(gpsVelocity[0]);
+    //SERIAL_PRINT(" velGpsE:");
+    //SERIAL_PRINT(gpsVelocity[1]);
     //SERIAL_PRINT(" velY:");
     //SERIAL_PRINT(velocityVector[YAXIS]);
     //SERIAL_PRINT(" velZ:");
@@ -432,6 +432,19 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(velRollCommand);
     //SERIAL_PRINT(" velPitch:");
     //SERIAL_PRINT(velPitchCommand);
+    //SERIAL_PRINT(" smoothedACC:");
+    //PrintValueComma(accVelocity[XAXIS]);
+    //PrintValueComma(smoothedAcc[XAXIS]);
+    //SERIAL_PRINT(" accY:");
+    //SERIAL_PRINT(smoothedAcc[YAXIS]);
+    //SERIAL_PRINT(" filteredAcc:");
+    //SERIAL_PRINT(filteredAccel[XAXIS]);
+    PrintValueComma(gpsRollAxisCorrection);
+    PrintValueComma(motorAxisCommandRoll);
+    PrintValueComma(receiverCommand[XAXIS]);
+    PrintValueComma(gpsPitchAxisCorrection);
+    SERIAL_PRINT(motorAxisCommandPitch);
+    PrintValueComma(receiverCommand[YAXIS]);
     SERIAL_PRINTLN();
     break;
 
@@ -1023,6 +1036,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X");
   #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo +");
+#elif defined(roverConfig)
+    SERIAL_PRINTLN("Rover");
   #endif
 
   SERIAL_PRINT("Receiver Channels: ");

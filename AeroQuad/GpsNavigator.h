@@ -96,7 +96,6 @@ double adjustHeading(double currentHeading, double desiredHeading) {
   return currentHeading;
 }
 
-
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
   // from http://www.movable-type.co.uk/scripts/latlong.html
   return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(lon2-lon1)) * earthRadius;
@@ -122,8 +121,22 @@ void estimateGPSVelocity() {
   previousLon = currentLon;
 }
 
+void estimateAccVelocity() {
+  const double smoothFactor = 1.0;
+  const double deltaT = 0.010;
+
+  // estimate X, Y, Z velocities
+  for (int axis=XAXIS; axis<=ZAXIS; axis++) {
+    smoothedAcc[axis] +=  acc[axis]*deltaT*9.80665; //filterSmooth(acc[axis] * deltaT * 9806.65, smoothedAcc[axis], smoothFactor); // cm/s
+  }
+
+  accVelocity[0] = smoothedAcc[XAXIS]*cos(trueNorthHeading) - smoothedAcc[YAXIS]*sin(trueNorthHeading);
+  accVelocity[1] = smoothedAcc[XAXIS]*sin(trueNorthHeading) + smoothedAcc[YAXIS]*cos(trueNorthHeading);
+  accVelocity[2] = 0.0;
+}
+
 void estimateVelocity() {
-  const double smoothFactor = 0.3;
+  const double smoothFactor = 1.0;
   const double blendFactor = 0.3;
 
   double gpsCourse = (double)gpsData.course/10.0E2;
@@ -135,7 +148,7 @@ void estimateVelocity() {
 
   // estimate X, Y, Z velocities
   for (int axis=XAXIS; axis<=ZAXIS; axis++) {
-    smoothedAcc[axis] =  filterSmooth(acc[axis] * G_Dt * 980.665, smoothedAcc[axis], smoothFactor); // cm/s
+    smoothedAcc[axis] =  filterSmooth(acc[axis] * G_Dt * 9806.65, smoothedAcc[axis], smoothFactor); // cm/s
   }
 
   accVelocity[0] = smoothedAcc[XAXIS]*cos(trueNorthHeading) - smoothedAcc[YAXIS]*sin(trueNorthHeading);
@@ -211,7 +224,7 @@ void loadNewRoute() {
  */
 
 void processNavigation() {
-  #define MAXBANKANGLE 10 // (degrees)
+  #define MAXBANKANGLE 30 // (degrees)
   #define MAXCROSSTRACKANGLE 90 // (degrees)
   #define MAXCROSSTRACKDISTANCE 15 // (meters)
   const double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
@@ -253,9 +266,9 @@ void processNavigation() {
   crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
   groundTrackHeading = desiredHeading + crossTrack; // TODO: update to fix issue around +/-180
 
-  gpsRollAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE))/PWM2RAD;
-  gpsPitchAxisCorrection = 0;
-  gpsYawAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE))/PWM2RAD;
+  gpsPitchAxisCorrection = rad(10.0); // pitch forward in degrees converted to radians
+  gpsRollAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE));
+  gpsYawAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE));
 }
 
 void processPositionHold()
@@ -265,10 +278,10 @@ void processPositionHold()
   lonDelta = positionHoldPointToReach.longitude - currentPosition.longitude;
 
   posRollCommand = -updatePID(0, lonDelta*cos(trueNorthHeading) - latDelta*sin(trueNorthHeading), &PID[GPSROLL_PID_IDX]);
-  gpsRollAxisCorrection = constrain(posRollCommand, -maxPosAngle, maxPosAngle);
+  gpsRollAxisCorrection = 0.0; //constrain(posRollCommand, -maxPosAngle, maxPosAngle);
 
   posPitchCommand = -updatePID(0, lonDelta*sin(trueNorthHeading) + latDelta*cos(trueNorthHeading), &PID[GPSPITCH_PID_IDX]);
-  gpsPitchAxisCorrection = constrain(posPitchCommand, -maxPosAngle, maxPosAngle);
+  gpsPitchAxisCorrection = 0.0; //constrain(posPitchCommand, -maxPosAngle, maxPosAngle);
 
   gpsYawAxisCorrection = 0;
 
@@ -277,8 +290,10 @@ void processPositionHold()
   velPID.I = 0.0;
   velPID.D = 0.0;
   //estimateVelocity(velocityVector, gpsData.speed, gpsData.course);
-  velRollCommand = updatePID(0, velocityVector[XAXIS], &velPID); // cm/s
-  velPitchCommand = updatePID(0, velocityVector[YAXIS], &velPID); // cm/s
+  //velRollCommand = updatePID(0, velocityVector[YAXIS], &velPID); // cm/s
+  //velPitchCommand = updatePID(0, velocityVector[XAXIS], &velPID); // cm/s
+  velRollCommand = updatePID(0, smoothedAcc[YAXIS], &PID[GPSROLL_PID_IDX]);
+  velPitchCommand = updatePID(0, smoothedAcc[XAXIS], &PID[GPSPITCH_PID_IDX]);
 }
 
 /**
