@@ -2178,8 +2178,6 @@ void readSerialCommand() {
 					accelRawData[ZAXIS][i] = 0;
 				}
 
-				isAccelCalibrationStep1Done = true;
-
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
 					areAllStepsCompleted = true;
@@ -2239,8 +2237,6 @@ void readSerialCommand() {
 					accelRawData[YAXIS][i] = 0;
 					accelRawData[ZAXIS][i] = 0;
 				}
-
-				isAccelCalibrationStep2Done = true;
 
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
@@ -2302,8 +2298,6 @@ void readSerialCommand() {
 					accelRawData[ZAXIS][i] = 0;
 				}
 
-				isAccelCalibrationStep1Done = true;
-
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
 					areAllStepsCompleted = true;
@@ -2363,8 +2357,6 @@ void readSerialCommand() {
 					accelRawData[YAXIS][i] = 0;
 					accelRawData[ZAXIS][i] = 0;
 				}
-
-				isAccelCalibrationStep4Done = true;
 
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
@@ -2426,8 +2418,6 @@ void readSerialCommand() {
 					accelRawData[ZAXIS][i] = 0;
 				}
 
-				isAccelCalibrationStep5Done = true;
-
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
 					areAllStepsCompleted = true;
@@ -2487,8 +2477,6 @@ void readSerialCommand() {
 					accelRawData[YAXIS][i] = 0;
 					accelRawData[ZAXIS][i] = 0;
 				}
-
-				isAccelCalibrationStep6Done = true;
 
 				// Check if all steps completed
 				if(isAccelCalibrationStep1Done && isAccelCalibrationStep2Done && isAccelCalibrationStep3Done && isAccelCalibrationStep4Done && isAccelCalibrationStep5Done && isAccelCalibrationStep6Done) {
