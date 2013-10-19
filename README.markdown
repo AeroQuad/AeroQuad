@@ -1,5 +1,10 @@
+AeroCheapQuad
+=============
+This project was forked from AeroQuad to adapt it to a specific cheap sensor.
+
 AeroQuad Flight Software Source Code v3.2
 ========================================
+
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
 
 Version 3.2 Release Notes (1/27/2013)
