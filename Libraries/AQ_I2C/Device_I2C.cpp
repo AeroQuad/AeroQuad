@@ -88,8 +88,9 @@ byte readWhoI2C(int deviceAddress) {
   Wire.beginTransmission(deviceAddress);
   Wire.write((byte)0);
   Wire.endTransmission();
-  delay(100);
   Wire.requestFrom(deviceAddress, 1);
+  while(!Wire.available()){
+  }
   return Wire.read();
 }
 
