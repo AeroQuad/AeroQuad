@@ -44,8 +44,8 @@ void calculateFlightError()
             motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
             motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
       #else
-            motorAxisCommandRoll = receiverCommand[XAXIS] + (gpsRollAxisCorrection * 11.1111); // convert +/-90 deg to +/-1000 PWM
-            motorAxisCommandPitch = receiverCommand[YAXIS] + (gpsPitchAxisCorrection * 11.1111);
+            motorAxisCommandRoll = receiverCommand[XAXIS] + gpsRollAxisCorrection;
+            motorAxisCommandPitch = receiverCommand[YAXIS] + gpsPitchAxisCorrection;
       #endif
     }
     else
@@ -53,8 +53,13 @@ void calculateFlightError()
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
     float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-    motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-    motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+    #ifndef roverConfig
+      motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+      motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+    #else
+      motorAxisCommandRoll   = receiverCommand[XAXIS];
+      motorAxisCommandPitch  = receiverCommand[YAXIS];
+    #endif
   }
   else {
 	// Replace rate mode for now until we figure out how to assign new functions to transmitter channels through Configurator
@@ -71,8 +76,13 @@ void calculateFlightError()
 	float pitchCommand = rollInput * sin(simpleModeHeading) + pitchInput * cos(simpleModeHeading);
 	float rollAttitudeCmd  = updatePID(rollCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
 	float pitchAttitudeCmd = updatePID(pitchCommand * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-	motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-	motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+        #ifndef roverConfig
+	  motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+	  motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+        #else
+          motorAxisCommandRoll   = receiverCommand[XAXIS];
+          motorAxisCommandPitch  = receiverCommand[YAXIS];
+        #endif
   }
 }
 

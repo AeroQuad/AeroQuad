@@ -110,7 +110,7 @@
     }
 
 
-    if (receiverCommand[AUX1] < MINSWITCH) {  // Enable autopilot
+    if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;

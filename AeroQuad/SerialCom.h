@@ -245,6 +245,8 @@ void readSerialCommand() {
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
+        waypointCaptureDistance = readFloatSerial();
+        forwardSpeed = readFloatSerial();
         writeEEPROM();
       #else
         skipSerialValues(9);
@@ -439,12 +441,17 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(smoothedAcc[YAXIS]);
     //SERIAL_PRINT(" filteredAcc:");
     //SERIAL_PRINT(filteredAccel[XAXIS]);
-    PrintValueComma(gpsRollAxisCorrection);
-    PrintValueComma(motorAxisCommandRoll);
-    PrintValueComma(receiverCommand[XAXIS]);
-    PrintValueComma(gpsPitchAxisCorrection);
-    SERIAL_PRINT(motorAxisCommandPitch);
-    PrintValueComma(receiverCommand[YAXIS]);
+//    PrintValueComma(groundTrackHeading-currentHeading);
+//    PrintValueComma(gpsRollAxisCorrection);
+//    PrintValueComma(motorAxisCommandRoll);
+//    PrintValueComma(receiverCommand[XAXIS]);
+//    PrintValueComma(gpsPitchAxisCorrection);
+//    PrintValueComma(motorAxisCommandPitch);
+//    SERIAL_PRINT(receiverCommand[YAXIS]);
+    PrintValueComma(distanceToNextWaypoint);
+    PrintValueComma(distanceToFollowingWaypoint);
+    PrintValueComma(testDistanceWaypoint);
+    PrintValueComma(distanceToGoPosition);
     SERIAL_PRINTLN();
     break;
 
@@ -714,9 +721,11 @@ void sendSerialTelemetry() {
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
+      PrintValueComma(waypointCaptureDistance);
+      PrintValueComma(forwardSpeed);
       queryType = 'X';
     #else
-      PrintDummyValues(9);
+      PrintDummyValues(11);
     #endif
     SERIAL_PRINTLN();
     queryType = 'X';

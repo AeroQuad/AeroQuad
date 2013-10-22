@@ -239,6 +239,8 @@ void initializeEEPROM() {
       waypoint[location].latitude = GPS_INVALID_ANGLE;
       waypoint[location].altitude = GPS_INVALID_ALTITUDE;
     }
+    waypointCaptureDistance = 6.0;
+    forwardSpeed = 15.0;
   #endif
 
   // Camera Control
@@ -326,6 +328,8 @@ void readEEPROM() {
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+    waypointCaptureDistance = readFloat(WAYPOINT_CAPTURE_ADR);
+    forwardSpeed = readFloat(FORWARD_SPEED_ADR);
     
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
       waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
@@ -439,6 +443,8 @@ void writeEEPROM(){
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+    writeFloat(waypointCaptureDistance, WAYPOINT_CAPTURE_ADR);
+    writeFloat(forwardSpeed, FORWARD_SPEED_ADR);
     
     for (byte location = 0; location < MAX_WAYPOINTS; location++) {
       writeLong(waypoint[location].longitude, WAYPOINT_ADR[location].longitude);

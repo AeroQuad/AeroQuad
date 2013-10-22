@@ -1246,7 +1246,7 @@
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
 #if defined(WirelessTelemetry) 
-  #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(AeroQuadSTM32)
     #define SERIAL_PORT Serial3
   #else    // force 328p to use the normal port
     #define SERIAL_PORT Serial
@@ -1432,7 +1432,9 @@ void process100HzTask() {
   }
     
   calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
-  estimateAccVelocity();
+  #if defined(UseGPS)
+    estimateAccVelocity();
+  #endif
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     zVelocity = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS] - runtimeZBias;

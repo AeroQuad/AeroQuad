@@ -96,6 +96,14 @@ double adjustHeading(double currentHeading, double desiredHeading) {
   return currentHeading;
 }
 
+double calculateGPSDistance(GeodeticPosition waypoint1, GeodeticPosition waypoint2) {
+  double lat1 = (double)waypoint1.latitude * GPS2RAD;
+  double lon1 = (double)waypoint1.longitude * GPS2RAD;
+  double lat2 = (double)waypoint2.latitude * GPS2RAD;
+  double lon2 = (double)waypoint2.longitude * GPS2RAD;
+  return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(lon2-lon1)) * earthRadius;
+}
+
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
   // from http://www.movable-type.co.uk/scripts/latlong.html
   return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(lon2-lon1)) * earthRadius;
@@ -176,17 +184,32 @@ void positionVector(double *vector, GeodeticPosition position) {
  * Evaluate the position to reach depending of the state of the mission
  */
 bool updateWaypoints() { // returns false if next waypoint available, true if at end of route
+  if (waypointIndex == -2) { // creates one time path from current position to first waypoint
+    missionPositionToReach.latitude = currentPosition.latitude;
+    missionPositionToReach.longitude = currentPosition.longitude;
+    missionPositionToReach.altitude = currentPosition.altitude;
+    fromWaypoint = currentPosition;
+    toWaypoint = waypoint[0];
+    followingWaypoint = waypoint[1];
+    positionVector(fromVector, fromWaypoint);
+    positionVector(toVector, toWaypoint);
+    vectorCrossProductDbl(normalVector, fromVector, toVector);
+    vectorNormalize(normalVector);
+    negNormalVector[0] = -normalVector[0];
+    negNormalVector[1] = -normalVector[1];
+    negNormalVector[2] = -normalVector[2];
+    if (missionPositionToReach.altitude > 2000.0) {
+      missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
+    }
+    waypointIndex = -1;
+    return false;
+  }
 
-  if (waypointIndex == -1) { // if mission have not been started
+  if ((waypointIndex < MAX_WAYPOINTS)) {
     waypointIndex++;
   }
 
-  if ((waypointIndex < MAX_WAYPOINTS) && (distanceToNextWaypoint < waypointCaptureDistance)) {
-    waypointIndex++;
-  }
-
-  if (waypointIndex >= MAX_WAYPOINTS ||
-      waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
+  if (waypointIndex >= MAX_WAYPOINTS || waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
     missionPositionToReach.latitude = homePosition.latitude;
     missionPositionToReach.longitude = homePosition.longitude;
     missionPositionToReach.altitude = homePosition.altitude;
@@ -195,10 +218,10 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
   else {
     missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
     missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
-    missionPositionToReach.altitude = (waypoint[waypointIndex].altitude/100);
-
+    missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
     fromWaypoint = waypoint[waypointIndex];
     toWaypoint = waypoint[waypointIndex+1];
+    followingWaypoint = waypoint[waypointIndex+2];
     positionVector(fromVector, fromWaypoint);
     positionVector(toVector, toWaypoint);
     vectorCrossProductDbl(normalVector, fromVector, toVector);
@@ -206,7 +229,6 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     negNormalVector[0] = -normalVector[0];
     negNormalVector[1] = -normalVector[1];
     negNormalVector[2] = -normalVector[2];
-
     if (missionPositionToReach.altitude > 2000.0) {
       missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
     }
@@ -215,7 +237,7 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
 }
 
 void loadNewRoute() {
-  waypointIndex = -1;
+  waypointIndex = -2; // create path from current position to first waypoint
   updateWaypoints();
 }
 
@@ -224,10 +246,15 @@ void loadNewRoute() {
  */
 
 void processNavigation() {
-  #define MAXBANKANGLE 30 // (degrees)
-  #define MAXCROSSTRACKANGLE 90 // (degrees)
-  #define MAXCROSSTRACKDISTANCE 15 // (meters)
-  const double crossTrackFactor = -MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE;
+  #define MAXBANKANGLE 30 // degrees, should I change all angle errors to max bank angle error?
+
+  #define MAXPWM 500 // max PWM to output
+  #define MAXTRACKANGLE 60 // degrees
+  const double Deg2PWMFactor = MAXPWM/MAXTRACKANGLE; // convert degrees into PWM
+
+  #define MAXCROSSTRACKANGLE 60 // degrees
+  #define MAXCROSSTRACKDISTANCE 15 // meters
+  const double Meters2DegFactor = MAXCROSSTRACKANGLE/MAXCROSSTRACKDISTANCE; // convert meters into degrees
 
   // Convert lat/lon to ECI unit vector
   positionVector(presentPosition, currentPosition);
@@ -239,14 +266,17 @@ void processNavigation() {
   vectorNormalize(presentPositionNorth);
   desiredHeading = deg(atan2(vectorDotProductDbl(normalVector, presentPositionNorth), vectorDotProductDbl(negNormalVector, presentPositionEast)));
   currentHeading = adjustHeading(heading, desiredHeading);
-  trackAngleError = desiredHeading - currentHeading;
+  // units of track angle error is degrees
+  trackAngleError = constrain(desiredHeading-currentHeading, -MAXTRACKANGLE, MAXTRACKANGLE);
 
   // Calculate cross track error
   vectorCrossProductDbl(normalPerpendicularVector, presentPosition, normalVector);
   vectorNormalize(normalPerpendicularVector);
   vectorCrossProductDbl(alongPathVector, normalVector, normalPerpendicularVector);
   vectorNormalize(alongPathVector);
-  crossTrackError = earthRadius * atan2(vectorDotProductDbl(negNormalVector, presentPosition), vectorDotProductDbl(alongPathVector, presentPosition));
+  crossTrack = earthRadius * atan2(vectorDotProductDbl(negNormalVector, presentPosition), vectorDotProductDbl(alongPathVector, presentPosition));
+  // units of cross track error is converted to degrees
+  crossTrackError = constrain(crossTrack*Meters2DegFactor, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
 
   // Calculate distance to next waypoint
   vectorCrossProductDbl(normalRangeVector, presentPosition, toVector);
@@ -256,19 +286,22 @@ void processNavigation() {
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
   distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
   distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
+  distanceToFollowingWaypoint = calculateGPSDistance(currentPosition, followingWaypoint);
+  testDistanceWaypoint = calculateGPSDistance(currentPosition, toWaypoint);
 
-  if (distanceToNextWaypoint < waypointCaptureDistance) {
+  // These corrections need to be PWM centered around 0
+  gpsPitchAxisCorrection = forwardSpeed * Deg2PWMFactor * 2.5; // pitch forward in degrees converted to radians
+  gpsRollAxisCorrection = constrain((trackAngleError+crossTrackError)*Deg2PWMFactor, -MAXBANKANGLE, MAXBANKANGLE);
+  gpsYawAxisCorrection = constrain((trackAngleError+crossTrackError)*Deg2PWMFactor, -MAXBANKANGLE, MAXBANKANGLE);
+
+  if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
     bool routeisFinished = updateWaypoints();
-    if (routeisFinished)
+    if (routeisFinished) {
       positionHoldState = ON;
+      navigationState = OFF;
+      gpsPitchAxisCorrection = 0.0;
+    }
   }
-
-  crossTrack = constrain(crossTrackFactor * crossTrackError, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
-  groundTrackHeading = desiredHeading + crossTrack; // TODO: update to fix issue around +/-180
-
-  gpsPitchAxisCorrection = rad(10.0); // pitch forward in degrees converted to radians
-  gpsRollAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE));
-  gpsYawAxisCorrection = rad(constrain(groundTrackHeading-currentHeading, -MAXBANKANGLE, MAXBANKANGLE));
 }
 
 void processPositionHold()
