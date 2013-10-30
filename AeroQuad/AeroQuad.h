@@ -251,17 +251,18 @@ void reportVehicleState();
     double normalRangeVector[3], rangeVector[3];
     double zVector[3] = {0.0, 0.0, 1.0};
     double normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
-    GeodeticPosition fromWaypoint, toWaypoint, currentLocation;
+    GeodeticPosition fromWaypoint, toWaypoint, currentLocation, followingWaypoint;
     double desiredHeading, currentHeading, groundTrackHeading;
     double trackAngleError, crossTrackError, crossTrack, alongPathDistance;
     int waypointCount;
     double distanceToNextWaypoint = 99999999.0;
+    double distanceToFollowingWaypoint = 99999999.0;
+    double testDistanceWaypoint = 99999999.0;
     const double earthRadius = 6378100.0; // meters
-    const double waypointCaptureDistance = 2.0; // meters
+    double waypointCaptureDistance = 2.0; // meters
+    float forwardSpeed = 15.0;
     byte navigatorSerialCommand = OFF; // TODO: remove when autopilot working
     bool isRouteInitialized = false;
-    float navigatorHeadingGain = 1.0;
-    float normalHeadingGain = 3.0; // TODO: should we create a PID for autopilot?
     double distanceToGoAlongPath, distanceToGoPosition; // TODO: remove?
     float posRollCommand, posPitchCommand; // TODO: remove?
     long latDelta, lonDelta; // TODO: remove?
@@ -371,6 +372,8 @@ typedef struct {
   // GPS mission storing
   float GPS_MISSION_NB_POINT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+  float WAYPOINT_CAPTURE_ADR;
+  float FORWARD_SPEED_ADR;
 } t_NVR_Data;  
 
 

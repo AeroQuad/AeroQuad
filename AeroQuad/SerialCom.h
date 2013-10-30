@@ -245,6 +245,8 @@ void readSerialCommand() {
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
+        waypointCaptureDistance = readFloatSerial();
+        forwardSpeed = readFloatSerial();
         writeEEPROM();
       #else
         skipSerialValues(9);
@@ -400,18 +402,18 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(distanceToGoPosition);
     //SERIAL_PRINT(" WP:");
     //SERIAL_PRINT(waypointIndex);
-    SERIAL_PRINT(" Course:");
-    SERIAL_PRINT((double)gpsData.course/10.0E2);
+    //SERIAL_PRINT(" Course:");
+    //SERIAL_PRINT((double)gpsData.course/10.0E2);
     //SERIAL_PRINT(" estCourse:");
     //SERIAL_PRINT(estCourse);
-    SERIAL_PRINT(" Speed:");
-    SERIAL_PRINT(gpsData.speed);
+    //SERIAL_PRINT(" Speed:");
+    //PrintValueComma(meterPerSecSec[XAXIS]);
     //SERIAL_PRINT(" estSpeed:");
     //SERIAL_PRINT(estSpeed);
-    SERIAL_PRINT(" velGpsN:");
-    SERIAL_PRINT(gpsVelocity[0]);
-    SERIAL_PRINT(" velGpsE:");
-    SERIAL_PRINT(gpsVelocity[1]);
+    //SERIAL_PRINT(" velGpsN:");
+    //SERIAL_PRINT(gpsVelocity[0]);
+    //SERIAL_PRINT(" velGpsE:");
+    //SERIAL_PRINT(gpsVelocity[1]);
     //SERIAL_PRINT(" velY:");
     //SERIAL_PRINT(velocityVector[YAXIS]);
     //SERIAL_PRINT(" velZ:");
@@ -432,6 +434,24 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(velRollCommand);
     //SERIAL_PRINT(" velPitch:");
     //SERIAL_PRINT(velPitchCommand);
+    //SERIAL_PRINT(" smoothedACC:");
+    //PrintValueComma(accVelocity[XAXIS]);
+    //PrintValueComma(smoothedAcc[XAXIS]);
+    //SERIAL_PRINT(" accY:");
+    //SERIAL_PRINT(smoothedAcc[YAXIS]);
+    //SERIAL_PRINT(" filteredAcc:");
+    //SERIAL_PRINT(filteredAccel[XAXIS]);
+//    PrintValueComma(groundTrackHeading-currentHeading);
+//    PrintValueComma(gpsRollAxisCorrection);
+//    PrintValueComma(motorAxisCommandRoll);
+//    PrintValueComma(receiverCommand[XAXIS]);
+//    PrintValueComma(gpsPitchAxisCorrection);
+//    PrintValueComma(motorAxisCommandPitch);
+//    SERIAL_PRINT(receiverCommand[YAXIS]);
+    PrintValueComma(distanceToNextWaypoint);
+    PrintValueComma(distanceToFollowingWaypoint);
+    PrintValueComma(testDistanceWaypoint);
+    PrintValueComma(distanceToGoPosition);
     SERIAL_PRINTLN();
     break;
 
@@ -701,9 +721,11 @@ void sendSerialTelemetry() {
       PrintPID(GPSROLL_PID_IDX);
       PrintPID(GPSPITCH_PID_IDX);
       PrintPID(GPSYAW_PID_IDX);
+      PrintValueComma(waypointCaptureDistance);
+      PrintValueComma(forwardSpeed);
       queryType = 'X';
     #else
-      PrintDummyValues(9);
+      PrintDummyValues(11);
     #endif
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -1023,6 +1045,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X");
   #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo +");
+#elif defined(roverConfig)
+    SERIAL_PRINTLN("Rover");
   #endif
 
   SERIAL_PRINT("Receiver Channels: ");

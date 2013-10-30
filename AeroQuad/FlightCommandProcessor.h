@@ -110,14 +110,12 @@
     }
 
 
-    if (receiverCommand[AUX1] < MINSWITCH) {  // Enable autopilot
+    if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
         isGpsNavigationInitialized = true;
-        // Soften heading changes
-        normalHeadingGain = PID[HEADING_HOLD_PID_IDX].P;
       }
 
       if (!isRouteInitialized) {
@@ -223,9 +221,11 @@ void zeroGyroAccel() {
 
 void processZeroThrottleFunctionFromReceiverCommand() {
   // Disarm motors (left stick lower left corner)
-  if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
-	disarmMotors();
-  }    
+  #ifndef roverConfig
+    if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
+          disarmMotors();
+    }
+  #endif
 
   // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
   if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {

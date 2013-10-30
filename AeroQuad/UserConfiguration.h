@@ -56,7 +56,6 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
@@ -66,6 +65,7 @@
 //#define octoX8Config
 //#define octoPlusConfig
 //#define octoXConfig
+#define roverConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION
@@ -122,14 +122,14 @@
 // Receiver Setup
 // For more information on how to connect your receiver to your AeroQuad board please refer to http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
 // *******************************************************************************************************************************
-//#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
+#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
 //#define RemotePCReceiver	// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
-#define ReceiverPPM		// Use a PPM receiver
+//#define ReceiverPPM		// Use a PPM receiver
 //#define ReceiverHWPPM		// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
 
 // You need to select one of these channel order definitions for PPM receiver
-#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
+//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
 
@@ -153,8 +153,8 @@
 // *******************************************************************************************************************************
 //#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
-#define MavLink               // Enables the MavLink protocol
-#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+//#define MavLink               // Enables the MavLink protocol
+//#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 								// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
 //#define CONFIG_BAUDRATE 19200 // overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)

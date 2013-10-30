@@ -91,11 +91,9 @@ void processHeading()
         else {
           #if defined (UseGPSNavigator)
             if (navigationState == ON) {
-              //PID[HEADING_HOLD_PID_IDX].P = navigatorHeadingGain; // currently init in AeroQuad.h
               headingHold = updatePID(groundTrackHeading, heading, &PID[HEADING_HOLD_PID_IDX]);
             }
             else {
-              //PID[HEADING_HOLD_PID_IDX].P = normalHeadingGain;
               headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
               headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
             }
