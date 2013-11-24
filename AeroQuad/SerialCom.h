@@ -383,17 +383,19 @@ void sendSerialTelemetry() {
 
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    // ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
-    //  SERIAL_PRINT("Enabled: Des:");
-    //else
-    //  SERIAL_PRINT("Disabled: Des:");
-    //SERIAL_PRINT(desiredHeading);
-    //SERIAL_PRINT(" Cur:");
-    //SERIAL_PRINT(currentHeading);
-    //SERIAL_PRINT(" xTk:");
-    //SERIAL_PRINT(crossTrackError);
-    //SERIAL_PRINT(" trkG:");
-    //SERIAL_PRINT(groundTrackHeading);
+    if ((navigatorSerialCommand+isGpsNavigationInitialized+haveAGpsLock()) == 3)
+      SERIAL_PRINT("Enabled: Des:");
+    else
+      SERIAL_PRINT("Disabled: Des:");
+    SERIAL_PRINT(desiredHeading);
+    SERIAL_PRINT(" Cur:");
+    SERIAL_PRINT(currentHeading);
+    SERIAL_PRINT(" xTk:");
+    SERIAL_PRINT(crossTrackError);
+    SERIAL_PRINT(" trkA:");
+    SERIAL_PRINT(trackAngleError);
+    SERIAL_PRINT(" xTk+trkA:");
+    SERIAL_PRINT(crossTrackError+trackAngleError);
     //SERIAL_PRINT(" dstNxtWP:");
     //SERIAL_PRINT(distanceToNextWaypoint);
     //SERIAL_PRINT(" dstToGoAP:");
@@ -426,8 +428,8 @@ void sendSerialTelemetry() {
     //SERIAL_PRINT(posRollCommand);
     //SERIAL_PRINT(" pitchCmd:");
     //SERIAL_PRINT(posPitchCommand);
-    //SERIAL_PRINT(" gpsRollAxisCorrection:");
-    //SERIAL_PRINT(gpsRollAxisCorrection);
+    SERIAL_PRINT(" gpsRollAxisCorrection:");
+    SERIAL_PRINT(gpsRollAxisCorrection);
     //SERIAL_PRINT(" gpsPitchAxisCorrection:");
     //SERIAL_PRINT(gpsPitchAxisCorrection);
     //SERIAL_PRINT(" velRoll:");
@@ -448,10 +450,10 @@ void sendSerialTelemetry() {
 //    PrintValueComma(gpsPitchAxisCorrection);
 //    PrintValueComma(motorAxisCommandPitch);
 //    SERIAL_PRINT(receiverCommand[YAXIS]);
-    PrintValueComma(distanceToNextWaypoint);
-    PrintValueComma(distanceToFollowingWaypoint);
-    PrintValueComma(testDistanceWaypoint);
-    PrintValueComma(distanceToGoPosition);
+//    PrintValueComma(distanceToNextWaypoint);
+//    PrintValueComma(distanceToFollowingWaypoint);
+//    PrintValueComma(testDistanceWaypoint);
+//    PrintValueComma(distanceToGoPosition);
     SERIAL_PRINTLN();
     break;
 

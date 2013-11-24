@@ -56,7 +56,7 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
@@ -66,7 +66,7 @@
 //#define octoX8Config
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
-#define roverConfig
+//#define roverConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION
@@ -152,7 +152,7 @@
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Wireless+Connection
 // *******************************************************************************************************************************
-//#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 
 //#define MavLink               // Enables the MavLink protocol
 //#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink

@@ -276,7 +276,7 @@ void processNavigation() {
   vectorNormalize(alongPathVector);
   crossTrack = earthRadius * atan2(vectorDotProductDbl(negNormalVector, presentPosition), vectorDotProductDbl(alongPathVector, presentPosition));
   // units of cross track error is converted to degrees
-  crossTrackError = constrain(crossTrack*Meters2DegFactor, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  crossTrackError = -constrain(crossTrack*Meters2DegFactor, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
 
   // Calculate distance to next waypoint
   vectorCrossProductDbl(normalRangeVector, presentPosition, toVector);
@@ -291,8 +291,8 @@ void processNavigation() {
 
   // These corrections need to be PWM centered around 0
   gpsPitchAxisCorrection = forwardSpeed * Deg2PWMFactor * 2.5; // pitch forward in degrees converted to radians
-  gpsRollAxisCorrection = constrain((trackAngleError+crossTrackError)*Deg2PWMFactor, -MAXBANKANGLE, MAXBANKANGLE);
-  gpsYawAxisCorrection = constrain((trackAngleError+crossTrackError)*Deg2PWMFactor, -MAXBANKANGLE, MAXBANKANGLE);
+  gpsRollAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor;
+  gpsYawAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor;
 
   if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
     bool routeisFinished = updateWaypoints();
