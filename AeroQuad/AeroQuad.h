@@ -302,9 +302,6 @@ typedef struct {
   float slope;
   float offset;
   float smooth_factor;
-  float min;
-  float max;
-  float trim;
 } t_NVR_Receiver;
 
 typedef struct {    
