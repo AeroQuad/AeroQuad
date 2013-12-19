@@ -79,7 +79,7 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   else {
     PIDparameters->integratedError = 0.0;
   }
-  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
+//  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
   float dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastError) / (deltaPIDTime * 100); // dT fix from Honk
   PIDparameters->lastError = currentPosition;
 
@@ -88,7 +88,7 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
 
 void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (byte axis = 0; axis <= ATTITUDE_YAXIS_PID_IDX; axis++) {
+  for (byte axis = 0; axis <= ATTITUDE_GYRO_YAXIS_PID_IDX; axis++) {
     PID[axis].integratedError = 0;
     PID[axis].previousPIDTime = currentTime;
   }

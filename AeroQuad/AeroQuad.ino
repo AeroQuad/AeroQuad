@@ -1434,16 +1434,12 @@ void process100HzTask() {
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
       computeVelocityErrorFromBaroAltitude(getBaroAltitude());
-      
-      zVelocity = filterSmooth(zVelocitySum / zVelocityCount,previousZVelocity,0.5);
-      previousZVelocity = zVelocity;
-      zVelocitySum = 0.0;
-      zVelocityCount = 0;
-      
+
       float estimatedBaroAltitude = (previousBaroAltitude) + (zVelocity / 50.0);
       estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
      
       previousBaroAltitude = getBaroAltitude();
+      zVelocity = computedZVelicity;
     }
   #endif
         

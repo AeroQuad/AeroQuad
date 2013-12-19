@@ -226,12 +226,11 @@ void reportVehicleState();
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
     int gpsYawAxisCorrection = 0;
-    boolean isPositionHoldInitialized = false;
-    boolean isGpsNavigationInitialized = false;
-    
+    boolean isStorePositionNeeded = false;
+    boolean isInitNavigationNeeded = false;
 
     int waypointIndex = -1;    
-    float distanceToDestination = 99999999.0;
+    float gpsDistanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS] = {
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,

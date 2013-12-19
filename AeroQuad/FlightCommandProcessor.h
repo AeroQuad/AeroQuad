@@ -129,31 +129,34 @@
 
 
     if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
-      if (!isGpsNavigationInitialized) {
+      if (isInitNavigationNeeded) {
+        
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
-        isGpsNavigationInitialized = true;
+        isInitNavigationNeeded = false;
       }
+
   
       positionHoldState = OFF;         // disable the position hold while navigating
-      isPositionHoldInitialized = false;
+      isStorePositionNeeded = true;
   
       navigationState = ON;
     }
     else if (receiverCommand[AUX1] < 1250) {  // Enter in position hold state
-      if (!isPositionHoldInitialized) {
+      if (isStorePositionNeeded) {
+        
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
-  
+
         positionHoldPointToReach.latitude = currentPosition.latitude;
         positionHoldPointToReach.longitude = currentPosition.longitude;
         positionHoldPointToReach.altitude = getBaroAltitude();
-        isPositionHoldInitialized = true;
+        isStorePositionNeeded = false;
       }
   
-      isGpsNavigationInitialized = false;  // disable navigation
+      isInitNavigationNeeded = true;  // disable navigation
       navigationState = OFF;
   
       positionHoldState = ON;
@@ -161,10 +164,10 @@
     else {
       // Navigation and position hold are disabled
       positionHoldState = OFF;
-      isPositionHoldInitialized = false;
+      isStorePositionNeeded = true;
   
       navigationState = OFF;
-      isGpsNavigationInitialized = false;
+      isInitNavigationNeeded = true;
   
       gpsRollAxisCorrection = 0;
       gpsPitchAxisCorrection = 0;
