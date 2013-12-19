@@ -178,19 +178,6 @@ void initializeEEPROM() {
   
   initializePlatformSpecificAccelCalibration();
 
-  windupGuard = 1000.0;
-
-  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
-    #if defined AltitudeHoldBaro
-      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
-        PID[i].windupGuard = windupGuard;
-      }
-    #else
-      PID[i].windupGuard = windupGuard;
-    #endif
-  }
-    
   receiverXmitFactor = 1.0;
   minArmedThrottle = 1150;
   // AKA - old setOneG not in SI - accel->setOneG(500);
@@ -300,18 +287,6 @@ void readEEPROM() {
     batteryMonitorGoingDownTime = readFloat(BATT_DOWN_TIME_ADR);
   #endif
   
-  windupGuard = readFloat(WINDUPGUARD_ADR);
-  // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the EEPROM
-  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
-    #if defined AltitudeHoldBaro
-      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
-        PID[i].windupGuard = windupGuard;
-      }
-    #else
-      PID[i].windupGuard = windupGuard;
-    #endif      
-  }
-    
   minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
@@ -396,7 +371,6 @@ void writeEEPROM(){
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
   #endif
-  writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {

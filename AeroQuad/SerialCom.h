@@ -83,7 +83,6 @@ void readSerialCommand() {
       readSerialPID(ATTITUDE_YAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
-      windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
 
     case 'C': // Receive yaw PID
@@ -384,7 +383,6 @@ void sendSerialTelemetry() {
     PrintPID(ATTITUDE_YAXIS_PID_IDX);
     PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
     PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
-    SERIAL_PRINTLN(windupGuard);
     queryType = 'X';
     break;
 

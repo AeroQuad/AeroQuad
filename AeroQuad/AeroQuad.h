@@ -277,7 +277,6 @@ typedef struct {
   t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
-  float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
   float AREF_ADR;
