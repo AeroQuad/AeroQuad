@@ -1435,14 +1435,14 @@ void process100HzTask() {
       evaluateBaroAltitude();
       computeVelocityErrorFromBaroAltitude(getBaroAltitude());
       
-      zVelocity = filterSmooth(zVelocitySum / zVelocityCount,previousZVelocity,0.1);
+      zVelocity = filterSmooth(zVelocitySum / zVelocityCount,previousZVelocity,0.5);
       previousZVelocity = zVelocity;
       zVelocitySum = 0.0;
       zVelocityCount = 0;
       
-      float estimatedBaroAltitude = ((previousBaroAltitude+getBaroAltitude())/2) + (zVelocity / 50.0);
-      estimatedAltitude = ((getBaroAltitude()*0.5) + (estimatedBaroAltitude*0.5));
-      
+      float estimatedBaroAltitude = (previousBaroAltitude) + (zVelocity / 50.0);
+      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
+     
       previousBaroAltitude = getBaroAltitude();
     }
   #endif

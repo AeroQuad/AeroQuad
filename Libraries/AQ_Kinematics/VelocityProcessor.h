@@ -22,7 +22,7 @@
 #define _AQ_VELOCITY_PROCESSOR_
 
 #include "GlobalDefined.h"
-#include "AP_Buffer.h"
+#include "FifteenFloatBuffer.h"
 
 float timeConstantZ = 0.1;    
 float k1_z = 3 / timeConstantZ;
@@ -34,7 +34,7 @@ float zErrorPosition = 0.0;
 float zPositionCorrection = 0.0;
 float accelZCorrection = 0.0;
 float baseZPosition = 0.0;
-AP_BufferFloat_Size15 zBasePositionHistoryBuffer;
+FifteenFloatBuffer zBasePositionHistoryBuffer;
 
 void initVelocityProcessor();
 void updateVelocityProcessorGains();
@@ -44,7 +44,7 @@ void computeVelocityErrorFromBaroAltitude(float baroAltitude);
 
 void computeVelocityErrorFromBaroAltitude(float baroAltitude)
 {
-	float historySum = zBasePositionHistoryBuffer.peek(14);
+	float historySum = zBasePositionHistoryBuffer.peek(BUFFER_SIZE-1);
     zErrorPosition = baroAltitude - (historySum + zPositionCorrection);
 }
 

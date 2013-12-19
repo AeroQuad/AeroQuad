@@ -50,7 +50,7 @@ float lexInt = 0.0, leyInt = 0.0, lezInt = 0.0;  		// scaled integral error
 void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
   
   float norm;
-  float hx, hy, hz, bx, bz;
+  float hx, hy, bx, bz;
   float vx, vy, vz, wx, wy;
   float q0i, q1i, q2i, q3i;
   float exAcc, eyAcc, ezAcc;
@@ -69,12 +69,10 @@ void headingUpdate(float gx, float gy, float gz, float ax, float ay, float az, f
   mz = mz / norm;         
 
   // compute reference direction of flux
-  hx = mx * 2*(0.5 - lq2*lq2 - lq3*lq3) + my * 2*(lq1*lq2 - lq0*lq3)       + mz * 2*(lq1*lq3 + lq0*lq2);
-  hy = mx * 2*(lq1*lq2 + lq0*lq3)       + my * 2*(0.5 - lq1*lq1 - lq3*lq3) + mz * 2*(lq2*lq3 - lq0*lq1);
-  hz = mx * 2*(lq1*lq3 - lq0*lq2)       + my * 2*(lq2*lq3 + lq0*lq1)       + mz * 2*(0.5 - lq1*lq1 - lq2*lq2);
+  hx = mx * (lq0*lq0 + lq1*lq1 - lq2*lq2 - lq3*lq3) + my * 2 * (lq1*lq2 - lq0*lq3) + mz * 2 * (lq0*lq2 + lq1*lq3);
+  hy = mx * 2 * (lq1*lq2 + lq0*lq3) + my * (lq0*lq0 - lq1*lq1 + lq2*lq2 - lq3*lq3) + mz * 2 * (lq2*lq3 - lq0*lq1);
+  bz = mx * 2 * (lq1*lq3 - lq0*lq2) + my * 2 * (lq0*lq1 + lq2*lq3) + mz * (lq0*lq0 - lq1*lq1 - lq2*lq2 + lq3*lq3); 
   bx = sqrt(hx * hx + hy * hy);
-  bz = hz;
-
 
   // estimated direction of gravity and flux (v and w)
   vx = 2*(lq1*lq3 - lq0*lq2);
