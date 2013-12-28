@@ -56,6 +56,7 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
@@ -153,8 +154,8 @@
 // *******************************************************************************************************************************
 //#define WirelessTelemetry			// Enables wireless telemetry, for more information see wiki linked above
 
-//#define MavLink               	// Enables the MavLink protocol
-//#define MAV_SYSTEM_ID 100			// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+#define MavLink               	// Enables the MavLink protocol
+#define MAV_SYSTEM_ID 100			// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 									// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
 //#define CONFIG_BAUDRATE 19200 	// overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
