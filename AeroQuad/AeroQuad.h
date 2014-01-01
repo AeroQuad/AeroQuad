@@ -286,7 +286,6 @@ typedef struct {
   float ALTITUDE_MAX_THROTTLE_ADR;
   float ALTITUDE_MIN_THROTTLE_ADR;
   float ALTITUDE_SMOOTH_ADR;
-  float ALTITUDE_WINDUP_ADR;
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
   // Gyro calibration

@@ -53,7 +53,6 @@ struct PIDdata {
   // AKA experiments with PID
   float previousPIDTime;
   float integratedError;
-  float windupGuard; // Thinking about having individual wind up guards for each PID
 } PID[LAST_PID_IDX];
 
 // This struct above declares the variable PID[] to hold each of the PID values for various functions

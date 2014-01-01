@@ -1334,13 +1334,6 @@ void setup() {
   setupFourthOrder();
   initSensorsZeroFromEEPROM();
   
-  // Integral Limit for attitude mode
-  // This overrides default set in readEEPROM()
-  // Set for 1/2 max attitude command (+/-0.75 radians)
-  // Rate integral not used for now
-  PID[ATTITUDE_XAXIS_PID_IDX].windupGuard = 0.375;
-  PID[ATTITUDE_YAXIS_PID_IDX].windupGuard = 0.375;
-  
   // Flight angle estimation
   initializeKinematics();
 

@@ -153,7 +153,6 @@ void initializeEEPROM() {
     PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
     PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
     PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
     PID[ZDAMPENING_PID_IDX].P = 0.0;
     PID[ZDAMPENING_PID_IDX].I = 0.0;
     PID[ZDAMPENING_PID_IDX].D = 0.0;
@@ -262,7 +261,6 @@ void readEEPROM() {
   // Previously had issue where EEPROM was not reading right data
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     readPID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     #if defined AltitudeHoldBaro
       baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
     #endif  
@@ -343,7 +341,6 @@ void writeEEPROM(){
   
   #if defined AltitudeHoldBaro
     writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-    writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
   #endif
 
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder

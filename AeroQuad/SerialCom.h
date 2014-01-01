@@ -83,6 +83,7 @@ void readSerialCommand() {
       readSerialPID(ATTITUDE_YAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
+      readFloatSerial(); 
       break;
 
     case 'C': // Receive yaw PID
@@ -94,7 +95,7 @@ void readSerialCommand() {
     case 'D': // Altitude hold PID
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
-        PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
+        readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
@@ -383,6 +384,7 @@ void sendSerialTelemetry() {
     PrintPID(ATTITUDE_YAXIS_PID_IDX);
     PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
     PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
+    SERIAL_PRINTLN(0);
     queryType = 'X';
     break;
 
@@ -396,7 +398,7 @@ void sendSerialTelemetry() {
   case 'd': // Altitude Hold
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
-      PrintValueComma(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard);
+      PrintValueComma(0);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
