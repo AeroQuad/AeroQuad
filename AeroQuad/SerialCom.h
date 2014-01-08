@@ -491,14 +491,11 @@ void sendSerialTelemetry() {
     break;
 
   case 'l': // Send raw accel values
+    evaluateMetersPerSec();
     measureAccelSum();
-    PrintValueComma((int)(accelSample[XAXIS]/accelSampleCount));
-    accelSample[XAXIS] = 0;
-    PrintValueComma((int)(accelSample[YAXIS]/accelSampleCount));
-    accelSample[YAXIS] = 0;
-    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]/accelSampleCount));
-    accelSample[ZAXIS] = 0;
-    accelSampleCount = 0;
+    PrintValueComma((int)(accelSample[XAXIS]));
+    PrintValueComma((int)(accelSample[YAXIS]));
+    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]));
     break;
 
   case 'm': // Send magnetometer cal values

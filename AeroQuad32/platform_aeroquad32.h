@@ -129,9 +129,9 @@ void initPlatform() {
 // called when eeprom is initialized
 void initializePlatformSpecificAccelCalibration() {
   // Kenny default value, a real accel calibration is strongly recommended
-  accelScaleFactor[XAXIS] = 0.0011970000;
-  accelScaleFactor[YAXIS] = -0.0012050000;
-  accelScaleFactor[ZAXIS] = -0.0011770000;
+  accelScaleFactor[XAXIS] = 0.0011980000;
+  accelScaleFactor[YAXIS] = -0.0012020000;
+  accelScaleFactor[ZAXIS] = -0.0011750000;
   #ifdef HeadingMagHold
     magBias[XAXIS]  = 152.000000;
     magBias[YAXIS]  = 24.000000;

@@ -148,6 +148,14 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
+  
+  accelScaleFactor[XAXIS] = 1.0;
+  runTimeAccelBias[XAXIS] = 0;
+  accelScaleFactor[YAXIS] = 1.0;
+  runTimeAccelBias[YAXIS] = 0;
+  accelScaleFactor[ZAXIS] = 1.0;
+  runTimeAccelBias[ZAXIS] = 0;
+  storeSensorsZeroToEEPROM();
 
   #if defined (AltitudeHoldBaro)
     PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
@@ -161,7 +169,6 @@ void initializeEEPROM() {
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = 0.6;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
   #endif
 
   
