@@ -352,7 +352,6 @@ void PrintDummyValues(byte number) {
   }
 }
 
-
 float getHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -644,6 +643,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+
   case 'y': // send GPS info
     #if defined (UseGPS)
       PrintValueComma(gpsData.state);
@@ -662,6 +662,25 @@ void sendSerialTelemetry() {
     #endif    
     SERIAL_PRINTLN();
     break;
+
+  case '*':
+    #if defined(UseGPS)
+//	  writeBinaryLong(gpsData.lat);
+//	  writeBinaryLong(gpsData.lon);
+//	  writeBinaryLong(gpsData.height);
+//	  writeBinaryLong(gpsData.course);
+//	  writeBinaryLong(gpsData.speed);
+//	  //writeBinaryLong(gpsData.sats);
+//	  //writeBinaryLong(gpsData.accuracy);
+      PrintValueComma(gpsData.lat);
+      PrintValueComma(gpsData.lon);
+//      PrintValueComma(gpsData.height);
+      PrintValueComma(getHeading());
+      SERIAL_PRINT(gpsData.speed);
+	#endif
+	SERIAL_PRINTLN();
+	queryType = 'X';
+	break;
  
   case 'z': // Send all Altitude data 
     #if defined (AltitudeHoldBaro) 
@@ -772,6 +791,32 @@ void comma() {
   SERIAL_PRINT(',');
 }
 
+void writeBinaryFloat(float data)
+{
+  union binaryFloatType {
+	byte floatByte[4];
+	float floatVal;
+  } binaryFloat;
+
+  binaryFloat.floatVal = data;
+  SERIAL_PRINT(binaryFloat.floatByte[0]);
+  SERIAL_PRINT(binaryFloat.floatByte[1]);
+  SERIAL_PRINT(binaryFloat.floatByte[2]);
+  SERIAL_PRINT(binaryFloat.floatByte[3]);
+}
+
+void writeBinaryLong(unsigned long data) {
+  union binaryuslongType {
+    byte uslongByte[4];
+    unsigned long uslongVal;
+  } binaryuslong;
+
+  binaryuslong.uslongVal = data;
+  SERIAL_PRINT(binaryuslong.uslongByte[0]);
+  SERIAL_PRINT(binaryuslong.uslongByte[1]);
+  SERIAL_PRINT(binaryuslong.uslongByte[2]);
+  SERIAL_PRINT(binaryuslong.uslongByte[3]);
+}
 
 #ifdef BinaryWrite
 void printInt(int data) {
