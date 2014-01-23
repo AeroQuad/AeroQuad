@@ -66,6 +66,7 @@
 //#define octoX8Config
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
+//#define roverConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION

@@ -1205,6 +1205,8 @@
   #include "FlightControlOctoX.h"
 #elif defined(octoPlusConfig)
   #include "FlightControlOctoPlus.h"
+#elif defined(roverConfig)
+  #include "RoverControl.h"
 #endif
 
 //********************************************************
