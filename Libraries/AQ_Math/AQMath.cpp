@@ -112,6 +112,21 @@ float vectorDotProduct(int length, float vector1[], float vector2[])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//  Vector Dot Product for Double
+//  Return the Dot product of vectors a and b with length m
+//
+//  Call as: vectorDotProduct(a, b)
+////////////////////////////////////////////////////////////////////////////////
+
+double vectorDotProductDbl(double vector1[], double vector2[])
+{
+  double dotProduct = 0;
+  for (int i = 0; i < 3; i++)
+      dotProduct += vector1[i] * vector2[i];
+  return dotProduct;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //  Vector Cross Product
 //  Compute the cross product of vectors a and b with length 3
 //  Place result in vector C
@@ -120,6 +135,21 @@ float vectorDotProduct(int length, float vector1[], float vector2[])
 ////////////////////////////////////////////////////////////////////////////////
 
 void vectorCrossProduct(float vectorC[3], float vectorA[3], float vectorB[3])
+{
+  vectorC[0] = (vectorA[1] * vectorB[2]) - (vectorA[2] * vectorB[1]);
+  vectorC[1] = (vectorA[2] * vectorB[0]) - (vectorA[0] * vectorB[2]);
+  vectorC[2] = (vectorA[0] * vectorB[1]) - (vectorA[1] * vectorB[0]);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Vector Cross Product for Double
+//  Compute the cross product of vectors a and b with length 3
+//  Place result in vector C
+//
+//  Call as: vectorDotProduct(c, a, b)
+////////////////////////////////////////////////////////////////////////////////
+
+void vectorCrossProductDbl(double vectorC[3], double vectorA[3], double vectorB[3])
 {
   vectorC[0] = (vectorA[1] * vectorB[2]) - (vectorA[2] * vectorB[1]);
   vectorC[1] = (vectorA[2] * vectorB[0]) - (vectorA[0] * vectorB[2]);
@@ -172,6 +202,18 @@ void vectorSubtract(int length, float vectorC[], float vectorA[], float vectorB[
   {
      vectorC[i] = vectorA[i] - vectorB[i];
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Normalize the vector
+//  This assumes that result is an array of 3 floats
+////////////////////////////////////////////////////////////////////////////////
+void vectorNormalize(double result[])
+{
+  double magnitude = sqrt((result[0]*result[0])+(result[1]*result[1])+(result[2]*result[2]));
+  result[0] = result[0]/magnitude;
+  result[1] = result[1]/magnitude;
+  result[2] = result[2]/magnitude;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
