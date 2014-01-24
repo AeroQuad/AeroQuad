@@ -113,7 +113,59 @@ void processAltitudeHold()
   else {
     throttle = receiverCommand[THROTTLE];
   }
+ 
+  // compute baro velocity rate
+  #if defined(AltitudeHoldBaro)
+    deltaAltitudeRateMeters(50.0); 					// update altitude rate in meters per secon
+  #endif
 }
+
+
+#if defined(AltitudeHoldBaro)
+
+#define numberofSamplestoFilter 23					// numberofSamplestoFilter should  be an odd number, no smaller than 3											// filterSamples should  be an odd number, no smaller than 3
+float lastbaroAltitude = 0.0;
+
+/**********************************************************
+ ********************** digitalSmooth *********************
+ **********************************************************/
+
+float digitalSmooth(float rawIn, float *baroSmoothArray){		// some storage for holding out barometer samples
+  static float sumSamplestoFilter = 0.0;				// total samples after all processing
+  static int thisBaroSample, currentSampleSlot = 0;			// loop variables
+  static boolean done = false;						// used to find totalfilterSamples
+
+  if (!done) {								// find total samples while storing
+    for (currentSampleSlot=0; currentSampleSlot < numberofSamplestoFilter; currentSampleSlot++){
+      sumSamplestoFilter += baroSmoothArray[currentSampleSlot];
+    }
+    done = true;
+  }
+
+  thisBaroSample = (thisBaroSample + 1) % numberofSamplestoFilter;	// increment counter and roll over when needed
+									// % (modulo operator) rolls over variable
+  sumSamplestoFilter -= baroSmoothArray[thisBaroSample];		// drop last value from total
+  baroSmoothArray[thisBaroSample] = rawIn;				// input new data into the oldest slot
+  sumSamplestoFilter += rawIn;						// add new value to total
+  
+  return sumSamplestoFilter/numberofSamplestoFilter;
+}
+
+/**********************************************************
+ *************** Determine vertical rate (+/-) ************
+ **********************************************************/
+// this routine must be called in 50 Hz slice
+
+void deltaAltitudeRateMeters( float timeIncrement ) {	 		// meters per second using 50Hz slice
+  static float smoothArray[numberofSamplestoFilter];			// array for holding smoothed values for New Altitude 
+
+  climbFallRate = (baroAltitude-lastbaroAltitude)*timeIncrement;	// called in 50 Hz slice (timeIncrement)
+
+  climbFallRate = digitalSmooth(climbFallRate, smoothArray);		// so our eyes don't vibrate out of our skull
+  lastbaroAltitude = baroAltitude;
+}
+
+#endif
 
 #endif
 

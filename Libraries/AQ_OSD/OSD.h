@@ -42,6 +42,9 @@
 #ifdef AltitudeHoldRangeFinder
   void displayRanger();
 #endif
+#ifdef ShowLandingIndicator
+  void displayVariometer(float climbFallRate);
+#endif
 
 void initializeOSD();
 void updateOSD();
