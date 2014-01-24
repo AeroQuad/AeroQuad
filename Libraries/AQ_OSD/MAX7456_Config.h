@@ -45,6 +45,10 @@
 #define COMPASS_ROW 0
 #define COMPASS_COL 13
 
+//Compass bar  - 10 characters long
+#define COMPASS_BAR_ROW 1
+#define COMPASS_BAR_COL 10
+
 //Altitude reading - up to 8 characters long (32768 max)
 #define ALTITUDE_ROW 0
 #define ALTITUDE_COL 1
