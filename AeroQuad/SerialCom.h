@@ -992,6 +992,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X");
   #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo +");
+  #elif defined(roverConfig)
+    SERIAL_PRINTLN("Rover");
   #endif
 
   SERIAL_PRINT("Receiver Channels: ");

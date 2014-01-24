@@ -56,7 +56,7 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      
@@ -66,7 +66,7 @@
 //#define octoX8Config
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
-//#define roverConfig
+#define roverConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION
@@ -179,7 +179,7 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 //#define CameraTXControl  // need to have CameraControl to work
 
 //
