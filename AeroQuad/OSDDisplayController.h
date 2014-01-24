@@ -28,6 +28,7 @@ byte OSDsched = 0;
 void updateOSD() {
   // OSD is updated fully in 8 rounds
   // 1,3,5,7 - Attitude Indicator - updated at 5Hz
+  // 1,3,5,7 - Variometer Indicator - updated at 5Hz
   // 2       - Altitude, Heading, Timer, RSSI - updated at 1.25Hz
   // 4       - Battery info
   // 6,8     - GPS (internally 2 phases: Position & Navigation
@@ -45,6 +46,12 @@ void updateOSD() {
         if (ON == navigationState) extendedFlightMode = 3;
       #endif
       displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
+    }
+  #endif
+
+  #ifdef ShowLandingIndicator
+    if (OSDsched&0x55) {
+      displayVariometer(climbFallRate);
     }
   #endif
 

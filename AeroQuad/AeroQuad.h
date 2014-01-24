@@ -192,6 +192,8 @@ void writeBinaryLong(unsigned long);
 
   #if defined AltitudeHoldBaro
     float baroAltitudeToHoldTarget = 0.0;
+    float climbFallRate = 0.0;
+    void deltaAltitudeRateMeters( float timeIncrement );
   #endif  
   #if defined AltitudeHoldRangeFinder
     float sonarAltitudeToHoldTarget = 0.0;
