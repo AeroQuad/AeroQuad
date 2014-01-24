@@ -31,7 +31,7 @@
 #include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.2
+#define SOFTWARE_VERSION 4.0
 
 #if defined CONFIG_BAUDRATE
   #define BAUD CONFIG_BAUDRATE
