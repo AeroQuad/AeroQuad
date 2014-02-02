@@ -31,7 +31,7 @@
 #include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.2
+#define SOFTWARE_VERSION 4.0
 
 #if defined CONFIG_BAUDRATE
   #define BAUD CONFIG_BAUDRATE
@@ -196,6 +196,8 @@ void writeBinaryLong(unsigned long);
 
   #if defined AltitudeHoldBaro
     float baroAltitudeToHoldTarget = 0.0;
+    float climbFallRate = 0.0;
+    void deltaAltitudeRateMeters( float timeIncrement );
   #endif  
   #if defined AltitudeHoldRangeFinder
     float sonarAltitudeToHoldTarget = 0.0;
