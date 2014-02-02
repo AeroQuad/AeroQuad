@@ -1310,7 +1310,7 @@ void setup() {
   
   initPlatform();
   
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig) || defined(roverConfig)
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
      initializeMotors(SIX_Motors);
@@ -1404,6 +1404,14 @@ void setup() {
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
+
+  #if defined(roverConfig)
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+	  motorCommand[motor] = MIDCOMMAND;
+    }
+    motorArmed = ON;
+    safetyCheck = ON;
+  #endif
 }
 
 
@@ -1441,8 +1449,11 @@ void process100HzTask() {
     }
   #endif
         
-  processFlightControl();
-  
+  #ifndef roverConfig
+    processFlightControl();
+  #else
+    processRoverControl();
+  #endif
   
   #if defined(BinaryWrite)
     if (fastTransfer == ON) {

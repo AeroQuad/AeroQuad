@@ -220,6 +220,8 @@ void writeBinaryLong(unsigned long);
  * GPS navigation global declaration
  */
 #define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
+#define PRE_WAYPOINT -1
+#define UNINITIALIZED -2
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
@@ -232,23 +234,59 @@ void writeBinaryLong(unsigned long);
     byte navigationState = OFF;  // ON, OFF or ALTPANIC
     byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-    int missionNbPoint = 0;
+    int missionNbPoint = PRE_WAYPOINT;
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
     int gpsYawAxisCorrection = 0;
     boolean isPositionHoldInitialized = false;
     boolean isGpsNavigationInitialized = false;
 
-    int waypointIndex = -1;    
+    int waypointIndex = UNINITIALIZED;
     float distanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS] = {
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
-      
     GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
     
+    /* New updated GPS Navigation variables */
+    double fromVector[3], toVector[3], presentPosition[3];
+    double presentPositionEast[3], presentPositionNorth[3];
+    double normalRangeVector[3], rangeVector[3];
+    double zVector[3] = {0.0, 0.0, 1.0};
+    double normalVector[3], normalPerpendicularVector[3], alongPathVector[3], negNormalVector[3];
+    GeodeticPosition fromWaypoint, toWaypoint, currentLocation, followingWaypoint;
+    double desiredHeading, currentHeading, groundTrackHeading;
+    double trackAngleError, crossTrackError, crossTrack, alongPathDistance;
+    int waypointCount;
+    double distanceToNextWaypoint = 99999999.0;
+    double distanceToFollowingWaypoint = 99999999.0;
+    double testDistanceWaypoint = 99999999.0;
+    const double earthRadius = 6378100.0; // meters
+    double waypointCaptureDistance = 2.0; // meters
+    float forwardSpeed = 15.0;
+    byte navigatorSerialCommand = OFF; // TODO: remove when autopilot working
+    bool isRouteInitialized = false;
+    double distanceToGoAlongPath, distanceToGoPosition; // TODO: remove?
+    float posRollCommand, posPitchCommand; // TODO: remove?
+    long latDelta, lonDelta; // TODO: remove?
+
+    double velocityVector[3];
+    float velX = 0.0, velY = 0.0, velZ = 0.0;
+    int velRollCommand = 0;
+    int velPitchCommand = 0;
+    double estSpeed, estCourse;
+    double previousLat = 0.0;
+    double previousLon = 0.0;
+    double gpsVelocity[3], accVelocity[3];
+
+    // make local when working
+    float distanceFromStartToPosition;
+    float bearingFromStartToPosition;
+    float bearingFromStartToNextWP;
+
+
     void evaluateMissionPositionToReach();
     void processGpsNavigation();
   #endif
