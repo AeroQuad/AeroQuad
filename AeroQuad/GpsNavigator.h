@@ -186,9 +186,6 @@ void positionVector(double *vector, GeodeticPosition position) {
  */
 bool updateWaypoints() { // returns false if next waypoint available, true if at end of route
   if (waypointIndex == UNINITIALIZED) { // creates one time path from current position to first waypoint
-    missionPositionToReach.latitude = currentPosition.latitude;
-    missionPositionToReach.longitude = currentPosition.longitude;
-    missionPositionToReach.altitude = currentPosition.altitude;
     fromWaypoint = currentPosition;
     toWaypoint = waypoint[0];
     followingWaypoint = waypoint[1];
@@ -199,9 +196,6 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     negNormalVector[0] = -normalVector[0];
     negNormalVector[1] = -normalVector[1];
     negNormalVector[2] = -normalVector[2];
-    if (missionPositionToReach.altitude > MAX_ALTITUDE) {
-      missionPositionToReach.altitude = MAX_ALTITUDE; // fix max altitude to 2 km
-    }
     waypointIndex = PRE_WAYPOINT;
     return false;
   }
@@ -217,9 +211,6 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     return true; // finished route
   }
   else {
-    missionPositionToReach.latitude = waypoint[waypointIndex].latitude;
-    missionPositionToReach.longitude = waypoint[waypointIndex].longitude;
-    missionPositionToReach.altitude = waypoint[waypointIndex].altitude;
     fromWaypoint = waypoint[waypointIndex];
     toWaypoint = waypoint[waypointIndex+1];
     followingWaypoint = waypoint[waypointIndex+2];
@@ -230,9 +221,6 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     negNormalVector[0] = -normalVector[0];
     negNormalVector[1] = -normalVector[1];
     negNormalVector[2] = -normalVector[2];
-    if (missionPositionToReach.altitude > 2000.0) {
-      missionPositionToReach.altitude = 2000.0; // fix max altitude to 2 km
-    }
     return false;
   }
 }
@@ -285,20 +273,21 @@ void processNavigation() {
   vectorCrossProductDbl(rangeVector, toVector, normalRangeVector);
   vectorNormalize(rangeVector);
   distanceToNextWaypoint = earthRadius * atan2(vectorDotProductDbl(rangeVector, presentPosition), vectorDotProductDbl(presentPosition, toVector));
-  distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
-  distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
-  distanceToFollowingWaypoint = calculateGPSDistance(currentPosition, followingWaypoint);
+  //distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
+  //distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
+  //distanceToFollowingWaypoint = calculateGPSDistance(currentPosition, followingWaypoint);
   testDistanceWaypoint = calculateGPSDistance(currentPosition, toWaypoint);
 
   // These corrections need to be PWM centered around 0
-  gpsPitchAxisCorrection = forwardSpeed * Deg2PWMFactor * 2.5; // pitch forward in degrees converted to radians
-  gpsRollAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor;
-  gpsYawAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor;
+  gpsPitchAxisCorrection = forwardSpeed * Deg2PWMFactor * PID[GPSPITCH_PID_IDX].P; // pitch forward in degrees converted to radians
+  gpsRollAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor * PID[GPSROLL_PID_IDX].P;
+  gpsYawAxisCorrection = constrain((trackAngleError+crossTrackError), -MAXBANKANGLE, MAXBANKANGLE) * Deg2PWMFactor * PID[GPSROLL_PID_IDX].P;
 
-  if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
+  //if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
+  if (distanceToNextWaypoint < waypointCaptureDistance) {
     bool routeisFinished = updateWaypoints();
     if (routeisFinished) {
-      positionHoldState = ON;
+      positionHoldState = ON; // Be sure to fix bug where in positionHoldState, but TX switch is in autopilot
       navigationState = OFF;
       gpsPitchAxisCorrection = 0.0;
     }
@@ -335,14 +324,19 @@ void processPositionHold()
  */
 void processGpsNavigation() {
 
-  if (haveAGpsLock()) {
-
-    if (navigationState == ON) {
+  if (haveAGpsLock())
+  {
+    if (navigationState == ON)
+    {
+      if (!isRouteInitialized)
+      {
+        loadNewRoute();
+        isRouteInitialized = true;
+      }
       processNavigation();
     }
-    else if (positionHoldState == ON ) {
+    else if (positionHoldState == ON )
       processPositionHold();
-    }
   }
 }
 #endif

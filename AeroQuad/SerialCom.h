@@ -368,6 +368,16 @@ float getHeading()
 void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
+    PrintValueComma(waypointIndex);
+    PrintValueComma(distanceToNextWaypoint);
+    PrintValueComma(testDistanceWaypoint);
+
+    //PrintValueComma(waypointCaptureDistance);
+    //PrintValueComma(trackAngleError);
+    //PrintValueComma(crossTrackError);
+    //PrintValueComma(trackAngleError+crossTrackError);
+    //PrintValueComma(gpsRollAxisCorrection);
+    SERIAL_PRINTLN();
     break;
 
   case 'a': // Send roll and pitch rate mode PID values

@@ -109,7 +109,6 @@
       homePosition.altitude = DEFAULT_HOME_ALTITUDE;
     }
 
-
     if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
@@ -117,15 +116,8 @@
         gpsYawAxisCorrection = 0;
         isGpsNavigationInitialized = true;
       }
-
-      if (!isRouteInitialized) {
-          loadNewRoute();
-          isRouteInitialized = true;
-      }
-
       positionHoldState = OFF;         // disable the position hold while navigating
       isPositionHoldInitialized = false;
-  
       navigationState = ON;
     }
     else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
@@ -146,7 +138,6 @@
       isGpsNavigationInitialized = false;  // disable navigation
       isRouteInitialized = false;
       navigationState = OFF;
-  
       positionHoldState = ON;
     }
     else {
@@ -156,6 +147,8 @@
   
       navigationState = OFF;
       isGpsNavigationInitialized = false;
+      isRouteInitialized = false;
+      waypointIndex = UNINITIALIZED;
   
       gpsRollAxisCorrection = 0;
       gpsPitchAxisCorrection = 0;

@@ -363,18 +363,19 @@ void processFlightControl() {
 
 void processRoverControl()
 {
+  processHeading();
   #if defined (UseGPSNavigator)
     processGpsNavigation();
     if (navigationState == ON || positionHoldState == ON)
     {
-      motorAxisCommandRoll = receiverCommand[XAXIS] + gpsRollAxisCorrection;
-      motorAxisCommandPitch = receiverCommand[YAXIS] + gpsPitchAxisCorrection;
+      motorAxisCommandRoll = receiverCommand[YAXIS] + gpsRollAxisCorrection;
+      motorAxisCommandPitch = receiverCommand[XAXIS] + gpsPitchAxisCorrection;
     }
     else
   #endif
     {
-      motorAxisCommandRoll   = receiverCommand[XAXIS];
-      motorAxisCommandPitch  = receiverCommand[YAXIS];
+      motorAxisCommandRoll   = receiverCommand[YAXIS];
+      motorAxisCommandPitch  = receiverCommand[XAXIS];
     }
     applyMotorCommand();
     writeMotors();
