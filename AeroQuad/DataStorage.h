@@ -220,7 +220,7 @@ void initializeEEPROM() {
   #endif
   
   #if defined (UseGPSNavigator)
-    missionNbPoint = 0;
+    waypointCount = 0;
     PID[GPSROLL_PID_IDX].P = 0.8;
     PID[GPSROLL_PID_IDX].I = 0.0;
     PID[GPSROLL_PID_IDX].D = 0.0;
@@ -319,7 +319,7 @@ void readEEPROM() {
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 
   #if defined (UseGPSNavigator)
-    missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
+    waypointCount = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
@@ -429,7 +429,7 @@ void writeEEPROM(){
   #endif
   
   #if defined (UseGPSNavigator)
-    writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
+    writeFloat(waypointCount, GPS_MISSION_NB_POINT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);

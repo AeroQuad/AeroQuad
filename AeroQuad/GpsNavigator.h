@@ -184,8 +184,11 @@ void positionVector(double *vector, GeodeticPosition position) {
 /**
  * Evaluate the position to reach depending of the state of the mission
  */
-bool updateWaypoints() { // returns false if next waypoint available, true if at end of route
-  if (waypointIndex == UNINITIALIZED) { // creates one time path from current position to first waypoint
+bool updateWaypoints() // returns false if next waypoint available, true if at end of route
+{
+  if (waypointIndex == UNINITIALIZED)
+  {
+    // Creates one time path from current position to first waypoint
     fromWaypoint = currentPosition;
     toWaypoint = waypoint[0];
     followingWaypoint = waypoint[1];
@@ -200,17 +203,9 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     return false;
   }
 
-  if ((waypointIndex < MAX_WAYPOINTS)) {
-    waypointIndex++;
-  }
-
-  if (waypointIndex >= MAX_WAYPOINTS || waypoint[waypointIndex].altitude == GPS_INVALID_ALTITUDE) { // if mission is completed, last step is to go home 2147483647 == invalid altitude
-    missionPositionToReach.latitude = homePosition.latitude;
-    missionPositionToReach.longitude = homePosition.longitude;
-    missionPositionToReach.altitude = homePosition.altitude;
-    return true; // finished route
-  }
-  else {
+  waypointIndex++;
+  if (waypointIndex < waypointCount)
+  {
     fromWaypoint = waypoint[waypointIndex];
     toWaypoint = waypoint[waypointIndex+1];
     followingWaypoint = waypoint[waypointIndex+2];
@@ -222,6 +217,13 @@ bool updateWaypoints() { // returns false if next waypoint available, true if at
     negNormalVector[1] = -normalVector[1];
     negNormalVector[2] = -normalVector[2];
     return false;
+  }
+  else
+  {
+    missionPositionToReach.latitude = homePosition.latitude;
+    missionPositionToReach.longitude = homePosition.longitude;
+    missionPositionToReach.altitude = homePosition.altitude;
+    return true; // finished route
   }
 }
 
@@ -276,7 +278,7 @@ void processNavigation() {
   //distanceToGoAlongPath = earthRadius * acos(vectorDotProductDbl(toVector, alongPathVector));
   //distanceToGoPosition = earthRadius * acos(vectorDotProductDbl(toVector, presentPosition));
   //distanceToFollowingWaypoint = calculateGPSDistance(currentPosition, followingWaypoint);
-  testDistanceWaypoint = calculateGPSDistance(currentPosition, toWaypoint);
+  //testDistanceWaypoint = calculateGPSDistance(currentPosition, toWaypoint);
 
   // These corrections need to be PWM centered around 0
   gpsPitchAxisCorrection = forwardSpeed * Deg2PWMFactor * PID[GPSPITCH_PID_IDX].P; // pitch forward in degrees converted to radians

@@ -193,10 +193,18 @@ void readSerialCommand() {
 
     case 'O': // define waypoints
       #ifdef UseGPSNavigator
-        missionNbPoint = readIntegerSerial();
-        waypoint[missionNbPoint].latitude = readIntegerSerial();
-        waypoint[missionNbPoint].longitude = readIntegerSerial();
-        waypoint[missionNbPoint].altitude = readIntegerSerial();
+      {
+        int index = readIntegerSerial();
+        if (index >= 0)
+        {
+          waypoint[index].latitude = readIntegerSerial();
+          waypoint[index].longitude = readIntegerSerial();
+          waypoint[index].altitude = readIntegerSerial();
+          // Need to add speed?
+        }
+        else if (index == -1)
+          waypointCount = readIntegerSerial();
+      }
       #else
         for(byte i = 0; i < 4; i++) {
           readFloatSerial();
@@ -534,18 +542,24 @@ void sendSerialTelemetry() {
     break;
 
   case 'o': // send waypoints
+    {
     #ifdef UseGPSNavigator
-      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+      int index = readIntegerSerial();
+      if (index < 0)
+        SERIAL_PRINT(waypointCount);
+      else
+      {
         PrintValueComma(index);
         PrintValueComma(waypoint[index].latitude);
         PrintValueComma(waypoint[index].longitude);
-        PrintValueComma(waypoint[index].altitude);
+        SERIAL_PRINT(waypoint[index].altitude);
       }
     #else
       PrintDummyValues(4);
     #endif
     SERIAL_PRINTLN();
     queryType = 'X';
+    }
     break;
 
   case 'p': // Send Camera values

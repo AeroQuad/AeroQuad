@@ -236,7 +236,8 @@ void writeBinaryLong(unsigned long);
     byte navigationState = OFF;  // ON, OFF or ALTPANIC
     byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-    int missionNbPoint = PRE_WAYPOINT;
+    //int missionNbPoint = PRE_WAYPOINT;
+    int waypointCount;
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
     int gpsYawAxisCorrection = 0;
@@ -261,7 +262,6 @@ void writeBinaryLong(unsigned long);
     GeodeticPosition fromWaypoint, toWaypoint, currentLocation, followingWaypoint;
     double desiredHeading, currentHeading, groundTrackHeading;
     double trackAngleError, crossTrackError, crossTrack, alongPathDistance;
-    int waypointCount;
     double distanceToNextWaypoint = 99999999.0;
     double distanceToFollowingWaypoint = 99999999.0;
     double testDistanceWaypoint = 99999999.0;
