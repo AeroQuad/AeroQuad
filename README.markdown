@@ -6,7 +6,7 @@ Version 3.2 Release Notes (1/27/2013)
 ----------------------------------------
 * Unified release with Configurator for official support of AQ32 Flight Control Board
 
-Version 3.1 Beta 1 Release Notes (7/1/2012)
+Version 3.1 Beta 1 Release Notes (7/1/2013)
 ----------------------------------------
 * Waypoint following (Waypoints uploaded from Configurator) - EXPERIMENTAL
 * Auto Descent/Land (Must be tuned for your individual setup) - EXPERIMENTAL
