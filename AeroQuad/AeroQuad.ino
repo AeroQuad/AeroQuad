@@ -1117,13 +1117,9 @@
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined(triConfig)
-  #if defined (MOTOR_STM32)
-    #define MOTORS_STM32_TRI
-    #include <Motors_STM32.h>    
-  #else
-    #include <Motors_Tri.h>
-  #endif
+
+#if defined(MOTOR_PWM) && defined(triConfig)
+  #include <Motors_Tri.h>
 #elif defined(MOTOR_PWM)
   #include <Motors_PWM.h>
 #elif defined(MOTOR_PWM_Timer)
@@ -1132,6 +1128,9 @@
   #include <Motors_APM.h>
 #elif defined(MOTOR_I2C)
   #include <Motors_I2C.h>
+#elif defined(MOTOR_STM32) && defined(triConfig)
+  #define MOTORS_STM32_TRI
+  #include <Motors_STM32.h>    
 #elif defined(MOTOR_STM32)
   #include <Motors_STM32.h>    
 #endif
