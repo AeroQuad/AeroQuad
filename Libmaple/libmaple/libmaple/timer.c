@@ -81,6 +81,7 @@ static timer_dev timer4 = {
 timer_dev *TIMER4 = &timer4;
 
 #ifdef STM32_HIGH_DENSITY
+#if !defined(STM32F3)
 static timer_dev timer5 = {
     .regs         = { .gen = TIMER5_BASE },
     .clk_id       = RCC_TIMER5,
@@ -89,6 +90,7 @@ static timer_dev timer5 = {
 };
 /** Timer 5 device (general-purpose) */
 timer_dev *TIMER5 = &timer5;
+#endif
 
 static timer_dev timer6 = {
     .regs         = { .bas = TIMER6_BASE },
@@ -200,7 +202,9 @@ void timer_foreach(void (*fn)(timer_dev*)) {
     fn(TIMER3);
     fn(TIMER4);
 #ifdef STM32_HIGH_DENSITY
-    fn(TIMER5);
+	#if !defined(STM32F3)
+    	fn(TIMER5);
+	#endif
     fn(TIMER6);
     fn(TIMER7);
     fn(TIMER8);
@@ -279,10 +283,11 @@ void __irq_tim4(void) {
 }
 
 #if defined(STM32_HIGH_DENSITY) || defined(STM32_XL_DENSITY)
-
+#if !defined(STM32F3)
 void __irq_tim5(void) {
     dispatch_general(TIMER5);
 }
+#endif
 
 void __irq_tim6(void) {
     dispatch_basic(TIMER6);
@@ -463,9 +468,11 @@ static void enable_nonmuxed_irq(timer_dev *dev) {
         nvic_irq_enable(NVIC_TIMER4);
         break;
 #ifdef STM32_HIGH_DENSITY
+#if !defined(STM32F3)
     case RCC_TIMER5:
         nvic_irq_enable(NVIC_TIMER5);
         break;
+#endif
     case RCC_TIMER6:
         nvic_irq_enable(NVIC_TIMER6);
         break;

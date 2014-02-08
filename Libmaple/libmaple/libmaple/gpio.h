@@ -31,8 +31,10 @@
  *         (AFIO) prototypes, defines, and inlined access functions.
  */
 
-#ifdef STM32F2
-#include "gpioF2.h"
+#if defined(STM32F2)
+	#include "gpioF2.h"
+#elif defined(STM32F3)
+	#include "gpioF3.h"
 #else
-#include "gpioF1.h"
+	#include "gpioF1.h"
 #endif

@@ -4,6 +4,7 @@
 BOARD ?= aeroquad32
 #BOARD ?= aeroquad32f1
 #BOARD ?= discovery_f4
+#BOARD ?= discovery_f3
 #BOARD ?= aeroquad32mini
 #BOARD ?= freeflight
 
@@ -57,6 +58,10 @@ ifeq ($(BOARD), freeflight)
 GLOBAL_FLAGS += -DDISABLEUSB
 endif
 
+ifeq ($(BOARD), discovery_f3)
+//GLOBAL_FLAGS += -DDISABLEUSB
+endif
+
 ifeq ($(BOARD), aeroquad32)
 GLOBAL_FLAGS += -DF_CPU=168000000UL
 endif
@@ -77,7 +82,11 @@ endif
 #GLOBAL_FLAGS += -DDISABLEUSB
 #GLOBAL_FLAGS += -DUSB_DISC_OD
 		   
-GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m \
+#GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m4 -mthumb -march=armv7-m  -mfpu=fpv4-sp-d16 -mfloat-abi=hard 
+#GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m 
+
+#GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard  
+GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m4 -mthumb \
 		   -nostdlib -ffunction-sections -fdata-sections	     \
 		   -Wl,--gc-sections $(GLOBAL_FLAGS)
 GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall $(GLOBAL_FLAGS)
@@ -113,6 +122,7 @@ LIBMAPLE_MODULES += $(SRCROOT)/libraries/Wire
 # Experimental libraries:
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/FreeRTOS
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/mapleSDfat
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/FatFS
 
 # Call each module's rules.mk:
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))

@@ -47,7 +47,7 @@
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHoldBaro for baro), and voltage divider
 
 // STM32 processor
-#define AeroQuadSTM32        // Baloo board
+#define AeroQuadSTM32        	// AeroQuad32 board
 
 
 /****************************************************************************
@@ -56,7 +56,7 @@
 // Use only one of the following definitions
 //For more information please refer to http://aeroquad.com/showwiki.php?title=Flight+Configurations
 
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      
@@ -64,9 +64,9 @@
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Config
-//#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
-//#define octoXConfig			// EXPERIMENTAL: not completely re-tested
-#define roverConfig
+//#define octoPlusConfig
+//#define octoXConfig
+//#define roverConfig
 
 
 // MOTOR ADVANCE CONFIG SECTION
@@ -100,20 +100,20 @@
 // *******************************************************************************************************************************
 // GPS Options
 // *******************************************************************************************************************************
-#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
+#define UseGPS		        		// Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
 #define UseGPSNavigator
 
 // Device specific settings
-//#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
+//#define UseGPSMTKBINARY   		// Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
 
 //
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
 // *******************************************************************************************************************************
-//#define BattMonitor			  // Enables Battery monitor
-//#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
-//#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
+#define BattMonitor			  		// Enables Battery monitor
+//#define BattMonitorAutoDescent  	// NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
+//#define POWERED_BY_VIN          	// NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //
 // Advanced configuration. Please refer to the wiki for instructions.
 //#define BattCustomConfig DEFINE_BATTERY(0,A4,51.8,0,A3,180.3,0)
@@ -123,19 +123,19 @@
 // Receiver Setup
 // For more information on how to connect your receiver to your AeroQuad board please refer to http://aeroquad.com/showwiki.php?title=Connecting+the+receiver+to+your+AeroQuad+board
 // *******************************************************************************************************************************
-#define NormalReceiver	// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
-//#define RemotePCReceiver	// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
-//#define ReceiverSBUS		// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
-//#define ReceiverPPM		// Use a PPM receiver
-//#define ReceiverHWPPM		// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
+//#define NormalReceiver				// This does nothing really, but it indicates users that they don't have to define other options here if they have a normal receiver
+//#define RemotePCReceiver			// EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
+//#define ReceiverSBUS				// Use a Futaba sBUS RX, connect sBUS data line via an inverter (see wiki) to Serial2 RX, supports up to 8 channels on v2 and STM32 boards
+#define ReceiverPPM				// Use a PPM receiver
+//#define ReceiverHWPPM				// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
 
 // You need to select one of these channel order definitions for PPM receiver
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
+#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
+//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2	//For Robe/Hitec/Futaba/Turnigy9X+Er9X
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
 
-//#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
-//#define UseEzUHFRSSIReader	// Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
+//#define UseAnalogRSSIReader		// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
+//#define UseEzUHFRSSIReader		// Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
 //#define UseSBUSRSSIReader		
 
 //
@@ -144,7 +144,7 @@
 // *******************************************************************************************************************************
 //#define LASTCHANNEL 6
 #define LASTCHANNEL 8
-//#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
+//#define LASTCHANNEL 10 			// EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
 
 
 //
@@ -152,22 +152,22 @@
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Wireless+Connection
 // *******************************************************************************************************************************
-//#define WirelessTelemetry	// Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+//#define WirelessTelemetry			// Enables wireless telemetry, for more information see wiki linked above
 
-//#define MavLink               // Enables the MavLink protocol
-//#define MAV_SYSTEM_ID 100		// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
-								// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
+#define MavLink               		// Enables the MavLink protocol
+#define MAV_SYSTEM_ID 100			// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
+									// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
-#define CONFIG_BAUDRATE 57600 // overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
+//#define CONFIG_BAUDRATE 19200 	// overrides default baudrate for serial port (Configurator/MavLink/WirelessTelemetry)
 
 //
 // *******************************************************************************************************************************
 // Optional audio channel telemetry (for ground station tracking purposes)
 // This will output telemetry at slow (1200baud) rate once per second on Serial2. 
 // *******************************************************************************************************************************
-//#define SlowTelemetry			// Enables audio channel telemetry on Serial2
-//#define SoftModem             // Enable usage of DAC as modem on AQ32 instead of Serial 2
-//#define SOFTMODEM_FSKv2       // Enable non standard FSK frequencies used by FSKv2 module (TCM3105 at 8Mhz)
+//#define SlowTelemetry				// Enables audio channel telemetry on Serial2
+//#define SoftModem             	// Enable usage of DAC as modem on AQ32 instead of Serial 2
+//#define SOFTMODEM_FSKv2       	// Enable non standard FSK frequencies used by FSKv2 module (TCM3105 at 8Mhz)
 
 //
 // *******************************************************************************************************************************
@@ -181,7 +181,7 @@
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
 //#define CameraControl
-//#define CameraTXControl  // need to have CameraControl to work
+//#define CameraTXControl  			// need to have CameraControl to work
 
 //
 // *******************************************************************************************************************************

@@ -200,7 +200,6 @@ void initializeEEPROM() {
     receiverOffset[channel] = 0.0;
     receiverSmoothFactor[channel] = 1.0;
   }
-  receiverSmoothFactor[ZAXIS] = 0.5;
 
   flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
@@ -319,7 +318,7 @@ void readEEPROM() {
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 
   #if defined (UseGPSNavigator)
-    waypointCount = readFloat(GPS_MISSION_NB_POINT_ADR);
+    waypointCount = readFloat(GPS_WAYPOINT_COUNT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
@@ -429,7 +428,7 @@ void writeEEPROM(){
   #endif
   
   #if defined (UseGPSNavigator)
-    writeFloat(waypointCount, GPS_MISSION_NB_POINT_ADR);
+    writeFloat(waypointCount, GPS_WAYPOINT_COUNT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
     writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);

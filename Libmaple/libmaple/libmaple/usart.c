@@ -104,19 +104,24 @@ void usart_init(usart_dev *dev) {
  * @param baud        Baud rate for transmit/receive.
  */
 void usart_set_baud_rate(usart_dev *dev, uint32 baud) {
-    uint32 integer_part;
-    uint32 fractional_part;
-    uint32 tmp;
-
 	uint32 clock_speed = rcc_dev_clk_speed(dev->clk_id);
 
+#if defined(STM32F3)
+    uint32 divider = clock_speed / baud;
+    uint32 tmpreg  = clock_speed % baud;
+    /* round the divider : if fractional part i greater than 0.5 increment divider */
+    if (tmpreg >=  baud / 2) {
+    	divider++;
+    }
+    dev->regs->BRR = (uint16)divider;
+#else
     /* See ST RM0008 for the details on configuring the baud rate register */
-    integer_part = (25 * clock_speed) / (4 * baud);
-    tmp = (integer_part / 100) << 4;
-    fractional_part = integer_part - (100 * (tmp >> 4));
+    uint32 integer_part = (25 * clock_speed) / (4 * baud);
+    uint32 tmp = (integer_part / 100) << 4;
+    uint32 fractional_part = integer_part - (100 * (tmp >> 4));
     tmp |= (((fractional_part * 16) + 50) / 100) & ((uint8)0x0F);
-
     dev->regs->BRR = (uint16)tmp;
+#endif
 }
 
 /**
@@ -253,13 +258,21 @@ static inline void usart_irq(usart_dev *dev) {
 		rb_safe_insert(&dev->rbRX, (uint8)dev->regs->DR);
 #else
 		/* By default, push bytes around in the ring buffer. */
+	#if defined(STM32F3)
+		rb_push_insert(&dev->rbRX, (uint8)dev->regs->RDR);
+	#else
 		rb_push_insert(&dev->rbRX, (uint8)dev->regs->DR);
+	#endif
 #endif
 
 #ifdef USART_TX_IRQ
 	} else if(sr & USART_SR_TXE) {
 		if(rb_full_count(&dev->rbTX) > 0) {
-			dev->regs->DR = rb_remove(&dev->rbTX);
+			#if defined(STM32F3)
+				dev->regs->TDR = rb_remove(&dev->rbTX);
+			#else
+				dev->regs->DR = rb_remove(&dev->rbTX);
+			#endif
 		} else {
 			usart_tx_irq_disable(dev); // disable tx irq
 			// nops needed to deactivate the irq before irq handler is left

@@ -60,6 +60,8 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
 
 #include <Gyroscope_MPU6000.h>
 #include <Accelerometer_MPU6000.h>
+#include "log.h"
+#include "log.c"
 
 // heading mag hold declaration
 #ifdef HeadingMagHold
@@ -123,6 +125,11 @@ void initPlatform() {
 
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();
+  #endif
+
+  #ifdef EnableLogging
+    logInit();
+    logPrintF("starting logging...\r\n");
   #endif
 }
 

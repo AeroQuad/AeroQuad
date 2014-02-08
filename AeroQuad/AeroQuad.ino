@@ -1281,6 +1281,7 @@
 #endif  
 
 #if defined(MavLink)
+  #include "GCS_MAVLink.h"
   #include "MavLink.h"
 #else
   #include "SerialCom.h"

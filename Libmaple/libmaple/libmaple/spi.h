@@ -301,6 +301,9 @@ void spi_slave_enable(spi_dev *dev,
                       uint32 flags);
 
 uint32 spi_tx(spi_dev *dev, const void *buf, uint32 len);
+void spi_tx_bytebuffer(spi_dev *dev, const uint8 *buf, uint32 len);
+void spi_tx_byte(spi_dev *dev, const uint8 data);
+//void spi_tx_byte(spi_dev *dev, const void *buf);
 
 void spi_foreach(void (*fn)(spi_dev (*dev)));
 

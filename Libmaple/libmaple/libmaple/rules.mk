@@ -41,18 +41,7 @@ cSRCS_$(d) := adc.c                    \
               usart.c                  \
               util.c                   
 
-ifneq ($(MCU_FAMILY), STM32F2)
-	cSRCS_$(d) += \
-              usb/descriptors.c        \
-              usb/usb.c                \
-              usb/usb_callbacks.c      \
-              usb/usb_hardware.c       \
-              usb/usb_lib/usb_core.c   \
-              usb/usb_lib/usb_init.c   \
-              usb/usb_lib/usb_int.c    \
-              usb/usb_lib/usb_mem.c    \
-              usb/usb_lib/usb_regs.c
-else
+ifeq ($(MCU_FAMILY), STM32F2)
 	V=1
 	cSRCS_$(d) += \
 		usbF4/STM32_USB_Device_Library/Core/src/usbd_core.c \
@@ -68,10 +57,23 @@ else
 		usbF4/VCP/usbd_usr.c \
 		usbF4/usb.c \
 		usbF4/VCP/misc.c 
+else
+	cSRCS_$(d) += \
+              usb/descriptors.c        \
+              usb/usb.c                \
+              usb/usb_callbacks.c      \
+              usb/usb_hardware.c       \
+              usb/usb_lib/usb_core.c   \
+              usb/usb_lib/usb_init.c   \
+              usb/usb_lib/usb_int.c    \
+              usb/usb_lib/usb_mem.c    \
+              usb/usb_lib/usb_regs.c
 endif
 
 ifneq ($(MCU_FAMILY), STM32F2)
+ifneq ($(MCU_FAMILY), STM32F3)
 	cSRCS_$(d) += bkp.c
+endif
 endif
 
 sSRCS_$(d) := exc.S

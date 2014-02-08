@@ -56,6 +56,8 @@ float Ki = 0.0;                   					// integral gain governs rate of converge
 float halfT = 0.0;                					// half the sample period
 float q0 = 0.0, q1 = 0.0, q2 = 0.0, q3 = 0.0;       // quaternion elements representing the estimated orientation
 float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
+float acc[3] = {0.0, 0.0, 0.0};
+float smoothedAcc[3] = {0.0, 0.0, 0.0};
   
 float previousEx = 0.0;
 float previousEy = 0.0;
@@ -83,6 +85,11 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   vx = 2*(q1*q3 - q0*q2);
   vy = 2*(q0*q1 + q2*q3);
   vz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
+
+  // acceleration unit vector with gravity removed
+  acc[XAXIS] = ax + vx;
+  acc[YAXIS] = ay + vy;
+  acc[ZAXIS] = az + vz;
     
   // error is sum of cross product between reference direction of fields and direction measured by sensors
   ex = (vy*az - vz*ay);
@@ -122,7 +129,7 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   q1 += q1i;
   q2 += q2i;
   q3 += q3i;
-    
+
   // normalise quaternion
   norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
   q0 = q0 / norm;

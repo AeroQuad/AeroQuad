@@ -88,7 +88,7 @@ void Print::print(unsigned long n, int base) {
 }
 
 void Print::print(long long n, int base) {
-    if (base == BYTE) {
+    if (base == E_BYTE) {
         write((uint8)n);
         return;
     }
@@ -100,7 +100,7 @@ void Print::print(long long n, int base) {
 }
 
 void Print::print(unsigned long long n, int base) {
-    if (base == BYTE) {
+    if (base == E_BYTE) {
         write((uint8)n);
     } else {
         printNumber(n, base);

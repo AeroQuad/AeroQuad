@@ -1,4 +1,3 @@
-#include <../AeroQuad/UserConfiguration.h>
 #include <SerialMapping.h>
 #include <WProgram.h>
 
@@ -7,25 +6,26 @@ __attribute__(( constructor )) void premain() {
 }
 
 extern "C"{
-        void _init(){};
+	void _initxx(){};
 }
 
-// Uncomment this if compiling on OS X
-/*extern "C"{
-	void _init(){}; // dummy _init function for support of GNU toolchain from https://launchpad.net/gcc-arm-embedded
-}*/
+extern "C" { void systick_attach_callback(void (*callback)(void));}
+extern "C" { void logWorker();}
+
 
 int main(void)
 {
-	//init();
   	setup();
+  	systick_attach_callback(loop);
 
-	for (;;)
-		loop();
+	for (;;) {
+		//loop();
+		logWorker();
+	}
 
 	return 0;
 }
 
 
 #include "../AeroQuad/AeroQuad.ino"
-
+//#include "../AeroQuad/AeroQuad.cpp"

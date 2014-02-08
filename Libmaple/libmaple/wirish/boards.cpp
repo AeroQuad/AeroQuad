@@ -59,7 +59,7 @@ void init(void) {
 	systick_init(SYSTICK_RELOAD_VAL);
 	gpio_init_all();
 
-#ifdef STM32F2
+#if defined(STM32F2) || defined(STM32F3)
 	rcc_clk_enable(RCC_SYSCFG);
 #else
     afio_init();
@@ -84,7 +84,7 @@ bool boardUsesPin(uint8 pin) {
 }
 
 static void setupFlash(void) {
-#ifndef STM32F2
+#if !(defined(STM32F2) || defined(STM32F3))
 	// for F2 and F4 CPUs this is done in SetupClock...(), e.g. in SetupClock168MHz()
     flash_enable_prefetch();
     flash_set_latency(FLASH_WAIT_STATE_2);

@@ -274,8 +274,8 @@ void readPilotCommands() {
         simpleModeInitialize = true;
   }
 
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    //processAltitudeHoldStateFromReceiverCommand();
+  #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+    processAltitudeHoldStateFromReceiverCommand();
   #endif
   
   #if defined (AutoLanding)
