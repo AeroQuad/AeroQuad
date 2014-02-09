@@ -36,6 +36,8 @@
 #define MINTHROTTLE (MINCOMMAND + 100)
 #define LEVELOFF 100
 #define MAX_NB_CHANNEL 10
+#define MINSWITCH 1250
+#define MAXSWITCH 1750
 
 int lastReceiverChannel = 0;
 

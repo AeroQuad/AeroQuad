@@ -51,9 +51,24 @@ void calculateFlightError()
     motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
     motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
-  else {
+  else if (flightMode == RATE_FLIGHT_MODE){
     motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
     motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
+  }
+  else if (flightMode == SIMPLE_FLIGHT_MODE) {
+    if (simpleModeInitialize) {
+      simpleModeStartHeading = trueNorthHeading;
+      simpleModeInitialize = false;
+    }
+    float simpleModeHeading = trueNorthHeading - simpleModeStartHeading;
+    int rollInput = receiverCommand[XAXIS] - receiverZero[XAXIS];
+    int pitchInput = receiverCommand[YAXIS] - receiverZero[YAXIS];
+    float rollCommand = rollInput * cos(simpleModeHeading) - pitchInput * sin(simpleModeHeading);
+    float pitchCommand = rollInput * sin(simpleModeHeading) + pitchInput * cos(simpleModeHeading);
+    float rollAttitudeCmd  = updatePID(rollCommand * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+    float pitchAttitudeCmd = updatePID(pitchCommand * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+    motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
 }
 
@@ -268,7 +283,7 @@ void processMinMaxCommand()
 /**
  * processFlightControl
  *
- * Main flight control processos function
+ * Main flight control processor function
  */
 void processFlightControl() {
   
@@ -305,7 +320,7 @@ void processFlightControl() {
     #endif
     
     // ********************** Process throttle correction ********************
-    processThrottleCorrection();
+      processThrottleCorrection();
   }
 
   // ********************** Calculate Motor Commands *************************
@@ -343,6 +358,27 @@ void processFlightControl() {
   if (motorArmed == ON && safetyCheck == ON) {
     writeMotors();
   }
+}
+
+
+void processRoverControl()
+{
+  processHeading();
+  #if defined (UseGPSNavigator)
+    processGpsNavigation();
+    if (navigationState == ON || positionHoldState == ON)
+    {
+      motorAxisCommandRoll = receiverCommand[YAXIS] + gpsRollAxisCorrection;
+      motorAxisCommandPitch = receiverCommand[XAXIS] + gpsPitchAxisCorrection;
+    }
+    else
+  #endif
+    {
+      motorAxisCommandRoll   = receiverCommand[YAXIS];
+      motorAxisCommandPitch  = receiverCommand[XAXIS];
+    }
+    applyMotorCommand();
+    writeMotors();
 }
 
 #endif //#define _AQ_PROCESS_FLIGHT_CONTROL_H_
