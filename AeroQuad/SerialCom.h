@@ -301,6 +301,20 @@ void readSerialCommand() {
       else
         fastTransfer = OFF;
       break;
+
+    case '>': // setup autopilot states
+      #if defined (UseGPS)
+        {
+          int type = readIntegerSerial();
+          if (type == 0)
+            navigationState = readIntegerSerial();
+          if (type == 1)
+            positionHoldState = readIntegerSerial();
+          if (type == 2)
+            setHomePosition = true;
+        }
+      #endif
+      break;
     }
   }
 }
@@ -360,6 +374,33 @@ void PrintDummyValues(byte number) {
   }
 }
 
+void writeBinary(float data)
+{
+  union binaryFloatType {
+        byte floatByte[4];
+        float floatVal;
+  } binaryFloat;
+
+  binaryFloat.floatVal = data;
+  SERIAL_PORT.write(binaryFloat.floatByte[3]);
+  SERIAL_PORT.write(binaryFloat.floatByte[2]);
+  SERIAL_PORT.write(binaryFloat.floatByte[1]);
+  SERIAL_PORT.write(binaryFloat.floatByte[0]);
+}
+
+void writeBinary(long data) {
+  union binarylongType {
+    byte longByte[4];
+    long longVal;
+  } binaryLong;
+
+  binaryLong.longVal = data;
+  SERIAL_PORT.write(binaryLong.longByte[3]);
+  SERIAL_PORT.write(binaryLong.longByte[2]);
+  SERIAL_PORT.write(binaryLong.longByte[1]);
+  SERIAL_PORT.write(binaryLong.longByte[0]);
+}
+
 float getHeading()
 {
   #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
@@ -376,16 +417,13 @@ float getHeading()
 void sendSerialTelemetry() {
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    PrintValueComma(waypointIndex);
-    PrintValueComma(distanceToNextWaypoint);
-    PrintValueComma(testDistanceWaypoint);
-
-    //PrintValueComma(waypointCaptureDistance);
-    //PrintValueComma(trackAngleError);
-    //PrintValueComma(crossTrackError);
-    //PrintValueComma(trackAngleError+crossTrackError);
-    //PrintValueComma(gpsRollAxisCorrection);
+    writeBinary(testValue);
     SERIAL_PRINTLN();
+    //SERIAL_PRINT("0x");
+    SERIAL_PRINTLN(testValue, HEX);
+//    SERIAL_PRINT("0b");
+
+    queryType = 'X';
     break;
 
   case 'a': // Send roll and pitch rate mode PID values
@@ -687,25 +725,6 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     break;
 
-  case '*':
-    #if defined(UseGPS)
-//	  writeBinaryLong(gpsData.lat);
-//	  writeBinaryLong(gpsData.lon);
-//	  writeBinaryLong(gpsData.height);
-//	  writeBinaryLong(gpsData.course);
-//	  writeBinaryLong(gpsData.speed);
-//	  //writeBinaryLong(gpsData.sats);
-//	  //writeBinaryLong(gpsData.accuracy);
-      PrintValueComma(gpsData.lat);
-      PrintValueComma(gpsData.lon);
-//      PrintValueComma(gpsData.height);
-      PrintValueComma(getHeading());
-      SERIAL_PRINT(gpsData.speed);
-	#endif
-	SERIAL_PRINTLN();
-	queryType = 'X';
-	break;
- 
   case 'z': // Send all Altitude data 
     #if defined (AltitudeHoldBaro) 
       PrintValueComma(getBaroAltitude()); 
@@ -763,6 +782,43 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
 
+  case '*':
+    #if defined(UseGPS)
+    {
+      int type = readIntegerSerial();
+      if (type == 0) // send shortened position data
+      {
+        PrintValueComma(gpsData.lat);
+        PrintValueComma(gpsData.lon);
+        PrintValueComma(getHeading());
+        SERIAL_PRINT(gpsData.speed);
+      }
+      if (type == 1) // send stored home position
+      {
+        PrintValueComma(homePosition.latitude);
+        PrintValueComma(homePosition.longitude);
+        SERIAL_PRINT(homePosition.altitude);
+      }
+    }
+    #endif
+    SERIAL_PRINTLN();
+    queryType = 'X';
+    break;
+
+  case '<': // send autopilot status
+    #if defined(UseGPS)
+      {
+        int type = readIntegerSerial();
+        if (type == 0) // Autopilot Status
+          SERIAL_PRINT(navigationState);
+        if (type == 1) // Home position
+          SERIAL_PRINT(positionHoldState);
+      }
+    #endif
+    SERIAL_PRINTLN();
+    queryType = 'X';
+    break;
+
 #if defined(OSD) && defined(OSD_LOADFONT)
   case '&': // fontload
     if (OFF == motorArmed) {
@@ -815,140 +871,8 @@ void comma() {
   SERIAL_PRINT(',');
 }
 
-void writeBinaryFloat(float data)
+void printVehicleState(const char *sensorName, unsigned long state, const char *message)
 {
-  union binaryFloatType {
-	byte floatByte[4];
-	float floatVal;
-  } binaryFloat;
-
-  binaryFloat.floatVal = data;
-  SERIAL_PRINT(binaryFloat.floatByte[0]);
-  SERIAL_PRINT(binaryFloat.floatByte[1]);
-  SERIAL_PRINT(binaryFloat.floatByte[2]);
-  SERIAL_PRINT(binaryFloat.floatByte[3]);
-}
-
-void writeBinaryLong(unsigned long data) {
-  union binaryuslongType {
-    byte uslongByte[4];
-    unsigned long uslongVal;
-  } binaryuslong;
-
-  binaryuslong.uslongVal = data;
-  SERIAL_PRINT(binaryuslong.uslongByte[0]);
-  SERIAL_PRINT(binaryuslong.uslongByte[1]);
-  SERIAL_PRINT(binaryuslong.uslongByte[2]);
-  SERIAL_PRINT(binaryuslong.uslongByte[3]);
-}
-
-#ifdef BinaryWrite
-void printInt(int data) {
-  byte msb, lsb;
-
-  msb = data >> 8;
-  lsb = data & 0xff;
-
-  binaryPort->write(msb);
-  binaryPort->write(lsb);
-}
-
-void sendBinaryFloat(float data) {
-  union binaryFloatType {
-    byte floatByte[4];
-    float floatVal;
-  } binaryFloat;
-
-  binaryFloat.floatVal = data;
-  binaryPort->write(binaryFloat.floatByte[3]);
-  binaryPort->write(binaryFloat.floatByte[2]);
-  binaryPort->write(binaryFloat.floatByte[1]);
-  binaryPort->write(binaryFloat.floatByte[0]);
-}
-
-void sendBinaryuslong(unsigned long data) {
-  union binaryuslongType {
-    byte uslongByte[4];
-    unsigned long uslongVal;
-  } binaryuslong;
-
-  binaryuslong.uslongVal = data;
-  binaryPort->write(binaryuslong.uslongByte[3]);
-  binaryPort->write(binaryuslong.uslongByte[2]);
-  binaryPort->write(binaryuslong.uslongByte[1]);
-  binaryPort->write(binaryuslong.uslongByte[0]);
-}
-
-
-void fastTelemetry()
-{
-  // **************************************************************
-  // ***************** Fast Transfer Of Sensor Data ***************
-  // **************************************************************
-  // AeroQuad.h defines the output rate to be 10ms
-  // Since writing to UART is done by hardware, unable to measure data rate directly
-  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
-  // If float = 4 bytes, then 3600 floats/second
-  // If 10 ms output rate, then 36 floats/10ms
-  // Number of floats written using sendBinaryFloat is 15
-
-  if (motorArmed == ON) {
-    #ifdef OpenlogBinaryWrite
-       printInt(21845); // Start word of 0x5555
-       sendBinaryuslong(currentTime);
-        printInt((int)flightMode);
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(gyroRate[axis]);
-       }
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(meterPerSecSec[axis]);
-       }
-       sendBinaryFloat(accelOneG);
-       #ifdef HeadingMagHold
-          sendBinaryFloat(hdgX);
-          sendBinaryFloat(hdgY);
-		  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-		       #if defined(HeadingMagHold)
-			      sendBinaryFloat(getMagnetometerData(axis));
-		       #endif
-          }
-       #else
-         sendBinaryFloat(0.0);
-         sendBinaryFloat(0.0);
-         sendBinaryFloat(0.0);
-       #endif
-        for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-          sendBinaryFloat(kinematicsAngle[axis]);
-        }
-        printInt(32767); // Stop word of 0x7FFF
-    #else
-       printInt(21845); // Start word of 0x5555
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(gyroRate[axis]);
-       }
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(meterPerSecSec[axis]);
-       }
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++)
-       #if defined(HeadingMagHold)
-         sendBinaryFloat(getMagnetometerData(axis));
-       #else
-         sendBinaryFloat(0);
-       #endif
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(getGyroUnbias(axis));
-       }
-       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-         sendBinaryFloat(kinematicsAngle[axis]);
-       }
-       printInt(32767); // Stop word of 0x7FFF
-    #endif
-  }
-}
-#endif // BinaryWrite
-
-void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
-  
   SERIAL_PRINT(sensorName);
   SERIAL_PRINT(": ");
   if (!(vehicleState & state)) {
@@ -1047,6 +971,111 @@ void reportVehicleState() {
   SERIAL_PRINTLN("GPS: Not Enabled");
 #endif
 }
+
+#ifdef BinaryWrite
+void printInt(int data) {
+  byte msb, lsb;
+
+  msb = data >> 8;
+  lsb = data & 0xff;
+
+  binaryPort->write(msb);
+  binaryPort->write(lsb);
+}
+
+void sendBinaryFloat(float data) {
+  union binaryFloatType {
+    byte floatByte[4];
+    float floatVal;
+  } binaryFloat;
+
+  binaryFloat.floatVal = data;
+  binaryPort->write(binaryFloat.floatByte[3]);
+  binaryPort->write(binaryFloat.floatByte[2]);
+  binaryPort->write(binaryFloat.floatByte[1]);
+  binaryPort->write(binaryFloat.floatByte[0]);
+}
+
+void sendBinaryuslong(unsigned long data) {
+  union binaryuslongType {
+    byte uslongByte[4];
+    unsigned long uslongVal;
+  } binaryuslong;
+
+  binaryuslong.uslongVal = data;
+  binaryPort->write(binaryuslong.uslongByte[3]);
+  binaryPort->write(binaryuslong.uslongByte[2]);
+  binaryPort->write(binaryuslong.uslongByte[1]);
+  binaryPort->write(binaryuslong.uslongByte[0]);
+}
+
+
+void fastTelemetry()
+{
+  // **************************************************************
+  // ***************** Fast Transfer Of Sensor Data ***************
+  // **************************************************************
+  // AeroQuad.h defines the output rate to be 10ms
+  // Since writing to UART is done by hardware, unable to measure data rate directly
+  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
+  // If float = 4 bytes, then 3600 floats/second
+  // If 10 ms output rate, then 36 floats/10ms
+  // Number of floats written using sendBinaryFloat is 15
+
+  if (motorArmed == ON) {
+    #ifdef OpenlogBinaryWrite
+       printInt(21845); // Start word of 0x5555
+       sendBinaryuslong(currentTime);
+        printInt((int)flightMode);
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(gyroRate[axis]);
+       }
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
+       }
+       sendBinaryFloat(accelOneG);
+       #ifdef HeadingMagHold
+          sendBinaryFloat(hdgX);
+          sendBinaryFloat(hdgY);
+                  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+                       #if defined(HeadingMagHold)
+                              sendBinaryFloat(getMagnetometerData(axis));
+                       #endif
+          }
+       #else
+         sendBinaryFloat(0.0);
+         sendBinaryFloat(0.0);
+         sendBinaryFloat(0.0);
+       #endif
+        for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+          sendBinaryFloat(kinematicsAngle[axis]);
+        }
+        printInt(32767); // Stop word of 0x7FFF
+    #else
+       printInt(21845); // Start word of 0x5555
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(gyroRate[axis]);
+       }
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(meterPerSecSec[axis]);
+       }
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++)
+       #if defined(HeadingMagHold)
+         sendBinaryFloat(getMagnetometerData(axis));
+       #else
+         sendBinaryFloat(0);
+       #endif
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(getGyroUnbias(axis));
+       }
+       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+         sendBinaryFloat(kinematicsAngle[axis]);
+       }
+       printInt(32767); // Stop word of 0x7FFF
+    #endif
+  }
+}
+#endif // BinaryWrite
 
 #ifdef SlowTelemetry
   struct __attribute__((packed)) telemetryPacket {

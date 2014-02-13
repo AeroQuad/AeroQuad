@@ -287,8 +287,8 @@ void processNavigation() {
 
   //if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
   if (distanceToNextWaypoint < waypointCaptureDistance) {
-    bool routeisFinished = updateWaypoints();
-    if (routeisFinished) {
+    routeComplete = updateWaypoints();
+    if (routeComplete) {
       positionHoldState = ON; // Be sure to fix bug where in positionHoldState, but TX switch is in autopilot
       navigationState = OFF;
       gpsPitchAxisCorrection = 0.0;

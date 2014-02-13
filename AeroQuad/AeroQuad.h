@@ -142,8 +142,10 @@ void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
 void reportVehicleState();
-void writeFloatBinary(float);
-void writeBinaryLong(unsigned long);
+void writeBinary(float);
+void writeBinary(long);
+
+float testValue = 123.123;
 
 //////////////////////////////////////////////////////
 
@@ -282,6 +284,8 @@ void writeBinaryLong(unsigned long);
     double previousLat = 0.0;
     double previousLon = 0.0;
     double gpsVelocity[3], accVelocity[3];
+    bool routeComplete;
+    bool setHomePosition;
 
     // make local when working
     float distanceFromStartToPosition;
