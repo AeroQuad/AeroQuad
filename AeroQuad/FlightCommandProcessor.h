@@ -114,11 +114,15 @@
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
+        routeComplete = false;
         isGpsNavigationInitialized = true;
       }
-      positionHoldState = OFF;         // disable the position hold while navigating
-      isPositionHoldInitialized = false;
-      navigationState = ON;
+      if (!routeComplete) // if route is complete, don't turn on autopilot again
+      {
+        isPositionHoldInitialized = false;
+        positionHoldState = OFF;
+        navigationState = ON;
+      }
     }
     else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
       if (!isPositionHoldInitialized) {
@@ -135,7 +139,7 @@
         PID[GPSYAW_PID_IDX].integratedError = 0;
       }
   
-      isGpsNavigationInitialized = false;  // disable navigation
+      isGpsNavigationInitialized = false;
       isRouteInitialized = false;
       navigationState = OFF;
       positionHoldState = ON;
