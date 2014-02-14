@@ -303,16 +303,8 @@ void readSerialCommand() {
       break;
 
     case '>': // setup autopilot states
-      #if defined (UseGPS)
-        {
-          int type = readIntegerSerial();
-          if (type == 0)
-            navigationState = readIntegerSerial();
-          if (type == 1)
-            positionHoldState = readIntegerSerial();
-          if (type == 2)
-            setHomePosition = true;
-        }
+      #if defined (UseGPSNavigator)
+        autoPilotState = readIntegerSerial();
       #endif
       break;
     }
@@ -806,14 +798,8 @@ void sendSerialTelemetry() {
     break;
 
   case '<': // send autopilot status
-    #if defined(UseGPS)
-      {
-        int type = readIntegerSerial();
-        if (type == 0) // Autopilot Status
-          SERIAL_PRINT(navigationState);
-        if (type == 1) // Home position
-          SERIAL_PRINT(positionHoldState);
-      }
+    #if defined(UseGPSNavigator)
+      SERIAL_PRINT(autoPilotState);
     #endif
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -849,7 +835,6 @@ void readValueSerial(char *data, byte size) {
 
   data[index] = '\0';
 }
-
 
 // Used to read floating point values from the serial port
 float readFloatSerial() {

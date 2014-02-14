@@ -99,17 +99,16 @@
 #if defined (UseGPSNavigator)
   void processGpsNavigationStateFromReceiverCommand() {
     // Init home command
-    if (motorArmed == OFF && 
-        receiverCommand[THROTTLE] < MINCHECK && receiverCommand[ZAXIS] < MINCHECK &&
-        receiverCommand[YAXIS] > MAXCHECK && receiverCommand[XAXIS] > MAXCHECK &&
-        haveAGpsLock()) {
-  
+    if (autoPilotState == SET_HOME_POSITION && haveAGpsLock())
+    {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
       homePosition.altitude = DEFAULT_HOME_ALTITUDE;
+      autoPilotState = OFF;
     }
 
-    if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
+    //if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
+    if (autoPilotState == AUTO_NAVIGATION) {
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -120,11 +119,11 @@
       if (!routeComplete) // if route is complete, don't turn on autopilot again
       {
         isPositionHoldInitialized = false;
-        positionHoldState = OFF;
-        navigationState = ON;
+        autoPilotState = AUTO_NAVIGATION;
       }
     }
-    else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
+    //else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
+    else if (autoPilotState = POSITION_HOLD) {
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -140,18 +139,15 @@
       }
   
       isGpsNavigationInitialized = false;
-      isRouteInitialized = false;
-      navigationState = OFF;
-      positionHoldState = ON;
+      autoPilotState = POSITION_HOLD;
     }
     else {
       // Navigation and position hold are disabled
-      positionHoldState = OFF;
+      autoPilotState = OFF;
       isPositionHoldInitialized = false;
-  
-      navigationState = OFF;
       isGpsNavigationInitialized = false;
       isRouteInitialized = false;
+      routeComplete = false;
       waypointIndex = UNINITIALIZED;
   
       gpsRollAxisCorrection = 0;

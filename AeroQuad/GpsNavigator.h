@@ -289,8 +289,9 @@ void processNavigation() {
   if (distanceToNextWaypoint < waypointCaptureDistance) {
     routeComplete = updateWaypoints();
     if (routeComplete) {
-      positionHoldState = ON; // Be sure to fix bug where in positionHoldState, but TX switch is in autopilot
-      navigationState = OFF;
+      //positionHoldState = ON; // Be sure to fix bug where in positionHoldState, but TX switch is in autopilot
+      //navigationState = OFF;
+      autoPilotState = OFF; // change this to POSITION_HOLD when ready
       gpsPitchAxisCorrection = 0.0;
     }
   }
@@ -328,7 +329,7 @@ void processGpsNavigation() {
 
   if (haveAGpsLock())
   {
-    if (navigationState == ON)
+    if (autoPilotState == AUTO_NAVIGATION)
     {
       if (!isRouteInitialized)
       {
@@ -337,7 +338,7 @@ void processGpsNavigation() {
       }
       processNavigation();
     }
-    else if (positionHoldState == ON )
+    else if (autoPilotState == POSITION_HOLD )
       processPositionHold();
   }
 }
