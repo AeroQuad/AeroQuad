@@ -237,11 +237,8 @@ float testValue = 123.123;
   GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
 
   #if defined UseGPSNavigator
-    //byte navigationState = OFF;  // ON, OFF or ALTPANIC
-    //byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
     int autoPilotState = OFF;
 
-    //int missionNbPoint = PRE_WAYPOINT;
     int waypointCount;
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;

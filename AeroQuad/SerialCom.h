@@ -774,7 +774,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
 
-  case '*':
+  case '^':
     #if defined(UseGPS)
     {
       int type = readIntegerSerial();
@@ -782,10 +782,21 @@ void sendSerialTelemetry() {
       {
         PrintValueComma(gpsData.lat);
         PrintValueComma(gpsData.lon);
-        PrintValueComma(getHeading());
+        SERIAL_PRINT(getHeading());
+      }
+      if (type == 1)
+      {
+        PrintValueComma(gpsData.height);
+        PrintValueComma(gpsData.course);
         SERIAL_PRINT(gpsData.speed);
       }
-      if (type == 1) // send stored home position
+      if (type == 2)
+      {
+        PrintValueComma(gpsData.sats);
+        PrintValueComma(gpsData.accuracy);
+        SERIAL_PRINT(gpsData.state);
+      }
+      if (type == 3) // send stored home position
       {
         PrintValueComma(homePosition.latitude);
         PrintValueComma(homePosition.longitude);

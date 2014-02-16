@@ -119,11 +119,10 @@
       if (!routeComplete) // if route is complete, don't turn on autopilot again
       {
         isPositionHoldInitialized = false;
-        autoPilotState = AUTO_NAVIGATION;
       }
     }
     //else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
-    else if (autoPilotState = POSITION_HOLD) {
+    else if (autoPilotState == POSITION_HOLD) {
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -139,7 +138,9 @@
       }
   
       isGpsNavigationInitialized = false;
-      autoPilotState = POSITION_HOLD;
+    }
+    else if (autoPilotState == RETURN_TO_HOME) {
+        // Setup for return to home
     }
     else {
       // Navigation and position hold are disabled
