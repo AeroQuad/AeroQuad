@@ -99,28 +99,30 @@
 #if defined (UseGPSNavigator)
   void processGpsNavigationStateFromReceiverCommand() {
     // Init home command
-    if (motorArmed == OFF && 
-        receiverCommand[THROTTLE] < MINCHECK && receiverCommand[ZAXIS] < MINCHECK &&
-        receiverCommand[YAXIS] > MAXCHECK && receiverCommand[XAXIS] > MAXCHECK &&
-        haveAGpsLock()) {
-  
+    if (autoPilotState == SET_HOME_POSITION && haveAGpsLock())
+    {
       homePosition.latitude = currentPosition.latitude;
       homePosition.longitude = currentPosition.longitude;
       homePosition.altitude = DEFAULT_HOME_ALTITUDE;
+      autoPilotState = OFF;
     }
 
-    if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
+    //if (receiverCommand[AUX1] > MAXSWITCH) {  // Enable autopilot
+    if (autoPilotState == AUTO_NAVIGATION) {
       if (!isGpsNavigationInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
         gpsYawAxisCorrection = 0;
+        routeComplete = false;
         isGpsNavigationInitialized = true;
       }
-      positionHoldState = OFF;         // disable the position hold while navigating
-      isPositionHoldInitialized = false;
-      navigationState = ON;
+      if (!routeComplete) // if route is complete, don't turn on autopilot again
+      {
+        isPositionHoldInitialized = false;
+      }
     }
-    else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
+    //else if ((receiverCommand[AUX1] > MINSWITCH) && (receiverCommand[AUX1] < MAXSWITCH)) {  // Enable position hold
+    else if (autoPilotState == POSITION_HOLD) {
       if (!isPositionHoldInitialized) {
         gpsRollAxisCorrection = 0;
         gpsPitchAxisCorrection = 0;
@@ -135,19 +137,18 @@
         PID[GPSYAW_PID_IDX].integratedError = 0;
       }
   
-      isGpsNavigationInitialized = false;  // disable navigation
-      isRouteInitialized = false;
-      navigationState = OFF;
-      positionHoldState = ON;
+      isGpsNavigationInitialized = false;
+    }
+    else if (autoPilotState == RETURN_TO_HOME) {
+        // Setup for return to home
     }
     else {
       // Navigation and position hold are disabled
-      positionHoldState = OFF;
+      autoPilotState = OFF;
       isPositionHoldInitialized = false;
-  
-      navigationState = OFF;
       isGpsNavigationInitialized = false;
       isRouteInitialized = false;
+      routeComplete = false;
       waypointIndex = UNINITIALIZED;
   
       gpsRollAxisCorrection = 0;

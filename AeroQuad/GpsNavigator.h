@@ -204,7 +204,7 @@ bool updateWaypoints() // returns false if next waypoint available, true if at e
   }
 
   waypointIndex++;
-  if (waypointIndex < waypointCount)
+  if (waypointIndex < (waypointCount-1))
   {
     fromWaypoint = waypoint[waypointIndex];
     toWaypoint = waypoint[waypointIndex+1];
@@ -267,7 +267,8 @@ void processNavigation() {
   vectorNormalize(alongPathVector);
   crossTrack = earthRadius * atan2(vectorDotProductDbl(negNormalVector, presentPosition), vectorDotProductDbl(alongPathVector, presentPosition));
   // units of cross track error is converted to degrees
-  crossTrackError = -constrain(crossTrack*Meters2DegFactor, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  crossTrackError = -constrain(crossTrack*Meters2DegFactor*PID[GPSYAW_PID_IDX].P, -MAXCROSSTRACKANGLE, MAXCROSSTRACKANGLE);
+  // Temporarily use Yaw P gain to test crossTrackError effectiveness
 
   // Calculate distance to next waypoint
   vectorCrossProductDbl(normalRangeVector, presentPosition, toVector);
@@ -287,10 +288,9 @@ void processNavigation() {
 
   //if ((distanceToNextWaypoint < waypointCaptureDistance) || (distanceToFollowingWaypoint < distanceToNextWaypoint)) {
   if (distanceToNextWaypoint < waypointCaptureDistance) {
-    bool routeisFinished = updateWaypoints();
-    if (routeisFinished) {
-      positionHoldState = ON; // Be sure to fix bug where in positionHoldState, but TX switch is in autopilot
-      navigationState = OFF;
+    routeComplete = updateWaypoints();
+    if (routeComplete) {
+      autoPilotState = OFF; // change this to POSITION_HOLD when ready
       gpsPitchAxisCorrection = 0.0;
     }
   }
@@ -328,7 +328,7 @@ void processGpsNavigation() {
 
   if (haveAGpsLock())
   {
-    if (navigationState == ON)
+    if (autoPilotState == AUTO_NAVIGATION)
     {
       if (!isRouteInitialized)
       {
@@ -337,7 +337,7 @@ void processGpsNavigation() {
       }
       processNavigation();
     }
-    else if (positionHoldState == ON )
+    else if (autoPilotState == POSITION_HOLD )
       processPositionHold();
   }
 }

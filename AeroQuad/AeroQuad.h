@@ -48,6 +48,7 @@
  */
 byte calibrateESC = 0;
 int testCommand = 1000;
+
 //////////////////////////////////////////////////////
 
 /**
@@ -92,11 +93,7 @@ unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
-
-
 //////////////////////////////////////////////////////
-
-
 // Analog Reference Value
 // This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
@@ -117,8 +114,8 @@ float heading             = 0; // measured heading from yaw gyro (process variab
 float relativeHeading     = 0; // current heading the quad is set to (set point)
 byte  headingHoldState    = OFF;
 void  processHeading();
-//////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////
 
 /**
  * Serial communication global declaration
@@ -142,8 +139,10 @@ void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
 void reportVehicleState();
-void writeFloatBinary(float);
-void writeBinaryLong(unsigned long);
+void writeBinary(float);
+void writeBinary(long);
+
+float testValue = 123.123;
 
 //////////////////////////////////////////////////////
 
@@ -166,10 +165,8 @@ void writeBinaryLong(unsigned long);
     int batteyMonitorThrottleCorrection = 0;
   #endif
 #endif
+
 //////////////////////////////////////////////////////
-
-
-
 
 /**
  * Altitude control global declaration
@@ -203,6 +200,7 @@ void writeBinaryLong(unsigned long);
     float sonarAltitudeToHoldTarget = 0.0;
   #endif
 #endif
+
 //////////////////////////////////////////////////////
 
 /**
@@ -224,6 +222,12 @@ void writeBinaryLong(unsigned long);
 #define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
 #define PRE_WAYPOINT -1
 #define UNINITIALIZED -2
+
+#define AUTO_NAVIGATION 1
+#define POSITION_HOLD 2
+#define RETURN_TO_HOME 3
+#define SET_HOME_POSITION 4
+
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
@@ -233,10 +237,8 @@ void writeBinaryLong(unsigned long);
   GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
 
   #if defined UseGPSNavigator
-    byte navigationState = OFF;  // ON, OFF or ALTPANIC
-    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+    int autoPilotState = OFF;
 
-    //int missionNbPoint = PRE_WAYPOINT;
     int waypointCount;
     int gpsRollAxisCorrection = 0;
     int gpsPitchAxisCorrection = 0;
@@ -282,6 +284,8 @@ void writeBinaryLong(unsigned long);
     double previousLat = 0.0;
     double previousLon = 0.0;
     double gpsVelocity[3], accVelocity[3];
+    bool routeComplete;
+    bool setHomePosition;
 
     // make local when working
     float distanceFromStartToPosition;
@@ -293,6 +297,7 @@ void writeBinaryLong(unsigned long);
     void processGpsNavigation();
   #endif
 #endif
+
 //////////////////////////////////////////////////////
 
 /**
@@ -379,7 +384,6 @@ typedef struct {
   float GPS_WAYPOINT_COUNT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
-
 
 void readEEPROM(); 
 void initSensorsZeroFromEEPROM();

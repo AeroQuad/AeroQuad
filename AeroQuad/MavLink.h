@@ -352,7 +352,7 @@ void sendSerialHeartbeat() {
 	}
 
 #if defined(UseGPSNavigator)
-	if (navigationState == ON || positionHoldState == ON) {
+	if (autoPilotState == AUTO_NAVIGATION || autoPilotState == POSITION_HOLD) {
 		baseMode |= MAV_MODE_FLAG_GUIDED_ENABLED;
 	}
 #endif
@@ -421,7 +421,7 @@ void sendSerialGpsPostion() {
 
 void sendSerialNavControllerOutput() {
 #if defined(UseGPSNavigator)
-	if (waypointIndex > -1) {
+	if (waypointIndex > PRE_WAYPOINT) {
 		mavlink_msg_nav_controller_output_send(chan, gpsRollAxisCorrection, gpsPitchAxisCorrection, gpsYawAxisCorrection, desiredHeading, distanceToNextWaypoint, (missionPositionToReach.altitude / 10 - altitude), 0, crossTrackError);
 	}
 #endif
@@ -519,7 +519,7 @@ void sendSerialSysStatus() {
 	}
 #endif
 #if defined(UseGPSNavigator)
-	if (positionHoldState == ON || navigationState == ON) {
+	if (autoPilotState == AUTO_NAVIGATION || autoPilotState == POSITION_HOLD) {
 		controlSensorsEnabled |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL; // X/Y position control
 	}
 #endif
@@ -2053,11 +2053,16 @@ void handleMessage(mavlink_message_t msg) {
 		waypointTimeLastRequested = 0;
 		waypointIndexToBeRequested++;
 
-		if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) { // all waypoints received, send ACK message
+		// All waypoints received
+		if (waypointIndexToBeRequested >= waypointsToBeRequested || waypointIndexToBeRequested > waypointIndexToBeRequestedLast) {
 			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
 
 			waypointReceivingFromGCS = false;
+			
+			//Enable waypoint navigation mode
 			isRouteInitialized = false;
+			isGpsNavigationInitialized = false;
+			autoPilotState = AUTO_NAVIGATION;
 			break;
 		}
 #endif
@@ -2083,8 +2088,12 @@ void handleMessage(mavlink_message_t msg) {
 #endif
 		break;
 
-	case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:  // delete all waypoints of AQ
+	case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:  // clear waypoint list of AQ
 #if defined(UseGPSNavigator)
+		// switch to position hold mode
+		isPositionHoldInitialized = false;
+		autoPilotState = POSITION_HOLD;
+
 		for (byte index = 0; index < MAX_WAYPOINTS; index++) {
 			waypoint[index].longitude = GPS_INVALID_ANGLE;
 			waypoint[index].latitude = GPS_INVALID_ANGLE;

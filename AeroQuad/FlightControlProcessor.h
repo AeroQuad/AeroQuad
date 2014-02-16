@@ -37,7 +37,7 @@
 void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
-    if (navigationState == ON || positionHoldState == ON) {
+    if (autoPilotState == AUTO_NAVIGATION || autoPilotState == POSITION_HOLD) {
       float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
       float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
@@ -209,7 +209,7 @@ void processThrottleCorrection() {
  
   int throttleAdjust = 0;
   #if defined UseGPSNavigator
-    if (navigationState == ON || positionHoldState == ON) {
+    if (autoPilotState == AUTO_NAVIGATION || autoPilotState == POSITION_HOLD) {
       throttleAdjust = throttle / (cos (kinematicsAngle[XAXIS]*0.55) * cos (kinematicsAngle[YAXIS]*0.55));
       throttleAdjust = constrain ((throttleAdjust - throttle), 0, 50); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
     }
@@ -366,7 +366,7 @@ void processRoverControl()
   processHeading();
   #if defined (UseGPSNavigator)
     processGpsNavigation();
-    if (navigationState == ON || positionHoldState == ON)
+    if (autoPilotState == AUTO_NAVIGATION || autoPilotState == POSITION_HOLD)
     {
       motorAxisCommandRoll = receiverCommand[YAXIS] + gpsRollAxisCorrection;
       motorAxisCommandPitch = receiverCommand[XAXIS] + gpsPitchAxisCorrection;
