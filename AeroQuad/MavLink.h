@@ -1867,15 +1867,15 @@ void handleMessage(mavlink_message_t msg) {
 		break;
 
 	case MAVLINK_MSG_ID_SET_MODE: // set the base mode (only arming/disarming makes sense for now)
-		__mavlink_set_mode_t modesendet;
-		mavlink_msg_set_mode_decode(&msg, &modesendet);
+		__mavlink_set_mode_t modePacket;
+		mavlink_msg_set_mode_decode(&msg, &modePacket);
 
-		if (modesendet.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+		if (modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
 			if (!motorArmed) {
 				armMotors();
 			}
 		}
-		else if (!(modesendet.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
+		else if (!(modePacket.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
 			if (motorArmed) {
 				disarmMotors();
 			}
@@ -1970,10 +1970,10 @@ void handleMessage(mavlink_message_t msg) {
 
 	case MAVLINK_MSG_ID_MISSION_REQUEST: // GCS requests a specific waypoint
 #if defined(UseGPSNavigator)
-		__mavlink_mission_request_t requestedWaypointsendet;
-		mavlink_msg_mission_request_decode(&msg, &requestedWaypointsendet);
+		__mavlink_mission_request_t requestedWaypointPacket;
+		mavlink_msg_mission_request_decode(&msg, &requestedWaypointPacket);
 
-		waypointIndexToBeSent = requestedWaypointsendet.seq;
+		waypointIndexToBeSent = requestedWaypointPacket.seq;
 
 		isCurrentWaypoint = 0;
 		if (waypointIndexToBeSent == waypointIndex) {
@@ -1985,7 +1985,7 @@ void handleMessage(mavlink_message_t msg) {
 		y = waypoint[waypointIndexToBeSent].longitude / 1.0e7f;
 		z = waypoint[waypointIndexToBeSent].altitude / 1.0e2f;
 
-		mavlink_msg_mission_item_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, requestedWaypointsendet.seq,
+		mavlink_msg_mission_item_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, requestedWaypointPacket.seq,
 			navFrame, MAV_CMD_NAV_WAYPOINT, isCurrentWaypoint, 1, 0, waypointCaptureDistance, 0, 0, x, y, z);
 
 		// update last waypoint comm stamp
@@ -2022,8 +2022,8 @@ void handleMessage(mavlink_message_t msg) {
 #if defined(UseGPSNavigator)
 		result = MAV_MISSION_ACCEPTED;
 
-		__mavlink_mission_item_t waypointsendet;
-		mavlink_msg_mission_item_decode(&msg, &waypointsendet);
+		__mavlink_mission_item_t waypointPacket;
+		mavlink_msg_mission_item_decode(&msg, &waypointPacket);
 
 		// Check if receiving waypoints is expected, otherwise reject with time out message
 		if (!waypointReceivingFromGCS) {
@@ -2035,7 +2035,7 @@ void handleMessage(mavlink_message_t msg) {
 		}
 
 		// Check if this is the requested waypoint, otherwise reject
-		if (waypointsendet.seq != waypointIndexToBeRequested) {
+		if (waypointPacket.seq != waypointIndexToBeRequested) {
 			result = MAV_MISSION_INVALID_SEQUENCE;
 			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, result);
 
@@ -2043,9 +2043,9 @@ void handleMessage(mavlink_message_t msg) {
 			break;
 		}
 
-		waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointsendet.x;
-		waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointsendet.y;
-		waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointsendet.z;
+		waypoint[waypointIndexToBeRequested].latitude = 1.0e7f * waypointPacket.x;
+		waypoint[waypointIndexToBeRequested].longitude = 1.0e7f * waypointPacket.y;
+		waypoint[waypointIndexToBeRequested].altitude = 1.0e2f * waypointPacket.z;
 		waypointCount++;
 
 		// Update waypoint receiving state machine
@@ -2065,12 +2065,12 @@ void handleMessage(mavlink_message_t msg) {
 
 	case MAVLINK_MSG_ID_MISSION_WRITE_PARTIAL_LIST:
 #if defined(UseGPSNavigator)
-		mavlink_mission_write_partial_list_t waypointPartialListsendet;
-		mavlink_msg_mission_write_partial_list_decode(&msg, &waypointPartialListsendet);
+		mavlink_mission_write_partial_list_t waypointPartialListPacket;
+		mavlink_msg_mission_write_partial_list_decode(&msg, &waypointPartialListPacket);
 
-		if (waypointPartialListsendet.start_index > waypointCount ||
-			waypointPartialListsendet.end_index > waypointCount ||
-			waypointPartialListsendet.end_index < waypointPartialListsendet.start_index) {
+		if (waypointPartialListPacket.start_index > waypointCount ||
+			waypointPartialListPacket.end_index > waypointCount ||
+			waypointPartialListPacket.end_index < waypointPartialListPacket.start_index) {
 			mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Mission update rejected");
 			break;
 		}
@@ -2078,8 +2078,8 @@ void handleMessage(mavlink_message_t msg) {
 		waypointTimeLastReceived = millis();
 		waypointTimeLastRequested = 0;
 		waypointReceivingFromGCS = true;
-		waypointIndexToBeRequested = waypointPartialListsendet.start_index;
-		waypointIndexToBeRequestedLast = waypointPartialListsendet.end_index;
+		waypointIndexToBeRequested = waypointPartialListPacket.start_index;
+		waypointIndexToBeRequestedLast = waypointPartialListPacket.end_index;
 #endif
 		break;
 
