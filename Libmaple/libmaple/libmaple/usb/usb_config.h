@@ -65,12 +65,6 @@
     #define USB_DISC_DEV         GPIOD
     #define USB_DISC_PIN         11
 
-#elif defined(BOARD_discovery_f3)
-	// dummy entry, USB is disabled
-    #define VCOM_ID_PRODUCT      0x0004
-    #define USB_DISC_DEV         GPIOA
-    #define USB_DISC_PIN         12
-
 #elif defined(BOARD_freeflight)
 	// dummy entry, USB is disabled
     #define VCOM_ID_PRODUCT      0x0004

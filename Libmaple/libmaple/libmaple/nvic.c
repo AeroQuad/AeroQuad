@@ -70,8 +70,7 @@ void nvic_init(uint32 vector_table_address, uint32 offset) {
      * possible.
      */
     for (i = 0; i < STM32_NR_INTERRUPTS; i++) {
-        //nvic_irq_set_priority((nvic_irq_num)i, 0xF);
-        nvic_irq_set_priority((nvic_irq_num)i, 0x7); // ala42
+        nvic_irq_set_priority((nvic_irq_num)i, 0xF);
     }
 
     /* Lower systick interrupt priority to lowest level */

@@ -117,7 +117,7 @@ struct {
   volatile uint8 bESOFcnt;
 } ResumeS;
 
-#if defined(BOARD_aeroquad32) || defined(BOARD_aeroquad32f1) || defined(BOARD_aeroquad32mini) || defined(BOARD_discovery_f3)
+#if defined(BOARD_aeroquad32) || defined(BOARD_aeroquad32f1) || defined(BOARD_aeroquad32mini)
 
 void setupUSB (void) {
 #ifdef USB_DISC_OD
@@ -134,14 +134,6 @@ void setupUSB (void) {
 
   /* initialize the usb application */
   gpio_write_bit(USB_DISC_DEV, USB_DISC_PIN, 1); // ala42 // presents us to the host
-
-#if defined(BOARD_discovery_f3)
-#define GPIO_AF_OTG1_FS         (0xe)  /* OTG_FS Alternate Function mapping */
-	gpio_set_mode(GPIOA,11,GPIO_MODE_AF | GPIO_OTYPE_PP | GPIO_OSPEED_100MHZ);
-	gpio_set_mode(GPIOA,12,GPIO_MODE_AF | GPIO_OTYPE_PP | GPIO_OSPEED_100MHZ);
-	gpio_set_af_mode(GPIOA,11,GPIO_AF_OTG1_FS) ;	// OTG_FS_DM
-	gpio_set_af_mode(GPIOA,12,GPIO_AF_OTG1_FS) ;	// OTG_FS_DP
-#endif
   USB_Init();  // low level init routine provided by the ST library
 }
 
@@ -493,9 +485,4 @@ uint16 usbGetPending() {
   return countTx;
 }
 
-void usbEnableBlockingTx(void) {
-}
-
-void usbDisableBlockingTx(void) {
-}
 #endif

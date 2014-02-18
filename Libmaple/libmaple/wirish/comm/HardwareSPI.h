@@ -53,7 +53,6 @@ typedef enum SPIFrequency {
     SPI_562_500KHZ  = 5, /**< 562.500 KHz */
     SPI_281_250KHZ  = 6, /**< 281.250 KHz */
     SPI_140_625KHZ  = 7, /**< 140.625 KHz */
-    SPI_37MHZ       = 8
 } SPIFrequency;
 
 #define MAX_SPI_FREQS 8
@@ -147,10 +146,6 @@ public:
      */
     void readMaster(uint8 *buffer, uint32 length);
 
-	/**
-     * @brief clear read buffer
-     */
-    void clearrx();
 
 	void waitReady();
     /**
@@ -231,7 +226,7 @@ public:
      * @see HardwareSPI::read()
      */
     uint8 recv(void);
-//private:
+private:
     spi_dev *spi_d;
 };
 

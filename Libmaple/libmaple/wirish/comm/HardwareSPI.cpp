@@ -161,14 +161,9 @@ void HardwareSPI::end(void) {
  */
 
 uint8 HardwareSPI::read(void) {
-/*
-	uint8 buf[1];
+    uint8 buf[1];
     this->read(buf, 1);
     return buf[0];
-  */
-    while (!spi_is_rx_nonempty(this->spi_d))
-        ;
-    return (uint8)spi_rx_reg(this->spi_d);
 }
 
 void HardwareSPI::read(uint8 *buf, uint32 len) {
@@ -177,12 +172,6 @@ void HardwareSPI::read(uint8 *buf, uint32 len) {
         while (!spi_is_rx_nonempty(this->spi_d))
             ;
         buf[rxed++] = (uint8)spi_rx_reg(this->spi_d);
-    }
-}
-
-void HardwareSPI::clearrx() {
-    if(spi_is_rx_nonempty(this->spi_d)) {
-        spi_rx_reg(this->spi_d);
     }
 }
 
@@ -215,12 +204,20 @@ void HardwareSPI::waitReady() {
 		;
 }
 
-void HardwareSPI::write(uint8 b) {
-	spi_tx_byte(this->spi_d, b);
+void HardwareSPI::write(uint8 byte) {
+    this->write(&byte, 1);
 }
 
 void HardwareSPI::write(const uint8 *data, uint32 length) {
-	spi_tx_bytebuffer(this->spi_d, data, length);
+    uint32 txed = 0;
+    while (txed < length) {
+        txed += spi_tx(this->spi_d, data + txed, length - txed);
+    }
+}
+
+uint8 HardwareSPI::transfer(uint8 byte) {
+    this->write(byte);
+    return this->read();
 }
 
 /*
@@ -243,26 +240,13 @@ uint8 HardwareSPI::nssPin(void) {
     return dev_to_spi_pins(this->spi_d)->nss;
 }
 
-
-uint8 HardwareSPI::transfer(uint8 byte) {
-	this->clearrx();
-
-    this->write(byte);
-    return this->read();
-}
-
 /*
  * Deprecated functions
  */
 
 uint8 HardwareSPI::send(uint8 data) {
-    //uint8 buf[] = {data};
-    //return this->send(buf, 1);
-	this->clearrx();
-    this->write(data);
-
-    return this->read();
-
+    uint8 buf[] = {data};
+    return this->send(buf, 1);
 }
 
 #if 1	
@@ -271,13 +255,6 @@ uint8 HardwareSPI::send(const uint8 *buf, uint32 len) {
     uint8 ret = 0;
     while (txed < len) {
         this->write(buf[txed++]);
-        asm volatile("nop");
-        asm volatile("nop");
-        asm volatile("nop");
-        asm volatile("nop");
-        asm volatile("nop");
-        asm volatile("nop");
-        asm volatile("nop");
         ret = this->read();
     }
     return ret;
@@ -376,7 +353,7 @@ static void configure_gpios(spi_dev *dev, bool as_master) {
     disable_pwm(misoi);
     disable_pwm(mosii);
 
-#if defined(STM32F2) || defined(STM32F3)
+#ifdef STM32F2
 	if(dev->clk_id <= RCC_SPI2) {
 		if(nssi) {
 			if(!as_master) {
@@ -443,14 +420,6 @@ static spi_baud_rate determine_baud_rate(spi_dev *dev, SPIFrequency freq) {
         /* APB2 peripherals are too fast for 140.625 KHz */
         ASSERT(0);
         return (spi_baud_rate)~0;
-    }
-    if(freq == SPI_37MHZ) {
-    	if(rcc_dev_clk(dev->clk_id) == RCC_APB2) {
-    		return SPI_BAUD_PCLK_DIV_2;
-    	} else {
-            ASSERT(0);
-            return (spi_baud_rate)~0;
-       	}
     }
     return (rcc_dev_clk(dev->clk_id) == RCC_APB2 ?
             baud_rates[freq + 1] :

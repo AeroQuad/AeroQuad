@@ -1,1 +1,2 @@
-make -j1
+make -j4
+pause

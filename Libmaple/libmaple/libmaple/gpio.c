@@ -29,10 +29,8 @@
  * @brief GPIO initialization routine
  */
 
-#if defined(STM32F2)
-	#include "gpioF2.c"
-#elif defined(STM32F3)
-	#include "gpioF3.c"
+#ifdef STM32F2
+#include "gpioF2.c"
 #else
-	#include "gpioF1.c"
+#include "gpioF1.c"
 #endif

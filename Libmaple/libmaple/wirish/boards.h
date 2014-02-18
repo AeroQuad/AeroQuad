@@ -122,28 +122,26 @@ bool boardUsesPin(uint8 pin);
 /* FIXME HACK put boards/ before these paths once IDE uses make. */
 
 #ifdef BOARD_maple
-	#include "maple.h"
+#include "maple.h"
 #elif defined(BOARD_maple_native)
-	#include "maple_native.h"
+#include "maple_native.h"
 #elif defined(BOARD_maple_mini)
-	#include "maple_mini.h"
+#include "maple_mini.h"
 #elif defined(BOARD_maple_RET6)
 /*
  * **NOT** MAPLE REV6.  This the **Maple RET6 EDITION**, which is a
  * Maple with an STM32F103RET6 (...RET6) instead of an STM32F103RBT6
  * (...RBT6) on it.  Maple Rev6 (as of March 2011) DOES NOT EXIST.
  */
-	#include "maple_RET6.h"
+#include "maple_RET6.h"
 #elif defined(BOARD_aeroquad32) || defined(BOARD_aeroquad32f1)
-	#include "aeroquad32.h"
+#include "aeroquad32.h"
 #elif defined(BOARD_aeroquad32mini)
-	#include "aeroquad32mini.h"
+#include "aeroquad32mini.h"
 #elif defined(BOARD_discovery_f4)
-	#include "discovery_f4.h"
-#elif defined(BOARD_discovery_f3)
-	#include "discovery_f3.h"
+#include "discovery_f4.h"
 #elif defined(BOARD_freeflight)
-	#include "freeflight.h"
+#include "freeflight.h"
 #else
 /*
  * TODO turn this into a warning so people can:

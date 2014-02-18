@@ -51,29 +51,7 @@ extern "C"{
  */
 
 /** USART register map type */
-#if defined(STM32F3)
-	typedef struct usart_reg_map {
-	  __io uint32 CR1;    /*!< USART Control register 1,                 Address offset: 0x00 */
-	  __io uint32 CR2;    /*!< USART Control register 2,                 Address offset: 0x04 */
-	  __io uint32 CR3;    /*!< USART Control register 3,                 Address offset: 0x08 */
-	  __io uint16 BRR;    /*!< USART Baud rate register,                 Address offset: 0x0C */
-	  uint16  RESERVED1;  /*!< Reserved, 0x0E                                                 */
-	  __io uint16 GTPR;   /*!< USART Guard time and prescaler register,  Address offset: 0x10 */
-	  uint16  RESERVED2;  /*!< Reserved, 0x12                                                 */
-	  __io uint32 RTOR;   /*!< USART Receiver Time Out register,         Address offset: 0x14 */
-	  __io uint16 RQR;    /*!< USART Request register,                   Address offset: 0x18 */
-	  uint16  RESERVED3;  /*!< Reserved, 0x1A                                                 */
-
-	  __io uint32 SR;    /*!< ISR USART Interrupt and status register,      Address offset: 0x1C */
-
-	  __io uint32 ICR;    /*!< USART Interrupt flag Clear register,      Address offset: 0x20 */
-	  __io uint16 RDR;    /*!< USART Receive Data register,              Address offset: 0x24 */
-	  uint16  RESERVED4;  /*!< Reserved, 0x26                                                 */
-	  __io uint16 TDR;    /*!< USART Transmit Data register,             Address offset: 0x28 */
-	  uint16  RESERVED5;  /*!< Reserved, 0x2A                                                 */
-	} usart_reg_map;
-#else
-	typedef struct usart_reg_map {
+typedef struct usart_reg_map {
     __io uint32 SR;             /**< Status register */
     __io uint32 DR;             /**< Data register */
     __io uint32 BRR;            /**< Baud rate register */
@@ -81,8 +59,8 @@ extern "C"{
     __io uint32 CR2;            /**< Control register 2 */
     __io uint32 CR3;            /**< Control register 3 */
     __io uint32 GTPR;           /**< Guard time and prescaler register */
-	} usart_reg_map;
-#endif
+} usart_reg_map;
+
 /** USART1 register map base pointer */
 #ifdef STM32F2
   #define USART1_BASE                   ((struct usart_reg_map*)0x40011000)
@@ -138,17 +116,9 @@ extern "C"{
 #define USART_BRR_DIV_FRACTION          0xF
 
 /* Control register 1 */
-#if defined(STM32F3)
-	#define USART_CR1_UE_BIT                0
-	#define USART_CR1_M_BIT                 1
-	//#define USART_CR1_RWU_BIT               1
-	//#define USART_CR1_SBK_BIT               0
-#else
-	#define USART_CR1_UE_BIT                13
-	#define USART_CR1_M_BIT                 12
-	#define USART_CR1_RWU_BIT               1
-	#define USART_CR1_SBK_BIT               0
-#endif
+
+#define USART_CR1_UE_BIT                13
+#define USART_CR1_M_BIT                 12
 #define USART_CR1_WAKE_BIT              11
 #define USART_CR1_PCE_BIT               10
 #define USART_CR1_PS_BIT                9
@@ -159,6 +129,8 @@ extern "C"{
 #define USART_CR1_IDLEIE_BIT            4
 #define USART_CR1_TE_BIT                3
 #define USART_CR1_RE_BIT                2
+#define USART_CR1_RWU_BIT               1
+#define USART_CR1_SBK_BIT               0
 
 #define USART_CR1_UE                    BIT(USART_CR1_UE_BIT)
 #define USART_CR1_M                     BIT(USART_CR1_M_BIT)

@@ -21,32 +21,29 @@ extern int main (int, char **, char **);
 
 extern void exit (int) __attribute__ ((noreturn, weak));
 
-void __attribute ((weak))_init(void){};
-
 void  __attribute ((noreturn))
 __cs3_start_c (void)
 {
   unsigned regions = __cs3_region_num;
   const struct __cs3_region *rptr = __cs3_regions;
   int exit_code;
-  
+
   /* Initialize memory */
   for (regions = __cs3_region_num, rptr = __cs3_regions; regions--; rptr++)
     {
-		long long *src = (long long *)rptr->init;
-		long long *dst = (long long *)rptr->data;
-		unsigned limit = rptr->init_size;
-		unsigned count;
+      long long *src = (long long *)rptr->init;
+      long long *dst = (long long *)rptr->data;
+      unsigned limit = rptr->init_size;
+      unsigned count;
 
-		if (src != dst)
-			for (count = 0; count != limit; count += sizeof (long long))
-				*dst++ = *src++;
-		else
-			dst = (long long *)((char *)dst + limit);
-
-        limit = rptr->zero_size;
-		for (count = 0; count != limit; count += sizeof (long long))
-			*dst++ = 0;
+      if (src != dst)
+	for (count = 0; count != limit; count += sizeof (long long))
+	  *dst++ = *src++;
+      else
+	dst = (long long *)((char *)dst + limit);
+      limit = rptr->zero_size;
+      for (count = 0; count != limit; count += sizeof (long long))
+	*dst++ = 0;
     }
 
   /* Run initializers.  */

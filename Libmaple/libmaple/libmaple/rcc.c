@@ -30,10 +30,8 @@
  *        stm32, clock enable/disable and peripheral reset commands.
  */
 
-#if defined(STM32F2)
-	#include "rccF2.c"
-#elif defined(STM32F3)
-	#include "rccF3.c"
+#ifdef STM32F2
+#include "rccF2.c"
 #else
-	#include "rccF1.c"
+#include "rccF1.c"
 #endif

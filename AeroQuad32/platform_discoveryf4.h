@@ -35,8 +35,6 @@ static byte stm32_motor_mapping[] = {
 #define LED_Yellow Port2Pin('D', 13)
 
 #include <Device_I2C.h>
-#include "log.h"
-#include "log.c"
 
 //#include <Gyroscope_ITG3200.h>
 #include <Gyroscope_MPU6000.h>
@@ -110,11 +108,6 @@ void initPlatform() {
 
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();
-  #endif
-
-  #ifdef EnableLogging
-    logInit();
-    logPrintF("starting logging...\r\n");
   #endif
 }
 

@@ -95,17 +95,6 @@ ifeq ($(BOARD), discovery_f4)
    MCU_FAMILY := STM32F2
 endif
 
-ifeq ($(BOARD), discovery_f3)
-   MCU := STM32F303VC
-   PRODUCT_ID := 0003
-   ERROR_LED_PORT := GPIOE
-   ERROR_LED_PIN  := 13
-   DENSITY := STM32_HIGH_DENSITY
-   FLASH_SIZE := 262144
-   SRAM_SIZE := 40960
-   MCU_FAMILY := STM32F3
-endif
-
 
 # Memory target-specific configuration values
 

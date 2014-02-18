@@ -122,7 +122,7 @@ void USBSerial::enableBlockingTx(void) {
 }
 
 void USBSerial::disableBlockingTx(void) {
-	usbDisableBlockingTx();
+	usbEnableBlockingTx();
 }
 
 USBSerial SerialUSB;

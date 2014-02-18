@@ -20,8 +20,6 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ******************************************************************************/
-#define __FPU_PRESENT 1
-
 #if defined ( __ICCARM__ )
  #pragma system_include  /* treat file as system include file for MISRA check */
 #endif

@@ -280,13 +280,13 @@ uint8_t SdVolume::init(Sd2Card* dev, uint8_t part)
   {
     if (part > 4)
 	{
-		//SerialDebug.println("Error: SdVolume::init() MBR");
+		SerialDebug.println("Error: SdVolume::init() MBR");
 		return false;
 	}
 
     if (!cacheRawBlock(volumeStartBlock, CACHE_FOR_READ))
 	{
-		//SerialDebug.println("Error: SdVolume::init() Cache for read");
+		SerialDebug.println("Error: SdVolume::init() Cache for read");
 		return false;
 	}
 
@@ -298,14 +298,14 @@ uint8_t SdVolume::init(Sd2Card* dev, uint8_t part)
 	{
       // not a valid partition
 
-	  //SerialDebug.println("Error: SdVolume::init() Invalid partition");
+	  SerialDebug.println("Error: SdVolume::init() Invalid partition");
 	  return false;
     }
 	volumeStartBlock = p->firstSector;
   }
   if (!cacheRawBlock(volumeStartBlock, CACHE_FOR_READ))
   {
-	  //SerialDebug.println("Error: SdVolume::init() Cache for read2");
+	  SerialDebug.println("Error: SdVolume::init() Cache for read2");
 	  return false;
   }
 
@@ -313,14 +313,14 @@ uint8_t SdVolume::init(Sd2Card* dev, uint8_t part)
   uint8_t *data = &cacheBuffer_.data[0];
   for(int i=0; i<512; i++) {
 	  if(i % 16 == 0) {
-  		//SerialDebug.print(i, HEX);
-  		//SerialDebug.print("  ");
+  		SerialDebug.print(i, HEX);
+  		SerialDebug.print("  ");
 		//delay(10);
 	  }
-	  //SerialDebug.print(data[i], HEX);
-	  //SerialDebug.print(" ");
+	  SerialDebug.print(data[i], HEX);
+	  SerialDebug.print(" ");
 	  if(i % 16 == 15) {
-  		//SerialDebug.println();
+  		SerialDebug.println();
 		//delay(10);
 	  }
   }
@@ -334,7 +334,7 @@ uint8_t SdVolume::init(Sd2Card* dev, uint8_t part)
     bpb->sectorsPerCluster == 0)
   {
        // not valid FAT volume
-      //SerialDebug.println("Error: SdVolume::init() invalid FAT volume");
+      SerialDebug.println("Error: SdVolume::init() invalid FAT volume");
       return false;
   }
   fatCount_ = bpb->fatCount;
@@ -348,7 +348,7 @@ uint8_t SdVolume::init(Sd2Card* dev, uint8_t part)
     if (clusterSizeShift_++ > 7)
 	{
 		return false;
-		//SerialDebug.println("Error: SdVolume::init() not power of 2");
+		SerialDebug.println("Error: SdVolume::init() not power of 2");
 	}
   }
   blocksPerFat_ = bpb->sectorsPerFat16 ?

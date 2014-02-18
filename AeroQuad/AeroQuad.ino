@@ -1251,13 +1251,7 @@
     #define SERIAL_PORT Serial
   #endif
 #else  
-  #if defined(SERIAL_USES_USB)   // STM32 Maple
-    #define SERIAL_PORT SerialUSB
-    #undef BAUD
-    #define BAUD
-  #else
     #define SERIAL_PORT Serial
-  #endif
 #endif  
 
 #ifdef SlowTelemetry

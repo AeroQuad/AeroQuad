@@ -154,7 +154,7 @@
 // *******************************************************************************************************************************
 //#define WirelessTelemetry			// Enables wireless telemetry, for more information see wiki linked above
 
-#define MavLink               		// Enables the MavLink protocol
+//#define MavLink               		// Enables the MavLink protocol
 #define MAV_SYSTEM_ID 100			// Needs to be enabled when using MavLink, used to identify each of your copters using MavLink
 									// If you've only got one, leave the default value unchanged, otherwise make sure that each copter has a different ID 
 
@@ -188,12 +188,12 @@
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *************************************************************.******************************************************************
-//#define OSD
+#define OSD
 //#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define CALLSIGN "AeroQuad"         // Show (optional) callsign
-//#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
 //#define OSD_LOADFONT              // Include MAX7456 font into binary, give & on serial to upload
 

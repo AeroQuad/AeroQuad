@@ -113,14 +113,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libraries\FatFS\fattime.c"
-				>
-			</File>
-			<File
-				RelativePath=".\libraries\FatFS\ff.c"
-				>
-			</File>
-			<File
 				RelativePath=".\libmaple\flash.c"
 				>
 			</File>
@@ -213,10 +205,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libraries\FatFS\sd_spi_stm32.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\libraries\mapleSDfat\SdFile.cpp"
 				>
 			</File>
@@ -249,11 +237,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libmaple\usb\usb.c"
+				RelativePath=".\libmaple\usbF4\usb.c"
 				>
 			</File>
 			<File
-				RelativePath=".\libmaple\usbF4\usb.c"
+				RelativePath=".\libmaple\usb\usb.c"
 				>
 			</File>
 			<File
@@ -371,10 +359,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libraries\FatFS\diskio.h"
-				>
-			</File>
-			<File
 				RelativePath=".\libmaple\dma.h"
 				>
 			</File>
@@ -388,18 +372,6 @@
 			</File>
 			<File
 				RelativePath=".\libraries\mapleSDfat\FatStructs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libraries\FatFS\fattime.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libraries\FatFS\ff.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libraries\FatFS\ffconf.h"
 				>
 			</File>
 			<File
@@ -440,10 +412,6 @@
 			</File>
 			<File
 				RelativePath=".\libmaple\i2c.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libraries\FatFS\integer.h"
 				>
 			</File>
 			<File

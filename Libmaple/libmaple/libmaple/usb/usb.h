@@ -82,8 +82,6 @@ uint8 usbGetRTS(void);
 uint8 usbIsConnected(void);
 uint8 usbIsConfigured(void);
 uint16 usbGetPending(void);
-void usbEnableBlockingTx(void);
-void usbDisableBlockingTx(void);
 
 void usbSendHello(void);
 

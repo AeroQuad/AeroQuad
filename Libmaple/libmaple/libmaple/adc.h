@@ -338,7 +338,6 @@ typedef enum {
 void adc_set_sample_rate(const adc_dev *dev, adc_smp_rate smp_rate);
 void adc_calibrate(const adc_dev *dev);
 uint16 adc_read(const adc_dev *dev, uint8 channel);
-uint16 adc_read_fast(const adc_dev *dev, uint8 channel);
 
 /**
  * @brief Set the regular channel sequence length.

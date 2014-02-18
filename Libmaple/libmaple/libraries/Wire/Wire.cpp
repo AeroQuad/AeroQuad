@@ -121,6 +121,13 @@ void i2c_shift_out(Port port, uint8 val) {
 		i2c_scl_high(port);
 		i2c_scl_low(port);
 	}
+	/*
+	i2c_sda_high(port);
+	i2c_scl_high(port);
+	bool nack = digitalRead(port.sda);
+	i2c_scl_low(port);
+	*/
+
 }
 
 TwoWire::TwoWire() {
@@ -151,6 +158,14 @@ void TwoWire::begin(uint8 sda, uint8 scl) {
 	pinMode(sda, OUTPUT_OPEN_DRAIN);
 	digitalWrite(scl, HIGH);
 	digitalWrite(sda, HIGH);
+/*
+	long t0 = systick_get_count();
+	i2c_scl_high(port);
+	long t1 = systick_get_count();
+	Serial2.print("i2c_scl_high: ");
+	Serial2.print(t1-t0);
+	Serial2.println();
+*/
 }
 
 void TwoWire::beginTransmission(uint8 slave_address) {
@@ -177,6 +192,7 @@ uint8 TwoWire::endTransmission(void) {
 	for (uint8 i = 0; i < tx_buf_idx; i++) {
 		uint8 ret = writeOneByte(tx_buf[i]);
 		if (ret) {
+			//Serial1.println("endTransmission failed");
 			return ret;    // SUCCESS is 0
 		}
 	}
@@ -188,6 +204,26 @@ uint8 TwoWire::endTransmission(void) {
 	return SUCCESS;
 }
 
+#if 0
+uint8 TwoWire::requestFromOld(uint8 address, int num_bytes) {
+	if (num_bytes > WIRE_BUFSIZ) num_bytes = WIRE_BUFSIZ;
+
+	rx_buf_idx = 0;
+	rx_buf_len = 0;
+	while (rx_buf_len < num_bytes) {
+		if(!readOneByte(address, rx_buf + rx_buf_len))
+			rx_buf_len++;
+		else {
+			Serial1.print("requestFrom failed at byte ");
+			Serial1.print(rx_buf_len,10);
+			Serial1.println();
+			break;
+		}
+	}
+	return rx_buf_len;
+}
+#endif
+
 uint8 TwoWire::requestFrom(uint8 address, int num_bytes) {
 	if (num_bytes > WIRE_BUFSIZ) num_bytes = WIRE_BUFSIZ;
 
@@ -198,6 +234,9 @@ uint8 TwoWire::requestFrom(uint8 address, int num_bytes) {
 
 	i2c_shift_out(port, (address << 1) | I2C_READ);
 	if (!i2c_get_ack(port)) {
+		//Serial1.print("requestFrom failed at byte ");
+		//Serial1.print(rx_buf_len,10);
+		//Serial1.println();
 		return 0;
 	}
 

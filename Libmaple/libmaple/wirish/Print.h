@@ -26,7 +26,7 @@
 #include "libmaple_types.h"
 
 enum {
-    E_BYTE = 0,
+    BYTE = 0,
     BIN  = 2,
     OCT  = 8,
     DEC  = 10,

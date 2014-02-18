@@ -24,7 +24,6 @@ cppSRCS_$(d) := wirish_math.cpp		 \
                 boards/aeroquad32.cpp	 \
                 boards/aeroquad32mini.cpp	 \
                 boards/discovery_f4.cpp	 \
-                boards/discovery_f3.cpp	 \
                 boards/freeflight.cpp	 \
                 comm/HardwareSerial.cpp	 \
                 comm/HardwareSPI.cpp	 \

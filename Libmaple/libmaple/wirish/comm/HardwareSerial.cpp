@@ -92,13 +92,12 @@ void HardwareSerial::begin(uint32 baud) {
 
     const stm32_pin_info *txi = &PIN_MAP[tx_pin];
     const stm32_pin_info *rxi = &PIN_MAP[rx_pin];
-#if defined(STM32F2) || defined(STM32F3)
+#ifdef STM32F2
 	// int af = 7<<8;
     gpio_set_af_mode(txi->gpio_device, txi->gpio_bit, 7);
     gpio_set_af_mode(rxi->gpio_device, rxi->gpio_bit, 7);
     gpio_set_mode(txi->gpio_device, txi->gpio_bit, (gpio_pin_mode)(GPIO_AF_OUTPUT_PP | GPIO_PUPD_INPUT_PU | 0x700));
     gpio_set_mode(rxi->gpio_device, rxi->gpio_bit, (gpio_pin_mode)(GPIO_MODE_AF      | GPIO_PUPD_INPUT_PU | 0x700));
-
     //gpio_set_mode(txi->gpio_device, txi->gpio_bit, (gpio_pin_mode)(GPIO_PUPD_INPUT_PU));
     //gpio_set_mode(rxi->gpio_device, rxi->gpio_bit, (gpio_pin_mode)(GPIO_PUPD_INPUT_PU));
 #else
@@ -111,6 +110,7 @@ void HardwareSerial::begin(uint32 baud) {
         timer_set_mode(txi->timer_device, txi->timer_channel, TIMER_DISABLED);
     }
 #endif
+
     usart_init(usart_device);
     usart_set_baud_rate(usart_device, baud);
     usart_enable(usart_device);

@@ -145,18 +145,6 @@ uint32 digitalRead(uint8 pin);
 uint16 analogRead(uint8 pin);
 
 /**
- * Read an analog value from pin.  This function blocks during ADC
- * conversion, and has 12 bits of resolution.  The pin must have its
- * mode set to INPUT_ANALOG.
- *
- * @param pin Pin to read from.
- * @return Converted voltage, in the range 0--4095, (i.e. a 12-bit ADC
- *         conversion).
- * @see pinMode()
- */
-uint16 analogReadFast(uint8 pin);
-
-/**
  * Toggles the digital value at the given pin.
  *
  * The pin must have its mode set to OUTPUT.

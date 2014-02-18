@@ -1,12 +1,12 @@
 # setup environment
 
 TARGET_ARCH = -mcpu=cortex-m4 -mthumb
-#TARGET_ARCH = -mcpu=cortex-m4 -mthumb  -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+
 CC = arm-none-eabi-gcc
 CFLAGS =
 
-AS = $(CC) -x assembler-with-cpp -c $(TARGET_ARCH) -Wa,-gstabs
-ASFLAGS = -gstabs
+AS = $(CC) -x assembler-with-cpp -c $(TARGET_ARCH)
+ASFLAGS =
 
 AR = arm-none-eabi-ar
 ARFLAGS = cr
@@ -24,7 +24,7 @@ medium-density: $(LIB_OBJS)
 	$(AR) $(ARFLAGS) libcs3_stm32_med_density.a $(LIB_OBJS)
 	rm -f $(LIB_OBJS)
 
-high-density: CFLAGS := -DSTM32_HIGH_DENSITY -gdwarf-2 -O0
+high-density: CFLAGS := -DSTM32_HIGH_DENSITY
 high-density: ASFLAGS := -DSTM32_HIGH_DENSITY
 high-density: $(LIB_OBJS)
 	$(AR) $(ARFLAGS) libcs4_stm32_high_density.a $(LIB_OBJS)
