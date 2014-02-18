@@ -55,6 +55,7 @@ void calculateFlightError()
     motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*rotationSpeedFactor, &PID[RATE_XAXIS_PID_IDX]);
     motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*rotationSpeedFactor, &PID[RATE_YAXIS_PID_IDX]);
   }
+  #if defined HeadingMagHold
   else if (flightMode == SIMPLE_FLIGHT_MODE) {
     if (simpleModeInitialize) {
       simpleModeStartHeading = trueNorthHeading;
@@ -70,6 +71,7 @@ void calculateFlightError()
     motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
     motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
+  #endif
 }
 
 /**

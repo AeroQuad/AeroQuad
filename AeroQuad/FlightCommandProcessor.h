@@ -32,17 +32,17 @@
 // Maybe AUX1 sets altitude hold, position hold and return to home
 // Then AUX2 enables/disables autopilot, AUX1 return to home overrides autopilot
 
-#if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+#if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
   void processAltitudeHoldStateFromReceiverCommand() {
     if (receiverCommand[AUX1] < MAXSWITCH) {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with mandatory override of Altitude hold
         if (!isAltitudeHoldInitialized) {
-          #if defined AltitudeHoldBaro
+          #if defined(AltitudeHoldBaro)
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
-          #if defined AltitudeHoldRangeFinder
+          #if defined(AltitudeHoldRangeFinder)
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
@@ -67,12 +67,12 @@
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
         if (isAutoLandingInitialized) {
           autoLandingState = BARO_AUTO_DESCENT_STATE;
-          #if defined AltitudeHoldBaro
+          #if defined(AltitudeHoldBaro)
             baroAltitudeToHoldTarget = getBaroAltitude();
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
-          #if defined AltitudeHoldRangeFinder
+          #if defined(AltitudeHoldRangeFinder)
             sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
@@ -96,7 +96,7 @@
 #endif
 
 
-#if defined (UseGPSNavigator)
+#if defined(UseGPSNavigator)
   void processGpsNavigationStateFromReceiverCommand() {
     // Init home command
     if (autoPilotState == SET_HOME_POSITION && haveAGpsLock())
@@ -160,7 +160,7 @@
 
 
 void armMotors() {
-  #ifdef OSD_SYSTEM_MENU
+  #if defined(OSD_SYSTEM_MENU)
     if (menuOwnsSticks) {
       return;
     }
@@ -171,13 +171,7 @@ void armMotors() {
   }
   motorArmed = ON;
   
-  #ifdef EnableLogging
-    logEnd();
-    logInit();
-    //logPrintF("throttle,adjThrottle,altHoldState,pressure,rawTemp,baroRawAlt,baroAlt\r\n)");
-  #endif
-
-  #ifdef OSD
+  #if defined(OSD)
     notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");
   #endif  
 
@@ -189,15 +183,11 @@ void disarmMotors() {
   motorArmed = OFF;
   inFlight = false;
 
-  #ifdef EnableLogging
-    logEnd();
-  #endif
-
-  #ifdef OSD
+  #if defined(OSD)
     notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
   #endif
 
-  #if defined BattMonitorAutoDescent
+  #if defined(BattMonitorAutoDescent)
     batteryMonitorAlarmCounter = 0;
     batteryMonitorStartThrottle = 0;
     batteyMonitorThrottleCorrection = 0.0;
@@ -215,7 +205,7 @@ void zeroGyroAccel() {
 
 void processZeroThrottleFunctionFromReceiverCommand() {
   // Disarm motors (left stick lower left corner)
-  #ifndef roverConfig
+  #if !defined(roverConfig)
     if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
           disarmMotors();
     }
@@ -261,29 +251,36 @@ void readPilotCommands() {
   // Check Mode switch for Acro or Stable
   if (receiverCommand[MODE] > MIDCOMMAND) {
       flightMode = ATTITUDE_FLIGHT_MODE;
+	  #if defined(HeadingMagHold)
       simpleModeInitialize = false;
+	  #endif
   }
   else {
-      //flightMode = RATE_FLIGHT_MODE;
+	#if defined(HeadingMagHold)
       flightMode = SIMPLE_FLIGHT_MODE;
+	#else
+	  flightMode = RATE_FLIGHT_MODE;
+	#endif
   }
 
   if (previousFlightMode != flightMode) {
     zeroIntegralError();
     previousFlightMode = flightMode;
+	#if defined(HeadingMagHold)
     if (flightMode == SIMPLE_FLIGHT_MODE)
         simpleModeInitialize = true;
+	#endif
   }
 
-  #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+  #if defined(AltitudeHoldBaro) || defined(AltitudeHoldRangeFinder)
     processAltitudeHoldStateFromReceiverCommand();
   #endif
   
-  #if defined (AutoLanding)
+  #if defined(AutoLanding)
     processAutoLandingStateFromReceiverCommand();
   #endif
 
-  #if defined (UseGPSNavigator)
+  #if defined(UseGPSNavigator)
     processGpsNavigationStateFromReceiverCommand();
   #endif
 }

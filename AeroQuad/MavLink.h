@@ -41,6 +41,7 @@ uint8_t baseMode = MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 uint32_t customMode = 0; // for future use
 uint8_t systemStatus = MAV_STATE_BOOT;
 
+#if defined (HeadingMagHold)
 ///* Variables for mag calibration *///
 bool isCalibratingMag = false;
 
@@ -50,6 +51,7 @@ float measuredMagMax[3] = { 0.0, 0.0, 0.0 };
 int magCalibrationTimeout = 40000; // 40 seconds
 
 unsigned long magCalibrationTimeStarted = 0;
+#endif
 
 ///* Variables for accel calibration *///
 // Calibration needs to be performed in six different positions:
@@ -91,6 +93,7 @@ int accelCalibrationTimeout = 40000; // 40 seconds
 float tempReceiverSlope[MAX_NB_CHANNEL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 float tempReceiverOffset[MAX_NB_CHANNEL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
+#if defined (UseGPSNavigator)
 ///* Variables for sending and receiving waypoints *///
 bool waypointSendingToGCS = false;
 bool waypointReceivingFromGCS = false;
@@ -108,6 +111,7 @@ int waypointIndexToBeRequestedLast = -1; // Index of the waypoint to be requeste
 int waypointIndexToBeRequested = -1; // Index of single waypoint to be requested
 int waypointLastRequestedIndex = -1; // Index of the most recent requested waypoint
 int waypointIndexToBeSent = -1; // Index of waypoint to be sent
+#endif
 
 ///* Variables for transmitter calibration *///
 // default channel order in QGroundControl is:
@@ -277,7 +281,7 @@ mavlink_message_t msg;
 mavlink_status_t status;
 
 #if defined(AltitudeHoldBaro)
-	float altitude = 0.0;
+float altitude = 0.0;
 #endif
 
 
@@ -381,28 +385,31 @@ void sendSerialAttitude() {
 	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
 }
 
+
+float getHeading()
+{
+  #if defined(HeadingMagHold)
+    return ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360;
+  #else
+    return(gyroHeading);
+  #endif
+}
+
+
 void sendSerialHudData() {
-#if defined(HeadingMagHold)
 #if defined(AltitudeHoldBaro)
-#if defined (UseGPS)
+#if defined(UseGPS)
 	if (gpsData.state > GPS_NOFIX) {
-		mavlink_msg_vfr_hud_send(chan, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+		mavlink_msg_vfr_hud_send(chan, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 	}
 	else {
-		mavlink_msg_vfr_hud_send(chan, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+		mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 	}
 #else
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 #endif
 #else
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360, (receiverCommand[THROTTLE] - 1000) / 10, 0, 0.0);
-#endif
-#else
-#if defined(AltitudeHoldBaro)
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, 0, (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
-#else
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, 0, (receiverCommand[THROTTLE] - 1000) / 10, 0, 0.0);
-#endif
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, 0.0, 0.0);
 #endif
 }
 
@@ -411,9 +418,9 @@ void sendSerialGpsPostion() {
 	if (haveAGpsLock())
 	{
 #if defined(AltitudeHoldBaro)
-		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), altitude, 65535, getGpsSpeed(), getCourse(), ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), altitude, 65535, getGpsSpeed(), getCourse(), getHeading());
 #else
-		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360);
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, getHeading());
 #endif
 	}
 #endif
@@ -433,13 +440,13 @@ void sendSerialMotorOutput() {
 
 void sendSerialRawPressure() {
 #if defined(AltitudeHoldBaro)
-	mavlink_msg_raw_pressure_send(chan, millis(), pressure, 0, 0, MS5611lastRawTemperature);
+	mavlink_msg_raw_pressure_send(chan, millis(), pressure, 0, 0, 0);
 #endif
 }
 
 void sendSerialScaledPressure() {
 #if defined(AltitudeHoldBaro)
-	mavlink_msg_scaled_pressure_send(chan, millis(), pressure, 0, MS5611lastRawTemperature);
+	mavlink_msg_scaled_pressure_send(chan, millis(), pressure, 0, 0);
 #endif
 }
 
@@ -1439,7 +1446,7 @@ void sendQueuedParameters() {
 		paramListPartIndicator = -1;
 	}
 }
-
+#if defined(UseGPSNavigator)
 void receiveWaypoint() { // request waypoints one by one from GCS
 	if (waypointLastRequestedIndex != waypointIndexToBeRequested) {
 		waypointLastRequestedIndex = waypointIndexToBeRequested;
@@ -1447,7 +1454,7 @@ void receiveWaypoint() { // request waypoints one by one from GCS
 		mavlink_msg_mission_request_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, waypointIndexToBeRequested);
 	}
 }
-
+#endif
 bool calculateTransmitterCalibrationValues() {
 	for (byte channel = XAXIS; channel < 8; channel++) {
 		int diff = receiverRawMaxValue[channel] - receiverRawMinValue[channel];
@@ -1502,7 +1509,7 @@ void calculateAndStoreAccelCalibrationValues() {
 	writeEEPROM();
 	zeroIntegralError();
 }
-
+#if defined (HeadingMagHold)
 void resetMagCalibrationValues() {
 	for (int16_t axis = XAXIS; axis <= ZAXIS; axis++) {
 		measuredMagMax[axis] = 0;
@@ -1519,11 +1526,14 @@ void calculateAndStoreMagCalibrationValues() {
 	writeEEPROM();
 	zeroIntegralError();
 }
+#endif
 
 void handleMessage(mavlink_message_t msg) {
+#if defined (UseGPSNavigator)
 	float x = 0, y = 0, z = 0;
-	uint8_t result = MAV_RESULT_UNSUPPORTED;
 	uint8_t isCurrentWaypoint = 0;
+#endif
+	uint8_t result = MAV_RESULT_UNSUPPORTED;
 	bool suppressCommandAckMsg = false;
 
 	switch (msg.msgid) {
@@ -2103,7 +2113,6 @@ void handleMessage(mavlink_message_t msg) {
 		waypointCount = 0; // reset number of waypoints
 
 		// Sending ACK message three times to make sure it's received
-		//TODO: ACK is not received by GCS, but waypoints are deleted - maybe a bug in QGroundControl?
 		for (int16_t i = 0; i<3; i++) {
 			mavlink_msg_mission_ack_send(chan, MAV_SYSTEM_ID, MAV_COMPONENT_ID, MAV_MISSION_ACCEPTED);
 		}
@@ -2135,9 +2144,20 @@ void readSerialCommand() {
 
 	system_dropped_packets += status.packet_rx_drop_count;
 
+	#if defined(UseGPSNavigator)
 	if (!isCalibratingMag && !isCalibratingAccel && !waypointReceivingFromGCS && !waypointSendingToGCS) {
 		return;
 	}
+	#elif defined(HeadingMagHold)
+	if (!isCalibratingMag && !isCalibratingAccel) {
+		return;
+	}
+	#else
+	if (!isCalibratingAccel) {
+		return;
+	}
+	#endif
+
 
 	if (isCalibratingAccel) {
 		if (isStep1Calibrating) {
@@ -2501,7 +2521,7 @@ void readSerialCommand() {
 			}
 		}
 	}
-
+#if defined(HeadingMagHold)
 	if (isCalibratingMag) {
 		float rawXaxis = getMagnetometerRawData(XAXIS);
 		float rawYaxis = getMagnetometerRawData(YAXIS);
@@ -2530,23 +2550,23 @@ void readSerialCommand() {
 
 		mavlink_msg_statustext_send(chan, MAV_SEVERITY_INFO, "Calibrating magnetometer...");
 	}
-
+#endif
 	uint32_t tnow = millis();
-
+#if defined(HeadingMagHold)
 	// stop mag if timeout
 	if (isCalibratingMag && (tnow - magCalibrationTimeStarted) > magCalibrationTimeout) {
 		isCalibratingMag = false;
 
 		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Mag calibration Timeout - Please restart.");
 	}
-
+#endif
 	// stop accel calibration if timeout
 	if (isCalibratingAccel && (tnow - accelCalibrationLastTimeRequested) > accelCalibrationTimeout) {
 		isCalibratingAccel = false;
 
 		mavlink_msg_statustext_send(chan, MAV_SEVERITY_ERROR, "Accel calibration Timeout - Please restart.");
 	}
-
+#if defined(UseGPSNavigator)
 	if (waypointReceivingFromGCS && waypointIndexToBeRequested <= waypointsToBeRequested && tnow > waypointTimeLastRequested + 200) {
 		waypointTimeLastRequested = tnow;
 		receiveWaypoint();
@@ -2561,6 +2581,7 @@ void readSerialCommand() {
 	if (waypointReceivingFromGCS && (tnow - waypointTimeLastReceived) > waypointReceiveTimeout) {
 		waypointReceivingFromGCS = false;
 	}
+#endif
 }
 
 void sendSerialVehicleData() {
@@ -2582,7 +2603,10 @@ void sendSerialVehicleData() {
 }
 
 void sendSerialTelemetry() {
-	if (!waypointReceivingFromGCS && !waypointSendingToGCS) {
+#if defined(UseGPSNavigator)
+	if (!waypointReceivingFromGCS && !waypointSendingToGCS)
+#endif
+	{
 		// Don't interfere with mission transfer
 		sendSerialVehicleData();
 		sendQueuedParameters();

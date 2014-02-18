@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
+#if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406) || defined(UseGPSNavigator)
  #define UseGPS
 #endif 
 
