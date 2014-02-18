@@ -239,12 +239,21 @@ void readMPU6000Accel()
   }
 }
 
+//void readMPU6000Gyro()
+//{
+//  readMPU6000GyroCount++;
+//  if(readMPU6000GyroCount != readMPU6000Count) {
+//    readMPU6000Sensors();
+//    readMPU6000GyroCount++;
+//  }
+//}
+
 void readMPU6000Gyro()
 {
-  readMPU6000GyroCount++;
-  if(readMPU6000GyroCount != readMPU6000Count) {
-    readMPU6000Sensors();
-    readMPU6000GyroCount++;
-  }
+     readMPU6000GyroCount++;
+     if(readMPU6000GyroCount != readMPU6000Count) {
+         readMPU6000Sensors();
+         readMPU6000Count++; // this line is changed
+     }
 }
 #endif
