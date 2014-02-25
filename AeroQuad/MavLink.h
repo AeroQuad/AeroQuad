@@ -400,11 +400,7 @@ float getHeadingDegrees() {
 }
 
 void sendSerialAttitude() {
-  #if defined(HeadingMagHold)
-	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], getHeadingRadian(), 0, 0, 0);
-  #else
 	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], getHeadingRadian(), 0, 0, 0); 
-  #endif
 }
 
 void sendSerialHudData() {
