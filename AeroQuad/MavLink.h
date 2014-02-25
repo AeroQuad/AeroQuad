@@ -381,35 +381,46 @@ void sendSerialRawIMU() {
 #endif
 }
 
-void sendSerialAttitude() {
-	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], kinematicsAngle[ZAXIS], 0, 0, 0);
-}
-
-
-float getHeading()
-{
+float getHeadingRadian() {
   #if defined(HeadingMagHold)
-    return ((int)(trueNorthHeading / M_PI * 180.0) + 360) % 360;
+  	return trueNorthHeading;
   #else
-    return(gyroHeading);
+  	return kinematicsAngle[ZAXIS];
   #endif
 }
 
+float getHeadingDegrees() {
+  #if defined(HeadingMagHold)
+	float deg = degrees(trueNorthHeading);
+  	return (int)( 0.5 + (deg<-0.5 ? deg+360.0 : deg));
+  #else
+	float deg = degrees(kinematicsAngle[ZAXIS]);
+  	return (int)( 0.5 + (deg<-0.5 ? deg+360.0 : deg));
+  #endif
+}
+
+void sendSerialAttitude() {
+  #if defined(HeadingMagHold)
+	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], getHeadingRadian(), 0, 0, 0);
+  #else
+	mavlink_msg_attitude_send(chan, millis(), kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], getHeadingRadian(), 0, 0, 0); 
+  #endif
+}
 
 void sendSerialHudData() {
 #if defined(AltitudeHoldBaro)
 #if defined(UseGPS)
 	if (gpsData.state > GPS_NOFIX) {
-		mavlink_msg_vfr_hud_send(chan, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+		mavlink_msg_vfr_hud_send(chan, (float)getGpsSpeed() / 100.0f, (float)getGpsSpeed() / 100.0f, getHeadingDegrees(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 	}
 	else {
-		mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+		mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeadingDegrees(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 	}
 #else
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeadingDegrees(), (receiverCommand[THROTTLE] - 1000) / 10, altitude, 0.0);
 #endif
 #else
-	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeading(), (receiverCommand[THROTTLE] - 1000) / 10, 0.0, 0.0);
+	mavlink_msg_vfr_hud_send(chan, 0.0, 0.0, getHeadingDegrees(), (receiverCommand[THROTTLE] - 1000) / 10, 0.0, 0.0);
 #endif
 }
 
@@ -418,9 +429,9 @@ void sendSerialGpsPostion() {
 	if (haveAGpsLock())
 	{
 #if defined(AltitudeHoldBaro)
-		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), altitude, 65535, getGpsSpeed(), getCourse(), getHeading());
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), altitude, 65535, getGpsSpeed(), getCourse(), getHeadingDegrees());
 #else
-		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, getHeading());
+		mavlink_msg_global_position_int_send(chan, millis(), currentPosition.latitude, currentPosition.longitude, getGpsAltitude(), getGpsAltitude(), 0, 0, 0, getHeadingDegrees());
 #endif
 	}
 #endif
