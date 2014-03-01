@@ -891,34 +891,16 @@ void reportVehicleState() {
   SERIAL_PRINT("Software Version: ");
   SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
   SERIAL_PRINT("Board Type: ");
-  #if defined(AeroQuad_v1)
-    SERIAL_PRINTLN("v1.x");
-  #elif defined(AeroQuad_v1_IDG)
-    SERIAL_PRINTLN("v1.x IDG");
-  #elif defined(AeroQuadMega_v1)
-    SERIAL_PRINTLN("Mega v1.x");
-  #elif defined(AeroQuad_v18)
+  #if defined(AeroQuad_v18)
     SERIAL_PRINTLN("v1.8 and greater");
+  #elif defined(AeroQuad_Mini)
+    SERIAL_PRINTLN("Mini");
+  #elif defined(MWWFlip15)
+    SERIAL_PRINTLN("MWWFlip15");
   #elif defined(AeroQuadMega_v2)
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
     SERIAL_PRINTLN("Mega v21");
-  #elif defined(AeroQuadMega_v21)
-    SERIAL_PRINTLN("AutoNav");
-  #elif defined(AutonavShield)
-    SERIAL_PRINTLN("AutonavShield");
-  #elif defined(AeroQuad_Wii)
-    SERIAL_PRINTLN("Wii");
-  #elif defined(AeroQuadMega_Wii)
-    SERIAL_PRINTLN("Mega Wii");
-  #elif defined(ArduCopter)
-    SERIAL_PRINTLN("ArduCopter");
-  #elif defined(AeroQuadMega_CHR6DM)
-    SERIAL_PRINTLN("CHR6DM");
-  #elif defined(APM_OP_CHR6DM)
-    SERIAL_PRINTLN("APM w/ CHR6DM");
-  #elif defined(AeroQuad_Mini)
-    SERIAL_PRINTLN("Mini");
   #elif defined(AeroQuadSTM32)
     SERIAL_PRINTLN(STM32_BOARD_TYPE);
   #endif

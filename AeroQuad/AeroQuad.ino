@@ -215,6 +215,75 @@
   }
 #endif
 
+#ifdef MWWFlip15
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
+  #include <Device_I2C.h>
+
+  #define MPU6000_I2C
+  #include <Platform_MPU6000.h>
+  // Gyroscope declaration
+  #include <Gyroscope_MPU6000.h>
+  // Accelerometer declaration
+  #include <Accelerometer_MPU6000.h>
+
+  // Receiver declaration
+  #define RECEIVER_328P
+
+  // Motor declaration
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
+    #define MOTOR_PWM_Timer
+  #else
+    #define MOTOR_PWM
+  #endif    
+
+  // unsupported in mini
+  #undef HeadingMagHold
+  #undef BattMonitor
+  #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder  
+  #undef CameraControl
+  #undef OSD
+  #undef UseGPS
+  #undef UseGPSNavigator
+
+  /**
+   * Put AeroQuad_Mini specific initialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    Wire.begin();
+    TWBR = 12;
+    
+//    initMpu6050();
+    initializeMPU6000Sensors();
+  }
+
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0011980000;
+    accelScaleFactor[YAXIS] = -0.0012020000;
+    accelScaleFactor[ZAXIS] = -0.0011750000;
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    readMPU6000Sensors();
+    measureGyroSum();
+    measureAccelSum();
+  }
+#endif
+
 #ifdef AeroQuadMega_v2
   #define LED_Green 13
   #define LED_Red 4
@@ -678,7 +747,9 @@ void setup() {
     firstTimeBoot = true;
   }
   
+//  Serial.println("Pre Init platform");
   initPlatform();
+//  Serial.println("Init platform done");
   
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
@@ -694,8 +765,11 @@ void setup() {
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
+//  Serial.println("Pre Init gyro");
   initializeGyro(); // defined in Gyro.h
+//  Serial.println("After Init gyro");
   while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
+//  Serial.println("After Calibrate gyro");
   initializeAccel(); // defined in Accel.h
   if (firstTimeBoot) {
     computeAccelBias();
