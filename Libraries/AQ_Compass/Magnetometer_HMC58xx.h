@@ -44,16 +44,16 @@ void readSpecificMag(float *rawMag);
 
 void initializeMagnetometer() {
 
-  delay(10);                             // Power up delay **
+  delay(50);                             // Power up delay **
    
   if (readWhoI2C(COMPASS_ADDRESS) == COMPASS_IDENTITY) {
 	  vehicleState |= MAG_DETECTED;
   }    
 
   updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
-  delay(20);
+  delay(50);
   updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
-  delay(20);
+  delay(50);
 
   measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
 }

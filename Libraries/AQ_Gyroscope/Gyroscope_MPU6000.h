@@ -26,7 +26,7 @@ int gyroRaw[3] = {0,0,0};
 #include <Platform_MPU6000.h>
 #include <Gyroscope.h>
 
-#define GYRO_CALIBRATION_TRESHOLD 25
+#define GYRO_CALIBRATION_TRESHOLD 35
 
 void initializeGyro() {
   float range = 2*1000.0;
@@ -45,7 +45,7 @@ void gyroUpdateHeading()
 }
 
 void measureGyro() {
-  readMPU6000Gyro();
+  readMPU6000Sensors();
 
   int gyroADC[3];
   gyroADC[XAXIS] = (gyroRaw[XAXIS]=MPU6000.data.gyro.x)  - gyroZero[XAXIS];
@@ -60,7 +60,7 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-  readMPU6000Gyro();
+
   gyroSample[XAXIS] += (gyroRaw[XAXIS]=MPU6000.data.gyro.x);
   gyroSample[YAXIS] += (gyroRaw[YAXIS]=MPU6000.data.gyro.y);
   gyroSample[ZAXIS] += (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);

@@ -121,6 +121,8 @@ void initPlatform() {
   // I2C setup
   Wire.begin(Port2Pin('B', 7), Port2Pin('B', 6)); // I2C1_SDA PB7, I2C1_SCL PB6
 
+  initializeMPU6000Sensors();
+  
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();
   #endif
@@ -141,12 +143,15 @@ void initializePlatformSpecificAccelCalibration() {
 }
 
 unsigned long previousMeasureCriticalSensorsTime = 0;
+unsigned long measureCriticalSensorsTime = 0;
 void measureCriticalSensors() {
   // read sensors not faster than every 1 ms
-  if (currentTime - previousMeasureCriticalSensorsTime >= 1000) {
+  measureCriticalSensorsTime = micros();
+  if ((measureCriticalSensorsTime - previousMeasureCriticalSensorsTime) >= 1000) {
+    readMPU6000Sensors();
     measureGyroSum();
     measureAccelSum();
-    previousMeasureCriticalSensorsTime = currentTime;
+    previousMeasureCriticalSensorsTime = measureCriticalSensorsTime;
   }
 }
 

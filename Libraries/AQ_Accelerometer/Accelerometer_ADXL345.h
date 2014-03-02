@@ -68,7 +68,8 @@ void evaluateMetersPerSec() {
 }
 
 void computeAccelBias() {
-  
+
+  evaluateMetersPerSec();	// reset samples
   for (int samples = 0; samples < SAMPLECOUNT; samples++) {
     measureAccelSum();
     delayMicroseconds(2500);

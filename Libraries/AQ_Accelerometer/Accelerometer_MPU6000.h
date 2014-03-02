@@ -25,12 +25,12 @@
 #include <Accelerometer.h>
 
 void initializeAccel() {
-  initializeMPU6000Sensors();
+//  initializeMPU6000Sensors();
 }
 
 
 void measureAccel() {
-  readMPU6000Accel();
+  readMPU6000Sensors();
 
   meterPerSecSec[XAXIS] = MPU6000.data.accel.x * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
   meterPerSecSec[YAXIS] = MPU6000.data.accel.y * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
@@ -38,11 +38,11 @@ void measureAccel() {
 }
 
 void measureAccelSum() {
-  readMPU6000Accel();
+  
   accelSample[XAXIS] += MPU6000.data.accel.x;
   accelSample[YAXIS] += MPU6000.data.accel.y;
   accelSample[ZAXIS] += MPU6000.data.accel.z;
-
+  
   accelSampleCount++;
 }
 
@@ -55,6 +55,9 @@ void evaluateMetersPerSec() {
 }
 
 void computeAccelBias() {
+
+  evaluateMetersPerSec();	// reset samples
+  delay(2);
   for (int samples = 0; samples < SAMPLECOUNT; samples++) {
 	readMPU6000Sensors();
     measureAccelSum();

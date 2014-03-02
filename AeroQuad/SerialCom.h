@@ -491,8 +491,9 @@ void sendSerialTelemetry() {
     break;
 
   case 'l': // Send raw accel values
-    evaluateMetersPerSec();
-    measureAccelSum();
+    evaluateMetersPerSec();    // reset sample data
+    delay(2);
+    measureCriticalSensors();  // call mesureAccelSum that give one raw sample in accelSample
     PrintValueComma((int)(accelSample[XAXIS]));
     PrintValueComma((int)(accelSample[YAXIS]));
     SERIAL_PRINTLN ((int)(accelSample[ZAXIS]));
@@ -901,6 +902,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
     SERIAL_PRINTLN("Mega v21");
+  #elif defined(MWCProEz30)
+    SERIAL_PRINTLN("MWCProEz30");    
   #elif defined(AeroQuadSTM32)
     SERIAL_PRINTLN(STM32_BOARD_TYPE);
   #endif

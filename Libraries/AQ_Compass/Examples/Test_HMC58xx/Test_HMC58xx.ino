@@ -25,11 +25,11 @@
 #include <AQMath.h>
 
 //Uncomment the following two lines when testing the mag on v2.1 shield
-//#define SPARKFUN_9DOF_5883L
-//#include <Magnetometer_HMC5883L.h>
+#define SPARKFUN_9DOF_5883L
+#include <Magnetometer_HMC5883L.h>
 
 //Uncomment the following line when testing the mag on v2.0 shield
-#include <Magnetometer_HMC5843.h>
+//#include <Magnetometer_HMC5843.h>
 
 unsigned long timer;
 

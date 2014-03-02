@@ -215,7 +215,7 @@
   }
 #endif
 
-#ifdef MWWFlip15
+#ifdef MWCFlip15
   #define LED_Green 13
   #define LED_Red 12
   #define LED_Yellow 12
@@ -262,7 +262,6 @@
     Wire.begin();
     TWBR = 12;
     
-//    initMpu6050();
     initializeMPU6000Sensors();
   }
 
@@ -282,6 +281,7 @@
     measureGyroSum();
     measureAccelSum();
   }
+
 #endif
 
 #ifdef AeroQuadMega_v2
@@ -388,19 +388,130 @@
 #endif
 
 #ifdef AeroQuadMega_v21
+    #define LED_Green 13
+    #define LED_Red 4
+    #define LED_Yellow 31
+  
+    #include <Device_I2C.h>
+    // Gyroscope declaration
+    #define ITG3200_ADDRESS_ALTERNATE
+    #include <Gyroscope_ITG3200_9DOF.h>
+  
+    // Accelerometer declaration
+    #include <Accelerometer_ADXL345_9DOF.h>
+  
+    // Receiver Declaration
+    #define RECEIVER_MEGA
+  
+    // Motor declaration
+    #define MOTOR_PWM_Timer
+  
+    // heading mag hold declaration
+    #ifdef HeadingMagHold
+      #include <Compass.h>
+      #define SPARKFUN_9DOF_5883L
+    #endif
+  
+    // Altitude declaration
+    #ifdef AltitudeHoldBaro
+      #define BMP085
+    #endif
+    #ifdef AltitudeHoldRangeFinder
+      #define XLMAXSONAR 
+    #endif
+  
+  
+    // Battery Monitor declaration
+    #ifdef BattMonitor
+      #ifdef POWERED_BY_VIN
+        #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
+      #else
+        #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
+      #endif
+    #else
+      #undef BattMonitorAutoDescent
+      #undef POWERED_BY_VIN        
+    #endif
+  
+    #ifdef OSD
+      #define MAX7456_OSD
+    #endif  
+    
+    #ifndef UseGPS
+      #undef UseGPSNavigator
+    #endif
+  
+  
+    /**
+     * Put AeroQuadMega_v21 specific initialization need here
+     */
+    void initPlatform() {
+  
+      pinMode(LED_Red, OUTPUT);
+      digitalWrite(LED_Red, LOW);
+      pinMode(LED_Yellow, OUTPUT);
+      digitalWrite(LED_Yellow, LOW);
+  
+      // pins set to INPUT for camera stabilization so won't interfere with new camera class
+      pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+      pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+      pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+      pinMode(43, OUTPUT); // LED 1
+      pinMode(44, OUTPUT); // LED 2
+      pinMode(45, OUTPUT); // LED 3
+      pinMode(46, OUTPUT); // LED 4
+      digitalWrite(43, HIGH); // LED 1 on
+      digitalWrite(44, HIGH); // LED 2 on
+      digitalWrite(45, HIGH); // LED 3 on
+      digitalWrite(46, HIGH); // LED 4 on
+  
+      Wire.begin();
+      TWBR = 12;
+    }
+    
+    // called when eeprom is initialized
+    void initializePlatformSpecificAccelCalibration() {
+      // Kenny default value, a real accel calibration is strongly recommended
+      accelScaleFactor[XAXIS] = 0.0365570020;
+      accelScaleFactor[YAXIS] = 0.0363000011;
+      accelScaleFactor[ZAXIS] = -0.0384629964;
+      #ifdef HeadingMagHold
+        magBias[XAXIS]  = 1.500000;
+        magBias[YAXIS]  = 205.500000;
+        magBias[ZAXIS]  = -33.000000;
+      #endif
+    }
+  
+    /**
+     * Measure critical sensors
+     */
+    void measureCriticalSensors() {
+      measureGyroSum();
+      measureAccelSum();
+    }
+#endif
+
+
+#ifdef MWCProEz30
   #define LED_Green 13
   #define LED_Red 4
   #define LED_Yellow 31
-
+  
   #include <Device_I2C.h>
+  
+  #ifdef HeadingMagHold
+    #include <Compass.h>
+    #define HMC5883L
+  #endif
 
+
+  #define MPU6000_I2C
+  #include <Platform_MPU6000.h>
   // Gyroscope declaration
-  #define ITG3200_ADDRESS_ALTERNATE
-  #include <Gyroscope_ITG3200_9DOF.h>
-
+  #include <Gyroscope_MPU6000.h>
   // Accelerometer declaration
-  #include <Accelerometer_ADXL345_9DOF.h>
-
+  #include <Accelerometer_MPU6000.h>
+  
   // Receiver Declaration
   #define RECEIVER_MEGA
 
@@ -408,14 +519,11 @@
   #define MOTOR_PWM_Timer
 
   // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #include <Compass.h>
-    #define SPARKFUN_9DOF_5883L
-  #endif
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro
-    #define BMP085
+    #define MS5611
+    #define USE_MS5611_ALTERNATE_ADDRESS
   #endif
   #ifdef AltitudeHoldRangeFinder
     #define XLMAXSONAR 
@@ -468,14 +576,16 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    initializeMPU6000Sensors();
   }
   
   // called when eeprom is initialized
   void initializePlatformSpecificAccelCalibration() {
     // Kenny default value, a real accel calibration is strongly recommended
-    accelScaleFactor[XAXIS] = 0.0365570020;
-    accelScaleFactor[YAXIS] = 0.0363000011;
-    accelScaleFactor[ZAXIS] = -0.0384629964;
+    accelScaleFactor[XAXIS] = 0.0011980000;
+    accelScaleFactor[YAXIS] = -0.0012020000;
+    accelScaleFactor[ZAXIS] = -0.0011750000;
     #ifdef HeadingMagHold
       magBias[XAXIS]  = 1.500000;
       magBias[YAXIS]  = 205.500000;
@@ -487,9 +597,11 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    readMPU6000Sensors();
     measureGyroSum();
     measureAccelSum();
   }
+
 #endif
 
 //********************************************************
@@ -747,9 +859,7 @@ void setup() {
     firstTimeBoot = true;
   }
   
-//  Serial.println("Pre Init platform");
   initPlatform();
-//  Serial.println("Init platform done");
   
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
      initializeMotors(FOUR_Motors);
@@ -765,11 +875,8 @@ void setup() {
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
-//  Serial.println("Pre Init gyro");
   initializeGyro(); // defined in Gyro.h
-//  Serial.println("After Init gyro");
   while (!calibrateGyro()); // this make sure the craft is still befor to continue init process
-//  Serial.println("After Calibrate gyro");
   initializeAccel(); // defined in Accel.h
   if (firstTimeBoot) {
     computeAccelBias();

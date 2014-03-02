@@ -24,8 +24,8 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
-float baroAltitude      = 0.0; 
-float baroRawAltitude   = 0.0;
+float baroAltitude       = 0.0; 
+float baroRawAltitude    = 0.0;
 float baroGroundAltitude = 0.0;
 float baroSmoothFactor   = 0.02;
   
