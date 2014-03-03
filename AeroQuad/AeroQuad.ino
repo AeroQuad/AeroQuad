@@ -502,6 +502,7 @@
   #ifdef HeadingMagHold
     #include <Compass.h>
     #define HMC5883L
+//    #define SPARKFUN_5883L_BOB
   #endif
 
 

@@ -134,7 +134,8 @@ unsigned long MS5611readConversion(int addr) {
   sendByteI2C(addr, 0);
   Wire.requestFrom(addr, MS561101BA_D1D2_SIZE);
   if(Wire.available() == MS561101BA_D1D2_SIZE) {
-    conversion = (readByteI2C() << 16) | (readByteI2C() << 8) | (readByteI2C() << 0);
+//    conversion = (readByteI2C() << 16) | (readByteI2C() << 8) | (readByteI2C() << 0);
+	conversion = (((unsigned long)readByteI2C()) << 16) | ((unsigned int)((readByteI2C() << 8) | (readByteI2C() << 0)));
   } 
   else {
     conversion = 0;
@@ -249,7 +250,7 @@ void evaluateBaroAltitude() {
 
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
   // use calculation below in case you need a smaller binary file for CPUs having just 32KB flash ROM
-  baroRawAltitude = (101325.0-pressure)/4096.0*346.0;
+  // baroRawAltitude = (101325.0-pressure)/4096.0*346.0;
 
   if(MS5611_first_read) {
     baroAltitude = baroRawAltitude;

@@ -896,8 +896,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("v1.8 and greater");
   #elif defined(AeroQuad_Mini)
     SERIAL_PRINTLN("Mini");
-  #elif defined(MWWFlip15)
-    SERIAL_PRINTLN("MWWFlip15");
+  #elif defined(MWCFlip15)
+    SERIAL_PRINTLN("MWCFlip15");
   #elif defined(AeroQuadMega_v2)
     SERIAL_PRINTLN("Mega v2");
   #elif defined(AeroQuadMega_v21)
