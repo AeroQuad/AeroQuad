@@ -906,6 +906,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("MWCProEz30");    
   #elif defined(AeroQuadSTM32)
     SERIAL_PRINTLN(STM32_BOARD_TYPE);
+  #elif defined(Naze32)
+    SERIAL_PRINTLN("Naze32");
   #endif
 
   SERIAL_PRINT("Flight Config: ");

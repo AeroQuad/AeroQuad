@@ -613,6 +613,10 @@
 
 #ifdef AeroQuadSTM32
   #include "AeroQuad_STM32.h"
+#elif defined(Naze32)
+  #define AeroQuadSTM32
+  #define BOARD_naze32
+  #include "AeroQuad_STM32.h"
 #endif
 
 // default to 10bit ADC (AVR)
@@ -624,11 +628,8 @@
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
 #include "Kinematics.h"
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-  // CHR6DM have it's own kinematics, so, initialize in it's scope
-#else
-  #include "Kinematics_ARG.h"
-#endif
+#include "Kinematics_ARG.h"
+
 
 //********************************************************
 //******************** RECEIVER DECLARATION **************

@@ -1,5 +1,4 @@
 #ifndef _PLATFORM_AEROQUAD32_H_
-
 #define _PLATFORM_AEROQUAD32_H_
 
 static byte __attribute__((unused)) stm32_motor_mapping[] = {
@@ -139,7 +138,6 @@ void initializePlatformSpecificAccelCalibration() {
     magBias[YAXIS]  = 24.000000;
     magBias[ZAXIS]  = 16.500000;
   #endif
-
 }
 
 unsigned long previousMeasureCriticalSensorsTime = 0;

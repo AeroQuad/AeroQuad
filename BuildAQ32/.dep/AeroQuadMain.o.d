@@ -1,5 +1,5 @@
 objSTM32/dummy/../AeroQuad32/AeroQuadMain.o: \
- c:/Working/AeroQuad/AeroQuad32/AeroQuadMain.cpp \
+ c:/Working/Aeroquad/AeroQuad32/AeroQuadMain.cpp \
  ../AeroQuad/UserConfiguration.h ../AeroQuad32/SerialMapping.h \
  ../AeroQuad32/MapleCompatibility/WProgram.h \
  c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/include/stdint.h \
@@ -60,20 +60,20 @@ objSTM32/dummy/../AeroQuad32/AeroQuadMain.o: \
  ../Libmaple/libmaple/wirish/HardwareTimer.h \
  ../Libmaple/libmaple/wirish/usb_serial.h \
  ../Libmaple/libmaple/wirish/Print.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AeroQuad.ino \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/UserConfiguration.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AeroQuad.ino \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/UserConfiguration.h \
  ../AeroQuad32/MapleCompatibility/EEPROM.h \
  ../Libmaple/libmaple/wirish/wirish.h \
  ../AeroQuad32/MapleCompatibility/flash_stm32.h \
  ../Libmaple/libmaple/libraries/Wire/Wire.h \
  ../Libraries/AQ_Defines/GlobalDefined.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AeroQuad.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AeroQuad.h \
  ../AeroQuad32/MapleCompatibility/Arduino.h \
  ../AeroQuad32/MapleCompatibility/WProgram.h \
  ../AeroQuad32/MapleCompatibility/pins_arduino.h \
  ../Libraries/AQ_Gps/GpsDataType.h ../Libraries/AQ_Math/AQMath.h \
  ../Libraries/AQ_Receiver/Receiver.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/PID.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/PID.h \
  ../Libraries/AQ_Math/FourtOrderFilter.h ../AeroQuad32/AeroQuad_STM32.h \
  ../AeroQuad32/platform_aeroquad32.h ../Libraries/AQ_I2C/Device_I2C.h \
  ../Libraries/AQ_Gyroscope/Gyroscope_MPU6000.h \
@@ -83,7 +83,6 @@ objSTM32/dummy/../AeroQuad32/AeroQuadMain.o: \
  ../Libraries/AQ_Gyroscope/Gyroscope.h \
  ../Libraries/AQ_Accelerometer/Accelerometer_MPU6000.h \
  ../Libraries/AQ_Accelerometer/Accelerometer.h \
- ../Libraries/AQ_Compass/Compass.h \
  ../Libraries/AQ_Kinematics/Kinematics.h \
  ../Libraries/AQ_Kinematics/Kinematics_ARG.h \
  ../Libraries/AQ_Kinematics/Kinematics.h \
@@ -91,22 +90,14 @@ objSTM32/dummy/../AeroQuad32/AeroQuadMain.o: \
  ../Libraries/AQ_Receiver/Receiver.h \
  ../Libraries/AQ_Receiver/Receiver_PPM_common.h \
  ../Libraries/AQ_Motors/Motors_STM32.h ../Libraries/AQ_Motors/Motors.h \
- ../Libraries/AQ_Kinematics/HeadingFusionProcessorMARG.h \
- ../Libraries/AQ_Compass/Magnetometer_HMC5883L.h \
- ../Libraries/AQ_Compass/Compass.h \
- ../Libraries/AQ_Compass/Magnetometer_HMC58xx.h \
- ../Libraries/AQ_BarometricSensor/BarometricSensor_MS5611.h \
- ../Libraries/AQ_BarometricSensor/BarometricSensor.h \
- ../Libraries/AQ_Kinematics/VelocityProcessor.h \
- ../Libraries/AQ_Math/FifteenFloatBuffer.h \
  ../Libraries/AQ_FlightControlProcessor/FlightControlQuadX.h \
  ../Libraries/AQ_FlightControlProcessor/FlightControlVariable.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AltitudeControlProcessor.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/FlightControlProcessor.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/FlightCommandProcessor.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/HeadingHoldProcessor.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/DataStorage.h \
- c:/Working/AeroQuad/AeroQuad32/../AeroQuad/SerialCom.h
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AltitudeControlProcessor.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/FlightControlProcessor.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/FlightCommandProcessor.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/HeadingHoldProcessor.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/DataStorage.h \
+ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/SerialCom.h
 
 ../AeroQuad/UserConfiguration.h:
 
@@ -234,9 +225,9 @@ c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/
 
 ../Libmaple/libmaple/wirish/Print.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AeroQuad.ino:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AeroQuad.ino:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/UserConfiguration.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/UserConfiguration.h:
 
 ../AeroQuad32/MapleCompatibility/EEPROM.h:
 
@@ -248,7 +239,7 @@ c:/Working/AeroQuad/AeroQuad32/../AeroQuad/UserConfiguration.h:
 
 ../Libraries/AQ_Defines/GlobalDefined.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AeroQuad.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AeroQuad.h:
 
 ../AeroQuad32/MapleCompatibility/Arduino.h:
 
@@ -262,7 +253,7 @@ c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AeroQuad.h:
 
 ../Libraries/AQ_Receiver/Receiver.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/PID.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/PID.h:
 
 ../Libraries/AQ_Math/FourtOrderFilter.h:
 
@@ -286,8 +277,6 @@ c:/Working/AeroQuad/AeroQuad32/../AeroQuad/PID.h:
 
 ../Libraries/AQ_Accelerometer/Accelerometer.h:
 
-../Libraries/AQ_Compass/Compass.h:
-
 ../Libraries/AQ_Kinematics/Kinematics.h:
 
 ../Libraries/AQ_Kinematics/Kinematics_ARG.h:
@@ -304,34 +293,18 @@ c:/Working/AeroQuad/AeroQuad32/../AeroQuad/PID.h:
 
 ../Libraries/AQ_Motors/Motors.h:
 
-../Libraries/AQ_Kinematics/HeadingFusionProcessorMARG.h:
-
-../Libraries/AQ_Compass/Magnetometer_HMC5883L.h:
-
-../Libraries/AQ_Compass/Compass.h:
-
-../Libraries/AQ_Compass/Magnetometer_HMC58xx.h:
-
-../Libraries/AQ_BarometricSensor/BarometricSensor_MS5611.h:
-
-../Libraries/AQ_BarometricSensor/BarometricSensor.h:
-
-../Libraries/AQ_Kinematics/VelocityProcessor.h:
-
-../Libraries/AQ_Math/FifteenFloatBuffer.h:
-
 ../Libraries/AQ_FlightControlProcessor/FlightControlQuadX.h:
 
 ../Libraries/AQ_FlightControlProcessor/FlightControlVariable.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/AltitudeControlProcessor.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AltitudeControlProcessor.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/FlightControlProcessor.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/FlightControlProcessor.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/FlightCommandProcessor.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/FlightCommandProcessor.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/HeadingHoldProcessor.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/HeadingHoldProcessor.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/DataStorage.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/DataStorage.h:
 
-c:/Working/AeroQuad/AeroQuad32/../AeroQuad/SerialCom.h:
+c:/Working/Aeroquad/AeroQuad32/../AeroQuad/SerialCom.h:
