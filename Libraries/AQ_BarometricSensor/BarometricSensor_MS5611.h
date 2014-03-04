@@ -134,7 +134,6 @@ unsigned long MS5611readConversion(int addr) {
   sendByteI2C(addr, 0);
   Wire.requestFrom(addr, MS561101BA_D1D2_SIZE);
   if(Wire.available() == MS561101BA_D1D2_SIZE) {
-//    conversion = (readByteI2C() << 16) | (readByteI2C() << 8) | (readByteI2C() << 0);
 	conversion = (((unsigned long)readByteI2C()) << 16) | ((unsigned int)((readByteI2C() << 8) | (readByteI2C() << 0)));
   } 
   else {
