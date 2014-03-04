@@ -611,11 +611,7 @@
 //********************************************************
 //********************************************************
 
-#ifdef AeroQuadSTM32
-  #include "AeroQuad_STM32.h"
-#elif defined(Naze32)
-  #define AeroQuadSTM32
-  #define BOARD_naze32
+#if defined(AeroQuadSTM32)
   #include "AeroQuad_STM32.h"
 #endif
 

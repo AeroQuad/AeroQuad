@@ -41,7 +41,6 @@
 
 // STM32 processor
 #define AeroQuadSTM32        // Baloo board
-//#define Naze32
 
 
 /****************************************************************************
