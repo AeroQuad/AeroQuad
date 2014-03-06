@@ -255,8 +255,8 @@ typedef struct {
 } t_NVR_PID;
 
 typedef struct {
-  float slope;
-  float offset;
+  long minValue;
+  long maxValue;
   float smooth_factor;
 } t_NVR_Receiver;
 

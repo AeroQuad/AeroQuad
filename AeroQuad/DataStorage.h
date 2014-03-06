@@ -189,8 +189,8 @@ void initializeEEPROM() {
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-    receiverSlope[channel] = 1.0;
-    receiverOffset[channel] = 0.0;
+    receiverMinValue[channel] = 1000;
+    receiverMaxValue[channel] = 2000;
     receiverSmoothFactor[channel] = 1.0;
   }
   receiverSmoothFactor[ZAXIS] = 0.5;
@@ -378,8 +378,8 @@ void writeEEPROM(){
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
-    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
+    writeLong(receiverMinValue[channel],  RECEIVER_DATA[channel].minValue);
+    writeLong(receiverMaxValue[channel], RECEIVER_DATA[channel].minValue);
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
@@ -471,8 +471,8 @@ void initReceiverFromEEPROM() {
   receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
-    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
+    receiverMinValue[channel] = readLong(RECEIVER_DATA[channel].minValue);
+    receiverMaxValue[channel] = readLong(RECEIVER_DATA[channel].maxValue);
     receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
   }
 }

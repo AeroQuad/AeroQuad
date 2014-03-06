@@ -122,13 +122,15 @@ void readSerialCommand() {
       break;
 
     case 'G': // Receive transmitter calibration values
-      channelCal = (int)readFloatSerial();
-      receiverSlope[channelCal] = readFloatSerial();
+      for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
+        receiverMinValue[axis] = readIntegerSerial();
+      }
       break;
 
     case 'H': // Receive transmitter calibration values
-      channelCal = (int)readFloatSerial();
-      receiverOffset[channelCal] = readFloatSerial();
+      for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
+        receiverMaxValue[axis] = readIntegerSerial();
+      }
       break;
 
     case 'I': // Initialize EEPROM with default values
@@ -434,7 +436,7 @@ void sendSerialTelemetry() {
 
   case 'g': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      Serial.print(receiverSlope[axis], 6);
+      Serial.print(receiverMinValue[axis]);
       Serial.print(',');
     }
     SERIAL_PRINTLN();
@@ -443,7 +445,7 @@ void sendSerialTelemetry() {
 
   case 'h': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      Serial.print(receiverOffset[axis], 6);
+      Serial.print(receiverMaxValue[axis]);
       Serial.print(',');
     }
     SERIAL_PRINTLN();
@@ -464,14 +466,21 @@ void sendSerialTelemetry() {
         PrintValueComma(0);
       #endif
     }
+    #if defined(AltitudeHoldBaro)
+      PrintValueComma(getBaroAltitude());
+      PrintValueComma(zVelocity);
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+    #endif
     SERIAL_PRINTLN();
     break;
 
   case 'j': // Send raw mag values
     #ifdef HeadingMagHold
-      PrintValueComma(getMagnetometerRawData(XAXIS));
-      PrintValueComma(getMagnetometerRawData(YAXIS));
-      SERIAL_PRINTLN(getMagnetometerRawData(ZAXIS));
+      PrintValueComma(rawMag[XAXIS]);
+      PrintValueComma(rawMag[YAXIS]);
+      SERIAL_PRINTLN(rawMag[ZAXIS]);
     #endif
     break;
 
@@ -585,11 +594,14 @@ void sendSerialTelemetry() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       #if defined AltitudeHoldBaro
         PrintValueComma(estimatedAltitude);
+        PrintValueComma(zVelocity);
       #elif defined AltitudeHoldRangeFinder
         PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
+        PrintValueComma(0);
       #endif
       PrintValueComma((int)altitudeHoldState);
     #else
+      PrintValueComma(0);
       PrintValueComma(0);
       PrintValueComma(0);
     #endif
@@ -614,7 +626,7 @@ void sendSerialTelemetry() {
 
   case 't': // Send processed transmitter values
     for (byte axis = 0; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverCommand[axis]);
+      PrintValueComma(getRawChannelValue(axis));
     }
     SERIAL_PRINTLN();
     break;
@@ -906,8 +918,6 @@ void reportVehicleState() {
     SERIAL_PRINTLN("MWCProEz30");    
   #elif defined(AeroQuadSTM32)
     SERIAL_PRINTLN(STM32_BOARD_TYPE);
-  #elif defined(Naze32)
-    SERIAL_PRINTLN("Naze32");
   #endif
 
   SERIAL_PRINT("Flight Config: ");

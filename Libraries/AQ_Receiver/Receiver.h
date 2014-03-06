@@ -44,8 +44,8 @@ int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
 int receiverZero[3] = {0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0};
 int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0,0,0,};
-float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+int receiverMinValue[MAX_NB_CHANNEL] = {1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
+int receiverMaxValue[MAX_NB_CHANNEL] = {2000,2000,2000,2000,2000,2000,2000,2000,2000,2000};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 int channelCal;
 
@@ -72,10 +72,10 @@ void initializeReceiverParam(int nbChannel = 6) {
   }
 	
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverSlope[channel] = 1;
+    receiverMinValue[channel] = 1;
   }	
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    receiverOffset[channel] = 1;
+    receiverMaxValue[channel] = 1;
   }
   for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverSmoothFactor[channel] = 1; 
@@ -90,7 +90,7 @@ void readReceiver()
   for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
 
     // Apply receiver calibration adjustment
-    receiverData[channel] = (receiverSlope[channel] * getRawChannelValue(channel)) + receiverOffset[channel];
+	receiverData[channel] = map(getRawChannelValue(channel),receiverMinValue[channel],receiverMaxValue[channel],1000,2000);
     // Smooth the flight control receiver inputs
     receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }

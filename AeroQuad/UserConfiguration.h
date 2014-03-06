@@ -31,7 +31,7 @@
 
 // 328p processor
 //#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define MWCFlip15           // MWCFlip1.5 board from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/flip-mwc-flight-controller.html
 
 // Mega processor
@@ -40,7 +40,8 @@
 //#define MWCProEz30          // MWC Prop #z3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
 
 // STM32 processor
-#define AeroQuadSTM32        // Baloo board
+//#define AeroQuadSTM32        // Baloo board
+//#define Naze32
 
 
 /****************************************************************************
@@ -172,7 +173,7 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // For more information please refer to http://aeroquad.com/showwiki.php?title=Camera+Stabilization
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 //#define CameraTXControl  // need to have CameraControl to work
 
 //

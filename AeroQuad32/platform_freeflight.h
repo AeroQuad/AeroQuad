@@ -41,6 +41,11 @@ static byte stm32_motor_mapping[] = {
 #include <Accelerometer_MPU6000.h>
 // heading mag hold declaration
 
+
+//#include <Gyroscope_ITG3200.h>
+//#include <Accelerometer_ADXL345_9DOF.h>
+
+
 #undef HeadingMagHold
 #undef AltitudeHoldBaro
 #undef BattMonitor

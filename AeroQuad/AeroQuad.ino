@@ -502,6 +502,7 @@
   #ifdef HeadingMagHold
     #include <Compass.h>
     #define HMC5883L
+//    #define SPARKFUN_5883L_BOB
   #endif
 
 
@@ -610,7 +611,11 @@
 //********************************************************
 //********************************************************
 
-#if defined(AeroQuadSTM32)
+#ifdef AeroQuadSTM32
+  #include "AeroQuad_STM32.h"
+#elif defined(Naze32)
+  #define AeroQuadSTM32
+  #define BOARD_freeflight
   #include "AeroQuad_STM32.h"
 #endif
 
@@ -980,7 +985,7 @@ void process100HzTask() {
       estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
      
       previousBaroAltitude = getBaroAltitude();
-      zVelocity = computedZVelicity;
+      zVelocity = filterSmooth(computedZVelicity, zVelocity, 0.05);
     }
   #endif
         
