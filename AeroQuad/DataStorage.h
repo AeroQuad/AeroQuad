@@ -334,7 +334,6 @@ void readEEPROM() {
 }
 
 void writeEEPROM(){
-  cli(); // Needed so that APM sensor data does not overflow
   writePID(XAXIS, ROLL_PID_GAIN_ADR);
   writePID(YAXIS, PITCH_PID_GAIN_ADR);
   writePID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
@@ -379,7 +378,7 @@ void writeEEPROM(){
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeLong(receiverMinValue[channel],  RECEIVER_DATA[channel].minValue);
-    writeLong(receiverMaxValue[channel], RECEIVER_DATA[channel].minValue);
+    writeLong(receiverMaxValue[channel], RECEIVER_DATA[channel].maxValue);
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
@@ -438,7 +437,6 @@ void writeEEPROM(){
       writeFloat(servoTXChannels, SERVOTXCHANNELS_ADR);
     #endif
   #endif 
-  sei(); // Restart interrupts
 }
 
 void initSensorsZeroFromEEPROM() {
@@ -478,4 +476,4 @@ void initReceiverFromEEPROM() {
 }
 
 #endif // _AQ_DATA_STORAGE_H_
-
+ 

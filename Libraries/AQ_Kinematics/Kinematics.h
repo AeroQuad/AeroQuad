@@ -29,6 +29,8 @@
 #define ARG 3
 #define MARG 4
 
+
+
 // This class is responsible for calculating vehicle attitude
 byte kinematicsType = 0;
 float kinematicsAngle[3] = {0.0,0.0,0.0};
@@ -38,34 +40,18 @@ float earthAccel[3] = {0.0,0.0,0.0};
 
 float accelCutoff = 0.0;
 
-void initializeBaseKinematicsParam() {
+void initializeBaseKinematicParam() {
 
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     kinematicsAngle[axis] = 0.0;
   }
-//  gyroAngle[XAXIS] = 0;
-//  gyroAngle[YAXIS] = 0;
 }
 
 void initializeKinematics(float hdgX, float hdgY);
-void calculateKinematics(float rollRate,           float pitchRate,     float yawRate,       
-                         float longitudinalAccel,  float lateralAccel,  float verticalAccel, 
-                         float G_Dt);
-float getGyroUnbias(byte axis);
+	
 void calibrateKinematics();
  
-  // returns the kinematicsAngle of a specific axis in SI units (radians)
-//  const float getData(byte axis) {
-//    return kinematicsAngle[axis];
-//  }
-  // return heading as +PI/-PI
-//  const float getHeading(byte axis) {
-//    return(kinematicsAngle[axis]);
-//  }
-  
-  // This really needs to be in Radians to be consistent
-  // I'll fix later - AKA
-  // returns heading in degrees as 0-360
+
 const float kinematicsGetDegreesHeading(byte axis) {
   float tDegrees;
     

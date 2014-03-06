@@ -202,7 +202,6 @@ void processZeroThrottleFunctionFromReceiverCommand() {
     calibrateGyro();
     computeAccelBias();
     storeSensorsZeroToEEPROM();
-    calibrateKinematics();
     zeroIntegralError();
     pulseMotors(3);
   }   

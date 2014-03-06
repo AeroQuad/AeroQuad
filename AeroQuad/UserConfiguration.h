@@ -31,13 +31,13 @@
 
 // 328p processor
 //#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define MWCFlip15           // MWCFlip1.5 board from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/flip-mwc-flight-controller.html
 
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-//#define MWCProEz30          // MWC Prop #z3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
+#define MWCProEz30          // MWC Prop #z3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
 
 // STM32 processor
 //#define AeroQuadSTM32        // Baloo board
@@ -84,8 +84,8 @@
 // For more information on how to activate theese features with your transmitter
 // Please refer to http://aeroquad.com/showwiki.php?title=Using+the+transmitters+sticks+and+switches+to+operate+your+AeroQuad
 // *******************************************************************************************************************************
-//#define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro		// Enables Barometer
+#define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHoldBaro		// Enables Barometer
 //#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
 //#define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
@@ -93,8 +93,8 @@
 // *******************************************************************************************************************************
 // GPS Options
 // *******************************************************************************************************************************
-//#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
-//#define UseGPSNavigator
+#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
+#define UseGPSNavigator
 
 // Device specific settings
 //#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)
@@ -104,7 +104,7 @@
 // Battery Monitor Options
 // For more information on how to setup the Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=Battery+Monitor
 // *******************************************************************************************************************************
-//#define BattMonitor			  // Enables Battery monitor
+#define BattMonitor			  // Enables Battery monitor
 //#define BattMonitorAutoDescent  // NEED BattMonitor defined. If you want the craft to auto descent when the battery reaches the alarm voltage
 //#define POWERED_BY_VIN          // NEED BattMonitor defined. Uncomment this if your v2.x shield is powered directly by the Vin/Gnd of the arduino
 //
@@ -135,8 +135,8 @@
 // *******************************************************************************************************************************
 // Define how many channels are connected from your R/C receiver
 // *******************************************************************************************************************************
-#define LASTCHANNEL 6
-//#define LASTCHANNEL 8
+//#define LASTCHANNEL 6
+#define LASTCHANNEL 8
 //#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
 
 

@@ -628,7 +628,12 @@
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
 #include "Kinematics.h"
-#include "Kinematics_ARG.h"
+#if defined(HeadingMagHold)
+  #include "Kinematics_MARG.h"
+#else
+  #include "Kinematics_ARG.h"
+#endif
+
 
 
 //********************************************************
@@ -692,10 +697,10 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined(HMC5843)
-  #include <HeadingFusionProcessorMARG.h>
+//  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5843.h>
 #elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
-  #include <HeadingFusionProcessorMARG.h>
+//  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5883L.h>
 #elif defined(COMPASS_CHR6DM)
 #endif
@@ -887,13 +892,11 @@ void setup() {
   setupFourthOrder();
   initSensorsZeroFromEEPROM();
   
-  // Flight angle estimation
-  initializeKinematics();
-
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
-    initializeHeadingFusion();
+  #else    
+    initializeKinematics();
   #endif
   
   // Optional Sensors
@@ -967,8 +970,14 @@ void process100HzTask() {
   for (int axis = XAXIS; axis <= ZAXIS; axis++) {
     filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
   }
-    
-  calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+   
+  #if defined (HeadingMagHold) 
+    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[XAXIS], measuredMag[XAXIS], G_Dt);
+    magDataUpdate = false;
+  #else
+    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+  #endif
+
   
   #if defined AltitudeHoldBaro
     float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
@@ -1052,9 +1061,7 @@ void process10HzTask1() {
     tenHZpreviousTime = currentTime;
      
     measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-    
-    calculateHeading();
-    
+    magDataUpdate = true;
   #endif
 }
 
@@ -1129,12 +1136,14 @@ void loop () {
     
     process100HzTask();
 
+    measureCriticalSensors();
     // ================================================================
     // 50Hz task loop
     // ================================================================
     if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
       process50HzTask();
     }
+    measureCriticalSensors();
 
     // ================================================================
     // 10Hz task loop
@@ -1148,6 +1157,7 @@ void loop () {
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       process10HzTask3();
     }
+    measureCriticalSensors();
     
     // ================================================================
     // 1Hz task loop
@@ -1155,6 +1165,7 @@ void loop () {
     if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
       process1HzTask();
     }
+    measureCriticalSensors();
     
     previousTime = currentTime;
   }

@@ -131,6 +131,7 @@ void readSerialCommand() {
       for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
         receiverMaxValue[axis] = readIntegerSerial();
       }
+      writeEEPROM();
       break;
 
     case 'I': // Initialize EEPROM with default values

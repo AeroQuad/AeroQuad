@@ -144,7 +144,7 @@ void eulerAngles()
 
 void initializeKinematics() 
 {
-  initializeBaseKinematicsParam();
+  initializeBaseKinematicParam();
   q0 = 1.0;
   q1 = 0.0;
   q2 = 0.0;
