@@ -24,7 +24,11 @@
 #if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
   #define PPM_PIN_INTERRUPT()          attachInterrupt(0, rxInt, RISING) //PIN 0
 #else
-  #define PPM_PIN_INTERRUPT()          attachInterrupt(4, rxInt, RISING) //PIN 19, also used for Spektrum satellite option
+	#if defined (PPM_ON_THROTTLE)
+		#define PPM_PIN_INTERRUPT()        DDRK &= ~(1<<0); PORTK |= (1<<0);  PCICR |= (1<<2); PCMSK2 |= (1<<0);
+	#else
+		#define PPM_PIN_INTERRUPT()          attachInterrupt(4, rxInt, RISING) //PIN 19, also used for Spektrum satellite option
+	#endif
 #endif
 
 #include "Arduino.h"
@@ -59,10 +63,16 @@ static void rxInt() {
   }
 }
 
+#if defined (PPM_ON_THROTTLE)
+	ISR(PCINT2_vect) { if(PINK & (1<<0)) rxInt(); }
+#endif
+
+
 void initializeReceiver(int nbChannel) {
 
   initializeReceiverParam(nbChannel);
-  PPM_PIN_INTERRUPT();
+ 
+  PPM_PIN_INTERRUPT(); 
 }
 
 int getRawChannelValue(byte channel) {

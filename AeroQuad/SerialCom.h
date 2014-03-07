@@ -154,11 +154,8 @@ void readSerialCommand() {
 
     case 'K': // Write accel calibration values
       accelScaleFactor[XAXIS] = readFloatSerial();
-      readFloatSerial();
       accelScaleFactor[YAXIS] = readFloatSerial();
-      readFloatSerial();
       accelScaleFactor[ZAXIS] = readFloatSerial();
-      readFloatSerial();
       computeAccelBias();    
       storeSensorsZeroToEEPROM();
       break;
@@ -174,9 +171,9 @@ void readSerialCommand() {
 
     case 'M': // calibrate magnetometer
       #ifdef HeadingMagHold
-        magBias[XAXIS]  = readFloatSerial();
-        magBias[YAXIS]  = readFloatSerial();
-        magBias[ZAXIS]  = readFloatSerial();
+        magBias[XAXIS] = readFloatSerial();
+        magBias[YAXIS] = readFloatSerial();
+        magBias[ZAXIS] = readFloatSerial();
         writeEEPROM();
       #else
         skipSerialValues(3);

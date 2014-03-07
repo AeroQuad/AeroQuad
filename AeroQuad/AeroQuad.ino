@@ -502,7 +502,6 @@
   #ifdef HeadingMagHold
     #include <Compass.h>
     #define HMC5883L
-//    #define SPARKFUN_5883L_BOB
   #endif
 
 
@@ -515,6 +514,9 @@
   
   // Receiver Declaration
   #define RECEIVER_MEGA
+  #if defined (ReceiverPPM)
+    #define PPM_ON_THROTTLE
+  #endif
 
   // Motor declaration
   #define MOTOR_PWM_Timer
