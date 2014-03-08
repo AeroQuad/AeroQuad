@@ -613,12 +613,32 @@ void sendSerialTelemetry() {
     }
     PrintDummyValues(8 - LASTMOTOR); // max of 8 motor outputs supported
 
-    #ifdef BattMonitor
+    #if defined(BattMonitor)
       PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
     #else
       PrintValueComma(0);
     #endif
+    
     PrintValueComma(flightMode);
+    
+    #if defined(UseGPS)
+      PrintValueComma(gpsData.state);
+      PrintValueComma(gpsData.sats);
+      PrintValueComma(gpsData.speed);
+      PrintValueComma(gpsData.height);
+      PrintValueComma(gpsData.course);
+      PrintValueComma(gpsData.lat);
+      PrintValueComma(gpsData.lon);
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+      PrintValueComma(0);
+    #endif
+    
     SERIAL_PRINTLN();
     break;
 
@@ -957,13 +977,7 @@ void reportVehicleState() {
   printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
   printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
 #ifdef UseGPS
-  SERIAL_PRINT("GPS: ");
-  SERIAL_PRINT((gpsData.state==GPS_DETECTING)?"Scanning ":"Detected ");
-  if (gpsData.state != GPS_DETECTING) {
-    SERIAL_PRINT(gpsTypes[gpsData.type].name);
-  }
-  SERIAL_PRINT("@");
-  SERIAL_PRINTLN(gpsBaudRates[gpsData.baudrate]);
+  SERIAL_PRINTLN("GPS: Enabled");
 #else
   SERIAL_PRINTLN("GPS: Not Enabled");
 #endif

@@ -1,5 +1,5 @@
 objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
- c:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.cpp \
+ c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.cpp \
  ../Libmaple/libmaple/wirish/wirish.h \
  ../Libmaple/libmaple/libmaple/libmaple.h \
  ../Libmaple/libmaple/libmaple/libmaple_types.h \
@@ -50,8 +50,8 @@ objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
  ../Libmaple/libmaple/wirish/HardwareTimer.h \
  ../Libmaple/libmaple/wirish/usb_serial.h \
  ../Libmaple/libmaple/wirish/Print.h \
- c:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.h \
- c:/Working/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.h
+ c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.h \
+ c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/flash_stm32.h
 
 ../Libmaple/libmaple/wirish/wirish.h:
 
@@ -157,6 +157,6 @@ c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/
 
 ../Libmaple/libmaple/wirish/Print.h:
 
-c:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.h:
+c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.h:
 
-c:/Working/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.h:
+c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/flash_stm32.h:

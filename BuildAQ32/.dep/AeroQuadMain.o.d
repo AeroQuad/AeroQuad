@@ -83,13 +83,22 @@ objSTM32/dummy/../AeroQuad32/AeroQuadMain.o: \
  ../Libraries/AQ_Gyroscope/Gyroscope.h \
  ../Libraries/AQ_Accelerometer/Accelerometer_MPU6000.h \
  ../Libraries/AQ_Accelerometer/Accelerometer.h \
+ ../Libraries/AQ_Compass/Compass.h \
  ../Libraries/AQ_Kinematics/Kinematics.h \
- ../Libraries/AQ_Kinematics/Kinematics_ARG.h \
+ ../Libraries/AQ_Kinematics/Kinematics_MARG.h \
  ../Libraries/AQ_Kinematics/Kinematics.h \
+ ../Libraries/AQ_Kinematics/MagnetometerDeclinationDB.h \
  ../Libraries/AQ_Receiver/Receiver_STM32PPM.h \
  ../Libraries/AQ_Receiver/Receiver.h \
  ../Libraries/AQ_Receiver/Receiver_PPM_common.h \
  ../Libraries/AQ_Motors/Motors_STM32.h ../Libraries/AQ_Motors/Motors.h \
+ ../Libraries/AQ_Compass/Magnetometer_HMC5883L.h \
+ ../Libraries/AQ_Compass/Compass.h \
+ ../Libraries/AQ_Compass/Magnetometer_HMC58xx.h \
+ ../Libraries/AQ_BarometricSensor/BarometricSensor_MS5611.h \
+ ../Libraries/AQ_BarometricSensor/BarometricSensor.h \
+ ../Libraries/AQ_Kinematics/VelocityProcessor.h \
+ ../Libraries/AQ_Math/FifteenFloatBuffer.h \
  ../Libraries/AQ_FlightControlProcessor/FlightControlQuadX.h \
  ../Libraries/AQ_FlightControlProcessor/FlightControlVariable.h \
  c:/Working/Aeroquad/AeroQuad32/../AeroQuad/AltitudeControlProcessor.h \
@@ -277,11 +286,15 @@ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/PID.h:
 
 ../Libraries/AQ_Accelerometer/Accelerometer.h:
 
-../Libraries/AQ_Kinematics/Kinematics.h:
-
-../Libraries/AQ_Kinematics/Kinematics_ARG.h:
+../Libraries/AQ_Compass/Compass.h:
 
 ../Libraries/AQ_Kinematics/Kinematics.h:
+
+../Libraries/AQ_Kinematics/Kinematics_MARG.h:
+
+../Libraries/AQ_Kinematics/Kinematics.h:
+
+../Libraries/AQ_Kinematics/MagnetometerDeclinationDB.h:
 
 ../Libraries/AQ_Receiver/Receiver_STM32PPM.h:
 
@@ -292,6 +305,20 @@ c:/Working/Aeroquad/AeroQuad32/../AeroQuad/PID.h:
 ../Libraries/AQ_Motors/Motors_STM32.h:
 
 ../Libraries/AQ_Motors/Motors.h:
+
+../Libraries/AQ_Compass/Magnetometer_HMC5883L.h:
+
+../Libraries/AQ_Compass/Compass.h:
+
+../Libraries/AQ_Compass/Magnetometer_HMC58xx.h:
+
+../Libraries/AQ_BarometricSensor/BarometricSensor_MS5611.h:
+
+../Libraries/AQ_BarometricSensor/BarometricSensor.h:
+
+../Libraries/AQ_Kinematics/VelocityProcessor.h:
+
+../Libraries/AQ_Math/FifteenFloatBuffer.h:
 
 ../Libraries/AQ_FlightControlProcessor/FlightControlQuadX.h:
 
