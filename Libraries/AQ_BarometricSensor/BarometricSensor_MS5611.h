@@ -27,11 +27,13 @@
 #include "Device_I2C.h"
 #include <AQMath.h>
 
+
+//#define DEBUG_MS5611
 #ifndef USE_MS5611_ALTERNATE_ADDRESS
   #define MS5611_I2C_ADDRESS         0x76
 #else
   #define MS5611_I2C_ADDRESS         0x77
-#endif	
+#endif
 
 #define MS561101BA_PROM_BASE_ADDR  0xA0
 #define MS561101BA_PROM_REG_COUNT  8     // number of registers in the PROM
@@ -134,7 +136,7 @@ unsigned long MS5611readConversion(int addr) {
   sendByteI2C(addr, 0);
   Wire.requestFrom(addr, MS561101BA_D1D2_SIZE);
   if(Wire.available() == MS561101BA_D1D2_SIZE) {
-	conversion = (((unsigned long)readByteI2C()) << 16) | ((unsigned int)((readByteI2C() << 8) | (readByteI2C() << 0)));
+    conversion = (((unsigned long)readByteI2C()) << 16) | ((unsigned int)((readByteI2C() << 8) | (readByteI2C() << 0)));
   } 
   else {
     conversion = 0;
@@ -244,13 +246,13 @@ void evaluateBaroAltitude() {
   if (rawPressureSumCount == 0) { // it may occur at init time that no pressure has been read yet!
     return;
   }
-  
+
   pressure = rawPressureSum / rawPressureSumCount;
 
   baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
   // use calculation below in case you need a smaller binary file for CPUs having just 32KB flash ROM
-  // baroRawAltitude = (101325.0-pressure)/4096.0*346.0;
-
+  // baroRawAltitude = (101325.0-pressure)/4096*346;
+  
   if(MS5611_first_read) {
     baroAltitude = baroRawAltitude;
     MS5611_first_read = false;
@@ -258,7 +260,7 @@ void evaluateBaroAltitude() {
   else {
     baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);
   }
-
+  
   rawPressureSum = 0.0;
   rawPressureSumCount = 0;
 
