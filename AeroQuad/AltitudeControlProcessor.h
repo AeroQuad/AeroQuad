@@ -48,7 +48,6 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-
   if (altitudeHoldState == ON) {
     int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
     // computer altitude error!
@@ -73,17 +72,17 @@ void processAltitudeHold()
     }
     
     // ZDAMPENING COMPUTATIONS
-//    #if defined AltitudeHoldBaro
+    #if defined AltitudeHoldBaro
     
 //      PID[ZDAMPENING_PID_IDX].P = 12;
 //      PID[ZDAMPENING_PID_IDX].I = 0;
 //      PID[ZDAMPENING_PID_IDX].D = 2;
 //      float zDampeningThrottleCorrection = filterSmooth(updatePID(0.0, zVelicity, &PID[ZDAMPENING_PID_IDX]),previousZDampeningThrottleCorrection,0.1);
 //      previousZDampeningThrottleCorrection = zDampeningThrottleCorrection;
-        float zDampeningThrottleCorrection = updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
+        float zDampeningThrottleCorrection = -updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
 //      Serial.println(zDampeningThrottleCorrection);
 //      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-//    #endif
+    #endif
 
     
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {

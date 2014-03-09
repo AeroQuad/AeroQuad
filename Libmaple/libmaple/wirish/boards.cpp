@@ -100,7 +100,18 @@ static void setupFlash(void) {
  * comment above.
  */
 static void setupClocks() {
+#if defined(BOARD_freeflight)
+    gpio_init(GPIOC);
+    gpio_set_mode(GPIOC, 15, GPIO_INPUT_PD);
+    if(gpio_read_bit(GPIOC, 15)) {
+        rcc_clk_init(RCC_CLKSRC_PLL, RCC_PLLSRC_HSE, RCC_PLLMUL_6);
+    } else {
+        rcc_clk_init(RCC_CLKSRC_PLL, RCC_PLLSRC_HSE, RCC_PLLMUL_9);
+    }
+#else
     rcc_clk_init(RCC_CLKSRC_PLL, RCC_PLLSRC_HSE, RCC_PLLMUL_9);
+#endif    
+
     rcc_set_prescaler(RCC_PRESCALER_AHB, RCC_AHB_SYSCLK_DIV_1);
     rcc_set_prescaler(RCC_PRESCALER_APB1, RCC_APB1_HCLK_DIV_2);
     rcc_set_prescaler(RCC_PRESCALER_APB2, RCC_APB2_HCLK_DIV_1);

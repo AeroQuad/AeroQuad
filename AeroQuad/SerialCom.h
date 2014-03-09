@@ -106,6 +106,7 @@ void readSerialCommand() {
           readFloatSerial();
         #endif
         readSerialPID(ZDAMPENING_PID_IDX);
+        writeEEPROM();
       #endif
       break;
 
