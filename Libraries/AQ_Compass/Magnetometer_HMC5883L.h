@@ -46,14 +46,13 @@ void readSpecificMag(float *rawMag) {
     rawMag[ZAXIS] = readShortI2C();
     rawMag[YAXIS] = readShortI2C();
   #elif defined (MWCProEz30)  // MWCProEz30
-	rawMag[XAXIS] = -readShortI2C();
-    rawMag[ZAXIS] = -readShortI2C();
-    rawMag[YAXIS] = -readShortI2C();
+    rawMag[ZAXIS] =   readShortI2C();
+    rawMag[YAXIS] =   readShortI2C();
+    rawMag[XAXIS] =  -readShortI2C();
   #elif defined (HMC5883L)  // baloo
     rawMag[YAXIS] =  readShortI2C();
     rawMag[ZAXIS] = -readShortI2C();
     rawMag[XAXIS] =  readShortI2C();
-  
   #else 
       #error Define HMC5883L Orientation
   #endif

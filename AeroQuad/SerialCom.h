@@ -355,18 +355,16 @@ void PrintDummyValues(byte number) {
 
 float getHeading()
 {
-  #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    float heading = trueNorthHeading;
-    if (heading < 0) { 
-      heading += (2.0 * M_PI);
-    }
-    return heading;
+  #if defined(HeadingMagHold) 
+    return trueNorthHeading;
   #else
     return(gyroHeading);
   #endif
 }
 
 void sendSerialTelemetry() {
+//  Serial.println(degrees(trueNorthHeading));
+  
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     break;

@@ -67,9 +67,9 @@ void measureMagnetometer(float roll, float pitch) {
 
   updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
 
-  measuredMag[XAXIS] = rawMag[XAXIS] + magBias[XAXIS];
-  measuredMag[YAXIS] = rawMag[YAXIS] + magBias[YAXIS];
-  measuredMag[ZAXIS] = rawMag[ZAXIS] + magBias[ZAXIS];
+  measuredMag[XAXIS] = rawMag[XAXIS] - magBias[XAXIS];
+  measuredMag[YAXIS] = rawMag[YAXIS] - magBias[YAXIS];
+  measuredMag[ZAXIS] = rawMag[ZAXIS] - magBias[ZAXIS];
   
   const float cosRoll =  cos(roll);
   const float sinRoll =  sin(roll);
