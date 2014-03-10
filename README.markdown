@@ -108,7 +108,7 @@ Version 2.5 Release Notes (11/30/2011)
  * Fixed various 8 channel transmitter channel bugs (special thanks to Ala42!)
  * Added safety procedure for ESC calibration (prevent random full throttles during PID updates)
    * Please keep common sense safety practices in place, remove props or remove battery power when necessary
- * Optmized SerialCom.pde (removed unused commands)
+ * Optimized SerialCom.pde (removed unused commands)
  
 Version 2.4.3 Release Notes (7/24/2011)
 ----------------------------------------
@@ -209,7 +209,7 @@ Flight software configuration support for multiple hardware has changed.  Look f
     // Select which hardware you wish to use with the AeroQuad Flight Software
     
     //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
-    #define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+      #define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
     //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors
     //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
     //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
