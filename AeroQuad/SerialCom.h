@@ -89,7 +89,7 @@ void readSerialCommand() {
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      headingHoldConfig = readFloatSerial();
+      readFloatSerial();
       break;
 
     case 'D': // Altitude hold PID
@@ -111,7 +111,7 @@ void readSerialCommand() {
       break;
 
     case 'E': // Receive sensor filtering values
-      aref = readFloatSerial();
+      readFloatSerial();
       minArmedThrottle = readFloatSerial();
       break;
 
@@ -390,7 +390,7 @@ void sendSerialTelemetry() {
   case 'c': // Send yaw PID values
     PrintPID(ZAXIS_PID_IDX);
     PrintPID(HEADING_HOLD_PID_IDX);
-    SERIAL_PRINTLN((int)headingHoldConfig);
+    SERIAL_PRINTLN(0);
     queryType = 'X';
     break;
 
@@ -416,7 +416,7 @@ void sendSerialTelemetry() {
     break;
 
   case 'e': // miscellaneous config values
-    PrintValueComma(aref);
+    PrintValueComma(0);
     SERIAL_PRINTLN(minArmedThrottle);
     queryType = 'X';
     break;

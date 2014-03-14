@@ -92,22 +92,10 @@ unsigned long hundredHZpreviousTime = 0;
 
 //////////////////////////////////////////////////////
 
-
-// Analog Reference Value
-// This value provided from Configurator
-// Use a DMM to measure the voltage between AREF and GND
-// Enter the measured voltage below to define your value for aref
-// If you don't have a DMM use the following:
-// AeroQuad Shield v1.7, aref = 3.0
-// AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Read in from EEPROM
-//////////////////////////////////////////////////////
-
 /**
  * Heading and heading hold global declaration section
  */
  
-byte  headingHoldConfig   = 0;
 float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading             = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading     = 0; // current heading the quad is set to (set point)
@@ -279,9 +267,7 @@ typedef struct {
   float SOFTWARE_VERSION_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
-  float AREF_ADR;
   float FLIGHTMODE_ADR;
-  float HEADINGHOLD_ADR;
   float ACCEL_1G_ADR;
   float ALTITUDE_MAX_THROTTLE_ADR;
   float ALTITUDE_MIN_THROTTLE_ADR;

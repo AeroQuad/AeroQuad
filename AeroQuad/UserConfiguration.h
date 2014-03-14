@@ -36,11 +36,11 @@
 
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-//#define MWCProEz30          // MWC Prop #z3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
+#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define MWCProEz30          // MWC Prop Ez3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
 
 // STM32 processor
-#define AeroQuadSTM32        // Baloo board
+//#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
@@ -92,8 +92,8 @@
 // *******************************************************************************************************************************
 // GPS Options
 // *******************************************************************************************************************************
-#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
-#define UseGPSNavigator
+//#define UseGPS		        // Enables GPS (for mega v2.0/v2.1 on Serial1 & AeroQuad32 on Serial2)
+//#define UseGPSNavigator
 
 // Device specific settings
 //#define UseGPSMTKBINARY   // Set MTK devices to binary protocol (only DiyDrones MTK1.6 protocol supported)

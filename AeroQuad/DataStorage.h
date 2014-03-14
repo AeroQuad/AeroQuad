@@ -196,8 +196,6 @@ void initializeEEPROM() {
   receiverSmoothFactor[ZAXIS] = 0.5;
 
   flightMode = RATE_FLIGHT_MODE;
-  headingHoldConfig = ON;
-  aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
   // Battery Monitor
   #ifdef BattMonitor
@@ -293,10 +291,8 @@ void readEEPROM() {
   #endif
   
   minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
-  aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
-  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 
   #if defined (UseGPSNavigator)
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
@@ -383,9 +379,7 @@ void writeEEPROM(){
   }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
-  writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
-  writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(accelOneG, ACCEL_1G_ADR);
   writeFloat(SOFTWARE_VERSION, SOFTWARE_VERSION_ADR);
   

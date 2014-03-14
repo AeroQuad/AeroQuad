@@ -53,6 +53,7 @@ void readSpecificMag(float *rawMag) {
     rawMag[YAXIS] =  readShortI2C();
     rawMag[ZAXIS] = -readShortI2C();
     rawMag[XAXIS] =  readShortI2C();
+
   #else 
       #error Define HMC5883L Orientation
   #endif
