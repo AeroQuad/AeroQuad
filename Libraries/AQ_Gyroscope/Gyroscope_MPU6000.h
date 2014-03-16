@@ -29,7 +29,7 @@ int gyroRaw[3] = {0,0,0};
 #define GYRO_CALIBRATION_TRESHOLD 35
 
 void initializeGyro() {
-  float range = 2*1000.0;
+  float range = 4*1000.0;
   gyroScaleFactor = radians(range/65536.0);
 
   initializeMPU6000Sensors();

@@ -76,6 +76,7 @@ void readSerialCommand() {
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
       rotationSpeedFactor = readFloatSerial();
+      writeEEPROM();
       break;
 
     case 'B': // Receive roll/pitch attitude mode PID
@@ -83,13 +84,13 @@ void readSerialCommand() {
       readSerialPID(ATTITUDE_YAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
       readSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
-      readFloatSerial(); 
+      writeEEPROM();
       break;
 
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
       readSerialPID(HEADING_HOLD_PID_IDX);
-      readFloatSerial();
+      writeEEPROM();
       break;
 
     case 'D': // Altitude hold PID
@@ -187,6 +188,7 @@ void readSerialCommand() {
         batteryMonitorThrottleTarget = readFloatSerial();
         batteryMonitorGoingDownTime = readFloatSerial();
         setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
+        writeEEPROM();
       #else
         skipSerialValues(3);
       #endif
@@ -198,6 +200,7 @@ void readSerialCommand() {
         waypoint[missionNbPoint].latitude = readIntegerSerial();
         waypoint[missionNbPoint].longitude = readIntegerSerial();
         waypoint[missionNbPoint].altitude = readIntegerSerial();
+        writeEEPROM();
       #else
         for(byte i = 0; i < 4; i++) {
           readFloatSerial();
@@ -219,6 +222,7 @@ void readSerialCommand() {
         servoMaxPitch = readFloatSerial();
         servoMaxRoll = readFloatSerial();
         servoMaxYaw = readFloatSerial();
+        writeEEPROM();
         #ifdef CameraTXControl
           servoTXChannels = readFloatSerial();
         #endif
@@ -235,6 +239,7 @@ void readSerialCommand() {
       #if defined (AltitudeHoldRangeFinder)
         maxRangeFinderRange = readFloatSerial();
         minRangeFinderRange = readFloatSerial();
+        writeEEPROM();
       #else
         skipSerialValues(2);
       #endif
@@ -484,15 +489,9 @@ void sendSerialTelemetry() {
   case 'k': // Send accelerometer cal values
     SERIAL_PRINT(accelScaleFactor[XAXIS], 6);
     comma();
-    SERIAL_PRINT(runTimeAccelBias[XAXIS], 6);
-    comma();
     SERIAL_PRINT(accelScaleFactor[YAXIS], 6);
     comma();
-    SERIAL_PRINT(runTimeAccelBias[YAXIS], 6);
-    comma();
-    SERIAL_PRINT(accelScaleFactor[ZAXIS], 6);
-    comma();
-    SERIAL_PRINTLN(runTimeAccelBias[ZAXIS], 6);
+    SERIAL_PRINTLN(accelScaleFactor[ZAXIS], 6);
     queryType = 'X';
     break;
 

@@ -90,10 +90,6 @@ void initializePlatformSpecificAccelCalibration() {
   accelScaleFactor[ZAXIS] = -0.0011750000;
 }
 
-void SignalAlive(int frameCounter) {
-	digitalWrite(LED_Green, (frameCounter/50) & 1);
-}
-
 
 unsigned long previousMeasureCriticalSensorsTime = 0;
 unsigned long measureCriticalSensorsTime = 0;
@@ -105,7 +101,6 @@ void measureCriticalSensors() {
     measureGyroSum();
     measureAccelSum();
     previousMeasureCriticalSensorsTime = measureCriticalSensorsTime;
-	SignalAlive(frameCounter);
   }
 }
 
