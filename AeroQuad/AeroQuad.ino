@@ -912,7 +912,6 @@ void setup() {
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard;
   #endif
   
   #ifdef BattMonitor
@@ -982,21 +981,21 @@ void process100HzTask() {
 
   
   #if defined AltitudeHoldBaro
-    float filteredZAccel = (filteredAccel[ZAXIS] * (1 - accelOneG * invSqrt(isq(filteredAccel[XAXIS]) + isq(filteredAccel[YAXIS]) + isq(filteredAccel[ZAXIS])))) - runTimeAccelBias[ZAXIS];
+    float filteredZAccel = (sqrt(square(filteredAccel[XAXIS]) + square(filteredAccel[YAXIS]) + square(filteredAccel[ZAXIS])));
     computeVelocity(filteredZAccel, G_Dt);
-    zVelocitySum+=computedZVelicity;
-    zVelocityCount++;
-   
     measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
       computeVelocityErrorFromBaroAltitude(getBaroAltitude());
 
-      float estimatedBaroAltitude = (previousBaroAltitude) + (zVelocity / 50.0);
-      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
-     
-      previousBaroAltitude = getBaroAltitude();
-      zVelocity = filterSmooth(computedZVelicity, zVelocity, 0.05);
+//      float estimatedBaroAltitude = (previousBaroAltitude) + (zVelocity / 50.0);
+//      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
+//      previousBaroAltitude = getBaroAltitude();
+//      zVelocity = filterSmooth(computedZVelicity, zVelocity, 0.05);
+      
+      
+      estimatedAltitude = getBaroAltitude();
+      zVelocity = computedZVelocity;
     }
   #endif
         

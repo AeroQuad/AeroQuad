@@ -286,14 +286,14 @@ void calculateKinematics(float gx, float gy, float gz,
 		trueNorthHeading = -atan2( 2.0f * (q1q2 + q0q3), q0q0 + q1q1 - q2q2 - q3q3 );
 
 		// can't explain the math, but it seem we have a bug in the heading, just an offset of about 50 degree!!!
-		trueNorthHeading = trueNorthHeading + radians(40); 
+/*		trueNorthHeading = trueNorthHeading + radians(40); 
 		if (trueNorthHeading > M_PI)  {  // Angle normalization (-180 deg, 180 deg)
 			trueNorthHeading -= (2.0 * M_PI);
 		} 
 		else if (trueNorthHeading < -M_PI){
 			trueNorthHeading += (2.0 * M_PI);
 		}
-		
+*/		
 		// ?!?!?!?!?!
 
 		#if defined UseGPS

@@ -172,7 +172,4 @@ int findMedianIntWithDiff(int *data, int arraySize, int * diff);
 
 boolean isSwitched(float previousError, float currentError);
 
-float invSqrt(float x);
-int32_t  isq(int32_t  x);
-
 #endif

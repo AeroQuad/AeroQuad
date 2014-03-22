@@ -24,17 +24,18 @@
 #include "GlobalDefined.h"
 #include "FifteenFloatBuffer.h"
 
-float timeConstantZ = 0.1;    
+float timeConstantZ = 5.0;    
 float k1_z = 3 / timeConstantZ;
 float k2_z = 3 / (timeConstantZ*timeConstantZ);
 float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
 
-float computedZVelicity = 0.0;
+float computedZVelocity = 0.0;
+float currentComputedZVelocity = 0.0;
 float zErrorPosition = 0.0;
 float zPositionCorrection = 0.0;
 float accelZCorrection = 0.0;
 float baseZPosition = 0.0;
-FifteenFloatBuffer zBasePositionHistoryBuffer;
+FloatBuffer15Size zBasePositionHistoryBuffer;
 
 void initVelocityProcessor();
 void updateVelocityProcessorGains();
@@ -44,22 +45,33 @@ void computeVelocityErrorFromBaroAltitude(float baroAltitude);
 
 void computeVelocityErrorFromBaroAltitude(float baroAltitude)
 {
-	float historySum = zBasePositionHistoryBuffer.peek(BUFFER_SIZE-1);
-    zErrorPosition = baroAltitude - (historySum + zPositionCorrection);
+	float historySum;
+    if( zBasePositionHistoryBuffer.is_full() ) {
+        historySum = zBasePositionHistoryBuffer.front();
+    }
+	else{
+        historySum = baseZPosition;
+    }
+    zErrorPosition = (baroAltitude * 100.0F) - (historySum + zPositionCorrection);
 }
-
 
 void computeVelocity(float filteredAccelZ, float dt)
 {
-	filteredAccelZ = constrain(filteredAccelZ, -9.0,9.0); // Sercurity to prevent overflow
+	filteredAccelZ -= accelOneG;
+	filteredAccelZ *= 100.0F;
 	
 	accelZCorrection += zErrorPosition * k3_z  * dt;
-	computedZVelicity += zErrorPosition * k2_z  * dt;
+	currentComputedZVelocity += zErrorPosition * k2_z  * dt;
 	zPositionCorrection += zErrorPosition * k1_z  * dt;
+	
 	float velocity_increase = (filteredAccelZ + accelZCorrection) * dt;
-	baseZPosition += (computedZVelicity + velocity_increase*0.5) * dt;
-	computedZVelicity += velocity_increase;
-	zBasePositionHistoryBuffer.add(baseZPosition);
+	baseZPosition += (currentComputedZVelocity + velocity_increase*0.5) * dt;
+	currentComputedZVelocity += velocity_increase;
+	
+	computedZVelocity = currentComputedZVelocity;
+	
+	
+	zBasePositionHistoryBuffer.push_back(baseZPosition);
 }
 
 #endif

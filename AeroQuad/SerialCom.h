@@ -470,7 +470,7 @@ void sendSerialTelemetry() {
     }
     #if defined(AltitudeHoldBaro)
       PrintValueComma(getBaroAltitude());
-      PrintValueComma(zVelocity);
+      PrintValueComma(zVelocity/100.0F);
     #else
       PrintValueComma(0);
       PrintValueComma(0);
@@ -590,7 +590,7 @@ void sendSerialTelemetry() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       #if defined AltitudeHoldBaro
         PrintValueComma(estimatedAltitude);
-        PrintValueComma(zVelocity);
+        PrintValueComma(zVelocity/100.0F);
       #elif defined AltitudeHoldRangeFinder
         PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
         PrintValueComma(0);

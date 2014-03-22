@@ -165,11 +165,7 @@ void reportVehicleState();
   int altitudeHoldThrottle = 1000;
   boolean isAltitudeHoldInitialized = false;
   
-  float zVelocitySum = 0.0;
-  int zVelocityCount = 0;
   float zVelocity = 0.0;
-  float previousZVelocity = 0.0;
-  float previousBaroAltitude = 0.0;
   float estimatedAltitude = 0.0;
   
   #if defined AltitudeHoldBaro
