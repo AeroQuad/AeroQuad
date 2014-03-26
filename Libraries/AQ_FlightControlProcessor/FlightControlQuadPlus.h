@@ -35,17 +35,10 @@
 
 #include "FlightControlVariable.h"
 
-#ifdef OLD_MOTOR_NUMBERING  
-  #define FRONT MOTOR1
-  #define REAR  MOTOR2
-  #define RIGHT MOTOR3
-  #define LEFT  MOTOR4
-#else
-  #define FRONT MOTOR1
-  #define RIGHT MOTOR2
-  #define REAR  MOTOR3
-  #define LEFT  MOTOR4
-#endif
+#define FRONT MOTOR1
+#define RIGHT MOTOR2
+#define REAR  MOTOR3
+#define LEFT  MOTOR4
 #define LASTMOTOR (MOTOR4+1)
 
 int motorMaxCommand[4] = {0,0,0,0};

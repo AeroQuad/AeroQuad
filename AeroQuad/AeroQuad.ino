@@ -527,6 +527,7 @@
   #ifdef AltitudeHoldBaro
     #define MS5611
     #define USE_MS5611_ALTERNATE_ADDRESS
+    #define USE_Z_DAMPENING
   #endif
   #ifdef AltitudeHoldRangeFinder
     #define XLMAXSONAR 
@@ -897,6 +898,7 @@ void setup() {
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
+    initializeKinematics(0.0, 0.0, -accelOneG, measuredMag[XAXIS], measuredMag[XAXIS], measuredMag[XAXIS]);
   #else    
     initializeKinematics();
   #endif
@@ -987,14 +989,14 @@ void process100HzTask() {
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
       computeVelocityErrorFromBaroAltitude(getBaroAltitude());
-
-//      float estimatedBaroAltitude = (previousBaroAltitude) + (zVelocity / 50.0);
-//      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
-//      previousBaroAltitude = getBaroAltitude();
-//      zVelocity = filterSmooth(computedZVelicity, zVelocity, 0.05);
       
+      static float previousBaroAltitude;
+      float estimatedBaroAltitude = (previousBaroAltitude) + ((zVelocity / 100.0) / 50.0);
+      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
+      previousBaroAltitude = getBaroAltitude();
+//      zVelocity = filterSmooth(computedZVelocity, zVelocity, 0.05);
       
-      estimatedAltitude = getBaroAltitude();
+//      estimatedAltitude = getBaroAltitude();
       zVelocity = computedZVelocity;
     }
   #endif

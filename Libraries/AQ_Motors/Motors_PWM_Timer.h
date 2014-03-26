@@ -56,11 +56,7 @@
 
 #include "Motors.h"
 
-#if defined (USE_400HZ_ESC)
-  #define PWM_FREQUENCY 400   // in Hz
-#else
-  #define PWM_FREQUENCY 300   // in Hz
-#endif  
+#define PWM_FREQUENCY 400   // in Hz
 
 #define PWM_PRESCALER 8
 #define PWM_COUNTER_PERIOD (F_CPU/PWM_PRESCALER/PWM_FREQUENCY)

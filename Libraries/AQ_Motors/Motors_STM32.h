@@ -8,11 +8,7 @@
 ////////////////////////////////////////////////////////
 // definition section
 
-#if defined (USE_400HZ_ESC)
-  #define PWM_FREQUENCY 400   // in Hz
-#else
-  #define PWM_FREQUENCY 300   // in Hz
-#endif
+#define PWM_FREQUENCY 400   // in Hz
 #define PWM_PERIODE     (1000000/PWM_FREQUENCY)
 
 #ifdef MOTORS_STM32_TRI

@@ -72,16 +72,8 @@ void processAltitudeHold()
     }
     
     // ZDAMPENING COMPUTATIONS
-    #if defined AltitudeHoldBaro
-    
-//      PID[ZDAMPENING_PID_IDX].P = 12;
-//      PID[ZDAMPENING_PID_IDX].I = 0;
-//      PID[ZDAMPENING_PID_IDX].D = 2;
-//      float zDampeningThrottleCorrection = filterSmooth(updatePID(0.0, zVelicity, &PID[ZDAMPENING_PID_IDX]),previousZDampeningThrottleCorrection,0.1);
-//      previousZDampeningThrottleCorrection = zDampeningThrottleCorrection;
-        float zDampeningThrottleCorrection = -updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
-//      Serial.println(zDampeningThrottleCorrection);
-//      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    #if defined USE_Z_DAMPENING  
+      float zDampeningThrottleCorrection = updatePID(0.0, zVelocity, &PID[ZDAMPENING_PID_IDX]);
     #endif
 
     

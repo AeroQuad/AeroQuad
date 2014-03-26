@@ -60,21 +60,8 @@
 //#define octoPlusConfig		// EXPERIMENTAL: not completely re-tested
 //#define octoXConfig			// EXPERIMENTAL: not completely re-tested
 
-
 // MOTOR ADVANCE CONFIG SECTION
 //#define CHANGE_YAW_DIRECTION	// only needed if you want to reverse the yaw correction direction
-
-#define USE_400HZ_ESC			// For ESC that support 400Hz update rate, ESC OR PLATFORM MAY NOT SUPPORT IT
-
-
-//
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// In the 3.0 code the motor numbering has changed to simplify motor configuration.
-// Please refer to our wiki (http://aeroquad.com/showwiki.php?title=Flight+Configurations)
-// or the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//#define OLD_MOTOR_NUMBERING	// Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // *******************************************************************************************************************************
@@ -154,15 +141,6 @@
 
 //
 // *******************************************************************************************************************************
-// Optional audio channel telemetry (for ground station tracking purposes)
-// This will output telemetry at slow (1200baud) rate once per second on Serial2. 
-// *******************************************************************************************************************************
-//#define SlowTelemetry			// Enables audio channel telemetry on Serial2
-//#define SoftModem             // Enable usage of DAC as modem on AQ32 instead of Serial 2
-//#define SOFTMODEM_FSKv2       // Enable non standard FSK frequencies used by FSKv2 module (TCM3105 at 8Mhz)
-
-//
-// *******************************************************************************************************************************
 // Camera Stabilization
 // Servo output goes to D11(pitch), D12(roll), D13(yaw) on AeroQuad v1.8 shield
 // If using v2.0 Shield place jumper between:
@@ -184,7 +162,7 @@
 //#define ShowRSSI                  // This REQUIRES a RSSI reader
 //#define PAL                       // uncomment this to default to PAL video
 //#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-//#define CALLSIGN "KF7YRK"         // Show (optional) callsign
+//#define CALLSIGN "AQ"             // Show (optional) callsign
 //#define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
 //#define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
 //#define OSD_LOADFONT              // Include MAX7456 font into binary, give & on serial to upload
