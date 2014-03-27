@@ -58,10 +58,13 @@
 #include "AeroQuad.h"
 #include "PID.h"
 #include <AQMath.h>
+
 #include <FourtOrderFilter.h>
 #ifdef BattMonitor
   #include <BatteryMonitorTypes.h>
 #endif
+
+#include <vector3.h>
 
 //********************************************************
 //********************************************************
@@ -805,30 +808,13 @@
 //********************************************************
 //****************** SERIAL PORT DECLARATION *************
 //********************************************************
-#if defined(WirelessTelemetry) 
-  #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    #define SERIAL_PORT Serial3
-  #else    // force 328p to use the normal port
-    #define SERIAL_PORT Serial
-  #endif
-#else  
-  #if defined(SERIAL_USES_USB)   // STM32 Maple
-    #define SERIAL_PORT SerialUSB
-    #undef BAUD
-    #define BAUD
-  #else
-    #define SERIAL_PORT Serial
-  #endif
-#endif  
-
-#ifdef SlowTelemetry
-  #include <AQ_RSCode.h>
+#if defined(AeroQuadSTM32) && defined (SERIAL_USES_USB)
+  #define SERIAL_PORT SerialUSB
+  #undef BAUD
+  #define BAUD
+#else
+  #define SERIAL_PORT Serial
 #endif
-
-#ifdef SoftModem
-  #include <AQ_SoftModem.h>
-#endif
-
 
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
