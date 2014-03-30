@@ -158,12 +158,12 @@ void initializeEEPROM() {
   storeSensorsZeroToEEPROM();
 
   #if defined (AltitudeHoldBaro)
-    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
-    PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 50.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.0;
     PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-    PID[ZDAMPENING_PID_IDX].P = 0.0;
+    PID[ZDAMPENING_PID_IDX].P = 2.0;
     PID[ZDAMPENING_PID_IDX].I = 0.0;
-    PID[ZDAMPENING_PID_IDX].D = 0.0;
+    PID[ZDAMPENING_PID_IDX].D = 0.1;
   #endif
   #if defined (AltitudeHoldRangeFinder)
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
@@ -173,8 +173,8 @@ void initializeEEPROM() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    minThrottleAdjust = -50.0;
-    maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
+    minThrottleAdjust = -200.0;
+    maxThrottleAdjust = 200.0; //we don't want it to be able to take over totally
     #if defined AltitudeHoldBaro
       baroSmoothFactor = 0.1;
     #endif
