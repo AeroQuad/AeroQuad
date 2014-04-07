@@ -968,29 +968,21 @@ void process100HzTask() {
 
   
   #if defined AltitudeHoldBaro
-    measureBaroSum();
-  
-    #if defined USE_Z_DAMPENING
-      float filteredZAccel = (sqrt(square(filteredAccel[XAXIS]) + square(filteredAccel[YAXIS]) + square(filteredAccel[ZAXIS])));
-      computeVelocity(filteredZAccel, G_Dt);
-    #endif
-    
+    float filteredZAccel = (sqrt(square(filteredAccel[XAXIS]) + square(filteredAccel[YAXIS]) + square(filteredAccel[ZAXIS])));
+    computeVelocity(filteredZAccel, G_Dt);
+    measureBaroSum(); 
     if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
       evaluateBaroAltitude();
-
-      #if defined USE_Z_DAMPENING      
-        computeVelocityErrorFromBaroAltitude(getBaroAltitude());
-        static float previousBaroAltitude;
-        
-        float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
-        estimatedBaroAltitude = (estimatedBaroAltitude) + ((computedZVelocity / 100.0) / 50.0);
-        estimatedAltitude = filterSmooth(((estimatedBaroAltitude*0.1) + (estimatedBaroAltitude*0.9)), estimatedAltitude, 0.01);
-        previousBaroAltitude = getBaroAltitude();
-        
-        zVelocity = computedZVelocity;
-      #else
-        estimatedAltitude = getBaroAltitude();
-      #endif 
+      computeVelocityErrorFromBaroAltitude(getBaroAltitude());
+      
+      static float previousBaroAltitude;
+      float estimatedBaroAltitude = (previousBaroAltitude) + ((zVelocity / 100.0) / 50.0);
+      estimatedAltitude = ((getBaroAltitude()*0.1) + (estimatedBaroAltitude*0.9));
+      previousBaroAltitude = getBaroAltitude();
+//      zVelocity = filterSmooth(computedZVelocity, zVelocity, 0.05);
+      
+//      estimatedAltitude = getBaroAltitude();
+      zVelocity = computedZVelocity;
     }
   #endif
         
