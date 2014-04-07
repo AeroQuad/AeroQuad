@@ -72,8 +72,9 @@ void processAltitudeHold()
     }
     
     // ZDAMPENING COMPUTATIONS
+    float zDampeningThrottleCorrection = 0;
     #if defined USE_Z_DAMPENING  
-      float zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocity, &PID[ZDAMPENING_PID_IDX]);
+      zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocity, &PID[ZDAMPENING_PID_IDX]);
       zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);      
       altitudeHoldThrottleCorrection = 0;
     #endif
