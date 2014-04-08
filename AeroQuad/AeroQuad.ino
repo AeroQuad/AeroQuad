@@ -811,6 +811,8 @@
   #define SERIAL_PORT SerialUSB
   #undef BAUD
   #define BAUD
+#elif defined (USE_WIRELESS_COMMUNICATION)
+  #define SERIAL_PORT Serial1
 #else
   #define SERIAL_PORT Serial
 #endif
@@ -920,16 +922,6 @@ void setup() {
     InitSerialLCD();
   #endif
 
-  #if defined(BinaryWrite) || defined(BinaryWritePID)
-    #ifdef OpenlogBinaryWrite
-      binaryPort = &Serial1;
-      binaryPort->begin(115200);
-      delay(1000);
-    #else
-     binaryPort = &Serial;
-    #endif
-  #endif
-  
   #if defined(UseGPS)
     initializeGps();
   #endif 
@@ -996,18 +988,6 @@ void process100HzTask() {
         
   processFlightControl();
   
-  
-  #if defined(BinaryWrite)
-    if (fastTransfer == ON) {
-      // write out fastTelemetry to Configurator or openLog
-      fastTelemetry();
-    }
-  #endif      
-  
-  #ifdef SlowTelemetry
-    updateSlowTelemetry100Hz();
-  #endif
-
   #if defined(UseGPS)
     updateGps();
   #endif      

@@ -63,6 +63,9 @@
 // MOTOR ADVANCE CONFIG SECTION
 //#define CHANGE_YAW_DIRECTION	// only needed if you want to reverse the yaw correction direction
 
+
+// define wireless communication on serial 0 at 57600
+#define USE_WIRELESS_COMMUNICATION
 //
 // *******************************************************************************************************************************
 // Optional Sensors
