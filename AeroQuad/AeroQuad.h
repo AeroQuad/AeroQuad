@@ -163,6 +163,7 @@ void reportVehicleState();
   
   float zVelocity = 0.0;
   float estimatedAltitude = 0.0;
+  float previousBaroAltitude = 0.0;
   
   #if defined AltitudeHoldBaro
     float baroAltitudeToHoldTarget = 0.0;

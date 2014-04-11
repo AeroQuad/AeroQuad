@@ -23,20 +23,14 @@
 
 #include "GlobalDefined.h"
 
-#define CF 0
-#define KF 1
-#define DCM 2
-#define ARG 3
-#define MARG 4
-
 
 
 // This class is responsible for calculating vehicle attitude
 byte kinematicsType = 0;
 float kinematicsAngle[3] = {0.0,0.0,0.0};
-//float gyroAngle[2] = {0.0,0.0};
 float correctedRateVector[3] = {0.0,0.0,0.0};
 float earthAccel[3] = {0.0,0.0,0.0};
+float kinematicCorrectedAccel[3] = { 0.0, 0.0, 0.0 };
 
 float accelCutoff = 0.0;
 

@@ -129,6 +129,10 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   q1 = q1 / norm;
   q2 = q2 / norm;
   q3 = q3 / norm;
+  
+  kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
+  kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
+  kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 }
   
 void eulerAngles()

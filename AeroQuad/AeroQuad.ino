@@ -933,12 +933,12 @@ void process100HzTask() {
     calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   #endif
 
-  
-  #if defined AltitudeHoldBaro
+  #if defined (AltitudeHoldBaro)
     measureBaroSum();
-  
     #if defined USE_Z_DAMPENING
-      float filteredZAccel = (sqrt(square(filteredAccel[XAXIS]) + square(filteredAccel[YAXIS]) + square(filteredAccel[ZAXIS])));
+      float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS]
+                                 + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS]
+                                 + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
       computeVelocity(filteredZAccel, G_Dt);
     #endif
     
@@ -947,14 +947,12 @@ void process100HzTask() {
 
       #if defined USE_Z_DAMPENING      
         computeVelocityErrorFromBaroAltitude(getBaroAltitude());
-        static float previousBaroAltitude;
-        
-        float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
-        estimatedBaroAltitude = (estimatedBaroAltitude) + ((computedZVelocity / 100.0) / 50.0);
-        estimatedAltitude = filterSmooth(((estimatedBaroAltitude*0.1) + (estimatedBaroAltitude*0.9)), estimatedAltitude, 0.01);
-        previousBaroAltitude = getBaroAltitude();
-        
         zVelocity = computedZVelocity;
+
+        float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
+        estimatedBaroAltitude = (estimatedBaroAltitude) + ((zVelocity / 100.0) / 50.0);
+        estimatedAltitude = filterSmooth(estimatedBaroAltitude, estimatedAltitude, 0.05);
+        previousBaroAltitude = getBaroAltitude();
       #else
         estimatedAltitude = getBaroAltitude();
       #endif 
