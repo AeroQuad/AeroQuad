@@ -111,6 +111,10 @@ void initializeKinematics(float ax, float ay, float az, float mx, float my, floa
     q2q2 = q2 * q2;
     q2q3 = q2 * q3;
     q3q3 = q3 * q3;
+	
+	kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
+    kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
+    kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 }
 
 //====================================================================================================
