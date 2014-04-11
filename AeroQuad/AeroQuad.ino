@@ -85,7 +85,7 @@
   #include <Accelerometer_BMA180.h>
 
   // Receiver declaration
-  #define RECEIVER_328P
+  #include <Receiver_328p.h>
 
   // Motor declaration
   #define MOTOR_PWM_Timer
@@ -157,7 +157,7 @@
   #include <Accelerometer_ADXL345.h>
 
   // Receiver declaration
-  #define RECEIVER_328P
+  #include <Receiver_328p.h>
 
   // Motor declaration
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
@@ -233,7 +233,7 @@
   #include <Accelerometer_MPU6000.h>
 
   // Receiver declaration
-  #define RECEIVER_328P
+  #include <Receiver_328p.h>
 
   // Motor declaration
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
@@ -300,8 +300,8 @@
   // Accelerometer declaration
   #include <Accelerometer_BMA180.h>
 
-  // Receiver Declaration
-  #define RECEIVER_MEGA
+  // Receiver declaration
+  #include <Receiver_MEGA.h>
 
   // Motor declaration
   #define MOTOR_PWM_Timer
@@ -391,107 +391,107 @@
 #endif
 
 #ifdef AeroQuadMega_v21
-    #define LED_Green 13
-    #define LED_Red 4
-    #define LED_Yellow 31
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
+  #include <Device_I2C.h>
+  // Gyroscope declaration
+  #define ITG3200_ADDRESS_ALTERNATE
+  #include <Gyroscope_ITG3200_9DOF.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer_ADXL345_9DOF.h>
   
-    #include <Device_I2C.h>
-    // Gyroscope declaration
-    #define ITG3200_ADDRESS_ALTERNATE
-    #include <Gyroscope_ITG3200_9DOF.h>
+  // Receiver declaration
+  #include <Receiver_MEGA.h>
   
-    // Accelerometer declaration
-    #include <Accelerometer_ADXL345_9DOF.h>
-  
-    // Receiver Declaration
-    #define RECEIVER_MEGA
-  
-    // Motor declaration
-    #define MOTOR_PWM_Timer
-  
-    // heading mag hold declaration
-    #ifdef HeadingMagHold
-      #include <Compass.h>
-      #define SPARKFUN_9DOF_5883L
-    #endif
-  
-    // Altitude declaration
-    #ifdef AltitudeHoldBaro
-      #define BMP085
-    #endif
-    #ifdef AltitudeHoldRangeFinder
-      #define XLMAXSONAR 
-    #endif
-  
-  
-    // Battery Monitor declaration
-    #ifdef BattMonitor
-      #ifdef POWERED_BY_VIN
-        #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
-      #else
-        #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
-      #endif
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+
+  // heading mag hold declaration
+  #ifdef HeadingMagHold
+    #include <Compass.h>
+    #define SPARKFUN_9DOF_5883L
+  #endif
+
+  // Altitude declaration
+  #ifdef AltitudeHoldBaro
+    #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
+
+  // Battery Monitor declaration
+  #ifdef BattMonitor
+    #ifdef POWERED_BY_VIN
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0, BM_NOPIN, 0, 0) // v2 shield powered via VIN (no diode)
     #else
-      #undef BattMonitorAutoDescent
-      #undef POWERED_BY_VIN        
+      #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.82, BM_NOPIN, 0, 0) // v2 shield powered via power jack
     #endif
+  #else
+    #undef BattMonitorAutoDescent
+    #undef POWERED_BY_VIN        
+  #endif
+
+  #ifdef OSD
+    #define MAX7456_OSD
+  #endif  
   
-    #ifdef OSD
-      #define MAX7456_OSD
-    #endif  
-    
-    #ifndef UseGPS
-      #undef UseGPSNavigator
+  #ifndef UseGPS
+    #undef UseGPSNavigator
+  #endif
+
+
+  /**
+   * Put AeroQuadMega_v21 specific initialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on
+
+    Wire.begin();
+    TWBR = 12;
+  }
+  
+  // called when eeprom is initialized
+  void initializePlatformSpecificAccelCalibration() {
+    // Kenny default value, a real accel calibration is strongly recommended
+    accelScaleFactor[XAXIS] = 0.0365570020;
+    accelScaleFactor[YAXIS] = 0.0363000011;
+    accelScaleFactor[ZAXIS] = -0.0384629964;
+    #ifdef HeadingMagHold
+      magBias[XAXIS]  = 1.500000;
+      magBias[YAXIS]  = 205.500000;
+      magBias[ZAXIS]  = -33.000000;
     #endif
-  
-  
-    /**
-     * Put AeroQuadMega_v21 specific initialization need here
-     */
-    void initPlatform() {
-  
-      pinMode(LED_Red, OUTPUT);
-      digitalWrite(LED_Red, LOW);
-      pinMode(LED_Yellow, OUTPUT);
-      digitalWrite(LED_Yellow, LOW);
-  
-      // pins set to INPUT for camera stabilization so won't interfere with new camera class
-      pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
-      pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
-      pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
-      pinMode(43, OUTPUT); // LED 1
-      pinMode(44, OUTPUT); // LED 2
-      pinMode(45, OUTPUT); // LED 3
-      pinMode(46, OUTPUT); // LED 4
-      digitalWrite(43, HIGH); // LED 1 on
-      digitalWrite(44, HIGH); // LED 2 on
-      digitalWrite(45, HIGH); // LED 3 on
-      digitalWrite(46, HIGH); // LED 4 on
-  
-      Wire.begin();
-      TWBR = 12;
-    }
-    
-    // called when eeprom is initialized
-    void initializePlatformSpecificAccelCalibration() {
-      // Kenny default value, a real accel calibration is strongly recommended
-      accelScaleFactor[XAXIS] = 0.0365570020;
-      accelScaleFactor[YAXIS] = 0.0363000011;
-      accelScaleFactor[ZAXIS] = -0.0384629964;
-      #ifdef HeadingMagHold
-        magBias[XAXIS]  = 1.500000;
-        magBias[YAXIS]  = 205.500000;
-        magBias[ZAXIS]  = -33.000000;
-      #endif
-    }
-  
-    /**
-     * Measure critical sensors
-     */
-    void measureCriticalSensors() {
-      measureGyroSum();
-      measureAccelSum();
-    }
+  }
+
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyroSum();
+    measureAccelSum();
+  }
 #endif
 
 
@@ -515,11 +515,9 @@
   // Accelerometer declaration
   #include <Accelerometer_MPU6000.h>
   
-  // Receiver Declaration
-  #define RECEIVER_MEGA
-  #if defined (ReceiverPPM)
-    #define PPM_ON_THROTTLE
-  #endif
+  // Receiver declaration
+  #define PPM_ON_THROTTLE
+  #include <Receiver_MEGA.h>
 
   // Motor declaration
   #define MOTOR_PWM_Timer
@@ -645,28 +643,6 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined(ReceiverHWPPM)
-  #include <Receiver_HWPPM.h>
-#elif defined(ReceiverPPM)
-  #include <Receiver_PPM.h>
-#elif defined(AeroQuad_Mini) && (defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config))
-  #include <Receiver_PPM.h>
-#elif defined(RemotePCReceiver)
-  #include <Receiver_RemotePC.h>
-#elif defined(ReceiverSBUS)
-  #include <Receiver_SBUS.h>
-#elif defined(RECEIVER_328P)
-  #include <Receiver_328p.h>
-#elif defined(RECEIVER_MEGA)
-  #include <Receiver_MEGA.h>
-#elif defined(RECEIVER_APM)
-  #include <Receiver_APM.h>
-#elif defined(RECEIVER_STM32PPM)
-  #include <Receiver_STM32PPM.h>  
-#elif defined(RECEIVER_STM32)
-  #include <Receiver_STM32.h>  
-#endif
-
 #if defined(UseAnalogRSSIReader) 
   #include <AnalogRSSIReader.h>
 #elif defined(UseEzUHFRSSIReader)
@@ -847,10 +823,10 @@ void setup() {
   digitalWrite(LED_Green, LOW);
 
   initCommunication();
+  readEEPROM(); 
   
-  readEEPROM(); // defined in DataStorage.h
   boolean firstTimeBoot = false;
-  if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all parameters
+  if (readFloat(SOFTWARE_VERSION_ADR) != SOFTWARE_VERSION) { // If we detect the wrong soft version, we init all EEPROM
     initializeEEPROM();
     writeEEPROM();
     firstTimeBoot = true;
@@ -866,8 +842,7 @@ void setup() {
      initializeMotors(EIGHT_Motors);
   #endif
 
-  initializeReceiver(LASTCHANNEL);
-  initReceiverFromEEPROM();
+  (*initializeReceiver[receiverTypeUsed])();
   
   // Initialize sensors
   // If sensors have a common initialization routine

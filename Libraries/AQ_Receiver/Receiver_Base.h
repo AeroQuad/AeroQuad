@@ -18,20 +18,38 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_RECEIVER_PPM_COMMON_H_
-#define _AEROQUAD_RECEIVER_PPM_COMMON_H_
+#ifndef _AEROQUAD_RECEIVER_BASE_H_
+#define _AEROQUAD_RECEIVER_BASE_H_
 
-#define PPM_CHANNELS 10
+#include "Arduino.h"
 
-#define SERIAL_SUM_PPM_1         1,2,3,0,4,5,6,7,8,9 // PITCH,YAW,THR,ROLL... For Graupner/Spektrum
-#define SERIAL_SUM_PPM_2         0,1,3,2,4,5,6,7,8,9 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba/Turnigy9xFrsky
-#define SERIAL_SUM_PPM_3         1,0,3,2,4,5,6,7,8,9 // PITCH,ROLL,THR,YAW... For some Hitec/Sanwa/Others
+#include "ReceiverType.h"
 
-#if defined (SKETCH_SERIAL_SUM_PPM)
-  #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM
+#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
+  #define MAX_NB_CHANNEL 5
 #else
-  #define SERIAL_SUM_PPM SERIAL_SUM_PPM_1
+  #define MAX_NB_CHANNEL 8
 #endif
 
+byte LAST_CHANNEL = MAX_NB_CHANNEL;
+
+#define PWM2RAD 0.002 
+
+
+// Receiver variables
+#define TIMEOUT 25000
+#define MINCOMMAND 1000
+#define MIDCOMMAND 1500
+#define MAXCOMMAND 2000
+#define MINDELTA 200
+#define MINCHECK (MINCOMMAND + 100)
+#define MAXCHECK (MAXCOMMAND - 100)
+#define MINTHROTTLE (MINCOMMAND + 100)
+#define LEVELOFF 100
+
+int receiverZero[3] = {1500,1500,1500};
+
 #endif
+
+
 

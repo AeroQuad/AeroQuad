@@ -148,6 +148,15 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
+
+  receiverTypeUsed = RECEIVER_PPM;
+  for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
+    receiverMinValue[channel] = 1000;
+    receiverMaxValue[channel] = 2000;
+  }
+  for (byte i = 0; i < LAST_CHANNEL;i++) {
+    receiverChannelMap[i] = i;    
+  }
   
   accelScaleFactor[XAXIS] = 1.0;
   runTimeAccelBias[XAXIS] = 0;
@@ -184,16 +193,13 @@ void initializeEEPROM() {
   
   initializePlatformSpecificAccelCalibration();
 
-  receiverXmitFactor = 1.0;
   minArmedThrottle = 1150;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
-  for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
+  for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
     receiverMinValue[channel] = 1000;
     receiverMaxValue[channel] = 2000;
-    receiverSmoothFactor[channel] = 1.0;
   }
-  receiverSmoothFactor[ZAXIS] = 0.5;
 
   flightMode = RATE_FLIGHT_MODE;
   
@@ -261,6 +267,15 @@ void readEEPROM() {
   readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
   rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  
+  receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
+  for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
+    receiverMinValue[channel] = readLong(RECEIVER_DATA[channel].minValue);
+    receiverMaxValue[channel] = readLong(RECEIVER_DATA[channel].maxValue);
+  }
+  for (byte i = 0; i < LAST_CHANNEL; i++) {
+    receiverChannelMap[i] = readFloat(RECEIVER_CHANNEL_MAP_ADR[i]);    
+  }
   
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
@@ -339,7 +354,16 @@ void writeEEPROM(){
   writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   
-  writeFloat(rotationSpeedFactor,ROTATION_SPEED_FACTOR_ARD);
+  writeFloat(rotationSpeedFactor, ROTATION_SPEED_FACTOR_ARD);
+  
+  writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
+  for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
+    writeLong(receiverMinValue[channel], RECEIVER_DATA[channel].minValue);
+    writeLong(receiverMaxValue[channel], RECEIVER_DATA[channel].maxValue);
+  }
+  for (byte i = 0; i < LAST_CHANNEL; i++) {
+    writeFloat(receiverChannelMap[i], RECEIVER_CHANNEL_MAP_ADR[i]);    
+  }
   
   #if defined AltitudeHoldBaro
     writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
@@ -370,13 +394,7 @@ void writeEEPROM(){
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
   #endif
-  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
 
-  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-    writeLong(receiverMinValue[channel],  RECEIVER_DATA[channel].minValue);
-    writeLong(receiverMaxValue[channel], RECEIVER_DATA[channel].maxValue);
-    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
-  }
 
   writeFloat(minArmedThrottle, MINARMEDTHROTTLE_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
@@ -457,16 +475,6 @@ void storeSensorsZeroToEEPROM() {
   writeFloat(runTimeAccelBias[YAXIS], YAXIS_ACCEL_BIAS_ADR);
   writeFloat(accelScaleFactor[ZAXIS], ZAXIS_ACCEL_SCALE_FACTOR_ADR);
   writeFloat(runTimeAccelBias[ZAXIS], ZAXIS_ACCEL_BIAS_ADR);
-}
-
-void initReceiverFromEEPROM() {
-  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
-  
-  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
-    receiverMinValue[channel] = readLong(RECEIVER_DATA[channel].minValue);
-    receiverMaxValue[channel] = readLong(RECEIVER_DATA[channel].maxValue);
-    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
-  }
 }
 
 #endif // _AQ_DATA_STORAGE_H_

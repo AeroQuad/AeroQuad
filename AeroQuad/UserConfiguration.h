@@ -37,10 +37,10 @@
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-#define MWCProEz30          // MWC Prop Ez3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
+//#define MWCProEz30          // MWC Prop Ez3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
 
 // STM32 processor
-//#define AeroQuadSTM32        // Baloo board
+#define AeroQuadSTM32        // Baloo board
 
 
 /****************************************************************************
@@ -65,7 +65,7 @@
 
 
 // define wireless communication on serial 0 at 57600
-#define USE_WIRELESS_COMMUNICATION
+//#define USE_WIRELESS_COMMUNICATION
 //
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -73,8 +73,8 @@
 // For more information on how to activate theese features with your transmitter
 // Please refer to http://aeroquad.com/showwiki.php?title=Using+the+transmitters+sticks+and+switches+to+operate+your+AeroQuad
 // *******************************************************************************************************************************
-#define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro		// Enables Barometer
+//#define HeadingMagHold		// Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHoldBaro		// Enables Barometer
 //#define AltitudeHoldRangeFinder	// Enables Altitude Hold with range finder, not displayed on the configurator (yet)
 //#define AutoLanding			// Enables auto landing on channel AUX3 of the remote, NEEDS AltitudeHoldBaro AND AltitudeHoldRangeFinder to be defined
 
@@ -111,22 +111,10 @@
 #define ReceiverPPM		// Use a PPM receiver
 //#define ReceiverHWPPM		// Use a PPM receiver with HW timer (less jitter on channel values than PPM), needs a HW modification (see wiki)
 
-// You need to select one of these channel order definitions for PPM receiver
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1	//For Graupner/Spektrum (DEFAULT)
-#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2		//For Robe/Hitec/Futaba/Turnigy9X+Er9X
-//#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3	//For some Hitec/Sanwa/Others
-
 //#define UseAnalogRSSIReader	// Reads RSSI for receiver failsafe, NEEDS A RECEIVER WITH FAILSAVE CONNECTED ON PIN A6 OF THE SHIELD
 //#define UseEzUHFRSSIReader	// Reads RSSI and Signal quality on channel 7(RSSI) and 8(Signal Quality) of the EzUHF receiver (Receiver have to be configures this way)
 //#define UseSBUSRSSIReader		
 
-//
-// *******************************************************************************************************************************
-// Define how many channels are connected from your R/C receiver
-// *******************************************************************************************************************************
-//#define LASTCHANNEL 6
-#define LASTCHANNEL 8
-//#define LASTCHANNEL 10 // EXPERIMENTAL only tested with ReceiverSBUS on AQ32, test extensively before using other boards/receiver types
 
 
 //

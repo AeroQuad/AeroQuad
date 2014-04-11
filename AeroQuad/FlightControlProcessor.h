@@ -38,16 +38,16 @@ void calculateFlightError()
 {
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
-      float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
     else
   #endif
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
-    float rollAttitudeCmd  = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+    float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
     motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
     motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
@@ -224,10 +224,10 @@ void processThrottleCorrection() {
  */
 void processHardManuevers() {
   
-  if ((receiverCommand[XAXIS] < MINCHECK) ||
-      (receiverCommand[XAXIS] > MAXCHECK) ||
-      (receiverCommand[YAXIS] < MINCHECK) ||
-      (receiverCommand[YAXIS] > MAXCHECK)) {  
+  if ((receiverCommand[receiverChannelMap[XAXIS]] < MINCHECK) ||
+      (receiverCommand[receiverChannelMap[XAXIS]] > MAXCHECK) ||
+      (receiverCommand[receiverChannelMap[YAXIS]] < MINCHECK) ||
+      (receiverCommand[receiverChannelMap[YAXIS]] > MAXCHECK)) {  
         
     for (int motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minArmedThrottle;
@@ -291,7 +291,7 @@ void processFlightControl() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       processAltitudeHold();
     #else
-      throttle = receiverCommand[THROTTLE];
+      throttle = receiverCommand[receiverChannelMap[THROTTLE]];
     #endif
     
     // ********************** Process Battery monitor hold **************************
@@ -317,7 +317,7 @@ void processFlightControl() {
   processMinMaxCommand();
 
   // If throttle in minimum position, don't apply yaw
-  if (receiverCommand[THROTTLE] < MINCHECK) {
+  if (receiverCommand[receiverChannelMap[THROTTLE]] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minArmedThrottle;
       if (inFlight && flightMode == RATE_FLIGHT_MODE) {

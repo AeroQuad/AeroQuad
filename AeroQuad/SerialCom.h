@@ -117,21 +117,20 @@ void readSerialCommand() {
       break;
 
     case 'F': // Receive transmitter smoothing values
-      receiverXmitFactor = readFloatSerial();
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverSmoothFactor[channel] = readFloatSerial();
-      }
       break;
 
     case 'G': // Receive transmitter calibration values
-      for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-        receiverMinValue[axis] = readIntegerSerial();
+      for (int channel = 0; channel < LAST_CHANNEL; channel++) {
+        receiverMinValue[channel] = readFloatSerial();
+        receiverMaxValue[channel] = readFloatSerial();
       }
+      writeEEPROM();
       break;
 
-    case 'H': // Receive transmitter calibration values
-      for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-        receiverMaxValue[axis] = readIntegerSerial();
+    case 'H': // Reset transmitter calibration values
+      for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
+        receiverMinValue[channel] = 1000;
+        receiverMaxValue[channel] = 2000;
       }
       writeEEPROM();
       break;
@@ -233,6 +232,22 @@ void readSerialCommand() {
           skipSerialValues(13);
         #endif
       #endif
+      break;
+      
+    case 'R':
+      for (byte channel = 0; channel < LAST_CHANNEL; channel++)
+      {
+        receiverChannelMap[channel] = readFloatSerial();
+      }
+      writeEEPROM();
+      break;
+
+    case 'S':
+      for (byte channel = 0; channel < LAST_CHANNEL; channel++)
+      {
+        receiverChannelMap[channel] = channel;
+      }
+      writeEEPROM();
       break;
 
     case 'U': // Range Finder
@@ -427,27 +442,14 @@ void sendSerialTelemetry() {
     break;
 
   case 'f': // Send transmitter smoothing values
-    PrintValueComma(receiverXmitFactor);
-    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverSmoothFactor[axis]);
-    }
-    PrintDummyValues(10 - LASTCHANNEL);
-    SERIAL_PRINTLN();
     queryType = 'X';
     break;
 
   case 'g': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      Serial.print(receiverMinValue[axis]);
+    for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
+      Serial.print(receiverMinValue[channel]);
       Serial.print(',');
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'h': // Send transmitter calibration data
-    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      Serial.print(receiverMaxValue[axis]);
+      Serial.print(receiverMaxValue[channel]);
       Serial.print(',');
     }
     SERIAL_PRINTLN();
@@ -603,7 +605,7 @@ void sendSerialTelemetry() {
     #endif
 
     for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
-      PrintValueComma((channel < LASTCHANNEL) ? receiverCommand[channel] : 0);
+      PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
     }
 
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
@@ -640,13 +642,13 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     break;
 
-  case 't': // Send processed transmitter values
-    for (byte axis = 0; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(getRawChannelValue(axis));
+  case 't': // Send raw transmitter values
+    for (byte channel = 0; channel < LAST_CHANNEL; channel++) {
+      PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
     }
     SERIAL_PRINTLN();
     break;
-
+    
   case 'u': // Send range finder values
     #if defined (AltitudeHoldRangeFinder)
       PrintValueComma(maxRangeFinderRange);
@@ -670,6 +672,7 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
+    
   case 'y': // send GPS info
     #if defined (UseGPS)
       PrintValueComma(gpsData.state);
@@ -853,8 +856,18 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo +");
   #endif
 
-  SERIAL_PRINT("Receiver Channels: ");
-  SERIAL_PRINTLN(LASTCHANNEL);
+  SERIAL_PRINT("ReceiverType: ");
+  SERIAL_PRINTLN(receiverTypeUsed);
+
+  SERIAL_PRINT("ReceiverNbChannels: ");
+  SERIAL_PRINTLN(LAST_CHANNEL);
+  
+  SERIAL_PRINT("ReceiverChannelMap: ");
+  for (byte channel = 0; channel < LAST_CHANNEL-1; channel++)
+  {
+    PrintValueComma(receiverChannelMap[channel]);
+  }
+  SERIAL_PRINTLN(receiverChannelMap[LAST_CHANNEL-1]);
 
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);

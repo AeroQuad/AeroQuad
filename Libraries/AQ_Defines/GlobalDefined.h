@@ -21,6 +21,9 @@
 #ifndef _AEROQUAD_GLOBAL_DEFINES_H_
 #define _AEROQUAD_GLOBAL_DEFINES_H_
 
+#include "Arduino.h"
+
+#define PWM2RAD 0.002 
 
 // More AQ relative than generic... have to be think again
 // Basic axis definitions
@@ -39,5 +42,8 @@
 #define OFF 0
 
 #define ALTPANIC 2
+
+typedef void (*functionPtr)();
+typedef int  (*intFunctionPtrByte)(byte);
 
 #endif

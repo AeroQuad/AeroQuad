@@ -30,12 +30,12 @@
 #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
   boolean isPositionHoldEnabledByUser() {
     #if defined (UseGPSNavigator)
-      if ((receiverCommand[AUX1] < 1750) || (receiverCommand[AUX2] < 1750)) {
+      if ((receiverCommand[receiverChannelMap[AUX1]] < 1750) || (receiverCommand[receiverChannelMap[AUX2]] < 1750)) {
         return true;
       }
       return false;
     #else
-      if (receiverCommand[AUX1] < 1750) {
+      if (receiverCommand[receiverChannelMap[AUX1]] < 1750) {
         return true;
       }
       return false;
@@ -58,7 +58,7 @@
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
-          altitudeHoldThrottle = receiverCommand[THROTTLE];
+          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
           isAltitudeHoldInitialized = true;
         }
         altitudeHoldState = ON;
@@ -88,7 +88,7 @@
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
           #endif
-          altitudeHoldThrottle = receiverCommand[THROTTLE];
+          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
           isAutoLandingInitialized = true;
         }
         altitudeHoldState = ON;
@@ -99,12 +99,12 @@
       autoLandingThrottleCorrection = 0;
       isAutoLandingInitialized = false;
       #if defined (UseGPSNavigator)
-        if ((receiverCommand[AUX1] > 1750) && (receiverCommand[AUX2] > 1750)) {
+        if ((receiverCommand[receiverChannelMap[AUX1]] > 1750) && (receiverCommand[receiverChannelMap[AUX2]] > 1750)) {
           altitudeHoldState = OFF;
           isAltitudeHoldInitialized = false;
         }
       #else
-        if (receiverCommand[AUX1] > 1750) {
+        if (receiverCommand[receiverChannelMap[AUX1]] > 1750) {
           altitudeHoldState = OFF;
           isAltitudeHoldInitialized = false;
         }
@@ -118,8 +118,8 @@
   void processGpsNavigationStateFromReceiverCommand() {
     // Init home command
     if (motorArmed == OFF && 
-        receiverCommand[THROTTLE] < MINCHECK && receiverCommand[ZAXIS] < MINCHECK &&
-        receiverCommand[YAXIS] > MAXCHECK && receiverCommand[XAXIS] > MAXCHECK &&
+        receiverCommand[receiverChannelMap[THROTTLE]] < MINCHECK && receiverCommand[receiverChannelMap[ZAXIS]] < MINCHECK &&
+        receiverCommand[receiverChannelMap[YAXIS]] > MAXCHECK && receiverCommand[receiverChannelMap[XAXIS]] > MAXCHECK &&
         haveAGpsLock()) {
   
       homePosition.latitude = currentPosition.latitude;
@@ -128,7 +128,7 @@
     }
 
 
-    if (receiverCommand[AUX2] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
+    if (receiverCommand[receiverChannelMap[AUX2]] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
       if (isInitNavigationNeeded) {
         
         gpsRollAxisCorrection = 0;
@@ -143,7 +143,7 @@
   
       navigationState = ON;
     }
-    else if (receiverCommand[AUX1] < 1250) {  // Enter in position hold state
+    else if (receiverCommand[receiverChannelMap[AUX1]] < 1250) {  // Enter in position hold state
       if (isStorePositionNeeded) {
         
         gpsRollAxisCorrection = 0;
@@ -181,7 +181,7 @@
 
 void processZeroThrottleFunctionFromReceiverCommand() {
   // Disarm motors (left stick lower left corner)
-  if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
+  if (receiverCommand[receiverChannelMap[ZAXIS]] < MINCHECK && motorArmed == ON) {
     commandAllMotors(MINCOMMAND);
     motorArmed = OFF;
     inFlight = false;
@@ -198,7 +198,7 @@ void processZeroThrottleFunctionFromReceiverCommand() {
   }    
 
   // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-  if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {
+  if ((receiverCommand[receiverChannelMap[ZAXIS]] < MINCHECK) && (receiverCommand[receiverChannelMap[XAXIS]] > MAXCHECK) && (receiverCommand[receiverChannelMap[YAXIS]] < MINCHECK)) {
     calibrateGyro();
     computeAccelBias();
     storeSensorsZeroToEEPROM();
@@ -207,7 +207,7 @@ void processZeroThrottleFunctionFromReceiverCommand() {
   }   
 
   // Arm motors (left stick lower right corner)
-  if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
+  if (receiverCommand[receiverChannelMap[ZAXIS]] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
 
     #ifdef OSD_SYSTEM_MENU
       if (menuOwnsSticks) {
@@ -228,7 +228,7 @@ void processZeroThrottleFunctionFromReceiverCommand() {
 
   }
   // Prevents accidental arming of motor output if no transmitter command received
-  if (receiverCommand[ZAXIS] > MINCHECK) {
+  if (receiverCommand[receiverChannelMap[ZAXIS]] > MINCHECK) {
     safetyCheck = ON; 
   }
 }
@@ -246,18 +246,18 @@ void readPilotCommands() {
 
   readReceiver(); 
   
-  if (receiverCommand[THROTTLE] < MINCHECK) {
+  if (receiverCommand[receiverChannelMap[THROTTLE]] < MINCHECK) {
     processZeroThrottleFunctionFromReceiverCommand();
   }
 
   if (!inFlight) {
-    if (motorArmed == ON && receiverCommand[THROTTLE] > minArmedThrottle) {
+    if (motorArmed == ON && receiverCommand[receiverChannelMap[THROTTLE]] > minArmedThrottle) {
       inFlight = true;
     }
   }
 
     // Check Mode switch for Acro or Stable
-    if (receiverCommand[MODE] > 1500) {
+    if (receiverCommand[receiverChannelMap[MODE]] > 1500) {
         flightMode = ATTITUDE_FLIGHT_MODE;
     }
     else {

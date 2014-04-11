@@ -28,7 +28,7 @@
 #include "pins_arduino.h"
 #include "GpsDataType.h"
 #include "AQMath.h"
-#include "Receiver.h"
+#include "Receiver_Base.h"
 
 // Flight Software Version
 #define SOFTWARE_VERSION 3.2
@@ -237,7 +237,6 @@ typedef struct {
 typedef struct {
   long minValue;
   long maxValue;
-  float smooth_factor;
 } t_NVR_Receiver;
 
 typedef struct {    
@@ -257,7 +256,6 @@ typedef struct {
   t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
-  float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
   float FLIGHTMODE_ADR;
   float ACCEL_1G_ADR;
@@ -275,6 +273,10 @@ typedef struct {
   float YAXIS_ACCEL_SCALE_FACTOR_ADR;
   float ZAXIS_ACCEL_BIAS_ADR;
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
+  
+  float RECEIVER_CONFIG_TYPE_ADR;
+  float RECEIVER_CHANNEL_MAP_ADR[MAX_NB_CHANNEL];
+  
   // Mag Calibration
   float XAXIS_MAG_BIAS_ADR;
   float YAXIS_MAG_BIAS_ADR;

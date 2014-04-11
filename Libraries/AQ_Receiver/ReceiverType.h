@@ -18,35 +18,15 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_RECEIVER_REMOTE_PC_H_
-#define _AEROQUAD_RECEIVER_REMOTE_PC_H_
+#ifndef _AEROQUAD_RECEIVER_TYPE_H_
+#define _AEROQUAD_RECEIVER_TYPE_H_
 
-#include "Arduino.h"
-#include "Receiver.h"
+#define RECEIVER_PPM 0
+#define RECEIVER_PWM 1 
+#define RECEIVER_SBUS 2   
+#define RECEIVER_HWPPM 3
 
-void initializeReceiver(int nbChannel) {
-
-  initializeReceiverParam(nbChannel);
-  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
-    receiverCommand[channel] = 1500;
-    receiverZero[channel] = 1500;
-  }
-  receiverCommand[THROTTLE] = 0;
-  receiverZero[THROTTLE] = 0;
-  receiverCommand[MODE] = 2000;
-  receiverZero[MODE] = 0;
-  receiverCommand[AUX] = 2000;
-  receiverZero[AUX] = 0;
-}
-
-int getRawChannelValue(byte channel) {
-  return receiverCommand[channel];
-}
-  
-void setChannelValue(byte channel,int value) {
-  receiverCommand[channel] = value;
-}
-
+int8_t receiverTypeUsed = RECEIVER_PWM;
 
 #endif
 
