@@ -82,6 +82,31 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
   return (PIDparameters->P * error) + (PIDparameters->I * PIDparameters->integratedError) + dTerm;
 }
 
+
+float updatePIDDerivativeBaseRate(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+
+  // AKA PID experiments
+  const float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
+
+  PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
+  float error = targetPosition - currentPosition;
+
+  if (inFlight) {
+    PIDparameters->integratedError += error * deltaPIDTime;
+  }
+  else {
+    PIDparameters->integratedError = 0.0;
+  }
+  float cptr[3] = {0.0,0.0,0.0};
+  cptr[0] = PIDparameters->P * error;
+  cptr[1] = PIDparameters->I * PIDparameters->integratedError;
+  cptr[2] = PIDparameters->D * (targetPosition - PIDparameters->lastError) / (deltaPIDTime * 100); // dT fix from Honk
+  PIDparameters->lastError = targetPosition;
+
+  return cptr[0] + cptr[1] + cptr[2];
+}
+
+
 void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
   for (byte axis = 0; axis <= ATTITUDE_GYRO_YAXIS_PID_IDX; axis++) {

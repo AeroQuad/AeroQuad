@@ -471,8 +471,7 @@ void sendSerialTelemetry() {
       #endif
     }
     #if defined(AltitudeHoldBaro)
-//      PrintValueComma(getBaroAltitude());
-      PrintValueComma(estimatedAltitude);
+      PrintValueComma(getBaroAltitude());
       PrintValueComma(zVelocity/100.0);
     #else
       PrintValueComma(0);

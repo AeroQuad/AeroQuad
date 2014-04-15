@@ -65,7 +65,7 @@
 
 
 // define wireless communication on serial 0 at 57600
-//#define USE_WIRELESS_COMMUNICATION
+#define USE_WIRELESS_COMMUNICATION
 //
 // *******************************************************************************************************************************
 // Optional Sensors

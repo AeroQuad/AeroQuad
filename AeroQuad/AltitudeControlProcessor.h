@@ -28,19 +28,16 @@
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 
+
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 
-#define INVALID_THROTTLE_CORRECTION -1000
 #define ALTITUDE_BUMP_SPEED 0.01
 
-float previousZDampeningThrottleCorrection = 0.0;
+#ifndef MAX
+  #define MAX(A,B) ((A)>(B) ? (A) : (B))
+#endif
 
-/**
- * processAltitudeHold
- * 
- * This function is responsible to process the throttle correction 
- * to keep the current altitude if selected by the user 
- */
+float targetVerticalSpeed = 0.0;
 void processAltitudeHold()
 {
   // ****************************** Altitude Adjust *************************
@@ -48,73 +45,64 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-  if (altitudeHoldState == ON) {
-    int altitudeHoldThrottleCorrection = INVALID_THROTTLE_CORRECTION;
-    // computer altitude error!
-    #if defined AltitudeHoldRangeFinder
-      if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) {
-        if (sonarAltitudeToHoldTarget == INVALID_RANGE) {
-          sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
-        }
-        altitudeHoldThrottleCorrection = updatePID(sonarAltitudeToHoldTarget, rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX], &PID[SONAR_ALTITUDE_HOLD_PID_IDX]);
-        altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      }
-    #endif
-    #if defined AltitudeHoldBaro
-      if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
-        altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, estimatedAltitude, &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
-        altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      }
-    #endif        
-    if (altitudeHoldThrottleCorrection == INVALID_THROTTLE_CORRECTION) {
-      throttle = receiverCommand[receiverChannelMap[THROTTLE]];
-      return;
-    }
-    
-    // ZDAMPENING COMPUTATIONS
-    float zDampeningThrottleCorrection = 0;
-    #if defined USE_Z_DAMPENING  
-      zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocity, &PID[ZDAMPENING_PID_IDX]);
-      zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);      
-      altitudeHoldThrottleCorrection = 0;
-    #endif
+  // Now, thank to abarton for this complete improvement using accel z velicoty here
+  // http://aeroquad.com/showthread.php?8912-Altitude-Hold-(again)
 
-    
-    if (abs(altitudeHoldThrottle - receiverCommand[receiverChannelMap[THROTTLE]]) > altitudeHoldPanicStickMovement) {
-      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+  if (altitudeHoldState == ON) {
+
+    static float previousAltitudeToHoldTarget = 0.0;
+    const float dT = 1.0/50.0;
+    float altitudeToHoldTargetROC = (baroAltitudeToHoldTarget - previousAltitudeToHoldTarget) / dT;
+    previousAltitudeToHoldTarget = baroAltitudeToHoldTarget;
+    altitudeToHoldTargetROC = constrain(altitudeToHoldTargetROC, -1.0, 1.0);
+
+    float vDeadBand = 0.125;
+    float altitudeError = fabs(baroAltitudeToHoldTarget - estimatedAltitude);
+    if (altitudeError > vDeadBand) {
+      const float a = 5.0; // Deceleration rate as we approach target altitude, m/s^2.
+      targetVerticalSpeed = a * sqrt(2.0 * (altitudeError-vDeadBand) / a);
+      if (baroAltitudeToHoldTarget < estimatedAltitude) {
+        targetVerticalSpeed = -targetVerticalSpeed;
+      }
     } 
     else {
-      
-      if (receiverCommand[receiverChannelMap[THROTTLE]] > (altitudeHoldThrottle + altitudeHoldBump)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-        #if defined AltitudeHoldBaro
-          baroAltitudeToHoldTarget += ALTITUDE_BUMP_SPEED;
-        #endif
-        #if defined AltitudeHoldRangeFinder
-          float newalt = sonarAltitudeToHoldTarget + ALTITUDE_BUMP_SPEED;
-          if (isOnRangerRange(newalt)) {
-            sonarAltitudeToHoldTarget = newalt;
-          }
-        #endif
-      }
-      
-      if (receiverCommand[receiverChannelMap[THROTTLE]] < (altitudeHoldThrottle - altitudeHoldBump)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-        #if defined AltitudeHoldBaro
-          baroAltitudeToHoldTarget -= ALTITUDE_BUMP_SPEED;
-        #endif
-        #if defined AltitudeHoldRangeFinder
-          float newalt = sonarAltitudeToHoldTarget - ALTITUDE_BUMP_SPEED;
-          if (isOnRangerRange(newalt)) {
-            sonarAltitudeToHoldTarget = newalt;
-          }
-        #endif
-      }
+      targetVerticalSpeed = updatePIDDerivativeBaseRate(baroAltitudeToHoldTarget, estimatedAltitude, &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
     }
-    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
+    targetVerticalSpeed += altitudeToHoldTargetROC;
+
+    const float vMax = 5.0; // Maximum target speed, m/s.
+    targetVerticalSpeed = constrain(targetVerticalSpeed, -vMax, vMax);
+
+    float altitudeHoldThrottleCorrection = updatePIDDerivativeBaseRate(targetVerticalSpeed, zVelocity, &PID[ZDAMPENING_PID_IDX]);
+    altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+
+    if (abs(altitudeHoldThrottle - receiverCommand[receiverChannelMap[THROTTLE]]) > altitudeHoldPanicStickMovement) {
+      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+      altitudeHoldThrottleCorrection = 0;
+    }
+    else {
+
+      float altitudeBump = 0.0;
+      if (receiverCommand[receiverChannelMap[THROTTLE]] > (altitudeHoldThrottle + altitudeHoldBump)) {
+        altitudeBump = ALTITUDE_BUMP_SPEED;
+      }
+      else if (receiverCommand[receiverChannelMap[THROTTLE]] < (altitudeHoldThrottle - altitudeHoldBump)) {
+        altitudeBump = -ALTITUDE_BUMP_SPEED;
+      }
+
+      baroAltitudeToHoldTarget += altitudeBump;
+    }
+    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
+
+    //  Increase throttle to compensate for pitch or roll up to 45 degrees.
+    throttle = throttle * (1.0 / MAX(0.707107, kinematicCorrectedAccel[ZAXIS]));
   }
   else {
     throttle = receiverCommand[receiverChannelMap[THROTTLE]];
   }
 }
+
+
 
 #endif
 
