@@ -20,11 +20,11 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
 };
 
 #ifdef RECEIVER_STM32PPM
-  static byte receiverPinPPM = Port2Pin('D', 15);
+//  static byte receiverPinPPM = Port2Pin('D', 15);
 #elif defined ReceiverSBUS
   // Do nothing
 #else
-  static byte receiverPin[] = {
+/*  static byte receiverPin[] = {
     Port2Pin('D', 12),
     Port2Pin('D', 13),
     Port2Pin('D', 14),
@@ -34,6 +34,7 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
     Port2Pin('E', 13),
     Port2Pin('E', 14)
   };
+*/  
 #endif
 
 #define STM32_BOARD_TYPE "aeroquad32"

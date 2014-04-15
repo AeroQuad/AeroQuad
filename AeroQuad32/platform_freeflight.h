@@ -10,22 +10,6 @@ static byte stm32_motor_mapping[] = {
 	Port2Pin('A', 11)
 };
 
-#ifdef RECEIVER_STM32PPM
-  static byte receiverPinPPM = Port2Pin('A', 0);
-#else
-	static byte receiverPin[] = {
-		Port2Pin('A',  0),
-		Port2Pin('A',  1),
-		Port2Pin('A',  2),
-		Port2Pin('A',  3),
-		Port2Pin('A',  6),
-		Port2Pin('A',  7),
-		Port2Pin('B',  0),
-		Port2Pin('B',  1)
-	};
-#endif
-
-
 #define STM32_BOARD_TYPE "Free Flight"
 #define LED_Green  Port2Pin('B', 4)
 #define LED_Red    Port2Pin('B', 3)

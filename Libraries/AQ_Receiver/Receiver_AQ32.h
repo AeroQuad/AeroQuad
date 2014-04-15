@@ -31,17 +31,7 @@
 // definition of pins used for PWM receiver input
 
 
-/*
- ROLL     0	3
- PITCH    1	1
- YAW      2	0
- THROTTLE 3	2
- MODE     4	4
- AUX      5	6
- AUX2     6	5
- AUX3     7	7
- */
-
+#if defined(BOARD_aeroquad32)
 static byte receiverPin[] = {
     Port2Pin('D', 12),
     Port2Pin('D', 13),
@@ -53,7 +43,26 @@ static byte receiverPin[] = {
     Port2Pin('E', 14)
 };
 
-static byte ReceiverChannelMapPWM[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // default mapping
+static byte receiverPinPPM = Port2Pin('D', 15);
+
+#elif defined(BOARD_freeflight)
+static byte receiverPin[] = {
+	Port2Pin('A',  0),
+	Port2Pin('A',  1),
+	Port2Pin('A',  2),
+	Port2Pin('A',  3),
+	Port2Pin('A',  6),
+	Port2Pin('A',  7),
+	Port2Pin('B',  0),
+	Port2Pin('B',  1)
+};
+
+static byte receiverPinPPM = Port2Pin('A', 0);
+
+#endif
+
+
+static byte ReceiverChannelMapPWM[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,12 +226,12 @@ int getRawChannelValuePWM(const byte channel) {
 // RECEIVER PPM for AQ r32
 ////////////////////////////////////////
 
-static byte receiverPinPPM = Port2Pin('D', 15);
 
-#define SERIAL_SUM_PPM               0,1,3,2,4,5,6,7,8,9,10,11 // ROLL,PITCH,THR,YAW... For Robe/Hitec/Futaba/Turnigy9xFrsky
+
+#define SERIAL_SUM_PPM               0,1,3,2,4,5,6,7 
 static byte ReceiverChannelMapPPM[MAX_NB_CHANNEL] = {SERIAL_SUM_PPM};
 
-uint16 rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500,1500,1500,1500};
+uint16 rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
 byte   currentChannel;
 
 
@@ -329,7 +338,7 @@ int getRawChannelValuePPM(const byte channel) {
 
 
 
-
+#if defined(BOARD_aeroquad32)
 //
 // SBUS receiver
 //
@@ -337,16 +346,13 @@ int getRawChannelValuePPM(const byte channel) {
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
 #define SERIAL_SBUS Serial3
 
-static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {0,1,2,3,4,5,6,7,8,9,10,11};
+static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {0,1,2,3,4,5,6,7};
 static unsigned int sbusIndex = 0;
 // sbus rssi reader variables
 static unsigned short sbusFailSafeCount = 0;
 static unsigned long sbusFrameCount = 0;
 static unsigned short sbusRate = 0;
 boolean useSbusRSSIReader = false;
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementation part starts here.
@@ -422,6 +428,16 @@ int getRawChannelValueSBUS(const byte channel) {
 	}
 	return rawChannelValue[ReceiverChannelMapSBUS[channel]];
 }
+
+#elif defined(BOARD_freeflight)
+
+void initializeReceiverSBUS() {
+}
+
+int getRawChannelValueSBUS(const byte channel) {
+	return 1000;
+}
+#endif
 
 #endif
 

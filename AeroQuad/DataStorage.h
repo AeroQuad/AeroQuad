@@ -149,7 +149,7 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
 
-  receiverTypeUsed = RECEIVER_PPM;
+  receiverTypeUsed = RECEIVER_PWM;
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
     receiverMinValue[channel] = 1000;
     receiverMaxValue[channel] = 2000;

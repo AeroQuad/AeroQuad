@@ -7,15 +7,7 @@
 
 	#define ADC_NUMBER_OF_BITS	12
 
-	// Receiver Declaration
-	#if defined (ReceiverPPM) || defined (ReceiverHWPPM)
-		#undef ReceiverPPM
-		#undef ReceiverHWPPM
-		#define RECEIVER_STM32PPM
-	#elif defined (ReceiverSBUS)
-	#else
-		#define RECEIVER_STM32
-	#endif
+	#include <Receiver_AQ32.h>
 
 	// Motor declaration
 	#define MOTOR_STM32
