@@ -93,31 +93,23 @@ void readSerialCommand() {
       writeEEPROM();
       break;
 
-    case 'D': // Altitude hold PID
-      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
-        readFloatSerial();
-        altitudeHoldBump = readFloatSerial();
-        altitudeHoldPanicStickMovement = readFloatSerial();
-        minThrottleAdjust = readFloatSerial();
-        maxThrottleAdjust = readFloatSerial();
-        #if defined AltitudeHoldBaro
-          baroSmoothFactor = readFloatSerial();
-        #else
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      case 'D': // Altitude hold PID
+          readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
           readFloatSerial();
-        #endif
-        readSerialPID(ZDAMPENING_PID_IDX);
-        writeEEPROM();
-      #endif
-      break;
-
-    case 'E': // Receive sensor filtering values
-      readFloatSerial();
-      minArmedThrottle = readFloatSerial();
-      break;
-
-    case 'F': // Receive transmitter smoothing values
-      break;
+          altitudeHoldBump = readFloatSerial();
+          altitudeHoldPanicStickMovement = readFloatSerial();
+          minThrottleAdjust = readFloatSerial();
+          maxThrottleAdjust = readFloatSerial();
+          #if defined AltitudeHoldBaro
+            baroSmoothFactor = readFloatSerial();
+          #else
+            readFloatSerial();
+          #endif
+          readSerialPID(ZDAMPENING_PID_IDX);
+          writeEEPROM();
+        break;
+    #endif      
 
     case 'G': // Receive transmitter calibration values
       for (int channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -139,18 +131,6 @@ void readSerialCommand() {
       initializeEEPROM(); // defined in DataStorage.h
       writeEEPROM();
       storeSensorsZeroToEEPROM();
-      calibrateGyro();
-      zeroIntegralError();
-      #ifdef HeadingMagHold
-        initializeMagnetometer();
-      #endif
-      #ifdef AltitudeHoldBaro
-        initializeBaro();
-      #endif
-      break;
-
-    case 'J': // calibrate gyros
-      calibrateGyro();
       break;
 
     case 'K': // Write accel calibration values
@@ -163,77 +143,59 @@ void readSerialCommand() {
 
     case 'L': // generate accel bias
       computeAccelBias();
-      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-        calibrateKinematics();
-        accelOneG = meterPerSecSec[ZAXIS];
-      #endif
       storeSensorsZeroToEEPROM();
       break;
 
-    case 'M': // calibrate magnetometer
-      #ifdef HeadingMagHold
-        magBias[XAXIS] = readFloatSerial();
-        magBias[YAXIS] = readFloatSerial();
-        magBias[ZAXIS] = readFloatSerial();
-        writeEEPROM();
-      #else
-        skipSerialValues(3);
-      #endif
-      break;
+    #ifdef HeadingMagHold
+      case 'M': // calibrate magnetometer
+          magBias[XAXIS] = readFloatSerial();
+          magBias[YAXIS] = readFloatSerial();
+          magBias[ZAXIS] = readFloatSerial();
+          writeEEPROM();
+        break;
+    #endif
 
-    case 'N': // battery monitor
-      #ifdef BattMonitor
-        batteryMonitorAlarmVoltage = readFloatSerial();
-        batteryMonitorThrottleTarget = readFloatSerial();
-        batteryMonitorGoingDownTime = readFloatSerial();
-        setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
-        writeEEPROM();
-      #else
-        skipSerialValues(3);
-      #endif
-      break;
+    #ifdef BattMonitor
+      case 'N': // battery monitor
+          batteryMonitorAlarmVoltage = readFloatSerial();
+          batteryMonitorThrottleTarget = readFloatSerial();
+          batteryMonitorGoingDownTime = readFloatSerial();
+          setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
+          writeEEPROM();
+        break;
+    #endif
 
-    case 'O': // define waypoints
-      #ifdef UseGPSNavigator
-        missionNbPoint = readIntegerSerial();
-        waypoint[missionNbPoint].latitude = readIntegerSerial();
-        waypoint[missionNbPoint].longitude = readIntegerSerial();
-        waypoint[missionNbPoint].altitude = readIntegerSerial();
-        writeEEPROM();
-      #else
-        for(byte i = 0; i < 4; i++) {
-          readFloatSerial();
-        }
-      #endif
-      break;
-    case 'P': //  read Camera values
-      #ifdef CameraControl
-        cameraMode = readFloatSerial();
-        servoCenterPitch = readFloatSerial();
-        servoCenterRoll = readFloatSerial();
-        servoCenterYaw = readFloatSerial();
-        mCameraPitch = readFloatSerial();
-        mCameraRoll = readFloatSerial();
-        mCameraYaw = readFloatSerial();
-        servoMinPitch = readFloatSerial();
-        servoMinRoll = readFloatSerial();
-        servoMinYaw = readFloatSerial();
-        servoMaxPitch = readFloatSerial();
-        servoMaxRoll = readFloatSerial();
-        servoMaxYaw = readFloatSerial();
-        writeEEPROM();
-        #ifdef CameraTXControl
+    #ifdef UseGPSNavigator
+      case 'O': // define waypoints
+          missionNbPoint = readIntegerSerial();
+          waypoint[missionNbPoint].latitude = readIntegerSerial();
+          waypoint[missionNbPoint].longitude = readIntegerSerial();
+          waypoint[missionNbPoint].altitude = readIntegerSerial();
+          writeEEPROM();
+          break;
+    #endif
+
+    #ifdef CameraControl
+      case 'P': //  read Camera values
+          cameraMode = readFloatSerial();
+          servoCenterPitch = readFloatSerial();
+          servoCenterRoll = readFloatSerial();
+          servoCenterYaw = readFloatSerial();
+          mCameraPitch = readFloatSerial();
+          mCameraRoll = readFloatSerial();
+          mCameraYaw = readFloatSerial();
+          servoMinPitch = readFloatSerial();
+          servoMinRoll = readFloatSerial();
+          servoMinYaw = readFloatSerial();
+          servoMaxPitch = readFloatSerial();
+          servoMaxRoll = readFloatSerial();
+          servoMaxYaw = readFloatSerial();
           servoTXChannels = readFloatSerial();
-        #endif
-      #else
-        #ifdef CameraTXControl
-          skipSerialValues(14)
-        #else
-          skipSerialValues(13);
-        #endif
-      #endif
-      break;
+          writeEEPROM();
+          break;
+    #endif      
       
+    // receive receiver channel map
     case 'R':
       for (byte channel = 0; channel < LAST_CHANNEL; channel++)
       {
@@ -242,6 +204,7 @@ void readSerialCommand() {
       writeEEPROM();
       break;
 
+    // reset receiver channel map
     case 'S':
       for (byte channel = 0; channel < LAST_CHANNEL; channel++)
       {
@@ -250,34 +213,31 @@ void readSerialCommand() {
       writeEEPROM();
       break;
 
-    case 'U': // Range Finder
-      #if defined (AltitudeHoldRangeFinder)
+    #if defined (AltitudeHoldRangeFinder)
+      case 'U': // Range Finder
         maxRangeFinderRange = readFloatSerial();
         minRangeFinderRange = readFloatSerial();
         writeEEPROM();
-      #else
-        skipSerialValues(2);
-      #endif
-      break;
+        break;
+    #endif
+      
 
-    case 'V': // GPS
-      #if defined (UseGPSNavigator)
+    #if defined (UseGPSNavigator)
+      case 'V': // GPS
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
         writeEEPROM();
-      #else
-        skipSerialValues(9);
-      #endif
-      break;
+        break;
+    #endif
 
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
       break;
 
-    case 'X': // Stop sending messages
-      break;
+//    case 'X': // Stop sending messages
+//      break;
 
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
       validateCalibrateCommand(1);
@@ -287,18 +247,18 @@ void readSerialCommand() {
       validateCalibrateCommand(2);
       break;
 
-    case '3': // Test ESC calibration
-      if (validateCalibrateCommand(3)) {
-        testCommand = readFloatSerial();
-      }
-      break;
-
-    case '4': // Turn off ESC calibration
-      if (validateCalibrateCommand(4)) {
-        calibrateESC = 0;
-        testCommand = 1000;
-      }
-      break;
+//    case '3': // Test ESC calibration
+//      if (validateCalibrateCommand(3)) {
+//        testCommand = readFloatSerial();
+//      }
+//      break;
+//
+//    case '4': // Turn off ESC calibration
+//      if (validateCalibrateCommand(4)) {
+//        calibrateESC = 0;
+//        testCommand = 1000;
+//      }
+//      break;
 
     case '5': // Send individual motor commands (motor, command)
       if (validateCalibrateCommand(5)) {
@@ -306,13 +266,6 @@ void readSerialCommand() {
           motorConfiguratorCommand[motor] = (int)readFloatSerial();
         }
       }
-      break;
-
-    case 'Z': // fast telemetry transfer <--- get rid if this?
-      if (readFloatSerial() == 1.0)
-        fastTransfer = ON;
-      else
-        fastTransfer = OFF;
       break;
     }
   }
@@ -384,379 +337,345 @@ float getHeading()
 }
 
 void sendSerialTelemetry() {
-//  Serial.println(degrees(trueNorthHeading));
   
   switch (queryType) {
-  case '=': // Reserved debug command to view any variable from Serial Monitor
-    break;
 
-  case 'a': // Send roll and pitch rate mode PID values
-    PrintPID(RATE_XAXIS_PID_IDX);
-    PrintPID(RATE_YAXIS_PID_IDX);
-    PrintValueComma(rotationSpeedFactor);
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'b': // Send roll and pitch attitude mode PID values
-    PrintPID(ATTITUDE_XAXIS_PID_IDX);
-    PrintPID(ATTITUDE_YAXIS_PID_IDX);
-    PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
-    PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
-    SERIAL_PRINTLN(0);
-    queryType = 'X';
-    break;
-
-  case 'c': // Send yaw PID values
-    PrintPID(ZAXIS_PID_IDX);
-    PrintPID(HEADING_HOLD_PID_IDX);
-    SERIAL_PRINTLN(0);
-    queryType = 'X';
-    break;
-
-  case 'd': // Altitude Hold
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
-      PrintValueComma(0);
-      PrintValueComma(altitudeHoldBump);
-      PrintValueComma(altitudeHoldPanicStickMovement);
-      PrintValueComma(minThrottleAdjust);
-      PrintValueComma(maxThrottleAdjust);
-      #if defined AltitudeHoldBaro
-        PrintValueComma(baroSmoothFactor);
-      #else
-        PrintValueComma(0);
-      #endif
-      PrintPID(ZDAMPENING_PID_IDX);
-    #else
-      PrintDummyValues(10);
-    #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'e': // miscellaneous config values
-    PrintValueComma(0);
-    SERIAL_PRINTLN(minArmedThrottle);
-    queryType = 'X';
-    break;
-
-  case 'f': // Send transmitter smoothing values
-    queryType = 'X';
-    break;
-
-  case 'g': // Send transmitter calibration data
-    for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
-      Serial.print(receiverMinValue[channel]);
-      Serial.print(',');
-      Serial.print(receiverMaxValue[channel]);
-      Serial.print(',');
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'i': // Send sensor data
-    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(gyroRate[axis]);
-    }
-    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(filteredAccel[axis]);
-    }
-    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      #if defined(HeadingMagHold)
-        PrintValueComma(getMagnetometerData(axis));
-      #else
-        PrintValueComma(0);
-      #endif
-    }
-    #if defined(AltitudeHoldBaro)
-      PrintValueComma(getBaroAltitude());
-      PrintValueComma(zVelocity/100.0);
-    #else
-      PrintValueComma(0);
-      PrintValueComma(0);
-    #endif
-    SERIAL_PRINTLN();
-    break;
-
-  case 'j': // Send raw mag values
-    #ifdef HeadingMagHold
-      PrintValueComma(rawMag[XAXIS]);
-      PrintValueComma(rawMag[YAXIS]);
-      SERIAL_PRINTLN(rawMag[ZAXIS]);
-    #endif
-    break;
-
-  case 'k': // Send accelerometer cal values
-    SERIAL_PRINT(accelScaleFactor[XAXIS], 6);
-    comma();
-    SERIAL_PRINT(accelScaleFactor[YAXIS], 6);
-    comma();
-    SERIAL_PRINTLN(accelScaleFactor[ZAXIS], 6);
-    queryType = 'X';
-    break;
-
-  case 'l': // Send raw accel values
-    evaluateMetersPerSec();    // reset sample data
-    delay(2);
-    measureCriticalSensors();  // call mesureAccelSum that give one raw sample in accelSample
-    PrintValueComma((int)(accelSample[XAXIS]));
-    PrintValueComma((int)(accelSample[YAXIS]));
-    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]));
-    break;
-
-  case 'm': // Send magnetometer cal values
-    #ifdef HeadingMagHold
-      SERIAL_PRINT(magBias[XAXIS], 6);
-      comma();
-      SERIAL_PRINT(magBias[YAXIS], 6);
-      comma();
-      SERIAL_PRINTLN(magBias[ZAXIS], 6);
-    #endif
-    queryType = 'X';
-    break;
-
-  case 'n': // battery monitor
-    #ifdef BattMonitor
-      PrintValueComma(batteryMonitorAlarmVoltage);
-      PrintValueComma(batteryMonitorThrottleTarget);
-      PrintValueComma(batteryMonitorGoingDownTime);
-    #else
-      PrintDummyValues(3);
-    #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'o': // send waypoints
-    #ifdef UseGPSNavigator
-      for (byte index = 0; index < MAX_WAYPOINTS; index++) {
-        PrintValueComma(index);
-        PrintValueComma(waypoint[index].latitude);
-        PrintValueComma(waypoint[index].longitude);
-        PrintValueComma(waypoint[index].altitude);
-      }
-    #else
-      PrintDummyValues(4);
-    #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'p': // Send Camera values
-    #ifdef CameraControl
-      PrintValueComma(cameraMode);
-      PrintValueComma(servoCenterPitch);
-      PrintValueComma(servoCenterRoll);
-      PrintValueComma(servoCenterYaw);
-      PrintValueComma(mCameraPitch);
-      PrintValueComma(mCameraRoll);
-      PrintValueComma(mCameraYaw);
-      PrintValueComma(servoMinPitch);
-      PrintValueComma(servoMinRoll);
-      PrintValueComma(servoMinYaw);
-      PrintValueComma(servoMaxPitch);
-      PrintValueComma(servoMaxRoll);
-      PrintValueComma(servoMaxYaw);
-      #ifdef CameraTXControl
-        PrintValueComma(servoTXChannels);
-      #endif
-    #else
-      #ifdef CameraTXControl
-        PrintDummyValues(14);
-      #else
-        PrintDummyValues(13);
-      #endif
-    #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-
-  case 'q': // Send Vehicle State Value
-    SERIAL_PRINTLN(vehicleState);
-    queryType = 'X';
-    break;
-
-  case 'r': // Vehicle attitude
-    PrintValueComma(kinematicsAngle[XAXIS]);
-    PrintValueComma(kinematicsAngle[YAXIS]);
-    SERIAL_PRINTLN(getHeading());
-    break;
-
-  case 's': // Send all flight data
-    PrintValueComma(motorArmed);
-    PrintValueComma(kinematicsAngle[XAXIS]);
-    PrintValueComma(kinematicsAngle[YAXIS]);
-    PrintValueComma(getHeading());
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      #if defined AltitudeHoldBaro
-        PrintValueComma(estimatedAltitude);
-        PrintValueComma(zVelocity/100.0);
-      #elif defined AltitudeHoldRangeFinder
-        PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
-        PrintValueComma(0);
-      #endif
-      PrintValueComma((int)altitudeHoldState);
-    #else
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-    #endif
-
-    for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
-      PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
-    }
-
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      PrintValueComma(motorCommand[motor]);
-    }
-    PrintDummyValues(8 - LASTMOTOR); // max of 8 motor outputs supported
-
-    #if defined(BattMonitor)
-      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
-    #else
-      PrintValueComma(0);
-    #endif
-    
-    PrintValueComma(flightMode);
-    
-    #if defined(UseGPS)
-      PrintValueComma(gpsData.state);
-      PrintValueComma(gpsData.sats);
-      PrintValueComma(gpsData.speed);
-      PrintValueComma(gpsData.height);
-      PrintValueComma(gpsData.course);
-      PrintValueComma(gpsData.lat);
-      PrintValueComma(gpsData.lon);
-    #else
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-      PrintValueComma(0);
-    #endif
-    
-    SERIAL_PRINTLN();
-    break;
-
-  case 't': // Send raw transmitter values
-    for (byte channel = 0; channel < LAST_CHANNEL; channel++) {
-      PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
-    }
-    SERIAL_PRINTLN();
-    break;
-    
-  case 'u': // Send range finder values
-    #if defined (AltitudeHoldRangeFinder)
-      PrintValueComma(maxRangeFinderRange);
-      SERIAL_PRINTLN(minRangeFinderRange);
-    #else
-      PrintValueComma(0);
-      SERIAL_PRINTLN(0);
-    #endif
-    queryType = 'X';
-    break;
-
-  case 'v': // Send GPS PIDs
-    #if defined (UseGPSNavigator)
-      PrintPID(GPSROLL_PID_IDX);
-      PrintPID(GPSPITCH_PID_IDX);
-      PrintPID(GPSYAW_PID_IDX);
+    case 'a': // Send roll and pitch rate mode PID values
+      PrintPID(RATE_XAXIS_PID_IDX);
+      PrintPID(RATE_YAXIS_PID_IDX);
+      PrintValueComma(rotationSpeedFactor);
+      SERIAL_PRINTLN();
       queryType = 'X';
-    #else
-      PrintDummyValues(9);
-    #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-    
-  case 'y': // send GPS info
-    #if defined (UseGPS)
-      PrintValueComma(gpsData.state);
-      PrintValueComma(gpsData.lat);
-      PrintValueComma(gpsData.lon);
-      PrintValueComma(gpsData.height);
-      PrintValueComma(gpsData.course);
-      PrintValueComma(gpsData.speed);
-      PrintValueComma(gpsData.accuracy);
-      PrintValueComma(gpsData.sats);
-      PrintValueComma(gpsData.fixtime);
-      PrintValueComma(gpsData.sentences);
-      PrintValueComma(gpsData.idlecount);
-    #else
-      PrintDummyValues(11);
-    #endif    
-    SERIAL_PRINTLN();
-    break;
- 
-  case 'z': // Send all Altitude data 
-    #if defined (AltitudeHoldBaro) 
-      PrintValueComma(getBaroAltitude()); 
-    #else
-      PrintValueComma(0);
-    #endif 
-    #if defined (AltitudeHoldRangeFinder) 
-      SERIAL_PRINTLN(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
-    #else
-      SERIAL_PRINTLN(0); 
-    #endif 
-    break;
-    
-  case '$': // send BatteryMonitor voltage/current readings
-    #if defined (BattMonitor)
-      PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
-      #if defined (BM_EXTENDED)
-        PrintValueComma((float)batteryData[0].current/100.0);
-        PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
-      #else
-        PrintDummyValues(2);
-      #endif
-    #else
-      PrintDummyValues(3);
-    #endif
-    SERIAL_PRINTLN();
-    break;
-    
-  case '%': // send RSSI
-    #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader) || defined (UseSBUSRSSIReader)
-      SERIAL_PRINTLN(rssiRawValue);
-    #else
+      break;
+  
+    case 'b': // Send roll and pitch attitude mode PID values
+      PrintPID(ATTITUDE_XAXIS_PID_IDX);
+      PrintPID(ATTITUDE_YAXIS_PID_IDX);
+      PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
+      PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
       SERIAL_PRINTLN(0);
+      queryType = 'X';
+      break;
+  
+    case 'c': // Send yaw PID values
+      PrintPID(ZAXIS_PID_IDX);
+      PrintPID(HEADING_HOLD_PID_IDX);
+      SERIAL_PRINTLN(0);
+      queryType = 'X';
+      break;
+
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    case 'd': // Altitude Hold
+        PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
+        PrintValueComma(0);
+        PrintValueComma(altitudeHoldBump);
+        PrintValueComma(altitudeHoldPanicStickMovement);
+        PrintValueComma(minThrottleAdjust);
+        PrintValueComma(maxThrottleAdjust);
+        #if defined AltitudeHoldBaro
+          PrintValueComma(baroSmoothFactor);
+        #else
+          PrintValueComma(0);
+        #endif
+        PrintPID(ZDAMPENING_PID_IDX);
+        SERIAL_PRINTLN();
+        queryType = 'X';
+        break;
+    #endif        
+  
+//    case 'f': // Send transmitter smoothing values
+//      queryType = 'X';
+//      break;
+  
+    case 'g': // Send transmitter calibration data
+      for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
+        Serial.print(receiverMinValue[channel]);
+        Serial.print(',');
+        Serial.print(receiverMaxValue[channel]);
+        Serial.print(',');
+      }
+      SERIAL_PRINTLN();
+      queryType = 'X';
+      break;
+  
+    case 'i': // Send sensor data
+      for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+        PrintValueComma(gyroRate[axis]);
+      }
+      for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+        PrintValueComma(filteredAccel[axis]);
+      }
+      for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+        #if defined(HeadingMagHold)
+          PrintValueComma(getMagnetometerData(axis));
+        #else
+          PrintValueComma(0);
+        #endif
+      }
+      #if defined(AltitudeHoldBaro)
+        PrintValueComma(getBaroAltitude());
+        PrintValueComma(zVelocity/100.0);
+      #else
+        PrintValueComma(0);
+        PrintValueComma(0);
+      #endif
+      SERIAL_PRINTLN();
+      break;
+
+    #ifdef HeadingMagHold
+      case 'j': // Send raw mag values
+        PrintValueComma(rawMag[XAXIS]);
+        PrintValueComma(rawMag[YAXIS]);
+        SERIAL_PRINTLN(rawMag[ZAXIS]);
+        break;
     #endif
-    break;
+    
+//    case 'k': // Send accelerometer cal values
+//      SERIAL_PRINT(accelScaleFactor[XAXIS], 6);
+//      comma();
+//      SERIAL_PRINT(accelScaleFactor[YAXIS], 6);
+//      comma();
+//      SERIAL_PRINTLN(accelScaleFactor[ZAXIS], 6);
+//      queryType = 'X';
+//      break;
+  
+    case 'l': // Send raw accel values
+      evaluateMetersPerSec();    // reset sample data
+      delay(2);
+      measureCriticalSensors();  // call mesureAccelSum that give one raw sample in accelSample
+      PrintValueComma((int)(accelSample[XAXIS]));
+      PrintValueComma((int)(accelSample[YAXIS]));
+      SERIAL_PRINTLN ((int)(accelSample[ZAXIS]));
+      break;
+  
+//    case 'm': // Send magnetometer cal values
+//      #ifdef HeadingMagHold
+//        SERIAL_PRINT(magBias[XAXIS], 6);
+//        comma();
+//        SERIAL_PRINT(magBias[YAXIS], 6);
+//        comma();
+//        SERIAL_PRINTLN(magBias[ZAXIS], 6);
+//      #endif
+//      queryType = 'X';
+//      break;
 
-  case 'x': // Stop sending messages
-    break;
+    #ifdef BattMonitor
+      case 'n': // battery monitor
+        PrintValueComma(batteryMonitorAlarmVoltage);
+        PrintValueComma(batteryMonitorThrottleTarget);
+        PrintValueComma(batteryMonitorGoingDownTime);
+        SERIAL_PRINTLN();
+        queryType = 'X';
+        break;
+    #endif      
 
-  case '!': // Send flight software version
-    SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
-    queryType = 'X';
-    break;
+    #ifdef UseGPSNavigator
+      case 'o': // send waypoints
+        for (byte index = 0; index < MAX_WAYPOINTS; index++) {
+          PrintValueComma(index);
+          PrintValueComma(waypoint[index].latitude);
+          PrintValueComma(waypoint[index].longitude);
+          PrintValueComma(waypoint[index].altitude);
+        }
+        SERIAL_PRINTLN();
+        queryType = 'X';
+        break;
+    #endif        
 
-  case '#': // Send configuration
-    reportVehicleState();
-    queryType = 'X';
-    break;
+    #ifdef CameraControl
+      case 'p': // Send Camera values
+        PrintValueComma(cameraMode);
+        PrintValueComma(servoCenterPitch);
+        PrintValueComma(servoCenterRoll);
+        PrintValueComma(servoCenterYaw);
+        PrintValueComma(mCameraPitch);
+        PrintValueComma(mCameraRoll);
+        PrintValueComma(mCameraYaw);
+        PrintValueComma(servoMinPitch);
+        PrintValueComma(servoMinRoll);
+        PrintValueComma(servoMinYaw);
+        PrintValueComma(servoMaxPitch);
+        PrintValueComma(servoMaxRoll);
+        PrintValueComma(servoMaxYaw);
+        PrintValueComma(servoTXChannels);
+        SERIAL_PRINTLN();
+        queryType = 'X';
+        break;
+    #endif
+  
+    case 'q': // Send Vehicle State Value
+      SERIAL_PRINTLN(vehicleState);
+      queryType = 'X';
+      break;
+  
+//    case 'r': // Vehicle attitude
+//      PrintValueComma(kinematicsAngle[XAXIS]);
+//      PrintValueComma(kinematicsAngle[YAXIS]);
+//      SERIAL_PRINTLN(getHeading());
+//      break;
+  
+    case 's': // Send all flight data
+      PrintValueComma(motorArmed);
+      PrintValueComma(kinematicsAngle[XAXIS]);
+      PrintValueComma(kinematicsAngle[YAXIS]);
+      PrintValueComma(getHeading());
+      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+        #if defined AltitudeHoldBaro
+          PrintValueComma(estimatedAltitude);
+          PrintValueComma(zVelocity/100.0);
+        #elif defined AltitudeHoldRangeFinder
+          PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
+          PrintValueComma(0);
+        #endif
+        PrintValueComma((int)altitudeHoldState);
+      #else
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+      #endif
+  
+      for (byte channel = 0; channel < 8; channel++) { // Configurator expects 8 values
+        PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
+      }
+  
+      for (byte motor = 0; motor < LASTMOTOR; motor++) {
+        PrintValueComma(motorCommand[motor]);
+      }
+      PrintDummyValues(8 - LASTMOTOR); // max of 8 motor outputs supported
+  
+      #if defined(BattMonitor)
+        PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
+      #else
+        PrintValueComma(0);
+      #endif
+      
+      PrintValueComma(flightMode);
+      
+      #if defined(UseGPS)
+        PrintValueComma(gpsData.state);
+        PrintValueComma(gpsData.sats);
+        PrintValueComma(gpsData.speed);
+        PrintValueComma(gpsData.height);
+        PrintValueComma(gpsData.course);
+        PrintValueComma(gpsData.lat);
+        PrintValueComma(gpsData.lon);
+      #else
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+        PrintValueComma(0);
+      #endif
+      
+      SERIAL_PRINTLN();
+      break;
+  
+    case 't': // Send raw transmitter values
+      for (byte channel = 0; channel < LAST_CHANNEL; channel++) {
+        PrintValueComma(receiverCommand[receiverChannelMap[channel]]);
+      }
+      SERIAL_PRINTLN();
+      break;
 
-  case '6': // Report remote commands
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      PrintValueComma(motorCommand[motor]);
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
+    #if defined (AltitudeHoldRangeFinder)
+      case 'u': // Send range finder values
+        PrintValueComma(maxRangeFinderRange);
+        SERIAL_PRINTLN(minRangeFinderRange);
+        queryType = 'X';
+        break;
+    #endif
 
-#if defined(OSD) && defined(OSD_LOADFONT)
-  case '&': // fontload
-    if (OFF == motorArmed) {
-      max7456LoadFont();
-    }
-    queryType = 'X';
-    break;
-#endif
+    #if defined (UseGPSNavigator)
+      case 'v': // Send GPS PIDs
+        PrintPID(GPSROLL_PID_IDX);
+        PrintPID(GPSPITCH_PID_IDX);
+        PrintPID(GPSYAW_PID_IDX);
+        queryType = 'X';
+        SERIAL_PRINTLN();
+        queryType = 'X';
+        break;
+    #endif
+
+    #if defined (UseGPS)
+      case 'y': // send GPS info
+        PrintValueComma(gpsData.state);
+        PrintValueComma(gpsData.lat);
+        PrintValueComma(gpsData.lon);
+        PrintValueComma(gpsData.height);
+        PrintValueComma(gpsData.course);
+        PrintValueComma(gpsData.speed);
+        PrintValueComma(gpsData.accuracy);
+        PrintValueComma(gpsData.sats);
+        PrintValueComma(gpsData.fixtime);
+        PrintValueComma(gpsData.sentences);
+        PrintValueComma(gpsData.idlecount);
+        SERIAL_PRINTLN();
+        break;
+    #endif    
+      
+//    case 'z': // Send all Altitude data 
+//      #if defined (AltitudeHoldBaro) 
+//        PrintValueComma(getBaroAltitude()); 
+//      #else
+//        PrintValueComma(0);
+//      #endif 
+//      #if defined (AltitudeHoldRangeFinder) 
+//        SERIAL_PRINTLN(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
+//      #else
+//        SERIAL_PRINTLN(0); 
+//      #endif 
+//      break;
+
+    #if defined (BattMonitor)
+      case '$': // send BatteryMonitor voltage/current readings
+        PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s
+        #if defined (BM_EXTENDED)
+          PrintValueComma((float)batteryData[0].current/100.0);
+          PrintValueComma((float)batteryData[0].usedCapacity/1000.0);
+        #else
+          PrintDummyValues(2);
+        #endif
+        SERIAL_PRINTLN();
+        break;
+    #endif
+      
+    #if defined (UseAnalogRSSIReader) || defined (UseEzUHFRSSIReader) || defined (UseSBUSRSSIReader)
+      case '%': // send RSSI
+        SERIAL_PRINTLN(rssiRawValue);
+        break;
+    #endif
+  
+//    case 'x': // Stop sending messages
+//      break;
+  
+    case '!': // Send flight software version
+      SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
+      queryType = 'X';
+      break;
+  
+    case '#': // Send configuration
+      reportVehicleState();
+      queryType = 'X';
+      break;
+  
+//    case '6': // Report remote commands
+//      for (byte motor = 0; motor < LASTMOTOR; motor++) {
+//        PrintValueComma(motorCommand[motor]);
+//      }
+//      SERIAL_PRINTLN();
+//      queryType = 'X';
+//      break;
+  
+  #if defined(OSD) && defined(OSD_LOADFONT)
+    case '&': // fontload
+      if (OFF == motorArmed) {
+        max7456LoadFont();
+      }
+      queryType = 'X';
+      break;
+  #endif
 
   }
 }
@@ -862,12 +781,12 @@ void reportVehicleState() {
   SERIAL_PRINT("ReceiverNbChannels: ");
   SERIAL_PRINTLN(LAST_CHANNEL);
   
-  SERIAL_PRINT("ReceiverChannelMap: ");
-  for (byte channel = 0; channel < LAST_CHANNEL-1; channel++)
-  {
-    PrintValueComma(receiverChannelMap[channel]);
-  }
-  SERIAL_PRINTLN(receiverChannelMap[LAST_CHANNEL-1]);
+//  SERIAL_PRINT("ReceiverChannelMap: ");
+//  for (byte channel = 0; channel < LAST_CHANNEL-1; channel++)
+//  {
+//    PrintValueComma(receiverChannelMap[channel]);
+//  }
+//  SERIAL_PRINTLN(receiverChannelMap[LAST_CHANNEL-1]);
 
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);

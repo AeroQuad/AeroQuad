@@ -8,38 +8,38 @@
   it under the terms of the GNU General Public License as published by 
   the Free Software Foundation, either version 3 of the License, or 
   (at your option) any later version. 
- 
+
   This program is distributed in the hope that it will be useful, 
   but WITHOUT ANY WARRANTY; without even the implied warranty of 
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
   GNU General Public License for more details. 
- 
+
   You should have received a copy of the GNU General Public License 
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AQ_PROCESS_FLIGHT_CONTROL_VARIABLE_H_
-#define _AQ_PROCESS_FLIGHT_CONTROL_VARIABLE_H_
+
+#ifndef _AEROQUAD_FLIGHT_CONFIG_328p_H_
+#define _AEROQUAD_FLIGHT_CONFIG_328p_H_
+
+#include "Arduino.h"
+#include "FlightConfigType.h"
 
 
-int8_t YAW_DIRECTION = 1;
+#include "FlightControlQuadX.h"
+#include "FlightControlQuadPlus.h"
+#include "FlightControlHexPlus.h"
+#include "FlightControlHexX.h"
+#include "FlightControlTri.h"
+#include "FlightControlQuadY4.h"
+#include "FlightControlHexY6.h"
 
-#include <Motors.h>
+functionPtr applyMotorCommand[] = {applyMotorCommandQuadX,
+                                   applyMotorCommandQuadPlus,
+                                   applyMotorCommandHexPlus,
+                                   applyMotorCommandHexX,
+                                   applyMotorCommandTri,
+                                   applyMotorCommandY4,
+                                   applyMotorCommandY6};
 
-int motorAxisCommandRoll = 0;
-int motorAxisCommandPitch = 0;
-int motorAxisCommandYaw = 0;
-
-#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
-  int motorMaxCommand[6] = {0,0,0,0,0,0};
-  int motorMinCommand[6] = {0,0,0,0,0,0};
-  int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
-#else
-  int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
-  int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
-  int motorConfiguratorCommand[8] = {0,0,0,0,0,0,0,0};
 #endif
-
-
-#endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_VARIABLE_H_
-

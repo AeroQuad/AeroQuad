@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - March 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -18,20 +18,23 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#define ADC_NUMBER_OF_BITS 10
 
-#include <SensorsStatus.h>
-#include <MaxSonarRangeFinder.h>
+#ifndef _AEROQUAD_FLIGHT_CONFIG_H_
+#define _AEROQUAD_FLIGHT_CONFIG_H_
 
-void setup() {
-  Serial.begin(115200);
-  inititalizeRangeFinders();
-}
+#include "Arduino.h"
 
-void loop() {
-  
-  updateRangeFinders();
-  
-  Serial.print("Distance = ");
-  Serial.println(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
-}
+#define QUAD_X     0
+#define QUAD_PLUS  1  
+#define HEX_PLUS   2   
+#define HEX_X      3      
+#define TRI        4
+#define QUAD_Y4    5    
+#define HEX_Y6     6
+#define OCTO_X8    7 
+#define OCTO_PLUS  8	
+#define OCTO_X	   9
+
+volatile int8_t flightConfigType = QUAD_X;
+
+#endif

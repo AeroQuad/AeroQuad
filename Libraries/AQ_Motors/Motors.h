@@ -23,6 +23,7 @@
 #define _AEROQUAD_MOTORS_H_
 
 #include "Arduino.h"
+#include "FlightConfigType.h"
 
 #define MOTOR1 0
 #define MOTOR2 1
@@ -35,16 +36,11 @@
 #define MINCOMMAND 1000
 #define MAXCOMMAND 2000
 
-enum NB_Motors{
-  FOUR_Motors = 4,
-  SIX_Motors = 6,
-  EIGHT_Motors = 8
-};
 
-NB_Motors numberOfMotors = FOUR_Motors;
+volatile byte numberOfMotors = 4;
 int motorCommand[8] = {0,0,0,0,0,0,0,0};  // LASTMOTOR not know here, so, default at 8 @todo : Kenny, find a better way
   
-void initializeMotors(NB_Motors numbers = FOUR_Motors);
+void initializeMotors(byte numbers = 4);
 void writeMotors();
 void commandAllMotors(int command);
 

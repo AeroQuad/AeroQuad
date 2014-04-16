@@ -88,7 +88,9 @@
   #include <Receiver_328p.h>
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #include <Motors_328p.h>
+  
+  #include <FlightConfig328p.h>
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -122,6 +124,17 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
@@ -159,18 +172,10 @@
   // Receiver declaration
   #include <Receiver_328p.h>
 
-  // Motor declaration
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
-    #define MOTOR_PWM_Timer
-  #else
-    #define MOTOR_PWM
-  #endif    
-
-  // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #define HMC5843
-  #endif
+  #include <Motors_328p.h>
   
+  #include <FlightConfig328p.h>
+
   // Battery Monitor declaration
   #ifdef BattMonitor
     #define BattDefaultConfig DEFINE_BATTERY(0, 0, 15.0, 0.53, BM_NOPIN, 0, 0)
@@ -180,6 +185,7 @@
   #endif
 
   // unsupported in mini
+  #undef HeadingMagHold
   #undef AltitudeHoldBaro
   #undef AltitudeHoldRangeFinder  
   #undef CameraControl
@@ -199,6 +205,17 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
 
   // called when eeprom is initialized
@@ -236,11 +253,9 @@
   #include <Receiver_328p.h>
 
   // Motor declaration
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
-    #define MOTOR_PWM_Timer
-  #else
-    #define MOTOR_PWM
-  #endif    
+  #include <Motors_328p.h>
+  
+  #include <FlightConfig328p.h>
 
   // unsupported in mini
   #undef HeadingMagHold
@@ -264,6 +279,17 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
     
     initializeMPU6000Sensors();
   }
@@ -304,7 +330,9 @@
   #include <Receiver_MEGA.h>
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #include <Motors_MEGA.h>
+  
+  #include <FlightConfigMEGA.h>
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -366,6 +394,22 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
+        LASTMOTOR = 8;
+        break;
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
@@ -407,7 +451,9 @@
   #include <Receiver_MEGA.h>
   
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #include <Motors_MEGA.h>
+  
+  #include <FlightConfigMEGA.h>
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -470,6 +516,22 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
+        LASTMOTOR = 8;
+        break;
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
   }
   
   // called when eeprom is initialized
@@ -507,7 +569,6 @@
     #define HMC5883L
   #endif
 
-
   #define MPU6000_I2C
   #include <Platform_MPU6000.h>
   // Gyroscope declaration
@@ -520,9 +581,9 @@
   #include <Receiver_MEGA.h>
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #include <Motors_MEGA.h>
 
-  // heading mag hold declaration
+  #include <FlightConfigMEGA.h>
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro
@@ -581,6 +642,22 @@
 
     Wire.begin();
     TWBR = 12;
+    
+    switch (flightConfigType) 
+    {
+      case OCTO_X :
+      case OCTO_PLUS :
+      case OCTO_X8 :
+        LASTMOTOR = 8;
+        break;
+      case HEX_Y6 :
+      case HEX_PLUS :
+      case HEX_X :
+        LASTMOTOR = 6;
+        break;
+      default:
+        LASTMOTOR = 4;
+    }
     
     initializeMPU6000Sensors();
   }
@@ -726,27 +803,27 @@
 //********************************************************
 //******** FLIGHT CONFIGURATION DECLARATION **************
 //********************************************************
-#if defined(quadXConfig)
-  #include "FlightControlQuadX.h"
-#elif defined(quadPlusConfig)
-  #include "FlightControlQuadPlus.h"
-#elif defined(hexPlusConfig)
-  #include "FlightControlHexPlus.h"
-#elif defined(hexXConfig)
-  #include "FlightControlHexX.h"
-#elif defined(triConfig)
-  #include "FlightControlTri.h"
-#elif defined(quadY4Config)
-  #include "FlightControlQuadY4.h"
-#elif defined(hexY6Config)
-  #include "FlightControlHexY6.h"
-#elif defined(octoX8Config)
-  #include "FlightControlOctoX8.h"
-#elif defined(octoXConfig)
-  #include "FlightControlOctoX.h"
-#elif defined(octoPlusConfig)
-  #include "FlightControlOctoPlus.h"
-#endif
+//#if defined(quadXConfig)
+//  #include "FlightControlQuadX.h"
+//#elif defined(quadPlusConfig)
+//  #include "FlightControlQuadPlus.h"
+//#elif defined(hexPlusConfig)
+//  #include "FlightControlHexPlus.h"
+//#elif defined(hexXConfig)
+//  #include "FlightControlHexX.h"
+//#elif defined(triConfig)
+//  #include "FlightControlTri.h"
+//#elif defined(quadY4Config)
+//  #include "FlightControlQuadY4.h"
+//#elif defined(hexY6Config)
+//  #include "FlightControlHexY6.h"
+//#elif defined(octoX8Config)
+//  #include "FlightControlOctoX8.h"
+//#elif defined(octoXConfig)
+//  #include "FlightControlOctoX.h"
+//#elif defined(octoPlusConfig)
+//  #include "FlightControlOctoPlus.h"
+//#endif
 
 //********************************************************
 //****************** GPS DECLARATION *********************
@@ -834,13 +911,7 @@ void setup() {
   
   initPlatform();
   
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
-     initializeMotors(FOUR_Motors);
-  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
-     initializeMotors(SIX_Motors);
-  #elif defined(octoX8Config) || defined(octoXConfig) || defined(octoPlusConfig)
-     initializeMotors(EIGHT_Motors);
-  #endif
+  initializeMotors(LASTMOTOR);
 
   (*initializeReceiver[receiverTypeUsed])();
   
