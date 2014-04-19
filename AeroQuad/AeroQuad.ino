@@ -801,31 +801,6 @@
 #endif
 
 //********************************************************
-//******** FLIGHT CONFIGURATION DECLARATION **************
-//********************************************************
-//#if defined(quadXConfig)
-//  #include "FlightControlQuadX.h"
-//#elif defined(quadPlusConfig)
-//  #include "FlightControlQuadPlus.h"
-//#elif defined(hexPlusConfig)
-//  #include "FlightControlHexPlus.h"
-//#elif defined(hexXConfig)
-//  #include "FlightControlHexX.h"
-//#elif defined(triConfig)
-//  #include "FlightControlTri.h"
-//#elif defined(quadY4Config)
-//  #include "FlightControlQuadY4.h"
-//#elif defined(hexY6Config)
-//  #include "FlightControlHexY6.h"
-//#elif defined(octoX8Config)
-//  #include "FlightControlOctoX8.h"
-//#elif defined(octoXConfig)
-//  #include "FlightControlOctoX.h"
-//#elif defined(octoPlusConfig)
-//  #include "FlightControlOctoPlus.h"
-//#endif
-
-//********************************************************
 //****************** GPS DECLARATION *********************
 //********************************************************
 #if defined(UseGPS)

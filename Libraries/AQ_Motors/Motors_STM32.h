@@ -15,7 +15,7 @@
 //#endif
 #define PWM_PERIODE     (1000000/PWM_FREQUENCY)
 
-
+#if defined(BOARD_aeroquad32)
 static byte __attribute__((unused)) stm32_motor_mapping[] = {
   Port2Pin('C',  9),
   Port2Pin('C',  8),
@@ -34,6 +34,24 @@ static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
   Port2Pin('C',  6),
 };
 
+#elif defined(BOARD_freeflight)
+static byte stm32_motor_mapping[] = {
+  Port2Pin('B',  6),
+  Port2Pin('B',  7),
+  Port2Pin('B',  8),
+  Port2Pin('B',  9),
+  Port2Pin('A',  8),
+  Port2Pin('A', 11)
+};
+
+static byte __attribute__((unused)) stm32_motor_mapping_tri[] = {
+  Port2Pin('A',  8), // note this must be on separate timer device !!
+  Port2Pin('B',  6),
+  Port2Pin('B',  7),
+  Port2Pin('B',  8),
+};
+
+#endif
 
 
 #define PWM_SERVO_FREQUENCY 50 // Hz 
@@ -92,12 +110,8 @@ void initializeMotors(byte numbers) {
     for(motor=0; motor < _stm32_motor_number; motor++) {
 
       int prescaler = rcc_dev_timer_clk_speed(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device->clk_id)/1000000 - 1;
-
       timer_set_prescaler(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, prescaler);
-
-     
       timer_set_reload(PIN_MAP[STM32_MOTOR_MAP[motor]].timer_device, PWM_PERIODE);
-    
       pinMode(STM32_MOTOR_MAP[motor], PWM);
     }
   

@@ -65,23 +65,6 @@ static byte stm32_motor_mapping[] = {
 #endif
 
 
-void HardCodedAxisCalibration()
-{
-  initSensorsZeroFromEEPROM();
-  if((accelScaleFactor[XAXIS] == 1.0 && accelScaleFactor[YAXIS] == 1.0 && accelScaleFactor[ZAXIS] == 1.0) ||
-     (accelScaleFactor[XAXIS] == 0.0 && accelScaleFactor[YAXIS] == 0.0 && accelScaleFactor[ZAXIS] == 0.0)) {
-    #ifdef _AEROQUAD_PLATFORM_MPU6000_H_
-	  accelScaleFactor[XAXIS] = accelScaleFactor[YAXIS] = accelScaleFactor[ZAXIS] = 0.00119;
-    #else
-	  accelScaleFactor[XAXIS] = accelScaleFactor[YAXIS] = accelScaleFactor[ZAXIS] = 0.0048;
-    #endif
-    accelScaleFactor[YAXIS] *= -1;
-    accelScaleFactor[ZAXIS] *= -1;
-  }
-}
-
-
-
 /**
  * Put Discovery F4 specific initialization need here
  */
@@ -103,8 +86,6 @@ void initPlatform() {
 
   // I2C setup
   Wire.begin(Port2Pin('B', 9), Port2Pin('B', 6)); // I2C1_SDA PB9, I2C1_SCL PB6
-
-  HardCodedAxisCalibration();
 
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();

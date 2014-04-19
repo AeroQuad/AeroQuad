@@ -1,7 +1,7 @@
 #ifndef _PLATFORM_FREEFLIGHT_H_
 #define _PLATFORM_FREEFLIGHT_H_
 
-static byte stm32_motor_mapping[] = {
+/*static byte stm32_motor_mapping[] = {
 	Port2Pin('B',  6),
 	Port2Pin('B',  7),
 	Port2Pin('B',  8),
@@ -9,6 +9,7 @@ static byte stm32_motor_mapping[] = {
 	Port2Pin('A',  8),
 	Port2Pin('A', 11)
 };
+*/
 
 #define STM32_BOARD_TYPE "Free Flight"
 #define LED_Green  Port2Pin('B', 4)
@@ -32,7 +33,9 @@ static byte stm32_motor_mapping[] = {
 
 // Altitude declaration
 #ifdef AltitudeHoldBaro
+  #define USE_MS5611_ALTERNATE_ADDRESS
   #define MS5611
+  #define USE_Z_DAMPENING
 #endif
 
 #undef BattMonitor
@@ -48,25 +51,37 @@ static byte stm32_motor_mapping[] = {
 	#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, (BATT_AREF * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
 #endif
 
-
+#include <FlightConfigMEGA.h>
 
 /**
  * Put FreeFlight specific initialization need here
  */
 void initPlatform() {
-	pinMode(LED_Green, OUTPUT);
-	for(byte ledloop=0; ledloop<10; ledloop++) {
-		digitalWrite(LED_Green, ledloop & 1);
-		delay(50);
-	}
+  pinMode(LED_Green, OUTPUT);
+  for(byte ledloop=0; ledloop<10; ledloop++) {
+    digitalWrite(LED_Green, ledloop & 1);
+    delay(50);
+  }
 
-	pinMode(LED_Red, OUTPUT);
-	digitalWrite(LED_Red, LOW);
-	pinMode(LED_Yellow, OUTPUT);
-	digitalWrite(LED_Yellow, LOW);
+  pinMode(LED_Red, OUTPUT);
+  digitalWrite(LED_Red, LOW);
+  pinMode(LED_Yellow, OUTPUT);
+  digitalWrite(LED_Yellow, LOW);
 
-	// I2C setup
-	Wire.begin(Port2Pin('B', 11), Port2Pin('B', 10)); // I2C1_SDA PB11, I2C1_SCL PB10
+  // I2C setup
+  Wire.begin(Port2Pin('B', 11), Port2Pin('B', 10)); // I2C1_SDA PB11, I2C1_SCL PB10
+
+  switch (flightConfigType) 
+  {
+    case HEX_Y6 :
+    case HEX_PLUS :
+    case HEX_X :
+      LASTMOTOR = 6;
+      break;
+    default:
+    LASTMOTOR = 4;
+  }
+
 }
 
 // called when eeprom is initialized
@@ -75,6 +90,11 @@ void initializePlatformSpecificAccelCalibration() {
   accelScaleFactor[XAXIS] = 0.0011980000;
   accelScaleFactor[YAXIS] = -0.0012020000;
   accelScaleFactor[ZAXIS] = -0.0011750000;
+  #ifdef HeadingMagHold
+    magBias[XAXIS]  = 152.000000;
+    magBias[YAXIS]  = 24.000000;
+    magBias[ZAXIS]  = 16.500000;
+  #endif
 }
 
 
