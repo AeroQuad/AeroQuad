@@ -54,7 +54,7 @@ void applyMotorCommandTri() {
   motorCommand[MOTOR3] = throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3;
   motorCommand[MOTOR4] = throttle + motorAxisCommandPitch*4/3;
   const float yawMotorCommand = constrain(motorAxisCommandYaw,-MAX_RECEIVER_OFFSET-abs(receiverCommand[ZAXIS]),+MAX_RECEIVER_OFFSET+abs(receiverCommand[ZAXIS]));
-  motorCommand[MOTOR1] = constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * yawMotorCommand, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX);
+  motorCommand[MOTOR1] = constrain(TRI_YAW_MIDDLE + (yawDirection * yawMotorCommand), TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_

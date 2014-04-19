@@ -49,8 +49,8 @@ void applyMotorCommandY4() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   motorCommand[MOTOR1] = throttle - motorAxisCommandPitch + motorAxisCommandRoll;
   motorCommand[MOTOR2] = throttle - motorAxisCommandPitch - motorAxisCommandRoll;
-  motorCommand[MOTOR4] = throttle + motorAxisCommandPitch + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[MOTOR4] = throttle + motorAxisCommandPitch + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - (yawDirection * motorAxisCommandYaw);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_Y4_MODE_H_

@@ -236,8 +236,22 @@ void readSerialCommand() {
       zeroIntegralError();
       break;
 
-//    case 'X': // Stop sending messages
-//      break;
+    case 'Y':
+      flightConfigType = readFloatSerial();
+      writeEEPROM();
+      break;
+      
+    case 'Z':
+      yawDirection = readFloatSerial();
+      writeEEPROM();
+      break;
+      
+    case 'J': 
+      receiverTypeUsed = readFloatSerial();
+      writeEEPROM();
+      break;
+      
+
 
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
       validateCalibrateCommand(1);
@@ -647,8 +661,6 @@ void sendSerialTelemetry() {
         break;
     #endif
   
-//    case 'x': // Stop sending messages
-//      break;
   
     case '!': // Send flight software version
       SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
@@ -752,28 +764,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN(STM32_BOARD_TYPE);
   #endif
 
-  SERIAL_PRINT("Flight Config: ");
-  #if defined(quadPlusConfig)
-    SERIAL_PRINTLN("Quad +");
-  #elif defined(quadXConfig)
-    SERIAL_PRINTLN("Quad X");
-  #elif defined (quadY4Config)
-    SERIAL_PRINTLN("Quad Y4");
-  #elif defined (triConfig)
-    SERIAL_PRINTLN("Tri");
-  #elif defined(hexPlusConfig)
-    SERIAL_PRINTLN("Hex +");
-  #elif defined(hexXConfig)
-    SERIAL_PRINTLN("Hex X");
-  #elif defined(hexY6Config)
-    SERIAL_PRINTLN("Hex Y6");
-  #elif defined(octoX8Config)
-    SERIAL_PRINTLN("Octo X8");
-  #elif defined(octoXConfig)
-    SERIAL_PRINTLN("Octo X");
-  #elif defined(octoPlusConfig)
-    SERIAL_PRINTLN("Octo +");
-  #endif
+  SERIAL_PRINT("FlightConfig: ");
+  SERIAL_PRINTLN(flightConfigType);
 
   SERIAL_PRINT("ReceiverType: ");
   SERIAL_PRINTLN(receiverTypeUsed);
@@ -781,15 +773,11 @@ void reportVehicleState() {
   SERIAL_PRINT("ReceiverNbChannels: ");
   SERIAL_PRINTLN(LAST_CHANNEL);
   
-//  SERIAL_PRINT("ReceiverChannelMap: ");
-//  for (byte channel = 0; channel < LAST_CHANNEL-1; channel++)
-//  {
-//    PrintValueComma(receiverChannelMap[channel]);
-//  }
-//  SERIAL_PRINTLN(receiverChannelMap[LAST_CHANNEL-1]);
-
   SERIAL_PRINT("Motors: ");
   SERIAL_PRINTLN(LASTMOTOR);
+
+  SERIAL_PRINT("YawDirection: ");
+  SERIAL_PRINTLN(yawDirection);
 
   printVehicleState("Gyroscope", GYRO_DETECTED, "Detected");
   printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected");

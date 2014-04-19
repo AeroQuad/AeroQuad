@@ -269,6 +269,8 @@ typedef struct {
   
   float RECEIVER_CONFIG_TYPE_ADR;
   float RECEIVER_CHANNEL_MAP_ADR[MAX_NB_CHANNEL];
+  long YAW_DIRECTION_ADR;
+  long FLIGHT_CONFIG_TYPE;
   
   // Mag Calibration
   #if defined (HeadingMagHold)

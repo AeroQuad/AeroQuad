@@ -49,10 +49,10 @@
 //#define LASTMOTOR (MOTOR4+1)
 
 void applyMotorCommandQuadPlus() {
-  motorCommand[MOTOR1] = throttle - motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR2] = throttle - motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR4] = throttle + motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[MOTOR1] = throttle - motorAxisCommandPitch - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR2] = throttle - motorAxisCommandRoll  + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR4] = throttle + motorAxisCommandRoll  + (yawDirection * motorAxisCommandYaw);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_

@@ -22,7 +22,7 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_VARIABLE_H_
 
 
-int8_t YAW_DIRECTION = 1;
+int yawDirection = 1;
 
 #include <Motors.h>
 

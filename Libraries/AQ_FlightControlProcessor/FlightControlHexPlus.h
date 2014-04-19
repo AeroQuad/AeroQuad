@@ -46,12 +46,12 @@
 //#define LASTMOTOR   (MOTOR6+1)
 
 void applyMotorCommandHexPlus() {
-  motorCommand[MOTOR6] = throttle + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR3] = throttle - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR2] = throttle - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR5] = throttle + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR1] = throttle                          - motorAxisCommandPitch   - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR4] = throttle                          + motorAxisCommandPitch   + (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[MOTOR6] = throttle + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR3] = throttle - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR2] = throttle - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR5] = throttle + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR1] = throttle                          - motorAxisCommandPitch   - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR4] = throttle                          + motorAxisCommandPitch   + (yawDirection * motorAxisCommandYaw);
 }
 
 #endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_PLUS_MODE_H_

@@ -31,24 +31,11 @@
 
 #include "FlightControlVariable.h"
 
-//#ifdef OLD_MOTOR_NUMBERING  
-//  #define FRONT_LEFT  MOTOR1
-//  #define REAR_RIGHT  MOTOR2
-//  #define FRONT_RIGHT MOTOR3
-//  #define REAR_LEFT   MOTOR4
-//#else
-//  #define FRONT_LEFT  MOTOR1
-//  #define FRONT_RIGHT MOTOR2
-//  #define REAR_RIGHT  MOTOR3
-//  #define REAR_LEFT   MOTOR4
-//#endif
-//#define LASTMOTOR   (MOTOR4+1)
-
 void applyMotorCommandQuadX() {
-  motorCommand[MOTOR1] = throttle - motorAxisCommandPitch + motorAxisCommandRoll - (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR2] = throttle - motorAxisCommandPitch - motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR4] = throttle + motorAxisCommandPitch + motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - motorAxisCommandRoll - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[MOTOR1] = throttle - motorAxisCommandPitch + motorAxisCommandRoll - (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR2] = throttle - motorAxisCommandPitch - motorAxisCommandRoll + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR4] = throttle + motorAxisCommandPitch + motorAxisCommandRoll + (yawDirection * motorAxisCommandYaw);
+  motorCommand[MOTOR3] = throttle + motorAxisCommandPitch - motorAxisCommandRoll - (yawDirection * motorAxisCommandYaw);
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_

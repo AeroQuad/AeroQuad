@@ -148,7 +148,7 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
   rotationSpeedFactor = 1.0;
-
+  
   receiverTypeUsed = RECEIVER_PWM;
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
     receiverMinValue[channel] = 1000;
@@ -157,6 +157,8 @@ void initializeEEPROM() {
   for (byte i = 0; i < LAST_CHANNEL;i++) {
     receiverChannelMap[i] = i;    
   }
+  yawDirection = 1;
+  flightConfigType = QUAD_X;
   
   accelScaleFactor[XAXIS] = 1.0;
   runTimeAccelBias[XAXIS] = 0;
@@ -276,6 +278,9 @@ void readEEPROM() {
   for (byte i = 0; i < LAST_CHANNEL; i++) {
     receiverChannelMap[i] = readFloat(RECEIVER_CHANNEL_MAP_ADR[i]);    
   }
+  yawDirection = readLong(YAW_DIRECTION_ADR);
+  flightConfigType = readLong(FLIGHT_CONFIG_TYPE);
+
   
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
@@ -364,6 +369,8 @@ void writeEEPROM(){
   for (byte i = 0; i < LAST_CHANNEL; i++) {
     writeFloat(receiverChannelMap[i], RECEIVER_CHANNEL_MAP_ADR[i]);    
   }
+  writeLong(yawDirection, YAW_DIRECTION_ADR);
+  writeLong(flightConfigType, FLIGHT_CONFIG_TYPE);
   
   #if defined AltitudeHoldBaro
     writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
