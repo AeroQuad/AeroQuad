@@ -1,5 +1,5 @@
 objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
- c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.cpp \
+ d:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.cpp \
  ../Libmaple/libmaple/wirish/wirish.h \
  ../Libmaple/libmaple/libmaple/libmaple.h \
  ../Libmaple/libmaple/libmaple/libmaple_types.h \
@@ -28,18 +28,18 @@ objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
  ../Libmaple/libmaple/wirish/ext_interrupts.h \
  ../Libmaple/libmaple/wirish/wirish_debug.h \
  ../Libmaple/libmaple/wirish/wirish_math.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/include-fixed/math.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/reent.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/_ansi.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/newlib.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/config.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/ieeefp.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/features.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/_types.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/_types.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/_default_types.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/lock.h \
- c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/include/stddef.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/include-fixed/math.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/reent.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/_ansi.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/newlib.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/config.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/ieeefp.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/features.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/_types.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/_types.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/_default_types.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/lock.h \
+ d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/include/stddef.h \
  ../Libmaple/libmaple/wirish/comm/HardwareSPI.h \
  ../Libmaple/libmaple/libmaple/spi.h ../Libmaple/libmaple/libmaple/gpio.h \
  ../Libmaple/libmaple/wirish/boards.h \
@@ -50,8 +50,8 @@ objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
  ../Libmaple/libmaple/wirish/HardwareTimer.h \
  ../Libmaple/libmaple/wirish/usb_serial.h \
  ../Libmaple/libmaple/wirish/Print.h \
- c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.h \
- c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/flash_stm32.h
+ d:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.h \
+ d:/Working/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.h
 
 ../Libmaple/libmaple/wirish/wirish.h:
 
@@ -111,29 +111,29 @@ objSTM32/dummy/../AeroQuad32/MapleCompatibility/EEPROM.o: \
 
 ../Libmaple/libmaple/wirish/wirish_math.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/include-fixed/math.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/include-fixed/math.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/reent.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/reent.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/_ansi.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/_ansi.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/newlib.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/newlib.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/config.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/config.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/ieeefp.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/ieeefp.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/features.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/features.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/_types.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/_types.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/_types.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/_types.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/machine/_default_types.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/machine/_default_types.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/../../../../arm-none-eabi/include/sys/lock.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/../../../../arm-none-eabi/include/sys/lock.h:
 
-c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.7.3/include/stddef.h:
+d:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/arm-none-eabi/4.6.1/include/stddef.h:
 
 ../Libmaple/libmaple/wirish/comm/HardwareSPI.h:
 
@@ -157,6 +157,6 @@ c:\users\kenny\codesourcery\sourcery_codebench_lite_for_arm_eabi\bin\../lib/gcc/
 
 ../Libmaple/libmaple/wirish/Print.h:
 
-c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/EEPROM.h:
+d:/Working/AeroQuad/AeroQuad32/MapleCompatibility/EEPROM.h:
 
-c:/Working/Aeroquad/AeroQuad32/MapleCompatibility/flash_stm32.h:
+d:/Working/AeroQuad/AeroQuad32/MapleCompatibility/flash_stm32.h:

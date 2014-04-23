@@ -694,10 +694,6 @@
 
 #ifdef AeroQuadSTM32
   #include "AeroQuad_STM32.h"
-#elif defined(Naze32)
-  #define AeroQuadSTM32
-  #define BOARD_freeflight
-  #include "AeroQuad_STM32.h"
 #endif
 
 // default to 10bit ADC (AVR)

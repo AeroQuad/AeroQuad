@@ -52,7 +52,9 @@ int testCommand = 1000;
  * Flight control global declaration
  */
 #define RATE_FLIGHT_MODE 0
-#define ATTITUDE_FLIGHT_MODE 1
+#define HORIZON_FLIGHT_MODE 1
+#define ATTITUDE_FLIGHT_MODE 2
+
 byte previousFlightMode = ATTITUDE_FLIGHT_MODE;
 #define TASK_100HZ 1
 #define TASK_50HZ 2
@@ -287,7 +289,7 @@ typedef struct {
   #endif
   
   // Baro
-  #if defined (HeadingMagHold)
+  #if defined (AltitudeHoldBaro)
     float ALTITUDE_MAX_THROTTLE_ADR;
     float ALTITUDE_MIN_THROTTLE_ADR;
     float ALTITUDE_SMOOTH_ADR;
