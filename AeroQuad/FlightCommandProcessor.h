@@ -29,6 +29,9 @@
 
 #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
   boolean isPositionHoldEnabledByUser() {
+    if (!(vehicleState & BARO_DETECTED)) {
+      return false;
+    }
     #if defined (UseGPSNavigator)
       if ((receiverCommand[receiverChannelMap[AUX1]] < 1750) || (receiverCommand[receiverChannelMap[AUX2]] < 1750)) {
         return true;
@@ -257,12 +260,12 @@ void readPilotCommands() {
   }
 
     // Check Mode switch for Acro or Stable
-    if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
+    if (receiverCommand[receiverChannelMap[MODE]] > 1500) { //1666) {
         flightMode = ATTITUDE_FLIGHT_MODE;
     }
-    else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
-        flightMode = HORIZON_FLIGHT_MODE;
-    }
+//    else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
+//        flightMode = HORIZON_FLIGHT_MODE;
+//    }
     else {
         flightMode = RATE_FLIGHT_MODE;
     }

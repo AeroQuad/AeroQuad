@@ -36,8 +36,14 @@ unsigned long headingTime = micros();
  */
 void processHeading()
 {
+
   #if defined(HeadingMagHold)
-    heading = -degrees(trueNorthHeading);
+//    if (vehicleState & MAG_DETECTED) {
+//      heading = -degrees(trueNorthHeading);
+//    }
+//    else {
+      heading = degrees(gyroHeading);
+//    }
   #else
     heading = degrees(gyroHeading);
   #endif

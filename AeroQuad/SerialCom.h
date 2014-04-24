@@ -629,19 +629,6 @@ void sendSerialTelemetry() {
         break;
     #endif    
       
-//    case 'z': // Send all Altitude data 
-//      #if defined (AltitudeHoldBaro) 
-//        PrintValueComma(getBaroAltitude()); 
-//      #else
-//        PrintValueComma(0);
-//      #endif 
-//      #if defined (AltitudeHoldRangeFinder) 
-//        SERIAL_PRINTLN(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
-//      #else
-//        SERIAL_PRINTLN(0); 
-//      #endif 
-//      break;
-
     #if defined (BattMonitor)
       case '$': // send BatteryMonitor voltage/current readings
         PrintValueComma((float)batteryData[0].voltage/100.0); // voltage internally stored at 10mV:s

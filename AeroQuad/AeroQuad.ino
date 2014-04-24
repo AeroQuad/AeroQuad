@@ -52,6 +52,11 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
+#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
+  #define HeadingMagHold		
+  #define AltitudeHoldBaro		
+#endif
+
 #include <EEPROM.h>
 #include <Wire.h>
 #include <GlobalDefined.h>
@@ -900,8 +905,8 @@ void setup() {
   initSensorsZeroFromEEPROM();
   
   #ifdef HeadingMagHold
-    vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
+    vehicleState |= HEADINGHOLD_ENABLED;
     initializeKinematics(0.0, 0.0, -accelOneG, measuredMag[XAXIS], measuredMag[XAXIS], measuredMag[XAXIS]);
   #else    
     initializeKinematics();
@@ -976,28 +981,33 @@ void process100HzTask() {
   #endif
 
   #if defined (AltitudeHoldBaro)
-    measureBaroSum();
-    #if defined USE_Z_DAMPENING
-      float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS]
-                                 + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS]
-                                 + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
-      computeVelocity(filteredZAccel, G_Dt);
-    #endif
+    if (vehicleState & BARO_DETECTED)
+    {
+//    measureBaro();
+//    measureBaroSum();
+      #if defined USE_Z_DAMPENING
+        float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS]
+                                   + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS]
+                                   + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
+        computeVelocity(filteredZAccel, G_Dt);
+      #endif
     
-    if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-      evaluateBaroAltitude();
-
-      #if defined USE_Z_DAMPENING      
-        computeVelocityErrorFromBaroAltitude(getBaroAltitude());
-        zVelocity = computedZVelocity;
-
-        float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
-        estimatedBaroAltitude = (estimatedBaroAltitude) + ((zVelocity / 100.0) / 50.0);
-        estimatedAltitude = filterSmooth(estimatedBaroAltitude, estimatedAltitude, 0.05);
-        previousBaroAltitude = getBaroAltitude();
-      #else
-        estimatedAltitude = getBaroAltitude();
-      #endif 
+      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+//      evaluateBaroAltitude();
+        measureBaro();
+  
+        #if defined USE_Z_DAMPENING      
+          computeVelocityErrorFromBaroAltitude(getBaroAltitude());
+          zVelocity = computedZVelocity;
+  
+          float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
+          estimatedBaroAltitude = (estimatedBaroAltitude) + ((zVelocity / 100.0) / 50.0);
+          estimatedAltitude = filterSmooth(estimatedBaroAltitude, estimatedAltitude, 0.05);
+          previousBaroAltitude = getBaroAltitude();
+        #else
+          estimatedAltitude = getBaroAltitude();
+        #endif 
+      }
     }
   #endif
         
@@ -1050,9 +1060,10 @@ void process10HzTask1() {
   
     G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
     tenHZpreviousTime = currentTime;
-     
-    measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
-    magDataUpdate = true;
+    if (vehicleState & MAG_DETECTED) {
+      measureMagnetometer(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS]);
+      magDataUpdate = true;
+    }
   #endif
 }
 
