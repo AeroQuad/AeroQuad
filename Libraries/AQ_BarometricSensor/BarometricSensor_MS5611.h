@@ -223,7 +223,8 @@ void measureBaroSum() {
   if (isReadPressure) {
     rawPressureSum += readRawPressure();
     rawPressureSumCount++;
-    if (pressureCount == 20) {
+//    if (pressureCount == 20) {
+	if (pressureCount == 1) {
       requestRawTemperature();
       pressureCount = 0;
       isReadPressure = false;

@@ -47,8 +47,6 @@ byte LAST_CHANNEL = MAX_NB_CHANNEL;
 #define MINTHROTTLE (MINCOMMAND + 100)
 #define LEVELOFF 100
 
-int receiverZero[3] = {1500,1500,1500};
-
 #endif
 
 

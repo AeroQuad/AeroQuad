@@ -74,7 +74,7 @@ byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
-float rotationSpeedFactor = 1.0;
+float stickScalingFactor = 1.0;
 
 // main loop time variable
 unsigned long previousTime = 0;

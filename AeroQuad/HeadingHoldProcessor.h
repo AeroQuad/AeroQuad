@@ -110,9 +110,9 @@ void processHeading()
 
   // NEW SI Version
   #if defined (UseGPSNavigator) 
-    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - receiverZero[ZAXIS] + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
+    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - 1500 + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
   #else
-    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - receiverZero[ZAXIS]) * (2.5 * PWM2RAD);
+    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - 1500) * (2.5 * PWM2RAD);
   #endif
   
   const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);

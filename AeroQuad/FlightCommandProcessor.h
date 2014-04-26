@@ -130,7 +130,6 @@
       homePosition.altitude = DEFAULT_HOME_ALTITUDE;
     }
 
-
     if (receiverCommand[receiverChannelMap[AUX2]] < 1750) {  // Enter in execute mission state, if none, go back home, override the position hold
       if (isInitNavigationNeeded) {
         
@@ -236,9 +235,6 @@ void processZeroThrottleFunctionFromReceiverCommand() {
   }
 }
 
-
-
-
 /**
  * readPilotCommands
  * 
@@ -260,12 +256,12 @@ void readPilotCommands() {
   }
 
     // Check Mode switch for Acro or Stable
-    if (receiverCommand[receiverChannelMap[MODE]] > 1500) { //1666) {
+    if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
         flightMode = ATTITUDE_FLIGHT_MODE;
     }
-//    else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
-//        flightMode = HORIZON_FLIGHT_MODE;
-//    }
+    else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
+        flightMode = HORIZON_FLIGHT_MODE;
+    }
     else {
         flightMode = RATE_FLIGHT_MODE;
     }

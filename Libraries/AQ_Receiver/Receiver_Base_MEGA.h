@@ -54,11 +54,11 @@ void readReceiver()
   }
 }
   
-// return the smoothed & scaled number of radians/sec in stick movement - zero centered
+  
 const float getReceiverSIData(byte channel) {
-  return ((receiverCommand[channel] - receiverZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
+  return ((receiverCommand[receiverChannelMap[channel]] - 1500) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
 }
-
+  
 #endif
 
 

@@ -147,7 +147,7 @@ void initializeEEPROM() {
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].P = 100.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
-  rotationSpeedFactor = 1.0;
+  stickScalingFactor = 1.0;
   
   receiverTypeUsed = RECEIVER_PWM;
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -268,7 +268,7 @@ void readEEPROM() {
   readPID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
-  rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  stickScalingFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
   
   receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -359,7 +359,7 @@ void writeEEPROM(){
   writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
   
-  writeFloat(rotationSpeedFactor, ROTATION_SPEED_FACTOR_ARD);
+  writeFloat(stickScalingFactor, ROTATION_SPEED_FACTOR_ARD);
   
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {

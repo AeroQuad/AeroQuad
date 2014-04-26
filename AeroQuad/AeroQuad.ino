@@ -983,7 +983,7 @@ void process100HzTask() {
   #if defined (AltitudeHoldBaro)
     if (vehicleState & BARO_DETECTED)
     {
-//    measureBaro();
+    measureBaro();
 //    measureBaroSum();
       #if defined USE_Z_DAMPENING
         float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS]
@@ -994,7 +994,7 @@ void process100HzTask() {
     
       if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
 //      evaluateBaroAltitude();
-        measureBaro();
+//        measureBaro();
   
         #if defined USE_Z_DAMPENING      
           computeVelocityErrorFromBaroAltitude(getBaroAltitude());
