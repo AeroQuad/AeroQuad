@@ -82,8 +82,6 @@ void readSerialCommand() {
     case 'B': // Receive roll/pitch attitude mode PID
       readSerialPID(ATTITUDE_XAXIS_PID_IDX);
       readSerialPID(ATTITUDE_YAXIS_PID_IDX);
-      readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
-      readSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
       writeEEPROM();
       break;
 
@@ -365,8 +363,6 @@ void sendSerialTelemetry() {
     case 'b': // Send roll and pitch attitude mode PID values
       PrintPID(ATTITUDE_XAXIS_PID_IDX);
       PrintPID(ATTITUDE_YAXIS_PID_IDX);
-      PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
-      PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
       SERIAL_PRINTLN(0);
       queryType = 'X';
       break;

@@ -266,12 +266,6 @@ void readPilotCommands() {
         flightMode = RATE_FLIGHT_MODE;
     }
     
-    if (previousFlightMode != flightMode) {
-      zeroIntegralError();
-      previousFlightMode = flightMode;
-    }
-
-
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     processAltitudeHoldStateFromReceiverCommand();
   #endif

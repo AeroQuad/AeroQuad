@@ -28,8 +28,8 @@ enum {
   ATTITUDE_XAXIS_PID_IDX,
   ATTITUDE_YAXIS_PID_IDX,
   HEADING_HOLD_PID_IDX,
-  ATTITUDE_GYRO_XAXIS_PID_IDX,
-  ATTITUDE_GYRO_YAXIS_PID_IDX,
+//  ATTITUDE_GYRO_XAXIS_PID_IDX,
+//  ATTITUDE_GYRO_YAXIS_PID_IDX,
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     BARO_ALTITUDE_HOLD_PID_IDX,
     ZDAMPENING_PID_IDX,
@@ -109,7 +109,7 @@ float updatePIDDerivativeBaseRate(float targetPosition, float currentPosition, s
 
 void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (byte axis = 0; axis <= ATTITUDE_GYRO_YAXIS_PID_IDX; axis++) {
+  for (byte axis = 0; axis <= HEADING_HOLD_PID_IDX; axis++) {
     PID[axis].integratedError = 0;
     PID[axis].previousPIDTime = currentTime;
   }

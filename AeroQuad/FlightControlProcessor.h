@@ -34,8 +34,10 @@
  * Calculate roll/pitch axis error with gyro/accel data to
  * compute motor command thrust so used command are executed
  */
+float gyroDesiredPosition[2] = {0.0,0.0}; 
 void calculateFlightError()
 {
+  
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
       float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
@@ -45,13 +47,9 @@ void calculateFlightError()
     }
     else
   #endif
-  
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
-    float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-    motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-    motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
-    
+    gyroDesiredPosition[XAXIS]  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+    gyroDesiredPosition[YAXIS] = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
   }
   else if (flightMode == HORIZON_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
@@ -64,17 +62,15 @@ void calculateFlightError()
     float pitchRateRatiaux = (receiverCommand[receiverChannelMap[YAXIS]] - 1500) / 500.0;
     
     // apply ratiaux to different command
-    float rollGyroCommand = (rollAttitudeRatiaux * rollAttitudeCmd) + (rollRateRatiaux * getReceiverSIData(XAXIS));
-    float pitchGyroCommand = (pitchAttitudeRatiaux * pitchAttitudeCmd) + (pitchRateRatiaux * getReceiverSIData(YAXIS));
-    
-    motorAxisCommandRoll   = updatePID(rollGyroCommand, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-    motorAxisCommandPitch  = updatePID(pitchGyroCommand, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+    gyroDesiredPosition[XAXIS] = (rollAttitudeRatiaux * rollAttitudeCmd) + (rollRateRatiaux * getReceiverSIData(XAXIS));
+    gyroDesiredPosition[YAXIS] = (pitchAttitudeRatiaux * pitchAttitudeCmd) + (pitchRateRatiaux * getReceiverSIData(YAXIS));
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), gyroRate[XAXIS]*stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -gyroRate[YAXIS]*stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
+    gyroDesiredPosition[XAXIS] = getReceiverSIData(XAXIS);
+    gyroDesiredPosition[YAXIS] = getReceiverSIData(YAXIS);
   }
-//  Serial.print(motorAxisCommandRoll);Serial.print(" ");Serial.println(motorAxisCommandPitch);
+  motorAxisCommandRoll = updatePID(gyroDesiredPosition[XAXIS], gyroRate[XAXIS] * stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
+  motorAxisCommandPitch = updatePID(gyroDesiredPosition[YAXIS], -gyroRate[YAXIS] * stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
 }
 
 /**
