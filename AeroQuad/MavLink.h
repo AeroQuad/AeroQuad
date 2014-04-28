@@ -545,10 +545,10 @@ void sendSerialSysStatus() {
 #if defined(BM_EXTENDED)
 	mavlink_msg_sys_status_send(chan, controlSensorsPresent, controlSensorsEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, (int)(batteryData[0].current * 1000), -1, system_dropped_packets, 0, 0, 0, 0, 0);
 #else
-	mavlink_msg_sys_status_send(chan, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, -1, -1, system_dropped_packets, 0, 0, 0, 0, 0);
+	mavlink_msg_sys_status_send(chan, controlSensorsPresent, controlSensorsEnabled, controlSensorsHealthy, 0, batteryData[0].voltage * 10, -1, -1, system_dropped_packets, 0, 0, 0, 0, 0);
 #endif
 #else
-	mavlink_msg_sys_status_send(chan, &msg, controlSensorsPresent, controlSensorEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);
+	mavlink_msg_sys_status_send(chan, controlSensorsPresent, controlSensorsEnabled, controlSensorsHealthy, 0, 0, 0, 0, system_dropped_packets, 0, 0, 0, 0, 0);
 #endif
 }
 
