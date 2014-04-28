@@ -87,7 +87,7 @@
       autoLandingState = OFF;
       autoLandingThrottleCorrection = 0;
       isAutoLandingInitialized = false;
-      if (receiverCommand[AUX1] > SWITCHMAX) {
+      if (receiverCommand[AUX1] > MAXSWITCH) {
         altitudeHoldState = OFF;
         isAltitudeHoldInitialized = false;
       }
