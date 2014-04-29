@@ -38,8 +38,6 @@
   #define USE_Z_DAMPENING
 #endif
 
-#undef BattMonitor
-
 // Battery Monitor declaration
 #ifdef BattMonitor
 	#define BATT_AREF			3.3		// V
@@ -47,7 +45,7 @@
 	#define BATT_R_HIGH			10.0	// kOhm
 	#define BATT_R_LOW			1.0		// kOhm
 	#define BATT_ANALOG_INPUT	Port2Pin('A', 4)
-	#define BATT_DIODE_LOSS		0.76
+	#define BATT_DIODE_LOSS		0.0
 	#define BattDefaultConfig DEFINE_BATTERY(0, BATT_ANALOG_INPUT, (BATT_AREF * (BATT_R_HIGH + BATT_R_LOW) / BATT_R_LOW), BATT_DIODE_LOSS, BM_NOPIN, 0, 0)
 #endif
 
