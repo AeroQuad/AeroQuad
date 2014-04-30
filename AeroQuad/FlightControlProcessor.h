@@ -61,9 +61,18 @@ void calculateFlightError()
     float pitchAttitudeRatiaux = (500 - abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500)) / 500.0;
     float pitchRateRatiaux = (receiverCommand[receiverChannelMap[YAXIS]] - 1500) / 500.0;
     
+    float gyroRollCommand = rollRateRatiaux * getReceiverSIData(XAXIS);
+    if (getReceiverSIData(XAXIS) < 0 && gyroRollCommand > 0) {
+      gyroRollCommand = -gyroRollCommand;
+    }
+    float gyroPitchCommand = pitchRateRatiaux * getReceiverSIData(YAXIS);
+    if (getReceiverSIData(YAXIS) < 0 && gyroPitchCommand > 0) {
+      gyroPitchCommand = -gyroPitchCommand;
+    }
+    
     // apply ratiaux to different command
-    gyroDesiredPosition[XAXIS] = (rollAttitudeRatiaux * rollAttitudeCmd) + (rollRateRatiaux * getReceiverSIData(XAXIS));
-    gyroDesiredPosition[YAXIS] = (pitchAttitudeRatiaux * pitchAttitudeCmd) + (pitchRateRatiaux * getReceiverSIData(YAXIS));
+    gyroDesiredPosition[XAXIS] = (rollAttitudeRatiaux * rollAttitudeCmd) + gyroRollCommand;
+    gyroDesiredPosition[YAXIS] = (pitchAttitudeRatiaux * pitchAttitudeCmd) + gyroPitchCommand;
   }
   else {
     gyroDesiredPosition[XAXIS] = getReceiverSIData(XAXIS);
