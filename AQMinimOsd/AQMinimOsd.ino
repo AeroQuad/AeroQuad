@@ -125,7 +125,7 @@ void setup()
   
 //  analogReference(DEFAULT);
 
-//  readBoardConfig();
+  readBoardConfig();
 }
 
 unsigned long previousTime = 0;
