@@ -27,6 +27,7 @@ December 21, 2013  V2.2
 #include "Config.h"
 #include "GlobalVariables.h"
 
+
 // Screen is the Screen buffer between program an MAX7456 that will be writen to the screen at 10hz
 char screen[480];
 // ScreenBuffer is an intermietary buffer to created Strings to send to Screen buffer
@@ -43,6 +44,184 @@ unsigned long previous_millis_high =0;
 int hi_speed_cycle = 50;
 int lo_speed_cycle = 100;
 //----------------
+
+
+void (* resetFunc)(void)=0;
+
+void readEEPROM(void)
+{
+// For Settings
+  for(int en=0;en<EEPROM_SETTINGS;en++){
+     Settings[en] = EEPROM.read(en);
+  }
+// For Position of items on screen      
+  for(int en=0;en<EEPROM_ITEM_LOCATION-EEPROM_SETTINGS;en++){
+     Settings[en+EEPROM_SETTINGS+1] = EEPROM.read(en+EEPROM_SETTINGS+1);
+  }  
+}
+
+
+// for first run to ini
+void checkEEPROM(void)
+{
+// For H/W Settings
+  uint8_t EEPROM_Loaded = EEPROM.read(0);
+  if (!EEPROM_Loaded){
+    for(uint8_t en=0;en<EEPROM_SETTINGS;en++){
+      if (EEPROM.read(en) != EEPROM_DEFAULT[en])  EEPROM.write(en,EEPROM_DEFAULT[en]);
+    }
+// For items on screen.
+// First run, the default will be NTSC (show all data lines with NTSC systems that has only 13 lines)
+// In OSD menu' it's possible a quick default setup for PAL or NTSC
+    for(uint16_t en=0;en<EEPROM_ITEM_LOCATION-EEPROM_SETTINGS;en++) {
+      if (EEPROM.read(en+EEPROM_SETTINGS+1) != EEPROM_NTSC_DEFAULT[en]) EEPROM.write(en+EEPROM_SETTINGS+1,EEPROM_NTSC_DEFAULT[en]);
+    }
+  }
+}
+
+
+
+
+// '#'
+//15
+//Software Version: 3.2
+//Board Type: Free Flight
+//FlightConfig: 0
+//ReceiverType: 1
+//ReceiverNbChannels: 8
+//Motors: 4
+//YawDirection: 1
+//Gyroscope: Detected
+//Accelerometer: Detected
+//Barometer: Not Detected
+//Magnetometer: Not Detected
+//Heading Hold: Enabled
+//Altitude Hold: Enabled
+//Battery Monitor: Enabled
+//Camera Stability: Not Enabled
+//Range Detection: Not Enabled
+//GPS: Not Enabled
+ 
+// 's' 
+// 0,-0.49,0.16,2.86,0.00,0.00,0,1500,1500,1500,1500,1500,1500,1500,1500,1000,1000,1000,1000,0,0,0,0,0.00,1,0,0,0,0,0,0,0,
+
+
+#if defined (AQ_MINIM_OSD)
+
+#include "AQSerial.h"
+
+void setup()
+{
+  Serial.begin(115200);
+  
+  Serial.println("init");
+  
+  //Led output
+  pinMode(7,OUTPUT);  // PD7
+  
+  checkEEPROM();
+  readEEPROM();
+  MAX7456Setup();
+  
+//  analogReference(DEFAULT);
+
+//  readBoardConfig();
+}
+
+unsigned long previousTime = 0;
+void loop()
+{
+  unsigned long currentTime = micros();
+  unsigned long deltaTime = currentTime - previousTime;
+  if (deltaTime >= 40000) {
+    readLineDetails();
+    Serial.flush();
+    
+    MAX7456_DrawScreen();
+    
+    if( allSec < 6 ){
+      displayIntro();
+      lastCallSign = onTime;
+    }  
+    else
+    {
+      if(armed){
+        previousarmedstatus=1;
+      }
+      if(previousarmedstatus && !armed){
+        configPage=9;
+        ROW=10;
+        COL=1;
+        configMode=1;
+//        setMspRequests();
+      }
+      if(fontMode) {
+         displayFontScreen();
+      }
+      else if(configMode)
+      {
+        displayConfigScreen();
+      }
+      else
+      {
+        
+        displayVoltage();
+        displayVidVoltage();
+        displayRSSI();
+        displayTime();
+        displayMode();
+        if(Settings[L_TEMPERATUREPOSDSPL]&&((temperature<Settings[S_TEMPERATUREMAX])||(BlinkAlarm))) displayTemperature();        
+        displayAmperage();
+        displaypMeterSum();
+        displayArmed();
+        displayCurrentThrottle();
+
+        if ( (onTime > (lastCallSign+300)) || (onTime < (lastCallSign+4)))
+       {
+           // Displays 4 sec every 5min (no blink during flight)
+        if ( onTime > (lastCallSign+300))lastCallSign = onTime; 
+        displayCallsign(); 
+       
+       }
+       //if (!(MwSensorActive&mode_osd_switch)
+
+        if(MwSensorPresent&ACCELEROMETER)
+           displayHorizon(MwAngle[0],MwAngle[1]);
+
+        if(MwSensorPresent&MAGNETOMETER) {
+          displayHeadingGraph();
+          displayHeading();
+        }
+
+        if(MwSensorPresent&BAROMETER) {
+          displayAltitude();
+          displayClimbRate();
+        }
+
+        if(MwSensorPresent&GPSSENSOR) 
+          if(Settings[S_DISPLAYGPS]){
+            displayNumberOfSat();
+            displayDirectionToHome();
+            displayDistanceToHome();
+            displayAngleToHome();
+            displayGPS_speed();
+            displayGPSPosition();
+            displayGPS_altitude();
+          }
+      }
+    }
+    previousTime = currentTime;
+  }
+}
+
+
+
+#else // Following code is enabled when AQ OSD is not defined, it's usefull to keep it for now
+/*******************************************************************************************/
+/*******************************************************************************************/
+/****************************   KV OSD                   ***********************************/
+/*******************************************************************************************/
+/*******************************************************************************************/
 
 
 void setup()
@@ -71,7 +250,7 @@ void setup()
 
   blankserialRequest(MSP_IDENT);
 }
-void (* resetFunc)(void)=0;
+
 
 
 void setMspRequests() {
@@ -416,36 +595,6 @@ void writeEEPROM(void)
   }  
 }
 
-void readEEPROM(void)
-{
-// For Settings
-  for(int en=0;en<EEPROM_SETTINGS;en++){
-     Settings[en] = EEPROM.read(en);
-  }
-// For Position of items on screen      
-  for(int en=0;en<EEPROM_ITEM_LOCATION-EEPROM_SETTINGS;en++){
-     Settings[en+EEPROM_SETTINGS+1] = EEPROM.read(en+EEPROM_SETTINGS+1);
-  }  
-}
-
-
-// for first run to ini
-void checkEEPROM(void)
-{
-// For H/W Settings
-  uint8_t EEPROM_Loaded = EEPROM.read(0);
-  if (!EEPROM_Loaded){
-    for(uint8_t en=0;en<EEPROM_SETTINGS;en++){
-      if (EEPROM.read(en) != EEPROM_DEFAULT[en])  EEPROM.write(en,EEPROM_DEFAULT[en]);
-    }
-// For items on screen.
-// First run, the default will be NTSC (show all data lines with NTSC systems that has only 13 lines)
-// In OSD menu' it's possible a quick default setup for PAL or NTSC
-    for(uint16_t en=0;en<EEPROM_ITEM_LOCATION-EEPROM_SETTINGS;en++) {
-      if (EEPROM.read(en+EEPROM_SETTINGS+1) != EEPROM_NTSC_DEFAULT[en]) EEPROM.write(en+EEPROM_SETTINGS+1,EEPROM_NTSC_DEFAULT[en]);
-    }
-  }
-}
 
 uint8_t safeMode() {
   return 1;	// XXX
@@ -513,4 +662,5 @@ int16_t getNextCharToRequest() {
   return temp2;
 }
 
+#endif // KV_OSD end define
 

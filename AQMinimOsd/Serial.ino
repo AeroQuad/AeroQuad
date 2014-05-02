@@ -80,7 +80,7 @@ void serialMSPCheck()
       }
     }
     if(cmd == OSD_RESET) {
-    resetFunc();
+      resetFunc();
     }
     if(cmd == OSD_SERIAL_SPEED) {
     

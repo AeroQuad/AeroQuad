@@ -525,6 +525,7 @@ void sendSerialTelemetry() {
 //      break;
   
     case 's': // Send all flight data
+      SERIAL_PRINT('S');
       PrintValueComma(motorArmed);
       PrintValueComma(kinematicsAngle[XAXIS]);
       PrintValueComma(kinematicsAngle[YAXIS]);
