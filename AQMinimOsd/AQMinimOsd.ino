@@ -79,33 +79,6 @@ void checkEEPROM(void)
   }
 }
 
-
-
-
-// '#'
-//15
-//Software Version: 3.2
-//Board Type: Free Flight
-//FlightConfig: 0
-//ReceiverType: 1
-//ReceiverNbChannels: 8
-//Motors: 4
-//YawDirection: 1
-//Gyroscope: Detected
-//Accelerometer: Detected
-//Barometer: Not Detected
-//Magnetometer: Not Detected
-//Heading Hold: Enabled
-//Altitude Hold: Enabled
-//Battery Monitor: Enabled
-//Camera Stability: Not Enabled
-//Range Detection: Not Enabled
-//GPS: Not Enabled
- 
-// 's' 
-// 0,-0.49,0.16,2.86,0.00,0.00,0,1500,1500,1500,1500,1500,1500,1500,1500,1000,1000,1000,1000,0,0,0,0,0.00,1,0,0,0,0,0,0,0,
-
-
 #if defined (AQ_MINIM_OSD)
 
 #include "AQSerial.h"
@@ -113,9 +86,7 @@ void checkEEPROM(void)
 void setup()
 {
   Serial.begin(115200);
-  
-  Serial.println("init");
-  
+ 
   //Led output
   pinMode(7,OUTPUT);  // PD7
   
@@ -123,93 +94,64 @@ void setup()
   readEEPROM();
   MAX7456Setup();
   
-//  analogReference(DEFAULT);
-
-  readBoardConfig();
+  displayIntro();
+  MAX7456_DrawScreen();
+  
+//  readBoardConfig();
 }
+
+
+//boolean areMotorArmed = false;
+// 's' 
+// S0,1.0,2.0,3.0,4.00,5.00,6,1500,1500,1500,1500,1500,1500,1500,1500,1000,1000,1000,1000,0,0,0,0,0.00,1,0,0,0,0,0,0,0,
 
 unsigned long previousTime = 0;
 void loop()
 {
+//  return;
   unsigned long currentTime = micros();
   unsigned long deltaTime = currentTime - previousTime;
   if (deltaTime >= 40000) {
     readLineDetails();
     Serial.flush();
     
-    MAX7456_DrawScreen();
-    
-    if( allSec < 6 ){
-      displayIntro();
-      lastCallSign = onTime;
-    }  
-    else
-    {
-      if(armed){
-        previousarmedstatus=1;
-      }
-      if(previousarmedstatus && !armed){
-        configPage=9;
-        ROW=10;
-        COL=1;
-        configMode=1;
-//        setMspRequests();
-      }
-      if(fontMode) {
-         displayFontScreen();
-      }
-      else if(configMode)
-      {
-        displayConfigScreen();
-      }
-      else
-      {
-        
-        displayVoltage();
-        displayVidVoltage();
-        displayRSSI();
-        displayTime();
-        displayMode();
-        if(Settings[L_TEMPERATUREPOSDSPL]&&((temperature<Settings[S_TEMPERATUREMAX])||(BlinkAlarm))) displayTemperature();        
-        displayAmperage();
-        displaypMeterSum();
-        displayArmed();
-        displayCurrentThrottle();
+      
+    displayVoltage();
+//    displayVidVoltage();
+//    displayRSSI();
+//    displayTime();
+    displayFlightMode();
+//    if(Settings[L_TEMPERTUREPOSDSPL]&&((temperature<Settings[S_TEMPERATUREMAX])||(BlinkAlarm))) displayTemperature();        
+//    displayAmperage();
+//    displaypMeterSum();
+    displayArmed();
+    displayCurrentThrottle();
 
-        if ( (onTime > (lastCallSign+300)) || (onTime < (lastCallSign+4)))
-       {
-           // Displays 4 sec every 5min (no blink during flight)
-        if ( onTime > (lastCallSign+300))lastCallSign = onTime; 
-        displayCallsign(); 
-       
-       }
-       //if (!(MwSensorActive&mode_osd_switch)
+//    displayCallsign(); 
+   
+    displayHorizon(MwAngle[0],MwAngle[1]);
 
-        if(MwSensorPresent&ACCELEROMETER)
-           displayHorizon(MwAngle[0],MwAngle[1]);
-
-        if(MwSensorPresent&MAGNETOMETER) {
-          displayHeadingGraph();
-          displayHeading();
-        }
-
-        if(MwSensorPresent&BAROMETER) {
-          displayAltitude();
-          displayClimbRate();
-        }
-
-        if(MwSensorPresent&GPSSENSOR) 
-          if(Settings[S_DISPLAYGPS]){
-            displayNumberOfSat();
-            displayDirectionToHome();
-            displayDistanceToHome();
-            displayAngleToHome();
-            displayGPS_speed();
-            displayGPSPosition();
-            displayGPS_altitude();
-          }
-      }
+    if(isMagEnabled) {
+      displayHeadingGraph();
+      displayHeading();
     }
+
+    if(isBatterieMonitorEnabled) {
+      displayAltitude();
+      displayClimbRate();
+    }
+
+    if(isGpsEnabled) {
+      displayNumberOfSat();
+      displayDirectionToHome();
+      displayDistanceToHome();
+      displayAngleToHome();
+      displayGPS_speed();
+      displayGPSPosition();
+      displayGPS_altitude();
+    }
+      
+    MAX7456_DrawScreen();
     previousTime = currentTime;
   }
 }

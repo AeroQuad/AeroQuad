@@ -433,7 +433,7 @@ static uint16_t MwRcData[8]={   // This hold receiver pulse signal
 
 uint16_t  MwSensorPresent=0;
 uint32_t  MwSensorActive=0;
-uint8_t MwVersion=0;
+//uint8_t MwVersion=0;
 uint8_t MwVBat=0;
 int16_t MwVario=0;
 uint8_t armed=0;
@@ -557,8 +557,8 @@ const char disarmed_text[] PROGMEM = "DISARMED";
 const char armed_text[] PROGMEM = " ARMED";
 
 // For Intro
-const char message0[] PROGMEM = "KV_OSD_TEAM_2.2";
-const char message5[] PROGMEM = "MW VERSION:";
+const char message0[] PROGMEM = "KENNY9999 OSD";
+const char message5[] PROGMEM = "AQ VERSION: 3.3";
 const char message6[] PROGMEM = "MENU:THRT MIDDLE";
 const char message7[] PROGMEM = "YAW RIGHT";
 const char message8[] PROGMEM = "PITCH FULL";
@@ -726,18 +726,12 @@ const char MultiWiiLogoL2Add[17] PROGMEM = {
 const char MultiWiiLogoL3Add[17] PROGMEM = {
   0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0};
 
-const unsigned char MwAltitudeAdd[2]={
-  0xa7,0xa8};
-const unsigned char MwClimbRateAdd[2]={
-  0x9f,0x99};
-const unsigned char GPS_distanceToHomeAdd[2]={
-  0x8a,0x7a,};
-  const unsigned char GPS_distanceToHomeAdd1[2]={
-  0x8b,0x8b};
-const unsigned char MwGPSAltPositionAdd[2]={
-  0xa7,0xa8};
-const unsigned char MwGPSAltPositionAdd1[2]={
-  0xa3,0xa3};
+const unsigned char MwAltitudeAdd[2]={0xa7,0xa8};
+const unsigned char MwClimbRateAdd[2]={0x9f,0x99};
+const unsigned char GPS_distanceToHomeAdd[2]={0x8a,0x7a,};
+  const unsigned char GPS_distanceToHomeAdd1[2]={0x8b,0x8b};
+const unsigned char MwGPSAltPositionAdd[2]={0xa7,0xa8};
+const unsigned char MwGPSAltPositionAdd1[2]={0xa3,0xa3};
 const char KVTeamVersionPosition = 35;
 
 

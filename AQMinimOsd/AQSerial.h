@@ -9,6 +9,7 @@ boolean isBarometerEnabled = false;
 boolean isBatterieMonitorEnabled = false;
 boolean isMagEnabled = false;
 boolean isGpsEnabled = false;
+int flightMode = 2;
 
 
 void readString(char *data, byte size) {
@@ -58,14 +59,6 @@ float readFloatSerial() {
   return atof(data);
 }
 
-// Used to read integer values from the serial port
-//long readIntegerSerial() {
-//  char data[16] = "";
-//
-//  readValueSerial(data, sizeof(data));
-//  return atol(data);
-//}
-
 void readBoardConfig()
 {
   Serial.write('#');
@@ -103,9 +96,6 @@ void readBoardConfig()
 }
 
 
-//boolean areMotorArmed = false;
-// 's' 
-// S0,-0.49,0.16,2.86,0.00,0.00,0,1500,1500,1500,1500,1500,1500,1500,1500,1000,1000,1000,1000,0,0,0,0,0.00,1,0,0,0,0,0,0,0,
 
 void readLineDetails()
 {
@@ -127,20 +117,20 @@ void readLineDetails()
     }
   }
   armed = readFloatSerial();
-  MwAngle[0] = readFloatSerial();
-  MwAngle[1] = readFloatSerial();
-  MwHeading = readFloatSerial();
+  MwAngle[0] = map(degrees(readFloatSerial()),-10,10,-180,180);
+  MwAngle[1] = map(degrees(readFloatSerial()),-10,10,-180,180);
+  MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
   MwVario = readFloatSerial();
   int altitudeHoldState = readFloatSerial();
-  int receiverCommand1 = readFloatSerial();
-  int receiverCommand2 = readFloatSerial();
-  int receiverCommand3 = readFloatSerial();
-  int receiverCommand4 = readFloatSerial();
-  int receiverCommand5 = readFloatSerial();
-  int receiverCommand6 = readFloatSerial();
-  int receiverCommand7 = readFloatSerial();
-  int receiverCommand8 = readFloatSerial();
+  MwRcData[0] = readFloatSerial();
+  MwRcData[1] = readFloatSerial();
+  MwRcData[2] = readFloatSerial();
+  MwRcData[3] = readFloatSerial();
+  MwRcData[4] = readFloatSerial();
+  MwRcData[5] = readFloatSerial();
+  MwRcData[6] = readFloatSerial();
+  MwRcData[7] = readFloatSerial();
   int motorCommand1 = readFloatSerial();
   int motorCommand2 = readFloatSerial();
   int motorCommand3 = readFloatSerial();
@@ -149,15 +139,17 @@ void readLineDetails()
   int motorCommand6 = readFloatSerial();
   int motorCommand7 = readFloatSerial();
   int motorCommand8 = readFloatSerial();
-  voltage = readFloatSerial();
-  int flightMode = readFloatSerial();
+  voltage = readFloatSerial()*10;
+  flightMode = readFloatSerial();
   int gpsState = readFloatSerial();
-  int gpsNbSats = readFloatSerial();
-  int gpsSpeed = readFloatSerial();
-  int gpsHeight = readFloatSerial();
+  GPS_numSat = readFloatSerial();
+  GPS_speed = readFloatSerial();
+  GPS_altitude = readFloatSerial();
   int gpsCourse = readFloatSerial();
-  float gpsLatitude = readFloatSerial();
-  float gpsLongitude = readFloatSerial();
+  GPS_latitude = readFloatSerial();
+  GPS_longitude = readFloatSerial();
+  
+  GPS_fix = GPS_numSat >= 4 ? true : false; 
  
 }
 

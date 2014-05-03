@@ -90,7 +90,7 @@ void serialMSPCheck()
 
   if (cmdMSP==MSP_IDENT)
   {
-    MwVersion= read8();                             // MultiWii Firmware version
+//    MwVersion= read8();                             // MultiWii Firmware version
     modeMSPRequests &=~ REQ_MSP_IDENT;
   }
 

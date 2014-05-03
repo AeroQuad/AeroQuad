@@ -50,8 +50,8 @@
 #define THROTTLESTICK    3
 
 // STICK POSITION
-#define MAXSTICK         1900
-#define MINSTICK         1100
+#define MAXSTICK         2000
+#define MINSTICK         1000
 #define MINTROTTLE       1000
 
 // FOR POSITION OF PID CONFIG VALUE
