@@ -86,12 +86,17 @@ void readBoardConfig()
       isGpsEnabled = true;
       boardConfigRead = true;
     }
+    
     delay(1);
     timeout++;
     if (timeout == 50) {
       Serial.write('#');
       timeout = 0;
     }
+    
+   displayIntro();
+   MAX7456_DrawScreen();
+
   }
 }
 

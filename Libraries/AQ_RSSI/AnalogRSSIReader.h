@@ -21,6 +21,7 @@
 #ifndef _AQ_ANALOG_RSSI_READER_H_
 #define _AQ_ANALOG_RSSI_READER_H_
 
+#include "arduino.h"
 
 #define RSSI_PIN     A6     // analog pin to read
 //#define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)

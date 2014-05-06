@@ -21,7 +21,7 @@
 #ifndef _AQ_EzUHF_RSSI_READER_H_
 #define _AQ_EzUHF_RSSI_READER_H_
 
-#include <Receiver.h>
+#include <Receiver_Base_MEGA.h>
 
 #define RSSI_RAWVAL         // show raw A/D value instead of percents (for tuning)
 #define RSSI_MAX_RAW_VALUE 1001

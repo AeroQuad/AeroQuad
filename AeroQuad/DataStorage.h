@@ -200,6 +200,7 @@ void initializeEEPROM() {
   
   // Battery Monitor
   #ifdef BattMonitor
+    isBatteryMonitorEnabled = false;
     batteryMonitorAlarmVoltage = 3.33;
     batteryMonitorThrottleTarget = 1450;
     batteryMonitorGoingDownTime = 60000;
@@ -296,6 +297,7 @@ void readEEPROM() {
   
   // Battery Monitor
   #ifdef BattMonitor
+    isBatteryMonitorEnabled = readFloat(BATT_MONITOR_ENABLED_ADR);
     batteryMonitorAlarmVoltage = readFloat(BATT_ALARM_VOLTAGE_ADR);
     batteryMonitorThrottleTarget = readFloat(BATT_THROTTLE_TARGET_ADR);
     batteryMonitorGoingDownTime = readFloat(BATT_DOWN_TIME_ADR);
@@ -392,6 +394,7 @@ void writeEEPROM(){
   
   // Battery Monitor
   #ifdef BattMonitor
+    writeFloat(isBatteryMonitorEnabled, BATT_MONITOR_ENABLED_ADR);
     writeFloat(batteryMonitorAlarmVoltage, BATT_ALARM_VOLTAGE_ADR);
     writeFloat(batteryMonitorThrottleTarget, BATT_THROTTLE_TARGET_ADR);
     writeFloat(batteryMonitorGoingDownTime, BATT_DOWN_TIME_ADR);

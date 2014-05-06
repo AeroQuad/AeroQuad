@@ -106,8 +106,15 @@ void readSerialCommand() {
           #endif
           readSerialPID(ZDAMPENING_PID_IDX);
           writeEEPROM();
-        break;
+          break;
     #endif      
+    
+    #if defined (BattMonitor)
+      case 'E':
+        isBatteryMonitorEnabled = readFloatSerial();
+        writeEEPROM();
+        break;
+    #endif
 
     case 'G': // Receive transmitter calibration values
       for (int channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -259,19 +266,6 @@ void readSerialCommand() {
       validateCalibrateCommand(2);
       break;
 
-//    case '3': // Test ESC calibration
-//      if (validateCalibrateCommand(3)) {
-//        testCommand = readFloatSerial();
-//      }
-//      break;
-//
-//    case '4': // Turn off ESC calibration
-//      if (validateCalibrateCommand(4)) {
-//        calibrateESC = 0;
-//        testCommand = 1000;
-//      }
-//      break;
-
     case '5': // Send individual motor commands (motor, command)
       if (validateCalibrateCommand(5)) {
         for (byte motor = 0; motor < LASTMOTOR; motor++) {
@@ -393,10 +387,6 @@ void sendSerialTelemetry() {
         break;
     #endif        
   
-//    case 'f': // Send transmitter smoothing values
-//      queryType = 'X';
-//      break;
-  
     case 'g': // Send transmitter calibration data
       for (byte channel = XAXIS; channel < LAST_CHANNEL; channel++) {
         Serial.print(receiverMinValue[channel]);
@@ -440,15 +430,6 @@ void sendSerialTelemetry() {
         break;
     #endif
     
-//    case 'k': // Send accelerometer cal values
-//      SERIAL_PRINT(accelScaleFactor[XAXIS], 6);
-//      comma();
-//      SERIAL_PRINT(accelScaleFactor[YAXIS], 6);
-//      comma();
-//      SERIAL_PRINTLN(accelScaleFactor[ZAXIS], 6);
-//      queryType = 'X';
-//      break;
-  
     case 'l': // Send raw accel values
       evaluateMetersPerSec();    // reset sample data
       delay(2);
@@ -458,17 +439,6 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN ((int)(accelSample[ZAXIS]));
       break;
   
-//    case 'm': // Send magnetometer cal values
-//      #ifdef HeadingMagHold
-//        SERIAL_PRINT(magBias[XAXIS], 6);
-//        comma();
-//        SERIAL_PRINT(magBias[YAXIS], 6);
-//        comma();
-//        SERIAL_PRINTLN(magBias[ZAXIS], 6);
-//      #endif
-//      queryType = 'X';
-//      break;
-
     #ifdef BattMonitor
       case 'n': // battery monitor
         PrintValueComma(batteryMonitorAlarmVoltage);
@@ -517,12 +487,6 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN(vehicleState);
       queryType = 'X';
       break;
-  
-//    case 'r': // Vehicle attitude
-//      PrintValueComma(kinematicsAngle[XAXIS]);
-//      PrintValueComma(kinematicsAngle[YAXIS]);
-//      SERIAL_PRINTLN(getHeading());
-//      break;
   
     case 's': // Send all flight data
       SERIAL_PRINT('S');
@@ -655,14 +619,6 @@ void sendSerialTelemetry() {
       reportVehicleState();
       queryType = 'X';
       break;
-  
-//    case '6': // Report remote commands
-//      for (byte motor = 0; motor < LASTMOTOR; motor++) {
-//        PrintValueComma(motorCommand[motor]);
-//      }
-//      SERIAL_PRINTLN();
-//      queryType = 'X';
-//      break;
   
   #if defined(OSD) && defined(OSD_LOADFONT)
     case '&': // fontload

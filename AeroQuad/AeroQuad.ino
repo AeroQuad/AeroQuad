@@ -32,9 +32,37 @@
 // Define Security Checks
 //
 
-#if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
- #define UseGPS
-#endif 
+#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
+  #define HeadingMagHold		
+  #define AltitudeHoldBaro		
+
+  #define BattMonitor			  
+  
+//  #define UseAnalogRSSIReader	
+//  #define UseEzUHFRSSIReader	
+//  #define UseSBUSRSSIReader		
+
+  
+//  #define UseGPS		        
+//  #define UseGPSNavigator
+
+
+//  #define OSD
+//  #define ShowRSSI                  // This REQUIRES a RSSI reader
+//  #define PAL                       // uncomment this to default to PAL video
+//  #define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+//  #define CALLSIGN "AQ"             // Show (optional) callsign
+//  #define ShowAttitudeIndicator     // Display the attitude indicator calculated by the AHRS
+//  #define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
+//  #define OSD_LOADFONT              // Include MAX7456 font into binary, give & on serial to upload
+
+//  #define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
+
+
+#endif
+
+
+
 
 #if defined(UseGPSNavigator) && !defined(AltitudeHoldBaro)
   #error "GpsNavigation NEED AltitudeHoldBaro defined"
@@ -52,10 +80,6 @@
   #error "CameraTXControl need to have CameraControl defined"
 #endif 
 
-#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
-  #define HeadingMagHold		
-  #define AltitudeHoldBaro		
-#endif
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -926,8 +950,10 @@ void setup() {
   #endif
   
   #ifdef BattMonitor
-    initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
-    vehicleState |= BATTMONITOR_ENABLED;
+    if (isBatteryMonitorEnabled) {
+      vehicleState |= BATTMONITOR_ENABLED;
+      initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
+    }
   #endif
   
   #if defined(CameraControl)
@@ -1075,7 +1101,9 @@ void process10HzTask2() {
   lowPriorityTenHZpreviousTime = currentTime;
   
   #if defined(BattMonitor)
-    measureBatteryVoltage(G_Dt*1000.0);
+    if (vehicleState & BATTMONITOR_ENABLED) {
+      measureBatteryVoltage(G_Dt*1000.0);
+    }
   #endif
 
   // Listen for configuration commands and reports telemetry

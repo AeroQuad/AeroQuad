@@ -130,6 +130,7 @@ void reportVehicleState();
  * battery monitor and battery monitor throttle correction global declaration section
  */
 #if defined (BattMonitor)
+  boolean isBatteryMonitorEnabled = false;
   #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
   float batteryMonitorAlarmVoltage = 10.0;
   int batteryMonitorStartThrottle = 0;
@@ -280,6 +281,7 @@ typedef struct {
   
   // Battery Monitor
   #if defined (BattMonitor)
+    float BATT_MONITOR_ENABLED_ADR;
     float BATT_ALARM_VOLTAGE_ADR;
     float BATT_THROTTLE_TARGET_ADR;
     float BATT_DOWN_TIME_ADR;
