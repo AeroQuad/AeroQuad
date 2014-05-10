@@ -679,60 +679,87 @@ void printVehicleState(const char *sensorName, unsigned long state, const char *
   if (!(vehicleState & state)) {
     SERIAL_PRINT("Not ");
   }
-  SERIAL_PRINTLN(message);
+  SERIAL_PRINT(message);
 }
 
 void reportVehicleState() {
   // Tell Configurator how many vehicle state values to expect
-  SERIAL_PRINTLN(15);
+  SERIAL_PRINT(15);
+  SERIAL_PRINT(";");
+  delay(50);
   SERIAL_PRINT("Software Version: ");
-  SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
+  SERIAL_PRINT(SOFTWARE_VERSION);
+  SERIAL_PRINT(";");
+  delay(50);
   SERIAL_PRINT("Board Type: ");
   #if defined(AeroQuad_v18)
-    SERIAL_PRINTLN("v1.8 and greater");
+    SERIAL_PRINT("v1.8 and greater;");
   #elif defined(AeroQuad_Mini)
-    SERIAL_PRINTLN("Mini");
+    SERIAL_PRINT("Mini;");
   #elif defined(MWCFlip15)
-    SERIAL_PRINTLN("MWCFlip15");
+    SERIAL_PRINT("MWCFlip15;");
   #elif defined(AeroQuadMega_v2)
-    SERIAL_PRINTLN("Mega v2");
+    SERIAL_PRINT("Mega v2;");
   #elif defined(AeroQuadMega_v21)
-    SERIAL_PRINTLN("Mega v21");
+    SERIAL_PRINT("Mega v21;");
   #elif defined(MWCProEz30)
-    SERIAL_PRINTLN("MWCProEz30");    
+    SERIAL_PRINT("MWCProEz30;");    
   #elif defined(AeroQuadSTM32)
-    SERIAL_PRINTLN(STM32_BOARD_TYPE);
+    SERIAL_PRINT(STM32_BOARD_TYPE);
+    SERIAL_PRINT(";");
   #endif
+  delay(50);
 
   SERIAL_PRINT("FlightConfig: ");
-  SERIAL_PRINTLN(flightConfigType);
-
+  SERIAL_PRINT(flightConfigType);
+  SERIAL_PRINT(";");
+  delay(50);
+  
   SERIAL_PRINT("ReceiverType: ");
-  SERIAL_PRINTLN(receiverTypeUsed);
-
+  SERIAL_PRINT(receiverTypeUsed);
+  SERIAL_PRINT(";");
+  delay(50);
+  
   SERIAL_PRINT("ReceiverNbChannels: ");
-  SERIAL_PRINTLN(LAST_CHANNEL);
+  SERIAL_PRINT(LAST_CHANNEL);
+  SERIAL_PRINT(";");
+  delay(50);
   
   SERIAL_PRINT("Motors: ");
-  SERIAL_PRINTLN(LASTMOTOR);
-
+  SERIAL_PRINT(LASTMOTOR);
+  SERIAL_PRINT(";");
+  delay(50);
+  
   SERIAL_PRINT("YawDirection: ");
-  SERIAL_PRINTLN(yawDirection);
+  SERIAL_PRINT(yawDirection);
+  SERIAL_PRINT(";");
+  delay(50);
 
-  printVehicleState("Gyroscope", GYRO_DETECTED, "Detected");
-  printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected");
-  printVehicleState("Barometer", BARO_DETECTED, "Detected");
-  printVehicleState("Magnetometer", MAG_DETECTED, "Detected");
-  printVehicleState("Heading Hold", HEADINGHOLD_ENABLED, "Enabled");
-  printVehicleState("Altitude Hold", ALTITUDEHOLD_ENABLED, "Enabled");
-  printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled");
-  printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
-  printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
+  printVehicleState("Gyroscope", GYRO_DETECTED, "Detected;");
+  delay(50);
+  printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected;");
+  delay(50);
+  printVehicleState("Barometer", BARO_DETECTED, "Detected;");
+  delay(50);
+  printVehicleState("Magnetometer", MAG_DETECTED, "Detected;");
+  delay(50);
+  printVehicleState("Heading Hold", HEADINGHOLD_ENABLED, "Enabled;");
+  delay(50);
+  printVehicleState("Altitude Hold", ALTITUDEHOLD_ENABLED, "Enabled;");
+  delay(50);
+  printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled;");
+  delay(50);
+  printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled;");
+  delay(50);
+  printVehicleState("Range Detection", RANGE_ENABLED, "Enabled;");
+  delay(50);
 #ifdef UseGPS
-  SERIAL_PRINTLN("GPS: Enabled");
+  SERIAL_PRINT("GPS: Enabled;");
 #else
-  SERIAL_PRINTLN("GPS: Not Enabled");
+  SERIAL_PRINT("GPS: Not Enabled;");
 #endif
+  delay(50);
+  SERIAL_PRINTLN();
 }
 
 #endif // _AQ_SERIAL_COMM_

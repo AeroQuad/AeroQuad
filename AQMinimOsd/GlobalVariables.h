@@ -564,6 +564,18 @@ const char message7[] PROGMEM = "YAW RIGHT";
 const char message8[] PROGMEM = "PITCH FULL";
 const char message9[] PROGMEM = "UNIQUE ID:";         // Call Sign on the beginning of the transmission   
 
+const char baroDetectedMessage[] PROGMEM = "BARO DETECTED";
+const char baroNotDetectedMessage[] PROGMEM = "BARO NOT DETECTED";
+const char magDetectedMessage[] PROGMEM = "MAG DETECTED";
+const char magNotDetectedMessage[] PROGMEM = "MAG NOT DETECTED";
+const char battDetectedMessage[] PROGMEM = "BATT MONITOR DETECTED";
+const char battNotDetectedMessage[] PROGMEM = "BATT MON NOT DETECTED";
+const char gpsDetectedMessage[] PROGMEM = "GPS DETECTED";
+const char gpsNotDetectedMessage[] PROGMEM = "GPS NOT DETECTED";
+const char boardConfigReadMessage[] PROGMEM = "CONFIG READED";
+
+
+
 // For Config menu common
 const char configMsgON[] PROGMEM = "ON";
 const char configMsgOFF[] PROGMEM = "OFF";

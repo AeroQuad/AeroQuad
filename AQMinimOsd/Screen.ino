@@ -430,27 +430,39 @@ void displayIntro()
   else {
     MAX7456_WriteString_P(configMsgNTSC, KVTeamVersionPosition+44);  // NTSC
   }
-    
-//  MAX7456_WriteString_P(MultiWiiLogoL1Add, KVTeamVersionPosition+120);
-//  MAX7456_WriteString_P(MultiWiiLogoL2Add, KVTeamVersionPosition+120+LINE);
-//  MAX7456_WriteString_P(MultiWiiLogoL3Add, KVTeamVersionPosition+120+LINE+LINE);
+
+  if (isBarometerEnabled) {    
+    MAX7456_WriteString_P(baroDetectedMessage, KVTeamVersionPosition+120);
+  }
+  else {
+    MAX7456_WriteString_P(baroNotDetectedMessage, KVTeamVersionPosition+120);
+  }
+
+  if (isMagEnabled) {    
+    MAX7456_WriteString_P(magDetectedMessage, KVTeamVersionPosition+120+LINE);
+  }
+  else {
+    MAX7456_WriteString_P(magNotDetectedMessage, KVTeamVersionPosition+120+LINE);
+  }
+  
+  if (isBatterieMonitorEnabled) {    
+    MAX7456_WriteString_P(battDetectedMessage, KVTeamVersionPosition+120+LINE+LINE);
+  }
+  else {
+    MAX7456_WriteString_P(battNotDetectedMessage, KVTeamVersionPosition+120+LINE+LINE);
+  }
+  
+  if (isGpsEnabled) {    
+    MAX7456_WriteString_P(gpsDetectedMessage, KVTeamVersionPosition+120+LINE+LINE+LINE);
+  }
+  else {
+    MAX7456_WriteString_P(gpsNotDetectedMessage, KVTeamVersionPosition+120+LINE+LINE+LINE);
+  }
+  if (boardConfigRead) {
+    MAX7456_WriteString_P(boardConfigReadMessage, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE+LINE);
+  }
 
   MAX7456_WriteString_P(message5, KVTeamVersionPosition+122+LINE+LINE+LINE+LINE+LINE+LINE+LINE);
-//  MAX7456_WriteString(itoa(3.3,screenBuffer,10),KVTeamVersionPosition+131+LINE+LINE+LINE+LINE+LINE+LINE+LINE);
-
-//  MAX7456_WriteString_P(message6, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE+LINE);
-//  MAX7456_WriteString_P(message7, KVTeamVersionPosition+125+LINE+LINE+LINE+LINE+LINE+LINE);
-//  MAX7456_WriteString_P(message8, KVTeamVersionPosition+125+LINE+LINE+LINE+LINE+LINE+LINE+LINE);
-  
-//  MAX7456_WriteString_P(message9, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE+LINE+LINE+LINE+LINE);
-//  if(Settings[L_CALLSIGNPOSITIONDSPL]){
-//    for(int X=0; X<10; X++) {
-//      screenBuffer[X] = char(Settings[S_CS0 + X]);
-//    }
-//     if (BlinkAlarm) {
-//       MAX7456_WriteString(screenBuffer, KVTeamVersionPosition+130+LINE+LINE+LINE+LINE+LINE+LINE+LINE+LINE);;     // Call Sign on the beginning of the transmission (blink at sel freq)  
-//     }
-//   }
 }
 
 void displayFontScreen() {
@@ -534,16 +546,16 @@ void displayGPS_speed(void)
 void displayAltitude()
 {
   int16_t altitude;
-  if(Settings[S_UNITSYSTEM]) {
-    altitude = MwAltitude*0.032808;    // cm to feet
-  }
-  else {
-    altitude = MwAltitude/100;         // cm to mt
-  }
-
-  if(armed && allSec>5 && altitude > altitudeMAX) {
-    altitudeMAX = altitude;
-  }
+//  if(Settings[S_UNITSYSTEM]) {
+//    altitude = MwAltitude*0.032808;    // cm to feet
+//  }
+//  else {
+//    altitude = MwAltitude/100;         // cm to mt
+//  }
+  altitude = MwAltitude;
+//  if(armed && allSec>5 && altitude > altitudeMAX) {
+//    altitudeMAX = altitude;
+//  }
 
   screenBuffer[0]=MwAltitudeAdd[Settings[S_UNITSYSTEM]];
   itoa(altitude,screenBuffer+1,10);

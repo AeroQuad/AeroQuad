@@ -10,26 +10,9 @@ boolean isBatterieMonitorEnabled = false;
 boolean isMagEnabled = false;
 boolean isGpsEnabled = false;
 int flightMode = 2;
+boolean boardConfigRead = false;
 
 
-void readString(char *data, byte size) {
-  byte index = 0;
-  byte timeout = 0;
-  data[0] = '\0';
-
-  do {
-    if (Serial.available() == 0) {
-      delay(1);
-      timeout++;
-    } else {
-      data[index] = Serial.read();
-      timeout = 0;
-      index++;
-    }
-  } while ((index == 0 || data[index-1] != '\r' || data[index-1] != '\n') && (timeout < 10) && (index < size-1));
-
-  data[index] = '\0';
-}
 
 void readValueSerial(char *data, byte size) {
   byte index = 0;
@@ -62,41 +45,40 @@ float readFloatSerial() {
 void readBoardConfig()
 {
   Serial.write('#');
-  
-  boolean boardConfigRead = false;
-  byte timeout = 0;
-  while(!boardConfigRead)
-  {
-    char data[50];
-    readString(data, 50);
 
-    if (strcmp(data, "Barometer: Detected")  == 0) {
-      isBarometerEnabled = true;
+  byte timeoutForRequest = 0;
+  while(true)
+  {
+    String str = "";
+    str.reserve(200);  
+    str = Serial.readStringUntil(';');
+
+    if (str == "Barometer: Detected") {
+        isBarometerEnabled = true;
     }
-    else if (strcmp(data, "Magnetometer: Detected")  == 0) {
+    else if (str == "Magnetometer: Detected") {
       isMagEnabled = true;
     }
-    else if (strcmp(data, "Battery Monitor: Enabled")  == 0) {
-      isBatterieMonitorEnabled = false;
+    else if (str == "BatteryMonitor: Enabled") {
+      isBatterieMonitorEnabled = true;
     }
-    else if (strcmp(data, "GPS: Not Enabled")  == 0) {
-      boardConfigRead = true;
-    }
-    else if (strcmp(data, "GPS: Enabled")  == 0) {
-      isGpsEnabled = true;
-      boardConfigRead = true;
+    else if(str.indexOf("GPS") >= 0)
+    {
+//      if(str.indexOf("Not") < 0) {
+//        isGpsEnabled = true;
+//      }
+      return;
     }
     
-    delay(1);
-    timeout++;
-    if (timeout == 50) {
+    delay(50);
+    timeoutForRequest++;
+    if (timeoutForRequest == 50) {
       Serial.write('#');
-      timeout = 0;
+      timeoutForRequest = 0;
     }
     
-   displayIntro();
-   MAX7456_DrawScreen();
-
+    displayIntro();
+    MAX7456_DrawScreen();
   }
 }
 
@@ -122,8 +104,8 @@ void readLineDetails()
     }
   }
   armed = readFloatSerial();
-  MwAngle[0] = map(degrees(readFloatSerial()),-10,10,-180,180);
-  MwAngle[1] = map(degrees(readFloatSerial()),-10,10,-180,180);
+  MwAngle[0] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
+  MwAngle[1] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
   MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
   MwVario = readFloatSerial();

@@ -97,7 +97,13 @@ void setup()
   displayIntro();
   MAX7456_DrawScreen();
   
-//  readBoardConfig();
+  readBoardConfig();
+  
+  boardConfigRead = true;
+  
+  displayIntro();
+  MAX7456_DrawScreen();
+  delay(5000);
 }
 
 
@@ -115,8 +121,9 @@ void loop()
     readLineDetails();
     Serial.flush();
     
-      
-    displayVoltage();
+    if (isBatterieMonitorEnabled) {
+      displayVoltage();
+    }
 //    displayVidVoltage();
 //    displayRSSI();
 //    displayTime();
@@ -136,7 +143,7 @@ void loop()
       displayHeading();
     }
 
-    if(isBatterieMonitorEnabled) {
+    if(isBarometerEnabled) {
       displayAltitude();
       displayClimbRate();
     }
