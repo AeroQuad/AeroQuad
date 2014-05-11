@@ -557,7 +557,7 @@ const char disarmed_text[] PROGMEM = "DISARMED";
 const char armed_text[] PROGMEM = " ARMED";
 
 // For Intro
-const char message0[] PROGMEM = "KENNY9999 OSD";
+const char message0[] PROGMEM = "KENNY OSD";
 const char message5[] PROGMEM = "AQ VERSION: 3.3";
 const char message6[] PROGMEM = "MENU:THRT MIDDLE";
 const char message7[] PROGMEM = "YAW RIGHT";

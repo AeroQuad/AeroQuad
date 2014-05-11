@@ -59,7 +59,7 @@ void readBoardConfig()
     else if (str == "Magnetometer: Detected") {
       isMagEnabled = true;
     }
-    else if (str == "BatteryMonitor: Enabled") {
+    else if (str == "Battery Monitor: Enabled") {
       isBatterieMonitorEnabled = true;
     }
     else if(str.indexOf("GPS") >= 0)
@@ -105,7 +105,7 @@ void readLineDetails()
   }
   armed = readFloatSerial();
   MwAngle[0] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
-  MwAngle[1] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
+  MwAngle[1] = map(degrees(readFloatSerial()), 10, -10, -90, 90);
   MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
   MwVario = readFloatSerial();

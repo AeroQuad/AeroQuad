@@ -421,7 +421,7 @@ void displayHeadingGraph()
 
 void displayIntro()
 {
-  MAX7456_WriteString_P(message0, KVTeamVersionPosition+3);
+  MAX7456_WriteString_P(message0, KVTeamVersionPosition+5);
   
   MAX7456_WriteString_P(configMsg76, KVTeamVersionPosition+31);  // "VIDEO SYSTEM"
   if (Settings[S_VIDEOSIGNALTYPE]) {
