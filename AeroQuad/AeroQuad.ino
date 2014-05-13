@@ -780,7 +780,7 @@
 //********************************************************
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
-#if defined(HMC5843)
+#if defined(HMC5843) 
 //  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5843.h>
 #elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
@@ -929,9 +929,9 @@ void setup() {
   initSensorsZeroFromEEPROM();
   
   #ifdef HeadingMagHold
-    initializeMagnetometer();
     vehicleState |= HEADINGHOLD_ENABLED;
-    initializeKinematics(0.0, 0.0, -accelOneG, measuredMag[XAXIS], measuredMag[XAXIS], measuredMag[XAXIS]);
+    measureMagnetometer(0.0, 0.0);
+    initializeKinematics(0.0, 0.0, -accelOneG, measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS]);
   #else    
     initializeKinematics();
   #endif
