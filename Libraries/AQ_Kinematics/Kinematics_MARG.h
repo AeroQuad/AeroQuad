@@ -111,10 +111,6 @@ void initializeKinematics(float ax, float ay, float az, float mx, float my, floa
     q2q2 = q2 * q2;
     q2q3 = q2 * q3;
     q3q3 = q3 * q3;
-	
-	kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
-    kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
-    kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 }
 
 //====================================================================================================
@@ -207,13 +203,13 @@ void calculateKinematics(float gx, float gy, float gz,
 		// use un-extrapolated old values between magnetometer updates
 		// dubious as dT does not apply to the magnetometer calculation so
 		// time scaling is embedded in KpMag and KiMag
-		gx += exMag * 0.2;
-		gy += eyMag * 0.2;
-		gz += ezMag * 0.2;
+		gx += exMag * 0.002;
+		gy += eyMag * 0.002;
+		gz += ezMag * 0.002;
 
-		exMagInt += exMag * 0.0005;
-		eyMagInt += eyMag * 0.0005;
-		ezMagInt += ezMag * 0.0005;
+		exMagInt += exMag * 0.00005;
+		eyMagInt += eyMag * 0.00005;
+		ezMagInt += ezMag * 0.00005;
 
 		gx += exMagInt;
 		gy += eyMagInt;
@@ -253,16 +249,9 @@ void calculateKinematics(float gx, float gy, float gz,
 	kinematicsAngle[YAXIS] = -asin( 2.0f * (q1q3 - q0q2) );
 	trueNorthHeading = -atan2( 2.0f * (q1q2 + q0q3), q0q0 + q1q1 - q2q2 - q3q3 );
 
-	// can't explain the math, but it seem we have a bug in the heading, just an offset of about 50 degree!!!
-/*	trueNorthHeading = trueNorthHeading + radians(40); 
-	if (trueNorthHeading > M_PI)  {  // Angle normalization (-180 deg, 180 deg)
-		trueNorthHeading -= (2.0 * M_PI);
-	} 
-	else if (trueNorthHeading < -M_PI){
-		trueNorthHeading += (2.0 * M_PI);
-	}
-*/	
-	// ?!?!?!?!?!
+	kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
+    kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
+    kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 
 	#if defined UseGPS
 		if( compassDeclination != 0.0 ) {

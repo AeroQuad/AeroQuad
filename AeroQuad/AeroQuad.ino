@@ -930,6 +930,7 @@ void setup() {
   
   #ifdef HeadingMagHold
     vehicleState |= HEADINGHOLD_ENABLED;
+    initializeMagnetometer();
     measureMagnetometer(0.0, 0.0);
     initializeKinematics(0.0, 0.0, -accelOneG, measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS]);
   #else    
