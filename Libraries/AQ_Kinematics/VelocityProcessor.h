@@ -24,15 +24,15 @@
 #include "GlobalDefined.h"
 #include "FifteenFloatBuffer.h"
 
-//float timeConstantZ = 5.0;    
-//float k1_z = 3 / timeConstantZ;
-//float k2_z = 10 / (timeConstantZ*timeConstantZ);
-//float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
-
 float timeConstantZ = 5.0;    
 float k1_z = 3 / timeConstantZ;
-float k2_z = 3 / (timeConstantZ*timeConstantZ);
+float k2_z = 10 / (timeConstantZ*timeConstantZ);
 float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
+
+//float timeConstantZ = 5.0;    
+//float k1_z = 3 / timeConstantZ;
+//float k2_z = 3 / (timeConstantZ*timeConstantZ);
+//float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
 
 float computedZVelocity = 0.0;
 float currentComputedZVelocity = 0.0;

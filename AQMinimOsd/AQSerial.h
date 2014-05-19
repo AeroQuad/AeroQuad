@@ -108,7 +108,7 @@ void readLineDetails()
   MwAngle[1] = map(degrees(readFloatSerial()), 10, -10, -90, 90);
   MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
-  MwVario = readFloatSerial();
+  MwVario = readFloatSerial() * 100.0;
   int altitudeHoldState = readFloatSerial();
   MwRcData[0] = readFloatSerial();
   MwRcData[1] = readFloatSerial();

@@ -89,6 +89,8 @@
 #define BIT_I2C_IF_DIS          0x10
 #define BIT_INT_STATUS_DATA		0x01
 
+//#define USE_FS_2000DPS
+
 
 typedef struct {
   short x;
@@ -186,7 +188,11 @@ void initializeMPU6000Sensors()
 
   // FS & DLPF   FS=1000º/s, DLPF = 42Hz (low pass filter)
   MPU6000_WriteReg(MPUREG_CONFIG, BITS_DLPF_CFG_42HZ);
-  MPU6000_WriteReg(MPUREG_GYRO_CONFIG,BITS_FS_2000DPS);  // Gyro scale 1000º/s
+  #if defined(USE_FS_2000DPS)
+    MPU6000_WriteReg(MPUREG_GYRO_CONFIG,BITS_FS_2000DPS);  // Gyro scale 2000º/s
+  #else
+	MPU6000_WriteReg(MPUREG_GYRO_CONFIG,BITS_FS_1000DPS);  // Gyro scale 1000º/s
+  #endif
   MPU6000_WriteReg(MPUREG_ACCEL_CONFIG,0x08);   // Accel scale +-4g (4096LSB/g)
 
   // switch to high clock rate

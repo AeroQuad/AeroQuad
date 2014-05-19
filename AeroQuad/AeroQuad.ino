@@ -1010,29 +1010,18 @@ void process100HzTask() {
   #if defined (AltitudeHoldBaro)
     if (vehicleState & BARO_DETECTED)
     {
-      measureBaro();
-//    measureBaroSum();
+      measureBaroSum();
       #if defined USE_Z_DAMPENING
-        float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS]
-                                   + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS]
-                                   + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
+        float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
         computeVelocity(filteredZAccel, G_Dt);
       #endif
     
       if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-//      evaluateBaroAltitude();
-//        measureBaro();
-  
+        evaluateBaroAltitude();
+        estimatedAltitude = getBaroAltitude();
         #if defined USE_Z_DAMPENING      
-          computeVelocityErrorFromBaroAltitude(getBaroAltitude());
+          computeVelocityErrorFromBaroAltitude(estimatedAltitude);
           zVelocity = computedZVelocity;
-  
-          float estimatedBaroAltitude = filterSmooth(getBaroAltitude(), previousBaroAltitude, 0.01);
-          estimatedBaroAltitude = (estimatedBaroAltitude) + ((zVelocity / 100.0) / 50.0);
-          estimatedAltitude = filterSmooth(estimatedBaroAltitude, estimatedAltitude, 0.05);
-          previousBaroAltitude = getBaroAltitude();
-        #else
-          estimatedAltitude = getBaroAltitude();
         #endif 
       }
     }

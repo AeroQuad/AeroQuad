@@ -34,7 +34,8 @@
  * Calculate roll/pitch axis error with gyro/accel data to
  * compute motor command thrust so used command are executed
  */
-float gyroDesiredPosition[2] = {0.0,0.0}; 
+float gyroDesiredRollRate = 0.0;
+float gyroDesiredPitchRate = 0.0;
 void calculateFlightError()
 {
   
@@ -48,38 +49,36 @@ void calculateFlightError()
     else
   #endif
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
-    gyroDesiredPosition[XAXIS]  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    gyroDesiredPosition[YAXIS] = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    gyroDesiredRollRate  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+    gyroDesiredPitchRate = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
   }
   else if (flightMode == HORIZON_FLIGHT_MODE) {
     float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-    
-    // compute stick proportion ratiaux
     float rollAttitudeRatiaux = (500 - abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500)) / 500.0;
     float rollRateRatiaux = (receiverCommand[receiverChannelMap[XAXIS]] - 1500) / 500.0;
+    float rollGyroCommand = rollRateRatiaux * getReceiverSIData(XAXIS);
+    if (getReceiverSIData(XAXIS) < 0 && rollGyroCommand > 0) {
+      rollGyroCommand = -rollGyroCommand;
+    }
+    gyroDesiredRollRate = (rollAttitudeRatiaux * rollAttitudeCmd) + rollGyroCommand;
+    
+//    Serial.print(degrees(kinematicsAngle[XAXIS]));Serial.print(" ");Serial.println(degrees(kinematicsAngle[YAXIS]));
+    
+    float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
     float pitchAttitudeRatiaux = (500 - abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500)) / 500.0;
     float pitchRateRatiaux = (receiverCommand[receiverChannelMap[YAXIS]] - 1500) / 500.0;
-    
-    float gyroRollCommand = rollRateRatiaux * getReceiverSIData(XAXIS);
-    if (getReceiverSIData(XAXIS) < 0 && gyroRollCommand > 0) {
-      gyroRollCommand = -gyroRollCommand;
+    float pitchGyroCommand = pitchRateRatiaux * getReceiverSIData(YAXIS);
+    if (getReceiverSIData(YAXIS) < 0 && pitchGyroCommand > 0) {
+      pitchGyroCommand = -pitchGyroCommand;
     }
-    float gyroPitchCommand = pitchRateRatiaux * getReceiverSIData(YAXIS);
-    if (getReceiverSIData(YAXIS) < 0 && gyroPitchCommand > 0) {
-      gyroPitchCommand = -gyroPitchCommand;
-    }
-    
-    // apply ratiaux to different command
-    gyroDesiredPosition[XAXIS] = (rollAttitudeRatiaux * rollAttitudeCmd) + gyroRollCommand;
-    gyroDesiredPosition[YAXIS] = (pitchAttitudeRatiaux * pitchAttitudeCmd) + gyroPitchCommand;
+    gyroDesiredPitchRate = (pitchAttitudeRatiaux * pitchAttitudeCmd) + pitchGyroCommand;
   }
   else {
-    gyroDesiredPosition[XAXIS] = getReceiverSIData(XAXIS);
-    gyroDesiredPosition[YAXIS] = getReceiverSIData(YAXIS);
+    gyroDesiredRollRate = getReceiverSIData(XAXIS);
+    gyroDesiredPitchRate = getReceiverSIData(YAXIS);
   }
-  motorAxisCommandRoll = updatePID(gyroDesiredPosition[XAXIS], gyroRate[XAXIS] * stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
-  motorAxisCommandPitch = updatePID(gyroDesiredPosition[YAXIS], -gyroRate[YAXIS] * stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
+  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroRate[XAXIS] * stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
+  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroRate[YAXIS] * stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
 }
 
 /**
