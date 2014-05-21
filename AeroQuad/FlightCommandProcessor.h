@@ -255,16 +255,25 @@ void readPilotCommands() {
     }
   }
 
+  #if defined (HORIZON_MODE_AVAILABLE)
     // Check Mode switch for Acro or Stable
     if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
-        flightMode = ATTITUDE_FLIGHT_MODE;
+      flightMode = ATTITUDE_FLIGHT_MODE;
     }
     else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
-        flightMode = HORIZON_FLIGHT_MODE;
+      flightMode = HORIZON_FLIGHT_MODE;
     }
     else {
-        flightMode = RATE_FLIGHT_MODE;
+      flightMode = RATE_FLIGHT_MODE;
     }
+  #else
+    if (receiverCommand[receiverChannelMap[MODE]] > 1500) {
+      flightMode = ATTITUDE_FLIGHT_MODE;
+    }
+    else {
+      flightMode = RATE_FLIGHT_MODE;
+    }
+  #endif
     
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     processAltitudeHoldStateFromReceiverCommand();

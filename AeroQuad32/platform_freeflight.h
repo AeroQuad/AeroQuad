@@ -1,16 +1,6 @@
 #ifndef _PLATFORM_FREEFLIGHT_H_
 #define _PLATFORM_FREEFLIGHT_H_
 
-/*static byte stm32_motor_mapping[] = {
-	Port2Pin('B',  6),
-	Port2Pin('B',  7),
-	Port2Pin('B',  8),
-	Port2Pin('B',  9),
-	Port2Pin('A',  8),
-	Port2Pin('A', 11)
-};
-*/
-
 #define STM32_BOARD_TYPE "Free Flight"
 #define LED_Green  Port2Pin('B', 4)
 #define LED_Red    Port2Pin('B', 3)
@@ -35,7 +25,6 @@
 #ifdef AltitudeHoldBaro
   #define USE_MS5611_ALTERNATE_ADDRESS
   #define MS5611
-  #define USE_Z_DAMPENING
 #endif
 
 // Battery Monitor declaration
@@ -68,7 +57,7 @@ void initPlatform() {
 
   // I2C setup
   Wire.begin(Port2Pin('B', 11), Port2Pin('B', 10)); // I2C1_SDA PB11, I2C1_SCL PB10
-
+  
   switch (flightConfigType) 
   {
     case HEX_Y6 :

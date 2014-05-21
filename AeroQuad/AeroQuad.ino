@@ -32,7 +32,12 @@
 // Define Security Checks
 //
 
+#if defined (Naze32)
+  #defined AeroQuadSTM32
+#endif
+
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
+  #define HORIZON_MODE_AVAILABLE
   #define HeadingMagHold		
   #define AltitudeHoldBaro		
 
@@ -618,7 +623,6 @@
   #ifdef AltitudeHoldBaro
     #define MS5611
     #define USE_MS5611_ALTERNATE_ADDRESS
-    #define USE_Z_DAMPENING
   #endif
   #ifdef AltitudeHoldRangeFinder
     #define XLMAXSONAR 
@@ -794,6 +798,7 @@
 //********************************************************
 #if defined(BMP085)
   #include <BarometricSensor_BMP085.h>
+  #include <VelocityProcessor.h>
 #elif defined(MS5611)
  #include <BarometricSensor_MS5611.h>
  #include <VelocityProcessor.h>
@@ -1011,18 +1016,14 @@ void process100HzTask() {
     if (vehicleState & BARO_DETECTED)
     {
       measureBaroSum();
-      #if defined USE_Z_DAMPENING
-        float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
-        computeVelocity(filteredZAccel, G_Dt);
-      #endif
+      float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
+      computeVelocity(filteredZAccel, G_Dt);
     
       if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
         evaluateBaroAltitude();
         estimatedAltitude = getBaroAltitude();
-        #if defined USE_Z_DAMPENING      
-          computeVelocityErrorFromBaroAltitude(estimatedAltitude);
-          zVelocity = computedZVelocity;
-        #endif 
+        computeVelocityErrorFromBaroAltitude(estimatedAltitude);
+        zVelocity = computedZVelocity;
       }
     }
   #endif

@@ -25,7 +25,7 @@
 #include <Accelerometer.h>
 
 void initializeAccel() {
-//  initializeMPU6000Sensors();
+
 }
 
 

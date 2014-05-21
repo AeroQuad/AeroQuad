@@ -35,12 +35,11 @@
 // Altitude declaration
 #ifdef AltitudeHoldBaro
   #define MS5611
-  #define USE_Z_DAMPENING
 #endif
 
-#ifdef AltitudeHoldRangeFinder
-  #define XLMAXSONAR
-#endif
+//#ifdef AltitudeHoldRangeFinder
+//  #define XLMAXSONAR
+//#endif
 
 // Battery Monitor declaration
 #ifdef BattMonitor
@@ -89,8 +88,6 @@ void initPlatform() {
   // I2C setup
   Wire.begin(Port2Pin('B', 7), Port2Pin('B', 6)); // I2C1_SDA PB7, I2C1_SCL PB6
 
-  initializeMPU6000Sensors();
-  
   #if !defined(USE_USB_SERIAL)
     SerialUSB.begin();
   #endif

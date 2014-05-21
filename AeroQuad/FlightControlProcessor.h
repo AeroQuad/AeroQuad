@@ -52,28 +52,30 @@ void calculateFlightError()
     gyroDesiredRollRate  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
     gyroDesiredPitchRate = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
   }
-  else if (flightMode == HORIZON_FLIGHT_MODE) {
-    float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    float rollAttitudeRatiaux = (500 - abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500)) / 500.0;
-    float rollRateRatiaux = (receiverCommand[receiverChannelMap[XAXIS]] - 1500) / 500.0;
-    float rollGyroCommand = rollRateRatiaux * getReceiverSIData(XAXIS);
-    if (getReceiverSIData(XAXIS) < 0 && rollGyroCommand > 0) {
-      rollGyroCommand = -rollGyroCommand;
+  #if defined (HORIZON_MODE_AVAILABLE)
+    else if (flightMode == HORIZON_FLIGHT_MODE) {
+      
+      float rollRateRatiaux = (abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500) - 250) * 100.0 / 250.0;
+      float pitchRateRatiaux = (abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500) - 250) * 100.0 / 250.0;
+      float rateRatiaux = constrain(max(rollRateRatiaux,pitchRateRatiaux), 0, 250.0);
+      float attitudeRatiaux = 100.0 - rateRatiaux;
+      
+      float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float rollGyroCommand = rateRatiaux * getReceiverSIData(XAXIS);
+      if (getReceiverSIData(XAXIS) < 0 && rollGyroCommand > 0) {
+        rollGyroCommand = -rollGyroCommand;
+      }
+      gyroDesiredRollRate = (attitudeRatiaux * rollAttitudeCmd) + rollGyroCommand;
+  
+      float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      float pitchGyroCommand = rateRatiaux * getReceiverSIData(YAXIS);
+      if (getReceiverSIData(YAXIS) < 0 && pitchGyroCommand > 0) {
+        pitchGyroCommand = -pitchGyroCommand;
+      }
+      gyroDesiredPitchRate = (attitudeRatiaux * pitchAttitudeCmd) + pitchGyroCommand;
     }
-    gyroDesiredRollRate = (rollAttitudeRatiaux * rollAttitudeCmd) + rollGyroCommand;
-    
-//    Serial.print(degrees(kinematicsAngle[XAXIS]));Serial.print(" ");Serial.println(degrees(kinematicsAngle[YAXIS]));
-    
-    float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-    float pitchAttitudeRatiaux = (500 - abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500)) / 500.0;
-    float pitchRateRatiaux = (receiverCommand[receiverChannelMap[YAXIS]] - 1500) / 500.0;
-    float pitchGyroCommand = pitchRateRatiaux * getReceiverSIData(YAXIS);
-    if (getReceiverSIData(YAXIS) < 0 && pitchGyroCommand > 0) {
-      pitchGyroCommand = -pitchGyroCommand;
-    }
-    gyroDesiredPitchRate = (pitchAttitudeRatiaux * pitchAttitudeCmd) + pitchGyroCommand;
-  }
-  else {
+  #endif
+  else {  // simp
     gyroDesiredRollRate = getReceiverSIData(XAXIS);
     gyroDesiredPitchRate = getReceiverSIData(YAXIS);
   }
