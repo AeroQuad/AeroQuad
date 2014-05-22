@@ -915,9 +915,7 @@ void setup() {
   }
   
   initPlatform();
-  
   initializeMotors(LASTMOTOR);
-
   (*initializeReceiver[receiverTypeUsed])();
   
   // Initialize sensors
@@ -983,6 +981,11 @@ void setup() {
   #ifdef SlowTelemetry
      initSlowTelemetry();
   #endif
+  
+  userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+  userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+  userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+  userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);

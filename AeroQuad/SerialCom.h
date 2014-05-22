@@ -76,6 +76,7 @@ void readSerialCommand() {
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
       stickScalingFactor = readFloatSerial();
+      throttlePIDAdjustmentFactor = readFloatSerial();
       writeEEPROM();
       break;
 
@@ -350,6 +351,7 @@ void sendSerialTelemetry() {
       PrintPID(RATE_XAXIS_PID_IDX);
       PrintPID(RATE_YAXIS_PID_IDX);
       PrintValueComma(stickScalingFactor);
+      PrintValueComma(throttlePIDAdjustmentFactor);
       SERIAL_PRINTLN();
       queryType = 'X';
       break;

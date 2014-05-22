@@ -75,6 +75,12 @@ float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
 float stickScalingFactor = 1.0;
 
+float userRateRollP = 0.0;
+float userRateRollD = 0.0;
+float userRatePitchP = 0.0;
+float userRatePitchD = 0.0;
+int throttlePIDAdjustmentFactor = 0.0;
+
 // main loop time variable
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
@@ -259,6 +265,7 @@ typedef struct {
   
   // Gyro calibration
   float ROTATION_SPEED_FACTOR_ARD;
+  float THROTTLE_PID_ADJUSTMENT_ADR;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
   float XAXIS_ACCEL_SCALE_FACTOR_ADR;

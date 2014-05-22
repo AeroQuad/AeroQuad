@@ -267,7 +267,7 @@ void readPilotCommands() {
       flightMode = RATE_FLIGHT_MODE;
     }
   #else
-    if (receiverCommand[receiverChannelMap[MODE]] > 1500) {
+    if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
       flightMode = ATTITUDE_FLIGHT_MODE;
     }
     else {

@@ -28,6 +28,17 @@
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
 
 
+void processThrottlePIDAdjustment() 
+{
+  float throttleAdjustmentPercentage = (500 - (2000 - receiverCommand[receiverChannelMap[THROTTLE]])) * 0.2;
+  throttleAdjustmentPercentage = throttleAdjustmentPercentage < 0 ? 0 : throttleAdjustmentPercentage;
+  float pidPercentToRemove = throttleAdjustmentPercentage * throttlePIDAdjustmentFactor / 100.0;
+  PID[RATE_XAXIS_PID_IDX].P = userRateRollP - (pidPercentToRemove * userRateRollP / 100.0);
+  PID[RATE_XAXIS_PID_IDX].D = userRateRollD - (pidPercentToRemove * userRateRollD / 100.0);
+  PID[RATE_YAXIS_PID_IDX].P = userRatePitchP - (pidPercentToRemove * userRatePitchP / 100.0);
+  PID[RATE_YAXIS_PID_IDX].D = userRatePitchD - (pidPercentToRemove * userRatePitchD / 100.0);
+}
+
 /**
  * calculateFlightError
  *
@@ -38,7 +49,6 @@ float gyroDesiredRollRate = 0.0;
 float gyroDesiredPitchRate = 0.0;
 void calculateFlightError()
 {
-  
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
       float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
@@ -79,6 +89,9 @@ void calculateFlightError()
     gyroDesiredRollRate = getReceiverSIData(XAXIS);
     gyroDesiredPitchRate = getReceiverSIData(YAXIS);
   }
+  
+  processThrottlePIDAdjustment();
+  
   motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroRate[XAXIS] * stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
   motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroRate[YAXIS] * stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
 }

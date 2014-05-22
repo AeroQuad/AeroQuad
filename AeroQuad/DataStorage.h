@@ -141,6 +141,7 @@ void initializeEEPROM() {
   PID[HEADING_HOLD_PID_IDX].I = 0.1;
   PID[HEADING_HOLD_PID_IDX].D = 0.0;
   stickScalingFactor = 1.0;
+  throttlePIDAdjustmentFactor = 0.0;
   
   receiverTypeUsed = RECEIVER_PWM;
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -261,6 +262,7 @@ void readEEPROM() {
   readPID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
 
   stickScalingFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  throttlePIDAdjustmentFactor = readFloat(THROTTLE_PID_ADJUSTMENT_ADR);
   
   receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -351,6 +353,7 @@ void writeEEPROM(){
   writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   
   writeFloat(stickScalingFactor, ROTATION_SPEED_FACTOR_ARD);
+  writeFloat(throttlePIDAdjustmentFactor, THROTTLE_PID_ADJUSTMENT_ADR);
   
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
