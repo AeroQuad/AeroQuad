@@ -65,24 +65,24 @@ void calculateFlightError()
   #if defined (HORIZON_MODE_AVAILABLE)
     else if (flightMode == HORIZON_FLIGHT_MODE) {
       
-      float rollRateRatiaux = (abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500) - 250) * 100.0 / 250.0;
-      float pitchRateRatiaux = (abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500) - 250) * 100.0 / 250.0;
-      float rateRatiaux = constrain(max(rollRateRatiaux,pitchRateRatiaux), 0, 250.0);
-      float attitudeRatiaux = 100.0 - rateRatiaux;
+      float rollRateRatiaux = (abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500) - 250) * 0.4;
+      float pitchRateRatiaux = (abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500) - 250) * 0.4;
+      float rateRatiaux = constrain(max(rollRateRatiaux,pitchRateRatiaux), 0, 250.0) / 100.0;
+      float attitudeRatiaux = 1.0 - rateRatiaux;
       
       float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float rollGyroCommand = rateRatiaux * getReceiverSIData(XAXIS);
-      if (getReceiverSIData(XAXIS) < 0 && rollGyroCommand > 0) {
-        rollGyroCommand = -rollGyroCommand;
+      float rollRateCommand = rateRatiaux * getReceiverSIData(XAXIS);
+      if (getReceiverSIData(XAXIS) < 0 && rollRateCommand > 0) {
+        rollRateCommand = -rollRateCommand;
       }
-      gyroDesiredRollRate = (attitudeRatiaux * rollAttitudeCmd) + rollGyroCommand;
+      gyroDesiredRollRate = (attitudeRatiaux * rollAttitudeCmd) + rollRateCommand;
   
       float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-      float pitchGyroCommand = rateRatiaux * getReceiverSIData(YAXIS);
-      if (getReceiverSIData(YAXIS) < 0 && pitchGyroCommand > 0) {
-        pitchGyroCommand = -pitchGyroCommand;
+      float pitchRateCommand = rateRatiaux * getReceiverSIData(YAXIS);
+      if (getReceiverSIData(YAXIS) < 0 && pitchRateCommand > 0) {
+        pitchRateCommand = -pitchRateCommand;
       }
-      gyroDesiredPitchRate = (attitudeRatiaux * pitchAttitudeCmd) + pitchGyroCommand;
+      gyroDesiredPitchRate = (attitudeRatiaux * pitchAttitudeCmd) + pitchRateCommand;
     }
   #endif
   else {  // simp

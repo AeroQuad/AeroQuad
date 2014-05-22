@@ -75,6 +75,10 @@ void readSerialCommand() {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
+      userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+      userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+      userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+      userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
       stickScalingFactor = readFloatSerial();
       throttlePIDAdjustmentFactor = readFloatSerial();
       writeEEPROM();
