@@ -89,7 +89,7 @@
 #define BIT_I2C_IF_DIS          0x10
 #define BIT_INT_STATUS_DATA		0x01
 
-//#define USE_FS_2000DPS
+#define USE_FS_2000DPS
 
 
 typedef struct {

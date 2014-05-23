@@ -50,7 +50,7 @@ void readBoardConfig()
   while(true)
   {
     String str = "";
-    str.reserve(200);  
+    str.reserve(500);  
     str = Serial.readStringUntil(';');
 
     if (str == "Barometer: Detected") {
@@ -64,9 +64,6 @@ void readBoardConfig()
     }
     else if(str.indexOf("GPS") >= 0)
     {
-//      if(str.indexOf("Not") < 0) {
-//        isGpsEnabled = true;
-//      }
       return;
     }
     
