@@ -41,8 +41,6 @@
 #define ON 1
 #define OFF 0
 
-#define ALTPANIC 2
-
 typedef void (*functionPtr)();
 typedef int  (*intFunctionPtrByte)(byte);
 

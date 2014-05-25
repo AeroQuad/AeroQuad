@@ -28,47 +28,66 @@
 
 
 #if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
-  boolean isPositionHoldEnabledByUser() {
+  boolean isAltitudeHoldEnabledByUser() {
     if (!(vehicleState & BARO_DETECTED)) {
       return false;
     }
     #if defined (UseGPSNavigator)
-      if ((receiverCommand[receiverChannelMap[AUX1]] < 1750) || (receiverCommand[receiverChannelMap[AUX2]] < 1750)) {
+      if ((receiverCommand[receiverChannelMap[AUX1]] < 1666) || (receiverCommand[receiverChannelMap[AUX2]] < 1666)) {
         return true;
       }
       return false;
     #else
-      if (receiverCommand[receiverChannelMap[AUX1]] < 1750) {
+      if (receiverCommand[receiverChannelMap[AUX1]] < 1666) {
         return true;
       }
       return false;
     #endif
   }
-#endif
+  
+  boolean isVelocityHoldStateEnabledByUser() {
 
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    if (!(vehicleState & BARO_DETECTED)) {
+      if (receiverCommand[receiverChannelMap[AUX1]] < 1666) {
+        return true;
+      }
+      return false;
+    }
+    else if (receiverCommand[receiverChannelMap[AUX1]] > 1333 && receiverCommand[receiverChannelMap[AUX1]] < 1666 ) {
+      return true;
+    }
+    return false;
+  }
+  
   void processAltitudeHoldStateFromReceiverCommand() {
-    if (isPositionHoldEnabledByUser()) {
+    
+    if (isVelocityHoldStateEnabledByUser()) {
       if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-        if (!isAltitudeHoldInitialized) {
-          #if defined AltitudeHoldBaro
-            baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
-          #endif
-          #if defined AltitudeHoldRangeFinder
-            sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
-          #endif
+        if (!isVelocityHoldInitialisez) {
+          baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
+          PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
-          isAltitudeHoldInitialized = true;
+          isAltitudeHoldInitialized = false;
+          isVelocityHoldInitialisez = true;
         }
-        altitudeHoldState = ON;
+        altitudeHoldState = VELOCITY_HOLD_STATE;
       }
     } 
+    else if (isAltitudeHoldEnabledByUser()) {
+      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+        if (!isAltitudeHoldInitialized) {
+          baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
+          PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
+          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
+          isAltitudeHoldInitialized = true;
+          isVelocityHoldInitialisez = false;
+        }
+        altitudeHoldState = ALTITUDE_HOLD_STATE;
+      }
+    }
     else {
       isAltitudeHoldInitialized = false;
+      isVelocityHoldInitialisez = false;
       altitudeHoldState = OFF;
     }
   }

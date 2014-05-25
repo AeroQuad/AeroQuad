@@ -161,7 +161,11 @@ void reportVehicleState();
  * Altitude control global declaration
  */
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
- // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+ 
+  #define ALTITUDE_HOLD_STATE 1
+  #define VELOCITY_HOLD_STATE 2
+  #define ALTPANIC 3
   byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
@@ -169,6 +173,7 @@ void reportVehicleState();
   int maxThrottleAdjust = 50;
   int altitudeHoldThrottle = 1000;
   boolean isAltitudeHoldInitialized = false;
+  boolean isVelocityHoldInitialisez = false;
   
   float zVelocity = 0.0;
   float estimatedAltitude = 0.0;

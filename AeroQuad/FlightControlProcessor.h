@@ -328,7 +328,7 @@ void processFlightControl() {
     
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      processAltitudeHold();
+      processAltitudeControl();
     #else
       throttle = receiverCommand[receiverChannelMap[THROTTLE]];
     #endif
