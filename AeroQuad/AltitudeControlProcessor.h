@@ -24,17 +24,15 @@
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-
-
-
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
 
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 
-#define INVALID_THROTTLE_CORRECTION -1000
-#define ALTITUDE_BUMP_SPEED 0.01
+
+#define ALTITUDE_BUMP_SPEED 0.02
+#define MAX_MIN_ZVELOCITY 200
 
 float previousZDampeningThrottleCorrection = 0.0;
 
@@ -49,11 +47,11 @@ void processAltitudeHold()
   }
 
   float altitudeHoldThrottleCorrection = updatePID(baroAltitudeToHoldTarget, estimatedAltitude, &PID[BARO_ALTITUDE_HOLD_PID_IDX]);
-  altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+  altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, -400, 400);
   
   // ZDAMPENING COMPUTATIONS
-  float zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocity, &PID[ZDAMPENING_PID_IDX]);
-  zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);      
+  float zVelocityToReached = constrain(zVelocity, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
+  float zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
   
   throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
 }
@@ -61,10 +59,10 @@ void processAltitudeHold()
 void processVelocityHold()
 {
   int userVelocityCommand = (receiverCommand[receiverChannelMap[THROTTLE]] - altitudeHoldThrottle) / 2;
-  userVelocityCommand = constrain(userVelocityCommand, -100, 100);
+  userVelocityCommand = constrain(userVelocityCommand, -200, 200);
   
-  float zDampeningThrottleCorrection = updatePID(userVelocityCommand, zVelocity, &PID[ZDAMPENING_PID_IDX]);
-  zDampeningThrottleCorrection = constrain(zDampeningThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);      
+  float zVelocityToReached = constrain(zVelocity, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
+  float zDampeningThrottleCorrection = updatePID(userVelocityCommand, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
   
   throttle = altitudeHoldThrottle + zDampeningThrottleCorrection;
 }

@@ -102,8 +102,6 @@ void readSerialCommand() {
           readFloatSerial();
           altitudeHoldBump = readFloatSerial();
           altitudeHoldPanicStickMovement = readFloatSerial();
-          minThrottleAdjust = readFloatSerial();
-          maxThrottleAdjust = readFloatSerial();
           #if defined AltitudeHoldBaro
             baroSmoothFactor = readFloatSerial();
           #else
@@ -380,8 +378,6 @@ void sendSerialTelemetry() {
         PrintValueComma(0);
         PrintValueComma(altitudeHoldBump);
         PrintValueComma(altitudeHoldPanicStickMovement);
-        PrintValueComma(minThrottleAdjust);
-        PrintValueComma(maxThrottleAdjust);
         #if defined AltitudeHoldBaro
           PrintValueComma(baroSmoothFactor);
         #else

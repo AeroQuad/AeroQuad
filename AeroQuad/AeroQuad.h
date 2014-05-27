@@ -169,8 +169,6 @@ void reportVehicleState();
   byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
-  int minThrottleAdjust = -50;
-  int maxThrottleAdjust = 50;
   int altitudeHoldThrottle = 1000;
   boolean isAltitudeHoldInitialized = false;
   boolean isVelocityHoldInitialisez = false;
@@ -301,8 +299,6 @@ typedef struct {
   
   // Baro
   #if defined (AltitudeHoldBaro)
-    float ALTITUDE_MAX_THROTTLE_ADR;
-    float ALTITUDE_MIN_THROTTLE_ADR;
     float ALTITUDE_SMOOTH_ADR;
     float ALTITUDE_BUMP_ADR;
     float ALTITUDE_PANIC_ADR;

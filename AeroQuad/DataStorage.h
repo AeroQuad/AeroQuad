@@ -163,12 +163,12 @@ void initializeEEPROM() {
   storeSensorsZeroToEEPROM();
 
   #if defined (AltitudeHoldBaro)
-    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 50.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 75.0;
     PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.0;
     PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-    PID[ZDAMPENING_PID_IDX].P = 2.0;
+    PID[ZDAMPENING_PID_IDX].P = 6.0;
     PID[ZDAMPENING_PID_IDX].I = 0.0;
-    PID[ZDAMPENING_PID_IDX].D = 0.1;
+    PID[ZDAMPENING_PID_IDX].D = 0.0;
   #endif
   #if defined (AltitudeHoldRangeFinder)
     PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
@@ -178,13 +178,11 @@ void initializeEEPROM() {
 
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-    minThrottleAdjust = -200.0;
-    maxThrottleAdjust = 200.0; //we don't want it to be able to take over totally
     #if defined AltitudeHoldBaro
-      baroSmoothFactor = 0.1;
+      baroSmoothFactor = 0.07;
     #endif
-    altitudeHoldBump = 90;
-    altitudeHoldPanicStickMovement = 250;
+    altitudeHoldBump = 30;
+    altitudeHoldPanicStickMovement = 300;
   #endif
   
   initializePlatformSpecificAccelCalibration();
@@ -285,8 +283,6 @@ void readEEPROM() {
     #endif  
     altitudeHoldBump = readFloat(ALTITUDE_BUMP_ADR);
     altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
-    minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
-    maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
     readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
 
@@ -378,8 +374,6 @@ void writeEEPROM(){
     #endif
     writeFloat(altitudeHoldBump, ALTITUDE_BUMP_ADR);
     writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
-    writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
-    writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
     writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
   
