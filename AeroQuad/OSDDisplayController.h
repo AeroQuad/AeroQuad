@@ -42,8 +42,8 @@ void updateOSD() {
     if (OSDsched&0x55) {
       byte extendedFlightMode = flightMode;
       #if defined UseGPSNavigator
-        if (ON == positionHoldState) extendedFlightMode = 2;
-        if (ON == navigationState) extendedFlightMode = 3;
+        if (autoPilotState == POSITION_HOLD) extendedFlightMode = 2;
+        if (autoPilotState == AUTO_NAVIGATION) extendedFlightMode = 3;
       #endif
       displayArtificialHorizon(kinematicsAngle[XAXIS], kinematicsAngle[YAXIS], extendedFlightMode);
     }

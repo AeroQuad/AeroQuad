@@ -48,7 +48,7 @@ enum {
 };
 
 
-#define GPS_INVALID_POSITION {GPS_INVALID_ANGLE, GPS_INVALID_ANGLE, 0}
+#define GPS_INVALID_POSITION {GPS_INVALID_ANGLE, GPS_INVALID_ANGLE, GPS_INVALID_ALTITUDE}
 
 struct GeodeticPosition {
   long latitude;
@@ -70,6 +70,7 @@ struct gpsData {
     uint8_t  baudrate; // current baudrate (index) - used by autodetection
     uint8_t  type;     // current type - used by autodetection
     uint32_t idlecount; // how many times gpsUpdate has been called without getting a valid message
+    int32_t  velN,velE,velD; // cm/s
 };
 
 struct gpsConfigEntry {

@@ -381,7 +381,7 @@ typedef struct {
   float SERVOMAXYAW_ADR;
   float SERVOTXCHANNELS_ADR;
   // GPS mission storing
-  float GPS_MISSION_NB_POINT_ADR;
+  float GPS_WAYPOINT_COUNT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
 } t_NVR_Data;  
 

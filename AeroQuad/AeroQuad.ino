@@ -32,7 +32,7 @@
 // Define Security Checks
 //
 
-#if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406)
+#if defined(UseGPSNMEA) || defined(UseGPSUBLOX) || defined(UseGPSMTK) || defined(UseGPS406) || defined(UseGPSNavigator)
  #define UseGPS
 #endif 
 
@@ -1251,13 +1251,7 @@
     #define SERIAL_PORT Serial
   #endif
 #else  
-  #if defined(SERIAL_USES_USB)   // STM32 Maple
-    #define SERIAL_PORT SerialUSB
-    #undef BAUD
-    #define BAUD
-  #else
     #define SERIAL_PORT Serial
-  #endif
 #endif  
 
 #ifdef SlowTelemetry
@@ -1281,6 +1275,7 @@
 #endif  
 
 #if defined(MavLink)
+  #include "GCS_MAVLink.h"
   #include "MavLink.h"
 #else
   #include "SerialCom.h"

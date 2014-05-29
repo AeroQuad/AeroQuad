@@ -1,12 +1,10 @@
 #ifndef WProgram_h
 	#define WProgram_h
-	//#define USE_USB_SERIAL
-
 
 	extern void setup();
 	extern void loop();
 
-        #include <stdint.h>
+    #include <stdint.h>
 	#include <stdlib.h>
 	#include <string.h>
 	#include <math.h>
@@ -16,9 +14,9 @@
 	#define sei()     nvic_globalirq_enable()
 
 	#ifdef __cplusplus
-	  #ifdef BOARD_freeflight
-	    #undef USE_USB_SERIAL
-	  #endif
+		#ifdef BOARD_freeflight
+			#undef USE_USB_SERIAL
+		#endif
 		#ifdef USE_USB_SERIAL
 			#define SERIAL_VAR SerialUSB
 			typedef USBSerial tSerial;

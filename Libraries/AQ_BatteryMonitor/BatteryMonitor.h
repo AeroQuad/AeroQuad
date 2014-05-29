@@ -73,8 +73,11 @@ byte batteryGetCellCount(byte batNo) {
   else if (batteryData[batNo].voltage < 860) {
     return 2;
   }
-  else {
+  else if (batteryData[batNo].voltage < 1300) {
     return 3;
+  }
+  else {
+	return 4;
   }
 }
 
