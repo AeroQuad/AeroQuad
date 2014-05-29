@@ -225,86 +225,86 @@ void readSBUS()
 {
     static byte sbus[25] = {0};
     while(SERIAL_SBUS.available()) {
-		if(SERIAL_SBUS.available() > 124) { //input buffer is backed up and may cause lag - dump it to get back on track - set to 5 packets
-			while(SERIAL_SBUS.available()) SERIAL_SBUS.read();//dump the input buffer
-			sbusIndex = 0; //clear the packet buffer
-		}
-		else 
-		{
-			int val = SERIAL_SBUS.read();
-			if(sbusIndex == 0 && val != SBUS_SYNCBYTE) {
-				continue;
-			}
-			
-			sbus[sbusIndex] = val;
-			
-			if (sbusIndex == sbusPacketLength) { //we have a full packet
-				
-				if (val != SBUS_ENDBYTE) { //out of sync incorrect end byte
-					int shiftIndex = 0;
-					
-					for(int i=1;i<=sbusIndex;i++){ // start at array pos 2 because we already know the byte at pos 1 is a syncByte
-						if(sbus[i] == SBUS_SYNCBYTE){
-							shiftIndex = i;
-							break; //we have the location of the next SYNCBYTE
-						}
-					}
+        if(SERIAL_SBUS.available() > 124) { //input buffer is backed up and may cause lag - dump it to get back on track - set to 5 packets
+            while(SERIAL_SBUS.available()) SERIAL_SBUS.read();//dump the input buffer
+            sbusIndex = 0; //clear the packet buffer
+        }
+        else 
+        {
+            int val = SERIAL_SBUS.read();
+            if(sbusIndex == 0 && val != SBUS_SYNCBYTE) {
+                continue;
+            }
+            
+            sbus[sbusIndex] = val;
+            
+            if (sbusIndex == sbusPacketLength) { //we have a full packet
+                
+                if (val != SBUS_ENDBYTE) { //out of sync incorrect end byte
+                    int shiftIndex = 0;
+                    
+                    for(int i=1;i<=sbusIndex;i++){ // start at array pos 2 because we already know the byte at pos 1 is a syncByte
+                        if(sbus[i] == SBUS_SYNCBYTE){
+                            shiftIndex = i;
+                            break; //we have the location of the next SYNCBYTE
+                        }
+                    }
 
 
-					if(shiftIndex != 0) { //the start of a packet was found in the middle of the bad packet
-						//shift everything by the value of -shiftIndex
-						for(int i=0;i<=sbusPacketLength-shiftIndex;i++){
-							sbus[i] = sbus[i+shiftIndex];
-						}
+                    if(shiftIndex != 0) { //the start of a packet was found in the middle of the bad packet
+                        //shift everything by the value of -shiftIndex
+                        for(int i=0;i<=sbusPacketLength-shiftIndex;i++){
+                            sbus[i] = sbus[i+shiftIndex];
+                        }
 
 
-						//reset the sbusIndex to the next location
-						sbusIndex = sbusIndex - shiftIndex;
-						sbusIndex++;
-					}
-					else { //no packet start was found in the middle of the bad packet
-						sbusIndex = 0; //clear the packet buffer
-					}
-				
-				}
-				else 
-				{ //everything is OK as my end byte and sync byte are correct
-					rawChannelValue[XAXIS]      = ((sbus[1]     | sbus[2]<<8)  & 0x07FF);					// pitch
-					rawChannelValue[YAXIS]      = ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);					// roll
-					rawChannelValue[THROTTLE]   = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);	// throttle
-					rawChannelValue[ZAXIS]      = ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);					// yaw
-					rawChannelValue[MODE]       = ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
-					rawChannelValue[AUX1]       = ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
-					rawChannelValue[AUX2]       = ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
-					rawChannelValue[AUX3]       = ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
-					rawChannelValue[AUX4]       = ((sbus[12]    | sbus[13]<<8) & 0x07FF);
-					rawChannelValue[AUX5]       = ((sbus[13]>>3 | sbus[14]<<5) & 0x07FF);
-					//rawChannelValue[AUX6]		= ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
-					//rawChannelValue[AUX7]		= ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
-					
-					
-					if (useSbusRSSIReader) {
-						if (sbusRate == 0) {
-							sbusFrameCount++;
-						}
-						if (((sbus[23] >> 3) & 0x0001)) {
-							if ((sbusRate > 0) && (sbusFailSafeCount < sbusRate)) {
-								sbusFailSafeCount++;
-							}
-						} else if (sbusFailSafeCount > 0) {
-							sbusFailSafeCount--;
-						}
-					}	
-				
-					sbusIndex = 0; //clear the packet buffer
-					
-				}
-			}			
-			else 
-			{ //we have a partial packet - keep calm and carry on
-				sbusIndex++;
-			}
-		}
+                        //reset the sbusIndex to the next location
+                        sbusIndex = sbusIndex - shiftIndex;
+                        sbusIndex++;
+                    }
+                    else { //no packet start was found in the middle of the bad packet
+                        sbusIndex = 0; //clear the packet buffer
+                    }
+                
+                }
+                else 
+                { //everything is OK as my end byte and sync byte are correct
+                    rawChannelValue[XAXIS]      = ((sbus[1]     | sbus[2]<<8)  & 0x07FF);                    // pitch
+                    rawChannelValue[YAXIS]      = ((sbus[2]>>3  | sbus[3]<<5)  & 0x07FF);                    // roll
+                    rawChannelValue[THROTTLE]   = ((sbus[3]>>6  | sbus[4]<<2   | sbus[5]<<10) & 0x07FF);    // throttle
+                    rawChannelValue[ZAXIS]      = ((sbus[5]>>1  | sbus[6]<<7)  & 0x07FF);                    // yaw
+                    rawChannelValue[MODE]       = ((sbus[6]>>4  | sbus[7]<<4)  & 0x07FF);
+                    rawChannelValue[AUX1]       = ((sbus[7]>>7  | sbus[8]<<1   | sbus[9]<<9) & 0x07FF);
+                    rawChannelValue[AUX2]       = ((sbus[9]>>2  | sbus[10]<<6) & 0x07FF);
+                    rawChannelValue[AUX3]       = ((sbus[10]>>5 | sbus[11]<<3) & 0x07FF);
+                    rawChannelValue[AUX4]       = ((sbus[12]    | sbus[13]<<8) & 0x07FF);
+                    rawChannelValue[AUX5]       = ((sbus[13]>>3 | sbus[14]<<5) & 0x07FF);
+                    //rawChannelValue[AUX6]        = ((sbus[14]>>6 | sbus[15]<<2|sbus[16]<<10) & 0x07FF);
+                    //rawChannelValue[AUX7]        = ((sbus[16]>>1 | sbus[17]<<7) & 0x07FF);
+                    
+                    
+                    if (useSbusRSSIReader) {
+                        if (sbusRate == 0) {
+                            sbusFrameCount++;
+                        }
+                        if (((sbus[23] >> 3) & 0x0001)) {
+                            if ((sbusRate > 0) && (sbusFailSafeCount < sbusRate)) {
+                                sbusFailSafeCount++;
+                            }
+                        } else if (sbusFailSafeCount > 0) {
+                            sbusFailSafeCount--;
+                        }
+                    }    
+                
+                    sbusIndex = 0; //clear the packet buffer
+                    
+                }
+            }            
+            else 
+            { //we have a partial packet - keep calm and carry on
+                sbusIndex++;
+            }
+        }
     }
 }
 
