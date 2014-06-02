@@ -33,7 +33,7 @@
 //
 
 #if defined (Naze32)
-  #defined AeroQuadSTM32
+  #define AeroQuadSTM32
 #endif
 
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
