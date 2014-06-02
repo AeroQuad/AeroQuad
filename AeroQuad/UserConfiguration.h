@@ -37,10 +37,10 @@
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-#define MWCProEz30          // MWC Prop Ez3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
+//#define MWCProEz30          // MWC Prop Ez3.0 from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/multiwii-pro-ez3-0-flight-controller-w-gps-option.html
 
 // STM32 processor
-//#define AeroQuadSTM32
+#define AeroQuadSTM32
 //#define Naze32
 
 
