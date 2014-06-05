@@ -58,10 +58,8 @@ void calculateFlightError()
   int userPitchCommand = receiverCommand[receiverChannelMap[YAXIS]] - 1500;
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
-      float rollAttitudeCmd  = updatePID((userRollCommand + gpsRollAxisCorrection), kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((userPitchCommand + gpsPitchAxisCorrection), -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-      motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
-      motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
+      gyroDesiredRollRate  = updatePID((userRollCommand * 1.3 + gpsRollAxisCorrection), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
+      gyroDesiredPitchRate = updatePID((userPitchCommand * 1.3 + gpsPitchAxisCorrection), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
     }
     else
   #endif
