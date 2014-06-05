@@ -25,19 +25,24 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
-#define ATTITUDE_SCALING (0.75 * PWM2RAD)
+//#define ATTITUDE_SCALING (0.75 * PWM2RAD)
+
+#define RECEIVER_SCALE_FACTOR 2
+#define GYRO_STALE_RATIO RECEIVER_SCALE_FACTOR * 500
 
 
-void processThrottlePIDAdjustment() 
-{
-  float throttleAdjustmentPercentage = (500 - (2000 - receiverCommand[receiverChannelMap[THROTTLE]])) * 0.2;
-  throttleAdjustmentPercentage = throttleAdjustmentPercentage < 0 ? 0 : throttleAdjustmentPercentage;
-  float pidPercentToRemove = throttleAdjustmentPercentage * throttlePIDAdjustmentFactor / 100.0;
-  PID[RATE_XAXIS_PID_IDX].P = userRateRollP - (pidPercentToRemove * userRateRollP / 100.0);
-  PID[RATE_XAXIS_PID_IDX].D = userRateRollD - (pidPercentToRemove * userRateRollD / 100.0);
-  PID[RATE_YAXIS_PID_IDX].P = userRatePitchP - (pidPercentToRemove * userRatePitchP / 100.0);
-  PID[RATE_YAXIS_PID_IDX].D = userRatePitchD - (pidPercentToRemove * userRatePitchD / 100.0);
-}
+#if defined (USE_THROTTLE_PID_ADJUSTMENT)
+  void processThrottlePIDAdjustment() 
+  {
+    float throttleAdjustmentPercentage = (500 - (2000 - receiverCommand[receiverChannelMap[THROTTLE]])) * 0.2;
+    throttleAdjustmentPercentage = throttleAdjustmentPercentage < 0 ? 0 : throttleAdjustmentPercentage;
+    float pidPercentToRemove = throttleAdjustmentPercentage * throttlePIDAdjustmentFactor / 100.0;
+    PID[RATE_XAXIS_PID_IDX].P = userRateRollP - (pidPercentToRemove * userRateRollP / 100.0);
+    PID[RATE_XAXIS_PID_IDX].D = userRateRollD - (pidPercentToRemove * userRateRollD / 100.0);
+    PID[RATE_YAXIS_PID_IDX].P = userRatePitchP - (pidPercentToRemove * userRatePitchP / 100.0);
+    PID[RATE_YAXIS_PID_IDX].D = userRatePitchD - (pidPercentToRemove * userRatePitchD / 100.0);
+  }
+#endif  
 
 /**
  * calculateFlightError
@@ -49,51 +54,58 @@ float gyroDesiredRollRate = 0.0;
 float gyroDesiredPitchRate = 0.0;
 void calculateFlightError()
 {
+  int userRollCommand = receiverCommand[receiverChannelMap[XAXIS]] - 1500;
+  int userPitchCommand = receiverCommand[receiverChannelMap[YAXIS]] - 1500;
   #if defined (UseGPSNavigator)
     if (navigationState == ON || positionHoldState == ON) {
-      float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - receiverZero[XAXIS] + gpsRollAxisCorrection) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - receiverZero[YAXIS] + gpsPitchAxisCorrection) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+      float rollAttitudeCmd  = updatePID((userRollCommand + gpsRollAxisCorrection), kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float pitchAttitudeCmd = updatePID((userPitchCommand + gpsPitchAxisCorrection), -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
       motorAxisCommandRoll   = updatePID(rollAttitudeCmd, gyroRate[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
       motorAxisCommandPitch  = updatePID(pitchAttitudeCmd, -gyroRate[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
     }
     else
   #endif
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
-    gyroDesiredRollRate  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-    gyroDesiredPitchRate = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    
+    gyroDesiredRollRate  = updatePID((userRollCommand*1.3), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
+    gyroDesiredPitchRate = updatePID((userPitchCommand*1.3), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
   }
   #if defined (HORIZON_MODE_AVAILABLE)
     else if (flightMode == HORIZON_FLIGHT_MODE) {
       
-      float rollRateRatiaux = (abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500) - 250) * 0.4;
-      float pitchRateRatiaux = (abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500) - 250) * 0.4;
-      float rateRatiaux = constrain(max(rollRateRatiaux,pitchRateRatiaux), 0, 250.0) / 100.0;
+      float rollRateRatiaux = (abs(userRollCommand) - 250) * 0.4;
+      float pitchRateRatiaux = (abs(userPitchCommand) - 250) * 0.4;
+      float rateRatiaux = constrain(max(rollRateRatiaux, pitchRateRatiaux), 0, 250.0) / 100.0;
       float attitudeRatiaux = 1.0 - rateRatiaux;
       
-      float rollAttitudeCmd  = updatePID((receiverCommand[receiverChannelMap[XAXIS]] - 1500) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
-      float rollRateCommand = rateRatiaux * getReceiverSIData(XAXIS);
-      if (getReceiverSIData(XAXIS) < 0 && rollRateCommand > 0) {
+      float rollAttitudeCmd = updatePID((userRollCommand), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
+      float rollRateCommand = rateRatiaux * (userRollCommand) * rotationSpeedFactor;
+      if (userRollCommand < 0 && rollRateCommand > 0) {
         rollRateCommand = -rollRateCommand;
       }
       gyroDesiredRollRate = (attitudeRatiaux * rollAttitudeCmd) + rollRateCommand;
   
-      float pitchAttitudeCmd = updatePID((receiverCommand[receiverChannelMap[YAXIS]] - 1500) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
-      float pitchRateCommand = rateRatiaux * getReceiverSIData(YAXIS);
-      if (getReceiverSIData(YAXIS) < 0 && pitchRateCommand > 0) {
+      float pitchAttitudeCmd = updatePID((userPitchCommand), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
+      float pitchRateCommand = rateRatiaux * (userPitchCommand) * rotationSpeedFactor;
+      if (userPitchCommand < 0 && pitchRateCommand > 0) {
         pitchRateCommand = -pitchRateCommand;
       }
       gyroDesiredPitchRate = (attitudeRatiaux * pitchAttitudeCmd) + pitchRateCommand;
     }
   #endif
-  else {  // simp
-    gyroDesiredRollRate = getReceiverSIData(XAXIS);
-    gyroDesiredPitchRate = getReceiverSIData(YAXIS);
+  else {  
+    gyroDesiredRollRate = (userRollCommand) * rotationSpeedFactor;
+    gyroDesiredPitchRate = (userPitchCommand) * rotationSpeedFactor;
   }
   
-  processThrottlePIDAdjustment();
+  #if defined (USE_THROTTLE_PID_ADJUSTMENT)
+    processThrottlePIDAdjustment();
+  #endif
   
-  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroRate[XAXIS] * stickScalingFactor, &PID[RATE_XAXIS_PID_IDX]);
-  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroRate[YAXIS] * stickScalingFactor, &PID[RATE_YAXIS_PID_IDX]);
+  float scaledGyroRateX = map(gyroADC[XAXIS],-(gyroOneMeterSecADCFactor),(gyroOneMeterSecADCFactor), -GYRO_STALE_RATIO, GYRO_STALE_RATIO);
+  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, scaledGyroRateX, &PID[RATE_XAXIS_PID_IDX]);
+  float scaledGyroRateY = map(gyroADC[YAXIS],-(gyroOneMeterSecADCFactor),(gyroOneMeterSecADCFactor), -GYRO_STALE_RATIO, GYRO_STALE_RATIO);
+  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -scaledGyroRateY, &PID[RATE_YAXIS_PID_IDX]);
 }
 
 /**

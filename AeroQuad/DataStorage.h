@@ -122,16 +122,16 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM() {
-  PID[RATE_XAXIS_PID_IDX].P = 100.0;
-  PID[RATE_XAXIS_PID_IDX].I = 150.0;
-  PID[RATE_XAXIS_PID_IDX].D = -350.0;
-  PID[RATE_YAXIS_PID_IDX].P = 100.0;
-  PID[RATE_YAXIS_PID_IDX].I = 150.0;
-  PID[RATE_YAXIS_PID_IDX].D = -350.0;
-  PID[ATTITUDE_XAXIS_PID_IDX].P = 3.5;
+  PID[RATE_XAXIS_PID_IDX].P = 0.1;
+  PID[RATE_XAXIS_PID_IDX].I = 0.5;
+  PID[RATE_XAXIS_PID_IDX].D = -0.3;
+  PID[RATE_YAXIS_PID_IDX].P = 0.1;
+  PID[RATE_YAXIS_PID_IDX].I = 0.5;
+  PID[RATE_YAXIS_PID_IDX].D = -0.3;
+  PID[ATTITUDE_XAXIS_PID_IDX].P = 3.0;
   PID[ATTITUDE_XAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_XAXIS_PID_IDX].D = 0.0;
-  PID[ATTITUDE_YAXIS_PID_IDX].P = 3.5;
+  PID[ATTITUDE_YAXIS_PID_IDX].P = 3.0;
   PID[ATTITUDE_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_YAXIS_PID_IDX].D = 0.0;
   PID[ZAXIS_PID_IDX].P = 200.0;
@@ -140,8 +140,8 @@ void initializeEEPROM() {
   PID[HEADING_HOLD_PID_IDX].P = 3.0;
   PID[HEADING_HOLD_PID_IDX].I = 0.1;
   PID[HEADING_HOLD_PID_IDX].D = 0.0;
-  stickScalingFactor = 1.0;
-  throttlePIDAdjustmentFactor = 0;
+  rotationSpeedFactor = 7.0;
+  throttlePIDAdjustmentFactor = 25;
   
   receiverTypeUsed = RECEIVER_PWM;
   for(byte channel = 0; channel < LAST_CHANNEL; channel++) {
@@ -259,7 +259,7 @@ void readEEPROM() {
   readPID(ATTITUDE_YAXIS_PID_IDX, LEVELPITCH_PID_GAIN_ADR);
   readPID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
 
-  stickScalingFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
   throttlePIDAdjustmentFactor = readLong(THROTTLE_PID_ADJUSTMENT_ADR);
   
   receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
@@ -348,7 +348,7 @@ void writeEEPROM(){
   writePID(ZAXIS, YAW_PID_GAIN_ADR);
   writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   
-  writeFloat(stickScalingFactor, ROTATION_SPEED_FACTOR_ARD);
+  writeFloat(rotationSpeedFactor, ROTATION_SPEED_FACTOR_ARD);
   writeLong(throttlePIDAdjustmentFactor, THROTTLE_PID_ADJUSTMENT_ADR);
   
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);

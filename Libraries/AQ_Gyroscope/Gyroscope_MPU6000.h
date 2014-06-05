@@ -32,6 +32,8 @@ void initializeGyro() {
   float range = 2*2000.0;
   gyroScaleFactor = radians(range/65536.0);
 
+  gyroOneMeterSecADCFactor = 1 / gyroScaleFactor;
+	
   initializeMPU6000Sensors();
 }
 
@@ -47,7 +49,6 @@ void gyroUpdateHeading()
 void measureGyro() {
   readMPU6000Sensors();
 
-  int gyroADC[3];
   gyroADC[XAXIS] = (gyroRaw[XAXIS]=MPU6000.data.gyro.x)  - gyroZero[XAXIS];
   gyroADC[YAXIS] = gyroZero[YAXIS] - (gyroRaw[YAXIS]=MPU6000.data.gyro.y);
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);
@@ -69,7 +70,7 @@ void measureGyroSum() {
 }
 
 void evaluateGyroRate() {
-  int gyroADC[3];
+  
   gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount) - gyroZero[XAXIS];
   gyroADC[YAXIS] = gyroZero[YAXIS] - (gyroSample[YAXIS] / gyroSampleCount);
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - (gyroSample[ZAXIS] / gyroSampleCount);

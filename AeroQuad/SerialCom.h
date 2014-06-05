@@ -75,11 +75,13 @@ void readSerialCommand() {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
-      userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
-      userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
-      userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
-      userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
-      stickScalingFactor = readFloatSerial();
+      #if defined (USE_THROTTLE_PID_ADJUSTMENT)
+        userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+        userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+        userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+        userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+      #endif
+      rotationSpeedFactor = readFloatSerial();
       throttlePIDAdjustmentFactor = readFloatSerial();
       writeEEPROM();
       break;
@@ -352,7 +354,7 @@ void sendSerialTelemetry() {
     case 'a': // Send roll and pitch rate mode PID values
       PrintPID(RATE_XAXIS_PID_IDX);
       PrintPID(RATE_YAXIS_PID_IDX);
-      PrintValueComma(stickScalingFactor);
+      PrintValueComma(rotationSpeedFactor);
       PrintValueComma(throttlePIDAdjustmentFactor);
       SERIAL_PRINTLN();
       queryType = 'X';

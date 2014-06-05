@@ -32,7 +32,7 @@
 
 
 #define ALTITUDE_BUMP_SPEED 0.02
-#define MAX_MIN_ZVELOCITY 200
+#define MAX_MIN_ZVELOCITY 300
 
 float previousZDampeningThrottleCorrection = 0.0;
 

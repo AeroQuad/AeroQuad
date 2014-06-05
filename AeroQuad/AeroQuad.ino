@@ -37,6 +37,7 @@
 #endif
 
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
+  
   #define HORIZON_MODE_AVAILABLE
   #define HeadingMagHold		
   #define AltitudeHoldBaro		
@@ -982,14 +983,17 @@ void setup() {
      initSlowTelemetry();
   #endif
   
-  userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
-  userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
-  userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
-  userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+  #if defined (USE_THROTTLE_PID_ADJUSTMENT)
+    userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+    userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+    userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+    userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+  #endif
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
+  
 }
 
 

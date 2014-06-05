@@ -73,13 +73,16 @@ byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
-float stickScalingFactor = 1.0;
+float rotationSpeedFactor = 2.5;
 
-float userRateRollP = 0.0;
-float userRateRollD = 0.0;
-float userRatePitchP = 0.0;
-float userRatePitchD = 0.0;
+#if defined (USE_THROTTLE_PID_ADJUSTMENT)
+  float userRateRollP = 0.0;
+  float userRateRollD = 0.0;
+  float userRatePitchP = 0.0;
+  float userRatePitchD = 0.0;
+#endif
 int throttlePIDAdjustmentFactor = 0;
+
 
 // main loop time variable
 unsigned long previousTime = 0;
