@@ -32,12 +32,14 @@
 // Define Security Checks
 //
 
+// @todo remove flight mode from eeprom!!!
+
 #if defined (Naze32)
   #define AeroQuadSTM32
 #endif
 
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
-  
+  #define USE_THROTTLE_PID_ADJUSTMENT
   #define HORIZON_MODE_AVAILABLE
   #define HeadingMagHold		
   #define AltitudeHoldBaro		
@@ -62,7 +64,6 @@
 //  #define USUnits                   // Enable for US units (feet,miles,mph), leave uncommented for metric units (meter,kilometer,km/h)
 
 //  #define OSD_SYSTEM_MENU           // Menu system, currently only usable with OSD or SERIAL_LCD
-
 
 #endif
 
@@ -785,12 +786,9 @@
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined(HMC5843) 
-//  #include <HeadingFusionProcessorMARG.h>
   #include <Magnetometer_HMC5843.h>
-#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L)
-//  #include <HeadingFusionProcessorMARG.h>
+#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L) || defined (Naze32)
   #include <Magnetometer_HMC5883L.h>
-#elif defined(COMPASS_CHR6DM)
 #endif
 
 //********************************************************
@@ -834,9 +832,9 @@
 //****************** GPS DECLARATION *********************
 //********************************************************
 #if defined(UseGPS)
-  #if !defined(HeadingMagHold)
-    #error We need the magnetometer to use the GPS
-  #endif 
+//  #if !defined(HeadingMagHold)
+//    #error We need the magnetometer to use the GPS
+//  #endif 
   #include <GpsAdapter.h>
   #include "GpsNavigator.h"
 #endif
@@ -1012,7 +1010,7 @@ void process100HzTask() {
   }
    
   #if defined (HeadingMagHold) 
-    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[XAXIS], measuredMag[XAXIS], G_Dt);
+    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
     magDataUpdate = false;
   #else
     calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);

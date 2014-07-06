@@ -43,10 +43,15 @@ float halfT;
 uint8_t isAHRSInitialized = false;
 float compassDeclination = 0.0;
 
+/*
 float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
 
+float previousGx = 0.0;
+float previousGy = 0.0;
+float previousGz = 0.0;
+*/
 
 #define SQR(x)  ((x) * (x))
 
@@ -156,20 +161,25 @@ void calculateKinematics(float gx, float gy, float gz,
 	if (kiAcc > 0.0f)
 	{
 		exAccInt += exAcc * kiAcc;
-		if (isSwitched(previousEx,exAcc)) {
+/*		if (isSwitched(previousEx,exAcc)) {
 			exAccInt = 0.0;
 		}
 		previousEx = exAcc;
+*/		
 		eyAccInt += eyAcc * kiAcc;
-		if (isSwitched(previousEy,eyAcc)) {
+/*		if (isSwitched(previousEy,eyAcc)) {
 			eyAccInt = 0.0;
 		}
 		previousEy = eyAcc;
+*/
+		
 		ezAccInt += ezAcc * kiAcc;
-		if (isSwitched(previousEz,ezAcc)) {
+/*		if (isSwitched(previousEz,ezAcc)) {
 			ezAccInt = 0.0;
 		}
 		previousEz = ezAcc;
+*/
+		
 		gx += exAccInt;
 		gy += eyAccInt;
 		gz += ezAccInt;
@@ -203,13 +213,32 @@ void calculateKinematics(float gx, float gy, float gz,
 		// use un-extrapolated old values between magnetometer updates
 		// dubious as dT does not apply to the magnetometer calculation so
 		// time scaling is embedded in KpMag and KiMag
-		gx += exMag * 0.002;
-		gy += eyMag * 0.002;
-		gz += ezMag * 0.002;
+		static const float magP = 0.2; //0.2;
+		gx += exMag * magP;
+		gy += eyMag * magP;
+		gz += ezMag * magP;
 
-		exMagInt += exMag * 0.00005;
-		eyMagInt += eyMag * 0.00005;
-		ezMagInt += ezMag * 0.00005;
+		static const float magI = 0.0005; //0.0005;
+		exMagInt += exMag * magI;
+/*		if (isSwitched(previousGx,gx)) {
+			exMagInt = 0.0;
+		}
+		previousGx = gx;
+*/		
+		
+		eyMagInt += eyMag * magI;
+/*		if (isSwitched(previousGy,gy)) {
+			eyMagInt = 0.0;
+		}
+		previousGy = gy;
+*/		
+
+		ezMagInt += ezMag * magI;
+/*        if (isSwitched(previousGz,gz)) {
+			ezMagInt = 0.0;
+		}
+		previousGz = gz;
+*/
 
 		gx += exMagInt;
 		gy += eyMagInt;

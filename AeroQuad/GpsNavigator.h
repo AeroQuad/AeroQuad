@@ -53,7 +53,9 @@ void initHomeBase() {
       homePosition.longitude = currentPosition.longitude;
       homePosition.altitude = DEFAULT_HOME_ALTITUDE;  
       // Set the magnetometer declination when we get the home position set
-      setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+      #if defined (HeadingMagHold)
+        setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+      #endif
       // Set reference location for Equirectangular projection used for coordinates
       setProjectionLocation(currentPosition);
       

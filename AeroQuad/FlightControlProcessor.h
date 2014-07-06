@@ -50,6 +50,10 @@
  */
 float gyroDesiredRollRate = 0.0;
 float gyroDesiredPitchRate = 0.0;
+
+//float previousGyroADCX = 0.0;
+//float previousGyroADCY = 0.0;
+
 void calculateFlightError()
 {
   const int userRollCommand  = map(receiverCommand[receiverChannelMap[XAXIS]] - 1500, -500 , 500, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor);
@@ -95,12 +99,19 @@ void calculateFlightError()
     #endif
   }
   
-  #if defined (USE_THROTTLE_PID_ADJUSTMENT)
-    processThrottlePIDAdjustment();
-  #endif
-  
+//  if (isSwitched(previousGyroADCX, gyroADC[XAXIS])) {
+//    PID[RATE_XAXIS_PID_IDX].integratedError = 0.0;
+//  }
+//  previousGyroADCX = gyroADC[XAXIS];
   motorAxisCommandRoll = updatePID(gyroDesiredRollRate * rotationSpeedFactor, gyroADC[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
+//  PID[RATE_XAXIS_PID_IDX].integratedError = constrain(PID[RATE_XAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
+  
+//  if (isSwitched(previousGyroADCY, gyroADC[YAXIS])) {
+//    PID[RATE_YAXIS_PID_IDX].integratedError = 0.0;
+//  }
+//  previousGyroADCY = gyroADC[YAXIS];
   motorAxisCommandPitch = updatePID(gyroDesiredPitchRate * rotationSpeedFactor, -gyroADC[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
+//  PID[RATE_YAXIS_PID_IDX].integratedError = constrain(PID[RATE_YAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
 }
 
 /**
@@ -334,7 +345,7 @@ void processFlightControl() {
     #endif
     
     // ********************** Process Altitude hold **************************
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    #if defined AltitudeHoldBaro
       processAltitudeControl();
     #else
       throttle = receiverCommand[receiverChannelMap[THROTTLE]];
@@ -352,6 +363,10 @@ void processFlightControl() {
     
     // ********************** Process throttle correction ********************
     processThrottleCorrection();
+    
+    #if defined (USE_THROTTLE_PID_ADJUSTMENT)
+      processThrottlePIDAdjustment();
+    #endif
   }
 
   // ********************** Calculate Motor Commands *************************

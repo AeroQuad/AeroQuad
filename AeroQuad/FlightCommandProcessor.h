@@ -202,6 +202,7 @@
 
 void processZeroThrottleFunctionFromReceiverCommand() {
   // Disarm motors (left stick lower left corner)
+  
   if (receiverCommand[receiverChannelMap[ZAXIS]] < MINCHECK && motorArmed == ON) {
     commandAllMotors(MINCOMMAND);
     motorArmed = OFF;
@@ -293,6 +294,11 @@ void readPilotCommands() {
       flightMode = RATE_FLIGHT_MODE;
     }
   #endif
+  
+  if (previousFlightMode != flightMode) {
+    zeroIntegralError();
+  }
+  previousFlightMode = flightMode;
     
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     processAltitudeHoldStateFromReceiverCommand();

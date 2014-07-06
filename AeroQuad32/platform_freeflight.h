@@ -18,7 +18,6 @@
 // heading mag hold declaration
 #ifdef HeadingMagHold
   #include <Compass.h>
-  #define HMC5883L
 #endif
 
 // Altitude declaration

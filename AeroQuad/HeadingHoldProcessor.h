@@ -36,17 +36,7 @@ unsigned long headingTime = micros();
  */
 void processHeading()
 {
-
-  #if defined(HeadingMagHold)
-//    if (vehicleState & MAG_DETECTED) {
-//      heading = -degrees(trueNorthHeading);
-//    }
-//    else {
-      heading = degrees(gyroHeading);
-//    }
-  #else
-    heading = degrees(gyroHeading);
-  #endif
+  heading = degrees(gyroHeading);
 
   // Always center relative heading around absolute heading chosen during yaw command
   // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
@@ -57,48 +47,28 @@ void processHeading()
   if (heading <= (setHeading - 180)) {
     relativeHeading += 360;
   }
-  if (heading >= (setHeading + 180)) {
+  else if (heading >= (setHeading + 180)) {
     relativeHeading -= 360;
   }
-
+  
   // Apply heading hold only when throttle high enough to start flight
-  if (receiverCommand[receiverChannelMap[THROTTLE]] > MINCHECK ) { 
+  if (inFlight) { 
     
-    #if defined (UseGPSNavigator)
-      if (( (receiverCommand[receiverChannelMap[ZAXIS]] + gpsYawAxisCorrection) > (MIDCOMMAND + 25)) || 
-          ( (receiverCommand[receiverChannelMap[ZAXIS]] + gpsYawAxisCorrection) < (MIDCOMMAND - 25))) {
-    #else
-      if ((receiverCommand[receiverChannelMap[ZAXIS]] > (MIDCOMMAND + 25)) || 
-          (receiverCommand[receiverChannelMap[ZAXIS]] < (MIDCOMMAND - 25))) {
-    #endif
-    
+    if ((receiverCommand[receiverChannelMap[ZAXIS]] > (MIDCOMMAND + 25)) || 
+        (receiverCommand[receiverChannelMap[ZAXIS]] < (MIDCOMMAND - 25))) {
       
       // If commanding yaw, turn off heading hold and store latest heading
       setHeading = heading;
       headingHold = 0;
       PID[HEADING_HOLD_PID_IDX].integratedError = 0;
-      headingHoldState = OFF;
       headingTime = currentTime;
     }
     else {
-      if (relativeHeading < 0.25 && relativeHeading > -0.25) {
-        headingHold = 0;
-        PID[HEADING_HOLD_PID_IDX].integratedError = 0;
-      }
-      else if (headingHoldState == OFF) { // quick fix to soften heading hold on new heading
-        if ((currentTime - headingTime) > 500000) {
-          headingHoldState = ON;
-          headingTime = currentTime;
-          setHeading = heading;
-          headingHold = 0;
-        }
-      }
-      else {
-      // No new yaw input, calculate current heading vs. desired heading heading hold
-      // Relative heading is always centered around zero
-        headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
-        headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
-      }
+
+    // No new yaw input, calculate current heading vs. desired heading heading hold
+    // Relative heading is always centered around zero
+      headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
+      headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
     }
   }
   else {
@@ -108,13 +78,7 @@ void processHeading()
     PID[HEADING_HOLD_PID_IDX].integratedError = 0;
   }
 
-  // NEW SI Version
-  #if defined (UseGPSNavigator) 
-    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - 1500 + gpsYawAxisCorrection) * (2.5 * PWM2RAD);
-  #else
-    float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - 1500) * (2.5 * PWM2RAD);
-  #endif
-  
+  const float receiverSiData = (receiverCommand[receiverChannelMap[ZAXIS]] - 1500) * (2.5 * PWM2RAD);
   const float commandedYaw = constrain(receiverSiData + radians(headingHold), -PI, PI);
   motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }
