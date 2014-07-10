@@ -157,10 +157,6 @@ void initializeKinematics()
   eyInt = 0.0;
   ezInt = 0.0;
 	
-  previousEx = 0;
-  previousEy = 0;
-  previousEz = 0;
-
   Kp = 0.2; // 2.0;
   Ki = 0.0005; //0.005;
 }

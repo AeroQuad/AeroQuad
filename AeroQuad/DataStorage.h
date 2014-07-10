@@ -134,13 +134,11 @@ void initializeEEPROM() {
   PID[ATTITUDE_YAXIS_PID_IDX].P = 0.45;
   PID[ATTITUDE_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_YAXIS_PID_IDX].D = 0.0;
-  PID[ZAXIS_PID_IDX].P = 200.0;
-  PID[ZAXIS_PID_IDX].I = 5.0;
+  PID[ZAXIS_PID_IDX].P = 0.2;
+  PID[ZAXIS_PID_IDX].I = 0.5;
   PID[ZAXIS_PID_IDX].D = 0.0;
-  PID[HEADING_HOLD_PID_IDX].P = 3.0;
-  PID[HEADING_HOLD_PID_IDX].I = 0.1;
-  PID[HEADING_HOLD_PID_IDX].D = 0.0;
   rotationSpeedFactor = 2.5;
+  yawSpeedFactor = 2.5;
   throttlePIDAdjustmentFactor = 25;
   
   receiverTypeUsed = RECEIVER_PWM;
@@ -257,9 +255,9 @@ void readEEPROM() {
   readPID(ZAXIS, YAW_PID_GAIN_ADR);
   readPID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
   readPID(ATTITUDE_YAXIS_PID_IDX, LEVELPITCH_PID_GAIN_ADR);
-  readPID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
 
   rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  yawSpeedFactor = readFloat(YAW_SPEED_FACTOR_ARD);
   throttlePIDAdjustmentFactor = readLong(THROTTLE_PID_ADJUSTMENT_ADR);
   
   receiverTypeUsed = readFloat(RECEIVER_CONFIG_TYPE_ADR);
@@ -346,9 +344,10 @@ void writeEEPROM(){
   writePID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_YAXIS_PID_IDX, LEVELPITCH_PID_GAIN_ADR);
   writePID(ZAXIS, YAW_PID_GAIN_ADR);
-  writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   
   writeFloat(rotationSpeedFactor, ROTATION_SPEED_FACTOR_ARD);
+  writeFloat(yawSpeedFactor, YAW_SPEED_FACTOR_ARD);
+  
   writeLong(throttlePIDAdjustmentFactor, THROTTLE_PID_ADJUSTMENT_ADR);
   
   writeFloat(receiverTypeUsed, RECEIVER_CONFIG_TYPE_ADR);

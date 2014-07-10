@@ -75,12 +75,10 @@ void readSerialCommand() {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
-      #if defined (USE_THROTTLE_PID_ADJUSTMENT)
-        userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
-        userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
-        userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
-        userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
-      #endif
+      userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+      userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+      userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+      userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
       rotationSpeedFactor = readFloatSerial();
       throttlePIDAdjustmentFactor = readFloatSerial();
       writeEEPROM();
@@ -94,7 +92,7 @@ void readSerialCommand() {
 
     case 'C': // Receive yaw PID
       readSerialPID(ZAXIS_PID_IDX);
-      readSerialPID(HEADING_HOLD_PID_IDX);
+      yawSpeedFactor = readFloatSerial();
       writeEEPROM();
       break;
 
@@ -369,7 +367,7 @@ void sendSerialTelemetry() {
   
     case 'c': // Send yaw PID values
       PrintPID(ZAXIS_PID_IDX);
-      PrintPID(HEADING_HOLD_PID_IDX);
+      PrintValueComma(yawSpeedFactor);
       SERIAL_PRINTLN(0);
       queryType = 'X';
       break;
@@ -676,19 +674,19 @@ void comma() {
   SERIAL_PRINT(',');
 }
 
-void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
-  
-  SERIAL_PRINT(sensorName);
-  SERIAL_PRINT(": ");
-  if (!(vehicleState & state)) {
-    SERIAL_PRINT("Not ");
-  }
-  SERIAL_PRINT(message);
-}
+//void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
+//  
+//  SERIAL_PRINT(sensorName);
+//  SERIAL_PRINT(": ");
+//  if (!(vehicleState & state)) {
+//    SERIAL_PRINT("Not ");
+//  }
+//  SERIAL_PRINT(message);
+//}
 
 void reportVehicleState() {
   // Tell Configurator how many vehicle state values to expect
-  SERIAL_PRINT(15);
+  SERIAL_PRINT(vehicleState);
   SERIAL_PRINT(";");
   delay(50);
   SERIAL_PRINT("Software Version: ");
@@ -737,32 +735,7 @@ void reportVehicleState() {
   SERIAL_PRINT("YawDirection: ");
   SERIAL_PRINT(yawDirection);
   SERIAL_PRINT(";");
-  delay(50);
 
-  printVehicleState("Gyroscope", GYRO_DETECTED, "Detected;");
-  delay(50);
-  printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected;");
-  delay(50);
-  printVehicleState("Barometer", BARO_DETECTED, "Detected;");
-  delay(50);
-  printVehicleState("Magnetometer", MAG_DETECTED, "Detected;");
-  delay(50);
-  printVehicleState("Heading Hold", HEADINGHOLD_ENABLED, "Enabled;");
-  delay(50);
-  printVehicleState("Altitude Hold", ALTITUDEHOLD_ENABLED, "Enabled;");
-  delay(50);
-  printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled;");
-  delay(50);
-  printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled;");
-  delay(50);
-  printVehicleState("Range Detection", RANGE_ENABLED, "Enabled;");
-  delay(50);
-#ifdef UseGPS
-  SERIAL_PRINT("GPS: Enabled;");
-#else
-  SERIAL_PRINT("GPS: Not Enabled;");
-#endif
-  delay(50);
   SERIAL_PRINTLN();
 }
 

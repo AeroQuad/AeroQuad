@@ -31,8 +31,8 @@
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 
 
-#define ALTITUDE_BUMP_SPEED 0.02
-#define MAX_MIN_ZVELOCITY 300
+#define ALTITUDE_BUMP_SPEED 0.01
+#define MAX_MIN_ZVELOCITY 200
 
 float previousZDampeningThrottleCorrection = 0.0;
 
@@ -58,8 +58,13 @@ void processAltitudeHold()
 
 void processVelocityHold()
 {
-  int userVelocityCommand = (receiverCommand[receiverChannelMap[THROTTLE]] - altitudeHoldThrottle) / 2;
-  userVelocityCommand = constrain(userVelocityCommand, -200, 200);
+  int userVelocityCommand = 0;
+  if ((receiverCommand[receiverChannelMap[THROTTLE]] > (altitudeHoldThrottle + 25)) || 
+      (receiverCommand[receiverChannelMap[THROTTLE]] < (altitudeHoldThrottle - 25))) {
+    userVelocityCommand = (receiverCommand[receiverChannelMap[THROTTLE]] - altitudeHoldThrottle);
+    userVelocityCommand = map(userVelocityCommand, -500, 500, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
+  }
+  userVelocityCommand = constrain(userVelocityCommand, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
   
   float zVelocityToReached = constrain(zVelocity, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
   float zDampeningThrottleCorrection = updatePID(userVelocityCommand, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
@@ -69,17 +74,6 @@ void processVelocityHold()
 
 void processAltitudeControl()
 {
-  if (altitudeHoldState == ALTPANIC) {
-    return;
-  }
-  
-  if (altitudeHoldState == ALTITUDE_HOLD_STATE || altitudeHoldState == ALTITUDE_HOLD_STATE) {
-    if (abs(altitudeHoldThrottle - receiverCommand[receiverChannelMap[THROTTLE]]) > altitudeHoldPanicStickMovement) {
-      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-      return;
-    }
-  }
-
   if (altitudeHoldState == ALTITUDE_HOLD_STATE) {
     processAltitudeHold();    
   }

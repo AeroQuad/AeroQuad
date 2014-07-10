@@ -43,7 +43,6 @@ float halfT;
 uint8_t isAHRSInitialized = false;
 float compassDeclination = 0.0;
 
-/*
 float previousEx = 0.0;
 float previousEy = 0.0;
 float previousEz = 0.0;
@@ -51,7 +50,6 @@ float previousEz = 0.0;
 float previousGx = 0.0;
 float previousGy = 0.0;
 float previousGz = 0.0;
-*/
 
 #define SQR(x)  ((x) * (x))
 
@@ -161,24 +159,22 @@ void calculateKinematics(float gx, float gy, float gz,
 	if (kiAcc > 0.0f)
 	{
 		exAccInt += exAcc * kiAcc;
-/*		if (isSwitched(previousEx,exAcc)) {
+		if (isSwitched(previousEx,exAcc)) {
 			exAccInt = 0.0;
 		}
 		previousEx = exAcc;
-*/		
+
 		eyAccInt += eyAcc * kiAcc;
-/*		if (isSwitched(previousEy,eyAcc)) {
+		if (isSwitched(previousEy,eyAcc)) {
 			eyAccInt = 0.0;
 		}
 		previousEy = eyAcc;
-*/
 		
 		ezAccInt += ezAcc * kiAcc;
-/*		if (isSwitched(previousEz,ezAcc)) {
+		if (isSwitched(previousEz,ezAcc)) {
 			ezAccInt = 0.0;
 		}
 		previousEz = ezAcc;
-*/
 		
 		gx += exAccInt;
 		gy += eyAccInt;
@@ -220,25 +216,22 @@ void calculateKinematics(float gx, float gy, float gz,
 
 		static const float magI = 0.0005; //0.0005;
 		exMagInt += exMag * magI;
-/*		if (isSwitched(previousGx,gx)) {
+		if (isSwitched(previousGx,gx)) {
 			exMagInt = 0.0;
 		}
 		previousGx = gx;
-*/		
 		
 		eyMagInt += eyMag * magI;
-/*		if (isSwitched(previousGy,gy)) {
+		if (isSwitched(previousGy,gy)) {
 			eyMagInt = 0.0;
 		}
 		previousGy = gy;
-*/		
 
 		ezMagInt += ezMag * magI;
-/*        if (isSwitched(previousGz,gz)) {
+        if (isSwitched(previousGz,gz)) {
 			ezMagInt = 0.0;
 		}
 		previousGz = gz;
-*/
 
 		gx += exMagInt;
 		gy += eyMagInt;

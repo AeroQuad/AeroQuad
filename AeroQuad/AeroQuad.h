@@ -75,13 +75,12 @@ byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
 float rotationSpeedFactor = 2.5;
+float yawSpeedFactor = 2.5;
 
-#if defined (USE_THROTTLE_PID_ADJUSTMENT)
-  float userRateRollP = 0.0;
-  float userRateRollD = 0.0;
-  float userRatePitchP = 0.0;
-  float userRatePitchD = 0.0;
-#endif
+float userRateRollP = 0.0;
+float userRateRollD = 0.0;
+float userRatePitchP = 0.0;
+float userRatePitchD = 0.0;
 int throttlePIDAdjustmentFactor = 0;
 
 
@@ -169,7 +168,6 @@ void reportVehicleState();
  
   #define ALTITUDE_HOLD_STATE 1
   #define VELOCITY_HOLD_STATE 2
-  #define ALTPANIC 3
   byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
@@ -262,7 +260,6 @@ typedef struct {
   t_NVR_PID YAW_PID_GAIN_ADR;
   t_NVR_PID PITCH_PID_GAIN_ADR;
   t_NVR_PID LEVELPITCH_PID_GAIN_ADR;
-  t_NVR_PID HEADING_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[MAX_NB_CHANNEL];
   
   float SOFTWARE_VERSION_ADR;
@@ -272,6 +269,7 @@ typedef struct {
   
   // Gyro calibration
   float ROTATION_SPEED_FACTOR_ARD;
+  float YAW_SPEED_FACTOR_ARD;
   long  THROTTLE_PID_ADJUSTMENT_ADR;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;

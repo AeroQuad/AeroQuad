@@ -62,28 +62,32 @@
   void processAltitudeHoldStateFromReceiverCommand() {
     
     if (isVelocityHoldStateEnabledByUser()) {
-      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-        if (!isVelocityHoldInitialisez) {
-          baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
-          PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
-          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
-          isAltitudeHoldInitialized = false;
-          isVelocityHoldInitialisez = true;
+      if (!isVelocityHoldInitialisez) {
+        if (!inFlight) {
+          altitudeHoldThrottle = MIDCOMMAND;
         }
-        altitudeHoldState = VELOCITY_HOLD_STATE;
+        else {
+          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
+        }
+        isAltitudeHoldInitialized = false;
+        isVelocityHoldInitialisez = true;
       }
+      altitudeHoldState = VELOCITY_HOLD_STATE;
     } 
     else if (isAltitudeHoldEnabledByUser()) {
-      if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-        if (!isAltitudeHoldInitialized) {
-          baroAltitudeToHoldTarget = estimatedAltitude;//getBaroAltitude();
-          PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
-          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
-          isAltitudeHoldInitialized = true;
-          isVelocityHoldInitialisez = false;
+      if (!isAltitudeHoldInitialized) {
+        baroAltitudeToHoldTarget = estimatedAltitude;
+        PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
+        if (!inFlight) {
+          altitudeHoldThrottle = MIDCOMMAND;
         }
-        altitudeHoldState = ALTITUDE_HOLD_STATE;
+        else {
+          altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
+        }
+        isAltitudeHoldInitialized = true;
+        isVelocityHoldInitialisez = false;
       }
+      altitudeHoldState = ALTITUDE_HOLD_STATE;
     }
     else {
       isAltitudeHoldInitialized = false;
@@ -275,25 +279,16 @@ void readPilotCommands() {
     }
   }
 
-  #if defined (HORIZON_MODE_AVAILABLE)
-    // Check Mode switch for Acro or Stable
-    if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
-      flightMode = ATTITUDE_FLIGHT_MODE;
-    }
-    else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
-      flightMode = HORIZON_FLIGHT_MODE;
-    }
-    else {
-      flightMode = RATE_FLIGHT_MODE;
-    }
-  #else
-    if (receiverCommand[receiverChannelMap[MODE]] > 1333) {
-      flightMode = ATTITUDE_FLIGHT_MODE;
-    }
-    else {
-      flightMode = RATE_FLIGHT_MODE;
-    }
-  #endif
+  // Check Mode switch for Acro or Stable
+  if (receiverCommand[receiverChannelMap[MODE]] > 1666) {
+    flightMode = ATTITUDE_FLIGHT_MODE;
+  }
+  else if (receiverCommand[receiverChannelMap[MODE]] < 1666 && receiverCommand[receiverChannelMap[MODE]] > 1333) {
+    flightMode = HORIZON_FLIGHT_MODE;
+  }
+  else {
+    flightMode = RATE_FLIGHT_MODE;
+  }
   
   if (previousFlightMode != flightMode) {
     zeroIntegralError();
