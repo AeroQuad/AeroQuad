@@ -32,5 +32,7 @@ unsigned long vehicleState = 0;
 #define BATTMONITOR_ENABLED   0x040
 #define CAMERASTABLE_ENABLED  0x080
 #define RANGE_ENABLED         0x100
+#define GPS_ENABLED           0x200
+#define RSSI_ENABLED          0x400
 
 #endif

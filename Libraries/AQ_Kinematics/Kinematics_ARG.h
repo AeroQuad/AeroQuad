@@ -53,13 +53,9 @@
 
 float Kp = 0.0;                   					// proportional gain governs rate of convergence to accelerometer/magnetometer
 float Ki = 0.0;                   					// integral gain governs rate of convergence of gyroscope biases
-float halfT = 0.0;                					// half the sample period
-float q0 = 0.0, q1 = 0.0, q2 = 0.0, q3 = 0.0;       // quaternion elements representing the estimated orientation
+
 float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
   
-float previousEx = 0.0;
-float previousEy = 0.0;
-float previousEz = 0.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
@@ -137,9 +133,9 @@ void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float
   
 void eulerAngles()
 {
-  kinematicsAngle[XAXIS]  = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
+  kinematicsAngle[XAXIS] = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
   kinematicsAngle[YAXIS] = asin(2 * (q0*q2 - q1*q3));
-  kinematicsAngle[ZAXIS]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
+  kinematicsAngle[ZAXIS] = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +160,7 @@ void initializeKinematics()
 ////////////////////////////////////////////////////////////////////////////////
 // Calculate ARG
 ////////////////////////////////////////////////////////////////////////////////
-void calculateKinematics(float rollRate,          float pitchRate,    float yawRate,  
+void calculateKinematicsAGR(float rollRate,          float pitchRate,    float yawRate,  
                          float longitudinalAccel, float lateralAccel, float verticalAccel, 
                          float G_DT) {
     
@@ -177,9 +173,7 @@ void calculateKinematics(float rollRate,          float pitchRate,    float yawR
 float getGyroUnbias(byte axis) {
   return correctedRateVector[axis];
 }
+
   
-void calibrateKinematics() {}
-
-
 #endif
 

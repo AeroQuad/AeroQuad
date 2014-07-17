@@ -99,9 +99,8 @@ void readSerialCommand() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       case 'D': // Altitude hold PID
           readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
-          readFloatSerial();
           altitudeHoldBump = readFloatSerial();
-          altitudeHoldPanicStickMovement = readFloatSerial();
+          altitudeHoldMaxVelocitySpeed = readFloatSerial();
           #if defined AltitudeHoldBaro
             baroSmoothFactor = readFloatSerial();
           #else
@@ -339,9 +338,14 @@ void PrintDummyValues(byte number) {
 float getHeading()
 {
   #if defined(HeadingMagHold) 
-    return trueNorthHeading;
+    if (vehicleState & MAG_DETECTED) {
+      return trueNorthHeading;
+    }
+    else {
+      return gyroHeading;
+    }
   #else
-    return(gyroHeading);
+    return gyroHeading;
   #endif
 }
 
@@ -375,9 +379,8 @@ void sendSerialTelemetry() {
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     case 'd': // Altitude Hold
         PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
-        PrintValueComma(0);
         PrintValueComma(altitudeHoldBump);
-        PrintValueComma(altitudeHoldPanicStickMovement);
+        PrintValueComma(altitudeHoldMaxVelocitySpeed);
         #if defined AltitudeHoldBaro
           PrintValueComma(baroSmoothFactor);
         #else
@@ -536,7 +539,11 @@ void sendSerialTelemetry() {
         PrintValueComma(gpsData.course);
         PrintValueComma(gpsData.lat);
         PrintValueComma(gpsData.lon);
+        PrintValueComma(gpsDistanceToDestination);
+        PrintValueComma(angleToWaypoint);
       #else
+        PrintValueComma(0);
+        PrintValueComma(0);
         PrintValueComma(0);
         PrintValueComma(0);
         PrintValueComma(0);

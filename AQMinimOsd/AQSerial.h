@@ -2,13 +2,24 @@
 #ifndef _AQ_SERIAL_H_
 #define _AQ_SERIAL_H_
 
-
+#define GYRO_DETECTED         0x001
+#define ACCEL_DETECTED        0x002
+#define MAG_DETECTED          0x004
+#define BARO_DETECTED         0x008
+#define HEADINGHOLD_ENABLED   0x010
+#define ALTITUDEHOLD_ENABLED  0x020
+#define BATTMONITOR_ENABLED   0x040
+#define CAMERASTABLE_ENABLED  0x080
+#define RANGE_ENABLED         0x100
+#define GPS_ENABLED           0x200
+#define RSSI_ENABLED          0x400
 
 // datas values
 boolean isBarometerEnabled = false;
 boolean isBatterieMonitorEnabled = false;
 boolean isMagEnabled = false;
 boolean isGpsEnabled = false;
+boolean isRssiEnabled = false;
 int flightMode = 2;
 boolean boardConfigRead = false;
 
@@ -44,42 +55,55 @@ float readFloatSerial() {
 
 void readBoardConfig()
 {
-  Serial.write('#');
-
-  byte timeoutForRequest = 0;
+  String str = "";
+  str.reserve(10);
+  
   while(true)
   {
-    String str = "";
-    str.reserve(500);  
+    Serial.write('#');
+    delay(25);
     str = Serial.readStringUntil(';');
-
-    if (str == "Barometer: Detected") {
-        isBarometerEnabled = true;
+    char buf[str.length()];
+    str.toCharArray(buf,str.length()+1);
+    const int vehicleState = atof(buf); 
+    
+    if (vehicleState & BARO_DETECTED) {
+      isBarometerEnabled = true;
+      displayIntro();
+      MAX7456_DrawScreen();
     }
-    else if (str == "Magnetometer: Detected") {
+    delay(500);
+    if (vehicleState & MAG_DETECTED) {
       isMagEnabled = true;
+      displayIntro();
+      MAX7456_DrawScreen();
     }
-    else if (str == "Battery Monitor: Enabled") {
+    delay(500);
+    if (vehicleState & BATTMONITOR_ENABLED) {
       isBatterieMonitorEnabled = true;
+      displayIntro();
+      MAX7456_DrawScreen();
     }
-    else if(str.indexOf("GPS") >= 0)
-    {
+    delay(500);
+    if (vehicleState & GPS_ENABLED) {
+      isGpsEnabled = true;
+      displayIntro();
+      MAX7456_DrawScreen();
+    }
+    delay(500);
+    if (vehicleState & RSSI_ENABLED) {
+      isRssiEnabled = true;
+      displayIntro();
+      MAX7456_DrawScreen();
+    }
+    
+    if (vehicleState & GYRO_DETECTED && vehicleState & ACCEL_DETECTED) {
       return;
     }
-    
-    delay(50);
-    timeoutForRequest++;
-    if (timeoutForRequest == 50) {
-      Serial.write('#');
-      timeoutForRequest = 0;
-    }
-    
-    displayIntro();
-    MAX7456_DrawScreen();
+
+    Serial.flush();    
   }
 }
-
-
 
 void readLineDetails()
 {
@@ -102,7 +126,7 @@ void readLineDetails()
   }
   armed = readFloatSerial();
   MwAngle[0] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
-  MwAngle[1] = map(degrees(readFloatSerial()), 10, -10, -90, 90);
+  MwAngle[1] = map(degrees(readFloatSerial()), 15, -15, -90, 90);
   MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
   MwVario = readFloatSerial() * 100.0;
@@ -115,6 +139,7 @@ void readLineDetails()
   MwRcData[5] = readFloatSerial();
   MwRcData[6] = readFloatSerial();
   MwRcData[7] = readFloatSerial();
+//  rssi        = readFloatSerial();
   int motorCommand1 = readFloatSerial();
   int motorCommand2 = readFloatSerial();
   int motorCommand3 = readFloatSerial();

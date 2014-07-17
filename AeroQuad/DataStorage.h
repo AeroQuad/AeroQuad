@@ -180,7 +180,7 @@ void initializeEEPROM() {
       baroSmoothFactor = 0.07;
     #endif
     altitudeHoldBump = 30;
-    altitudeHoldPanicStickMovement = 300;
+    altitudeHoldMaxVelocitySpeed = 200.0;
   #endif
   
   initializePlatformSpecificAccelCalibration();
@@ -280,7 +280,7 @@ void readEEPROM() {
       baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
     #endif  
     altitudeHoldBump = readFloat(ALTITUDE_BUMP_ADR);
-    altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
+    altitudeHoldMaxVelocitySpeed = readFloat(ALTITUDE_MAX_VELOCITY_SPEED_ADR);
     readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
 
@@ -303,18 +303,18 @@ void readEEPROM() {
   flightMode = readFloat(FLIGHTMODE_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
 
-  #if defined (UseGPSNavigator)
-    missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
-    readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
-    readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
-    readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
-    
-    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
-      waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
-      waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
-      waypoint[location].altitude = readLong(WAYPOINT_ADR[location].altitude);
-    }    
-  #endif
+//  #if defined (UseGPSNavigator)
+//    missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
+//    readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
+//    readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+//    readPID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+//    
+//    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+//      waypoint[location].longitude = readLong(WAYPOINT_ADR[location].longitude);
+//      waypoint[location].latitude = readLong(WAYPOINT_ADR[location].latitude);
+//      waypoint[location].altitude = readLong(WAYPOINT_ADR[location].altitude);
+//    }    
+//  #endif
 
   // Camera Control
   #ifdef CameraControl
@@ -372,7 +372,7 @@ void writeEEPROM(){
       writeFloat(0.0, ALTITUDE_SMOOTH_ADR);
     #endif
     writeFloat(altitudeHoldBump, ALTITUDE_BUMP_ADR);
-    writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
+    writeFloat(altitudeHoldMaxVelocitySpeed, ALTITUDE_MAX_VELOCITY_SPEED_ADR);
     writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
   
@@ -402,18 +402,18 @@ void writeEEPROM(){
     writeFloat(minRangeFinderRange, RANGE_FINDER_MIN_ADR);
   #endif
   
-  #if defined (UseGPSNavigator)
-    writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
-    writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
-    writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
-    writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
-    
-    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
-      writeLong(waypoint[location].longitude, WAYPOINT_ADR[location].longitude);
-      writeLong(waypoint[location].latitude, WAYPOINT_ADR[location].latitude);
-      writeLong(waypoint[location].altitude, WAYPOINT_ADR[location].altitude);
-    }       
-  #endif
+//  #if defined (UseGPSNavigator)
+//    writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
+//    writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
+//    writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
+//    writePID(GPSYAW_PID_IDX, GPSYAW_PID_GAIN_ADR);
+//    
+//    for (byte location = 0; location < MAX_WAYPOINTS; location++) {
+//      writeLong(waypoint[location].longitude, WAYPOINT_ADR[location].longitude);
+//      writeLong(waypoint[location].latitude, WAYPOINT_ADR[location].latitude);
+//      writeLong(waypoint[location].altitude, WAYPOINT_ADR[location].altitude);
+//    }       
+//  #endif
 
     // Camera Control
   #ifdef CameraControl

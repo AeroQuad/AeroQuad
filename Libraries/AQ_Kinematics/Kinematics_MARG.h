@@ -30,7 +30,7 @@ float exMag    = 0.0f, eyMag    = 0.0f, ezMag    = 0.0f; // mag error
 float exMagInt = 0.0f, eyMagInt = 0.0f, ezMagInt = 0.0f; // mag integral error
 float kpAcc, kiAcc;
 
-float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+
 
 // auxiliary variables to reduce number of repeated operations
 float q0q0, q0q1, q0q2, q0q3;
@@ -38,14 +38,8 @@ float q1q1, q1q2, q1q3;
 float q2q2, q2q3;
 float q3q3;
 
-float halfT;
-
 uint8_t isAHRSInitialized = false;
 float compassDeclination = 0.0;
-
-float previousEx = 0.0;
-float previousEy = 0.0;
-float previousEz = 0.0;
 
 float previousGx = 0.0;
 float previousGy = 0.0;
@@ -120,7 +114,7 @@ void initializeKinematics(float ax, float ay, float az, float mx, float my, floa
 // Function
 //====================================================================================================
 
-void calculateKinematics(float gx, float gy, float gz,
+void calculateKinematicsMAGR(float gx, float gy, float gz,
                     float ax, float ay, float az,
                     float mx, float my, float mz,
                     float dt)

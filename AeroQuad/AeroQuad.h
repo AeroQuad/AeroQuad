@@ -170,7 +170,7 @@ void reportVehicleState();
   #define VELOCITY_HOLD_STATE 2
   byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
   int altitudeHoldBump = 90;
-  int altitudeHoldPanicStickMovement = 250;
+  float altitudeHoldMaxVelocitySpeed = 200.0;
   int altitudeHoldThrottle = 1000;
   boolean isAltitudeHoldInitialized = false;
   boolean isVelocityHoldInitialisez = false;
@@ -303,44 +303,44 @@ typedef struct {
   #if defined (AltitudeHoldBaro)
     float ALTITUDE_SMOOTH_ADR;
     float ALTITUDE_BUMP_ADR;
-    float ALTITUDE_PANIC_ADR;
+    float ALTITUDE_MAX_VELOCITY_SPEED_ADR;
     t_NVR_PID ALTITUDE_PID_GAIN_ADR;
     t_NVR_PID ZDAMP_PID_GAIN_ADR;
   #endif
   
-  // Range Finder
-  #if defined (AltitudeHoldRangeFinder)
-    float RANGE_FINDER_MAX_ADR;
-    float RANGE_FINDER_MIN_ADR;
-  #endif
+//  // Range Finder
+//  #if defined (AltitudeHoldRangeFinder)
+//    float RANGE_FINDER_MAX_ADR;
+//    float RANGE_FINDER_MIN_ADR;
+//  #endif
   
   // Camera Control
-  #if defined (CameraControl)
-    float CAMERAMODE_ADR;
-    float MCAMERAPITCH_ADR;
-    float MCAMERAROLL_ADR;    
-    float MCAMERAYAW_ADR;
-    float SERVOCENTERPITCH_ADR;
-    float SERVOCENTERROLL_ADR;
-    float SERVOCENTERYAW_ADR;
-    float SERVOMINPITCH_ADR;
-    float SERVOMINROLL_ADR;
-    float SERVOMINYAW_ADR;
-    float SERVOMAXPITCH_ADR;
-    float SERVOMAXROLL_ADR;
-    float SERVOMAXYAW_ADR;
-    float SERVOTXCHANNELS_ADR;
-  #endif
+//  #if defined (CameraControl)
+//    float CAMERAMODE_ADR;
+//    float MCAMERAPITCH_ADR;
+//    float MCAMERAROLL_ADR;    
+//    float MCAMERAYAW_ADR;
+//    float SERVOCENTERPITCH_ADR;
+//    float SERVOCENTERROLL_ADR;
+//    float SERVOCENTERYAW_ADR;
+//    float SERVOMINPITCH_ADR;
+//    float SERVOMINROLL_ADR;
+//    float SERVOMINYAW_ADR;
+//    float SERVOMAXPITCH_ADR;
+//    float SERVOMAXROLL_ADR;
+//    float SERVOMAXYAW_ADR;
+//    float SERVOTXCHANNELS_ADR;
+//  #endif
 
   // GPS mission storing
-  #if defined (UseGPS)
-    t_NVR_PID GPSROLL_PID_GAIN_ADR;
-    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
-    t_NVR_PID GPSYAW_PID_GAIN_ADR;
-  
-    float GPS_MISSION_NB_POINT_ADR;
-    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
-  #endif
+//  #if defined (UseGPS)
+//    t_NVR_PID GPSROLL_PID_GAIN_ADR;
+//    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+//    t_NVR_PID GPSYAW_PID_GAIN_ADR;
+//  
+//    float GPS_MISSION_NB_POINT_ADR;
+//    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+//  #endif
 } t_NVR_Data;  
 
 

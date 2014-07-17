@@ -572,6 +572,8 @@ const char battDetectedMessage[] PROGMEM = "BATT MONITOR DETECTED";
 const char battNotDetectedMessage[] PROGMEM = "BATT MON NOT DETECTED";
 const char gpsDetectedMessage[] PROGMEM = "GPS DETECTED";
 const char gpsNotDetectedMessage[] PROGMEM = "GPS NOT DETECTED";
+const char rssiDetectedMessage[] PROGMEM = "RSSI DETECTED";
+const char rssiNotDetectedMessage[] PROGMEM = "RSSI NOT DETECTED";
 const char boardConfigReadMessage[] PROGMEM = "CONFIG READED";
 
 

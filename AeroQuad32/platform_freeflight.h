@@ -65,7 +65,7 @@ void initPlatform() {
       LASTMOTOR = 6;
       break;
     default:
-    LASTMOTOR = 4;
+      LASTMOTOR = 4;
   }
 
 }

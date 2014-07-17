@@ -23,6 +23,11 @@
 
 #include "GlobalDefined.h"
 
+float halfT = 0.0;                		
+float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+float previousEx = 0.0;
+float previousEy = 0.0;
+float previousEz = 0.0;
 
 
 // This class is responsible for calculating vehicle attitude
@@ -41,10 +46,8 @@ void initializeBaseKinematicParam() {
   }
 }
 
-void initializeKinematics(float hdgX, float hdgY);
+//void initializeKinematics(float hdgX, float hdgY);
 	
-void calibrateKinematics();
- 
 
 const float kinematicsGetDegreesHeading(byte axis) {
   float tDegrees;
@@ -55,12 +58,6 @@ const float kinematicsGetDegreesHeading(byte axis) {
   else
     return (tDegrees);
 }
-  
-//  const byte getType(void) {
-    // This is set in each subclass to identify which algorithm used
-//    return kinematicsType;
-//  }
-
 
 #endif
 

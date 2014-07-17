@@ -30,11 +30,9 @@
 
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
 
-
 #define ALTITUDE_BUMP_SPEED 0.01
-#define MAX_MIN_ZVELOCITY 200
 
-float previousZDampeningThrottleCorrection = 0.0;
+
 
 
 void processAltitudeHold() 
@@ -50,8 +48,8 @@ void processAltitudeHold()
   altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, -400, 400);
   
   // ZDAMPENING COMPUTATIONS
-  float zVelocityToReached = constrain(zVelocity, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
-  float zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
+  float zVelocityToReached = constrain(zVelocity, -altitudeHoldMaxVelocitySpeed, altitudeHoldMaxVelocitySpeed);
+  const float zDampeningThrottleCorrection = updatePID(altitudeHoldThrottleCorrection, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
   
   throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection + zDampeningThrottleCorrection;
 }
@@ -59,15 +57,15 @@ void processAltitudeHold()
 void processVelocityHold()
 {
   int userVelocityCommand = 0;
-  if ((receiverCommand[receiverChannelMap[THROTTLE]] > (altitudeHoldThrottle + 25)) || 
-      (receiverCommand[receiverChannelMap[THROTTLE]] < (altitudeHoldThrottle - 25))) {
+  if ((receiverCommand[receiverChannelMap[THROTTLE]] > (altitudeHoldThrottle + 15)) || 
+      (receiverCommand[receiverChannelMap[THROTTLE]] < (altitudeHoldThrottle - 15))) {
     userVelocityCommand = (receiverCommand[receiverChannelMap[THROTTLE]] - altitudeHoldThrottle);
-    userVelocityCommand = map(userVelocityCommand, -500, 500, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
+    userVelocityCommand = map(userVelocityCommand, -500, 500, -altitudeHoldMaxVelocitySpeed, altitudeHoldMaxVelocitySpeed);
   }
-  userVelocityCommand = constrain(userVelocityCommand, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
+  userVelocityCommand = constrain(userVelocityCommand, -altitudeHoldMaxVelocitySpeed, altitudeHoldMaxVelocitySpeed);
   
-  float zVelocityToReached = constrain(zVelocity, -MAX_MIN_ZVELOCITY, MAX_MIN_ZVELOCITY);
-  float zDampeningThrottleCorrection = updatePID(userVelocityCommand, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
+  float zVelocityToReached = constrain(zVelocity, -altitudeHoldMaxVelocitySpeed, altitudeHoldMaxVelocitySpeed);
+  const float zDampeningThrottleCorrection = updatePID(userVelocityCommand, zVelocityToReached, &PID[ZDAMPENING_PID_IDX]);
   
   throttle = altitudeHoldThrottle + zDampeningThrottleCorrection;
 }

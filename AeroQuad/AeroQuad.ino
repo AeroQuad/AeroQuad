@@ -49,8 +49,8 @@
 //  #define UseSBUSRSSIReader		
 
   
-//  #define UseGPS		        
-//  #define UseGPSNavigator
+  #define UseGPS		        
+  #define UseGPSNavigator
 
 
 //  #define OSD
@@ -739,6 +739,7 @@
 #include "Kinematics.h"
 #if defined(HeadingMagHold)
   #include "Kinematics_MARG.h"
+  #include "Kinematics_ARG.h"
 #else
   #include "Kinematics_ARG.h"
 #endif
@@ -971,6 +972,7 @@ void setup() {
   #endif
 
   #if defined(UseGPS)
+    vehicleState |= GPS_ENABLED;
     initializeGps();
   #endif 
 
@@ -1006,10 +1008,15 @@ void process100HzTask() {
   }
    
   #if defined (HeadingMagHold) 
-    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
-    magDataUpdate = false;
+    if (vehicleState & MAG_DETECTED) {
+      calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
+      magDataUpdate = false;
+    }
+    else {
+      calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+    }
   #else
-    calculateKinematics(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
+    calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   #endif
 
   #if defined (AltitudeHoldBaro)
@@ -1023,7 +1030,7 @@ void process100HzTask() {
         evaluateBaroAltitude();
         estimatedAltitude = getBaroAltitude();
         computeVelocityErrorFromBaroAltitude(estimatedAltitude);
-        zVelocity = computedZVelocity;
+        zVelocity = filterSmooth(computedZVelocity, zVelocity, 0.75);
       }
     }
   #endif

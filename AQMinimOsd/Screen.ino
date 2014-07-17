@@ -458,6 +458,14 @@ void displayIntro()
   else {
     MAX7456_WriteString_P(gpsNotDetectedMessage, KVTeamVersionPosition+120+LINE+LINE+LINE);
   }
+  
+  if (isRssiEnabled) {    
+    MAX7456_WriteString_P(rssiDetectedMessage, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE);
+  }
+  else {
+    MAX7456_WriteString_P(rssiNotDetectedMessage, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE);
+  }
+  
   if (boardConfigRead) {
     MAX7456_WriteString_P(boardConfigReadMessage, KVTeamVersionPosition+120+LINE+LINE+LINE+LINE+LINE);
   }

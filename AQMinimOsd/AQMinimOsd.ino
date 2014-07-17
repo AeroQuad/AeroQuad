@@ -86,7 +86,7 @@ void checkEEPROM(void)
 void setup()
 {
   Serial.begin(115200);
- 
+  
   //Led output
   pinMode(7,OUTPUT);  // PD7
   
@@ -156,6 +156,10 @@ void loop()
       displayGPS_speed();
       displayGPSPosition();
       displayGPS_altitude();
+    }
+    
+    if (isRssiEnabled) {
+      displayRSSI();
     }
       
     MAX7456_DrawScreen();
