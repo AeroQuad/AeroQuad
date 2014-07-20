@@ -44,31 +44,29 @@ boolean isHomeBaseInitialized() {
 }
 
 void initHomeBase() {
-  if (haveNewGpsPosition()) {
-    if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
-      countToInitHome++;
-    }
-    else {
-      homePosition.latitude = currentPosition.latitude;
-      homePosition.longitude = currentPosition.longitude;
-      homePosition.altitude = DEFAULT_HOME_ALTITUDE;  
-      // Set the magnetometer declination when we get the home position set
-      #if defined (HeadingMagHold)
-        setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
-      #endif
-      // Set reference location for Equirectangular projection used for coordinates
-      setProjectionLocation(currentPosition);
-      
-
-      #if defined UseGPSNavigator
-        evaluateMissionPositionToReach();
-      #else
-        missionPositionToReach.latitude = homePosition.latitude;
-        missionPositionToReach.longitude = homePosition.longitude;
-        missionPositionToReach.altitude = homePosition.altitude;
-      #endif
-    }  
+  if (countToInitHome < MIN_NB_GPS_READ_TO_INIT_HOME) {
+    countToInitHome++;
   }
+  else {
+    homePosition.latitude = currentPosition.latitude;
+    homePosition.longitude = currentPosition.longitude;
+    homePosition.altitude = DEFAULT_HOME_ALTITUDE;  
+    // Set the magnetometer declination when we get the home position set
+    #if defined (HeadingMagHold)
+      setDeclinationLocation(currentPosition.latitude,currentPosition.longitude);
+    #endif
+    // Set reference location for Equirectangular projection used for coordinates
+    setProjectionLocation(currentPosition);
+    
+
+    #if defined UseGPSNavigator
+      evaluateMissionPositionToReach();
+    #else
+      missionPositionToReach.latitude = homePosition.latitude;
+      missionPositionToReach.longitude = homePosition.longitude;
+      missionPositionToReach.altitude = homePosition.altitude;
+    #endif
+  }  
 }
 
 
@@ -305,18 +303,18 @@ void initHomeBase() {
   void processNavigation() {
     
     // evaluate if we need to switch to another mission possition point
-    evaluateMissionPositionToReach();
+//    evaluateMissionPositionToReach();
     
-    computeDistanceToDestination(missionPositionToReach);
+//    computeDistanceToDestination(missionPositionToReach);
 
     // evaluate the flight behavior to adopt
-    evaluateFlightBehaviorFromDistance();
+//    evaluateFlightBehaviorFromDistance();
 
     computeRollPitchCraftAxisCorrection();
     
     evaluateAltitudeCorrection();    
 
-    computeHeadingCorrection();
+//    computeHeadingCorrection();
   }
 
   
@@ -324,23 +322,34 @@ void initHomeBase() {
    * Compute everything need to make adjustment to the craft attitude to go to the point to reach
    */
   void processGpsNavigation() {
-
-//    Serial.println(gpsData.sats);
-    
-    if (haveAGpsLock()) {
-      
-      if (haveNewGpsPosition()) {
+   
+    if (!isHomeBaseInitialized()) {
+      if (haveAGpsLock() && haveNewGpsPosition() ) {
+        initHomeBase();
         clearNewGpsPosition();
-        computeCurrentSpeedInCmPerSec();
-        if (navigationState == ON) {
-//          Serial.println("NAVIGATION");
-          processNavigation();
-        }
-        else if (positionHoldState == ON ) {
-//          Serial.println("POSITION");
-          processPositionHold();
-        }
       }
+      return;
+    }
+
+    if (haveAGpsLock() && haveNewGpsPosition()) {
+      
+//        computeCurrentSpeedInCmPerSec();
+//      Serial.print(serialQueryType);
+      
+//      if (navigationState == ON) {
+//        Serial.println("NAVIGATION");
+//        processNavigation();
+//      }
+//      else if (positionHoldState == ON ) {
+//        Serial.println("POSITION");
+//        processPositionHold();
+//      }
+//      else 
+      if (serialQueryType == 's') {
+        computeDistanceToDestination(homePosition);
+        angleToWaypoint = atan2(distanceX, distanceY)-trueNorthHeading;
+      }
+      clearNewGpsPosition();
     }
   }
 #endif  // #define UseGPSNavigator

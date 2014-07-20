@@ -126,7 +126,7 @@ void readLineDetails()
   }
   armed = readFloatSerial();
   MwAngle[0] = map(degrees(readFloatSerial()), -10, 10, -90, 90);
-  MwAngle[1] = map(degrees(readFloatSerial()), 15, -15, -90, 90);
+  MwAngle[1] = map(degrees(readFloatSerial()), 5, -5, -90, 90);
   MwHeading =  degrees(readFloatSerial());
   MwAltitude = readFloatSerial();
   MwVario = readFloatSerial() * 100.0;
@@ -157,8 +157,11 @@ void readLineDetails()
   int gpsCourse = readFloatSerial();
   GPS_latitude = readFloatSerial();
   GPS_longitude = readFloatSerial();
+  GPS_distanceToHome = readFloatSerial();
+  GPS_directionToHome = readFloatSerial();
+
   
-  GPS_fix = GPS_numSat >= 4 ? true : false; 
+  GPS_fix = GPS_numSat >= 6 ? true : false; 
  
 }
 

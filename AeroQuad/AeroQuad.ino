@@ -32,11 +32,10 @@
 // Define Security Checks
 //
 
-// @todo remove flight mode from eeprom!!!
-
-#if defined (Naze32)
+#if defined (Naze32) || defined (Naze32Full)
   #define AeroQuadSTM32
 #endif
+
 
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
   #define HeadingMagHold		
@@ -65,6 +64,11 @@
 
 #endif
 
+
+#if defined (Naze32) || defined (Naze32Full)
+  #define AeroQuadSTM32
+  #define BattMonitor			  
+#endif
 
 
 
@@ -1069,9 +1073,7 @@ void process50HzTask() {
   #endif
 
   #if defined(UseGPS)
-    if (haveAGpsLock() && !isHomeBaseInitialized()) {
-      initHomeBase();
-    }
+    processGpsNavigation();
   #endif      
 }
 

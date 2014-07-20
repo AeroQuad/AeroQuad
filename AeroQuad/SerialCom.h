@@ -29,8 +29,6 @@
 #ifndef _AQ_SERIAL_COMM_
 #define _AQ_SERIAL_COMM_
 
-char queryType = 'X';
-
 void initCommunication() {
   // do nothing here for now
 }
@@ -70,8 +68,8 @@ void skipSerialValues(byte number) {
 void readSerialCommand() {
   // Check for serial message
   if (SERIAL_AVAILABLE()) {
-    queryType = SERIAL_READ();
-    switch (queryType) {
+    serialQueryType = SERIAL_READ();
+    switch (serialQueryType) {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
@@ -351,7 +349,7 @@ float getHeading()
 
 void sendSerialTelemetry() {
   
-  switch (queryType) {
+  switch (serialQueryType) {
 
     case 'a': // Send roll and pitch rate mode PID values
       PrintPID(RATE_XAXIS_PID_IDX);
@@ -359,21 +357,21 @@ void sendSerialTelemetry() {
       PrintValueComma(rotationSpeedFactor);
       PrintValueComma(throttlePIDAdjustmentFactor);
       SERIAL_PRINTLN();
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
     case 'b': // Send roll and pitch attitude mode PID values
       PrintPID(ATTITUDE_XAXIS_PID_IDX);
       PrintPID(ATTITUDE_YAXIS_PID_IDX);
       SERIAL_PRINTLN(0);
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
     case 'c': // Send yaw PID values
       PrintPID(ZAXIS_PID_IDX);
       PrintValueComma(yawSpeedFactor);
       SERIAL_PRINTLN(0);
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
 
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
@@ -388,7 +386,7 @@ void sendSerialTelemetry() {
         #endif
         PrintPID(ZDAMPENING_PID_IDX);
         SERIAL_PRINTLN();
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif        
   
@@ -400,7 +398,7 @@ void sendSerialTelemetry() {
         Serial.print(',');
       }
       SERIAL_PRINTLN();
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
     case 'i': // Send sensor data
@@ -450,7 +448,7 @@ void sendSerialTelemetry() {
         PrintValueComma(batteryMonitorThrottleTarget);
         PrintValueComma(batteryMonitorGoingDownTime);
         SERIAL_PRINTLN();
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif      
 
@@ -463,7 +461,7 @@ void sendSerialTelemetry() {
           PrintValueComma(waypoint[index].altitude);
         }
         SERIAL_PRINTLN();
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif        
 
@@ -484,13 +482,13 @@ void sendSerialTelemetry() {
         PrintValueComma(servoMaxYaw);
         PrintValueComma(servoTXChannels);
         SERIAL_PRINTLN();
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif
   
     case 'q': // Send Vehicle State Value
       SERIAL_PRINTLN(vehicleState);
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
     case 's': // Send all flight data
@@ -499,14 +497,9 @@ void sendSerialTelemetry() {
       PrintValueComma(kinematicsAngle[XAXIS]);
       PrintValueComma(kinematicsAngle[YAXIS]);
       PrintValueComma(getHeading());
-      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        #if defined AltitudeHoldBaro
-          PrintValueComma(estimatedAltitude);
-          PrintValueComma(zVelocity/100.0);
-        #elif defined AltitudeHoldRangeFinder
-          PrintValueComma(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_RANGE ? rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] : 0.0);
-          PrintValueComma(0);
-        #endif
+      #if defined AltitudeHoldBaro
+        PrintValueComma(estimatedAltitude);
+        PrintValueComma(zVelocity/100.0);
         PrintValueComma((int)altitudeHoldState);
       #else
         PrintValueComma(0);
@@ -539,8 +532,8 @@ void sendSerialTelemetry() {
         PrintValueComma(gpsData.course);
         PrintValueComma(gpsData.lat);
         PrintValueComma(gpsData.lon);
-        PrintValueComma(gpsDistanceToDestination);
-        PrintValueComma(angleToWaypoint);
+        PrintValueComma(gpsDistanceToDestination/100);
+        PrintValueComma(degrees(angleToWaypoint));
       #else
         PrintValueComma(0);
         PrintValueComma(0);
@@ -567,7 +560,7 @@ void sendSerialTelemetry() {
       case 'u': // Send range finder values
         PrintValueComma(maxRangeFinderRange);
         SERIAL_PRINTLN(minRangeFinderRange);
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif
 
@@ -576,9 +569,9 @@ void sendSerialTelemetry() {
         PrintPID(GPSROLL_PID_IDX);
         PrintPID(GPSPITCH_PID_IDX);
         PrintPID(GPSYAW_PID_IDX);
-        queryType = 'X';
+        serialQueryType = 'X';
         SERIAL_PRINTLN();
-        queryType = 'X';
+        serialQueryType = 'X';
         break;
     #endif
 
@@ -621,12 +614,12 @@ void sendSerialTelemetry() {
   
     case '!': // Send flight software version
       SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
     case '#': // Send configuration
       reportVehicleState();
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   
   #if defined(OSD) && defined(OSD_LOADFONT)
@@ -634,7 +627,7 @@ void sendSerialTelemetry() {
       if (OFF == motorArmed) {
         max7456LoadFont();
       }
-      queryType = 'X';
+      serialQueryType = 'X';
       break;
   #endif
 

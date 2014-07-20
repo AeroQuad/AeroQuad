@@ -99,7 +99,7 @@ void measureBatteryVoltage(unsigned short deltaTime) {
   batteryAlarm = false;  
   batteryWarning = false;
   for (int i = 0; i < numberOfBatteries; i++) {
-    batteryData[i].voltage = (long)analogRead(batteryData[i].vPin) * batteryData[i].vScale / (1L<<ADC_NUMBER_OF_BITS) + batteryData[i].vBias;
+    batteryData[i].voltage = filterSmooth( (long)analogRead(batteryData[i].vPin) * batteryData[i].vScale / (1L<<ADC_NUMBER_OF_BITS) + batteryData[i].vBias, batteryData[i].voltage, 0.5);
 #ifdef BM_EXTENDED
     if (batteryData[i].voltage < batteryData[i].minVoltage) {
       batteryData[i].minVoltage = batteryData[i].voltage;

@@ -99,15 +99,17 @@ void calculateFlightError()
 //    PID[RATE_XAXIS_PID_IDX].integratedError = 0.0;
 //  }
 //  previousGyroADCX = gyroADC[XAXIS];
+  PID[RATE_XAXIS_PID_IDX].integratedError = constrain(PID[RATE_XAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
   motorAxisCommandRoll = updatePID(gyroDesiredRollRate * rotationSpeedFactor, gyroADC[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
-//  PID[RATE_XAXIS_PID_IDX].integratedError = constrain(PID[RATE_XAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
+
   
 //  if (isSwitched(previousGyroADCY, gyroADC[YAXIS])) {
 //    PID[RATE_YAXIS_PID_IDX].integratedError = 0.0;
 //  }
 //  previousGyroADCY = gyroADC[YAXIS];
+  PID[RATE_YAXIS_PID_IDX].integratedError = constrain(PID[RATE_YAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
   motorAxisCommandPitch = updatePID(gyroDesiredPitchRate * rotationSpeedFactor, -gyroADC[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
-//  PID[RATE_YAXIS_PID_IDX].integratedError = constrain(PID[RATE_YAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
+
 }
 
 /**
@@ -332,13 +334,6 @@ void processFlightControl() {
   processHeading();
   
   if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
-    
-    // ********************** Process position hold or navigation **************************
-    #if defined (UseGPS)
-      #if defined (UseGPSNavigator)
-        processGpsNavigation();
-      #endif  
-    #endif
     
     // ********************** Process Altitude hold **************************
     #if defined AltitudeHoldBaro

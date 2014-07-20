@@ -152,10 +152,10 @@ void loop()
       displayNumberOfSat();
       displayDirectionToHome();
       displayDistanceToHome();
-      displayAngleToHome();
+//      displayAngleToHome();
       displayGPS_speed();
       displayGPSPosition();
-      displayGPS_altitude();
+//      displayGPS_altitude();
     }
     
     if (isRssiEnabled) {

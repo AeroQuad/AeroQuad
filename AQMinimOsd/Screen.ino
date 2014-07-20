@@ -491,12 +491,12 @@ void displayGPSPosition()
   if(Settings[L_MW_GPS_LATPOSITIONDSPL]){
     screenBuffer[0] = SYM_LAT;
     FormatGPSCoord(GPS_latitude,screenBuffer+1,4,'N','S');
-    MAX7456_WriteString(screenBuffer,((Settings[L_MW_GPS_LATPOSITIONROW]-1)*30) + Settings[L_MW_GPS_LATPOSITIONCOL]);
+    MAX7456_WriteString(screenBuffer,((Settings[L_MW_GPS_LATPOSITIONROW])*30) + Settings[L_MW_GPS_LATPOSITIONCOL]);
   }
   if(Settings[L_MW_GPS_LONPOSITIONDSPL]){
     screenBuffer[0] = SYM_LON;
     FormatGPSCoord(GPS_longitude,screenBuffer+1,4,'E','W');
-    MAX7456_WriteString(screenBuffer,((Settings[L_MW_GPS_LONPOSITIONROW]-1)*30) + Settings[L_MW_GPS_LONPOSITIONCOL]);
+    MAX7456_WriteString(screenBuffer,((Settings[L_MW_GPS_LONPOSITIONROW])*30) + Settings[L_MW_GPS_LONPOSITIONCOL]);
   }
 }
 
@@ -524,7 +524,7 @@ void displayNumberOfSat()
   screenBuffer[0] = SYM_SAT_L;
   screenBuffer[1] = SYM_SAT_R;
   itoa(GPS_numSat,screenBuffer+2,10);
-  MAX7456_WriteString(screenBuffer,((Settings[L_GPS_NUMSATPOSITIONROW]-1)*30) + Settings[L_GPS_NUMSATPOSITIONCOL]);
+  MAX7456_WriteString(screenBuffer,((Settings[L_GPS_NUMSATPOSITIONROW]-1)*30) + Settings[L_GPS_NUMSATPOSITIONCOL]-1);
 }
 
 void displayGPS_speed(void)
@@ -644,7 +644,7 @@ void displayDirectionToHome()
     return;
   }
   
-  int16_t d = MwHeading + 180 + 360 - GPS_directionToHome;
+  int16_t d = 360 - (-GPS_directionToHome);
   d *= 4;
   d += 45;
   d = (d/90)%16;

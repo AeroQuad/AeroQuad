@@ -65,6 +65,7 @@ byte flightMode = RATE_FLIGHT_MODE;
 byte previousFlightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minArmedThrottle; // initial value configured by user
+char serialQueryType = 'X';
 
 float G_Dt = 0.002; 
 int throttle = 1000;
@@ -204,7 +205,7 @@ void reportVehicleState();
 /**
  * GPS navigation global declaration
  */
-#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
+#define MAX_WAYPOINTS 8  // needed for EEPROM adr offset declarations
 #if defined (UseGPS)
 
   #include <GpsAdapter.h>
@@ -227,8 +228,8 @@ void reportVehicleState();
     int waypointIndex = -1;    
     float gpsDistanceToDestination = 99999999.0;
     GeodeticPosition waypoint[MAX_WAYPOINTS] = {
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+//      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+//      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
       GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
       
@@ -333,14 +334,14 @@ typedef struct {
 //  #endif
 
   // GPS mission storing
-//  #if defined (UseGPS)
-//    t_NVR_PID GPSROLL_PID_GAIN_ADR;
-//    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
-//    t_NVR_PID GPSYAW_PID_GAIN_ADR;
-//  
-//    float GPS_MISSION_NB_POINT_ADR;
-//    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
-//  #endif
+  #if defined (UseGPS)
+    t_NVR_PID GPSROLL_PID_GAIN_ADR;
+    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+    t_NVR_PID GPSYAW_PID_GAIN_ADR;
+  
+    float GPS_MISSION_NB_POINT_ADR;
+    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+  #endif
 } t_NVR_Data;  
 
 
