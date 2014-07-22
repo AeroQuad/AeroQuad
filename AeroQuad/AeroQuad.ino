@@ -32,12 +32,10 @@
 // Define Security Checks
 //
 
-#if defined (Naze32) || defined (Naze32Full)
-  #define AeroQuadSTM32
-#endif
 
 
-#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (AeroQuadSTM32)
+#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (Naze32Full)
+  #define USE_HORIZON_MODE
   #define HeadingMagHold		
   #define AltitudeHoldBaro		
 
@@ -64,12 +62,11 @@
 
 #endif
 
-
 #if defined (Naze32) || defined (Naze32Full)
   #define AeroQuadSTM32
-  #define BattMonitor			  
+  #define BattMonitor	
+  #define USE_HORIZON_MODE		  
 #endif
-
 
 
 #if defined(UseGPSNavigator) && !defined(AltitudeHoldBaro)
@@ -790,7 +787,7 @@
 //********************************************************
 #if defined(HMC5843) 
   #include <Magnetometer_HMC5843.h>
-#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L) || defined (Naze32)
+#elif defined(SPARKFUN_9DOF_5883L) || defined(SPARKFUN_5883L_BOB) || defined(HMC5883L) || defined (Naze32Full)
   #include <Magnetometer_HMC5883L.h>
 #endif
 
@@ -945,13 +942,6 @@ void setup() {
   #ifdef AltitudeHoldBaro
     initializeBaro();
     vehicleState |= ALTITUDEHOLD_ENABLED;
-  #endif
-  #ifdef AltitudeHoldRangeFinder
-    inititalizeRangeFinders();
-    vehicleState |= RANGE_ENABLED;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = PID[BARO_ALTITUDE_HOLD_PID_IDX].P*2;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = PID[BARO_ALTITUDE_HOLD_PID_IDX].I;
-    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = PID[BARO_ALTITUDE_HOLD_PID_IDX].D;
   #endif
   
   #ifdef BattMonitor

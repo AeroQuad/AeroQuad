@@ -46,7 +46,7 @@ void readSpecificMag(float *rawMag) {
     rawMag[YAXIS] =  readShortI2C();
     rawMag[ZAXIS] = -readShortI2C();
     rawMag[XAXIS] =  readShortI2C();
-  #elif defined (Naze32)
+  #elif defined (Naze32Full)
     rawMag[XAXIS] = -readShortI2C();
     rawMag[ZAXIS] = -readShortI2C();
     rawMag[YAXIS] =  readShortI2C();

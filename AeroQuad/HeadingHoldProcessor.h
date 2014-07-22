@@ -70,8 +70,10 @@ void processHeading()
   int userYawCommand = 0.0;
   if ((receiverCommand[receiverChannelMap[ZAXIS]] > (MIDCOMMAND + 15)) || 
       (receiverCommand[receiverChannelMap[ZAXIS]] < (MIDCOMMAND - 15))) {
-        userYawCommand = map(receiverCommand[receiverChannelMap[ZAXIS]] - 1500, -500 , 500, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor) * yawSpeedFactor;
+        userYawCommand = map(receiverCommand[receiverChannelMap[ZAXIS]] - 1500, -500 , 500, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor) * 
+                         map((abs(receiverCommand[receiverChannelMap[ZAXIS]] - 1500)), 0 , 500, 100, yawSpeedFactor*100) / 100.0;
   }
+  
   motorAxisCommandYaw = updatePID(userYawCommand, gyroADC[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }
 
