@@ -56,7 +56,7 @@ void calculateFlightError()
   
   switch(flightMode)
   {
-//    #if defined (UseGPSNavigator)
+//    #if defined (UseGPS)
 //      if (navigationState == ON || positionHoldState == ON) {
 //        gyroDesiredRollRate  = updatePID((userRollCommand * 1.3 + gpsRollAxisCorrection), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
 //        gyroDesiredPitchRate = updatePID((userPitchCommand * 1.3 + gpsPitchAxisCorrection), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
@@ -150,19 +150,11 @@ void processCalibrateESC()
       }
     }
     else {
-      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      #if defined AltitudeHoldBaro
         if (altitudeHoldState == ON) {
-          #if defined AltitudeHoldBaro
             baroAltitudeToHoldTarget -= 0.01;
-          #endif
-          #if defined AltitudeHoldRangeFinder
-            if (sonarAltitudeToHoldTarget != INVALID_RANGE) {
-              sonarAltitudeToHoldTarget -= 0.01;
-            }
-          #endif
         }
         else {
-      #endif
           if (batteryMonitorStartThrottle == 0) {  // init battery monitor throttle correction!
             batteryMonitorStartTime = millis();
             if (throttle < batteryMonitorThrottleTarget) {
@@ -182,7 +174,6 @@ void processCalibrateESC()
           else {
             batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
           }
-      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         }
       #endif
     }

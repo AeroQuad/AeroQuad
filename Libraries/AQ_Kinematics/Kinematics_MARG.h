@@ -263,7 +263,7 @@ void calculateKinematicsMAGR(float gx, float gy, float gz,
 
 	kinematicsAngle[XAXIS] = atan2( 2.0f * (q0q1 + q2q3), q0q0 - q1q1 - q2q2 + q3q3 );
 	kinematicsAngle[YAXIS] = -asin( 2.0f * (q1q3 - q0q2) );
-	trueNorthHeading = -atan2( 2.0f * (q1q2 + q0q3), q0q0 + q1q1 - q2q2 - q3q3 );
+	trueNorthHeading = atan2( 2.0f * (q1q2 + q0q3), q0q0 + q1q1 - q2q2 - q3q3 );
 
 	kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
     kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;

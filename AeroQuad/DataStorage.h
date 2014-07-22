@@ -209,7 +209,8 @@ void initializeEEPROM() {
     minRangeFinderRange = 0.0;
   #endif
   
-  #if defined (UseGPSNavigator)
+  #if defined (UseGPS)
+    isGpsEnabled = false;
     missionNbPoint = 0;
     PID[GPSROLL_PID_IDX].P = 0.8;
     PID[GPSROLL_PID_IDX].I = 0.0;
@@ -303,7 +304,8 @@ void readEEPROM() {
   flightMode = readFloat(FLIGHTMODE_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
 
-  #if defined (UseGPSNavigator)
+  #if defined (UseGPS)
+    isGpsEnabled = readFloat(GPS_ENABLED_ADR);
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     readPID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);
@@ -402,7 +404,8 @@ void writeEEPROM(){
     writeFloat(minRangeFinderRange, RANGE_FINDER_MIN_ADR);
   #endif
   
-  #if defined (UseGPSNavigator)
+  #if defined (UseGPS)
+    writeFloat(isGpsEnabled, GPS_ENABLED_ADR);
     writeFloat(missionNbPoint, GPS_MISSION_NB_POINT_ADR);
     writePID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
     writePID(GPSPITCH_PID_IDX, GPSPITCH_PID_GAIN_ADR);

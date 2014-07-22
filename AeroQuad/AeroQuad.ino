@@ -47,8 +47,6 @@
 
   
   #define UseGPS		        
-  #define UseGPSNavigator
-
 
 //  #define OSD
 //  #define ShowRSSI                  // This REQUIRES a RSSI reader
@@ -69,12 +67,16 @@
 #endif
 
 
-#if defined(UseGPSNavigator) && !defined(AltitudeHoldBaro)
+#if defined(UseGPS) && !defined(AltitudeHoldBaro)
   #error "GpsNavigation NEED AltitudeHoldBaro defined"
 #endif
 
-#if defined(AutoLanding) && (!defined(AltitudeHoldBaro) || !defined(AltitudeHoldRangeFinder))
-  #error "AutoLanding NEED AltitudeHoldBaro and AltitudeHoldRangeFinder defined"
+#if defined(UseGPS) && !defined(HeadingMagHold)
+  #error "GpsNavigation NEED HeadingMagHold defined"
+#endif
+
+#if defined(AutoLanding) && !defined(AltitudeHoldBaro)
+  #error "AutoLanding NEED AltitudeHoldBaro defined"
 #endif
 
 #if defined(ReceiverSBUS) && defined(SlowTelemetry)
@@ -140,11 +142,9 @@
   #endif
 
   #undef AltitudeHoldBaro
-  #undef AltitudeHoldRangeFinder
   #undef CameraControl
   #undef OSD
   #undef UseGPS
-  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_v18 specific initialization need here
@@ -221,11 +221,9 @@
   // unsupported in mini
   #undef HeadingMagHold
   #undef AltitudeHoldBaro
-  #undef AltitudeHoldRangeFinder  
   #undef CameraControl
   #undef OSD
   #undef UseGPS
-  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_Mini specific initialization need here
@@ -295,11 +293,9 @@
   #undef HeadingMagHold
   #undef BattMonitor
   #undef AltitudeHoldBaro
-  #undef AltitudeHoldRangeFinder  
   #undef CameraControl
   #undef OSD
   #undef UseGPS
-  #undef UseGPSNavigator
 
   /**
    * Put AeroQuad_Mini specific initialization need here
@@ -379,9 +375,6 @@
   #ifdef AltitudeHoldBaro    
     #define BMP085 
   #endif
-  #ifdef AltitudeHoldRangeFinder
-    #define XLMAXSONAR 
-  #endif
 
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -399,10 +392,6 @@
     #define MAX7456_OSD
   #endif  
   
-  #ifndef UseGPS
-    #undef UseGPSNavigator
-  #endif
-
   /**
    * Put AeroQuadMega_v2 specific initialization need here
    */
@@ -499,10 +488,6 @@
   #ifdef AltitudeHoldBaro
     #define BMP085
   #endif
-  #ifdef AltitudeHoldRangeFinder
-    #define XLMAXSONAR 
-  #endif
-
 
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -520,11 +505,6 @@
     #define MAX7456_OSD
   #endif  
   
-  #ifndef UseGPS
-    #undef UseGPSNavigator
-  #endif
-
-
   /**
    * Put AeroQuadMega_v21 specific initialization need here
    */
@@ -624,10 +604,6 @@
     #define MS5611
     #define USE_MS5611_ALTERNATE_ADDRESS
   #endif
-  #ifdef AltitudeHoldRangeFinder
-    #define XLMAXSONAR 
-  #endif
-
 
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -645,10 +621,6 @@
     #define MAX7456_OSD
   #endif  
   
-  #ifndef UseGPS
-    #undef UseGPSNavigator
-  #endif
-
 
   /**
    * Put AeroQuadMega_v21 specific initialization need here
@@ -966,8 +938,10 @@ void setup() {
   #endif
 
   #if defined(UseGPS)
-    vehicleState |= GPS_ENABLED;
-    initializeGps();
+    if (isGpsEnabled) {
+      vehicleState |= GPS_ENABLED;
+      initializeGps();
+    }
   #endif 
 
   #ifdef SlowTelemetry
@@ -1002,13 +976,8 @@ void process100HzTask() {
   }
    
   #if defined (HeadingMagHold) 
-    if (vehicleState & MAG_DETECTED) {
-      calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
-      magDataUpdate = false;
-    }
-    else {
-      calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
-    }
+    calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
+    magDataUpdate = false;
   #else
     calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   #endif
@@ -1032,7 +1001,9 @@ void process100HzTask() {
   processFlightControl();
   
   #if defined(UseGPS)
-    updateGps();
+    if (isGpsEnabled) {
+      updateGps();
+    }
   #endif      
   
   #if defined(CameraControl)
@@ -1058,12 +1029,10 @@ void process50HzTask() {
     readRSSI();
   #endif
 
-  #ifdef AltitudeHoldRangeFinder
-    updateRangeFinders();
-  #endif
-
   #if defined(UseGPS)
-    processGpsNavigation();
+    if (isGpsEnabled) {
+      processGpsNavigation();
+    }
   #endif      
 }
 

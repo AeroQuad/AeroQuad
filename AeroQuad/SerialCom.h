@@ -94,16 +94,12 @@ void readSerialCommand() {
       writeEEPROM();
       break;
 
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    #if defined AltitudeHoldBaro
       case 'D': // Altitude hold PID
           readSerialPID(BARO_ALTITUDE_HOLD_PID_IDX);
           altitudeHoldBump = readFloatSerial();
           altitudeHoldMaxVelocitySpeed = readFloatSerial();
-          #if defined AltitudeHoldBaro
-            baroSmoothFactor = readFloatSerial();
-          #else
-            readFloatSerial();
-          #endif
+          baroSmoothFactor = readFloatSerial();
           readSerialPID(ZDAMPENING_PID_IDX);
           writeEEPROM();
           break;
@@ -170,16 +166,6 @@ void readSerialCommand() {
         break;
     #endif
 
-    #ifdef UseGPSNavigator
-      case 'O': // define waypoints
-          missionNbPoint = readIntegerSerial();
-          waypoint[missionNbPoint].latitude = readIntegerSerial();
-          waypoint[missionNbPoint].longitude = readIntegerSerial();
-          waypoint[missionNbPoint].altitude = readIntegerSerial();
-          writeEEPROM();
-          break;
-    #endif
-
     #ifdef CameraControl
       case 'P': //  read Camera values
           cameraMode = readFloatSerial();
@@ -218,20 +204,24 @@ void readSerialCommand() {
       writeEEPROM();
       break;
 
-    #if defined (AltitudeHoldRangeFinder)
-      case 'U': // Range Finder
-        maxRangeFinderRange = readFloatSerial();
-        minRangeFinderRange = readFloatSerial();
+    #if defined (UseGPS)
+      case 'U':
+        isGpsEnabled = readFloatSerial();
         writeEEPROM();
         break;
-    #endif
       
-
-    #if defined (UseGPSNavigator)
       case 'V': // GPS
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
         readSerialPID(GPSYAW_PID_IDX);
+        writeEEPROM();
+        break;
+        
+      case 'O': // define waypoints
+        missionNbPoint = readIntegerSerial();
+        waypoint[missionNbPoint].latitude = readIntegerSerial();
+        waypoint[missionNbPoint].longitude = readIntegerSerial();
+        waypoint[missionNbPoint].altitude = readIntegerSerial();
         writeEEPROM();
         break;
     #endif
@@ -255,8 +245,6 @@ void readSerialCommand() {
       receiverTypeUsed = readFloatSerial();
       writeEEPROM();
       break;
-      
-
 
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
       validateCalibrateCommand(1);
@@ -374,16 +362,12 @@ void sendSerialTelemetry() {
       serialQueryType = 'X';
       break;
 
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    #if defined AltitudeHoldBaro
     case 'd': // Altitude Hold
         PrintPID(BARO_ALTITUDE_HOLD_PID_IDX);
         PrintValueComma(altitudeHoldBump);
         PrintValueComma(altitudeHoldMaxVelocitySpeed);
-        #if defined AltitudeHoldBaro
-          PrintValueComma(baroSmoothFactor);
-        #else
-          PrintValueComma(0);
-        #endif
+        PrintValueComma(baroSmoothFactor);
         PrintPID(ZDAMPENING_PID_IDX);
         SERIAL_PRINTLN();
         serialQueryType = 'X';
@@ -452,7 +436,7 @@ void sendSerialTelemetry() {
         break;
     #endif      
 
-    #ifdef UseGPSNavigator
+    #if defined (UseGPS)
       case 'o': // send waypoints
         for (byte index = 0; index < MAX_WAYPOINTS; index++) {
           PrintValueComma(index);
@@ -524,7 +508,7 @@ void sendSerialTelemetry() {
       
       PrintValueComma(flightMode);
       
-      #if defined(UseGPS)
+      #if defined (UseGPS)
         PrintValueComma(gpsData.state);
         PrintValueComma(gpsData.sats);
         PrintValueComma(gpsData.speed);
@@ -556,15 +540,7 @@ void sendSerialTelemetry() {
       SERIAL_PRINTLN();
       break;
 
-    #if defined (AltitudeHoldRangeFinder)
-      case 'u': // Send range finder values
-        PrintValueComma(maxRangeFinderRange);
-        SERIAL_PRINTLN(minRangeFinderRange);
-        serialQueryType = 'X';
-        break;
-    #endif
-
-    #if defined (UseGPSNavigator)
+    #if defined (UseGPS)
       case 'v': // Send GPS PIDs
         PrintPID(GPSROLL_PID_IDX);
         PrintPID(GPSPITCH_PID_IDX);

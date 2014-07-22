@@ -70,8 +70,6 @@ void initHomeBase() {
 }
 
 
-#if defined UseGPSNavigator
-
   /*
     Because we are using lat and lon to do our distance errors here's a quick chart:
     100 	= 1m
@@ -352,7 +350,7 @@ void initHomeBase() {
       clearNewGpsPosition();
     }
   }
-#endif  // #define UseGPSNavigator
+
 
 
 #endif

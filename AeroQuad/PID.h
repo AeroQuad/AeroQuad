@@ -34,7 +34,7 @@ enum {
   #if defined AltitudeHoldRangeFinder
     SONAR_ALTITUDE_HOLD_PID_IDX,
   #endif
-  #if defined UseGPSNavigator
+  #if defined UseGPS
     GPSPITCH_PID_IDX,
     GPSROLL_PID_IDX,
     GPSYAW_PID_IDX,

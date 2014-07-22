@@ -164,7 +164,7 @@ void reportVehicleState();
 /**
  * Altitude control global declaration
  */
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+#if defined AltitudeHoldBaro
   // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
  
   #define ALTITUDE_HOLD_STATE 1
@@ -180,12 +180,7 @@ void reportVehicleState();
   float estimatedAltitude = 0.0;
   float previousBaroAltitude = 0.0;
   
-  #if defined AltitudeHoldBaro
-    float baroAltitudeToHoldTarget = 0.0;
-  #endif  
-  #if defined AltitudeHoldRangeFinder
-    float sonarAltitudeToHoldTarget = 0.0;
-  #endif
+  float baroAltitudeToHoldTarget = 0.0;
 #endif
 //////////////////////////////////////////////////////
 
@@ -205,39 +200,37 @@ void reportVehicleState();
 /**
  * GPS navigation global declaration
  */
-#define MAX_WAYPOINTS 8  // needed for EEPROM adr offset declarations
 #if defined (UseGPS)
-
-  #include <GpsAdapter.h>
+  #define MAX_WAYPOINTS 8  // needed for EEPROM adr offset declarations
+//  #include <GpsAdapter.h>
   
   #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
   GeodeticPosition homePosition = GPS_INVALID_POSITION; 
   GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
 
-  #if defined UseGPSNavigator
-    byte navigationState = OFF;  // ON, OFF or ALTPANIC
-    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+  byte navigationState = OFF;  // ON, OFF or ALTPANIC
+  byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
 
-    int missionNbPoint = 0;
-    int gpsRollAxisCorrection = 0;
-    int gpsPitchAxisCorrection = 0;
-    int gpsYawAxisCorrection = 0;
-    boolean isStorePositionNeeded = false;
-    boolean isInitNavigationNeeded = false;
+  int missionNbPoint = 0;
+  int gpsRollAxisCorrection = 0;
+  int gpsPitchAxisCorrection = 0;
+  int gpsYawAxisCorrection = 0;
+  boolean isStorePositionNeeded = false;
+  boolean isInitNavigationNeeded = false;
+  boolean isGpsEnabled = false;
 
-    int waypointIndex = -1;    
-    float gpsDistanceToDestination = 99999999.0;
-    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
+  int waypointIndex = -1;    
+  float gpsDistanceToDestination = 99999999.0;
+  GeodeticPosition waypoint[MAX_WAYPOINTS] = {
 //      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
 //      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
-      
-    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
+    GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+    GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
     
-    void evaluateMissionPositionToReach();
-    void processGpsNavigation();
-  #endif
+  GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
+  
+  void evaluateMissionPositionToReach();
+  void processGpsNavigation();
 #endif
 //////////////////////////////////////////////////////
 
@@ -309,11 +302,15 @@ typedef struct {
     t_NVR_PID ZDAMP_PID_GAIN_ADR;
   #endif
   
-//  // Range Finder
-//  #if defined (AltitudeHoldRangeFinder)
-//    float RANGE_FINDER_MAX_ADR;
-//    float RANGE_FINDER_MIN_ADR;
-//  #endif
+  #if defined (UseGPS)
+    float GPS_ENABLED_ADR;
+    t_NVR_PID GPSROLL_PID_GAIN_ADR;
+    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
+    t_NVR_PID GPSYAW_PID_GAIN_ADR;
+  
+    float GPS_MISSION_NB_POINT_ADR;
+    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
+  #endif
   
   // Camera Control
 //  #if defined (CameraControl)
@@ -334,14 +331,7 @@ typedef struct {
 //  #endif
 
   // GPS mission storing
-  #if defined (UseGPS)
-    t_NVR_PID GPSROLL_PID_GAIN_ADR;
-    t_NVR_PID GPSPITCH_PID_GAIN_ADR;
-    t_NVR_PID GPSYAW_PID_GAIN_ADR;
   
-    float GPS_MISSION_NB_POINT_ADR;
-    GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
-  #endif
 } t_NVR_Data;  
 
 

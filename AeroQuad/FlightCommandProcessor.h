@@ -27,12 +27,12 @@
 
 
 
-#if defined (AltitudeHoldBaro) || defined (AltitudeHoldRangeFinder)
+#if defined (AltitudeHoldBaro)
   boolean isAltitudeHoldEnabledByUser() {
     if (!(vehicleState & BARO_DETECTED)) {
       return false;
     }
-    #if defined (UseGPSNavigator)
+    #if defined (UseGPS)
       if ((receiverCommand[receiverChannelMap[AUX1]] < 1666) || (receiverCommand[receiverChannelMap[AUX2]] < 1666)) {
         return true;
       }
@@ -109,11 +109,6 @@
             PID[BARO_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
             PID[BARO_ALTITUDE_HOLD_PID_IDX].lastError = baroAltitudeToHoldTarget;
           #endif
-          #if defined AltitudeHoldRangeFinder
-            sonarAltitudeToHoldTarget = rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].integratedError = 0;
-            PID[SONAR_ALTITUDE_HOLD_PID_IDX].lastError = sonarAltitudeToHoldTarget;
-          #endif
           altitudeHoldThrottle = receiverCommand[receiverChannelMap[THROTTLE]];
           isAutoLandingInitialized = true;
         }
@@ -140,7 +135,7 @@
 #endif
 
 
-#if defined (UseGPSNavigator)
+#if defined (UseGPS)
   void processGpsNavigationStateFromReceiverCommand() {
     // Init home command
     if (motorArmed == OFF && 
@@ -305,7 +300,7 @@ void readPilotCommands() {
   }
   previousFlightMode = flightMode;
     
-  #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+  #if defined AltitudeHoldBaro
     processAltitudeHoldStateFromReceiverCommand();
   #endif
   
@@ -313,8 +308,14 @@ void readPilotCommands() {
     processAutoLandingStateFromReceiverCommand();
   #endif
 
-  #if defined (UseGPSNavigator)
-    processGpsNavigationStateFromReceiverCommand();
+  #if defined (UseGPS)
+    if (isGpsEnabled) {
+      processGpsNavigationStateFromReceiverCommand();
+    }
+    else {
+      positionHoldState = OFF;
+      navigationState = OFF;
+    }
   #endif
 }
 
