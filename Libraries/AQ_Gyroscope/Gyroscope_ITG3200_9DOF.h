@@ -36,7 +36,7 @@ void measureSpecificGyroSum() {
   gyroSample[ZAXIS] += readShortI2C();
 }
 
-void evaluateSpecificGyroRate(int *gyroADC) {
+void evaluateSpecificGyroRate(long *gyroADC) {
 
   gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount) - gyroZero[XAXIS];
   gyroADC[YAXIS] = (gyroSample[YAXIS] / gyroSampleCount) - gyroZero[YAXIS];

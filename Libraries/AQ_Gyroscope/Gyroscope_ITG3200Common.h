@@ -45,10 +45,10 @@
 #define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
-float gyroTempBias[3] = {0.0,0.0,0.0};
-void measureSpecificGyroADC(int *gyroADC);
+//float gyroTempBias[3] = {0.0,0.0,0.0};
+void measureSpecificGyroADC(long *gyroADC);
 void measureSpecificGyroSum();
-void evaluateSpecificGyroRate(int *gyroADC);
+void evaluateSpecificGyroRate(long *gyroADC);
 
 void initializeGyro() {
   if ((readWhoI2C(ITG3200_ADDRESS) & ITG3200_IDENTITY_MASK) == ITG3200_IDENTITY) {

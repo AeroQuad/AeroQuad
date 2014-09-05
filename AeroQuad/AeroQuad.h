@@ -84,6 +84,9 @@ float userRatePitchP = 0.0;
 float userRatePitchD = 0.0;
 int throttlePIDAdjustmentFactor = 0;
 
+float fastTaskGyroRate[3] = {0.0,0.0,0.0};
+byte fastTaskGyroSampleCount = 0;
+unsigned long fastTaskPreviousTime = 0;
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -96,6 +99,8 @@ unsigned long lowPriorityTenHZpreviousTime = 0;
 unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
+
+
 
 
 

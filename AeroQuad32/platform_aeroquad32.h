@@ -127,9 +127,10 @@ unsigned long measureCriticalSensorsTime = 0;
 void measureCriticalSensors() {
   // read sensors not faster than every 1 ms
   measureCriticalSensorsTime = micros();
+  readMPU6000Sensors();
+  measureGyroSum();
+
   if ((measureCriticalSensorsTime - previousMeasureCriticalSensorsTime) >= 1000) {
-    readMPU6000Sensors();
-    measureGyroSum();
     measureAccelSum();
     previousMeasureCriticalSensorsTime = measureCriticalSensorsTime;
   }

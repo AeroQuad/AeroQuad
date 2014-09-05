@@ -65,12 +65,12 @@ void measureGyroSum() {
   gyroSample[XAXIS] += (gyroRaw[XAXIS]=MPU6000.data.gyro.x);
   gyroSample[YAXIS] += (gyroRaw[YAXIS]=MPU6000.data.gyro.y);
   gyroSample[ZAXIS] += (gyroRaw[ZAXIS]=MPU6000.data.gyro.z);
-
+  
   gyroSampleCount++;
 }
 
 void evaluateGyroRate() {
-  
+
   gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount) - gyroZero[XAXIS];
   gyroADC[YAXIS] = gyroZero[YAXIS] - (gyroSample[YAXIS] / gyroSampleCount);
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - (gyroSample[ZAXIS] / gyroSampleCount);

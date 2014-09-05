@@ -34,7 +34,7 @@
 
 
 
-#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (Naze32Full)
+#if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (Naze32Full) || defined (AeroQuadSTM32)
   #define USE_HORIZON_MODE
   #define HeadingMagHold		
   #define AltitudeHoldBaro		
@@ -959,6 +959,19 @@ void setup() {
   
 }
 
+void processFastTask() {
+  G_Dt = (currentTime - fastTaskPreviousTime) / 1000000.0;
+  fastTaskPreviousTime = currentTime;
+  
+  evaluateGyroRate();
+  for (int axis = XAXIS; axis <= ZAXIS; axis++) {
+    fastTaskGyroRate[axis] += gyroRate[axis];
+  }
+  fastTaskGyroSampleCount++;
+  
+  processFlightControl();
+}
+
 
 /*******************************************************************
  * 100Hz task
@@ -968,13 +981,15 @@ void process100HzTask() {
   G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
   hundredHZpreviousTime = currentTime;
   
-  evaluateGyroRate();
+//  evaluateGyroRate();
   evaluateMetersPerSec();
-
   for (int axis = XAXIS; axis <= ZAXIS; axis++) {
     filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+    gyroRate[axis] = fastTaskGyroRate[axis] / fastTaskGyroSampleCount;
+    fastTaskGyroRate[axis] = 0;
   }
-   
+  fastTaskGyroSampleCount = 0;
+
   #if defined (HeadingMagHold) 
     calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
     magDataUpdate = false;
@@ -982,13 +997,14 @@ void process100HzTask() {
     calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], G_Dt);
   #endif
 
+
   #if defined (AltitudeHoldBaro)
     if (vehicleState & BARO_DETECTED)
     {
-      measureBaroSum();
       float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
       computeVelocity(filteredZAccel, G_Dt);
-    
+      
+      measureBaroSum();
       if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
         evaluateBaroAltitude();
         estimatedAltitude = getBaroAltitude();
@@ -998,8 +1014,6 @@ void process100HzTask() {
     }
   #endif
         
-  processFlightControl();
-  
   #if defined(UseGPS)
     if (isGpsEnabled) {
       updateGps();
@@ -1024,7 +1038,16 @@ void process50HzTask() {
 
   // Reads external pilot commands and performs functions based on stick configuration
   readPilotCommands(); 
-  
+
+  // ********************** Process Altitude hold **************************
+  #if defined AltitudeHoldBaro
+    processAltitudeControl();
+  #else
+    throttle = receiverCommand[receiverChannelMap[THROTTLE]];
+  #endif
+    
+  processThrottlePIDAdjustment();
+
   #if defined(UseAnalogRSSIReader) || defined(UseEzUHFRSSIReader) || defined(UseSBUSRSSIReader)
     readRSSI();
   #endif
@@ -1109,12 +1132,18 @@ void process1HzTask() {
 /*******************************************************************
  * Main loop funtions
  ******************************************************************/
+
+
 void loop () {
   
   currentTime = micros();
   deltaTime = currentTime - previousTime;
 
   measureCriticalSensors();
+  
+  if (currentTime >= (fastTaskPreviousTime + 2500L)) {  // 2500 = 400Hz and 2000 = 500Hz
+    processFastTask();
+  }
 
   // ================================================================
   // 100Hz task loop
@@ -1125,14 +1154,12 @@ void loop () {
     
     process100HzTask();
 
-    measureCriticalSensors();
     // ================================================================
     // 50Hz task loop
     // ================================================================
     if (frameCounter % TASK_50HZ == 0) {  //  50 Hz tasks
       process50HzTask();
     }
-    measureCriticalSensors();
 
     // ================================================================
     // 10Hz task loop
@@ -1146,7 +1173,6 @@ void loop () {
     else if ((currentTime - lowPriorityTenHZpreviousTime2) > 100000) {
       process10HzTask3();
     }
-    measureCriticalSensors();
     
     // ================================================================
     // 1Hz task loop
@@ -1154,7 +1180,6 @@ void loop () {
     if (frameCounter % TASK_1HZ == 0) {  //   1 Hz tasks
       process1HzTask();
     }
-    measureCriticalSensors();
     
     previousTime = currentTime;
   }

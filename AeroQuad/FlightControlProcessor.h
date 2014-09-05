@@ -94,11 +94,8 @@ void calculateFlightError()
     #endif
   }
   
-//  PID[RATE_XAXIS_PID_IDX].integratedError = constrain(PID[RATE_XAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
-  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroADC[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
-  
-//  PID[RATE_YAXIS_PID_IDX].integratedError = constrain(PID[RATE_YAXIS_PID_IDX].integratedError, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor); 
-  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroADC[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
+  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroADC[XAXIS], &PID[RATE_XAXIS_PID_IDX], gyroOneMeterSecADCFactor);
+  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroADC[YAXIS], &PID[RATE_YAXIS_PID_IDX], gyroOneMeterSecADCFactor);
 }
 
 /**
@@ -141,115 +138,78 @@ void processCalibrateESC()
  * alarm was reach, and the throttle is slowly decrease for a minute til
  * batteryMonitorThrottle that is configurable with the configurator
  */
-#if defined BattMonitor && defined BattMonitorAutoDescent
-  void processBatteryMonitorThrottleAdjustment() {
-    
-    if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
-      if (batteryAlarm) {
-        batteryMonitorAlarmCounter++;
-      }
-    }
-    else {
-      #if defined AltitudeHoldBaro
-        if (altitudeHoldState == ON) {
-            baroAltitudeToHoldTarget -= 0.01;
-        }
-        else {
-          if (batteryMonitorStartThrottle == 0) {  // init battery monitor throttle correction!
-            batteryMonitorStartTime = millis();
-            if (throttle < batteryMonitorThrottleTarget) {
-              batteryMonitorStartThrottle = batteryMonitorThrottleTarget;
-            }
-            else {
-              batteryMonitorStartThrottle = throttle; 
-            }
-          }
-          int batteryMonitorThrottle = map(millis()-batteryMonitorStartTime, 0, batteryMonitorGoingDownTime, batteryMonitorStartThrottle, batteryMonitorThrottleTarget);
-          if (batteryMonitorThrottle < batteryMonitorThrottleTarget) {
-            batteryMonitorThrottle = batteryMonitorThrottleTarget;
-          }
-          if (throttle < batteryMonitorThrottle) {
-            batteyMonitorThrottleCorrection = 0;
-          }
-          else {
-            batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
-          }
-        }
-      #endif
-    }
-  }
-#endif  
+//#if defined BattMonitor && defined BattMonitorAutoDescent
+//  void processBatteryMonitorThrottleAdjustment() {
+//    
+//    if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
+//      if (batteryAlarm) {
+//        batteryMonitorAlarmCounter++;
+//      }
+//    }
+//    else {
+//      #if defined AltitudeHoldBaro
+//        if (altitudeHoldState == ON) {
+//            baroAltitudeToHoldTarget -= 0.01;
+//        }
+//        else {
+//          if (batteryMonitorStartThrottle == 0) {  // init battery monitor throttle correction!
+//            batteryMonitorStartTime = millis();
+//            if (throttle < batteryMonitorThrottleTarget) {
+//              batteryMonitorStartThrottle = batteryMonitorThrottleTarget;
+//            }
+//            else {
+//              batteryMonitorStartThrottle = throttle; 
+//            }
+//          }
+//          int batteryMonitorThrottle = map(millis()-batteryMonitorStartTime, 0, batteryMonitorGoingDownTime, batteryMonitorStartThrottle, batteryMonitorThrottleTarget);
+//          if (batteryMonitorThrottle < batteryMonitorThrottleTarget) {
+//            batteryMonitorThrottle = batteryMonitorThrottleTarget;
+//          }
+//          if (throttle < batteryMonitorThrottle) {
+//            batteyMonitorThrottleCorrection = 0;
+//          }
+//          else {
+//            batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
+//          }
+//        }
+//      #endif
+//    }
+//  }
+//#endif  
 
 
-#if defined AutoLanding
-  #define BARO_AUTO_LANDING_DESCENT_SPEED 0.008
-  #define SONAR_AUTO_LANDING_DESCENT_SPEED 0.005
-  void processAutoLandingAltitudeCorrection() {
-    if (autoLandingState != OFF) {   
-
-      if (autoLandingState == BARO_AUTO_DESCENT_STATE) {
-        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
-        if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) { 
-          autoLandingState = SONAR_AUTO_DESCENT_STATE;
-        }
-      }
-      else if (autoLandingState == SONAR_AUTO_DESCENT_STATE) {
-        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
-        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
-        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.5) {
-          autoLandingState = MOTOR_AUTO_DESCENT_STATE;
-        }
-      }
-      else {
-        autoLandingThrottleCorrection -= 1;
-        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
-        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
-
-        if (((throttle + autoLandingThrottleCorrection) < 1000) || (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.20)) {
-          commandAllMotors(MINCOMMAND);
-          motorArmed = OFF;
-        }
-      }
-    }
- }
-#endif
-
-
-/**
- * processThrottleCorrection
- * 
- * This function will add some throttle imput if the craft is angled
- * this prevent the craft to loose altitude when angled.
- * it also add the battery throttle correction in case
- * of we are in auto-descent.
- * 
- * Special thank to Ziojo for this.
- */
-void processThrottleCorrection() {
- 
-  int throttleAdjust = 0;
-  #if defined UseGPSNavigator
-    if (navigationState == ON || positionHoldState == ON) {
-      throttleAdjust = throttle / (cos (kinematicsAngle[XAXIS]*0.55) * cos (kinematicsAngle[YAXIS]*0.55));
-      throttleAdjust = constrain ((throttleAdjust - throttle), 0, 50); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
-    }
-  #endif
-  #if defined BattMonitorAutoDescent
-    throttleAdjust += batteyMonitorThrottleCorrection;
-  #endif
-  #if defined (AutoLanding)
-    #if defined BattMonitorAutoDescent
-      if (batteyMonitorThrottleCorrection != 0) { // don't auto land in the same time that the battery monitor do auto descent, or Override the auto descent to land, TBD
-        throttleAdjust += autoLandingThrottleCorrection;
-      }
-    #else
-      throttleAdjust += autoLandingThrottleCorrection;
-    #endif
-  #endif
-  
-  throttle = constrain((throttle + throttleAdjust),MINCOMMAND,MAXCOMMAND-150);  // limmit throttle to leave some space for motor correction in max throttle manuever
-}
-
+//#if defined AutoLanding
+//  #define BARO_AUTO_LANDING_DESCENT_SPEED 0.008
+//  #define SONAR_AUTO_LANDING_DESCENT_SPEED 0.005
+//  void processAutoLandingAltitudeCorrection() {
+//    if (autoLandingState != OFF) {   
+//
+//      if (autoLandingState == BARO_AUTO_DESCENT_STATE) {
+//        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+//        if (isOnRangerRange(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX])) { 
+//          autoLandingState = SONAR_AUTO_DESCENT_STATE;
+//        }
+//      }
+//      else if (autoLandingState == SONAR_AUTO_DESCENT_STATE) {
+//        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+//        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
+//        if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.5) {
+//          autoLandingState = MOTOR_AUTO_DESCENT_STATE;
+//        }
+//      }
+//      else {
+//        autoLandingThrottleCorrection -= 1;
+//        baroAltitudeToHoldTarget -= BARO_AUTO_LANDING_DESCENT_SPEED;
+//        sonarAltitudeToHoldTarget -= SONAR_AUTO_LANDING_DESCENT_SPEED;
+//
+//        if (((throttle + autoLandingThrottleCorrection) < 1000) || (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] < 0.20)) {
+//          commandAllMotors(MINCOMMAND);
+//          motorArmed = OFF;
+//        }
+//      }
+//    }
+// }
+//#endif
 
 /**
  * processHardManuevers
@@ -312,31 +272,6 @@ void processFlightControl() {
   
   // ********************** Update Yaw ***************************************
   processHeading();
-  
-  if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  // 50hz task
-    
-    // ********************** Process Altitude hold **************************
-    #if defined AltitudeHoldBaro
-      processAltitudeControl();
-    #else
-      throttle = receiverCommand[receiverChannelMap[THROTTLE]];
-    #endif
-    
-    // ********************** Process Battery monitor hold **************************
-    #if defined BattMonitor && defined BattMonitorAutoDescent
-      processBatteryMonitorThrottleAdjustment();
-    #endif
-
-    // ********************** Process Auto-Descent  **************************
-    #if defined AutoLanding
-      processAutoLandingAltitudeCorrection();
-    #endif
-    
-    // ********************** Process throttle correction ********************
-    processThrottleCorrection();
-    
-    processThrottlePIDAdjustment();
-  }
 
   // ********************** Calculate Motor Commands *************************
   if (motorArmed && safetyCheck) {

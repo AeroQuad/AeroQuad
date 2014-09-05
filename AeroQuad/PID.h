@@ -60,7 +60,7 @@ struct PIDdata {
 // ALTITUDE = 8 (used for altitude hold)
 // ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
 
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters, float errorTreshold = 0) {
 
   const float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
 
@@ -69,6 +69,9 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
 
   if (inFlight) {
     PIDparameters->integratedError += error * deltaPIDTime;
+    if (errorTreshold != 0) {
+      PIDparameters->integratedError = constrain(PIDparameters->integratedError, -errorTreshold, errorTreshold);
+    }
   }
   else {
     PIDparameters->integratedError = 0.0;
