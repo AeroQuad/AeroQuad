@@ -78,12 +78,15 @@ boolean inFlight = false; // true when motor are armed and that the user pass on
 float rotationSpeedFactor = 2.5;
 float yawSpeedFactor = 2.5;
 
-float userRateRollP = 0.0;
-float userRateRollD = 0.0;
-float userRatePitchP = 0.0;
-float userRatePitchD = 0.0;
+#if defined (USE_TPA_ADJUSTMENT)
+  float userRateRollP = 0.0;
+  float userRateRollD = 0.0;
+  float userRatePitchP = 0.0;
+  float userRatePitchD = 0.0;
+#endif 
 int throttlePIDAdjustmentFactor = 0;
-
+  
+  
 float fastTaskGyroRate[3] = {0.0,0.0,0.0};
 byte fastTaskGyroSampleCount = 0;
 unsigned long fastTaskPreviousTime = 0;

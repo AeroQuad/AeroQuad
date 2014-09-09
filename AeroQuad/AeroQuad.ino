@@ -37,7 +37,8 @@
 #if defined (AeroQuadMega_v2) || defined (AeroQuadMega_v21) || defined (MWCProEz30) || defined (Naze32Full) || defined (AeroQuadSTM32)
   #define USE_HORIZON_MODE
   #define HeadingMagHold		
-  #define AltitudeHoldBaro		
+  #define AltitudeHoldBaro	
+  #define USE_TPA_ADJUSTMENT	
 
   #define BattMonitor			  
   
@@ -63,7 +64,12 @@
 #if defined (Naze32) || defined (Naze32Full)
   #define AeroQuadSTM32
   #define BattMonitor	
-  #define USE_HORIZON_MODE		  
+  #define USE_HORIZON_MODE		
+  #define USE_TPA_ADJUSTMENT  
+#endif
+
+#if defined (AeroQuad_v18) || defined (AeroQuad_Mini) || defined (MWCFlip15)
+  #undef USE_TPA_ADJUSTMENT
 #endif
 
 
@@ -948,10 +954,12 @@ void setup() {
      initSlowTelemetry();
   #endif
   
-  userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
-  userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
-  userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
-  userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+  #if defined (USE_TPA_ADJUSTMENT)
+    userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+    userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+    userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+    userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+  #endif
 
   previousTime = micros();
   digitalWrite(LED_Green, HIGH);
@@ -981,7 +989,6 @@ void process100HzTask() {
   G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
   hundredHZpreviousTime = currentTime;
   
-//  evaluateGyroRate();
   evaluateMetersPerSec();
   for (int axis = XAXIS; axis <= ZAXIS; axis++) {
     filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
@@ -1046,7 +1053,9 @@ void process50HzTask() {
     throttle = receiverCommand[receiverChannelMap[THROTTLE]];
   #endif
     
-  processThrottlePIDAdjustment();
+  #if defined (USE_TPA_ADJUSTMENT)
+    processThrottlePIDAdjustment();
+  #endif
 
   #if defined(UseAnalogRSSIReader) || defined(UseEzUHFRSSIReader) || defined(UseSBUSRSSIReader)
     readRSSI();
