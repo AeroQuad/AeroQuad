@@ -1141,7 +1141,7 @@ void loop () {
 
   measureCriticalSensors();
   
-  if (currentTime >= (fastTaskPreviousTime + 2500L)) {  // 2500 = 400Hz and 2000 = 500Hz
+  if (currentTime >= (fastTaskPreviousTime + fastLoopSleepingDelay)) {  // 2500 = 400Hz, 2000 = 500Hz, 10000 = 100Hz
     processFastTask();
   }
 

@@ -151,6 +151,7 @@ void initializeEEPROM() {
   }
   yawDirection = 1;
   flightConfigType = QUAD_X;
+  fastLoopSleepingDelay = 2500;
   
   accelScaleFactor[XAXIS] = 1.0;
   runTimeAccelBias[XAXIS] = 0;
@@ -271,6 +272,7 @@ void readEEPROM() {
   }
   yawDirection = readLong(YAW_DIRECTION_ADR);
   flightConfigType = readLong(FLIGHT_CONFIG_TYPE);
+  fastLoopSleepingDelay = readLong(FAST_LOOP_SLEEPING_DELAY);
 
   
   // Leaving separate PID reads as commented for now
@@ -362,6 +364,7 @@ void writeEEPROM(){
   }
   writeLong(yawDirection, YAW_DIRECTION_ADR);
   writeLong(flightConfigType, FLIGHT_CONFIG_TYPE);
+  writeLong(fastLoopSleepingDelay, FAST_LOOP_SLEEPING_DELAY);
   
   #if defined AltitudeHoldBaro
     writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);

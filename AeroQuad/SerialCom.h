@@ -105,13 +105,6 @@ void readSerialCommand() {
           break;
     #endif      
     
-    #if defined (BattMonitor)
-      case 'E':
-        isBatteryMonitorEnabled = readFloatSerial();
-        writeEEPROM();
-        break;
-    #endif
-
     case 'G': // Receive transmitter calibration values
       for (int channel = 0; channel < LAST_CHANNEL; channel++) {
         receiverMinValue[channel] = readFloatSerial();
@@ -205,11 +198,6 @@ void readSerialCommand() {
       break;
 
     #if defined (UseGPS)
-      case 'U':
-        isGpsEnabled = readFloatSerial();
-        writeEEPROM();
-        break;
-      
       case 'V': // GPS
         readSerialPID(GPSROLL_PID_IDX);
         readSerialPID(GPSPITCH_PID_IDX);
@@ -231,18 +219,21 @@ void readSerialCommand() {
       zeroIntegralError();
       break;
 
-    case 'Y':
-      flightConfigType = readFloatSerial();
-      writeEEPROM();
-      break;
-      
-    case 'Z':
-      yawDirection = readFloatSerial();
-      writeEEPROM();
-      break;
-      
     case 'J': 
       receiverTypeUsed = readFloatSerial();
+      flightConfigType = readFloatSerial();
+      yawDirection = readFloatSerial();
+      #if defined (BattMonitor)
+        isBatteryMonitorEnabled = readFloatSerial();
+      #else
+        readFloatSerial();
+      #endif
+      #if defined (UseGPS)
+        isGpsEnabled = readFloatSerial();
+      #else
+        readFloatSerial();
+      #endif
+      fastLoopSleepingDelay = readFloatSerial();
       writeEEPROM();
       break;
 
@@ -710,6 +701,10 @@ void reportVehicleState() {
   
   SERIAL_PRINT("YawDirection: ");
   SERIAL_PRINT(yawDirection);
+  SERIAL_PRINT(";");
+
+  SERIAL_PRINT("EscUpdateSpeed: ");
+  SERIAL_PRINT(fastLoopSleepingDelay);
   SERIAL_PRINT(";");
 
   SERIAL_PRINTLN();

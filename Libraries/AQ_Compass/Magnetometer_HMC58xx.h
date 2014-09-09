@@ -28,7 +28,6 @@
 #include "Arduino.h"
 
 #define COMPASS_ADDRESS 0x1E
-#define COMPASS_IDENTITY 0x10
 
 //#define SENSOR_GAIN 0x00  // +/- 0.7 Ga
 #define SENSOR_GAIN 0x20  // +/- 1.0 Ga (default)
@@ -43,19 +42,26 @@ void readSpecificMag(float *rawMag);
 
 
 void initializeMagnetometer() {
-
-  delay(50);                             // Power up delay **
+  delay(10);                             // Power up delay **
    
-  if (readWhoI2C(COMPASS_ADDRESS) == COMPASS_IDENTITY) {
-    vehicleState |= MAG_DETECTED;
-  }    
+  sendByteI2C(COMPASS_ADDRESS, 10);
+  Wire.requestFrom(COMPASS_ADDRESS, 3);
+  if(Wire.available() == 3) {
+    byte id1 = Wire.read();
+    byte id2 = Wire.read();
+    byte id3 = Wire.read();
+    if(id1 == 'H' && id2 == '4' && id3 == '3') {
+      vehicleState |= MAG_DETECTED;
+      
+	  updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
+      delay(20);
 
-  updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
-  delay(50);
-  updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
-  delay(50);
+      updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
+      delay(20);
 
-  measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+      measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+    }
+  }  
 }
 
 void measureMagnetometer(float roll, float pitch) {
@@ -67,21 +73,21 @@ void measureMagnetometer(float roll, float pitch) {
 
   updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
 
-  measuredMag[XAXIS] = rawMag[XAXIS] - magBias[XAXIS];
-  measuredMag[YAXIS] = rawMag[YAXIS] - magBias[YAXIS];
-  measuredMag[ZAXIS] = rawMag[ZAXIS] - magBias[ZAXIS];
+  measuredMag[XAXIS] = rawMag[XAXIS] + magBias[XAXIS];
+  measuredMag[YAXIS] = rawMag[YAXIS] + magBias[YAXIS];
+  measuredMag[ZAXIS] = rawMag[ZAXIS] + magBias[ZAXIS];
   
   const float cosRoll =  cos(roll);
   const float sinRoll =  sin(roll);
   const float cosPitch = cos(pitch);
   const float sinPitch = sin(pitch);
 
-  const float magX = (float)measuredMag[XAXIS] * cosPitch + 
-                     (float)measuredMag[YAXIS] * sinRoll * sinPitch + 
-                     (float)measuredMag[ZAXIS] * cosRoll * sinPitch;
+  const float magX = measuredMag[XAXIS] * cosPitch + 
+                     measuredMag[YAXIS] * sinRoll * sinPitch + 
+                     measuredMag[ZAXIS] * cosRoll * sinPitch;
            
-  const float magY = (float)measuredMag[YAXIS] * cosRoll - 
-                     (float)measuredMag[ZAXIS] * sinRoll;
+  const float magY = measuredMag[YAXIS] * cosRoll - 
+                     measuredMag[ZAXIS] * sinRoll;
 
   const float tmp  = sqrt(magX * magX + magY * magY);
    

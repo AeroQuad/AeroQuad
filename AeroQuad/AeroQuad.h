@@ -87,6 +87,7 @@ int throttlePIDAdjustmentFactor = 0;
 float fastTaskGyroRate[3] = {0.0,0.0,0.0};
 byte fastTaskGyroSampleCount = 0;
 unsigned long fastTaskPreviousTime = 0;
+int fastLoopSleepingDelay = 2500;
 
 // main loop time variable
 unsigned long previousTime = 0;
@@ -282,6 +283,7 @@ typedef struct {
   float RECEIVER_CHANNEL_MAP_ADR[MAX_NB_CHANNEL];
   long YAW_DIRECTION_ADR;
   long FLIGHT_CONFIG_TYPE;
+  long FAST_LOOP_SLEEPING_DELAY;
   
   // Mag Calibration
   #if defined (HeadingMagHold)
