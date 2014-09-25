@@ -21,36 +21,36 @@
 
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
-float trueNorthHeading = 0.0;
+double trueNorthHeading = 0.0;
 boolean magDataUpdate = false;
 
-float exAcc    = 0.0f, eyAcc    = 0.0f, ezAcc    = 0.0f; // accel error
-float exAccInt = 0.0f, eyAccInt = 0.0f, ezAccInt = 0.0f; // accel integral error
-float exMag    = 0.0f, eyMag    = 0.0f, ezMag    = 0.0f; // mag error
-float exMagInt = 0.0f, eyMagInt = 0.0f, ezMagInt = 0.0f; // mag integral error
-float kpAcc, kiAcc;
+double exAcc    = 0.0f, eyAcc    = 0.0f, ezAcc    = 0.0f; // accel error
+double exAccInt = 0.0f, eyAccInt = 0.0f, ezAccInt = 0.0f; // accel integral error
+double exMag    = 0.0f, eyMag    = 0.0f, ezMag    = 0.0f; // mag error
+double exMagInt = 0.0f, eyMagInt = 0.0f, ezMagInt = 0.0f; // mag integral error
+double kpAcc, kiAcc;
 
 
 
 // auxiliary variables to reduce number of repeated operations
-float q0q0, q0q1, q0q2, q0q3;
-float q1q1, q1q2, q1q3;
-float q2q2, q2q3;
-float q3q3;
+double q0q0, q0q1, q0q2, q0q3;
+double q1q1, q1q2, q1q3;
+double q2q2, q2q3;
+double q3q3;
 
 uint8_t isAHRSInitialized = false;
-float compassDeclination = 0.0;
+double compassDeclination = 0.0;
 
-float previousGx = 0.0;
-float previousGy = 0.0;
-float previousGz = 0.0;
+double previousGx = 0.0;
+double previousGy = 0.0;
+double previousGz = 0.0;
 
 #define SQR(x)  ((x) * (x))
 
 //----------------------------------------------------------------------------------------------------
 
-float accConfidenceDecay = 0.0f;
-float accConfidence      = 1.0f;
+double accConfidenceDecay = 0.0f;
+double accConfidence      = 1.0f;
 
 #define HardFilter(O,N)  ((O)*0.9f+(N)*0.1f)
 
@@ -60,14 +60,14 @@ float accConfidence      = 1.0f;
 // Initialization
 //====================================================================================================
 
-void initializeKinematics(float ax, float ay, float az, float mx, float my, float mz)
+void initializeKinematics(double ax, double ay, double az, double mx, double my, double mz)
 {
 	initializeBaseKinematicParam();
 
-    float initialRoll, initialPitch;
-    float cosRoll, sinRoll, cosPitch, sinPitch;
-    float magX, magY;
-    float initialHdg, cosHeading, sinHeading;
+    double initialRoll, initialPitch;
+    double cosRoll, sinRoll, cosPitch, sinPitch;
+    double magX, magY;
+    double initialHdg, cosHeading, sinHeading;
 
     initialRoll  = atan2(-ay, -az);
     initialPitch = atan2( ax, -az);
@@ -114,15 +114,15 @@ void initializeKinematics(float ax, float ay, float az, float mx, float my, floa
 // Function
 //====================================================================================================
 
-void calculateKinematicsMAGR(float gx, float gy, float gz,
-                    float ax, float ay, float az,
-                    float mx, float my, float mz,
-                    float dt)
+void calculateKinematicsMAGR(double gx, double gy, double gz,
+                    double ax, double ay, double az,
+                    double mx, double my, double mz,
+                    double dt)
 {
-    float norm, normR;
-    float hx, hy, hz, bx, bz;
-    float vx, vy, vz, wx, wy, wz;
-    float q0i, q1i, q2i, q3i;
+    double norm, normR;
+    double hx, hy, hz, bx, bz;
+    double vx, vy, vz, wx, wy, wz;
+    double q0i, q1i, q2i, q3i;
 
 	halfT = dt * 0.5f;
 	norm = sqrt(SQR(ax) + SQR(ay) + SQR(az));
@@ -203,12 +203,12 @@ void calculateKinematicsMAGR(float gx, float gy, float gz,
 		// use un-extrapolated old values between magnetometer updates
 		// dubious as dT does not apply to the magnetometer calculation so
 		// time scaling is embedded in KpMag and KiMag
-		static const float magP = 0.2; //0.2;
+		static const double magP = 0.2; //0.2;
 		gx += exMag * magP;
 		gy += eyMag * magP;
 		gz += ezMag * magP;
 
-		static const float magI = 0.0005; //0.0005;
+		static const double magI = 0.0005; //0.0005;
 		exMagInt += exMag * magI;
 		if (isSwitched(previousGx,gx)) {
 			exMagInt = 0.0;

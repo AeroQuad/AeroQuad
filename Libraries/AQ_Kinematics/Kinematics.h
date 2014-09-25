@@ -23,21 +23,21 @@
 
 #include "GlobalDefined.h"
 
-float halfT = 0.0;                		
-float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
-float previousEx = 0.0;
-float previousEy = 0.0;
-float previousEz = 0.0;
+double halfT = 0.0;                		
+double q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+double previousEx = 0.0;
+double previousEy = 0.0;
+double previousEz = 0.0;
 
 
 // This class is responsible for calculating vehicle attitude
 byte kinematicsType = 0;
-float kinematicsAngle[3] = {0.0,0.0,0.0};
-float correctedRateVector[3] = {0.0,0.0,0.0};
-float earthAccel[3] = {0.0,0.0,0.0};
-float kinematicCorrectedAccel[3] = { 0.0, 0.0, 0.0 };
+double kinematicsAngle[3] = {0.0,0.0,0.0};
+double correctedRateVector[3] = {0.0,0.0,0.0};
+double earthAccel[3] = {0.0,0.0,0.0};
+double kinematicCorrectedAccel[3] = { 0.0, 0.0, 0.0 };
 
-float accelCutoff = 0.0;
+double accelCutoff = 0.0;
 
 void initializeBaseKinematicParam() {
 
@@ -46,11 +46,11 @@ void initializeBaseKinematicParam() {
   }
 }
 
-//void initializeKinematics(float hdgX, float hdgY);
+//void initializeKinematics(double hdgX, double hdgY);
 	
 
-const float kinematicsGetDegreesHeading(byte axis) {
-  float tDegrees;
+const double kinematicsGetDegreesHeading(byte axis) {
+  double tDegrees;
     
   tDegrees = degrees(kinematicsAngle[axis]);
   if (tDegrees < 0.0)

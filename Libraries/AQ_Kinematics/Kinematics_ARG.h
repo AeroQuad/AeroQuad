@@ -51,21 +51,21 @@
 
 #include <AQMath.h>
 
-float Kp = 0.0;                   					// proportional gain governs rate of convergence to accelerometer/magnetometer
-float Ki = 0.0;                   					// integral gain governs rate of convergence of gyroscope biases
+double Kp = 0.2;     //2.0;                   					// proportional gain governs rate of convergence to accelerometer/magnetometer
+double Ki = 0.0005;  //0.005;			// integral gain governs rate of convergence of gyroscope biases
 
-float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
+double exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
   
 
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
-void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float G_Dt) {
+void argUpdate(double gx, double gy, double gz, double ax, double ay, double az, double G_Dt) {
   
-  float norm;
-  float vx, vy, vz;
-  float q0i, q1i, q2i, q3i;
-  float ex, ey, ez;
+  double norm;
+  double vx, vy, vz;
+  double q0i, q1i, q2i, q3i;
+  double ex, ey, ez;
     
   halfT = G_Dt/2;
   
@@ -152,17 +152,14 @@ void initializeKinematics()
   exInt = 0.0;
   eyInt = 0.0;
   ezInt = 0.0;
-	
-  Kp = 0.2; // 2.0;
-  Ki = 0.0005; //0.005;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 // Calculate ARG
 ////////////////////////////////////////////////////////////////////////////////
-void calculateKinematicsAGR(float rollRate,          float pitchRate,    float yawRate,  
-                         float longitudinalAccel, float lateralAccel, float verticalAccel, 
-                         float G_DT) {
+void calculateKinematicsAGR(double rollRate,          double pitchRate,    double yawRate,  
+                         double longitudinalAccel, double lateralAccel, double verticalAccel, 
+                         double G_DT) {
     
   argUpdate(rollRate,          pitchRate,    yawRate, 
             longitudinalAccel, lateralAccel, verticalAccel,  
@@ -170,7 +167,7 @@ void calculateKinematicsAGR(float rollRate,          float pitchRate,    float y
   eulerAngles();
 }
   
-float getGyroUnbias(byte axis) {
+double getGyroUnbias(byte axis) {
   return correctedRateVector[axis];
 }
 

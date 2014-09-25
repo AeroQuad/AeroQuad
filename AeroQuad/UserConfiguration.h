@@ -32,7 +32,7 @@
 // 328p processor
 //#define AeroQuad_v18        // Arduino Uno with AeroQuad Shield v1.8 or 1.9
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
-#define MWCFlip15           // MWCFlip1.5 board from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/flip-mwc-flight-controller.html
+//#define MWCFlip15           // MWCFlip1.5 board from ready to fly quad -> http://witespyquad.gostorego.com/flight-controllers/flip-mwc-flight-controller.html
 
 // Mega processor
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
@@ -42,7 +42,7 @@
 // STM32 processor
 //#define AeroQuadSTM32
 //#define Naze32
-//#define Naze32Full
+#define Naze32Full
 
 
 /****************************************************************************
