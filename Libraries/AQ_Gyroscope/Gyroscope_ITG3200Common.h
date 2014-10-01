@@ -70,6 +70,7 @@ void measureGyro() {
   
   for (byte axis = 0; axis <= ZAXIS; axis++) {
 	gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
+	gyroADC[axis] = map(gyroADC[axis], -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
   }
  
   // Measure gyro heading
@@ -97,7 +98,11 @@ void evaluateGyroRate() {
   gyroSampleCount = 0;
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
+  	//anti gyro glitch, limit the variation between two consecutive readings
+    gyroADC[axis] = constrain(gyroADC[axis], previousGyroADC[axis]-800, previousGyroADC[axis]+800);
     gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
+	previousGyroADC[axis] = gyroADC[axis];
+	gyroADC[axis] = map(gyroADC[axis], -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
   }
   
   // Measure gyro heading

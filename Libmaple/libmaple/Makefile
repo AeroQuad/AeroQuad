@@ -1,11 +1,11 @@
 # Try "make help" for more information on BOARD and MEMORY_TARGET;
 # these default to a Maple Flash build.
 #BOARD ?= maple
-#BOARD ?= aeroquad32
+BOARD ?= aeroquad32
 #BOARD ?= aeroquad32f1
 #BOARD ?= discovery_f4
 #BOARD ?= aeroquad32mini
-BOARD ?= freeflight
+#BOARD ?= freeflight
 
 #V=1
 
