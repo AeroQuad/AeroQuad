@@ -24,11 +24,12 @@
 #include "Arduino.h"
 #include "Receiver_Base_MEGA.h"
 
+//#define STM32_TIMER_DEBUG // enable debug messages
 
-static byte ReceiverChannelMap[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
-////////////////////////////////////////
-// RECEIVER PWM
-////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// configuration part starts here
+// definition of pins used for PWM receiver input
+
 
 #if defined(BOARD_aeroquad32)
 static byte receiverPin[] = {
@@ -41,6 +42,9 @@ static byte receiverPin[] = {
     Port2Pin('E', 13),
     Port2Pin('E', 14)
 };
+
+static byte receiverPinPPM = Port2Pin('D', 15);
+
 #elif defined(BOARD_freeflight)
 static byte receiverPin[] = {
 	Port2Pin('A',  0),
@@ -52,8 +56,18 @@ static byte receiverPin[] = {
 	Port2Pin('B',  0),
 	Port2Pin('B',  1)
 };
+
+static byte receiverPinPPM = Port2Pin('A', 0);
+
 #endif
 
+
+static byte ReceiverChannelMapPWM[] = {0, 1, 2, 3, 4, 5, 6, 7}; // default mapping
+
+
+///////////////////////////////////////////////////////////////////////////////
+// implementation part starts here.
+// forward declaration, array is defined at the end of this file
 extern voidFuncPtr PWM_in_handler[];
 
 typedef struct {
@@ -136,7 +150,7 @@ void PWMInvertPolarity(volatile tFrqDataPWM *f) {
     f->TimerRegs->CCER ^= f->PolarityMask; // invert polarity
 }
 
-void FrqChangePWM(volatile tFrqDataPWM *f) {
+void FrqChange(volatile tFrqDataPWM *f) {
     
     timer_gen_reg_map *timer = f->TimerRegs;
     uint16_t c = *(f->Timer_ccr);
@@ -157,6 +171,7 @@ void FrqChangePWM(volatile tFrqDataPWM *f) {
         }
     }
     else if(rising) {
+        // rising edge, store start time
         f->RiseTime = c;
         f->Valid = true;
     }
@@ -164,11 +179,14 @@ void FrqChangePWM(volatile tFrqDataPWM *f) {
     PWMInvertPolarity(f);
 }
 
+// hide the class details from the interrupt handler
 void IrqChangeValue(int chan) {
-    FrqChangePWM(&FrqDataPWM[chan]);
+    FrqChange(&FrqDataPWM[chan]);
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// definition of interrupt handler functions, one for each channel
 void PWM_in_0() { IrqChangeValue(0); }
 void PWM_in_1() { IrqChangeValue(1); }
 void PWM_in_2() { IrqChangeValue(2); }
@@ -180,19 +198,23 @@ void PWM_in_7() { IrqChangeValue(7); }
 
 voidFuncPtr PWM_in_handler[] = { PWM_in_0, PWM_in_1, PWM_in_2, PWM_in_3, PWM_in_4, PWM_in_5, PWM_in_6, PWM_in_7 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// interface part starts here
+
 void initializeReceiverPWM() {
     
 	InitFrqMeasurementPWM();
 }
 
+
 int getRawChannelValuePWM(const byte channel) {
-	int chan = ReceiverChannelMap[channel];
+	int chan = ReceiverChannelMapPWM[channel];
 	if(chan < (int)sizeof(receiverPin)) {
 		volatile tFrqDataPWM *f = &FrqDataPWM[chan];
 		uint16_t PulsLength = f->HighTime;
 		return PulsLength;
-	} 
-	else {
+	} else {
 		return 1500;
 	}
 }
@@ -201,14 +223,13 @@ int getRawChannelValuePWM(const byte channel) {
 
 
 ////////////////////////////////////////
-// RECEIVER PPM
+// RECEIVER PPM for AQ r32
 ////////////////////////////////////////
 
-#if defined(BOARD_aeroquad32)
-  static byte receiverPinPPM = Port2Pin('D', 15);
-#elif defined(BOARD_freeflight)
-  static byte receiverPinPPM = Port2Pin('A', 0);
-#endif
+
+
+#define SERIAL_SUM_PPM               0,1,3,2,4,5,6,7 
+static byte ReceiverChannelMapPPM[MAX_NB_CHANNEL] = {SERIAL_SUM_PPM};
 
 uint16 rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
 byte   currentChannel;
@@ -228,7 +249,7 @@ typedef struct {
 
 volatile tFrqDataPPM FrqDataPPM;
 
-void FrqInitPPM(timer_dev *aTimer, int aTimerChannel)
+void FrqInit(int aDefault, timer_dev *aTimer, int aTimerChannel)
 {
     aTimerChannel--;  // transform timer channel numbering from 1-4 to 0-3
     
@@ -266,7 +287,7 @@ void FrqInitPPM(timer_dev *aTimer, int aTimerChannel)
     
 }
 
-void FrqChangePPM()
+void FrqChange()
 {
     uint16_t c = *(FrqDataPPM.Timer_ccr);
     uint16_t diffTime = c - FrqDataPPM.RiseTime;
@@ -294,11 +315,16 @@ void InitFrqMeasurementPPM()
     currentChannel=8;
     if(timer_num != NULL) {
         gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_AF_INPUT_PD);
-        FrqInitPPM(timer_num, PIN_MAP[pin].timer_channel);
-        timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChangePPM);
+        FrqInit(1500, timer_num, PIN_MAP[pin].timer_channel);
+        timer_attach_interrupt(timer_num, PIN_MAP[pin].timer_channel, FrqChange);
     }
     
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// interface part starts here
 
 void initializeReceiverPPM() {
     
@@ -307,19 +333,20 @@ void initializeReceiverPPM() {
 
 
 int getRawChannelValuePPM(const byte channel) {
-    return rawChannelValue[ReceiverChannelMap[channel]];
+    return rawChannelValue[ReceiverChannelMapPPM[channel]];
 }
 
 
 
 #if defined(BOARD_aeroquad32)
-////////////////////////////////////////
-// RECEIVER PPM
-////////////////////////////////////////
+//
+// SBUS receiver
+//
 
 #define SBUS_SYNCBYTE 0x0F // some sites say 0xF0
 #define SERIAL_SBUS Serial3
 
+static byte ReceiverChannelMapSBUS[MAX_NB_CHANNEL] = {0,1,2,3,4,5,6,7};
 static unsigned int sbusIndex = 0;
 // sbus rssi reader variables
 static unsigned short sbusFailSafeCount = 0;
@@ -441,7 +468,7 @@ int getRawChannelValueSBUS(const byte channel) {
     if (channel == XAXIS) {
         readSBUS();
 	}
-	return rawChannelValue[ReceiverChannelMap[channel]];
+	return rawChannelValue[ReceiverChannelMapSBUS[channel]];
 }
 
 #elif defined(BOARD_freeflight)
