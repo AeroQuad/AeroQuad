@@ -84,7 +84,6 @@ void processAltitudeControl()
     {
       throttle = 1850;
     }
-
   }
 }
 
