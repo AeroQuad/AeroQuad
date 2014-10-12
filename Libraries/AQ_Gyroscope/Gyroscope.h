@@ -26,7 +26,7 @@
 
 #define FINDZERO 49
 
-#define MAX_GYRO_METER_PER_SEC_ADC 300.0
+#define MAX_GYRO_METER_PER_SEC_ADC 500.0
 
 long  gyroADC[3] = {0,0,0};
 long  previousGyroADC[3] = {0,0,0};

@@ -42,7 +42,7 @@
 
 static const char *STR_MTKPINNINGOFF = "$PMTK397,0*23\r\n";
 static const char *STR_MTK5HZ =        "$PMTK220,200*2C\r\n";
-static const char *STR_MTKBINARY =     "$PGCMD,16,0,0,0,0,0*6A\r\n";
+//static const char *STR_MTKBINARY =     "$PGCMD,16,0,0,0,0,0*6A\r\n";
 static const char *STR_MTK38400 =      "$PMTK251,38400*27\r\n";
 
 #define CONFIG_MTKPINNINGOFF {(byte *)STR_MTKPINNINGOFF, 0}

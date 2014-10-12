@@ -30,7 +30,7 @@ double exMag    = 0.0f, eyMag    = 0.0f, ezMag    = 0.0f; // mag error
 double exMagInt = 0.0f, eyMagInt = 0.0f, ezMagInt = 0.0f; // mag integral error
 double kpAcc, kiAcc;
 
-
+double kinematicCorrectedAccel[3] = { 0.0, 0.0, 0.0 };
 
 // auxiliary variables to reduce number of repeated operations
 double q0q0, q0q1, q0q2, q0q3;
@@ -49,10 +49,8 @@ double previousGz = 0.0;
 
 //----------------------------------------------------------------------------------------------------
 
-double accConfidenceDecay = 0.0f;
-double accConfidence      = 1.0f;
 
-#define HardFilter(O,N)  ((O)*0.9f+(N)*0.1f)
+
 
 //----------------------------------------------------------------------------------------------------
 
@@ -127,8 +125,9 @@ void calculateKinematicsMAGR(double gx, double gy, double gz,
 	halfT = dt * 0.5f;
 	norm = sqrt(SQR(ax) + SQR(ay) + SQR(az));
 	
-	kpAcc = 0.2 * accConfidence;
-	kiAcc = 0.0005 * accConfidence;
+	calculateAccConfidence(norm);
+	kpAcc = DEFAULT_Kp * accConfidence;
+	kiAcc = DEFAULT_Ki * accConfidence;
 
 	normR = 1.0f / norm;
 	ax *= normR;

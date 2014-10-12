@@ -51,7 +51,7 @@
 
 #include <AQMath.h>
 
-double Kp = 0.2;     //2.0;                   					// proportional gain governs rate of convergence to accelerometer/magnetometer
+double Kp = 0.2;     //2.0;             // proportional gain governs rate of convergence to accelerometer/magnetometer
 double Ki = 0.0005;  //0.005;			// integral gain governs rate of convergence of gyroscope biases
 
 double exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
@@ -71,6 +71,10 @@ void argUpdate(double gx, double gy, double gz, double ax, double ay, double az,
   
   // normalise the measurements
   norm = sqrt(ax*ax + ay*ay + az*az);       
+  calculateAccConfidence(norm);
+  Kp = DEFAULT_Kp * accConfidence;
+  Ki = DEFAULT_Ki * accConfidence;
+	
   ax = ax / norm;
   ay = ay / norm;
   az = az / norm;
@@ -126,18 +130,16 @@ void argUpdate(double gx, double gy, double gz, double ax, double ay, double az,
   q2 = q2 / norm;
   q3 = q3 / norm;
   
-  kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
-  kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
-  kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
-}
+//  kinematicCorrectedAccel[0] = 2 * q1 * q3 - 2 * q0 * q2;
+//  kinematicCorrectedAccel[1] = 2 * q2 * q3 + 2 * q0 * q1;
+//  kinematicCorrectedAccel[2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
   
-void eulerAngles()
-{
+  // eulerAngles
   kinematicsAngle[XAXIS] = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
   kinematicsAngle[YAXIS] = asin(2 * (q0*q2 - q1*q3));
   kinematicsAngle[ZAXIS] = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
 }
-
+  
 ////////////////////////////////////////////////////////////////////////////////
 // Initialize ARG
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +166,6 @@ void calculateKinematicsAGR(double rollRate,          double pitchRate,    doubl
   argUpdate(rollRate,          pitchRate,    yawRate, 
             longitudinalAccel, lateralAccel, verticalAccel,  
 		    G_Dt);
-  eulerAngles();
 }
   
 double getGyroUnbias(byte axis) {

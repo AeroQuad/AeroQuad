@@ -35,9 +35,29 @@ byte kinematicsType = 0;
 double kinematicsAngle[3] = {0.0,0.0,0.0};
 double correctedRateVector[3] = {0.0,0.0,0.0};
 double earthAccel[3] = {0.0,0.0,0.0};
-double kinematicCorrectedAccel[3] = { 0.0, 0.0, 0.0 };
 
-double accelCutoff = 0.0;
+
+
+#define HardFilter(O,N)  ((O)*0.9f+(N)*0.1f)
+
+#define DEFAULT_Kp 0.4  // 0.2
+#define DEFAULT_Ki 0.0005 // 0.0005
+
+double accConfidence      = 1.0f;
+double accConfidenceDecay = 1.0f / sqrt(0.75f);	// @todo, accelCutOff should go into eeprom... if it work
+
+
+void calculateAccConfidence(double accMag)
+{
+	// G.K. Egan (C) computes confidence in accelerometers when
+	// aircraft is being accelerated over and above that due to gravity
+	static double accMagP = 1.0f;
+	accMag /= accelOneG;  // HJI Added to convert MPS^2 to G's
+	accMag  = HardFilter(accMagP, accMag );
+	accMagP = accMag;
+	accConfidence = constrain(1.0 - (accConfidenceDecay * sqrt(fabs(accMag - 1.0f))), 0.01f, 1.0f);
+}
+
 
 void initializeBaseKinematicParam() {
 
@@ -50,13 +70,14 @@ void initializeBaseKinematicParam() {
 	
 
 const double kinematicsGetDegreesHeading(byte axis) {
-  double tDegrees;
     
-  tDegrees = degrees(kinematicsAngle[axis]);
-  if (tDegrees < 0.0)
+  double tDegrees = degrees(kinematicsAngle[axis]);
+  if (tDegrees < 0.0) {
     return (tDegrees + 360.0);
-  else
+  }
+  else {
     return (tDegrees);
+  }
 }
 
 #endif

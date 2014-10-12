@@ -70,6 +70,7 @@
 
 #if defined (AeroQuad_v18) || defined (AeroQuad_Mini) || defined (MWCFlip15)
   #undef USE_TPA_ADJUSTMENT
+  #undef USE_HORIZON_MODE
 #endif
 
 
