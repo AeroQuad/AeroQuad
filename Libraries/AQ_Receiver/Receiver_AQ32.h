@@ -24,7 +24,14 @@
 #include "Arduino.h"
 #include "Receiver_Base_MEGA.h"
 
-//#define STM32_TIMER_DEBUG // enable debug messages
+byte   currentChannel;
+uint16 rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
+uint16 currentRawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
+uint16 previousRawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
+uint16 seccondPreviousRawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
+uint16 thirhPreviousRawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration part starts here
@@ -209,11 +216,20 @@ void initializeReceiverPWM() {
 
 
 int getRawChannelValuePWM(const byte channel) {
-	int chan = ReceiverChannelMapPWM[channel];
-	if(chan < (int)sizeof(receiverPin)) {
-		volatile tFrqDataPWM *f = &FrqDataPWM[chan];
-		uint16_t PulsLength = f->HighTime;
-		return PulsLength;
+	currentChannel = ReceiverChannelMapPWM[channel];
+	if(currentChannel < (int)sizeof(receiverPin)) {
+		volatile tFrqDataPWM *f = &FrqDataPWM[currentChannel];
+		
+		currentRawChannelValue[currentChannel] = f->HighTime;
+	    rawChannelValue[currentChannel] = (currentRawChannelValue[currentChannel] + 
+										   previousRawChannelValue[currentChannel] + 
+										   seccondPreviousRawChannelValue[currentChannel] + 
+										   thirhPreviousRawChannelValue[currentChannel]) / 4;
+		thirhPreviousRawChannelValue[currentChannel] = seccondPreviousRawChannelValue[currentChannel];
+		seccondPreviousRawChannelValue[currentChannel] = previousRawChannelValue[currentChannel];
+		previousRawChannelValue[currentChannel] = currentRawChannelValue[currentChannel];
+		
+		return rawChannelValue[currentChannel];
 	} else {
 		return 1500;
 	}
@@ -231,8 +247,7 @@ int getRawChannelValuePWM(const byte channel) {
 #define SERIAL_SUM_PPM               0,1,3,2,4,5,6,7 
 static byte ReceiverChannelMapPPM[MAX_NB_CHANNEL] = {SERIAL_SUM_PPM};
 
-uint16 rawChannelValue[MAX_NB_CHANNEL] =  {1500,1500,1500,1500,1500,1500,1500};
-byte   currentChannel;
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -293,8 +308,15 @@ void FrqChange()
     uint16_t diffTime = c - FrqDataPPM.RiseTime;
     if ((diffTime > 900) && (diffTime < 2100)) {
       if (currentChannel < MAX_NB_CHANNEL) {
-	      rawChannelValue[currentChannel] = diffTime;
-          currentChannel++;
+	    currentRawChannelValue[currentChannel] = diffTime;
+	    rawChannelValue[currentChannel] = (currentRawChannelValue[currentChannel] + 
+										   previousRawChannelValue[currentChannel] + 
+										   seccondPreviousRawChannelValue[currentChannel] + 
+										   thirhPreviousRawChannelValue[currentChannel]) / 4;
+		thirhPreviousRawChannelValue[currentChannel] = seccondPreviousRawChannelValue[currentChannel];
+		seccondPreviousRawChannelValue[currentChannel] = previousRawChannelValue[currentChannel];
+		previousRawChannelValue[currentChannel] = currentRawChannelValue[currentChannel];
+        currentChannel++;
       }
     }
     else if (diffTime > 2500) {

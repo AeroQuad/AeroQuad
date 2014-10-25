@@ -393,7 +393,7 @@ int findMedianInt(int *data, int arraySize)
   return data[arraySize/2]; // return the median value
 }
 
-int findMedianIntWithDiff(int *data, int arraySize, int * diff) 
+long findMedianIntWithDiff(long *data, int arraySize, int * diff) 
 {
   int temp;
   boolean done = 0;

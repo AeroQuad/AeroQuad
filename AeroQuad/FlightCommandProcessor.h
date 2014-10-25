@@ -292,7 +292,6 @@ void readPilotCommands() {
     else {
       flightMode = RATE_FLIGHT_MODE;
     }
-
   #endif
   
   if (previousFlightMode != flightMode) {

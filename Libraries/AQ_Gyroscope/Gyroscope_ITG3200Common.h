@@ -29,7 +29,7 @@
   #define ITG3200_ADDRESS					0x69
 #endif
 
-#define GYRO_CALIBRATION_TRESHOLD 4
+#define GYRO_CALIBRATION_TRESHOLD 100
 
 #define ITG3200_IDENTITY                0x68
 #define ITG3200_IDENTITY_MASK           0x7E
@@ -45,7 +45,7 @@
 #define ITG3200_TEMPERATURE_ADDRESS     0x1B
 
 
-//float gyroTempBias[3] = {0.0,0.0,0.0};
+void measureGyro();
 void measureSpecificGyroADC(long *gyroADC);
 void measureSpecificGyroSum();
 void evaluateSpecificGyroRate(long *gyroADC);
@@ -62,6 +62,15 @@ void initializeGyro() {
   updateRegisterI2C(ITG3200_ADDRESS, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
 
+void gyroUpdateHeading() {
+  // Measure gyro heading
+  unsigned long currentTime = micros();
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
+}
+
 void measureGyro() {
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
@@ -70,47 +79,41 @@ void measureGyro() {
   
   for (byte axis = 0; axis <= ZAXIS; axis++) {
 	gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
-	gyroADC[axis] = map(gyroADC[axis], -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
   }
  
-  // Measure gyro heading
-  long int currentTime = micros();
-  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
-    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
-  }
-  gyroLastMesuredTime = currentTime;
+  gyroUpdateHeading();
 }
 
 void measureGyroSum() {
   sendByteI2C(ITG3200_ADDRESS, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(ITG3200_ADDRESS, ITG3200_BUFFER_SIZE);
-  
+ 
   measureSpecificGyroSum();
-  
   gyroSampleCount++;
 }
 
 void evaluateGyroRate() {
-  evaluateSpecificGyroRate(gyroADC);
-  gyroSample[XAXIS] = 0;
-  gyroSample[YAXIS] = 0;
-  gyroSample[ZAXIS] = 0;
-  gyroSampleCount = 0;
 
-  for (byte axis = 0; axis <= ZAXIS; axis++) {
-  	//anti gyro glitch, limit the variation between two consecutive readings
-    gyroADC[axis] = constrain(gyroADC[axis], previousGyroADC[axis]-800, previousGyroADC[axis]+800);
-    gyroRate[axis] = gyroADC[axis] * gyroScaleFactor;
-	previousGyroADC[axis] = gyroADC[axis];
-	gyroADC[axis] = map(gyroADC[axis], -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
+  evaluateSpecificGyroRate(gyroADC);
+  processGyroCommon();
+}
+
+
+boolean calibrateGyro() {
+
+  for (int i=0; i < FINDZERO; i++) {
+    measureGyroSum();
+    delay(10);
   }
-  
-  // Measure gyro heading
-  long int currentTime = micros();
-  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
-    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  for (byte axis = 0; axis < 3; axis++) {
+    gyroZero[axis] = gyroSample[axis] / FINDZERO;
+	gyroSample[axis] = 0;
+	if (abs(gyroZero[axis]) >= GYRO_CALIBRATION_TRESHOLD) {
+	  return false;
+	}
   }
-  gyroLastMesuredTime = currentTime;
+  gyroSampleCount = 0;
+  return true;
 }
 
 

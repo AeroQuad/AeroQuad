@@ -40,11 +40,11 @@ double earthAccel[3] = {0.0,0.0,0.0};
 
 #define HardFilter(O,N)  ((O)*0.9f+(N)*0.1f)
 
-#define DEFAULT_Kp 0.4  // 0.2
-#define DEFAULT_Ki 0.0005 // 0.0005
+#define DEFAULT_Kp 0.4 // 0.2
+#define DEFAULT_Ki 0.0 // 0.0005
 
 double accConfidence      = 1.0f;
-double accConfidenceDecay = 1.0f / sqrt(0.75f);	// @todo, accelCutOff should go into eeprom... if it work
+double accConfidenceDecay = 1.0f / sqrt(0.6f);	// @todo, accelCutOff should go into eeprom... if it work
 
 
 void calculateAccConfidence(double accMag)
@@ -55,7 +55,7 @@ void calculateAccConfidence(double accMag)
 	accMag /= accelOneG;  // HJI Added to convert MPS^2 to G's
 	accMag  = HardFilter(accMagP, accMag );
 	accMagP = accMag;
-	accConfidence = constrain(1.0 - (accConfidenceDecay * sqrt(fabs(accMag - 1.0f))), 0.01f, 1.0f);
+	accConfidence = constrain(1.0 - (accConfidenceDecay * sqrt(fabs(accMag - 1.0f))), 0.0f, 1.0f);
 }
 
 

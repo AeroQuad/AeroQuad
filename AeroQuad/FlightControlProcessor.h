@@ -50,13 +50,10 @@
 float gyroDesiredRollRate = 0.0;
 float gyroDesiredPitchRate = 0.0;
 
-//#define MAX_GYRO_METER_PER_SEC_ADC 450.0
-
-
 void calculateFlightError()
 {
-  const int userRollCommand  = map(receiverCommand[receiverChannelMap[XAXIS]] - 1500, -500 , 500, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
-  const int userPitchCommand = map(receiverCommand[receiverChannelMap[YAXIS]] - 1500, -500 , 500, -MAX_GYRO_METER_PER_SEC_ADC, MAX_GYRO_METER_PER_SEC_ADC);
+  const int userRollCommand  = map(receiverCommand[receiverChannelMap[XAXIS]] - 1500, -500 , 500, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor);
+  const int userPitchCommand = map(receiverCommand[receiverChannelMap[YAXIS]] - 1500, -500 , 500, -gyroOneMeterSecADCFactor, gyroOneMeterSecADCFactor);
   
   switch(flightMode)
   {
@@ -68,8 +65,8 @@ void calculateFlightError()
 //      else
 //    #endif
     case ATTITUDE_FLIGHT_MODE:
-      gyroDesiredRollRate  = updatePID((userRollCommand * 0.75), kinematicsAngle[XAXIS] * MAX_GYRO_METER_PER_SEC_ADC, &PID[ATTITUDE_XAXIS_PID_IDX]);
-      gyroDesiredPitchRate = updatePID((userPitchCommand * 0.75), -kinematicsAngle[YAXIS] * MAX_GYRO_METER_PER_SEC_ADC, &PID[ATTITUDE_YAXIS_PID_IDX]);
+      gyroDesiredRollRate  = updatePID((userRollCommand * 0.75), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
+      gyroDesiredPitchRate = updatePID((userPitchCommand * 0.75), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
       break;
     case RATE_FLIGHT_MODE:  // accro
       gyroDesiredRollRate = userRollCommand * map((abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500)), 0 , 500, 100, rotationSpeedFactor*100) / 100.0;
@@ -82,14 +79,14 @@ void calculateFlightError()
       const float rateRatiaux = constrain(max(rollRateRatiaux, pitchRateRatiaux), 0, 250.0) / 100.0;
       const float attitudeRatiaux = 1.0 - rateRatiaux;
       
-      const float rollAttitudeCmd = attitudeRatiaux * updatePID((userRollCommand * 0.75), kinematicsAngle[XAXIS] * MAX_GYRO_METER_PER_SEC_ADC, &PID[ATTITUDE_XAXIS_PID_IDX]);
+      const float rollAttitudeCmd = attitudeRatiaux * updatePID((userRollCommand * 0.75), kinematicsAngle[XAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_XAXIS_PID_IDX]);
       float rollRateCommand = rateRatiaux * userRollCommand * map((abs(receiverCommand[receiverChannelMap[XAXIS]] - 1500)), 0 , 500, 100, rotationSpeedFactor*100) / 100.0;
       if (userRollCommand < 0 && rollRateCommand > 0) {
         rollRateCommand = -rollRateCommand;
       }
       gyroDesiredRollRate = rollAttitudeCmd + rollRateCommand;
   
-      const float pitchAttitudeCmd = attitudeRatiaux * updatePID((userPitchCommand * 0.75), -kinematicsAngle[YAXIS] * MAX_GYRO_METER_PER_SEC_ADC, &PID[ATTITUDE_YAXIS_PID_IDX]);
+      const float pitchAttitudeCmd = attitudeRatiaux * updatePID((userPitchCommand * 0.75), -kinematicsAngle[YAXIS] * gyroOneMeterSecADCFactor, &PID[ATTITUDE_YAXIS_PID_IDX]);
       float pitchRateCommand = rateRatiaux * userPitchCommand * map((abs(receiverCommand[receiverChannelMap[YAXIS]] - 1500)), 0 , 500, 100, rotationSpeedFactor*100) / 100.0;
       if (userPitchCommand < 0 && pitchRateCommand > 0) {
         pitchRateCommand = -pitchRateCommand;
@@ -98,8 +95,8 @@ void calculateFlightError()
     #endif
   }
   
-  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroADC[XAXIS], &PID[RATE_XAXIS_PID_IDX], gyroOneMeterSecADCFactor);
-  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroADC[YAXIS], &PID[RATE_YAXIS_PID_IDX], gyroOneMeterSecADCFactor);
+  motorAxisCommandRoll = updatePID(gyroDesiredRollRate, gyroADCData[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
+  motorAxisCommandPitch = updatePID(gyroDesiredPitchRate, -gyroADCData[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
 }
 
 /**
@@ -289,12 +286,7 @@ void processFlightControl() {
   if (receiverCommand[receiverChannelMap[THROTTLE]] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minArmedThrottle;
-      if (inFlight && flightMode == RATE_FLIGHT_MODE) {
-        motorMaxCommand[motor] = MAXCOMMAND;
-      }
-      else {
-        motorMaxCommand[motor] = minArmedThrottle;
-      }
+      motorMaxCommand[motor] = minArmedThrottle;
     }
   }
   

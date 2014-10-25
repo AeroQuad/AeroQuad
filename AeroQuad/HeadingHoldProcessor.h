@@ -74,7 +74,7 @@ void processHeading()
                          map((abs(receiverCommand[receiverChannelMap[ZAXIS]] - 1500)), 0 , 500, 100, yawSpeedFactor*100) / 100.0;
   }
   
-  motorAxisCommandYaw = updatePID(userYawCommand, gyroADC[ZAXIS], &PID[ZAXIS_PID_IDX]);
+  motorAxisCommandYaw = updatePID(userYawCommand, gyroADCData[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }
 
 #endif

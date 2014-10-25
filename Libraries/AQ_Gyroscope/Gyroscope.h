@@ -24,12 +24,13 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
-#define FINDZERO 49
+#define FINDZERO 512
 
-#define MAX_GYRO_METER_PER_SEC_ADC 500.0
+long gyroADCData[3] = {0,0,0};
+long gyroADC[3] = {0,0,0};
+long previousGyroADC[3] = {0,0,0};
+long seccondPreviousGyroADC[3] = {0,0,0};
 
-long  gyroADC[3] = {0,0,0};
-long  previousGyroADC[3] = {0,0,0};
 float gyroRate[3] = {0.0,0.0,0.0};
 long  gyroZero[3] = {0,0,0};
 long  gyroSample[3] = {0,0,0};
@@ -43,7 +44,23 @@ void measureGyroSum();
 void evaluateGyroRate();
 void initializeGyro();
 void measureGyro();
+void gyroUpdateHeading();
 boolean calibrateGyro();
-void readGyroTemp();
+
+
+void processGyroCommon() {
+	
+  gyroSampleCount = 0;
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
+    gyroSample[axis] = 0;
+    gyroADCData[axis] = (gyroADC[axis] + previousGyroADC[axis] + seccondPreviousGyroADC[axis]) / 3;
+	seccondPreviousGyroADC[axis] = previousGyroADC[axis];
+	previousGyroADC[axis] = gyroADC[axis];
+	gyroRate[axis] = gyroADCData[axis] * gyroScaleFactor;
+  }
+  gyroUpdateHeading();
+}
+
+
 
 #endif

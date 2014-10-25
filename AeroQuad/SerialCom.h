@@ -313,7 +313,6 @@ void PrintDummyValues(byte number) {
   }
 }
 
-
 float getHeading()
 {
   #if defined(HeadingMagHold) 
@@ -383,7 +382,7 @@ void sendSerialTelemetry() {
         PrintValueComma(gyroRate[axis]);
       }
       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-        PrintValueComma(filteredAccel[axis]);
+        PrintValueComma(meterPerSecSec[axis]);
       }
       for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
         #if defined(HeadingMagHold)
