@@ -71,9 +71,9 @@ void argUpdate(double gx, double gy, double gz, double ax, double ay, double az,
   
   // normalise the measurements
   norm = sqrt(ax*ax + ay*ay + az*az);       
-  calculateAccConfidence(norm);
-  Kp = DEFAULT_Kp * accConfidence;
-  Ki = DEFAULT_Ki * accConfidence;
+//  calculateAccConfidence(norm);
+  Kp = DEFAULT_Kp;// * accConfidence;
+  Ki = DEFAULT_Ki;// * accConfidence;
 	
   ax = ax / norm;
   ay = ay / norm;

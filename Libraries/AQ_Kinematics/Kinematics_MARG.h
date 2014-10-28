@@ -125,9 +125,9 @@ void calculateKinematicsMAGR(double gx, double gy, double gz,
 	halfT = dt * 0.5f;
 	norm = sqrt(SQR(ax) + SQR(ay) + SQR(az));
 	
-	calculateAccConfidence(norm);
-	kpAcc = DEFAULT_Kp * accConfidence;
-	kiAcc = DEFAULT_Ki * accConfidence;
+//	calculateAccConfidence(norm);
+	kpAcc = DEFAULT_Kp;// * accConfidence;
+	kiAcc = DEFAULT_Ki;// * accConfidence;
 
 	normR = 1.0f / norm;
 	ax *= normR;

@@ -73,7 +73,10 @@ byte motorArmed = OFF;
 byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
-//float filteredAccel[3] = {0.0,0.0,0.0};
+float filteredAccel[3] = {0.0,0.0,0.0};
+float currentFilteredAccel[3] = {0.0,0.0,0.0};
+float previousFilteredAccel[3] = {0.0,0.0,0.0};
+float seccondPreviousFilteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
 float rotationSpeedFactor = 2.5;
 float yawSpeedFactor = 2.5;
@@ -104,20 +107,10 @@ unsigned long lowPriorityTenHZpreviousTime2 = 0;
 unsigned long fiftyHZpreviousTime = 0;
 unsigned long hundredHZpreviousTime = 0;
 
-
-
-
-
 //////////////////////////////////////////////////////
-
 /**
  * Heading and heading hold global declaration section
  */
- 
-float headingHold         = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading             = 0; // measured heading from yaw gyro (process variable)
-float relativeHeading     = 0; // current heading the quad is set to (set point)
-byte  headingHoldState    = OFF;
 void  processHeading();
 //////////////////////////////////////////////////////
 
@@ -178,14 +171,14 @@ void reportVehicleState();
  
   #define ALTITUDE_HOLD_STATE 1
   #define VELOCITY_HOLD_STATE 2
+  byte altHoldInitCountdown = 50;
   byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-  int altitudeHoldBump = 90;
+  int  altitudeHoldBump = 90;
   float altitudeHoldMaxVelocitySpeed = 200.0;
   int altitudeHoldThrottle = 1000;
   boolean isAltitudeHoldInitialized = false;
   boolean isVelocityHoldInitialisez = false;
-  
-  float zVelocity = 0.0;
+
   float estimatedAltitude = 0.0;
   float previousBaroAltitude = 0.0;
   

@@ -125,11 +125,9 @@ void initializePlatformSpecificAccelCalibration() {
 unsigned long previousMeasureCriticalSensorsTime = 0;
 unsigned long measureCriticalSensorsTime = 0;
 void measureCriticalSensors() {
-  // read sensors not faster than every 1 ms
   measureCriticalSensorsTime = micros();
   readMPU6000Sensors();
   measureGyroSum();
-
   if ((measureCriticalSensorsTime - previousMeasureCriticalSensorsTime) >= 1000) {
     measureAccelSum();
     previousMeasureCriticalSensorsTime = measureCriticalSensorsTime;

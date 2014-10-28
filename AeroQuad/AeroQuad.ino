@@ -968,6 +968,10 @@ void setup() {
   
 }
 
+
+/*******************************************************************
+ * Fast task 500Hz or 400hz or 100Hz user selectable
+ ******************************************************************/
 void processFastTask() {
   G_Dt = (currentTime - fastTaskPreviousTime) / 1000000.0;
   fastTaskPreviousTime = currentTime;
@@ -992,15 +996,17 @@ void process100HzTask() {
   
   evaluateMetersPerSec();
   for (int axis = XAXIS; axis <= ZAXIS; axis++) {
-//    filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+    currentFilteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
+    filteredAccel[axis] = (currentFilteredAccel[axis] + previousFilteredAccel[axis] + seccondPreviousFilteredAccel[axis]) / 3;
+    seccondPreviousFilteredAccel[axis] = previousFilteredAccel[axis];
+    previousFilteredAccel[axis] = currentFilteredAccel[axis];
     gyroRate[axis] = fastTaskGyroRate[axis] / fastTaskGyroSampleCount;
     fastTaskGyroRate[axis] = 0;
   }
   fastTaskGyroSampleCount = 0;
 
   #if defined (HeadingMagHold) 
-//    calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
-    calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
+    calculateKinematicsMAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], filteredAccel[XAXIS], filteredAccel[YAXIS], filteredAccel[ZAXIS], measuredMag[XAXIS], measuredMag[YAXIS], measuredMag[ZAXIS], G_Dt);
     magDataUpdate = false;
   #else
     calculateKinematicsAGR(gyroRate[XAXIS], gyroRate[YAXIS], gyroRate[ZAXIS], meterPerSecSec[XAXIS], meterPerSecSec[YAXIS], meterPerSecSec[ZAXIS], G_Dt);
@@ -1010,17 +1016,20 @@ void process100HzTask() {
   #if defined (AltitudeHoldBaro)
     if (vehicleState & BARO_DETECTED)
     {
-//      float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
-
-      float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
-      computeVelocity(filteredZAccel, G_Dt);
-      
-      measureBaroSum();
-      if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
-        evaluateBaroAltitude();
-        estimatedAltitude = getBaroAltitude();
-        computeVelocityErrorFromBaroAltitude(estimatedAltitude);
-        zVelocity = filterSmooth(computedZVelocity, zVelocity, 0.75);
+      if (altHoldInitCountdown > 0) {
+        altHoldInitCountdown--;
+      }
+      else {
+        const float filteredZAccel = -(meterPerSecSec[XAXIS] * kinematicCorrectedAccel[XAXIS] + meterPerSecSec[YAXIS] * kinematicCorrectedAccel[YAXIS] + meterPerSecSec[ZAXIS] * kinematicCorrectedAccel[ZAXIS]);
+  
+        computeVelocity(filteredZAccel, G_Dt);
+        
+        measureBaroSum();
+        if (frameCounter % THROTTLE_ADJUST_TASK_SPEED == 0) {  //  50 Hz tasks
+          evaluateBaroAltitude();
+          estimatedAltitude = getBaroAltitude();
+          computeVelocityErrorFromBaroAltitude(estimatedAltitude);
+        }
       }
     }
   #endif

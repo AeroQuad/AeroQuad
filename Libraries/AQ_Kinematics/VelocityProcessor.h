@@ -26,11 +26,13 @@
 
 float timeConstantZ = 5.0;    
 float k1_z = 3 / timeConstantZ;
-float k2_z = 10 / (timeConstantZ*timeConstantZ);
-float k3_z = 1 / (timeConstantZ*timeConstantZ*timeConstantZ);
+float k2_z = 10 / (timeConstantZ * timeConstantZ);
+float k3_z = 1 / (timeConstantZ * timeConstantZ * timeConstantZ);
 
-float computedZVelocity = 0.0;
-float currentComputedZVelocity = 0.0;
+float zVelocity = 0.0;
+float currentZVelocity = 0.0;
+float previousZVelocity = 0.0;
+float seccondPreviousZVelocity = 0.0;
 float zErrorPosition = 0.0;
 float zPositionCorrection = 0.0;
 float accelZCorrection = 0.0;
@@ -59,15 +61,17 @@ void computeVelocity(float filteredAccelZ, float dt)
 	filteredAccelZ *= 100.0F;
 	
 	accelZCorrection += zErrorPosition * k3_z  * dt;
-	currentComputedZVelocity += zErrorPosition * k2_z  * dt;
+	currentZVelocity += zErrorPosition * k2_z  * dt;
 	zPositionCorrection += zErrorPosition * k1_z  * dt;
 		
 	float velocityIncrease = (filteredAccelZ + accelZCorrection) * dt;
-	baseZPosition += (currentComputedZVelocity + velocityIncrease*0.5) * dt;
-	currentComputedZVelocity += velocityIncrease;
+	baseZPosition += (currentZVelocity + velocityIncrease*0.5) * dt;
+	currentZVelocity += velocityIncrease;
 	
-	computedZVelocity = currentComputedZVelocity;
-
+	zVelocity = (currentZVelocity + previousZVelocity + seccondPreviousZVelocity) / 3;
+	seccondPreviousZVelocity = previousZVelocity;
+	previousZVelocity = currentZVelocity;
+	
 	zBasePositionHistoryBuffer.push_back(baseZPosition);
 }
 
