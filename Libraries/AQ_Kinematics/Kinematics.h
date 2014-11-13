@@ -40,14 +40,13 @@ double earthAccel[3] = {0.0,0.0,0.0};
 
 #define HardFilter(O,N)  ((O)*0.9f+(N)*0.1f)
 
-#define DEFAULT_Kp 0.2 // 0.2
+#define DEFAULT_Kp 0.5 // 0.2
 #define DEFAULT_Ki 0.0005 // 0.0005
 
-//double accConfidence      = 1.0f;
-//double accConfidenceDecay = 1.0f / sqrt(0.6f);	// @todo, accelCutOff should go into eeprom... if it work
+double accConfidence      = 1.0f;
+double accConfidenceDecay = 1.0f / sqrt(0.6f);	// @todo, accelCutOff should go into eeprom... if it work
 
-
-/*void calculateAccConfidence(double accMag)
+void calculateAccConfidence(double accMag)
 {
 	// G.K. Egan (C) computes confidence in accelerometers when
 	// aircraft is being accelerated over and above that due to gravity
@@ -57,7 +56,6 @@ double earthAccel[3] = {0.0,0.0,0.0};
 	accMagP = accMag;
 	accConfidence = constrain(1.0 - (accConfidenceDecay * sqrt(fabs(accMag - 1.0f))), 0.0f, 1.0f);
 }
-*/
 
 
 void initializeBaseKinematicParam() {
@@ -66,8 +64,6 @@ void initializeBaseKinematicParam() {
     kinematicsAngle[axis] = 0.0;
   }
 }
-
-//void initializeKinematics(double hdgX, double hdgY);
 	
 
 const double kinematicsGetDegreesHeading(byte axis) {

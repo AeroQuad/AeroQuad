@@ -62,33 +62,26 @@ void initializeKinematics(double ax, double ay, double az, double mx, double my,
 {
 	initializeBaseKinematicParam();
 
-    double initialRoll, initialPitch;
-    double cosRoll, sinRoll, cosPitch, sinPitch;
-    double magX, magY;
-    double initialHdg, cosHeading, sinHeading;
+    double initialRoll  = atan2(-ay, -az);
+    double initialPitch = atan2( ax, -az);
 
-    initialRoll  = atan2(-ay, -az);
-    initialPitch = atan2( ax, -az);
+    double cosRoll  = cos(initialRoll);
+    double sinRoll  = sin(initialRoll);
+    double cosPitch = cos(initialPitch);
+    double sinPitch = sin(initialPitch);
 
-    cosRoll  = cos(initialRoll);
-    sinRoll  = sin(initialRoll);
-    cosPitch = cos(initialPitch);
-    sinPitch = sin(initialPitch);
+    double magX = mx * cosPitch + my * sinRoll * sinPitch + mz * cosRoll * sinPitch;
+    double magY = my * cosRoll - mz * sinRoll;
 
-    magX = mx * cosPitch + my * sinRoll * sinPitch + mz * cosRoll * sinPitch;
-
-    magY = my * cosRoll - mz * sinRoll;
-
-    initialHdg = atan2(-magY, magX);
+    double initialHdg = atan2(-magY, magX);
 
     cosRoll = cos(initialRoll * 0.5f);
     sinRoll = sin(initialRoll * 0.5f);
-
     cosPitch = cos(initialPitch * 0.5f);
     sinPitch = sin(initialPitch * 0.5f);
 
-    cosHeading = cos(initialHdg * 0.5f);
-    sinHeading = sin(initialHdg * 0.5f);
+    double cosHeading = cos(initialHdg * 0.5f);
+    double sinHeading = sin(initialHdg * 0.5f);
 
     q0 = cosRoll * cosPitch * cosHeading + sinRoll * sinPitch * sinHeading;
     q1 = sinRoll * cosPitch * cosHeading - cosRoll * sinPitch * sinHeading;
@@ -117,27 +110,21 @@ void calculateKinematicsMAGR(double gx, double gy, double gz,
                     double mx, double my, double mz,
                     double dt)
 {
-    double norm, normR;
-    double hx, hy, hz, bx, bz;
-    double vx, vy, vz, wx, wy, wz;
-    double q0i, q1i, q2i, q3i;
-
 	halfT = dt * 0.5f;
-	norm = sqrt(SQR(ax) + SQR(ay) + SQR(az));
-	
-//	calculateAccConfidence(norm);
-	kpAcc = DEFAULT_Kp;// * accConfidence;
-	kiAcc = DEFAULT_Ki;// * accConfidence;
+	double norm = sqrt(SQR(ax) + SQR(ay) + SQR(az));
+	calculateAccConfidence(norm);
+	kpAcc = DEFAULT_Kp * accConfidence;
+	kiAcc = DEFAULT_Ki * accConfidence;
 
-	normR = 1.0f / norm;
+	double normR = 1.0f / norm;
 	ax *= normR;
 	ay *= normR;
 	az *= normR;
 
 	// estimated direction of gravity (v)
-	vx = 2.0f * (q1q3 - q0q2);
-	vy = 2.0f * (q0q1 + q2q3);
-	vz = q0q0 - q1q1 - q2q2 + q3q3;
+	double vx = 2.0f * (q1q3 - q0q2);
+	double vy = 2.0f * (q0q1 + q2q3);
+	double vz = q0q0 - q1q1 - q2q2 + q3q3;
 
 	// error is sum of cross product between reference direction
 	// of fields and direction measured by sensors
@@ -184,16 +171,16 @@ void calculateKinematicsMAGR(double gx, double gy, double gz,
 		mz *= normR;
 
 		// compute reference direction of flux
-		hx = 2.0f * (mx * (0.5f - q2q2 - q3q3) + my * (q1q2 - q0q3) + mz * (q1q3 + q0q2));
-		hy = 2.0f * (mx * (q1q2 + q0q3) + my * (0.5f - q1q1 - q3q3) + mz * (q2q3 - q0q1));
-		hz = 2.0f * (mx * (q1q3 - q0q2) + my * (q2q3 + q0q1) + mz * (0.5f - q1q1 - q2q2));
-		bx = sqrt((hx * hx) + (hy * hy));
-		bz = hz;
+		double hx = 2.0f * (mx * (0.5f - q2q2 - q3q3) + my * (q1q2 - q0q3) + mz * (q1q3 + q0q2));
+		double hy = 2.0f * (mx * (q1q2 + q0q3) + my * (0.5f - q1q1 - q3q3) + mz * (q2q3 - q0q1));
+		double hz = 2.0f * (mx * (q1q3 - q0q2) + my * (q2q3 + q0q1) + mz * (0.5f - q1q1 - q2q2));
+		double bx = sqrt((hx * hx) + (hy * hy));
+		double bz = hz;
 
 		// estimated direction of flux (w)
-		wx = 2.0f * (bx * (0.5f - q2q2 - q3q3) + bz * (q1q3 - q0q2));
-		wy = 2.0f * (bx * (q1q2 - q0q3) + bz * (q0q1 + q2q3));
-		wz = 2.0f * (bx * (q0q2 + q1q3) + bz * (0.5f - q1q1 - q2q2));
+		double wx = 2.0f * (bx * (0.5f - q2q2 - q3q3) + bz * (q1q3 - q0q2));
+		double wy = 2.0f * (bx * (q1q2 - q0q3) + bz * (q0q1 + q2q3));
+		double wz = 2.0f * (bx * (q0q2 + q1q3) + bz * (0.5f - q1q1 - q2q2));
 
 		exMag = my * wz - mz * wy;
 		eyMag = mz * wx - mx * wz;
@@ -232,14 +219,10 @@ void calculateKinematicsMAGR(double gx, double gy, double gz,
 	}
 
 	// integrate quaternion rate
-	q0i = (-q1 * gx - q2 * gy - q3 * gz) * halfT;
-	q1i = ( q0 * gx + q2 * gz - q3 * gy) * halfT;
-	q2i = ( q0 * gy - q1 * gz + q3 * gx) * halfT;
-	q3i = ( q0 * gz + q1 * gy - q2 * gx) * halfT;
-	q0 += q0i;
-	q1 += q1i;
-	q2 += q2i;
-	q3 += q3i;
+	q0 += ((-q1 * gx - q2 * gy - q3 * gz) * halfT);
+	q1 += (( q0 * gx + q2 * gz - q3 * gy) * halfT);
+	q2 += (( q0 * gy - q1 * gz + q3 * gx) * halfT);
+	q3 += (( q0 * gz + q1 * gy - q2 * gx) * halfT);
 
 	// normalise quaternion
 	normR = 1.0f / sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);

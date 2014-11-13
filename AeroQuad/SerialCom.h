@@ -73,15 +73,18 @@ void readSerialCommand() {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(RATE_XAXIS_PID_IDX);
       readSerialPID(RATE_YAXIS_PID_IDX);
-      #if defined (USE_TPA_ADJUSTMENT)
-        userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
-        userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
-        userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
-        userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
-      #endif
       rotationSpeedFactor = readFloatSerial();
       throttlePIDAdjustmentFactor = readFloatSerial();
       writeEEPROM();
+      #if defined (USE_TPA_ADJUSTMENT)
+        userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+        userRateRollI = PID[RATE_XAXIS_PID_IDX].I;
+        userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
+        userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+        userRatePitchI = PID[RATE_YAXIS_PID_IDX].I;
+        userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+      #endif
+
       break;
 
     case 'B': // Receive roll/pitch attitude mode PID
@@ -94,6 +97,11 @@ void readSerialCommand() {
       readSerialPID(ZAXIS_PID_IDX);
       yawSpeedFactor = readFloatSerial();
       writeEEPROM();
+      #if defined (USE_TPA_ADJUSTMENT)
+        userYawP = PID[ZAXIS_PID_IDX].P;
+        userYawI = PID[ZAXIS_PID_IDX].I;
+        userYawD = PID[ZAXIS_PID_IDX].D;
+      #endif
       break;
 
     #if defined AltitudeHoldBaro
@@ -537,7 +545,6 @@ void sendSerialTelemetry() {
         PrintPID(GPSROLL_PID_IDX);
         PrintPID(GPSPITCH_PID_IDX);
         PrintPID(GPSYAW_PID_IDX);
-        serialQueryType = 'X';
         SERIAL_PRINTLN();
         serialQueryType = 'X';
         break;

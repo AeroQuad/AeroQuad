@@ -24,10 +24,13 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
-float baroAltitude       = 0.0; 
-float baroRawAltitude    = 0.0;
-float baroGroundAltitude = 0.0;
-float baroSmoothFactor   = 0.02;
+float baroAltitude        		= 0.0; 
+float baroRawAltitude    		= 0.0;
+float currentBaroRawAltitude    = 0.0;
+float previousBaroRawAltitude   = 0.0;
+float seccondPreviousBaroRawAltitude   = 0.0;
+float baroGroundAltitude 		= 0.0;
+float baroSmoothFactor   		= 0.03;
   
 // **********************************************************************
 // The following function calls must be defined inside any new subclasses

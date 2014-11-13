@@ -957,9 +957,14 @@ void setup() {
   
   #if defined (USE_TPA_ADJUSTMENT)
     userRateRollP = PID[RATE_XAXIS_PID_IDX].P;
+    userRateRollI = PID[RATE_XAXIS_PID_IDX].I;
     userRateRollD = PID[RATE_XAXIS_PID_IDX].D;
     userRatePitchP = PID[RATE_YAXIS_PID_IDX].P;
+    userRatePitchI = PID[RATE_YAXIS_PID_IDX].I;
     userRatePitchD = PID[RATE_YAXIS_PID_IDX].D;
+    userYawP = PID[ZAXIS_PID_IDX].P;
+    userYawI = PID[ZAXIS_PID_IDX].I;
+    userYawD = PID[ZAXIS_PID_IDX].D;
   #endif
 
   previousTime = micros();
@@ -996,10 +1001,7 @@ void process100HzTask() {
   
   evaluateMetersPerSec();
   for (int axis = XAXIS; axis <= ZAXIS; axis++) {
-    currentFilteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
-    filteredAccel[axis] = (currentFilteredAccel[axis] + previousFilteredAccel[axis] + seccondPreviousFilteredAccel[axis]) / 3;
-    seccondPreviousFilteredAccel[axis] = previousFilteredAccel[axis];
-    previousFilteredAccel[axis] = currentFilteredAccel[axis];
+    filteredAccel[axis] = computeFourthOrder(meterPerSecSec[axis], &fourthOrder[axis]);
     gyroRate[axis] = fastTaskGyroRate[axis] / fastTaskGyroSampleCount;
     fastTaskGyroRate[axis] = 0;
   }

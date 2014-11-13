@@ -68,10 +68,11 @@ void computeVelocity(float filteredAccelZ, float dt)
 	baseZPosition += (currentZVelocity + velocityIncrease*0.5) * dt;
 	currentZVelocity += velocityIncrease;
 	
-	zVelocity = (currentZVelocity + previousZVelocity + seccondPreviousZVelocity) / 3;
+	zVelocity = currentZVelocity;
+/*	zVelocity = (currentZVelocity + previousZVelocity + seccondPreviousZVelocity) / 3;
 	seccondPreviousZVelocity = previousZVelocity;
 	previousZVelocity = currentZVelocity;
-	
+*/	
 	zBasePositionHistoryBuffer.push_back(baseZPosition);
 }
 

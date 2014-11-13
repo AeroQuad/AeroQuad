@@ -74,18 +74,20 @@ byte safetyCheck = OFF;
 byte maxLimit = OFF;
 byte minLimit = OFF;
 float filteredAccel[3] = {0.0,0.0,0.0};
-float currentFilteredAccel[3] = {0.0,0.0,0.0};
-float previousFilteredAccel[3] = {0.0,0.0,0.0};
-float seccondPreviousFilteredAccel[3] = {0.0,0.0,0.0};
 boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
 float rotationSpeedFactor = 2.5;
 float yawSpeedFactor = 2.5;
 
 #if defined (USE_TPA_ADJUSTMENT)
   float userRateRollP = 0.0;
+  float userRateRollI = 0.0;
   float userRateRollD = 0.0;
   float userRatePitchP = 0.0;
+  float userRatePitchI = 0.0;
   float userRatePitchD = 0.0;
+  float userYawP = 0.0;
+  float userYawI = 0.0;
+  float userYawD = 0.0;
 #endif 
 int throttlePIDAdjustmentFactor = 0;
   

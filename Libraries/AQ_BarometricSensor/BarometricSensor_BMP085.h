@@ -184,7 +184,10 @@ void evaluateBaroAltitude() {
   x2 = (-7357 * p) >> 16;
   pressure = (p + ((x1 + x2 + 3791) >> 4));
     
-  baroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
+  currentBaroRawAltitude = 44330 * (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute baroAltitude in meters
+  baroRawAltitude = (currentBaroRawAltitude + previousBaroRawAltitude + seccondPreviousBaroRawAltitude) / 3;
+  seccondPreviousBaroRawAltitude = previousBaroRawAltitude;
+  previousBaroRawAltitude = currentBaroRawAltitude;
   // use calculation below in case you need a smaller binary file for CPUs having just 32KB flash ROM
   // baroRawAltitude = (101325.0-pressure)/4096*346;
   baroAltitude = filterSmooth(baroRawAltitude, baroAltitude, baroSmoothFactor);

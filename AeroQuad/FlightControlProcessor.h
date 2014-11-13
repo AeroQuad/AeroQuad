@@ -25,19 +25,27 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
-//#define RECEIVER_SCALE_FACTOR 2
-//#define GYRO_SCALE_RATIO RECEIVER_SCALE_FACTOR * 500
 
 #if defined (USE_TPA_ADJUSTMENT)
+  #define TPA_THROTTLE 800.0
   void processThrottlePIDAdjustment() 
   {
-    float throttleAdjustmentPercentage = (500 - (2000 - receiverCommand[receiverChannelMap[THROTTLE]])) * 0.2;
+    if (!inFlight) {
+      return;
+    }
+    float throttleAdjustmentPercentage = TPA_THROTTLE - (2000 - receiverCommand[receiverChannelMap[THROTTLE]]);
     throttleAdjustmentPercentage = throttleAdjustmentPercentage < 0 ? 0 : throttleAdjustmentPercentage;
-    float pidPercentToRemove = throttleAdjustmentPercentage * throttlePIDAdjustmentFactor / 100.0;
+    const float pidPercentToRemove = map(throttleAdjustmentPercentage, 0.0, TPA_THROTTLE, 0.0, throttlePIDAdjustmentFactor);
+    
     PID[RATE_XAXIS_PID_IDX].P = userRateRollP - (pidPercentToRemove * userRateRollP / 100.0);
+    PID[RATE_XAXIS_PID_IDX].I = userRateRollI - (pidPercentToRemove * userRateRollI / 100.0);
     PID[RATE_XAXIS_PID_IDX].D = userRateRollD - (pidPercentToRemove * userRateRollD / 100.0);
     PID[RATE_YAXIS_PID_IDX].P = userRatePitchP - (pidPercentToRemove * userRatePitchP / 100.0);
+    PID[RATE_YAXIS_PID_IDX].I = userRatePitchI - (pidPercentToRemove * userRatePitchI / 100.0);
     PID[RATE_YAXIS_PID_IDX].D = userRatePitchD - (pidPercentToRemove * userRatePitchD / 100.0);
+    PID[ZAXIS_PID_IDX].P = userYawP - (pidPercentToRemove * userYawP / 100.0);
+    PID[ZAXIS_PID_IDX].I = userYawI - (pidPercentToRemove * userYawI / 100.0);
+    PID[ZAXIS_PID_IDX].D = userYawD - (pidPercentToRemove * userYawD / 100.0);
   }
 #endif
 
